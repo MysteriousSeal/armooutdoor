@@ -41,6 +41,13 @@ class OrderController extends Controller
         return view('admin.orders.index', [
             'orders' => $orders,
             'orderCount' => Order::query()->count(),
+            'toPrepareCount' => Order::query()->whereIn('status', ['placed', 'preparing'])->count(),
+            'missingTrackingCount' => Order::query()
+                ->where('status', 'shipped')
+                ->where(function ($query): void {
+                    $query->whereNull('tracking_number')->orWhere('tracking_number', '');
+                })
+                ->count(),
             'search' => $search,
         ]);
     }

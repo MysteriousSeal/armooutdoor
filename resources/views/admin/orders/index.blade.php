@@ -9,7 +9,9 @@
             <h2 class="admin-list-title">Orders</h2>
             <p class="admin-list-lede">Every order placed in the shop.</p>
             <div class="admin-list-meta">
-                <span class="admin-list-chip">{{ number_format($orderCount) }} orders</span>
+                <span class="admin-list-chip">{{ number_format($orderCount) }} {{ \Illuminate\Support\Str::plural('order', $orderCount) }}</span>
+                <span class="admin-list-chip">{{ number_format($toPrepareCount) }} to prepare</span>
+                <span class="admin-list-chip">{{ number_format($missingTrackingCount) }} missing tracking</span>
                 @if ($search !== '')
                     <span class="admin-list-chip is-filtered">Filtered</span>
                 @endif
@@ -31,22 +33,21 @@
         </form>
 
         @if ($orders->isEmpty())
-            <p class="empty-state">No orders found.</p>
+            <p class="empty-state">
+                {{ $search !== '' ? 'No orders match this search.' : 'No orders yet.' }}
+            </p>
         @else
             <p class="admin-result-count">
                 Showing {{ $orders->firstItem() }}–{{ $orders->lastItem() }}
             </p>
 
             <div class="admin-table-wrap">
-                <table class="admin-table">
+                <table class="admin-table admin-orders-table">
                     <thead>
                         <tr>
                             <th>Order</th>
                             <th>Customer</th>
-                            <th>Date</th>
-                            <th>Items</th>
-                            <th>Carrier</th>
-                            <th>Payment</th>
+                            <th>Shipping</th>
                             <th>Status</th>
                             <th>Tracking</th>
                             <th class="admin-table-num">Total</th>
@@ -60,6 +61,7 @@
                                     <a href="{{ route('admin.orders.show', $order) }}" class="admin-table-strong">
                                         {{ $order->number }}
                                     </a>
+                                    <span class="admin-table-sub">{{ $order->created_at->format('d M Y · H:i') }}</span>
                                 </td>
                                 <td>
                                     <span class="admin-table-primary">{{ $order->user?->name ?? '—' }}</span>
@@ -67,10 +69,15 @@
                                         <span class="admin-table-sub">{{ $order->user->email }}</span>
                                     @endif
                                 </td>
-                                <td>{{ $order->created_at->format('d M Y · H:i') }}</td>
-                                <td>{{ $order->items_count }}</td>
-                                <td>{{ $order->carrierName() !== '' ? $order->carrierName() : '—' }}</td>
-                                <td>{{ $order->payment_method?->label() ?? '—' }}</td>
+                                <td>
+                                    <span class="admin-table-primary">
+                                        {{ $order->carrierName() !== '' ? $order->carrierName() : '—' }}
+                                    </span>
+                                    <span class="admin-table-sub">
+                                        {{ $order->payment_method?->label() ?? '—' }}
+                                        · {{ $order->items_count }} {{ \Illuminate\Support\Str::plural('item', $order->items_count) }}
+                                    </span>
+                                </td>
                                 <td>
                                     <span class="badge badge-{{ $order->status }}">
                                         {{ ucfirst($order->status) }}
@@ -84,6 +91,26 @@
                                 <td class="admin-table-num">{{ $order->formattedTotal() }}</td>
                                 <td>
                                     <div class="admin-table-actions">
+                                        @if ($order->invoiceIsAvailable())
+                                            <a
+                                                href="{{ route('admin.orders.invoice', $order) }}"
+                                                class="admin-table-icon-btn"
+                                                title="Download invoice"
+                                                aria-label="Download invoice"
+                                            >
+                                                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                                                    <path d="M12 4v11m0 0-4-4m4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    <path d="M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
+                                            </a>
+                                        @else
+                                            <span class="admin-table-icon-btn is-disabled" title="Invoice not available yet" aria-hidden="true">
+                                                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                                                    <path d="M12 4v11m0 0-4-4m4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    <path d="M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
+                                            </span>
+                                        @endif
                                         <a href="{{ route('admin.orders.show', $order) }}" class="btn btn-sm btn-primary">View</a>
                                     </div>
                                 </td>

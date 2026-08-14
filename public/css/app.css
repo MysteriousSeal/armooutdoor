@@ -3316,6 +3316,8 @@ a.admin-stat-card:hover {
 .admin-toolbar-search {
     flex: 1 1 18rem;
     max-width: 28rem;
+    height: 2.5rem;
+    background: var(--bg);
 }
 
 .admin-result-count {
@@ -3353,8 +3355,17 @@ a.admin-stat-card:hover {
     background: color-mix(in srgb, var(--bg) 55%, var(--surface));
 }
 
+.admin-table tbody tr:hover td {
+    background: color-mix(in srgb, var(--bg) 70%, var(--surface));
+}
+
 .admin-table tr:last-child td {
     border-bottom: 0;
+}
+
+.admin-orders-table td {
+    padding-top: 0.9rem;
+    padding-bottom: 0.9rem;
 }
 
 .admin-table-indent {
@@ -3381,6 +3392,34 @@ a.admin-stat-card:hover {
     text-align: right;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
+}
+
+.admin-table-icon-col {
+    text-align: center;
+    white-space: nowrap;
+}
+
+.admin-table-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    flex-shrink: 0;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    transition: color 0.15s, border-color 0.15s;
+}
+
+a.admin-table-icon-btn:hover {
+    color: var(--text);
+    border-color: var(--text-muted);
+}
+
+.admin-table-icon-btn.is-disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
 }
 
 .tracking-flag {
@@ -3471,7 +3510,10 @@ a.admin-stat-card:hover {
 
 .admin-table-actions {
     display: flex;
+    align-items: center;
+    justify-content: flex-end;
     gap: 0.4rem;
+    min-width: 8.25rem;
 }
 
 .admin-order-heading {
