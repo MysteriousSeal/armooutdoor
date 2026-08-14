@@ -7,6 +7,10 @@
         <nav class="breadcrumbs" aria-label="breadcrumb">
             <a href="{{ localized_route('home') }}">{{ __('store.breadcrumb_home') }}</a>
             <span class="breadcrumbs-sep" aria-hidden="true">/</span>
+            <a href="{{ localized_route('account.index') }}">{{ __('store.account_title') }}</a>
+            <span class="breadcrumbs-sep" aria-hidden="true">/</span>
+            <a href="{{ localized_route('orders.index') }}">{{ __('store.account_orders') }}</a>
+            <span class="breadcrumbs-sep" aria-hidden="true">/</span>
             <span>{{ __('store.order_title', ['number' => $order->number]) }}</span>
         </nav>
 
