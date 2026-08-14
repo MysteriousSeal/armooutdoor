@@ -2,6 +2,10 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-14 (6)
+
+- **Admin UI polish**: restyled the admin nav bar (brand mark, section links moved to their own row) and the manual order creation page (sections now use the same card style as the rest of the admin).
+
 ## 2026-08-14 (5)
 
 - **Marketplaces**: each marketplace can now have an invoice note, printed in the invoice's Notes section (snapshotted onto the order, so it survives the marketplace being renamed or deleted). Orders placed via a marketplace also get a "Paiement sur \<marketplace\>" line above that note.

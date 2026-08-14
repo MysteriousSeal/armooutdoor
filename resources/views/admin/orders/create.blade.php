@@ -57,13 +57,13 @@
             </div>
         </header>
 
-        <form method="POST" action="{{ route('admin.orders.store') }}" class="admin-form-card admin-order-create" id="manual-order-form" novalidate>
+        <form method="POST" action="{{ route('admin.orders.store') }}" class="admin-order-create" id="manual-order-form" novalidate>
             @csrf
 
             <div class="admin-order-create-grid">
-                <div class="admin-order-create-col">
-                    <section class="admin-order-create-section">
-                        <h3 class="admin-panel-title">Customer</h3>
+                <div class="order-main">
+                    <section class="order-panel">
+                        <h3 class="order-panel-title">Customer</h3>
 
                         <div class="admin-choice-row">
                             <label class="admin-choice {{ old('customer_mode', 'existing') === 'existing' ? 'is-selected' : '' }}">
@@ -116,8 +116,8 @@
                         </div>
                     </section>
 
-                    <section class="admin-order-create-section">
-                        <h3 class="admin-panel-title">Products</h3>
+                    <section class="order-panel">
+                        <h3 class="order-panel-title">Products</h3>
                         <p class="form-error js-field-error" data-error-for="items" @unless($errors->has('items')) hidden @endunless>
                             {{ $errors->first('items') }}
                         </p>
@@ -197,8 +197,8 @@
                         <button type="button" class="btn btn-sm btn-secondary" id="add-item-row">Add another product</button>
                     </section>
 
-                    <section class="admin-order-create-section">
-                        <h3 class="admin-panel-title">Carrier</h3>
+                    <section class="order-panel">
+                        <h3 class="order-panel-title">Carrier</h3>
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="carrier_id">Carrier</label>
@@ -232,8 +232,8 @@
                         </div>
                     </section>
 
-                    <section class="admin-order-create-section">
-                        <h3 class="admin-panel-title">Marketplace</h3>
+                    <section class="order-panel">
+                        <h3 class="order-panel-title">Marketplace</h3>
                         <div class="form-group">
                             <label for="marketplace_id">Marketplace (optional)</label>
                             <select id="marketplace_id" name="marketplace_id" class="form-control">
@@ -252,9 +252,9 @@
                     </section>
                 </div>
 
-                <div class="admin-order-create-col">
-                    <section class="admin-order-create-section">
-                        <h3 class="admin-panel-title">Shipping address</h3>
+                <div class="order-main">
+                    <section class="order-panel">
+                        <h3 class="order-panel-title">Shipping address</h3>
                         <div class="form-group" id="saved-shipping-wrap" hidden>
                             <label for="saved-shipping-address">Saved address</label>
                             <select id="saved-shipping-address" class="form-control" data-address-picker="shipping">
@@ -264,8 +264,8 @@
                         @include('admin.orders.partials.address-fields', ['snapshot' => [], 'prefix' => 'shipping', 'bag' => 'default'])
                     </section>
 
-                    <section class="admin-order-create-section">
-                        <h3 class="admin-panel-title">Billing address</h3>
+                    <section class="order-panel">
+                        <h3 class="order-panel-title">Billing address</h3>
                         <div class="form-group">
                             <label class="form-check">
                                 <input type="checkbox" name="billing_same_as_shipping" value="1" id="billing-same-as-shipping" @checked(old('billing_same_as_shipping', true))>
@@ -285,7 +285,7 @@
                 </div>
             </div>
 
-            <div class="form-actions admin-order-create-actions">
+            <div class="order-panel admin-order-create-actions">
                 <a href="{{ route('admin.orders.index') }}" class="btn btn-secondary">Cancel</a>
                 <button type="submit" class="btn btn-primary">Create order</button>
             </div>
