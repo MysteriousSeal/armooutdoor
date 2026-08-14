@@ -5,6 +5,7 @@ Armo Outdoor is a French-only e-commerce storefront for outdoor and shooting-ran
 ## Storefront
 
 - Catalog browsing by category, product search, and a site sitemap.
+- Product variants (size, color, etc.) with per-variant price and stock, selectable on the product page and carried through the cart, checkout, and order history.
 - Cart and checkout with saved shipping/billing addresses, carrier selection (home delivery or relay point), and free-shipping thresholds.
 - Customer accounts: order history with status tracking, wishlist, saved addresses.
 - Password reset and standard authentication.
@@ -12,7 +13,7 @@ Armo Outdoor is a French-only e-commerce storefront for outdoor and shooting-ran
 
 ## Admin back office (`/admin`)
 
-- Product, category, and customer management.
+- Product, category, and customer management, including per-product variants (price/stock overrides, SKU/GTIN, image).
 - Order management: status workflow (Placed → Preparing → Shipped) with a full history log, shipment tracking (carrier + tracking number), and order detail view.
 - Shipping settings (free-shipping threshold and eligible carriers).
 - Company & legal settings used to fill in the storefront's legal pages.
