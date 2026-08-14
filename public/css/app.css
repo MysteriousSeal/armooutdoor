@@ -3125,47 +3125,60 @@ textarea.form-control {
     z-index: 100;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
-    padding: 0 1.5rem;
 }
 
-.admin-nav-inner {
-    width: 100%;
+.admin-nav-bar {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
-    min-height: 3.5rem;
-    padding: 0.75rem 0;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem 1.5rem 0.55rem;
 }
 
 .admin-brand {
-    font-weight: 600;
-    font-size: 0.9375rem;
-    letter-spacing: 0.02em;
-    color: var(--text);
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.65rem;
     flex-shrink: 0;
+    color: var(--text);
 }
 
-.admin-brand span {
+.admin-brand-mark {
+    font-size: 1.2rem;
     font-weight: 500;
-    color: var(--text-muted);
+    letter-spacing: -0.03em;
+    line-height: 1;
+}
+
+.admin-brand-badge {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-hover);
+    padding: 0.18rem 0.4rem;
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+    background: color-mix(in srgb, var(--accent) 8%, var(--surface));
 }
 
 .admin-nav-links {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.375rem;
+    align-items: stretch;
+    gap: 0.15rem;
+    padding: 0 1.15rem;
+    overflow-x: auto;
     font-size: 0.875rem;
 }
 
 .admin-nav-links a {
     display: inline-flex;
     align-items: center;
-    height: 2.25rem;
-    padding: 0 0.75rem;
+    height: 2.6rem;
+    padding: 0 0.85rem;
     color: var(--text-muted);
-    border: 1px solid transparent;
+    font-weight: 500;
     white-space: nowrap;
+    border-bottom: 2px solid transparent;
 }
 
 .admin-nav-links a:hover {
@@ -3174,32 +3187,33 @@ textarea.form-control {
 
 .admin-nav-links a.active {
     color: var(--text);
-    background: var(--bg);
-    border-color: var(--accent);
+    border-bottom-color: var(--accent);
 }
 
 .admin-nav-actions {
     display: inline-flex;
     align-items: center;
-    gap: 0.75rem;
-    margin-left: auto;
+    gap: 0.35rem;
     flex-shrink: 0;
 }
 
 .admin-nav-utility {
-    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    height: 2.25rem;
+    padding: 0 0.7rem;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 500;
     color: var(--text-muted);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
     white-space: nowrap;
 }
 
 .admin-nav-utility:hover {
     color: var(--text);
-}
-
-.admin-nav-divider {
-    width: 1px;
-    height: 1.5rem;
-    background: var(--border);
 }
 
 .admin-nav-logout {
@@ -4409,12 +4423,13 @@ a.admin-table-icon-btn:hover {
 }
 
 @media (max-width: 768px) {
-    .admin-nav-inner {
+    .admin-nav-bar {
         flex-wrap: wrap;
+        padding: 0.75rem 1rem 0.45rem;
     }
 
-    .admin-nav-actions {
-        margin-left: 0;
+    .admin-nav-links {
+        padding: 0 0.5rem;
     }
 
     .admin-stat-grid,

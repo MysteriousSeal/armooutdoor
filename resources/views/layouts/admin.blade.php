@@ -24,19 +24,13 @@
 </head>
 <body class="admin-body">
     <header class="admin-nav">
-        <div class="admin-nav-inner">
+        <div class="admin-nav-bar">
             <a href="{{ route('admin.dashboard') }}" class="admin-brand">
-                Armo Outdoor <span>Admin</span>
+                <span class="admin-brand-mark">
+                    <span class="logo-primary">Armo</span><span class="logo-secondary">Outdoor</span>
+                </span>
+                <span class="admin-brand-badge">Admin</span>
             </a>
-
-            <nav class="admin-nav-links" aria-label="Admin sections">
-                <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard</a>
-                <a href="{{ route('admin.customers.index') }}" class="{{ request()->routeIs('admin.customers.*') ? 'active' : '' }}">Customers</a>
-                <a href="{{ route('admin.orders.index') }}" class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">Orders</a>
-                <a href="{{ route('admin.products.index') }}" class="{{ request()->routeIs('admin.products.*') ? 'active' : '' }}">Products</a>
-                <a href="{{ route('admin.categories.index') }}" class="{{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">Categories</a>
-                <a href="{{ route('admin.settings.index') }}" class="{{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">Settings</a>
-            </nav>
 
             <div class="admin-nav-actions">
                 <button
@@ -50,15 +44,22 @@
                     <span class="theme-toggle-icon theme-toggle-icon-sun" aria-hidden="true">☀</span>
                     <span class="theme-toggle-icon theme-toggle-icon-moon" aria-hidden="true">☾</span>
                 </button>
-                <span class="admin-nav-divider" aria-hidden="true"></span>
                 <a href="{{ route('home') }}" class="admin-nav-utility" target="_blank" rel="noopener noreferrer">View shop</a>
-                <span class="admin-nav-divider" aria-hidden="true"></span>
                 <form action="{{ route('admin.logout') }}" method="POST" class="admin-nav-logout">
                     @csrf
-                    <button type="submit" class="btn btn-sm btn-secondary">Logout</button>
+                    <button type="submit" class="admin-nav-utility">Logout</button>
                 </form>
             </div>
         </div>
+
+        <nav class="admin-nav-links" aria-label="Admin sections">
+            <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard</a>
+            <a href="{{ route('admin.customers.index') }}" class="{{ request()->routeIs('admin.customers.*') ? 'active' : '' }}">Customers</a>
+            <a href="{{ route('admin.orders.index') }}" class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">Orders</a>
+            <a href="{{ route('admin.products.index') }}" class="{{ request()->routeIs('admin.products.*') ? 'active' : '' }}">Products</a>
+            <a href="{{ route('admin.categories.index') }}" class="{{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">Categories</a>
+            <a href="{{ route('admin.settings.index') }}" class="{{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">Settings</a>
+        </nav>
     </header>
 
     <main class="admin-main">
