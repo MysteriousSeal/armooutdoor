@@ -81,6 +81,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/settings/company', [AdminCompanySettingController::class, 'update'])->name('settings.company.update');
         Route::get('/settings/orders', [AdminSettingsController::class, 'orders'])->name('settings.orders.edit');
         Route::post('/settings/marketplaces', [AdminMarketplaceController::class, 'store'])->name('settings.marketplaces.store');
+        Route::put('/settings/marketplaces/{marketplace}', [AdminMarketplaceController::class, 'update'])->name('settings.marketplaces.update');
         Route::delete('/settings/marketplaces/{marketplace}', [AdminMarketplaceController::class, 'destroy'])->name('settings.marketplaces.destroy');
     });
 });

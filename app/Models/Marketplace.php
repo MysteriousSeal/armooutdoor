@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['name'])]
+#[Fillable(['name', 'note'])]
 class Marketplace extends Model
 {
     //

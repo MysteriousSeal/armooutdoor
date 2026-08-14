@@ -162,6 +162,7 @@ class OrderController extends Controller
                     'payment_method' => 'card',
                     'marketplace_id' => $marketplace?->id,
                     'marketplace_name' => $marketplace?->name,
+                    'marketplace_note' => $marketplace?->note,
                 ]);
 
                 foreach ($items as $item) {
