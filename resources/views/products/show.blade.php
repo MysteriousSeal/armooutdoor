@@ -152,6 +152,26 @@
             </section>
         @endif
 
+        @if ($product->variants->where('is_active', true)->isNotEmpty())
+            <section class="product-specs" aria-labelledby="product-variants-title">
+                <h3 class="product-desc-title" id="product-variants-title">{{ __('store.product_variants') }}</h3>
+                <ul class="product-variants-list">
+                    @foreach ($product->variants->where('is_active', true) as $variant)
+                        <li class="product-variant-row">
+                            <span class="product-variant-label">{{ $variant->label() !== '' ? $variant->label() : $product->localizedName() }}</span>
+                            @if ($variant->sku)
+                                <span class="product-variant-sku">{{ $variant->sku }}</span>
+                            @endif
+                            <span class="product-variant-price">{{ $variant->formattedPrice() }}</span>
+                            <span class="product-variant-stock {{ $variant->inStock() ? 'is-in-stock' : 'is-out-of-stock' }}">
+                                {{ $variant->inStock() ? __('store.in_stock') : __('store.out_of_stock') }}
+                            </span>
+                        </li>
+                    @endforeach
+                </ul>
+            </section>
+        @endif
+
         @if ($related->isNotEmpty())
             <section class="shop-section">
                 <header class="section-header">

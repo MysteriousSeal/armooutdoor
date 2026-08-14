@@ -1505,6 +1505,64 @@ button.btn {
     color: var(--text);
 }
 
+.product-variants-list {
+    max-width: 40rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.product-variant-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9375rem;
+}
+
+.product-variant-row:last-child {
+    border-bottom: 0;
+}
+
+.product-variant-label {
+    font-weight: 500;
+    margin-right: auto;
+}
+
+.product-variant-sku {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+
+.product-variant-price {
+    font-variant-numeric: tabular-nums;
+}
+
+.product-variant-stock {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.product-variant-stock.is-in-stock {
+    color: #3d6b4e;
+}
+
+.product-variant-stock.is-out-of-stock {
+    color: #a44;
+}
+
+[data-theme='dark'] .product-variant-stock.is-in-stock {
+    color: #9dccab;
+}
+
+[data-theme='dark'] .product-variant-stock.is-out-of-stock {
+    color: #e0a3a3;
+}
+
 @media (max-width: 560px) {
     .product-specs-row {
         grid-template-columns: 1fr;

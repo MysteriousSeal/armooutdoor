@@ -49,6 +49,19 @@ class StoreProductRequest extends FormRequest
             'remove_gallery_images.*' => ['integer'],
             'remove_main' => ['sometimes', 'boolean'],
             'gallery_order' => ['nullable', 'string'],
+
+            'variants' => ['nullable', 'array'],
+            'variants.*.id' => ['nullable', 'integer'],
+            'variants.*._delete' => ['nullable', 'boolean'],
+            'variants.*.attributes_text' => ['nullable', 'string', 'max:500'],
+            'variants.*.sku' => ['nullable', 'string', 'max:64'],
+            'variants.*.gtin' => ['nullable', 'string', 'regex:/^(\d{8}|\d{12,14})$/'],
+            'variants.*.price' => ['nullable', 'numeric', 'min:0', 'max:99999.99'],
+            'variants.*.quantity' => ['nullable', 'integer', 'min:0', 'max:99999'],
+            'variants.*.is_active' => ['nullable', 'boolean'],
+            'variants.*.remove_image' => ['nullable', 'boolean'],
+            'variant_images' => ['nullable', 'array'],
+            'variant_images.*' => ['nullable', 'image', 'max:4096'],
         ];
     }
 
@@ -62,6 +75,48 @@ class StoreProductRequest extends FormRequest
                 && ! $this->hasFile('gallery_images')) {
                 $validator->errors()->add('gallery_images', 'Add at least one product photo.');
             }
+
+            $this->validateVariantUniqueness($validator, $product);
         });
+    }
+
+    private function validateVariantUniqueness($validator, ?\App\Models\Product $product): void
+    {
+        $rows = (array) $this->input('variants', []);
+
+        foreach (['sku', 'gtin'] as $field) {
+            $seen = [];
+
+            foreach ($rows as $index => $row) {
+                if (! empty($row['_delete'])) {
+                    continue;
+                }
+
+                $variantId = filled($row['id'] ?? null) ? (int) $row['id'] : null;
+
+                $value = trim((string) ($row[$field] ?? ''));
+
+                if ($value === '') {
+                    continue;
+                }
+
+                if (isset($seen[$value])) {
+                    $validator->errors()->add("variants.{$index}.{$field}", 'This '.strtoupper($field).' is already used by another variant below.');
+
+                    continue;
+                }
+
+                $seen[$value] = true;
+
+                $exists = \App\Models\ProductVariant::query()
+                    ->where($field, $value)
+                    ->when($variantId, fn ($query) => $query->where('id', '!=', $variantId))
+                    ->exists();
+
+                if ($exists) {
+                    $validator->errors()->add("variants.{$index}.{$field}", 'This '.strtoupper($field).' is already used by another variant.');
+                }
+            }
+        }
     }
 }

@@ -69,6 +69,18 @@ class Product extends Model
         return $this->hasMany(ProductImage::class)->orderBy('sort_order');
     }
 
+    public function variants(): HasMany
+    {
+        return $this->hasMany(ProductVariant::class)->orderBy('sort_order');
+    }
+
+    public function hasVariants(): bool
+    {
+        return $this->relationLoaded('variants')
+            ? $this->variants->isNotEmpty()
+            : $this->variants()->exists();
+    }
+
     public function wishlistItems(): HasMany
     {
         return $this->hasMany(WishlistItem::class);

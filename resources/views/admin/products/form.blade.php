@@ -133,6 +133,122 @@
                 </div>
             </div>
 
+            @php
+                $oldVariants = old('variants', $product->exists
+                    ? $product->variants->map(fn ($variant) => [
+                        'id' => $variant->id,
+                        'attributes_text' => collect($variant->attribute_values ?? [])->map(fn ($attribute) => $attribute['label'].': '.$attribute['value'])->implode(', '),
+                        'sku' => $variant->sku,
+                        'gtin' => $variant->gtin,
+                        'price' => $variant->price_cents !== null ? number_format($variant->price_cents / 100, 2, '.', '') : '',
+                        'quantity' => $variant->quantity,
+                        'is_active' => $variant->is_active,
+                        'image_url' => $variant->image ? $variant->imageUrl() : null,
+                    ])->values()->all()
+                    : []);
+            @endphp
+            <div class="form-group">
+                <label>Variants</label>
+                <p class="form-hint">
+                    Optional — one row per variant (e.g. a size or a color), each with its own SKU and GTIN.
+                    Attributes are free text like <code>Taille: L, Couleur: Rouge</code>.
+                    Leave price blank to use the product's price.
+                </p>
+
+                <div id="variants-list">
+                    @foreach ($oldVariants as $index => $variant)
+                        <div class="variant-row form-row">
+                            @if (! empty($variant['id']))
+                                <input type="hidden" name="variants[{{ $index }}][id]" value="{{ $variant['id'] }}">
+                            @endif
+                            <input type="hidden" name="variants[{{ $index }}][_delete]" value="" class="variant-delete-flag">
+                            <div class="form-group">
+                                <label>Attributes</label>
+                                <input type="text" name="variants[{{ $index }}][attributes_text]" class="form-control" placeholder="Taille: L, Couleur: Rouge" value="{{ $variant['attributes_text'] ?? '' }}">
+                                @error("variants.{$index}.attributes_text") <p class="form-error">{{ $message }}</p> @enderror
+                            </div>
+                            <div class="form-group">
+                                <label>SKU</label>
+                                <input type="text" name="variants[{{ $index }}][sku]" class="form-control" maxlength="64" value="{{ $variant['sku'] ?? '' }}">
+                                @error("variants.{$index}.sku") <p class="form-error">{{ $message }}</p> @enderror
+                            </div>
+                            <div class="form-group">
+                                <label>GTIN</label>
+                                <input type="text" name="variants[{{ $index }}][gtin]" class="form-control" maxlength="14" value="{{ $variant['gtin'] ?? '' }}">
+                                @error("variants.{$index}.gtin") <p class="form-error">{{ $message }}</p> @enderror
+                            </div>
+                            <div class="form-group">
+                                <label>Price (€)</label>
+                                <input type="number" name="variants[{{ $index }}][price]" class="form-control" min="0" max="99999.99" step="0.01" placeholder="Same as product" value="{{ $variant['price'] ?? '' }}">
+                                @error("variants.{$index}.price") <p class="form-error">{{ $message }}</p> @enderror
+                            </div>
+                            <div class="form-group">
+                                <label>Quantity</label>
+                                <input type="number" name="variants[{{ $index }}][quantity]" class="form-control" min="0" max="99999" step="1" value="{{ $variant['quantity'] ?? 0 }}">
+                                @error("variants.{$index}.quantity") <p class="form-error">{{ $message }}</p> @enderror
+                            </div>
+                            <div class="form-group">
+                                <label>Image</label>
+                                @if (! empty($variant['image_url']))
+                                    <img src="{{ $variant['image_url'] }}" alt="" width="40" height="40" style="object-fit: cover">
+                                    <label class="form-check">
+                                        <input type="checkbox" name="variants[{{ $index }}][remove_image]" value="1">
+                                        Remove
+                                    </label>
+                                @endif
+                                <input type="file" name="variant_images[{{ $index }}]" accept="image/jpeg,image/png,image/gif,image/webp">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-check">
+                                    <input type="checkbox" name="variants[{{ $index }}][is_active]" value="1" @checked($variant['is_active'] ?? true)>
+                                    Active
+                                </label>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-secondary variant-remove">Remove variant</button>
+                        </div>
+                    @endforeach
+                </div>
+
+                <button type="button" class="btn btn-sm btn-secondary" id="variant-add">Add variant</button>
+
+                <template id="variant-row-template">
+                    <div class="variant-row form-row">
+                        <input type="hidden" name="variants[__INDEX__][_delete]" value="" class="variant-delete-flag">
+                        <div class="form-group">
+                            <label>Attributes</label>
+                            <input type="text" name="variants[__INDEX__][attributes_text]" class="form-control" placeholder="Taille: L, Couleur: Rouge">
+                        </div>
+                        <div class="form-group">
+                            <label>SKU</label>
+                            <input type="text" name="variants[__INDEX__][sku]" class="form-control" maxlength="64">
+                        </div>
+                        <div class="form-group">
+                            <label>GTIN</label>
+                            <input type="text" name="variants[__INDEX__][gtin]" class="form-control" maxlength="14">
+                        </div>
+                        <div class="form-group">
+                            <label>Price (€)</label>
+                            <input type="number" name="variants[__INDEX__][price]" class="form-control" min="0" max="99999.99" step="0.01" placeholder="Same as product">
+                        </div>
+                        <div class="form-group">
+                            <label>Quantity</label>
+                            <input type="number" name="variants[__INDEX__][quantity]" class="form-control" min="0" max="99999" step="1" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Image</label>
+                            <input type="file" name="variant_images[__INDEX__]" accept="image/jpeg,image/png,image/gif,image/webp">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-check">
+                                <input type="checkbox" name="variants[__INDEX__][is_active]" value="1" checked>
+                                Active
+                            </label>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-secondary variant-remove">Remove variant</button>
+                    </div>
+                </template>
+            </div>
+
             <div class="form-group">
                 <label>Images</label>
                 <p class="form-hint">Drag tiles to reorder — the first is the cover shown across the shop. Drop more below.</p>
@@ -237,6 +353,43 @@
                 bindRemove(row);
                 list.appendChild(row);
                 row.querySelector('input').focus();
+            });
+        })();
+
+        (function () {
+            var list = document.getElementById('variants-list');
+            var addBtn = document.getElementById('variant-add');
+            var template = document.getElementById('variant-row-template');
+            var counter = list ? list.querySelectorAll('.variant-row').length : 0;
+
+            if (!list || !addBtn || !template) {
+                return;
+            }
+
+            function bindRemove(row) {
+                row.querySelector('.variant-remove').addEventListener('click', function () {
+                    var hasId = row.querySelector('input[name$="[id]"]');
+                    if (hasId) {
+                        var flag = row.querySelector('.variant-delete-flag');
+                        if (flag) {
+                            flag.value = '1';
+                        }
+                        row.hidden = true;
+                    } else {
+                        row.remove();
+                    }
+                });
+            }
+
+            list.querySelectorAll('.variant-row').forEach(bindRemove);
+
+            addBtn.addEventListener('click', function () {
+                var html = template.innerHTML.replaceAll('__INDEX__', String(counter));
+                list.insertAdjacentHTML('beforeend', html);
+                var row = list.lastElementChild;
+                bindRemove(row);
+                row.querySelector('input').focus();
+                counter++;
             });
         })();
     </script>

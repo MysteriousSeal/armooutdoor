@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\StoreProductRequest;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
+use App\Models\ProductVariant;
 use App\Support\HtmlSanitizer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -64,6 +65,7 @@ class ProductController extends Controller
     {
         $product = Product::query()->create($this->payload($request));
         $this->syncImages($request, $product, null);
+        $this->syncVariants($request, $product);
 
         return redirect()
             ->route('admin.products.edit', $product)
@@ -73,7 +75,7 @@ class ProductController extends Controller
     public function edit(Product $product): View
     {
         return view('admin.products.form', [
-            'product' => $product->load('images'),
+            'product' => $product->load('images', 'variants'),
             'categories' => $this->categoryOptions(),
         ]);
     }
@@ -83,6 +85,7 @@ class ProductController extends Controller
         $oldCoverImage = $product->image;
         $product->update($this->payload($request, $product));
         $this->syncImages($request, $product, $oldCoverImage);
+        $this->syncVariants($request, $product);
 
         return redirect()
             ->route('admin.products.edit', $product)
@@ -172,6 +175,111 @@ class ProductController extends Controller
         }
 
         return $characteristics;
+    }
+
+    /**
+     * Variant attributes are entered as free text like "Taille: L, Couleur: Rouge"
+     * so the admin isn't locked into a fixed set of attribute types.
+     */
+    private function syncVariants(StoreProductRequest $request, Product $product): void
+    {
+        $rows = (array) $request->input('variants', []);
+        $files = $request->file('variant_images', []);
+
+        foreach ($rows as $index => $row) {
+            $variantId = filled($row['id'] ?? null) ? (int) $row['id'] : null;
+
+            if (! empty($row['_delete'])) {
+                if ($variantId !== null) {
+                    $variant = ProductVariant::query()->find($variantId);
+
+                    if ($variant !== null && $variant->product_id === $product->id) {
+                        if ($variant->image) {
+                            $this->deleteStoredImageFile($variant->image);
+                        }
+
+                        $variant->delete();
+                    }
+                }
+
+                continue;
+            }
+
+            $attributesText = trim((string) ($row['attributes_text'] ?? ''));
+            $sku = filled($row['sku'] ?? null) ? trim((string) $row['sku']) : null;
+            $gtin = filled($row['gtin'] ?? null) ? trim((string) $row['gtin']) : null;
+
+            if ($variantId === null && $attributesText === '' && $sku === null && $gtin === null) {
+                continue;
+            }
+
+            $payload = [
+                'attribute_values' => $this->parseVariantAttributes($attributesText),
+                'sku' => $sku,
+                'gtin' => $gtin,
+                'price_cents' => filled($row['price'] ?? null) ? (int) round(((float) $row['price']) * 100) : null,
+                'quantity' => (int) ($row['quantity'] ?? 0),
+                'is_active' => ! empty($row['is_active']),
+                'sort_order' => (int) $index,
+            ];
+
+            $uploadedImage = $files[$index] ?? null;
+
+            if ($variantId !== null) {
+                $variant = ProductVariant::query()->find($variantId);
+
+                if ($variant === null || $variant->product_id !== $product->id) {
+                    continue;
+                }
+
+                if ($uploadedImage instanceof UploadedFile) {
+                    if ($variant->image) {
+                        $this->deleteStoredImageFile($variant->image);
+                    }
+
+                    $payload['image'] = $this->storeUploadedImage($uploadedImage, $product->slug.'-variant');
+                } elseif (! empty($row['remove_image'])) {
+                    if ($variant->image) {
+                        $this->deleteStoredImageFile($variant->image);
+                    }
+
+                    $payload['image'] = null;
+                }
+
+                $variant->update($payload);
+
+                continue;
+            }
+
+            if ($uploadedImage instanceof UploadedFile) {
+                $payload['image'] = $this->storeUploadedImage($uploadedImage, $product->slug.'-variant');
+            }
+
+            $product->variants()->create($payload);
+        }
+    }
+
+    /**
+     * @return list<array{label: string, value: string}>
+     */
+    private function parseVariantAttributes(string $text): array
+    {
+        if ($text === '') {
+            return [];
+        }
+
+        return collect(explode(',', $text))
+            ->map(function (string $pair): array {
+                $parts = explode(':', $pair, 2);
+
+                return [
+                    'label' => trim($parts[0] ?? ''),
+                    'value' => trim($parts[1] ?? ''),
+                ];
+            })
+            ->filter(fn (array $attribute): bool => $attribute['label'] !== '' && $attribute['value'] !== '')
+            ->values()
+            ->all();
     }
 
     private function resolveImage(StoreProductRequest $request, ?Product $product, string $slug): string
