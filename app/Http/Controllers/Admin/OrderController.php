@@ -92,14 +92,40 @@ class OrderController extends Controller
 
     public function store(StoreManualOrderRequest $request): RedirectResponse
     {
-        return $this->saveManualOrder($request, null);
+        return $this->handleManualOrderSave($request, null);
     }
 
     public function update(StoreManualOrderRequest $request, Order $order): RedirectResponse
     {
         abort_unless($order->isDraft(), 404);
 
-        return $this->saveManualOrder($request, $order);
+        return $this->handleManualOrderSave($request, $order);
+    }
+
+    private function handleManualOrderSave(StoreManualOrderRequest $request, ?Order $order): RedirectResponse
+    {
+        $wasNew = $order === null;
+        $finalize = $request->input('action') === 'placed';
+
+        try {
+            $savedOrder = $this->saveManualOrder($request, $order);
+        } catch (\RuntimeException $exception) {
+            if ($exception->getMessage() === 'stock') {
+                return back()->withInput()->with('status', 'One of the selected products no longer has enough stock.');
+            }
+
+            throw $exception;
+        }
+
+        $message = match (true) {
+            ! $finalize => 'Draft saved.',
+            $wasNew => 'Manual order created.',
+            default => 'Draft finalized into an order.',
+        };
+
+        return redirect()
+            ->route('admin.orders.show', $savedOrder)
+            ->with('status', $message);
     }
 
     private function customerOptions()
@@ -137,7 +163,10 @@ class OrderController extends Controller
         return User::query()->create([...$attributes, 'password' => Str::random(32)]);
     }
 
-    private function saveManualOrder(StoreManualOrderRequest $request, ?Order $order): RedirectResponse
+    /**
+     * @throws \RuntimeException with message "stock" when a product no longer has enough stock to finalize
+     */
+    protected function saveManualOrder(StoreManualOrderRequest $request, ?Order $order): Order
     {
         $items = $request->validItems();
         $carrier = Carrier::query()->where('active', true)->findOrFail($request->input('carrier_id'));
@@ -171,104 +200,86 @@ class OrderController extends Controller
                 'phone' => $request->input('billing_phone'),
             ];
 
-        try {
-            $shippingPrice = $request->input('shipping_price');
-            $marketplace = $request->input('marketplace_id')
-                ? Marketplace::query()->find($request->input('marketplace_id'))
-                : null;
+        $shippingPrice = $request->input('shipping_price');
+        $marketplace = $request->input('marketplace_id')
+            ? Marketplace::query()->find($request->input('marketplace_id'))
+            : null;
 
-            $savedOrder = DB::transaction(function () use ($order, $customer, $carrier, $shippingSnapshot, $billingSnapshot, $items, $shippingPrice, $marketplace, $finalize): Order {
-                $productsQuery = Product::query()->whereIn('id', $items->pluck('product_id'));
-                $products = $finalize
-                    ? $productsQuery->lockForUpdate()->get()->keyBy('id')
-                    : $productsQuery->get()->keyBy('id');
+        return DB::transaction(function () use ($order, $customer, $carrier, $shippingSnapshot, $billingSnapshot, $items, $shippingPrice, $marketplace, $finalize): Order {
+            $productsQuery = Product::query()->whereIn('id', $items->pluck('product_id'));
+            $products = $finalize
+                ? $productsQuery->lockForUpdate()->get()->keyBy('id')
+                : $productsQuery->get()->keyBy('id');
 
-                $subtotal = 0;
+            $subtotal = 0;
 
-                foreach ($items as $item) {
-                    $product = $products->get($item['product_id']);
+            foreach ($items as $item) {
+                $product = $products->get($item['product_id']);
 
-                    if ($product === null || ($finalize && $product->quantity < $item['quantity'])) {
-                        throw new \RuntimeException('stock');
-                    }
-
-                    $subtotal += $item['unit_price_cents'] * $item['quantity'];
+                if ($product === null || ($finalize && $product->quantity < $item['quantity'])) {
+                    throw new \RuntimeException('stock');
                 }
 
-                $shipping = filled($shippingPrice)
-                    ? (int) round(((float) $shippingPrice) * 100)
-                    : ShippingSetting::current()->effectivePriceCents($carrier, $subtotal);
-
-                $attributes = [
-                    'is_manual' => true,
-                    'user_id' => $customer->id,
-                    'status' => $finalize ? 'placed' : 'draft',
-                    'address_snapshot' => $shippingSnapshot,
-                    'billing_address_snapshot' => $billingSnapshot,
-                    'carrier_id' => $carrier->id,
-                    'carrier_method' => $carrier->method,
-                    'carrier_snapshot' => $carrier->toSnapshot(),
-                    'subtotal_cents' => $subtotal,
-                    'shipping_cents' => $shipping,
-                    'total_cents' => $subtotal + $shipping,
-                    'payment_method' => 'card',
-                    'marketplace_id' => $marketplace?->id,
-                    'marketplace_name' => $marketplace?->name,
-                    'marketplace_note' => $marketplace?->note,
-                ];
-
-                if ($order === null) {
-                    $savedOrder = Order::query()->create([...$attributes, 'number' => Order::generateNumber()]);
-                } else {
-                    $wasDraft = $order->isDraft();
-                    $order->update($attributes);
-                    $savedOrder = $order;
-
-                    if ($finalize && $wasDraft) {
-                        $savedOrder->statusHistories()->create(['status' => 'placed']);
-                    }
-
-                    $savedOrder->items()->delete();
-                }
-
-                foreach ($items as $item) {
-                    $product = $products->get($item['product_id']);
-
-                    if ($finalize) {
-                        $product->decrement('quantity', $item['quantity']);
-                    }
-
-                    OrderItem::query()->create([
-                        'order_id' => $savedOrder->id,
-                        'product_id' => $product->id,
-                        'product_slug' => $product->slug,
-                        'name' => $product->name,
-                        'image' => $product->image,
-                        'unit_price_cents' => $item['unit_price_cents'],
-                        'quantity' => $item['quantity'],
-                        'line_cents' => $item['unit_price_cents'] * $item['quantity'],
-                    ]);
-                }
-
-                return $savedOrder;
-            });
-        } catch (\RuntimeException $exception) {
-            if ($exception->getMessage() === 'stock') {
-                return back()->withInput()->with('status', 'One of the selected products no longer has enough stock.');
+                $subtotal += $item['unit_price_cents'] * $item['quantity'];
             }
 
-            throw $exception;
-        }
+            $shipping = filled($shippingPrice)
+                ? (int) round(((float) $shippingPrice) * 100)
+                : ShippingSetting::current()->effectivePriceCents($carrier, $subtotal);
 
-        $message = match (true) {
-            ! $finalize => 'Draft saved.',
-            $order === null => 'Manual order created.',
-            default => 'Draft finalized into an order.',
-        };
+            $attributes = [
+                'is_manual' => true,
+                'user_id' => $customer->id,
+                'status' => $finalize ? 'placed' : 'draft',
+                'address_snapshot' => $shippingSnapshot,
+                'billing_address_snapshot' => $billingSnapshot,
+                'carrier_id' => $carrier->id,
+                'carrier_method' => $carrier->method,
+                'carrier_snapshot' => $carrier->toSnapshot(),
+                'subtotal_cents' => $subtotal,
+                'shipping_cents' => $shipping,
+                'total_cents' => $subtotal + $shipping,
+                'payment_method' => 'card',
+                'marketplace_id' => $marketplace?->id,
+                'marketplace_name' => $marketplace?->name,
+                'marketplace_note' => $marketplace?->note,
+            ];
 
-        return redirect()
-            ->route('admin.orders.show', $savedOrder)
-            ->with('status', $message);
+            if ($order === null) {
+                $savedOrder = Order::query()->create([...$attributes, 'number' => Order::generateNumber()]);
+            } else {
+                $wasDraft = $order->isDraft();
+                $order->update($attributes);
+                $savedOrder = $order;
+
+                if ($finalize && $wasDraft) {
+                    $savedOrder->statusHistories()->create(['status' => 'placed']);
+                }
+
+                $savedOrder->items()->delete();
+            }
+
+            foreach ($items as $item) {
+                $product = $products->get($item['product_id']);
+
+                if ($finalize) {
+                    $product->decrement('quantity', $item['quantity']);
+                }
+
+                OrderItem::query()->create([
+                    'order_id' => $savedOrder->id,
+                    'product_id' => $product->id,
+                    'product_slug' => $product->slug,
+                    'name' => $product->name,
+                    'image' => $product->image,
+                    'unit_price_cents' => $item['unit_price_cents'],
+                    'quantity' => $item['quantity'],
+                    'line_cents' => $item['unit_price_cents'] * $item['quantity'],
+                ]);
+            }
+
+            return $savedOrder;
+        });
     }
 
     public function show(Order $order): View
