@@ -252,6 +252,9 @@
                     @if ($order->package_type_name)
                         <div class="notes-line">Colis : {{ $order->package_type_name }}</div>
                     @endif
+                    @if ($order->marketplace_name)
+                        <div class="notes-line">Paiement sur {{ $order->marketplace_name }}</div>
+                    @endif
                     @if ($order->marketplace_note)
                         <div class="notes-line">{{ $order->marketplace_note }}</div>
                     @endif
