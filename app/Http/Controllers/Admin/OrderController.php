@@ -65,6 +65,7 @@ class OrderController extends Controller
             'customers' => User::query()
                 ->where('is_admin', false)
                 ->where('external', false)
+                ->with('addresses')
                 ->orderBy('name')
                 ->get(),
             'products' => Product::query()->active()->orderBy('name')->get(),
@@ -113,7 +114,9 @@ class OrderController extends Controller
             ];
 
         try {
-            $order = DB::transaction(function () use ($customer, $carrier, $shippingSnapshot, $billingSnapshot, $items): Order {
+            $shippingPrice = $request->input('shipping_price');
+
+            $order = DB::transaction(function () use ($customer, $carrier, $shippingSnapshot, $billingSnapshot, $items, $shippingPrice): Order {
                 $products = Product::query()
                     ->whereIn('id', $items->pluck('product_id'))
                     ->lockForUpdate()
@@ -129,10 +132,12 @@ class OrderController extends Controller
                         throw new \RuntimeException('stock');
                     }
 
-                    $subtotal += $product->price_cents * $item['quantity'];
+                    $subtotal += $item['unit_price_cents'] * $item['quantity'];
                 }
 
-                $shipping = ShippingSetting::current()->effectivePriceCents($carrier, $subtotal);
+                $shipping = filled($shippingPrice)
+                    ? (int) round(((float) $shippingPrice) * 100)
+                    : ShippingSetting::current()->effectivePriceCents($carrier, $subtotal);
 
                 $order = Order::query()->create([
                     'number' => Order::generateNumber(),
@@ -159,9 +164,9 @@ class OrderController extends Controller
                         'product_slug' => $product->slug,
                         'name' => $product->name,
                         'image' => $product->image,
-                        'unit_price_cents' => $product->price_cents,
+                        'unit_price_cents' => $item['unit_price_cents'],
                         'quantity' => $item['quantity'],
-                        'line_cents' => $product->price_cents * $item['quantity'],
+                        'line_cents' => $item['unit_price_cents'] * $item['quantity'],
                     ]);
                 }
 

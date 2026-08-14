@@ -28,8 +28,10 @@ class StoreManualOrderRequest extends FormRequest
             'items' => ['required', 'array'],
             'items.*.product_id' => ['nullable', 'exists:products,id'],
             'items.*.quantity' => ['nullable', 'integer', 'min:1'],
+            'items.*.price' => ['nullable', 'numeric', 'min:0'],
 
             'carrier_id' => ['required', Rule::exists('carriers', 'id')->where('active', true)],
+            'shipping_price' => ['nullable', 'numeric', 'min:0'],
 
             'first_name' => ['required', 'string', 'max:80'],
             'last_name' => ['required', 'string', 'max:80'],
@@ -83,16 +85,24 @@ class StoreManualOrderRequest extends FormRequest
     }
 
     /**
-     * @return \Illuminate\Support\Collection<int, array{product_id: int, quantity: int}>
+     * @return \Illuminate\Support\Collection<int, array{product_id: int, quantity: int, unit_price_cents: int}>
      */
     public function validItems(): \Illuminate\Support\Collection
     {
         return collect($this->input('items', []))
             ->filter(fn (array $row): bool => filled($row['product_id'] ?? null) && filled($row['quantity'] ?? null))
-            ->map(fn (array $row): array => [
-                'product_id' => (int) $row['product_id'],
-                'quantity' => (int) $row['quantity'],
-            ])
+            ->map(function (array $row): array {
+                $product = Product::query()->find($row['product_id']);
+                $unitPriceCents = filled($row['price'] ?? null)
+                    ? (int) round(((float) $row['price']) * 100)
+                    : (int) ($product?->price_cents ?? 0);
+
+                return [
+                    'product_id' => (int) $row['product_id'],
+                    'quantity' => (int) $row['quantity'],
+                    'unit_price_cents' => $unitPriceCents,
+                ];
+            })
             ->values();
     }
 }
