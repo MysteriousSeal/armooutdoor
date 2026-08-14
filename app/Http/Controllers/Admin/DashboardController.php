@@ -17,9 +17,10 @@ class DashboardController extends Controller
         $last7Start = $now->copy()->subDays(6)->startOfDay();
         $last30Start = $now->copy()->subDays(29)->startOfDay();
 
-        $nonRefunded = fn () => Order::query()->where('status', '!=', 'refunded');
+        $nonRefunded = fn () => Order::query()->whereNotIn('status', ['refunded', 'draft']);
 
-        $orderCount = Order::query()->count();
+        $orderCount = Order::query()->where('status', '!=', 'draft')->count();
+        $draftCount = Order::query()->where('status', 'draft')->count();
         $nonRefundedCount = $nonRefunded()->count();
         $netRevenueCents = (int) $nonRefunded()->sum('total_cents');
         $refundedCents = (int) Order::query()->where('status', 'refunded')->sum('total_cents');
@@ -32,12 +33,14 @@ class DashboardController extends Controller
 
         $dailyRows = Order::query()
             ->where('created_at', '>=', $last7Start)
+            ->where('status', '!=', 'draft')
             ->selectRaw("strftime('%Y-%m-%d', created_at) as day, count(*) as orders, sum(case when status != 'refunded' then total_cents else 0 end) as revenue_cents")
             ->groupBy('day')
             ->pluck('revenue_cents', 'day')
             ->all();
         $dailyOrderRows = Order::query()
             ->where('created_at', '>=', $last7Start)
+            ->where('status', '!=', 'draft')
             ->selectRaw("strftime('%Y-%m-%d', created_at) as day, count(*) as orders")
             ->groupBy('day')
             ->pluck('orders', 'day')
@@ -62,7 +65,7 @@ class DashboardController extends Controller
 
         $topProducts = OrderItem::query()
             ->join('orders', 'orders.id', '=', 'order_items.order_id')
-            ->where('orders.status', '!=', 'refunded')
+            ->whereNotIn('orders.status', ['refunded', 'draft'])
             ->select('order_items.*')
             ->get()
             ->groupBy('product_slug')
@@ -87,7 +90,7 @@ class DashboardController extends Controller
             ->limit(8)
             ->get();
 
-        $recentOrders = Order::query()->with('user')->latest()->limit(8)->get();
+        $recentOrders = Order::query()->where('status', '!=', 'draft')->with('user')->latest()->limit(8)->get();
 
         return view('admin.dashboard', [
             'customerCount' => User::query()->where('is_admin', false)->where('external', false)->count(),
@@ -96,6 +99,7 @@ class DashboardController extends Controller
             'productCount' => Product::query()->count(),
             'activeProductCount' => Product::query()->active()->count(),
             'orderCount' => $orderCount,
+            'draftCount' => $draftCount,
             'nonRefundedCount' => $nonRefundedCount,
             'netRevenueCents' => $netRevenueCents,
             'refundedCents' => $refundedCents,

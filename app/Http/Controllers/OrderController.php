@@ -12,14 +12,14 @@ class OrderController extends Controller
 {
     public function index(): View
     {
-        $orders = request()->user()->orders()->withCount('items')->get();
+        $orders = request()->user()->orders()->where('status', '!=', 'draft')->withCount('items')->get();
 
         return view('orders.index', compact('orders'));
     }
 
     public function show(Order $order): View
     {
-        abort_unless($order->user_id === request()->user()->id, 404);
+        abort_unless($order->user_id === request()->user()->id && ! $order->isDraft(), 404);
 
         $order->load(['items', 'statusHistories', 'trackingCarrier']);
 

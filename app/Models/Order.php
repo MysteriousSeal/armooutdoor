@@ -140,7 +140,12 @@ class Order extends Model
 
     public function invoiceIsAvailable(): bool
     {
-        return ! in_array($this->status, ['placed', 'preparing'], true);
+        return ! in_array($this->status, ['placed', 'preparing', 'draft'], true);
+    }
+
+    public function isDraft(): bool
+    {
+        return $this->status === 'draft';
     }
 
     public function statusMessage(): string

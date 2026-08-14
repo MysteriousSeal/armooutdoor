@@ -1,8 +1,16 @@
 @extends('layouts.admin')
 
-@section('title', 'Create manual order')
+@php
+    $isEdit = isset($order) && $order !== null;
+@endphp
+
+@section('title', $isEdit ? 'Edit draft order' : 'Create manual order')
 
 @php
+    $customerIsExternal = $isEdit && $order->user && $order->user->external;
+    $defaultCustomerMode = $customerIsExternal ? 'new' : 'existing';
+    $defaultCustomerId = $isEdit && $order->user && ! $order->user->external ? $order->user_id : '';
+
     $customerOptions = $customers->map(fn ($customer) => [
         'id' => $customer->id,
         'label' => $customer->name.' ('.$customer->email.')',
@@ -18,7 +26,14 @@
         'search' => $product->localizedName().' '.($product->sku ?? ''),
         'price' => number_format($product->price_cents / 100, 2, '.', ''),
     ])->values();
-    $selectedCustomerLabel = optional($customerOptions->firstWhere('id', (int) old('customer_id')))['label'] ?? '';
+    $selectedCustomerLabel = optional($customerOptions->firstWhere('id', (int) old('customer_id', $defaultCustomerId)))['label'] ?? '';
+    $defaultItems = $isEdit
+        ? $order->items->map(fn ($item) => [
+            'product_id' => $item->product_id,
+            'quantity' => $item->quantity,
+            'price' => number_format($item->unit_price_cents / 100, 2, '.', ''),
+        ])->values()->all()
+        : [['product_id' => '', 'quantity' => 1], ['product_id' => '', 'quantity' => 1]];
     $customerAddresses = $customers->mapWithKeys(function ($customer) {
         return [
             $customer->id => $customer->addresses->map(fn ($address) => [
@@ -49,16 +64,36 @@
         <header class="admin-list-hero">
             <div class="admin-list-hero-row">
                 <div>
-                    <p class="admin-list-kicker"><a href="{{ route('admin.orders.index') }}">Orders</a></p>
-                    <h2 class="admin-list-title">Create manual order</h2>
-                    <p class="admin-list-lede">Log a sale made outside the site — pick products, then a shipping and billing address.</p>
+                    <p class="admin-list-kicker">
+                        <a href="{{ route('admin.orders.index') }}">Orders</a>
+                        @if ($isEdit)
+                            / <a href="{{ route('admin.orders.show', $order) }}">{{ $order->number }}</a>
+                        @endif
+                    </p>
+                    <h2 class="admin-list-title">{{ $isEdit ? 'Edit draft order' : 'Create manual order' }}</h2>
+                    <p class="admin-list-lede">
+                        @if ($isEdit)
+                            This order is still a draft — everything can be edited. Save it as a draft again, or finalize it into a real order.
+                        @else
+                            Log a sale made outside the site — pick products, then a shipping and billing address.
+                        @endif
+                    </p>
                 </div>
-                <a href="{{ route('admin.orders.index') }}" class="btn btn-secondary">Back to orders</a>
+                <a href="{{ $isEdit ? route('admin.orders.show', $order) : route('admin.orders.index') }}" class="btn btn-secondary">
+                    {{ $isEdit ? 'Back to order' : 'Back to orders' }}
+                </a>
             </div>
         </header>
 
-        <form method="POST" action="{{ route('admin.orders.store') }}" class="admin-order-create" id="manual-order-form" novalidate>
+        <form
+            method="POST"
+            action="{{ $isEdit ? route('admin.orders.update', $order) : route('admin.orders.store') }}"
+            class="admin-order-create"
+            id="manual-order-form"
+            novalidate
+        >
             @csrf
+            @if ($isEdit) @method('PUT') @endif
 
             <div class="admin-order-create-grid">
                 <div class="order-main">
@@ -66,12 +101,12 @@
                         <h3 class="order-panel-title">Customer</h3>
 
                         <div class="admin-choice-row">
-                            <label class="admin-choice {{ old('customer_mode', 'existing') === 'existing' ? 'is-selected' : '' }}">
-                                <input type="radio" name="customer_mode" value="existing" id="customer-mode-existing" @checked(old('customer_mode', 'existing') === 'existing')>
+                            <label class="admin-choice {{ old('customer_mode', $defaultCustomerMode) === 'existing' ? 'is-selected' : '' }}">
+                                <input type="radio" name="customer_mode" value="existing" id="customer-mode-existing" @checked(old('customer_mode', $defaultCustomerMode) === 'existing')>
                                 <span>Existing customer</span>
                             </label>
-                            <label class="admin-choice {{ old('customer_mode') === 'new' ? 'is-selected' : '' }}">
-                                <input type="radio" name="customer_mode" value="new" id="customer-mode-new" @checked(old('customer_mode') === 'new')>
+                            <label class="admin-choice {{ old('customer_mode', $defaultCustomerMode) === 'new' ? 'is-selected' : '' }}">
+                                <input type="radio" name="customer_mode" value="new" id="customer-mode-new" @checked(old('customer_mode', $defaultCustomerMode) === 'new')>
                                 <span>New external customer</span>
                             </label>
                         </div>
@@ -80,7 +115,7 @@
                         <div class="form-group" id="customer-existing-fields">
                             <label for="customer_search">Customer</label>
                             <div class="search-select" data-search-select data-source="customers">
-                                <input type="hidden" name="customer_id" id="customer_id" value="{{ old('customer_id') }}">
+                                <input type="hidden" name="customer_id" id="customer_id" value="{{ old('customer_id', $defaultCustomerId) }}">
                                 <input
                                     type="text"
                                     id="customer_search"
@@ -99,18 +134,18 @@
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="new_customer_first_name">First name</label>
-                                    <input type="text" id="new_customer_first_name" name="new_customer_first_name" class="form-control" value="{{ old('new_customer_first_name') }}" maxlength="80">
+                                    <input type="text" id="new_customer_first_name" name="new_customer_first_name" class="form-control" value="{{ old('new_customer_first_name', $customerIsExternal ? $order->user->first_name : '') }}" maxlength="80">
                                     @error('new_customer_first_name') <p class="form-error">{{ $message }}</p> @enderror
                                 </div>
                                 <div class="form-group">
                                     <label for="new_customer_last_name">Last name</label>
-                                    <input type="text" id="new_customer_last_name" name="new_customer_last_name" class="form-control" value="{{ old('new_customer_last_name') }}" maxlength="80">
+                                    <input type="text" id="new_customer_last_name" name="new_customer_last_name" class="form-control" value="{{ old('new_customer_last_name', $customerIsExternal ? $order->user->last_name : '') }}" maxlength="80">
                                     @error('new_customer_last_name') <p class="form-error">{{ $message }}</p> @enderror
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label for="new_customer_email">Email (optional)</label>
-                                <input type="email" id="new_customer_email" name="new_customer_email" class="form-control" value="{{ old('new_customer_email') }}" maxlength="160">
+                                <input type="email" id="new_customer_email" name="new_customer_email" class="form-control" value="{{ old('new_customer_email', $customerIsExternal ? $order->user->email : '') }}" maxlength="160">
                                 @error('new_customer_email') <p class="form-error">{{ $message }}</p> @enderror
                             </div>
                         </div>
@@ -123,7 +158,7 @@
                         </p>
 
                         <div id="item-rows">
-                            @php($oldItems = old('items', [['product_id' => '', 'quantity' => 1], ['product_id' => '', 'quantity' => 1]]))
+                            @php($oldItems = old('items', $defaultItems))
                             @foreach ($oldItems as $index => $item)
                                 @php($selectedProductLabel = optional($productOptions->firstWhere('id', (int) ($item['product_id'] ?? 0)))['label'] ?? '')
                                 <div class="form-row form-row--item">
@@ -208,7 +243,7 @@
                                         <option
                                             value="{{ $carrier->id }}"
                                             data-price="{{ number_format($carrier->price_cents / 100, 2, '.', '') }}"
-                                            @selected((string) old('carrier_id') === (string) $carrier->id)
+                                            @selected((string) old('carrier_id', $isEdit ? $order->carrier_id : '') === (string) $carrier->id)
                                         >
                                             {{ $carrier->localizedName() }} — {{ $carrier->formattedPrice() }} ({{ $carrier->method->value }})
                                         </option>
@@ -223,7 +258,7 @@
                                     id="shipping_price"
                                     name="shipping_price"
                                     class="form-control"
-                                    value="{{ old('shipping_price') }}"
+                                    value="{{ old('shipping_price', $isEdit ? number_format($order->shipping_cents / 100, 2, '.', '') : '') }}"
                                     min="0"
                                     step="0.01"
                                 >
@@ -241,7 +276,7 @@
                                 @foreach ($marketplaces as $marketplace)
                                     <option
                                         value="{{ $marketplace->id }}"
-                                        @selected((string) old('marketplace_id') === (string) $marketplace->id)
+                                        @selected((string) old('marketplace_id', $isEdit ? $order->marketplace_id : '') === (string) $marketplace->id)
                                     >
                                         {{ $marketplace->name }}
                                     </option>
@@ -261,33 +296,35 @@
                                 <option value="">New address</option>
                             </select>
                         </div>
-                        @include('admin.orders.partials.address-fields', ['snapshot' => [], 'prefix' => 'shipping', 'bag' => 'default'])
+                        @include('admin.orders.partials.address-fields', ['snapshot' => $isEdit ? ($order->address_snapshot ?? []) : [], 'prefix' => 'shipping', 'bag' => 'default'])
                     </section>
 
                     <section class="order-panel">
                         <h3 class="order-panel-title">Billing address</h3>
+                        @php($defaultBillingSameAsShipping = $isEdit ? ! $order->hasSeparateBillingAddress() : true)
                         <div class="form-group">
                             <label class="form-check">
-                                <input type="checkbox" name="billing_same_as_shipping" value="1" id="billing-same-as-shipping" @checked(old('billing_same_as_shipping', true))>
+                                <input type="checkbox" name="billing_same_as_shipping" value="1" id="billing-same-as-shipping" @checked(old('billing_same_as_shipping', $defaultBillingSameAsShipping))>
                                 Same as shipping address
                             </label>
                         </div>
-                        <div id="billing-address-fields" @if (old('billing_same_as_shipping', true)) hidden @endif>
+                        <div id="billing-address-fields" @if (old('billing_same_as_shipping', $defaultBillingSameAsShipping)) hidden @endif>
                             <div class="form-group" id="saved-billing-wrap" hidden>
                                 <label for="saved-billing-address">Saved address</label>
                                 <select id="saved-billing-address" class="form-control" data-address-picker="billing">
                                     <option value="">New address</option>
                                 </select>
                             </div>
-                            @include('admin.orders.partials.address-fields', ['snapshot' => [], 'prefix' => 'billing', 'bag' => 'default', 'fieldPrefix' => 'billing_'])
+                            @include('admin.orders.partials.address-fields', ['snapshot' => $isEdit ? ($order->billing_address_snapshot ?? $order->address_snapshot ?? []) : [], 'prefix' => 'billing', 'bag' => 'default', 'fieldPrefix' => 'billing_'])
                         </div>
                     </section>
                 </div>
             </div>
 
             <div class="order-panel admin-order-create-actions">
-                <a href="{{ route('admin.orders.index') }}" class="btn btn-secondary">Cancel</a>
-                <button type="submit" class="btn btn-primary">Create order</button>
+                <a href="{{ $isEdit ? route('admin.orders.show', $order) : route('admin.orders.index') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" name="action" value="draft" class="btn btn-secondary">Save as draft</button>
+                <button type="submit" name="action" value="placed" class="btn btn-primary">{{ $isEdit ? 'Finalize order' : 'Create order' }}</button>
             </div>
         </form>
     </div>

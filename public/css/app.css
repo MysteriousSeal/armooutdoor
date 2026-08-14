@@ -3716,6 +3716,12 @@ a.admin-table-icon-btn:hover {
     background: color-mix(in srgb, var(--accent) 10%, var(--surface));
 }
 
+.badge-draft {
+    color: var(--text-muted);
+    border-color: var(--border);
+    background: var(--bg);
+}
+
 .badge-preparing {
     color: #8a6d1f;
     border-color: #ecd9a3;

@@ -19,12 +19,21 @@ class StoreManualOrderRequest extends FormRequest
      */
     public function rules(): array
     {
+        $order = $this->route('order');
+        $existingExternalUserId = $order?->user?->external === true ? $order->user_id : null;
+
         return [
+            'action' => ['required', Rule::in(['draft', 'placed'])],
             'customer_mode' => ['required', Rule::in(['existing', 'new'])],
             'customer_id' => ['nullable', Rule::requiredIf($this->input('customer_mode') === 'existing'), 'exists:users,id'],
             'new_customer_first_name' => ['nullable', Rule::requiredIf($this->input('customer_mode') === 'new'), 'string', 'max:80'],
             'new_customer_last_name' => ['nullable', Rule::requiredIf($this->input('customer_mode') === 'new'), 'string', 'max:80'],
-            'new_customer_email' => ['nullable', 'email', 'max:160', 'unique:users,email'],
+            'new_customer_email' => [
+                'nullable',
+                'email',
+                'max:160',
+                Rule::unique('users', 'email')->ignore($existingExternalUserId),
+            ],
 
             'items' => ['required', 'array'],
             'items.*.product_id' => ['nullable', 'exists:products,id'],

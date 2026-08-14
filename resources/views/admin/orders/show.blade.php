@@ -16,13 +16,17 @@
                     </div>
                 </div>
                 <div class="admin-order-actions">
-                    @if ($order->status === 'placed')
-                        <button type="button" class="btn btn-primary" data-modal-open="prepare-confirm-modal">Mark as being prepared</button>
-                    @elseif ($order->status === 'preparing')
-                        <button type="button" class="btn btn-primary" data-modal-open="ship-confirm-modal">Mark as shipped</button>
-                    @endif
-                    @if ($order->status !== 'refunded')
-                        <button type="button" class="btn btn-secondary" data-modal-open="refund-confirm-modal">Mark as refunded</button>
+                    @if ($order->isDraft())
+                        <a href="{{ route('admin.orders.edit', $order) }}" class="btn btn-primary">Edit draft</a>
+                    @else
+                        @if ($order->status === 'placed')
+                            <button type="button" class="btn btn-primary" data-modal-open="prepare-confirm-modal">Mark as being prepared</button>
+                        @elseif ($order->status === 'preparing')
+                            <button type="button" class="btn btn-primary" data-modal-open="ship-confirm-modal">Mark as shipped</button>
+                        @endif
+                        @if ($order->status !== 'refunded')
+                            <button type="button" class="btn btn-secondary" data-modal-open="refund-confirm-modal">Mark as refunded</button>
+                        @endif
                     @endif
                 </div>
             </div>
@@ -146,59 +150,61 @@
                         </p>
                     @endif
 
-                    <form method="POST" action="{{ route('admin.orders.tracking.update', $order) }}" class="order-shipping-form">
-                        @csrf
-                        @method('PATCH')
-                        <div class="order-shipping-field">
-                            <label for="tracking_carrier_id">Tracking carrier</label>
-                            <div class="order-shipping-select-wrap">
-                                <select id="tracking_carrier_id" name="tracking_carrier_id" class="order-shipping-select">
-                                    <option value="">Select a carrier</option>
-                                    @foreach ($carriers as $carrier)
-                                        <option
-                                            value="{{ $carrier->id }}"
-                                            @selected(old('tracking_carrier_id', $order->tracking_carrier_id ?? $order->carrier_id) == $carrier->id)
-                                        >
-                                            {{ $carrier->localizedName() }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                    @unless ($order->isDraft())
+                        <form method="POST" action="{{ route('admin.orders.tracking.update', $order) }}" class="order-shipping-form">
+                            @csrf
+                            @method('PATCH')
+                            <div class="order-shipping-field">
+                                <label for="tracking_carrier_id">Tracking carrier</label>
+                                <div class="order-shipping-select-wrap">
+                                    <select id="tracking_carrier_id" name="tracking_carrier_id" class="order-shipping-select">
+                                        <option value="">Select a carrier</option>
+                                        @foreach ($carriers as $carrier)
+                                            <option
+                                                value="{{ $carrier->id }}"
+                                                @selected(old('tracking_carrier_id', $order->tracking_carrier_id ?? $order->carrier_id) == $carrier->id)
+                                            >
+                                                {{ $carrier->localizedName() }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
-                        </div>
-                        <div class="order-shipping-field">
-                            <label for="tracking_number">Tracking number</label>
-                            <input
-                                type="text"
-                                id="tracking_number"
-                                name="tracking_number"
-                                class="order-shipping-input"
-                                value="{{ old('tracking_number', $order->tracking_number) }}"
-                                maxlength="100"
-                                placeholder="Add a tracking number"
-                                autocomplete="off"
-                            >
-                        </div>
-                        <div class="order-shipping-field">
-                            <label for="package_type_id">Package type</label>
-                            <div class="order-shipping-select-wrap">
-                                <select id="package_type_id" name="package_type_id" class="order-shipping-select">
-                                    <option value="">Select a package type</option>
-                                    @foreach ($packageTypes as $packageType)
-                                        <option
-                                            value="{{ $packageType->id }}"
-                                            @selected(old('package_type_id', $order->package_type_id) == $packageType->id)
-                                        >
-                                            {{ $packageType->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                            <div class="order-shipping-field">
+                                <label for="tracking_number">Tracking number</label>
+                                <input
+                                    type="text"
+                                    id="tracking_number"
+                                    name="tracking_number"
+                                    class="order-shipping-input"
+                                    value="{{ old('tracking_number', $order->tracking_number) }}"
+                                    maxlength="100"
+                                    placeholder="Add a tracking number"
+                                    autocomplete="off"
+                                >
                             </div>
-                            @if ($order->package_type_name && ! $order->packageType)
-                                <p class="form-hint">Previously saved as "{{ $order->package_type_name }}" (removed from the package type list).</p>
-                            @endif
-                        </div>
-                        <button type="submit" class="btn btn-secondary btn-block">Save tracking</button>
-                    </form>
+                            <div class="order-shipping-field">
+                                <label for="package_type_id">Package type</label>
+                                <div class="order-shipping-select-wrap">
+                                    <select id="package_type_id" name="package_type_id" class="order-shipping-select">
+                                        <option value="">Select a package type</option>
+                                        @foreach ($packageTypes as $packageType)
+                                            <option
+                                                value="{{ $packageType->id }}"
+                                                @selected(old('package_type_id', $order->package_type_id) == $packageType->id)
+                                            >
+                                                {{ $packageType->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                @if ($order->package_type_name && ! $order->packageType)
+                                    <p class="form-hint">Previously saved as "{{ $order->package_type_name }}" (removed from the package type list).</p>
+                                @endif
+                            </div>
+                            <button type="submit" class="btn btn-secondary btn-block">Save tracking</button>
+                        </form>
+                    @endunless
                 </section>
 
                 <section class="order-fact">
@@ -304,7 +310,7 @@
             </dialog>
         @endif
 
-        @if ($order->status !== 'refunded')
+        @if (! $order->isDraft() && $order->status !== 'refunded')
             <dialog id="refund-confirm-modal" class="modal" aria-labelledby="refund-confirm-title">
                 <form method="POST" action="{{ route('admin.orders.refund', $order) }}">
                     @csrf

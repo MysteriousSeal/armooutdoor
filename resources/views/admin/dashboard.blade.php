@@ -44,6 +44,11 @@
 
         <div class="admin-stat-grid admin-stat-grid--secondary">
             <a href="{{ route('admin.orders.index') }}" class="admin-stat-card admin-stat-card--compact">
+                <span class="admin-stat-label">Drafts</span>
+                <span class="admin-stat-value">{{ number_format($draftCount) }}</span>
+                <span class="admin-stat-value--sm">Not finalized yet</span>
+            </a>
+            <a href="{{ route('admin.orders.index') }}" class="admin-stat-card admin-stat-card--compact">
                 <span class="admin-stat-label">Refunded</span>
                 <span class="admin-stat-value">{{ format_euros($refundedCents) }}</span>
                 <span class="admin-stat-value--sm">{{ number_format($statusCounts['refunded'] ?? 0) }} {{ \Illuminate\Support\Str::plural('order', $statusCounts['refunded'] ?? 0) }}</span>
@@ -140,7 +145,7 @@
                 <section class="order-fact">
                     <h3 class="order-fact-title">Orders by status</h3>
                     <ul class="admin-dash-list">
-                        @foreach (['placed', 'preparing', 'shipped', 'refunded'] as $status)
+                        @foreach (['draft', 'placed', 'preparing', 'shipped', 'refunded'] as $status)
                             <li>
                                 <span class="badge badge-{{ $status }}">{{ ucfirst($status) }}</span>
                                 <span class="admin-dash-list-value">{{ number_format($statusCounts[$status] ?? 0) }}</span>

@@ -15,6 +15,9 @@
             </div>
             <div class="admin-list-meta">
                 <span class="admin-list-chip">{{ number_format($orderCount) }} {{ \Illuminate\Support\Str::plural('order', $orderCount) }}</span>
+                @if ($draftCount > 0)
+                    <span class="admin-list-chip">{{ number_format($draftCount) }} {{ \Illuminate\Support\Str::plural('draft', $draftCount) }}</span>
+                @endif
                 <span class="admin-list-chip">{{ number_format($toPrepareCount) }} to prepare</span>
                 <span class="admin-list-chip">{{ number_format($missingTrackingCount) }} missing tracking</span>
                 @if ($search !== '')

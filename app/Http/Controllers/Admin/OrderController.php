@@ -49,7 +49,8 @@ class OrderController extends Controller
 
         return view('admin.orders.index', [
             'orders' => $orders,
-            'orderCount' => Order::query()->count(),
+            'orderCount' => Order::query()->where('status', '!=', 'draft')->count(),
+            'draftCount' => Order::query()->where('status', 'draft')->count(),
             'toPrepareCount' => Order::query()->whereIn('status', ['placed', 'preparing'])->count(),
             'missingTrackingCount' => Order::query()
                 ->where('status', 'shipped')
@@ -64,13 +65,21 @@ class OrderController extends Controller
     public function create(): View
     {
         return view('admin.orders.create', [
-            'customers' => User::query()
-                ->where('is_admin', false)
-                ->where('external', false)
-                ->with('addresses')
-                ->orderBy('first_name')
-                ->orderBy('last_name')
-                ->get(),
+            'order' => null,
+            'customers' => $this->customerOptions(),
+            'products' => Product::query()->active()->orderBy('name')->get(),
+            'carriers' => Carrier::query()->active()->get(),
+            'marketplaces' => Marketplace::query()->orderBy('name')->get(),
+        ]);
+    }
+
+    public function edit(Order $order): View
+    {
+        abort_unless($order->isDraft(), 404);
+
+        return view('admin.orders.create', [
+            'order' => $order,
+            'customers' => $this->customerOptions(),
             'products' => Product::query()->active()->orderBy('name')->get(),
             'carriers' => Carrier::query()->active()->get(),
             'marketplaces' => Marketplace::query()->orderBy('name')->get(),
@@ -79,18 +88,58 @@ class OrderController extends Controller
 
     public function store(StoreManualOrderRequest $request): RedirectResponse
     {
+        return $this->saveManualOrder($request, null);
+    }
+
+    public function update(StoreManualOrderRequest $request, Order $order): RedirectResponse
+    {
+        abort_unless($order->isDraft(), 404);
+
+        return $this->saveManualOrder($request, $order);
+    }
+
+    private function customerOptions()
+    {
+        return User::query()
+            ->where('is_admin', false)
+            ->where('external', false)
+            ->with('addresses')
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->get();
+    }
+
+    private function resolveCustomer(StoreManualOrderRequest $request, ?Order $order): User
+    {
+        if ($request->input('customer_mode') === 'existing') {
+            return User::query()->findOrFail($request->input('customer_id'));
+        }
+
+        $attributes = [
+            'first_name' => $request->input('new_customer_first_name'),
+            'last_name' => $request->input('new_customer_last_name'),
+            'email' => $request->input('new_customer_email'),
+            'external' => true,
+        ];
+
+        $existingExternal = $order?->user?->external === true ? $order->user : null;
+
+        if ($existingExternal !== null) {
+            $existingExternal->update($attributes);
+
+            return $existingExternal;
+        }
+
+        return User::query()->create([...$attributes, 'password' => Str::random(32)]);
+    }
+
+    private function saveManualOrder(StoreManualOrderRequest $request, ?Order $order): RedirectResponse
+    {
         $items = $request->validItems();
         $carrier = Carrier::query()->where('active', true)->findOrFail($request->input('carrier_id'));
+        $finalize = $request->input('action') === 'placed';
 
-        $customer = $request->input('customer_mode') === 'existing'
-            ? User::query()->findOrFail($request->input('customer_id'))
-            : User::query()->create([
-                'first_name' => $request->input('new_customer_first_name'),
-                'last_name' => $request->input('new_customer_last_name'),
-                'email' => $request->input('new_customer_email'),
-                'password' => Str::random(32),
-                'external' => true,
-            ]);
+        $customer = $this->resolveCustomer($request, $order);
 
         $shippingSnapshot = [
             'label' => null,
@@ -124,19 +173,18 @@ class OrderController extends Controller
                 ? Marketplace::query()->find($request->input('marketplace_id'))
                 : null;
 
-            $order = DB::transaction(function () use ($customer, $carrier, $shippingSnapshot, $billingSnapshot, $items, $shippingPrice, $marketplace): Order {
-                $products = Product::query()
-                    ->whereIn('id', $items->pluck('product_id'))
-                    ->lockForUpdate()
-                    ->get()
-                    ->keyBy('id');
+            $savedOrder = DB::transaction(function () use ($order, $customer, $carrier, $shippingSnapshot, $billingSnapshot, $items, $shippingPrice, $marketplace, $finalize): Order {
+                $productsQuery = Product::query()->whereIn('id', $items->pluck('product_id'));
+                $products = $finalize
+                    ? $productsQuery->lockForUpdate()->get()->keyBy('id')
+                    : $productsQuery->get()->keyBy('id');
 
                 $subtotal = 0;
 
                 foreach ($items as $item) {
                     $product = $products->get($item['product_id']);
 
-                    if ($product === null || $product->quantity < $item['quantity']) {
+                    if ($product === null || ($finalize && $product->quantity < $item['quantity'])) {
                         throw new \RuntimeException('stock');
                     }
 
@@ -147,11 +195,10 @@ class OrderController extends Controller
                     ? (int) round(((float) $shippingPrice) * 100)
                     : ShippingSetting::current()->effectivePriceCents($carrier, $subtotal);
 
-                $order = Order::query()->create([
-                    'number' => Order::generateNumber(),
+                $attributes = [
                     'is_manual' => true,
                     'user_id' => $customer->id,
-                    'status' => 'placed',
+                    'status' => $finalize ? 'placed' : 'draft',
                     'address_snapshot' => $shippingSnapshot,
                     'billing_address_snapshot' => $billingSnapshot,
                     'carrier_id' => $carrier->id,
@@ -164,14 +211,31 @@ class OrderController extends Controller
                     'marketplace_id' => $marketplace?->id,
                     'marketplace_name' => $marketplace?->name,
                     'marketplace_note' => $marketplace?->note,
-                ]);
+                ];
+
+                if ($order === null) {
+                    $savedOrder = Order::query()->create([...$attributes, 'number' => Order::generateNumber()]);
+                } else {
+                    $wasDraft = $order->isDraft();
+                    $order->update($attributes);
+                    $savedOrder = $order;
+
+                    if ($finalize && $wasDraft) {
+                        $savedOrder->statusHistories()->create(['status' => 'placed']);
+                    }
+
+                    $savedOrder->items()->delete();
+                }
 
                 foreach ($items as $item) {
                     $product = $products->get($item['product_id']);
-                    $product->decrement('quantity', $item['quantity']);
+
+                    if ($finalize) {
+                        $product->decrement('quantity', $item['quantity']);
+                    }
 
                     OrderItem::query()->create([
-                        'order_id' => $order->id,
+                        'order_id' => $savedOrder->id,
                         'product_id' => $product->id,
                         'product_slug' => $product->slug,
                         'name' => $product->name,
@@ -182,7 +246,7 @@ class OrderController extends Controller
                     ]);
                 }
 
-                return $order;
+                return $savedOrder;
             });
         } catch (\RuntimeException $exception) {
             if ($exception->getMessage() === 'stock') {
@@ -192,9 +256,15 @@ class OrderController extends Controller
             throw $exception;
         }
 
+        $message = match (true) {
+            ! $finalize => 'Draft saved.',
+            $order === null => 'Manual order created.',
+            default => 'Draft finalized into an order.',
+        };
+
         return redirect()
-            ->route('admin.orders.show', $order)
-            ->with('status', 'Manual order created.');
+            ->route('admin.orders.show', $savedOrder)
+            ->with('status', $message);
     }
 
     public function show(Order $order): View
@@ -210,6 +280,8 @@ class OrderController extends Controller
 
     public function prepare(Order $order): RedirectResponse
     {
+        abort_if($order->isDraft(), 404);
+
         $order->markStatus('preparing');
 
         return back()->with('status', 'Order marked as being prepared.');
@@ -217,6 +289,8 @@ class OrderController extends Controller
 
     public function ship(Order $order): RedirectResponse
     {
+        abort_if($order->isDraft(), 404);
+
         $order->markStatus('shipped');
 
         return back()->with('status', 'Order marked as shipped.');
@@ -224,7 +298,7 @@ class OrderController extends Controller
 
     public function refund(Order $order): RedirectResponse
     {
-        abort_if($order->status === 'refunded', 403);
+        abort_if($order->isDraft() || $order->status === 'refunded', 403);
 
         $order->markStatus('refunded');
 
@@ -247,6 +321,8 @@ class OrderController extends Controller
 
     public function updateTracking(Request $request, Order $order): RedirectResponse
     {
+        abort_if($order->isDraft(), 404);
+
         $validated = $request->validate([
             'tracking_number' => ['nullable', 'string', 'max:100'],
             'tracking_carrier_id' => ['nullable', Rule::exists('carriers', 'id')],
