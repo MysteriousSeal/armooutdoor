@@ -37,7 +37,7 @@
                     · Deleted customer
                 @endif
             </p>
-            @if ($order->payment_method || $order->carrierName() !== '' || $order->marketplace)
+            @if ($order->payment_method || $order->carrierName() !== '' || $order->marketplace_name)
                 <div class="admin-list-meta">
                     @if ($order->payment_method)
                         <span class="admin-list-chip">{{ $order->payment_method->label() }}</span>
@@ -45,8 +45,8 @@
                     @if ($order->carrierName() !== '')
                         <span class="admin-list-chip">{{ $order->carrierName() }}</span>
                     @endif
-                    @if ($order->marketplace)
-                        <span class="admin-list-chip">{{ $order->marketplace->name }}</span>
+                    @if ($order->marketplace_name)
+                        <span class="admin-list-chip">{{ $order->marketplace_name }}</span>
                     @endif
                 </div>
             @endif

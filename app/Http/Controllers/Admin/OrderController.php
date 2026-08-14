@@ -120,9 +120,11 @@ class OrderController extends Controller
 
         try {
             $shippingPrice = $request->input('shipping_price');
-            $marketplaceId = $request->input('marketplace_id') ?: null;
+            $marketplace = $request->input('marketplace_id')
+                ? Marketplace::query()->find($request->input('marketplace_id'))
+                : null;
 
-            $order = DB::transaction(function () use ($customer, $carrier, $shippingSnapshot, $billingSnapshot, $items, $shippingPrice, $marketplaceId): Order {
+            $order = DB::transaction(function () use ($customer, $carrier, $shippingSnapshot, $billingSnapshot, $items, $shippingPrice, $marketplace): Order {
                 $products = Product::query()
                     ->whereIn('id', $items->pluck('product_id'))
                     ->lockForUpdate()
@@ -158,7 +160,8 @@ class OrderController extends Controller
                     'shipping_cents' => $shipping,
                     'total_cents' => $subtotal + $shipping,
                     'payment_method' => 'card',
-                    'marketplace_id' => $marketplaceId,
+                    'marketplace_id' => $marketplace?->id,
+                    'marketplace_name' => $marketplace?->name,
                 ]);
 
                 foreach ($items as $item) {
@@ -194,7 +197,7 @@ class OrderController extends Controller
 
     public function show(Order $order): View
     {
-        $order->load(['user', 'items.product', 'statusHistories', 'marketplace']);
+        $order->load(['user', 'items.product', 'statusHistories']);
 
         return view('admin.orders.show', [
             'order' => $order,

@@ -27,6 +27,7 @@ use Illuminate\Support\Str;
     'package_type_id',
     'package_type_name',
     'marketplace_id',
+    'marketplace_name',
     'relay_point_id',
     'relay_snapshot',
     'subtotal_cents',
