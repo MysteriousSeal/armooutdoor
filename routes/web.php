@@ -60,6 +60,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/categories/{category}', [AdminCategoryController::class, 'update'])->name('categories.update');
 
         Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
+        Route::get('/orders/create', [AdminOrderController::class, 'create'])->name('orders.create');
+        Route::post('/orders', [AdminOrderController::class, 'store'])->name('orders.store');
         Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
         Route::get('/orders/{order}/invoice', [AdminOrderController::class, 'invoice'])->name('orders.invoice');
         Route::patch('/orders/{order}/prepare', [AdminOrderController::class, 'prepare'])->name('orders.prepare');

@@ -3,15 +3,22 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreManualOrderRequest;
 use App\Http\Requests\Admin\UpdateOrderBillingAddressRequest;
 use App\Http\Requests\Admin\UpdateOrderShippingAddressRequest;
 use App\Models\Carrier;
 use App\Models\CompanySetting;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\PackageType;
+use App\Models\Product;
+use App\Models\ShippingSetting;
+use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
@@ -50,6 +57,127 @@ class OrderController extends Controller
                 ->count(),
             'search' => $search,
         ]);
+    }
+
+    public function create(): View
+    {
+        return view('admin.orders.create', [
+            'customers' => User::query()
+                ->where('is_admin', false)
+                ->where('external', false)
+                ->orderBy('name')
+                ->get(),
+            'products' => Product::query()->active()->orderBy('name')->get(),
+            'carriers' => Carrier::query()->active()->get(),
+        ]);
+    }
+
+    public function store(StoreManualOrderRequest $request): RedirectResponse
+    {
+        $items = $request->validItems();
+        $carrier = Carrier::query()->where('active', true)->findOrFail($request->input('carrier_id'));
+
+        $customer = $request->input('customer_mode') === 'existing'
+            ? User::query()->findOrFail($request->input('customer_id'))
+            : User::query()->create([
+                'name' => $request->input('new_customer_name'),
+                'email' => $request->input('new_customer_email'),
+                'password' => Str::random(32),
+                'external' => true,
+            ]);
+
+        $shippingSnapshot = [
+            'label' => null,
+            'first_name' => $request->input('first_name'),
+            'last_name' => $request->input('last_name'),
+            'line1' => $request->input('line1'),
+            'line2' => $request->input('line2'),
+            'postal_code' => $request->input('postal_code'),
+            'city' => $request->input('city'),
+            'country' => $request->input('country'),
+            'phone' => $request->input('phone'),
+        ];
+
+        $billingSnapshot = $request->boolean('billing_same_as_shipping')
+            ? $shippingSnapshot
+            : [
+                'label' => null,
+                'first_name' => $request->input('billing_first_name'),
+                'last_name' => $request->input('billing_last_name'),
+                'line1' => $request->input('billing_line1'),
+                'line2' => $request->input('billing_line2'),
+                'postal_code' => $request->input('billing_postal_code'),
+                'city' => $request->input('billing_city'),
+                'country' => $request->input('billing_country'),
+                'phone' => $request->input('billing_phone'),
+            ];
+
+        try {
+            $order = DB::transaction(function () use ($customer, $carrier, $shippingSnapshot, $billingSnapshot, $items): Order {
+                $products = Product::query()
+                    ->whereIn('id', $items->pluck('product_id'))
+                    ->lockForUpdate()
+                    ->get()
+                    ->keyBy('id');
+
+                $subtotal = 0;
+
+                foreach ($items as $item) {
+                    $product = $products->get($item['product_id']);
+
+                    if ($product === null || $product->quantity < $item['quantity']) {
+                        throw new \RuntimeException('stock');
+                    }
+
+                    $subtotal += $product->price_cents * $item['quantity'];
+                }
+
+                $shipping = ShippingSetting::current()->effectivePriceCents($carrier, $subtotal);
+
+                $order = Order::query()->create([
+                    'number' => Order::generateNumber(),
+                    'user_id' => $customer->id,
+                    'status' => 'placed',
+                    'address_snapshot' => $shippingSnapshot,
+                    'billing_address_snapshot' => $billingSnapshot,
+                    'carrier_id' => $carrier->id,
+                    'carrier_method' => $carrier->method,
+                    'carrier_snapshot' => $carrier->toSnapshot(),
+                    'subtotal_cents' => $subtotal,
+                    'shipping_cents' => $shipping,
+                    'total_cents' => $subtotal + $shipping,
+                    'payment_method' => 'card',
+                ]);
+
+                foreach ($items as $item) {
+                    $product = $products->get($item['product_id']);
+                    $product->decrement('quantity', $item['quantity']);
+
+                    OrderItem::query()->create([
+                        'order_id' => $order->id,
+                        'product_id' => $product->id,
+                        'product_slug' => $product->slug,
+                        'name' => $product->name,
+                        'image' => $product->image,
+                        'unit_price_cents' => $product->price_cents,
+                        'quantity' => $item['quantity'],
+                        'line_cents' => $product->price_cents * $item['quantity'],
+                    ]);
+                }
+
+                return $order;
+            });
+        } catch (\RuntimeException $exception) {
+            if ($exception->getMessage() === 'stock') {
+                return back()->withInput()->with('status', 'One of the selected products no longer has enough stock.');
+            }
+
+            throw $exception;
+        }
+
+        return redirect()
+            ->route('admin.orders.show', $order)
+            ->with('status', 'Manual order created.');
     }
 
     public function show(Order $order): View

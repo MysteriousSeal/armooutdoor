@@ -5,9 +5,14 @@
 @section('content')
     <div class="admin-list-page">
         <header class="admin-list-hero">
-            <p class="admin-list-kicker">Sales</p>
-            <h2 class="admin-list-title">Orders</h2>
-            <p class="admin-list-lede">Every order placed in the shop.</p>
+            <div class="admin-list-hero-row">
+                <div>
+                    <p class="admin-list-kicker">Sales</p>
+                    <h2 class="admin-list-title">Orders</h2>
+                    <p class="admin-list-lede">Every order placed in the shop.</p>
+                </div>
+                <a href="{{ route('admin.orders.create') }}" class="btn btn-primary">Create manual order</a>
+            </div>
             <div class="admin-list-meta">
                 <span class="admin-list-chip">{{ number_format($orderCount) }} {{ \Illuminate\Support\Str::plural('order', $orderCount) }}</span>
                 <span class="admin-list-chip">{{ number_format($toPrepareCount) }} to prepare</span>

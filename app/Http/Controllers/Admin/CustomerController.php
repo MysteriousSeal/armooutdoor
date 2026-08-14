@@ -15,6 +15,7 @@ class CustomerController extends Controller
 
         $customers = User::query()
             ->where('is_admin', false)
+            ->where('external', false)
             ->withCount(['orders', 'addresses'])
             ->when($search !== '', function ($query) use ($search): void {
                 $query->where(function ($query) use ($search): void {
@@ -28,7 +29,7 @@ class CustomerController extends Controller
 
         return view('admin.customers.index', [
             'customers' => $customers,
-            'customerCount' => User::query()->where('is_admin', false)->count(),
+            'customerCount' => User::query()->where('is_admin', false)->where('external', false)->count(),
             'search' => $search,
         ]);
     }

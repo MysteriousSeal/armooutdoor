@@ -13,7 +13,7 @@ class DashboardController extends Controller
     public function __invoke(): View
     {
         return view('admin.dashboard', [
-            'customerCount' => User::query()->where('is_admin', false)->count(),
+            'customerCount' => User::query()->where('is_admin', false)->where('external', false)->count(),
             'productCount' => Product::query()->count(),
             'orderCount' => Order::query()->count(),
         ]);
