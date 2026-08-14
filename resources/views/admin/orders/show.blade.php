@@ -29,7 +29,10 @@
             <p class="admin-list-lede admin-list-lede--wide">
                 {{ $order->created_at->format('d M Y · H:i') }}
                 @if ($order->user)
-                    · {{ $order->user->name }} · {{ $order->user->email }}
+                    · {{ $order->user->name }}
+                    @if ($order->user->email)
+                        · {{ $order->user->email }}
+                    @endif
                 @else
                     · Deleted customer
                 @endif
@@ -195,8 +198,10 @@
                     <h3 class="order-fact-title">Customer</h3>
                     @if ($order->user)
                         <p>
-                            {{ $order->user->name }}<br>
-                            {{ $order->user->email }}
+                            {{ $order->user->name }}
+                            @if ($order->user->email)
+                                <br>{{ $order->user->email }}
+                            @endif
                         </p>
                     @else
                         <p>Deleted customer</p>

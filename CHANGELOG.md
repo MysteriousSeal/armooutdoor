@@ -2,6 +2,10 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-14 (3)
+
+- **Manual order creation**: email is now optional for a new external customer. `users.email` made nullable (unique constraint still allows multiple customers with no email); admin order pages no longer show a dangling separator or blank line when a customer has none.
+
 ## 2026-08-14 (2)
 
 - **Customers now have a first and last name** instead of a single "name" field:

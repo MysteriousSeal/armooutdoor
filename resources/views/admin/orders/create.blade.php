@@ -109,7 +109,7 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="new_customer_email">Email</label>
+                                <label for="new_customer_email">Email (optional)</label>
                                 <input type="email" id="new_customer_email" name="new_customer_email" class="form-control" value="{{ old('new_customer_email') }}" maxlength="160">
                                 @error('new_customer_email') <p class="form-error">{{ $message }}</p> @enderror
                             </div>
@@ -517,9 +517,7 @@
                     } else {
                         clearFieldError(newLastName);
                     }
-                    if (isBlank(newEmail)) {
-                        fail(newEmail, 'Enter an email.');
-                    } else if (! /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail.value.trim())) {
+                    if (! isBlank(newEmail) && ! /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail.value.trim())) {
                         fail(newEmail, 'Enter a valid email.');
                     } else {
                         clearFieldError(newEmail);
