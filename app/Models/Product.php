@@ -111,6 +111,15 @@ class Product extends Model
         return $this->quantity > 0;
     }
 
+    public function isPurchasable(): bool
+    {
+        if ($this->hasVariants()) {
+            return $this->variants->contains(fn (ProductVariant $variant): bool => $variant->is_active && $variant->inStock());
+        }
+
+        return $this->inStock();
+    }
+
     public function lowStock(): bool
     {
         return $this->quantity > 0 && $this->quantity <= 2;

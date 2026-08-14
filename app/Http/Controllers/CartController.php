@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\ShippingSetting;
 use App\Support\Cart;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class CartController extends Controller
@@ -25,28 +27,44 @@ class CartController extends Controller
     {
         $validated = $request->validate([
             'product_id' => ['required', 'integer', 'exists:products,id'],
+            'variant_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('product_variants', 'id')
+                    ->where('product_id', $request->input('product_id'))
+                    ->where('is_active', true),
+            ],
             'quantity' => ['nullable', 'integer', 'min:1', 'max:'.Cart::MAX_QUANTITY],
         ]);
 
-        $product = Product::query()->findOrFail($validated['product_id']);
+        $product = Product::query()->with('variants')->findOrFail($validated['product_id']);
 
         if (! $product->is_active) {
             abort(404);
         }
 
-        if (! $product->inStock()) {
+        if ($product->hasVariants() && empty($validated['variant_id'])) {
+            return back()->withErrors(['variant_id' => __('store.select_variant_required')]);
+        }
+
+        $variant = isset($validated['variant_id'])
+            ? $product->variants->firstWhere('id', $validated['variant_id'])
+            : null;
+
+        if (! ($variant?->inStock() ?? $product->inStock())) {
             return back()->with('status', __('store.out_of_stock'));
         }
 
         $wanted = $validated['quantity'] ?? 1;
-        $alreadyInCart = $cart->quantityOf($product);
-        $allowed = max(0, $product->maxPurchasable() - $alreadyInCart);
+        $alreadyInCart = $cart->quantityOf($product, $variant);
+        $maxPurchasable = $variant?->maxPurchasable() ?? $product->maxPurchasable();
+        $allowed = max(0, $maxPurchasable - $alreadyInCart);
 
         if ($allowed < 1) {
-            return back()->with('status', __('store.stock_limit', ['count' => $product->quantity]));
+            return back()->with('status', __('store.stock_limit', ['count' => $variant?->quantity ?? $product->quantity]));
         }
 
-        $cart->add($product, min($wanted, $allowed));
+        $cart->add($product, min($wanted, $allowed), $variant);
 
         return back()->with('status', __('store.added_to_cart', [
             'product' => $product->localizedName(),
@@ -56,10 +74,15 @@ class CartController extends Controller
     public function update(Request $request, Cart $cart, Product $product): RedirectResponse
     {
         $validated = $request->validate([
+            'variant_id' => ['nullable', 'integer', Rule::exists('product_variants', 'id')->where('product_id', $product->id)],
             'quantity' => ['required', 'integer', 'min:0', 'max:'.Cart::MAX_QUANTITY],
         ]);
 
-        $cart->update($product, $validated['quantity']);
+        $variant = isset($validated['variant_id'])
+            ? ProductVariant::query()->find($validated['variant_id'])
+            : null;
+
+        $cart->update($product, $validated['quantity'], $variant);
 
         $status = $validated['quantity'] === 0
             ? __('store.removed_from_cart', ['product' => $product->localizedName()])
@@ -68,9 +91,17 @@ class CartController extends Controller
         return back()->with('status', $status);
     }
 
-    public function destroy(Cart $cart, Product $product): RedirectResponse
+    public function destroy(Request $request, Cart $cart, Product $product): RedirectResponse
     {
-        $cart->remove($product);
+        $validated = $request->validate([
+            'variant_id' => ['nullable', 'integer', Rule::exists('product_variants', 'id')->where('product_id', $product->id)],
+        ]);
+
+        $variant = isset($validated['variant_id'])
+            ? ProductVariant::query()->find($validated['variant_id'])
+            : null;
+
+        $cart->remove($product, $variant);
 
         return back()->with('status', __('store.removed_from_cart', [
             'product' => $product->localizedName(),

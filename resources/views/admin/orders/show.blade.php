@@ -73,7 +73,9 @@
                                             {{ $item->localizedName() }}
                                         @endif
                                     </p>
-                                    @if ($item->product?->sku)
+                                    @if ($item->variant_label)
+                                        <p class="order-item-sku">{{ $item->variant_label }}</p>
+                                    @elseif ($item->product?->sku)
                                         <p class="order-item-sku">SKU {{ $item->product->sku }}</p>
                                     @endif
                                     <p class="order-item-meta">× {{ $item->quantity }} · {{ format_euros($item->unit_price_cents) }}</p>

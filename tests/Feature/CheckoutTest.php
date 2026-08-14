@@ -6,6 +6,7 @@ use App\Models\Address;
 use App\Models\Carrier;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\RelayPoint;
 use App\Models\User;
 use Database\Seeders\CatalogSeeder;
@@ -26,15 +27,15 @@ class CheckoutTest extends TestCase
 
     public function test_guests_are_sent_to_login_before_checkout(): void
     {
-        $this->get('/fr/checkout')
-            ->assertRedirect('/fr/login');
+        $this->get('/checkout')
+            ->assertRedirect('/login');
     }
 
     public function test_an_empty_cart_cannot_be_checked_out(): void
     {
         $this->actingAs(User::factory()->create())
-            ->get('/fr/checkout')
-            ->assertRedirect('/fr/cart');
+            ->get('/checkout')
+            ->assertRedirect('/cart');
     }
 
     public function test_checkout_page_is_translated(): void
@@ -43,10 +44,10 @@ class CheckoutTest extends TestCase
         $product = Product::query()->where('slug', 'ridge-tent')->firstOrFail();
 
         $this->actingAs($user)
-            ->post('/fr/cart', ['product_id' => $product->id, 'quantity' => 1]);
+            ->post('/cart', ['product_id' => $product->id, 'quantity' => 1]);
 
         $this->actingAs($user)
-            ->get('/fr/checkout')
+            ->get('/checkout')
             ->assertOk()
             ->assertSee('À domicile')
             ->assertSee('Point relais')
@@ -63,11 +64,11 @@ class CheckoutTest extends TestCase
         $product = Product::query()->where('slug', 'daylight-pack')->firstOrFail();
 
         $this->actingAs($user)
-            ->post('/fr/cart', ['product_id' => $product->id, 'quantity' => 1]);
+            ->post('/cart', ['product_id' => $product->id, 'quantity' => 1]);
 
         $this->actingAs($user)
-            ->from('/fr/checkout')
-            ->post('/fr/checkout/addresses', [
+            ->from('/checkout')
+            ->post('/checkout/addresses', [
                 'label' => 'Home',
                 'first_name' => 'Colas',
                 'last_name' => 'Martin',
@@ -78,7 +79,7 @@ class CheckoutTest extends TestCase
                 'phone' => '0612345678',
                 'is_default' => '1',
             ])
-            ->assertRedirect('/fr/checkout')
+            ->assertRedirect('/checkout')
             ->assertSessionHas('status');
 
         $this->assertDatabaseHas('addresses', [
@@ -97,18 +98,19 @@ class CheckoutTest extends TestCase
         $carrier = Carrier::query()->where('slug', 'colissimo-home')->firstOrFail();
 
         $this->actingAs($user)
-            ->post('/fr/cart', ['product_id' => $product->id, 'quantity' => 2]);
+            ->post('/cart', ['product_id' => $product->id, 'quantity' => 2]);
 
         $response = $this->actingAs($user)
-            ->post('/fr/checkout', [
+            ->post('/checkout', [
                 'address_id' => $address->id,
+                'same_billing_address' => true,
                 'carrier_id' => $carrier->id,
                 'payment_method' => 'card',
             ]);
 
         $order = Order::query()->firstOrFail();
 
-        $response->assertRedirect('/fr/orders/'.$order->number);
+        $response->assertRedirect('/orders/'.$order->number);
 
         $this->assertSame('placed', $order->status);
         $this->assertSame('card', $order->payment_method->value);
@@ -120,7 +122,7 @@ class CheckoutTest extends TestCase
         $this->assertDatabaseMissing('cart_items', ['user_id' => $user->id]);
 
         $this->actingAs($user)
-            ->get('/fr/orders/'.$order->number)
+            ->get('/orders/'.$order->number)
             ->assertOk()
             ->assertSee($order->number)
             ->assertSee('Poêle en fonte')
@@ -136,16 +138,17 @@ class CheckoutTest extends TestCase
         $carrier = Carrier::query()->where('slug', 'mondial-relay')->firstOrFail();
 
         $this->actingAs($user)
-            ->post('/fr/cart', ['product_id' => $product->id, 'quantity' => 1]);
+            ->post('/cart', ['product_id' => $product->id, 'quantity' => 1]);
 
         $this->actingAs($user)
-            ->from('/fr/checkout')
-            ->post('/fr/checkout', [
+            ->from('/checkout')
+            ->post('/checkout', [
                 'address_id' => $address->id,
+                'same_billing_address' => true,
                 'carrier_id' => $carrier->id,
                 'payment_method' => 'card',
             ])
-            ->assertRedirect('/fr/checkout')
+            ->assertRedirect('/checkout')
             ->assertSessionHasErrors('relay_point_id');
 
         $this->assertSame(0, Order::query()->count());
@@ -160,11 +163,12 @@ class CheckoutTest extends TestCase
         $relay = RelayPoint::query()->where('slug', 'lyon-bellecour')->firstOrFail();
 
         $this->actingAs($user)
-            ->post('/fr/cart', ['product_id' => $product->id, 'quantity' => 1]);
+            ->post('/cart', ['product_id' => $product->id, 'quantity' => 1]);
 
         $this->actingAs($user)
-            ->post('/fr/checkout', [
+            ->post('/checkout', [
                 'address_id' => $address->id,
+                'same_billing_address' => true,
                 'carrier_id' => $carrier->id,
                 'relay_point_id' => $relay->id,
                 'payment_method' => 'paypal',
@@ -180,12 +184,53 @@ class CheckoutTest extends TestCase
         $this->assertSame(390, $order->shipping_cents);
 
         $this->actingAs($user)
-            ->get('/fr/orders/'.$order->number)
+            ->get('/orders/'.$order->number)
             ->assertOk()
             ->assertSee('Point relais')
             ->assertSee('Relais Bellecour')
             ->assertSee('Lyon')
             ->assertSee('PayPal');
+    }
+
+    public function test_checkout_records_the_selected_variant_and_decrements_its_stock(): void
+    {
+        $user = User::factory()->create();
+        $product = Product::query()->where('slug', 'ridge-tent')->firstOrFail();
+        $productQuantityBefore = $product->quantity;
+        $variant = ProductVariant::query()->create([
+            'product_id' => $product->id,
+            'attribute_values' => [['label' => 'Taille', 'value' => 'Taille M']],
+            'price_cents' => 39900,
+            'quantity' => 5,
+            'is_active' => true,
+        ]);
+        $address = Address::factory()->for($user)->create();
+        $carrier = Carrier::query()->where('slug', 'colissimo-home')->firstOrFail();
+
+        $this->actingAs($user)
+            ->post('/cart', [
+                'product_id' => $product->id,
+                'variant_id' => $variant->id,
+                'quantity' => 2,
+            ]);
+
+        $this->actingAs($user)
+            ->post('/checkout', [
+                'address_id' => $address->id,
+                'same_billing_address' => true,
+                'carrier_id' => $carrier->id,
+                'payment_method' => 'card',
+            ])
+            ->assertRedirect();
+
+        $order = Order::query()->firstOrFail();
+        $item = $order->items()->firstOrFail();
+
+        $this->assertSame($variant->id, $item->product_variant_id);
+        $this->assertSame('Taille M', $item->variant_label);
+        $this->assertSame(79800, $item->line_cents);
+        $this->assertSame(3, $variant->fresh()->quantity);
+        $this->assertSame($productQuantityBefore, $product->fresh()->quantity);
     }
 
     public function test_a_user_cannot_use_someone_elses_address(): void
@@ -197,16 +242,16 @@ class CheckoutTest extends TestCase
         $product = Product::query()->where('slug', 'ridge-tent')->firstOrFail();
 
         $this->actingAs($user)
-            ->post('/fr/cart', ['product_id' => $product->id, 'quantity' => 1]);
+            ->post('/cart', ['product_id' => $product->id, 'quantity' => 1]);
 
         $this->actingAs($user)
-            ->from('/fr/checkout')
-            ->post('/fr/checkout', [
+            ->from('/checkout')
+            ->post('/checkout', [
                 'address_id' => $address->id,
                 'carrier_id' => $carrier->id,
                 'payment_method' => 'card',
             ])
-            ->assertRedirect('/fr/checkout')
+            ->assertRedirect('/checkout')
             ->assertSessionHasErrors('address_id');
     }
 
@@ -218,15 +263,15 @@ class CheckoutTest extends TestCase
         $carrier = Carrier::query()->where('slug', 'colissimo-home')->firstOrFail();
 
         $this->actingAs($user)
-            ->post('/fr/cart', ['product_id' => $product->id, 'quantity' => 1]);
+            ->post('/cart', ['product_id' => $product->id, 'quantity' => 1]);
 
         $this->actingAs($user)
-            ->from('/fr/checkout')
-            ->post('/fr/checkout', [
+            ->from('/checkout')
+            ->post('/checkout', [
                 'address_id' => $address->id,
                 'carrier_id' => $carrier->id,
             ])
-            ->assertRedirect('/fr/checkout')
+            ->assertRedirect('/checkout')
             ->assertSessionHasErrors('payment_method');
     }
 }
