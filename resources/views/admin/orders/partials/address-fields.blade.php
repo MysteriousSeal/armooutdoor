@@ -1,5 +1,6 @@
 @php
     $fieldPrefix = $fieldPrefix ?? '';
+    $phoneOptional = $phoneOptional ?? false;
     $bagErrors = $errors->{$bag};
     $field = fn (string $name) => $fieldPrefix.$name;
     $val = fn (string $name) => $bagErrors->any()
@@ -56,8 +57,8 @@
         @if ($bagErrors->has($field('country'))) <p class="form-error">{{ $bagErrors->first($field('country')) }}</p> @endif
     </div>
     <div class="form-group">
-        <label for="{{ $prefix }}_phone">Phone</label>
-        <input type="text" id="{{ $prefix }}_phone" name="{{ $field('phone') }}" class="form-control" value="{{ $val('phone') }}" required maxlength="30">
+        <label for="{{ $prefix }}_phone">Phone{{ $phoneOptional ? ' (optional)' : '' }}</label>
+        <input type="text" id="{{ $prefix }}_phone" name="{{ $field('phone') }}" class="form-control" value="{{ $val('phone') }}" @unless($phoneOptional) required @endunless maxlength="30">
         @if ($bagErrors->has($field('phone'))) <p class="form-error">{{ $bagErrors->first($field('phone')) }}</p> @endif
     </div>
 </div>

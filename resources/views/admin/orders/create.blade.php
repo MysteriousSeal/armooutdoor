@@ -296,7 +296,7 @@
                                 <option value="">New address</option>
                             </select>
                         </div>
-                        @include('admin.orders.partials.address-fields', ['snapshot' => $isEdit ? ($order->address_snapshot ?? []) : [], 'prefix' => 'shipping', 'bag' => 'default'])
+                        @include('admin.orders.partials.address-fields', ['snapshot' => $isEdit ? ($order->address_snapshot ?? []) : [], 'prefix' => 'shipping', 'bag' => 'default', 'phoneOptional' => true])
                     </section>
 
                     <section class="order-panel">
@@ -315,7 +315,7 @@
                                     <option value="">New address</option>
                                 </select>
                             </div>
-                            @include('admin.orders.partials.address-fields', ['snapshot' => $isEdit ? ($order->billing_address_snapshot ?? $order->address_snapshot ?? []) : [], 'prefix' => 'billing', 'bag' => 'default', 'fieldPrefix' => 'billing_'])
+                            @include('admin.orders.partials.address-fields', ['snapshot' => $isEdit ? ($order->billing_address_snapshot ?? $order->address_snapshot ?? []) : [], 'prefix' => 'billing', 'bag' => 'default', 'fieldPrefix' => 'billing_', 'phoneOptional' => true])
                         </div>
                     </section>
                 </div>
@@ -627,7 +627,7 @@
                     clearFieldError(carrierSelect);
                 }
 
-                ['first_name', 'last_name', 'line1', 'postal_code', 'city', 'country', 'phone'].forEach(function (field) {
+                ['first_name', 'last_name', 'line1', 'postal_code', 'city', 'country'].forEach(function (field) {
                     var input = document.getElementById('shipping_' + field);
                     if (! validateRequired(input, 'This field is required.')) {
                         if (! firstInvalid) {
@@ -638,7 +638,7 @@
                 });
 
                 if (! billingSame.checked) {
-                    ['first_name', 'last_name', 'line1', 'postal_code', 'city', 'country', 'phone'].forEach(function (field) {
+                    ['first_name', 'last_name', 'line1', 'postal_code', 'city', 'country'].forEach(function (field) {
                         var input = document.getElementById('billing_' + field);
                         if (! validateRequired(input, 'This field is required.')) {
                             if (! firstInvalid) {
