@@ -127,6 +127,11 @@ class Order extends Model
         return $this->trackingCarrier?->localizedName() ?: $this->carrierName();
     }
 
+    public function invoiceIsAvailable(): bool
+    {
+        return ! in_array($this->status, ['placed', 'preparing'], true);
+    }
+
     public function hasSeparateBillingAddress(): bool
     {
         return $this->billing_address_snapshot !== null

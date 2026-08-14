@@ -15,11 +15,16 @@
                         </span>
                     </div>
                 </div>
-                @if ($order->status === 'placed')
-                    <button type="button" class="btn btn-primary" data-modal-open="prepare-confirm-modal">Mark as being prepared</button>
-                @elseif ($order->status === 'preparing')
-                    <button type="button" class="btn btn-primary" data-modal-open="ship-confirm-modal">Mark as shipped</button>
-                @endif
+                <div class="admin-order-actions">
+                    @if ($order->status === 'placed')
+                        <button type="button" class="btn btn-primary" data-modal-open="prepare-confirm-modal">Mark as being prepared</button>
+                    @elseif ($order->status === 'preparing')
+                        <button type="button" class="btn btn-primary" data-modal-open="ship-confirm-modal">Mark as shipped</button>
+                    @endif
+                    @if ($order->status !== 'refunded')
+                        <button type="button" class="btn btn-secondary" data-modal-open="refund-confirm-modal">Mark as refunded</button>
+                    @endif
+                </div>
             </div>
             <p class="admin-list-lede admin-list-lede--wide">
                 {{ $order->created_at->format('d M Y · H:i') }}
@@ -89,6 +94,12 @@
                     <h3 class="order-panel-title">Total</h3>
                     <p class="order-total-amount">{{ $order->formattedTotal() }}</p>
                 </section>
+
+                @if ($order->invoiceIsAvailable())
+                    <div class="order-panel-actions">
+                        <a href="{{ route('admin.orders.invoice', $order) }}" class="btn btn-secondary">Download invoice</a>
+                    </div>
+                @endif
 
                 <section class="order-panel">
                     <h3 class="order-panel-title">Status history</h3>
@@ -276,6 +287,25 @@
                     <div class="modal-actions">
                         <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
                         <button type="submit" class="btn btn-primary">Mark as shipped</button>
+                    </div>
+                </form>
+            </dialog>
+        @endif
+
+        @if ($order->status !== 'refunded')
+            <dialog id="refund-confirm-modal" class="modal" aria-labelledby="refund-confirm-title">
+                <form method="POST" action="{{ route('admin.orders.refund', $order) }}">
+                    @csrf
+                    @method('PATCH')
+                    <p class="modal-kicker">{{ $order->number }}</p>
+                    <h3 class="modal-title" id="refund-confirm-title">Mark as refunded?</h3>
+                    <p class="modal-body">
+                        This will set the order status to <strong>Refunded</strong>, regardless of its current status.
+                        The customer will see the update on their order.
+                    </p>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                        <button type="submit" class="btn btn-primary">Mark as refunded</button>
                     </div>
                 </form>
             </dialog>

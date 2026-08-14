@@ -2567,6 +2567,10 @@ textarea.form-control {
     text-align: right;
 }
 
+.order-panel-actions {
+    text-align: right;
+}
+
 .order-total-amount {
     margin: 0;
     font-size: 1.5rem;
@@ -2764,6 +2768,12 @@ textarea.form-control {
     background: #eef4ef;
 }
 
+.order-status.is-refunded {
+    color: #a44;
+    border-color: #e3c6c6;
+    background: #f7ecec;
+}
+
 [data-theme='dark'] .order-status.is-preparing {
     color: #e0c36a;
     background: #3a3320;
@@ -2774,6 +2784,12 @@ textarea.form-control {
     color: #9dccab;
     background: #2a332c;
     border-color: #3d4d40;
+}
+
+[data-theme='dark'] .order-status.is-refunded {
+    color: #e0a3a3;
+    background: #3a2626;
+    border-color: #5c3a3a;
 }
 
 .order-list-meta {
@@ -3427,9 +3443,25 @@ a.admin-stat-card:hover {
 
 .admin-list-hero-row {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: 1.25rem;
+}
+
+.admin-order-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.admin-order-actions .btn {
+    height: 2.5rem;
+    min-width: 10.75rem;
+    padding: 0 1rem;
+    white-space: nowrap;
 }
 
 .admin-list-chip.is-filtered {
@@ -3487,6 +3519,12 @@ a.admin-stat-card:hover {
     color: #8a6d1f;
     border-color: #ecd9a3;
     background: #fbf3dc;
+}
+
+.badge-refunded {
+    color: #a44;
+    border-color: #e3c6c6;
+    background: #f7ecec;
 }
 
 .badge-disabled {
@@ -4029,6 +4067,16 @@ a.admin-stat-card:hover {
 
     .admin-list-hero-row {
         flex-direction: column;
+        align-items: stretch;
+    }
+
+    .admin-order-actions {
+        width: 100%;
+    }
+
+    .admin-order-actions .btn {
+        flex: 1 1 calc(50% - 0.25rem);
+        min-width: 0;
     }
 }
 
@@ -4157,6 +4205,10 @@ a.admin-stat-card:hover {
     --history-tone: #3d6b4e;
 }
 
+.order-timeline-item.is-refunded {
+    --history-tone: #a44;
+}
+
 .order-timeline-marker {
     width: 0.7rem;
     height: 0.7rem;
@@ -4201,6 +4253,10 @@ a.admin-stat-card:hover {
 
 [data-theme='dark'] .order-timeline-item.is-shipped {
     --history-tone: #9dccab;
+}
+
+[data-theme='dark'] .order-timeline-item.is-refunded {
+    --history-tone: #e0a3a3;
 }
 
 @media (max-width: 480px) {

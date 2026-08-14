@@ -172,6 +172,7 @@ return [
     'order_status_placed' => 'Enregistrée',
     'order_status_preparing' => 'En cours de préparation',
     'order_status_shipped' => 'Expédiée',
+    'order_status_refunded' => 'Remboursée',
     'order_history' => 'Historique de la commande',
     'order_tracking' => 'Suivi de livraison',
     'order_tracking_number' => 'Numéro de suivi',

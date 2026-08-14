@@ -8,8 +8,10 @@ use App\Http\Requests\Admin\UpdateOrderShippingAddressRequest;
 use App\Models\Carrier;
 use App\Models\Order;
 use App\Models\PackageType;
+use App\Support\SimplePdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -65,6 +67,25 @@ class OrderController extends Controller
         $order->markStatus('shipped');
 
         return back()->with('status', 'Order marked as shipped.');
+    }
+
+    public function refund(Order $order): RedirectResponse
+    {
+        abort_if($order->status === 'refunded', 403);
+
+        $order->markStatus('refunded');
+
+        return back()->with('status', 'Order marked as refunded.');
+    }
+
+    public function invoice(Order $order): Response
+    {
+        abort_unless($order->invoiceIsAvailable(), 404);
+
+        return response(SimplePdf::withText('Hello World'), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="invoice-'.$order->number.'.pdf"',
+        ]);
     }
 
     public function updateTracking(Request $request, Order $order): RedirectResponse
