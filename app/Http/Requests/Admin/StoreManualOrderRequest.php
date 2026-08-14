@@ -33,6 +33,7 @@ class StoreManualOrderRequest extends FormRequest
 
             'carrier_id' => ['required', Rule::exists('carriers', 'id')->where('active', true)],
             'shipping_price' => ['nullable', 'numeric', 'min:0'],
+            'marketplace_id' => ['nullable', 'exists:marketplaces,id'],
 
             'first_name' => ['required', 'string', 'max:80'],
             'last_name' => ['required', 'string', 'max:80'],

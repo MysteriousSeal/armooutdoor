@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\UpdateOrderBillingAddressRequest;
 use App\Http\Requests\Admin\UpdateOrderShippingAddressRequest;
 use App\Models\Carrier;
 use App\Models\CompanySetting;
+use App\Models\Marketplace;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\PackageType;
@@ -72,6 +73,7 @@ class OrderController extends Controller
                 ->get(),
             'products' => Product::query()->active()->orderBy('name')->get(),
             'carriers' => Carrier::query()->active()->get(),
+            'marketplaces' => Marketplace::query()->orderBy('name')->get(),
         ]);
     }
 
@@ -118,8 +120,9 @@ class OrderController extends Controller
 
         try {
             $shippingPrice = $request->input('shipping_price');
+            $marketplaceId = $request->input('marketplace_id') ?: null;
 
-            $order = DB::transaction(function () use ($customer, $carrier, $shippingSnapshot, $billingSnapshot, $items, $shippingPrice): Order {
+            $order = DB::transaction(function () use ($customer, $carrier, $shippingSnapshot, $billingSnapshot, $items, $shippingPrice, $marketplaceId): Order {
                 $products = Product::query()
                     ->whereIn('id', $items->pluck('product_id'))
                     ->lockForUpdate()
@@ -155,6 +158,7 @@ class OrderController extends Controller
                     'shipping_cents' => $shipping,
                     'total_cents' => $subtotal + $shipping,
                     'payment_method' => 'card',
+                    'marketplace_id' => $marketplaceId,
                 ]);
 
                 foreach ($items as $item) {
@@ -190,7 +194,7 @@ class OrderController extends Controller
 
     public function show(Order $order): View
     {
-        $order->load(['user', 'items.product', 'statusHistories']);
+        $order->load(['user', 'items.product', 'statusHistories', 'marketplace']);
 
         return view('admin.orders.show', [
             'order' => $order,

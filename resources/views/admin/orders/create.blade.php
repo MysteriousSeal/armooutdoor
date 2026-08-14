@@ -231,6 +231,25 @@
                             </div>
                         </div>
                     </section>
+
+                    <section class="admin-order-create-section">
+                        <h3 class="admin-panel-title">Marketplace</h3>
+                        <div class="form-group">
+                            <label for="marketplace_id">Marketplace (optional)</label>
+                            <select id="marketplace_id" name="marketplace_id" class="form-control">
+                                <option value="">— None —</option>
+                                @foreach ($marketplaces as $marketplace)
+                                    <option
+                                        value="{{ $marketplace->id }}"
+                                        @selected((string) old('marketplace_id') === (string) $marketplace->id)
+                                    >
+                                        {{ $marketplace->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('marketplace_id') <p class="form-error">{{ $message }}</p> @enderror
+                        </div>
+                    </section>
                 </div>
 
                 <div class="admin-order-create-col">

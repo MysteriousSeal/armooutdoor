@@ -26,6 +26,7 @@ use Illuminate\Support\Str;
     'tracking_carrier_id',
     'package_type_id',
     'package_type_name',
+    'marketplace_id',
     'relay_point_id',
     'relay_snapshot',
     'subtotal_cents',
@@ -80,6 +81,11 @@ class Order extends Model
     public function packageType(): BelongsTo
     {
         return $this->belongsTo(PackageType::class);
+    }
+
+    public function marketplace(): BelongsTo
+    {
+        return $this->belongsTo(Marketplace::class);
     }
 
     public function statusHistories(): HasMany
