@@ -14,10 +14,6 @@
                 <a href="{{ route('admin.orders.create') }}" class="btn btn-primary">Create manual order</a>
             </div>
             <div class="admin-list-meta">
-                <span class="admin-list-chip">{{ number_format($orderCount) }} {{ \Illuminate\Support\Str::plural('order', $orderCount) }}</span>
-                @if ($draftCount > 0)
-                    <span class="admin-list-chip">{{ number_format($draftCount) }} {{ \Illuminate\Support\Str::plural('draft', $draftCount) }}</span>
-                @endif
                 <span class="admin-list-chip">{{ number_format($toPrepareCount) }} to prepare</span>
                 <span class="admin-list-chip">{{ number_format($missingTrackingCount) }} missing tracking</span>
                 @if ($search !== '')
@@ -26,7 +22,17 @@
             </div>
         </header>
 
+        <nav class="admin-tabs" aria-label="Order tabs">
+            <a href="{{ route('admin.orders.index', array_filter(['tab' => 'orders', 'search' => $search ?: null])) }}" class="{{ $tab === 'orders' ? 'active' : '' }}">
+                Orders <span class="admin-tab-count">{{ number_format($orderCount) }}</span>
+            </a>
+            <a href="{{ route('admin.orders.index', array_filter(['tab' => 'draft', 'search' => $search ?: null])) }}" class="{{ $tab === 'draft' ? 'active' : '' }}">
+                Drafts <span class="admin-tab-count">{{ number_format($draftCount) }}</span>
+            </a>
+        </nav>
+
         <form method="GET" action="{{ route('admin.orders.index') }}" class="admin-toolbar">
+            <input type="hidden" name="tab" value="{{ $tab }}">
             <input
                 type="search"
                 name="search"
@@ -36,13 +42,17 @@
             >
             <button type="submit" class="btn btn-secondary">Search</button>
             @if ($search !== '')
-                <a href="{{ route('admin.orders.index') }}" class="btn btn-secondary">Clear</a>
+                <a href="{{ route('admin.orders.index', array_filter(['tab' => $tab !== 'orders' ? $tab : null])) }}" class="btn btn-secondary">Clear</a>
             @endif
         </form>
 
         @if ($orders->isEmpty())
             <p class="empty-state">
-                {{ $search !== '' ? 'No orders match this search.' : 'No orders yet.' }}
+                @if ($search !== '')
+                    No {{ $tab === 'draft' ? 'drafts' : 'orders' }} match this search.
+                @else
+                    {{ $tab === 'draft' ? 'No drafts yet.' : 'No orders yet.' }}
+                @endif
             </p>
         @else
             <p class="admin-result-count">

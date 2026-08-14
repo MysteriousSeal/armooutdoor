@@ -3303,6 +3303,54 @@ textarea.form-control {
     margin-top: 1.125rem;
 }
 
+.admin-tabs {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.admin-tabs a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 2.75rem;
+    margin-bottom: -1px;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-bottom: 2px solid transparent;
+}
+
+.admin-tabs a:hover {
+    color: var(--text);
+}
+
+.admin-tabs a.active {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+}
+
+.admin-tab-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.35rem;
+    height: 1.35rem;
+    padding: 0 0.35rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.admin-tabs a.active .admin-tab-count {
+    color: var(--accent-hover);
+    border-color: color-mix(in srgb, var(--accent) 32%, var(--border));
+    background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+}
+
 .admin-list-chip {
     display: inline-flex;
     align-items: center;

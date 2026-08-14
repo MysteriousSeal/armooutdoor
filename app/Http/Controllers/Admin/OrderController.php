@@ -29,10 +29,13 @@ class OrderController extends Controller
     public function index(Request $request): View
     {
         $search = trim((string) $request->query('search', ''));
+        $tab = $request->query('tab') === 'draft' ? 'draft' : 'orders';
 
         $orders = Order::query()
             ->with('user')
             ->withCount('items')
+            ->when($tab === 'draft', fn ($query) => $query->where('status', 'draft'))
+            ->when($tab === 'orders', fn ($query) => $query->where('status', '!=', 'draft'))
             ->when($search !== '', function ($query) use ($search): void {
                 $query->where(function ($query) use ($search): void {
                     $query->where('number', 'like', '%'.$search.'%')
@@ -49,6 +52,7 @@ class OrderController extends Controller
 
         return view('admin.orders.index', [
             'orders' => $orders,
+            'tab' => $tab,
             'orderCount' => Order::query()->where('status', '!=', 'draft')->count(),
             'draftCount' => Order::query()->where('status', 'draft')->count(),
             'toPrepareCount' => Order::query()->whereIn('status', ['placed', 'preparing'])->count(),
