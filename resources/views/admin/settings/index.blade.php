@@ -19,6 +19,10 @@
                 <span class="admin-stat-label">Company &amp; legal</span>
                 <span class="admin-stat-value admin-stat-value--sm">Info shown on the legal pages</span>
             </a>
+            <a href="{{ route('admin.settings.orders.edit') }}" class="admin-stat-card">
+                <span class="admin-stat-label">Orders</span>
+                <span class="admin-stat-value admin-stat-value--sm">Marketplaces you also sell on</span>
+            </a>
         </div>
     </div>
 @endsection

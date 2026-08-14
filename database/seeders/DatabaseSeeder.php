@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             CatalogSeeder::class,
             ShippingSeeder::class,
             PackageTypeSeeder::class,
+            MarketplaceSeeder::class,
             AdminSeeder::class,
         ]);
     }
