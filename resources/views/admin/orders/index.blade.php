@@ -53,6 +53,7 @@
                             <th>Order</th>
                             <th>Customer</th>
                             <th>Shipping</th>
+                            <th>Channel</th>
                             <th>Status</th>
                             <th>Tracking</th>
                             <th class="admin-table-num">Total</th>
@@ -82,6 +83,13 @@
                                         {{ $order->payment_method?->label() ?? '—' }}
                                         · {{ $order->items_count }} {{ \Illuminate\Support\Str::plural('item', $order->items_count) }}
                                     </span>
+                                </td>
+                                <td>
+                                    @if ($order->is_manual)
+                                        <span class="admin-list-chip">{{ $order->marketplace_name ?: 'Manuelle' }}</span>
+                                    @else
+                                        <span class="admin-table-sub">—</span>
+                                    @endif
                                 </td>
                                 <td>
                                     <span class="badge badge-{{ $order->status }}">

@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 
 #[Fillable([
     'number',
+    'is_manual',
     'user_id',
     'status',
     'address_id',
@@ -48,6 +49,7 @@ class Order extends Model
     protected function casts(): array
     {
         return [
+            'is_manual' => 'boolean',
             'address_snapshot' => 'array',
             'billing_address_snapshot' => 'array',
             'carrier_snapshot' => 'array',

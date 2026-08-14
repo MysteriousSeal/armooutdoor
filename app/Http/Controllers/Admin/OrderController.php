@@ -149,6 +149,7 @@ class OrderController extends Controller
 
                 $order = Order::query()->create([
                     'number' => Order::generateNumber(),
+                    'is_manual' => true,
                     'user_id' => $customer->id,
                     'status' => 'placed',
                     'address_snapshot' => $shippingSnapshot,
