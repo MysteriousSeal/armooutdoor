@@ -174,7 +174,12 @@
                 </section>
 
                 <section class="order-fact">
-                    <h3 class="order-fact-title">Shipping address</h3>
+                    <div class="order-fact-heading">
+                        <h3 class="order-fact-title">Shipping address</h3>
+                        @if ($order->addressIsEditable())
+                            <button type="button" class="footer-text-btn" data-modal-open="edit-shipping-address-modal">Edit</button>
+                        @endif
+                    </div>
                     <p>
                         {{ $order->address_snapshot['first_name'] }} {{ $order->address_snapshot['last_name'] }}<br>
                         {{ $order->address_snapshot['line1'] }}
@@ -191,7 +196,12 @@
 
                 @if ($order->billing_address_snapshot)
                     <section class="order-fact">
-                        <h3 class="order-fact-title">Billing address</h3>
+                        <div class="order-fact-heading">
+                            <h3 class="order-fact-title">Billing address</h3>
+                            @if ($order->addressIsEditable())
+                                <button type="button" class="footer-text-btn" data-modal-open="edit-billing-address-modal">Edit</button>
+                            @endif
+                        </div>
                         <p>
                             {{ $order->billing_address_snapshot['first_name'] }} {{ $order->billing_address_snapshot['last_name'] }}<br>
                             {{ $order->billing_address_snapshot['line1'] }}
@@ -247,6 +257,60 @@
                     <div class="modal-actions">
                         <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
                         <button type="submit" class="btn btn-primary">Mark as shipped</button>
+                    </div>
+                </form>
+            </dialog>
+        @endif
+
+        @if ($order->addressIsEditable())
+            <dialog
+                id="edit-shipping-address-modal"
+                class="modal modal--form"
+                aria-labelledby="edit-shipping-address-title"
+                @if ($errors->shippingAddress->any()) data-autoopen @endif
+            >
+                <form method="POST" action="{{ route('admin.orders.address.shipping', $order) }}">
+                    @csrf
+                    @method('PATCH')
+                    <p class="modal-kicker">{{ $order->number }}</p>
+                    <h3 class="modal-title" id="edit-shipping-address-title">Edit shipping address</h3>
+                    <p class="modal-body">
+                        This only changes the address on this order — the customer's saved address is not affected.
+                    </p>
+                    @include('admin.orders.partials.address-fields', [
+                        'snapshot' => $order->address_snapshot,
+                        'prefix' => 'shipping',
+                        'bag' => 'shippingAddress',
+                    ])
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save address</button>
+                    </div>
+                </form>
+            </dialog>
+
+            <dialog
+                id="edit-billing-address-modal"
+                class="modal modal--form"
+                aria-labelledby="edit-billing-address-title"
+                @if ($errors->billingAddress->any()) data-autoopen @endif
+            >
+                <form method="POST" action="{{ route('admin.orders.address.billing', $order) }}">
+                    @csrf
+                    @method('PATCH')
+                    <p class="modal-kicker">{{ $order->number }}</p>
+                    <h3 class="modal-title" id="edit-billing-address-title">Edit billing address</h3>
+                    <p class="modal-body">
+                        This only changes the address on this order — the customer's saved address is not affected.
+                    </p>
+                    @include('admin.orders.partials.address-fields', [
+                        'snapshot' => $order->billing_address_snapshot ?? $order->address_snapshot,
+                        'prefix' => 'billing',
+                        'bag' => 'billingAddress',
+                    ])
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save address</button>
                     </div>
                 </form>
             </dialog>

@@ -85,6 +85,16 @@ class Order extends Model
         $this->statusHistories()->create(['status' => $status]);
     }
 
+    /**
+     * Addresses can only be edited before an order has shipped. Listed as an
+     * allowlist (rather than excluding 'shipped') so future statuses like
+     * 'delivered' or 'refunded' are locked out by default too.
+     */
+    public function addressIsEditable(): bool
+    {
+        return in_array($this->status, ['placed', 'preparing'], true);
+    }
+
     public function formattedSubtotal(): string
     {
         return format_euros($this->subtotal_cents);

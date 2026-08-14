@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\UpdateOrderBillingAddressRequest;
+use App\Http\Requests\Admin\UpdateOrderShippingAddressRequest;
 use App\Models\Carrier;
 use App\Models\Order;
 use Illuminate\Http\RedirectResponse;
@@ -73,5 +75,23 @@ class OrderController extends Controller
         $order->update($validated);
 
         return back()->with('status', 'Tracking details saved.');
+    }
+
+    public function updateShippingAddress(UpdateOrderShippingAddressRequest $request, Order $order): RedirectResponse
+    {
+        abort_unless($order->addressIsEditable(), 403);
+
+        $order->update(['address_snapshot' => ['label' => null, ...$request->validated()]]);
+
+        return back()->with('status', 'Shipping address updated for this order.');
+    }
+
+    public function updateBillingAddress(UpdateOrderBillingAddressRequest $request, Order $order): RedirectResponse
+    {
+        abort_unless($order->addressIsEditable(), 403);
+
+        $order->update(['billing_address_snapshot' => ['label' => null, ...$request->validated()]]);
+
+        return back()->with('status', 'Billing address updated for this order.');
     }
 }

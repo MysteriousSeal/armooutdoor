@@ -2440,6 +2440,13 @@ textarea.form-control {
     color: var(--accent);
 }
 
+.order-fact-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
 .order-items {
     list-style: none;
     margin: 0;
@@ -4015,6 +4022,10 @@ a.admin-stat-card:hover {
     background: var(--surface);
     color: var(--text);
     box-shadow: 0 18px 50px rgba(28, 27, 26, 0.18);
+}
+
+.modal--form {
+    width: min(30rem, calc(100vw - 2rem));
 }
 
 .modal[open] {

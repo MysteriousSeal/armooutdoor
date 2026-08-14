@@ -23,5 +23,9 @@
                 modal.close();
             }
         });
+
+        if (modal.hasAttribute('data-autoopen')) {
+            modal.showModal();
+        }
     });
 })();
