@@ -157,6 +157,25 @@
                                 autocomplete="off"
                             >
                         </div>
+                        <div class="order-shipping-field">
+                            <label for="package_type_id">Package type</label>
+                            <div class="order-shipping-select-wrap">
+                                <select id="package_type_id" name="package_type_id" class="order-shipping-select">
+                                    <option value="">Select a package type</option>
+                                    @foreach ($packageTypes as $packageType)
+                                        <option
+                                            value="{{ $packageType->id }}"
+                                            @selected(old('package_type_id', $order->package_type_id) == $packageType->id)
+                                        >
+                                            {{ $packageType->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            @if ($order->package_type_name && ! $order->packageType)
+                                <p class="form-hint">Previously saved as "{{ $order->package_type_name }}" (removed from the package type list).</p>
+                            @endif
+                        </div>
                         <button type="submit" class="btn btn-secondary btn-block">Save tracking</button>
                     </form>
                 </section>

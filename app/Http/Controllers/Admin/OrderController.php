@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\UpdateOrderBillingAddressRequest;
 use App\Http\Requests\Admin\UpdateOrderShippingAddressRequest;
 use App\Models\Carrier;
 use App\Models\Order;
+use App\Models\PackageType;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -48,6 +49,7 @@ class OrderController extends Controller
         return view('admin.orders.show', [
             'order' => $order,
             'carriers' => Carrier::query()->orderBy('sort_order')->get(),
+            'packageTypes' => PackageType::query()->orderBy('name')->get(),
         ]);
     }
 
@@ -70,9 +72,17 @@ class OrderController extends Controller
         $validated = $request->validate([
             'tracking_number' => ['nullable', 'string', 'max:100'],
             'tracking_carrier_id' => ['nullable', Rule::exists('carriers', 'id')],
+            'package_type_id' => ['nullable', Rule::exists('package_types', 'id')],
         ]);
 
-        $order->update($validated);
+        $packageType = $validated['package_type_id'] ?? null
+            ? PackageType::query()->find($validated['package_type_id'])
+            : null;
+
+        $order->update([
+            ...$validated,
+            'package_type_name' => $packageType?->name,
+        ]);
 
         return back()->with('status', 'Tracking details saved.');
     }

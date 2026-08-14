@@ -23,6 +23,8 @@ use Illuminate\Support\Str;
     'carrier_snapshot',
     'tracking_number',
     'tracking_carrier_id',
+    'package_type_id',
+    'package_type_name',
     'relay_point_id',
     'relay_snapshot',
     'subtotal_cents',
@@ -72,6 +74,11 @@ class Order extends Model
     public function trackingCarrier(): BelongsTo
     {
         return $this->belongsTo(Carrier::class, 'tracking_carrier_id');
+    }
+
+    public function packageType(): BelongsTo
+    {
+        return $this->belongsTo(PackageType::class);
     }
 
     public function statusHistories(): HasMany

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateShippingSettingRequest;
 use App\Models\Carrier;
+use App\Models\PackageType;
 use App\Models\ShippingSetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -16,6 +17,7 @@ class ShippingSettingController extends Controller
         return view('admin.settings.shipping', [
             'setting' => ShippingSetting::current(),
             'carriers' => Carrier::query()->orderBy('sort_order')->get(),
+            'packageTypes' => PackageType::query()->orderBy('name')->get(),
         ]);
     }
 

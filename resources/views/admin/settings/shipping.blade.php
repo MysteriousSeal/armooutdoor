@@ -74,5 +74,35 @@
                 <button type="submit" class="btn btn-primary">Save changes</button>
             </div>
         </form>
+
+        <div class="admin-form-card admin-form-card--solo">
+            <h3 class="admin-panel-title">Package types</h3>
+            <p class="form-hint">Used when adding tracking to an order. Removing one here doesn't change orders that already used it.</p>
+
+            @if ($packageTypes->isNotEmpty())
+                <ul class="admin-check-list admin-check-list--rows">
+                    @foreach ($packageTypes as $packageType)
+                        <li class="admin-check-list-row">
+                            <span>{{ $packageType->name }}</span>
+                            <form method="POST" action="{{ route('admin.settings.package-types.destroy', $packageType) }}">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="footer-text-btn">Remove</button>
+                            </form>
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+
+            <form method="POST" action="{{ route('admin.settings.package-types.store') }}" class="form-row form-row--inline">
+                @csrf
+                <div class="form-group">
+                    <label for="package_type_name" class="sr-only">Package type name</label>
+                    <input type="text" id="package_type_name" name="name" class="form-control" value="{{ old('name') }}" maxlength="80" placeholder="e.g. Boîte en carton">
+                    @error('name') <p class="form-error">{{ $message }}</p> @enderror
+                </div>
+                <button type="submit" class="btn btn-secondary">Add package type</button>
+            </form>
+        </div>
     </div>
 @endsection

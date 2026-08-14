@@ -73,6 +73,12 @@
                                 <dt>{{ __('store.order_tracking_number') }}</dt>
                                 <dd class="order-tracking-number">{{ $order->tracking_number }}</dd>
                             </div>
+                            @if ($order->package_type_name)
+                                <div>
+                                    <dt>{{ __('store.order_tracking_package_type') }}</dt>
+                                    <dd>{{ $order->package_type_name }}</dd>
+                                </div>
+                            @endif
                         </dl>
                     </section>
                 @endif

@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\CompanySettingController as AdminCompanySettingCo
 use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\PackageTypeController as AdminPackageTypeController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\ShippingSettingController as AdminShippingSettingController;
@@ -69,6 +70,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings.index');
         Route::get('/settings/shipping', [AdminShippingSettingController::class, 'edit'])->name('settings.shipping.edit');
         Route::put('/settings/shipping', [AdminShippingSettingController::class, 'update'])->name('settings.shipping.update');
+        Route::post('/settings/package-types', [AdminPackageTypeController::class, 'store'])->name('settings.package-types.store');
+        Route::delete('/settings/package-types/{packageType}', [AdminPackageTypeController::class, 'destroy'])->name('settings.package-types.destroy');
         Route::get('/settings/company', [AdminCompanySettingController::class, 'edit'])->name('settings.company.edit');
         Route::put('/settings/company', [AdminCompanySettingController::class, 'update'])->name('settings.company.update');
     });

@@ -176,6 +176,7 @@ return [
     'order_tracking' => 'Suivi de livraison',
     'order_tracking_number' => 'Numéro de suivi',
     'order_tracking_carrier' => 'Transporteur',
+    'order_tracking_package_type' => 'Type de colis',
     'order_count' => ':count commande|:count commandes',
     'order_view' => 'Voir la commande',
     'account_orders' => 'Commandes',
