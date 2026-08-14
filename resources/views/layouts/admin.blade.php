@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+@php
+    $theme = \App\Support\ThemePreference::resolve(request());
+@endphp
+<html lang="en" data-theme="{{ $theme }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script>
+        (function () {
+            var match = document.cookie.match(/(?:^|; )theme=(light|dark)/);
+            if (match) {
+                document.documentElement.setAttribute('data-theme', match[1]);
+            }
+        })();
+    </script>
+    <title>@yield('title', 'Admin') — Armo Outdoor</title>
+    <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
+    <meta name="theme-color" content="#8b7e74">
+    <link rel="preload" href="{{ asset('fonts/inter-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    @stack('styles')
+</head>
+<body class="admin-body">
+    <header class="admin-nav">
+        <div class="admin-nav-inner">
+            <a href="{{ route('admin.dashboard') }}" class="admin-brand">
+                Armo Outdoor <span>Admin</span>
+            </a>
+
+            <nav class="admin-nav-links" aria-label="Admin sections">
+                <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard</a>
+                <a href="{{ route('admin.customers.index') }}" class="{{ request()->routeIs('admin.customers.*') ? 'active' : '' }}">Customers</a>
+                <a href="{{ route('admin.orders.index') }}" class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">Orders</a>
+                <a href="{{ route('admin.products.index') }}" class="{{ request()->routeIs('admin.products.*') ? 'active' : '' }}">Products</a>
+                <a href="{{ route('admin.categories.index') }}" class="{{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">Categories</a>
+                <a href="{{ route('admin.settings.index') }}" class="{{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">Settings</a>
+            </nav>
+
+            <div class="admin-nav-actions">
+                <button
+                    type="button"
+                    class="theme-toggle-btn"
+                    id="theme-toggle"
+                    data-theme="{{ $theme }}"
+                    title="Toggle dark mode"
+                    aria-label="Toggle dark mode"
+                >
+                    <span class="theme-toggle-icon theme-toggle-icon-sun" aria-hidden="true">☀</span>
+                    <span class="theme-toggle-icon theme-toggle-icon-moon" aria-hidden="true">☾</span>
+                </button>
+                <span class="admin-nav-divider" aria-hidden="true"></span>
+                <a href="{{ route('home') }}" class="admin-nav-utility" target="_blank" rel="noopener noreferrer">View shop</a>
+                <span class="admin-nav-divider" aria-hidden="true"></span>
+                <form action="{{ route('admin.logout') }}" method="POST" class="admin-nav-logout">
+                    @csrf
+                    <button type="submit" class="btn btn-sm btn-secondary">Logout</button>
+                </form>
+            </div>
+        </div>
+    </header>
+
+    <main class="admin-main">
+        @if (session('status'))
+            <div class="flash flash-success" role="status">{{ session('status') }}</div>
+        @endif
+        @yield('content')
+    </main>
+
+    <script src="{{ asset('js/theme-toggle.js') }}" defer></script>
+    <script src="{{ asset('js/admin-modal.js') }}" defer></script>
+    @stack('scripts')
+</body>
+</html>

@@ -1,0 +1,39 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\UpdateShippingSettingRequest;
+use App\Models\Carrier;
+use App\Models\ShippingSetting;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
+
+class ShippingSettingController extends Controller
+{
+    public function edit(): View
+    {
+        return view('admin.settings.shipping', [
+            'setting' => ShippingSetting::current(),
+            'carriers' => Carrier::query()->orderBy('sort_order')->get(),
+        ]);
+    }
+
+    public function update(UpdateShippingSettingRequest $request): RedirectResponse
+    {
+        $setting = ShippingSetting::current();
+
+        $threshold = $request->input('free_shipping_threshold');
+
+        $setting->update([
+            'free_shipping_threshold_cents' => $threshold === null || $threshold === ''
+                ? null
+                : (int) round(((float) $threshold) * 100),
+            'free_shipping_carrier_ids' => array_map('intval', $request->input('free_shipping_carrier_ids', [])),
+        ]);
+
+        return redirect()
+            ->route('admin.settings.shipping.edit')
+            ->with('status', 'Shipping settings saved.');
+    }
+}

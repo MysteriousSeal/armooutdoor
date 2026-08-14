@@ -1,0 +1,118 @@
+@extends('layouts.admin')
+
+@section('title', 'Products')
+
+@section('content')
+    <div class="admin-list-page">
+        <header class="admin-list-hero">
+            <div class="admin-list-hero-row">
+                <div>
+                    <p class="admin-list-kicker">Catalog</p>
+                    <h2 class="admin-list-title">Products</h2>
+                    <p class="admin-list-lede">Everything in the shop, in euros. Add a piece or open one to edit it.</p>
+                </div>
+                <a href="{{ route('admin.products.create') }}" class="btn btn-primary">Add product</a>
+            </div>
+            <div class="admin-list-meta">
+                <span class="admin-list-chip">{{ number_format($productCount) }} products</span>
+                @if ($search !== '' || $categorySlug !== '')
+                    <span class="admin-list-chip is-filtered">Filtered</span>
+                @endif
+            </div>
+        </header>
+
+        <form method="GET" action="{{ route('admin.products.index') }}" class="admin-toolbar">
+            <input
+                type="search"
+                name="search"
+                class="form-control"
+                placeholder="Search name or slug…"
+                value="{{ $search }}"
+            >
+            <select name="category" class="form-control">
+                <option value="">All categories</option>
+                @foreach ($categories as $category)
+                    <option value="{{ $category->slug }}" @selected($categorySlug === $category->slug)>
+                        {{ $category->name['fr'] ?? $category->localizedName() }}
+                    </option>
+                @endforeach
+            </select>
+            <button type="submit" class="btn btn-secondary">Filter</button>
+            @if ($search !== '' || $categorySlug !== '')
+                <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">Clear</a>
+            @endif
+        </form>
+
+        @if ($products->isEmpty())
+            <div class="empty-state">
+                <p>No products found.</p>
+                <a href="{{ route('admin.products.create') }}" class="btn btn-primary">Add product</a>
+            </div>
+        @else
+            <p class="admin-result-count">
+                Showing {{ $products->firstItem() }}–{{ $products->lastItem() }}
+            </p>
+
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($products as $product)
+                            <tr>
+                                <td>
+                                    <a href="{{ route('admin.products.edit', $product) }}">
+                                        <img
+                                            class="admin-product-thumb"
+                                            src="{{ $product->imageUrl() }}"
+                                            alt="{{ $product->name['fr'] ?? $product->localizedName() }}"
+                                            loading="lazy"
+                                        >
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="{{ route('admin.products.edit', $product) }}">
+                                        {{ $product->name['fr'] ?? $product->localizedName() }}
+                                    </a>
+                                </td>
+                                <td>{{ $product->category?->name['fr'] ?? '—' }}</td>
+                                <td>{{ $product->formattedPrice() }}</td>
+                                <td>{{ $product->quantity }}</td>
+                                <td>
+                                    <form method="POST" action="{{ route('admin.products.status', $product) }}">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button
+                                            type="submit"
+                                            class="badge badge-btn {{ $product->is_active ? 'badge-active' : 'badge-disabled' }}"
+                                            title="Click to {{ $product->is_active ? 'disable' : 'activate' }}"
+                                        >
+                                            {{ $product->is_active ? 'Active' : 'Disabled' }}
+                                        </button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <div class="admin-table-actions">
+                                        <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-sm btn-primary">Edit</a>
+                                        <a href="{{ localized_route('products.show', ['product' => $product->slug], 'fr') }}" class="btn btn-sm btn-secondary" target="_blank" rel="noopener noreferrer">View</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            @include('admin.partials.pager', ['paginator' => $products])
+        @endif
+    </div>
+@endsection

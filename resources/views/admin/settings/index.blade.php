@@ -1,0 +1,24 @@
+@extends('layouts.admin')
+
+@section('title', 'Settings')
+
+@section('content')
+    <div class="admin-list-page">
+        <header class="admin-list-hero">
+            <p class="admin-list-kicker">Settings</p>
+            <h2 class="admin-list-title">Settings</h2>
+            <p class="admin-list-lede">Shop-wide configuration.</p>
+        </header>
+
+        <div class="admin-stat-grid">
+            <a href="{{ route('admin.settings.shipping.edit') }}" class="admin-stat-card">
+                <span class="admin-stat-label">Shipping</span>
+                <span class="admin-stat-value admin-stat-value--sm">Free shipping threshold &amp; carriers</span>
+            </a>
+            <a href="{{ route('admin.settings.company.edit') }}" class="admin-stat-card">
+                <span class="admin-stat-label">Company &amp; legal</span>
+                <span class="admin-stat-value admin-stat-value--sm">Info shown on the legal pages</span>
+            </a>
+        </div>
+    </div>
+@endsection

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+@php
+    $theme = \App\Support\ThemePreference::resolve(request());
+    $locale = app()->getLocale();
+@endphp
+<html lang="{{ str_replace('_', '-', $locale) }}" data-theme="{{ $theme }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script>
+        (function () {
+            var match = document.cookie.match(/(?:^|; )theme=(light|dark)/);
+            if (match) {
+                document.documentElement.setAttribute('data-theme', match[1]);
+            }
+        })();
+    </script>
+    <title>@yield('title', config('app.name'))</title>
+    <meta name="description" content="@yield('meta_description', __('store.meta_home'))">
+    <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
+    <meta name="theme-color" content="#8b7e74">
+    @hasSection('canonical')
+        <link rel="canonical" href="@yield('canonical')">
+    @endif
+    <link rel="preload" href="{{ asset('fonts/inter-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    @stack('head')
+</head>
+<body>
+    <header class="site-header">
+        <div class="site-header-inner">
+            <div class="site-header-main">
+                <h1 class="site-logo">
+                    <a href="{{ localized_route('home') }}" class="site-logo-link">
+                        <span class="site-logo-wordmark">
+                            <span class="logo-primary">Armo</span><span class="logo-secondary">Outdoor</span>
+                        </span>
+                    </a>
+                </h1>
+                <p class="site-tagline">{{ __('store.tagline') }}</p>
+            </div>
+            <div class="site-header-actions">
+                <form action="{{ localized_route('search') }}" method="GET" class="site-search" role="search">
+                    <label for="site-search-input" class="sr-only">{{ __('store.search_label') }}</label>
+                    <button type="submit" class="site-search-btn" aria-label="{{ __('store.search_label') }}">
+                        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                            <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.75"/>
+                            <path d="M20 20l-4.3-4.3" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                    <input
+                        type="search"
+                        id="site-search-input"
+                        name="q"
+                        class="site-search-input"
+                        placeholder="{{ __('store.search_placeholder') }}"
+                        value="{{ request('q') }}"
+                    >
+                </form>
+                @include('partials.cart-button', ['class' => 'cart-btn--header'])
+                <button
+                    type="button"
+                    class="site-menu-toggle"
+                    id="site-menu-toggle"
+                    aria-expanded="false"
+                    aria-controls="site-menu-panel"
+                    aria-label="{{ __('store.menu_toggle') }}"
+                >
+                    <svg class="site-menu-toggle-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                        <path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="site-subheader" id="site-subheader">
+        <div class="site-subheader-inner">
+            <div class="site-menu-panel" id="site-menu-panel">
+                <div class="site-subheader-nav">
+                    <nav class="sort-tabs" aria-label="{{ __('store.footer_shop') }}">
+                        <a href="{{ localized_route('home') }}" class="sort-tab {{ request()->routeIs('home') ? 'active' : '' }}">
+                            {{ __('store.nav_home') }}
+                        </a>
+                        @foreach ($navCategories as $navCategory)
+                            @php
+                                $currentCategory = request()->route('category') ?? request()->route('product')?->category;
+                                $navActive = $currentCategory
+                                    && ($currentCategory->is($navCategory) || $currentCategory->parent_id === $navCategory->id);
+                            @endphp
+                            <div class="nav-item {{ $navActive ? 'is-active' : '' }} {{ $navCategory->children->isNotEmpty() ? 'has-sub' : '' }}">
+                                <a
+                                    href="{{ localized_route('categories.show', ['category' => $navCategory->slug]) }}"
+                                    class="sort-tab {{ $navActive ? 'active' : '' }}"
+                                    @if ($navCategory->children->isNotEmpty())
+                                        aria-haspopup="true"
+                                    @endif
+                                >
+                                    {{ $navCategory->localizedName() }}
+                                </a>
+                                @if ($navCategory->children->isNotEmpty())
+                                    <ul class="nav-sub">
+                                        @foreach ($navCategory->children as $child)
+                                            <li>
+                                                <a
+                                                    href="{{ localized_route('categories.show', ['category' => $child->slug]) }}"
+                                                    class="{{ $currentCategory?->is($child) ? 'is-active' : '' }}"
+                                                >
+                                                    {{ $child->localizedName() }}
+                                                </a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @endif
+                            </div>
+                        @endforeach
+                    </nav>
+                </div>
+
+                <span class="site-header-divider" aria-hidden="true"></span>
+
+                <div class="site-auth">
+                    <button
+                        type="button"
+                        class="theme-toggle-btn"
+                        id="theme-toggle"
+                        data-theme="{{ $theme }}"
+                        title="{{ __('store.theme_toggle') }}"
+                        aria-label="{{ __('store.theme_toggle') }}"
+                    >
+                        <span class="theme-toggle-icon theme-toggle-icon-sun" aria-hidden="true">☀</span>
+                        <span class="theme-toggle-icon theme-toggle-icon-moon" aria-hidden="true">☾</span>
+                    </button>
+
+                    @include('partials.cart-button', ['class' => 'cart-btn--nav'])
+
+                    <span class="site-header-divider" aria-hidden="true"></span>
+
+                    @auth
+                        <a href="{{ localized_route('account.index') }}" class="site-auth-name {{ request()->routeIs('account.*') ? 'is-active' : '' }}">
+                            {{ auth()->user()->name }}
+                        </a>
+                        <form action="{{ localized_route('logout') }}" method="POST" class="site-auth-logout">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-secondary">{{ __('store.logout') }}</button>
+                        </form>
+                    @else
+                        <a href="{{ localized_route('login') }}" class="btn btn-sm btn-secondary {{ request()->routeIs('login') ? 'is-active' : '' }}">{{ __('store.login') }}</a>
+                        <a href="{{ localized_route('register') }}" class="btn btn-sm btn-primary {{ request()->routeIs('register') ? 'is-active' : '' }}">{{ __('store.register') }}</a>
+                    @endauth
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main class="site-main">
+        @if (session('status'))
+            <div class="container">
+                <div class="flash flash-success" role="status">{{ session('status') }}</div>
+            </div>
+        @endif
+
+        @yield('content')
+    </main>
+
+    <footer class="site-footer">
+        <div class="site-footer-inner">
+            <div class="site-footer-top">
+                <div class="site-footer-brand">
+                    <a href="{{ localized_route('home') }}" class="site-footer-brand-name">
+                        <span class="logo-primary">Armo</span><span class="logo-secondary">Outdoor</span>
+                    </a>
+                    <p class="site-footer-about">{{ __('store.footer_about') }}</p>
+                    <p class="site-footer-about">{{ __('store.footer_about_more') }}</p>
+                </div>
+
+                <nav class="site-footer-col" aria-labelledby="footer-shop-heading">
+                    <h2 id="footer-shop-heading" class="site-footer-heading">{{ __('store.footer_shop') }}</h2>
+                    <ul class="site-footer-links">
+                        @foreach ($navCategories as $navCategory)
+                            <li>
+                                <a href="{{ localized_route('categories.show', ['category' => $navCategory->slug]) }}">
+                                    {{ $navCategory->localizedName() }}
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </nav>
+
+                <div class="site-footer-col" aria-labelledby="footer-delivery-heading">
+                    <h2 id="footer-delivery-heading" class="site-footer-heading">{{ __('store.footer_delivery') }}</h2>
+                    <ul class="site-footer-links">
+                        <li>{{ __('store.footer_delivery_home') }}</li>
+                        <li>{{ __('store.footer_delivery_relay') }}</li>
+                        <li>{{ __('store.footer_delivery_track') }}</li>
+                    </ul>
+                    <h2 class="site-footer-heading site-footer-heading--spaced">{{ __('store.footer_payment') }}</h2>
+                    <ul class="site-footer-links">
+                        <li>{{ __('store.footer_payment_card') }}</li>
+                        <li>{{ __('store.footer_payment_paypal') }}</li>
+                    </ul>
+                </div>
+
+                <nav class="site-footer-col" aria-labelledby="footer-site-heading">
+                    <h2 id="footer-site-heading" class="site-footer-heading">{{ __('store.footer_site') }}</h2>
+                    <ul class="site-footer-links">
+                        <li><a href="{{ localized_route('home') }}">{{ __('store.nav_home') }}</a></li>
+                        <li><a href="{{ localized_route('cart.show') }}">{{ __('store.cart') }}</a></li>
+                        @auth
+                            <li><a href="{{ localized_route('account.index') }}">{{ __('store.account') }}</a></li>
+                            <li>
+                                <form action="{{ localized_route('logout') }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="footer-text-btn">{{ __('store.logout') }}</button>
+                                </form>
+                            </li>
+                        @else
+                            <li><a href="{{ localized_route('login') }}">{{ __('store.login') }}</a></li>
+                            <li><a href="{{ localized_route('register') }}">{{ __('store.register') }}</a></li>
+                        @endauth
+                    </ul>
+                </nav>
+            </div>
+
+            <div class="site-footer-bottom">
+                <p class="site-footer-copy">
+                    &copy; {{ date('Y') }}
+                    <a href="{{ localized_route('home') }}">Armo Outdoor</a>
+                    <span class="site-footer-copy-sep" aria-hidden="true">·</span>
+                    <span class="site-footer-copy-note">{{ __('store.footer_note') }}</span>
+                </p>
+                <nav class="site-footer-legal" aria-label="{{ __('store.legal_notice_title') }}">
+                    <a href="{{ route('legal.terms') }}">{{ __('store.legal_terms_title') }}</a>
+                    <a href="{{ route('legal.notice') }}">{{ __('store.legal_notice_title') }}</a>
+                    <a href="{{ route('legal.privacy') }}">{{ __('store.legal_privacy_title') }}</a>
+                    <a href="{{ route('legal.withdrawal') }}">{{ __('store.legal_withdrawal_title') }}</a>
+                </nav>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ asset('js/site-menu-toggle.js') }}" defer></script>
+    <script src="{{ asset('js/theme-toggle.js') }}" defer></script>
+    @stack('scripts')
+</body>
+</html>

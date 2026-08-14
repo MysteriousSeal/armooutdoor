@@ -1,0 +1,96 @@
+@extends('layouts.app')
+
+@section('title', __('store.legal_privacy_title').' — '.config('app.name'))
+@section('canonical', route('legal.privacy'))
+
+@section('content')
+    <div class="container">
+        <nav class="breadcrumbs" aria-label="breadcrumb">
+            <a href="{{ route('home') }}">{{ __('store.breadcrumb_home') }}</a>
+            <span class="breadcrumbs-sep" aria-hidden="true">/</span>
+            <span>{{ __('store.legal_privacy_title') }}</span>
+        </nav>
+
+        <header class="page-header">
+            <h2 class="page-title">{{ __('store.legal_privacy_title') }}</h2>
+        </header>
+
+        <div class="legal-page">
+            @unless ($company->isComplete())
+                <p class="legal-notice">
+                    Certaines informations de cette page sont encore des espaces réservés. Complétez-les dans
+                    <a href="{{ route('admin.settings.company.edit') }}">l'administration → Réglages → Company &amp; legal</a>.
+                </p>
+            @endunless
+            <p class="legal-updated">Dernière mise à jour : {{ now()->translatedFormat('d F Y') }}</p>
+
+            <h2>Responsable de traitement</h2>
+            <p>
+                Le responsable du traitement des données personnelles collectées sur ce site est {{ $company->value('company_name') }},
+                {{ $company->value('address') }}, joignable à {{ $company->value('contact_email') }}.
+            </p>
+
+            <h2>Données collectées</h2>
+            <p>Nous collectons les données suivantes, uniquement lorsqu'elles sont nécessaires :</p>
+            <ul>
+                <li>Identité : nom, prénom.</li>
+                <li>Coordonnées : e-mail, téléphone, adresses de livraison et de facturation.</li>
+                <li>Données de commande : produits achetés, historique de commandes.</li>
+                <li>Données de connexion : identifiants de compte, mot de passe (stocké de façon chiffrée).</li>
+            </ul>
+            <p>Aucune donnée bancaire n'est stockée par nos soins ; le paiement est traité par un prestataire tiers sécurisé.</p>
+
+            <h2>Finalités du traitement</h2>
+            <ul>
+                <li>Traitement et suivi des commandes, livraison, facturation.</li>
+                <li>Gestion du compte client (adresses, liste de souhaits, historique).</li>
+                <li>Réponse aux demandes de contact et service après-vente.</li>
+                <li>Respect de nos obligations légales et comptables.</li>
+            </ul>
+
+            <h2>Base légale</h2>
+            <p>
+                Les traitements reposent sur l'exécution du contrat de vente (commande, livraison), le respect
+                d'obligations légales (facturation, garanties) et, le cas échéant, le consentement du Client.
+            </p>
+
+            <h2>Destinataires des données</h2>
+            <p>
+                Les données sont destinées à {{ $company->value('company_name') }} et, le cas échéant, à ses prestataires techniques
+                (hébergement, transporteurs, prestataire de paiement), dans la stricte limite nécessaire à l'exécution
+                de la commande. Aucune donnée n'est vendue à des tiers.
+            </p>
+
+            <h2>Durée de conservation</h2>
+            <p>
+                Les données liées à un compte client sont conservées pendant la durée de vie du compte. Les données
+                liées à une commande sont conservées pendant la durée nécessaire au respect des obligations légales
+                et comptables (jusqu'à 10 ans pour les documents comptables).
+            </p>
+
+            <h2>Vos droits</h2>
+            <p>
+                Conformément au Règlement Général sur la Protection des Données (RGPD), vous disposez d'un droit
+                d'accès, de rectification, d'effacement, de limitation, d'opposition et de portabilité de vos données.
+                Vous pouvez exercer ces droits en écrivant à {{ $company->value('contact_email') }}.
+            </p>
+            <p>
+                Vous disposez également du droit d'introduire une réclamation auprès de la Commission Nationale de
+                l'Informatique et des Libertés (CNIL) — <a href="https://www.cnil.fr" rel="noopener noreferrer">www.cnil.fr</a>.
+            </p>
+
+            <h2>Cookies</h2>
+            <p>
+                Le site utilise des cookies strictement nécessaires à son fonctionnement (panier, session de connexion,
+                préférence d'affichage clair/sombre). Ces cookies ne nécessitent pas de consentement préalable au titre
+                de la réglementation applicable.
+            </p>
+
+            <h2>Sécurité</h2>
+            <p>
+                Nous mettons en œuvre les mesures techniques et organisationnelles appropriées pour protéger vos
+                données contre tout accès non autorisé, perte ou divulgation.
+            </p>
+        </div>
+    </div>
+@endsection
