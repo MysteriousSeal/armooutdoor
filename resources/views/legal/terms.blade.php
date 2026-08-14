@@ -4,18 +4,10 @@
 @section('canonical', route('legal.terms'))
 
 @section('content')
-    <div class="container">
-        <nav class="breadcrumbs" aria-label="breadcrumb">
-            <a href="{{ route('home') }}">{{ __('store.breadcrumb_home') }}</a>
-            <span class="breadcrumbs-sep" aria-hidden="true">/</span>
-            <span>{{ __('store.legal_terms_title') }}</span>
-        </nav>
+    <div class="container legal-wrap">
+        @include('legal.partials.chrome', ['title' => __('store.legal_terms_title')])
 
-        <header class="page-header">
-            <h2 class="page-title">{{ __('store.legal_terms_title') }}</h2>
-        </header>
-
-        <div class="legal-page">
+        <article class="legal-doc">
             <p class="legal-notice">
                 Ce document est un modèle à faire relire avant publication : il ne remplace pas l'avis d'un
                 professionnel du droit.
@@ -24,7 +16,6 @@
                     <a href="{{ route('admin.settings.company.edit') }}">l'administration → Réglages → Company &amp; legal</a>.
                 @endunless
             </p>
-            <p class="legal-updated">Dernière mise à jour : {{ now()->translatedFormat('d F Y') }}</p>
 
             <h2>Article 1 — Objet</h2>
             <p>
@@ -101,6 +92,6 @@
 
             <h2>Article 12 — Droit applicable</h2>
             <p>Les présentes CGV sont soumises au droit français.</p>
-        </div>
+        </article>
     </div>
 @endsection

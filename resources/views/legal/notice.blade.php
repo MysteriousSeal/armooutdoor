@@ -4,38 +4,55 @@
 @section('canonical', route('legal.notice'))
 
 @section('content')
-    <div class="container">
-        <nav class="breadcrumbs" aria-label="breadcrumb">
-            <a href="{{ route('home') }}">{{ __('store.breadcrumb_home') }}</a>
-            <span class="breadcrumbs-sep" aria-hidden="true">/</span>
-            <span>{{ __('store.legal_notice_title') }}</span>
-        </nav>
+    <div class="container legal-wrap">
+        @include('legal.partials.chrome', ['title' => __('store.legal_notice_title')])
 
-        <header class="page-header">
-            <h2 class="page-title">{{ __('store.legal_notice_title') }}</h2>
-        </header>
-
-        <div class="legal-page">
+        <article class="legal-doc">
             @unless ($company->isComplete())
                 <p class="legal-notice">
                     Certaines informations de cette page sont encore des espaces réservés. Complétez-les dans
                     <a href="{{ route('admin.settings.company.edit') }}">l'administration → Réglages → Company &amp; legal</a>.
                 </p>
             @endunless
-            <p class="legal-updated">Dernière mise à jour : {{ now()->translatedFormat('d F Y') }}</p>
 
             <h2>Éditeur du site</h2>
-            <p>
-                Le site Armo Outdoor est édité par {{ $company->value('company_name') }}, {{ $company->value('legal_form') }}
+            <dl class="legal-facts">
+                <div>
+                    <dt>Société</dt>
+                    <dd>
+                        {{ $company->value('company_name') }}
+                        @if ($company->value('legal_form') !== '')
+                            · {{ $company->value('legal_form') }}
+                        @endif
+                    </dd>
+                </div>
                 @if ($company->value('share_capital') !== '')
-                    au capital de {{ $company->value('share_capital') }},
+                    <div>
+                        <dt>Capital</dt>
+                        <dd>{{ $company->value('share_capital') }}</dd>
+                    </div>
                 @endif
-                immatriculé(e) sous le numéro SIRET {{ $company->value('siret') }}.<br>
-                Siège social : {{ $company->value('address') }}.<br>
-                {{ $company->vatMention() }}.<br>
-                Adresse e-mail : {{ $company->value('contact_email') }}.<br>
-                Téléphone : {{ $company->value('phone') }}.
-            </p>
+                <div>
+                    <dt>SIRET</dt>
+                    <dd>{{ $company->value('siret') }}</dd>
+                </div>
+                <div>
+                    <dt>Siège social</dt>
+                    <dd>{{ $company->value('address') }}</dd>
+                </div>
+                <div>
+                    <dt>TVA</dt>
+                    <dd>{{ $company->vatMention() }}</dd>
+                </div>
+                <div>
+                    <dt>E-mail</dt>
+                    <dd>{{ $company->value('contact_email') }}</dd>
+                </div>
+                <div>
+                    <dt>Téléphone</dt>
+                    <dd>{{ $company->value('phone') }}</dd>
+                </div>
+            </dl>
 
             <h2>Directeur de la publication</h2>
             <p>{{ $company->value('publication_director') }}.</p>
@@ -70,6 +87,6 @@
                 Le présent site et les présentes mentions légales sont soumis au droit français. En cas de litige, les
                 tribunaux français seront seuls compétents.
             </p>
-        </div>
+        </article>
     </div>
 @endsection

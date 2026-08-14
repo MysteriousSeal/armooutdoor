@@ -4,25 +4,16 @@
 @section('canonical', route('legal.withdrawal'))
 
 @section('content')
-    <div class="container">
-        <nav class="breadcrumbs" aria-label="breadcrumb">
-            <a href="{{ route('home') }}">{{ __('store.breadcrumb_home') }}</a>
-            <span class="breadcrumbs-sep" aria-hidden="true">/</span>
-            <span>{{ __('store.legal_withdrawal_title') }}</span>
-        </nav>
+    <div class="container legal-wrap">
+        @include('legal.partials.chrome', ['title' => __('store.legal_withdrawal_title')])
 
-        <header class="page-header">
-            <h2 class="page-title">{{ __('store.legal_withdrawal_title') }}</h2>
-        </header>
-
-        <div class="legal-page">
+        <article class="legal-doc">
             @unless ($company->isComplete())
                 <p class="legal-notice">
                     Certaines informations de cette page sont encore des espaces réservés. Complétez-les dans
                     <a href="{{ route('admin.settings.company.edit') }}">l'administration → Réglages → Company &amp; legal</a>.
                 </p>
             @endunless
-            <p class="legal-updated">Dernière mise à jour : {{ now()->translatedFormat('d F Y') }}</p>
 
             <h2>Délai de rétractation</h2>
             <p>
@@ -63,17 +54,23 @@
             </ul>
 
             <h2>Formulaire type de rétractation</h2>
-            <p>(à compléter et renvoyer uniquement en cas de volonté de se rétracter)</p>
-            <p>
-                À l'attention de {{ $company->value('company_name') }}, {{ $company->value('return_address') }},
-                {{ $company->value('contact_email') }} :<br>
-                Je notifie par la présente ma rétractation du contrat portant sur la commande n° [numéro de commande],
-                commandée le [date de commande] et reçue le [date de réception].<br>
-                Nom du Client : ……………………………<br>
-                Adresse du Client : ……………………………<br>
-                Signature du Client (en cas d'envoi papier) : ……………………………<br>
-                Date : ……………………………
-            </p>
-        </div>
+            <div class="legal-form">
+                <p class="legal-form-lede">À compléter et renvoyer uniquement en cas de volonté de se rétracter.</p>
+                <p>
+                    À l'attention de {{ $company->value('company_name') }}, {{ $company->value('return_address') }},
+                    {{ $company->value('contact_email') }} :
+                </p>
+                <p>
+                    Je notifie par la présente ma rétractation du contrat portant sur la commande n° [numéro de commande],
+                    commandée le [date de commande] et reçue le [date de réception].
+                </p>
+                <p>
+                    Nom du Client : ……………………………<br>
+                    Adresse du Client : ……………………………<br>
+                    Signature du Client (en cas d'envoi papier) : ……………………………<br>
+                    Date : ……………………………
+                </p>
+            </div>
+        </article>
     </div>
 @endsection

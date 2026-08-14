@@ -4,25 +4,16 @@
 @section('canonical', route('legal.privacy'))
 
 @section('content')
-    <div class="container">
-        <nav class="breadcrumbs" aria-label="breadcrumb">
-            <a href="{{ route('home') }}">{{ __('store.breadcrumb_home') }}</a>
-            <span class="breadcrumbs-sep" aria-hidden="true">/</span>
-            <span>{{ __('store.legal_privacy_title') }}</span>
-        </nav>
+    <div class="container legal-wrap">
+        @include('legal.partials.chrome', ['title' => __('store.legal_privacy_title')])
 
-        <header class="page-header">
-            <h2 class="page-title">{{ __('store.legal_privacy_title') }}</h2>
-        </header>
-
-        <div class="legal-page">
+        <article class="legal-doc">
             @unless ($company->isComplete())
                 <p class="legal-notice">
                     Certaines informations de cette page sont encore des espaces réservés. Complétez-les dans
                     <a href="{{ route('admin.settings.company.edit') }}">l'administration → Réglages → Company &amp; legal</a>.
                 </p>
             @endunless
-            <p class="legal-updated">Dernière mise à jour : {{ now()->translatedFormat('d F Y') }}</p>
 
             <h2>Responsable de traitement</h2>
             <p>
@@ -91,6 +82,6 @@
                 Nous mettons en œuvre les mesures techniques et organisationnelles appropriées pour protéger vos
                 données contre tout accès non autorisé, perte ou divulgation.
             </p>
-        </div>
+        </article>
     </div>
 @endsection

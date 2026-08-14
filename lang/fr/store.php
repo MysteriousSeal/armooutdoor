@@ -231,5 +231,11 @@ return [
     'legal_notice_title' => 'Mentions légales',
     'legal_privacy_title' => 'Politique de confidentialité',
     'legal_withdrawal_title' => 'Droit de rétractation',
+    'legal_kicker' => 'Informations légales',
+    'legal_updated' => 'Dernière mise à jour : :date',
+    'legal_terms_nav' => 'CGV',
+    'legal_notice_nav' => 'Mentions légales',
+    'legal_privacy_nav' => 'Confidentialité',
+    'legal_withdrawal_nav' => 'Rétractation',
     'footer_currency' => 'Prix en euros',
 ];
