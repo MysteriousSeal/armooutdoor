@@ -2580,6 +2580,17 @@ textarea.form-control {
     line-height: 1.2;
 }
 
+.order-refunded-note {
+    margin: 0.5rem 0 0;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #a44;
+}
+
+[data-theme='dark'] .order-refunded-note {
+    color: #e0a3a3;
+}
+
 .order-tracking-number {
     font-weight: 500;
     letter-spacing: 0.03em;
@@ -2723,6 +2734,12 @@ textarea.form-control {
 .order-list-body {
     min-width: 0;
     flex: 1;
+}
+
+.order-list-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .order-list-heading {

@@ -266,9 +266,15 @@
                         <td class="t-label">Livraison</td>
                         <td class="t-value">{{ $order->formattedShipping() }}</td>
                     </tr>
+                    @if ($order->status === 'refunded')
+                        <tr>
+                            <td class="t-label">Remboursement</td>
+                            <td class="t-value">{{ format_euros(-$order->total_cents) }}</td>
+                        </tr>
+                    @endif
                     <tr class="grand">
                         <td class="t-label">Total TTC</td>
-                        <td class="t-value">{{ $order->formattedTotal() }}</td>
+                        <td class="t-value">{{ $order->status === 'refunded' ? format_euros(0) : $order->formattedTotal() }}</td>
                     </tr>
                 </table>
             </td>

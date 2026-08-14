@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Str;
 
 #[Fillable([
@@ -130,6 +131,13 @@ class Order extends Model
     public function invoiceIsAvailable(): bool
     {
         return ! in_array($this->status, ['placed', 'preparing'], true);
+    }
+
+    public function statusMessage(): string
+    {
+        $key = 'store.order_thanks_'.$this->status;
+
+        return __(Lang::has($key) ? $key : 'store.order_thanks_placed');
     }
 
     public function hasSeparateBillingAddress(): bool

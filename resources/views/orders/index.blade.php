@@ -39,9 +39,24 @@
                             </p>
                         </div>
                         <p class="order-list-total">{{ $order->formattedTotal() }}</p>
-                        <a href="{{ localized_route('orders.show', ['order' => $order->number]) }}" class="btn btn-sm btn-secondary">
-                            {{ __('store.order_view') }}
-                        </a>
+                        <div class="order-list-actions">
+                            @if ($order->invoiceIsAvailable())
+                                <a
+                                    href="{{ localized_route('orders.invoice', ['order' => $order->number]) }}"
+                                    class="admin-table-icon-btn"
+                                    title="{{ __('store.order_download_invoice') }}"
+                                    aria-label="{{ __('store.order_download_invoice') }}"
+                                >
+                                    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                                        <path d="M12 4v11m0 0-4-4m4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </a>
+                            @endif
+                            <a href="{{ localized_route('orders.show', ['order' => $order->number]) }}" class="btn btn-sm btn-secondary">
+                                {{ __('store.order_view') }}
+                            </a>
+                        </div>
                     </li>
                 @endforeach
             </ul>

@@ -13,7 +13,7 @@
         <header class="order-hero">
             <p class="home-kicker">{{ __('store.order_confirmed') }}</p>
             <h2 class="page-title">{{ $order->number }}</h2>
-            <p class="page-lede">{{ __('store.order_thanks') }}</p>
+            <p class="page-lede">{{ $order->statusMessage() }}</p>
         </header>
 
         <div class="order-layout">
@@ -57,7 +57,20 @@
                 <section class="order-panel order-panel--total" aria-labelledby="order-totals-title">
                     <h3 class="order-panel-title" id="order-totals-title">{{ __('store.order_total') }}</h3>
                     <p class="order-total-amount">{{ $order->formattedTotal() }}</p>
+                    @if ($order->status === 'refunded')
+                        <p class="order-refunded-note">
+                            {{ __('store.order_refunded_amount', ['amount' => $order->formattedTotal()]) }}
+                        </p>
+                    @endif
                 </section>
+
+                @if ($order->invoiceIsAvailable())
+                    <div class="order-panel-actions">
+                        <a href="{{ localized_route('orders.invoice', ['order' => $order->number]) }}" class="btn btn-secondary">
+                            {{ __('store.order_download_invoice') }}
+                        </a>
+                    </div>
+                @endif
 
                 @if ($order->hasTracking())
                     <section class="order-panel" aria-labelledby="order-tracking-title">
