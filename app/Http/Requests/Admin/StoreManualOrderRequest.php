@@ -22,7 +22,8 @@ class StoreManualOrderRequest extends FormRequest
         return [
             'customer_mode' => ['required', Rule::in(['existing', 'new'])],
             'customer_id' => ['nullable', Rule::requiredIf($this->input('customer_mode') === 'existing'), 'exists:users,id'],
-            'new_customer_name' => ['nullable', Rule::requiredIf($this->input('customer_mode') === 'new'), 'string', 'max:160'],
+            'new_customer_first_name' => ['nullable', Rule::requiredIf($this->input('customer_mode') === 'new'), 'string', 'max:80'],
+            'new_customer_last_name' => ['nullable', Rule::requiredIf($this->input('customer_mode') === 'new'), 'string', 'max:80'],
             'new_customer_email' => ['nullable', Rule::requiredIf($this->input('customer_mode') === 'new'), 'email', 'max:160', 'unique:users,email'],
 
             'items' => ['required', 'array'],

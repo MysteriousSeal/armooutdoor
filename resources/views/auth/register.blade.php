@@ -14,22 +14,41 @@
                 <form method="POST" action="{{ localized_route('register.store') }}" class="auth-form">
                     @csrf
 
-                    <div class="form-group">
-                        <label for="name">{{ __('store.name') }}</label>
-                        <input
-                            type="text"
-                            id="name"
-                            name="name"
-                            class="form-control"
-                            value="{{ old('name') }}"
-                            required
-                            autofocus
-                            autocomplete="name"
-                            maxlength="80"
-                        >
-                        @error('name')
-                            <p class="form-error">{{ $message }}</p>
-                        @enderror
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="first_name">{{ __('store.first_name') }}</label>
+                            <input
+                                type="text"
+                                id="first_name"
+                                name="first_name"
+                                class="form-control"
+                                value="{{ old('first_name') }}"
+                                required
+                                autofocus
+                                autocomplete="given-name"
+                                maxlength="80"
+                            >
+                            @error('first_name')
+                                <p class="form-error">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="last_name">{{ __('store.last_name') }}</label>
+                            <input
+                                type="text"
+                                id="last_name"
+                                name="last_name"
+                                class="form-control"
+                                value="{{ old('last_name') }}"
+                                required
+                                autocomplete="family-name"
+                                maxlength="80"
+                            >
+                            @error('last_name')
+                                <p class="form-error">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
 
                     <div class="form-group">

@@ -95,11 +95,18 @@
                             @error('customer_id') <p class="form-error">{{ $message }}</p> @enderror
                         </div>
 
-                        <div class="form-row" id="customer-new-fields">
-                            <div class="form-group">
-                                <label for="new_customer_name">Name</label>
-                                <input type="text" id="new_customer_name" name="new_customer_name" class="form-control" value="{{ old('new_customer_name') }}" maxlength="160">
-                                @error('new_customer_name') <p class="form-error">{{ $message }}</p> @enderror
+                        <div id="customer-new-fields">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="new_customer_first_name">First name</label>
+                                    <input type="text" id="new_customer_first_name" name="new_customer_first_name" class="form-control" value="{{ old('new_customer_first_name') }}" maxlength="80">
+                                    @error('new_customer_first_name') <p class="form-error">{{ $message }}</p> @enderror
+                                </div>
+                                <div class="form-group">
+                                    <label for="new_customer_last_name">Last name</label>
+                                    <input type="text" id="new_customer_last_name" name="new_customer_last_name" class="form-control" value="{{ old('new_customer_last_name') }}" maxlength="80">
+                                    @error('new_customer_last_name') <p class="form-error">{{ $message }}</p> @enderror
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label for="new_customer_email">Email</label>
@@ -497,12 +504,18 @@
                         clearFieldError(document.getElementById('customer_search'));
                     }
                 } else {
-                    var newName = document.getElementById('new_customer_name');
+                    var newFirstName = document.getElementById('new_customer_first_name');
+                    var newLastName = document.getElementById('new_customer_last_name');
                     var newEmail = document.getElementById('new_customer_email');
-                    if (isBlank(newName)) {
-                        fail(newName, 'Enter a name.');
+                    if (isBlank(newFirstName)) {
+                        fail(newFirstName, 'Enter a first name.');
                     } else {
-                        clearFieldError(newName);
+                        clearFieldError(newFirstName);
+                    }
+                    if (isBlank(newLastName)) {
+                        fail(newLastName, 'Enter a last name.');
+                    } else {
+                        clearFieldError(newLastName);
                     }
                     if (isBlank(newEmail)) {
                         fail(newEmail, 'Enter an email.');

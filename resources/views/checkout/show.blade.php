@@ -75,7 +75,7 @@
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="first_name">{{ __('store.first_name') }}</label>
-                                        <input type="text" id="first_name" name="first_name" class="form-control" value="{{ old('first_name', auth()->user()->name) }}" required maxlength="80" autocomplete="given-name">
+                                        <input type="text" id="first_name" name="first_name" class="form-control" value="{{ old('first_name', auth()->user()->first_name) }}" required maxlength="80" autocomplete="given-name">
                                         @error('first_name') <p class="form-error">{{ $message }}</p> @enderror
                                     </div>
                                     <div class="form-group">

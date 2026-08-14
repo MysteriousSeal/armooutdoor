@@ -22,7 +22,8 @@ class RegisterController extends Controller
     public function store(Request $request, Cart $cart): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:80'],
+            'first_name' => ['required', 'string', 'max:80'],
+            'last_name' => ['required', 'string', 'max:80'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', Password::min(8)],
         ]);

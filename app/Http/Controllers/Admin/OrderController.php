@@ -36,7 +36,8 @@ class OrderController extends Controller
                 $query->where(function ($query) use ($search): void {
                     $query->where('number', 'like', '%'.$search.'%')
                         ->orWhereHas('user', function ($query) use ($search): void {
-                            $query->where('name', 'like', '%'.$search.'%')
+                            $query->where('first_name', 'like', '%'.$search.'%')
+                                ->orWhere('last_name', 'like', '%'.$search.'%')
                                 ->orWhere('email', 'like', '%'.$search.'%');
                         });
                 });
@@ -66,7 +67,8 @@ class OrderController extends Controller
                 ->where('is_admin', false)
                 ->where('external', false)
                 ->with('addresses')
-                ->orderBy('name')
+                ->orderBy('first_name')
+                ->orderBy('last_name')
                 ->get(),
             'products' => Product::query()->active()->orderBy('name')->get(),
             'carriers' => Carrier::query()->active()->get(),
@@ -81,7 +83,8 @@ class OrderController extends Controller
         $customer = $request->input('customer_mode') === 'existing'
             ? User::query()->findOrFail($request->input('customer_id'))
             : User::query()->create([
-                'name' => $request->input('new_customer_name'),
+                'first_name' => $request->input('new_customer_first_name'),
+                'last_name' => $request->input('new_customer_last_name'),
                 'email' => $request->input('new_customer_email'),
                 'password' => Str::random(32),
                 'external' => true,

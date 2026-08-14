@@ -13,7 +13,8 @@ class AdminSeeder extends Seeder
             'email' => 'admin@armooutdoor.test',
         ]);
 
-        $admin->name = 'Admin';
+        $admin->first_name = 'Admin';
+        $admin->last_name = 'Armo Outdoor';
         $admin->password = 'password';
         $admin->is_admin = true;
         $admin->save();
