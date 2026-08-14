@@ -50,6 +50,48 @@ class CompanySetting extends Model
         return in_array($field, self::OPTIONAL_FIELDS, true) ? '' : '['.$this->placeholder($field).']';
     }
 
+    /**
+     * Splits the free-form address into a street line and a "postal code
+     * city" line, e.g. "22 Rue Anita Conti, 44300, Nantes" becomes
+     * ["22 Rue Anita Conti", "44300 Nantes"].
+     *
+     * @return string[]
+     */
+    public function addressLines(): array
+    {
+        $parts = array_values(array_filter(array_map(
+            fn (string $part): string => trim($part),
+            explode(',', $this->value('address')),
+        ), fn (string $part): bool => $part !== ''));
+
+        if ($parts === []) {
+            return [];
+        }
+
+        $street = array_shift($parts);
+        $rest = trim(implode(' ', $parts));
+
+        return $rest !== '' ? [$street, $rest] : [$street];
+    }
+
+    public function formattedPhone(): string
+    {
+        $digits = preg_replace('/\D/', '', (string) $this->phone) ?? '';
+
+        if ($digits === '') {
+            return $this->value('phone');
+        }
+
+        if (str_starts_with($digits, '0')) {
+            $digits = substr($digits, 1);
+        }
+
+        $first = substr($digits, 0, 1);
+        $rest = str_split(substr($digits, 1), 2);
+
+        return trim('+33 '.$first.' '.implode(' ', $rest));
+    }
+
     public function vatMention(): string
     {
         return $this->vat_exempt

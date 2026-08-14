@@ -6,14 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateOrderBillingAddressRequest;
 use App\Http\Requests\Admin\UpdateOrderShippingAddressRequest;
 use App\Models\Carrier;
+use App\Models\CompanySetting;
 use App\Models\Order;
 use App\Models\PackageType;
-use App\Support\SimplePdf;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 class OrderController extends Controller
 {
@@ -82,10 +83,14 @@ class OrderController extends Controller
     {
         abort_unless($order->invoiceIsAvailable(), 404);
 
-        return response(SimplePdf::withText('Hello World'), 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="invoice-'.$order->number.'.pdf"',
-        ]);
+        $order->load('items.product');
+
+        $pdf = Pdf::loadView('admin.orders.invoice-pdf', [
+            'order' => $order,
+            'company' => CompanySetting::current(),
+        ])->setPaper('a4');
+
+        return $pdf->download('invoice-'.$order->number.'.pdf');
     }
 
     public function updateTracking(Request $request, Order $order): RedirectResponse

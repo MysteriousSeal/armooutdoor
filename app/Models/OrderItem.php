@@ -62,4 +62,17 @@ class OrderItem extends Model
 
         return asset('images/'.$this->image);
     }
+
+    /**
+     * Filesystem path for local images, for use in PDF rendering (dompdf
+     * embeds local files far more reliably than it fetches its own HTTP URLs).
+     */
+    public function imagePath(): string
+    {
+        if (str_starts_with($this->image, 'https://') || str_starts_with($this->image, 'http://')) {
+            return $this->image;
+        }
+
+        return public_path('images/'.$this->image);
+    }
 }
