@@ -62,6 +62,7 @@
                             <th>Category</th>
                             <th>Price</th>
                             <th>Stock</th>
+                            <th>GTIN</th>
                             <th>Status</th>
                             <th></th>
                         </tr>
@@ -80,13 +81,17 @@
                                     </a>
                                 </td>
                                 <td>
-                                    <a href="{{ route('admin.products.edit', $product) }}">
+                                    <a href="{{ route('admin.products.edit', $product) }}" class="admin-table-strong">
                                         {{ $product->name['fr'] ?? $product->localizedName() }}
                                     </a>
+                                    @if (filled($product->sku))
+                                        <span class="admin-table-sub">{{ $product->sku }}</span>
+                                    @endif
                                 </td>
                                 <td>{{ $product->category?->name['fr'] ?? '—' }}</td>
                                 <td>{{ $product->formattedPrice() }}</td>
                                 <td>{{ $product->quantity }}</td>
+                                <td>{{ filled($product->gtin) ? $product->gtin : '—' }}</td>
                                 <td>
                                     <form method="POST" action="{{ route('admin.products.status', $product) }}">
                                         @csrf
