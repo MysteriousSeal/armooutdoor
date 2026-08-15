@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreProductRequest;
+use App\Models\Carrier;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
@@ -59,6 +60,7 @@ class ProductController extends Controller
                 'sort_order' => 0,
             ]),
             'categories' => $this->categoryOptions(),
+            'carriers' => Carrier::query()->orderBy('sort_order')->get(),
         ]);
     }
 
@@ -79,6 +81,7 @@ class ProductController extends Controller
         return view('admin.products.form', [
             'product' => $product->load('images', 'variants'),
             'categories' => $this->categoryOptions(),
+            'carriers' => Carrier::query()->orderBy('sort_order')->get(),
         ]);
     }
 
@@ -153,6 +156,7 @@ class ProductController extends Controller
             'sku' => $request->filled('sku') ? $request->string('sku')->trim()->toString() : null,
             'gtin' => $request->filled('gtin') ? $request->string('gtin')->trim()->toString() : null,
             'weight_grams' => $request->filled('weight_grams') ? $request->integer('weight_grams') : null,
+            'carrier_ids' => array_map('intval', $request->input('carrier_ids', [])),
             'name' => [
                 'fr' => $request->string('name')->toString(),
             ],

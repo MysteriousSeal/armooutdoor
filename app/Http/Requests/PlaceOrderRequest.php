@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Carrier;
+use App\Support\Cart;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -52,6 +53,10 @@ class PlaceOrderRequest extends FormRequest
 
                 if ($carrier->isRelay() && ! $this->filled('relay_point_id')) {
                     $validator->errors()->add('relay_point_id', __('store.relay_required'));
+                }
+
+                if (! app(Cart::class)->allowsCarrier($carrier)) {
+                    $validator->errors()->add('carrier_id', __('store.carrier_unavailable'));
                 }
             },
         ];

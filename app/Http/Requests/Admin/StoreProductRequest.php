@@ -26,6 +26,8 @@ class StoreProductRequest extends FormRequest
             'price' => ['required', 'numeric', 'min:0', 'max:99999.99'],
             'quantity' => ['required', 'integer', 'min:0', 'max:99999'],
             'weight_grams' => ['nullable', 'integer', 'min:0', 'max:99999'],
+            'carrier_ids' => ['nullable', 'array'],
+            'carrier_ids.*' => ['integer', 'exists:carriers,id'],
             'is_active' => ['sometimes', 'boolean'],
             'sku' => [
                 'nullable',

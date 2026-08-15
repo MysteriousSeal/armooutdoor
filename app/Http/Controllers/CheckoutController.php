@@ -29,7 +29,7 @@ class CheckoutController extends Controller
 
         $user = request()->user();
         $addresses = $user->addresses()->get();
-        $carriers = Carrier::query()->active()->get();
+        $carriers = Carrier::query()->active()->get()->filter(fn (Carrier $carrier): bool => $cart->allowsCarrier($carrier))->values();
         $selectedAddressId = old('address_id', $addresses->firstWhere('is_default', true)?->id ?? $addresses->first()?->id);
         $sameBillingAddress = old('same_billing_address', true);
         $selectedBillingAddressId = old('billing_address_id', $selectedAddressId);

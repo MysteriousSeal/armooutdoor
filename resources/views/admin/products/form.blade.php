@@ -225,6 +225,35 @@
                             @error('weight_grams') <p class="form-error">{{ $message }}</p> @enderror
                         </div>
                     </section>
+
+                    @php
+                        $allCarrierIds = $carriers->pluck('id')->all();
+                        $selectedCarrierIds = old('carrier_ids', $product->exists ? ($product->carrier_ids ?? $allCarrierIds) : $allCarrierIds);
+                    @endphp
+
+                    <section class="order-panel">
+                        <h3 class="order-panel-title">Carriers</h3>
+                        <p class="form-hint">
+                            Which carriers can ship this product. Uncheck a carrier here to hide it at checkout for any
+                            cart that includes this product. Leave everything checked if there's no restriction.
+                        </p>
+
+                        <div class="admin-check-list">
+                            @foreach ($carriers as $carrier)
+                                <label class="form-check">
+                                    <input
+                                        type="checkbox"
+                                        name="carrier_ids[]"
+                                        value="{{ $carrier->id }}"
+                                        @checked(in_array($carrier->id, $selectedCarrierIds))
+                                    >
+                                    {{ $carrier->localizedName() }}
+                                    <span class="admin-check-list-meta">— {{ $carrier->formattedPrice() }}, {{ $carrier->method->value }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                        @error('carrier_ids') <p class="form-error">{{ $message }}</p> @enderror
+                    </section>
                 </div>
             </div>
 

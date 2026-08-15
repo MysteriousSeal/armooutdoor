@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'sku',
     'gtin',
     'weight_grams',
+    'carrier_ids',
     'name',
     'description',
     'characteristics',
@@ -50,6 +51,7 @@ class Product extends Model
             'price_cents' => 'integer',
             'quantity' => 'integer',
             'weight_grams' => 'integer',
+            'carrier_ids' => 'array',
             'is_active' => 'boolean',
             'featured' => 'boolean',
             'sort_order' => 'integer',
@@ -138,6 +140,15 @@ class Product extends Model
     public function lowStock(): bool
     {
         return $this->quantity > 0 && $this->quantity <= 2;
+    }
+
+    /**
+     * A null carrier_ids means unrestricted — every carrier can ship this
+     * product. Once set, only the listed carriers are allowed.
+     */
+    public function isCarrierAllowed(Carrier $carrier): bool
+    {
+        return $this->carrier_ids === null || in_array($carrier->id, $this->carrier_ids, true);
     }
 
     public function maxPurchasable(): int

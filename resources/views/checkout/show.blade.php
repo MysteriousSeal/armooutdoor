@@ -206,61 +206,65 @@
                         {{ __('store.shipping_section') }}
                     </h3>
 
-                    <div class="shipping-group">
-                        <h4 class="shipping-group-title">{{ __('store.shipping_home') }}</h4>
-                        <div class="choice-grid">
-                            @foreach ($homeCarriers as $carrier)
-                                <label class="choice-card">
-                                    <input
-                                        type="radio"
-                                        name="carrier_id"
-                                        value="{{ $carrier->id }}"
-                                        form="checkout-form"
-                                        data-method="home"
-                                        @checked((string) $selectedCarrierId === (string) $carrier->id)
-                                    >
-                                    <span class="choice-card-body">
-                                        <span class="choice-card-title">
-                                            {{ $carrier->localizedName() }}
-                                            <span class="choice-card-price">
-                                                {{ $carrierPricesCents[$carrier->id] === 0 ? __('store.shipping_free') : format_euros($carrierPricesCents[$carrier->id]) }}
+                    @if ($homeCarriers->isNotEmpty())
+                        <div class="shipping-group">
+                            <h4 class="shipping-group-title">{{ __('store.shipping_home') }}</h4>
+                            <div class="choice-grid">
+                                @foreach ($homeCarriers as $carrier)
+                                    <label class="choice-card">
+                                        <input
+                                            type="radio"
+                                            name="carrier_id"
+                                            value="{{ $carrier->id }}"
+                                            form="checkout-form"
+                                            data-method="home"
+                                            @checked((string) $selectedCarrierId === (string) $carrier->id)
+                                        >
+                                        <span class="choice-card-body">
+                                            <span class="choice-card-title">
+                                                {{ $carrier->localizedName() }}
+                                                <span class="choice-card-price">
+                                                    {{ $carrierPricesCents[$carrier->id] === 0 ? __('store.shipping_free') : format_euros($carrierPricesCents[$carrier->id]) }}
+                                                </span>
                                             </span>
+                                            <span class="choice-card-meta">{{ $carrier->localizedDescription() }}</span>
+                                            <span class="choice-card-meta">{{ $carrier->localizedEta() }}</span>
                                         </span>
-                                        <span class="choice-card-meta">{{ $carrier->localizedDescription() }}</span>
-                                        <span class="choice-card-meta">{{ $carrier->localizedEta() }}</span>
-                                    </span>
-                                </label>
-                            @endforeach
+                                    </label>
+                                @endforeach
+                            </div>
                         </div>
-                    </div>
+                    @endif
 
-                    <div class="shipping-group">
-                        <h4 class="shipping-group-title">{{ __('store.shipping_relay') }}</h4>
-                        <div class="choice-grid">
-                            @foreach ($relayCarriers as $carrier)
-                                <label class="choice-card">
-                                    <input
-                                        type="radio"
-                                        name="carrier_id"
-                                        value="{{ $carrier->id }}"
-                                        form="checkout-form"
-                                        data-method="relay"
-                                        @checked((string) $selectedCarrierId === (string) $carrier->id)
-                                    >
-                                    <span class="choice-card-body">
-                                        <span class="choice-card-title">
-                                            {{ $carrier->localizedName() }}
-                                            <span class="choice-card-price">
-                                                {{ $carrierPricesCents[$carrier->id] === 0 ? __('store.shipping_free') : format_euros($carrierPricesCents[$carrier->id]) }}
+                    @if ($relayCarriers->isNotEmpty())
+                        <div class="shipping-group">
+                            <h4 class="shipping-group-title">{{ __('store.shipping_relay') }}</h4>
+                            <div class="choice-grid">
+                                @foreach ($relayCarriers as $carrier)
+                                    <label class="choice-card">
+                                        <input
+                                            type="radio"
+                                            name="carrier_id"
+                                            value="{{ $carrier->id }}"
+                                            form="checkout-form"
+                                            data-method="relay"
+                                            @checked((string) $selectedCarrierId === (string) $carrier->id)
+                                        >
+                                        <span class="choice-card-body">
+                                            <span class="choice-card-title">
+                                                {{ $carrier->localizedName() }}
+                                                <span class="choice-card-price">
+                                                    {{ $carrierPricesCents[$carrier->id] === 0 ? __('store.shipping_free') : format_euros($carrierPricesCents[$carrier->id]) }}
+                                                </span>
                                             </span>
+                                            <span class="choice-card-meta">{{ $carrier->localizedDescription() }}</span>
+                                            <span class="choice-card-meta">{{ $carrier->localizedEta() }}</span>
                                         </span>
-                                        <span class="choice-card-meta">{{ $carrier->localizedDescription() }}</span>
-                                        <span class="choice-card-meta">{{ $carrier->localizedEta() }}</span>
-                                    </span>
-                                </label>
-                            @endforeach
+                                    </label>
+                                @endforeach
+                            </div>
                         </div>
-                    </div>
+                    @endif
                     @error('carrier_id')
                         <p class="form-error">{{ $message }}</p>
                     @enderror

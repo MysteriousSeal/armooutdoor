@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\Carrier;
 use App\Models\CartItem;
 use App\Models\Product;
 use App\Models\ProductVariant;
@@ -79,6 +80,15 @@ class Cart
     public function totalCents(): int
     {
         return $this->lines()->sum(fn (CartLine $line): int => $line->lineCents());
+    }
+
+    /**
+     * False if any product currently in the cart restricts its carriers and
+     * doesn't include this one.
+     */
+    public function allowsCarrier(Carrier $carrier): bool
+    {
+        return $this->lines()->every(fn (CartLine $line): bool => $line->product->isCarrierAllowed($carrier));
     }
 
     public function formattedTotal(): string
