@@ -12,19 +12,23 @@
     }
 
     var priceEl = document.getElementById('product-detail-price');
-    var badgeEl = document.getElementById('product-stock-badge');
+    var currentEl = document.getElementById('product-variant-current');
+    var mainImage = document.getElementById('product-detail-main-image');
     var qtyInput = form.querySelector('.qty-stepper-input');
     var submitBtn = form.querySelector('button[type="submit"]');
     var stepperButtons = form.querySelectorAll('.qty-stepper-btn');
 
     function applyVariant(radio) {
-        if (priceEl && radio.hasAttribute('data-variant-price')) {
-            priceEl.textContent = radio.getAttribute('data-variant-price');
+        if (currentEl && radio.hasAttribute('data-variant-label')) {
+            currentEl.textContent = radio.getAttribute('data-variant-label') || '';
         }
 
-        if (badgeEl) {
-            badgeEl.className = 'stock-badge ' + (radio.getAttribute('data-variant-stock-class') || '');
-            badgeEl.textContent = radio.getAttribute('data-variant-stock-label') || '';
+        if (mainImage && radio.getAttribute('data-variant-image')) {
+            mainImage.src = radio.getAttribute('data-variant-image');
+        }
+
+        if (priceEl && radio.hasAttribute('data-variant-price')) {
+            priceEl.textContent = radio.getAttribute('data-variant-price');
         }
 
         var max = parseInt(radio.getAttribute('data-variant-max'), 10) || 0;

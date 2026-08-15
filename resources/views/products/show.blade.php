@@ -77,8 +77,8 @@
                 <h2 class="product-detail-title">{{ $product->localizedName() }}</h2>
                 <div class="product-detail-meta">
                     <p class="product-detail-price" id="product-detail-price">{{ ($displayVariant ?? $product)->formattedPrice() }}</p>
-                    <span class="stock-badge {{ ($displayVariant ?? $product)->lowStock() ? 'is-low-stock' : (($displayVariant ?? $product)->inStock() ? 'is-in-stock' : 'is-out-of-stock') }}" id="product-stock-badge">
-                        {{ ($displayVariant ?? $product)->lowStock() ? __('store.low_stock') : (($displayVariant ?? $product)->inStock() ? __('store.in_stock') : __('store.out_of_stock')) }}
+                    <span class="stock-badge {{ $product->lowStock() ? 'is-low-stock' : ($product->inStock() ? 'is-in-stock' : 'is-out-of-stock') }}" id="product-stock-badge">
+                        {{ $product->lowStock() ? __('store.low_stock') : ($product->inStock() ? __('store.in_stock') : __('store.out_of_stock')) }}
                     </span>
                 </div>
 
@@ -88,32 +88,48 @@
                         <input type="hidden" name="product_id" value="{{ $product->id }}">
 
                         @if ($product->hasVariants())
-                            <fieldset class="product-variants-fieldset">
-                                <legend class="product-variants-legend">{{ __('store.product_variants') }}</legend>
-                                <div class="choice-grid choice-grid--variants" data-variant-options>
+                            @php
+                                $variantPricesDiffer = $activeVariants->map->effectivePriceCents()->unique()->count() > 1;
+                                $selectedVariantLabel = $displayVariant
+                                    ? ($displayVariant->label() !== '' ? $displayVariant->label() : $product->localizedName())
+                                    : '';
+                            @endphp
+                            <fieldset class="product-variants">
+                                <legend class="product-variants-legend">
+                                    <span>{{ __('store.product_variants') }}</span>
+                                    <span class="product-variants-current" id="product-variant-current">{{ $selectedVariantLabel }}</span>
+                                </legend>
+                                <div class="product-variant-grid" data-variant-options>
                                     @foreach ($activeVariants as $variant)
-                                        <label class="choice-card">
+                                        @php($variantLabel = $variant->label() !== '' ? $variant->label() : $product->localizedName())
+                                        <label class="product-variant-chip {{ ! $variant->inStock() ? 'is-unavailable' : '' }}">
                                             <input
                                                 type="radio"
                                                 name="variant_id"
                                                 value="{{ $variant->id }}"
+                                                data-variant-label="{{ $variantLabel }}"
                                                 data-variant-price="{{ $variant->formattedPrice() }}"
-                                                data-variant-stock-class="{{ $variant->lowStock() ? 'is-low-stock' : ($variant->inStock() ? 'is-in-stock' : 'is-out-of-stock') }}"
-                                                data-variant-stock-label="{{ $variant->lowStock() ? __('store.low_stock') : ($variant->inStock() ? __('store.in_stock') : __('store.out_of_stock')) }}"
                                                 data-variant-max="{{ $variant->maxPurchasable() }}"
+                                                @if ($variant->image)
+                                                    data-variant-image="{{ $variant->imageUrl() }}"
+                                                @endif
                                                 @checked((string) $selectedVariantId === (string) $variant->id)
                                                 {{ ! $variant->inStock() ? 'disabled' : '' }}
                                             >
-                                            <span class="choice-card-body">
-                                                <span class="choice-card-title">
-                                                    {{ $variant->label() !== '' ? $variant->label() : $product->localizedName() }}
-                                                    <span class="choice-card-price">{{ $variant->formattedPrice() }}</span>
-                                                </span>
-                                                @if ($variant->sku)
-                                                    <span class="choice-card-meta">{{ $variant->sku }}</span>
+                                            <span class="product-variant-chip-face">
+                                                @if ($variant->image)
+                                                    <span class="product-variant-chip-media">
+                                                        <img src="{{ $variant->imageUrl() }}" alt="">
+                                                    </span>
                                                 @endif
-                                                <span class="choice-card-meta">
-                                                    {{ $variant->lowStock() ? __('store.low_stock') : ($variant->inStock() ? __('store.in_stock') : __('store.out_of_stock')) }}
+                                                <span class="product-variant-chip-copy">
+                                                    <span class="product-variant-chip-label">{{ $variantLabel }}</span>
+                                                    @if ($variantPricesDiffer)
+                                                        <span class="product-variant-chip-price">{{ $variant->formattedPrice() }}</span>
+                                                    @endif
+                                                    <span class="product-variant-chip-stock {{ $variant->lowStock() ? 'is-low-stock' : ($variant->inStock() ? 'is-in-stock' : 'is-out-of-stock') }}">
+                                                        {{ $variant->lowStock() ? __('store.variant_stock_low') : ($variant->inStock() ? __('store.variant_stock_ok') : __('store.variant_stock_out')) }}
+                                                    </span>
                                                 </span>
                                             </span>
                                         </label>
