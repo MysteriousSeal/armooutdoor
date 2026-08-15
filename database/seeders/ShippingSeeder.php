@@ -60,6 +60,18 @@ class ShippingSeeder extends Seeder
                 'price_cents' => 450,
                 'sort_order' => 4,
             ],
+            [
+                'slug' => 'lettre-suivie',
+                'name' => ['en' => 'Lettre suivie', 'fr' => 'Lettre suivie'],
+                'description' => [
+                    'en' => 'Delivered to your mailbox by La Poste, tracked.',
+                    'fr' => 'Livré dans votre boîte aux lettres par La Poste, suivi.',
+                ],
+                'eta' => ['en' => '2–3 days', 'fr' => '2–3 jours'],
+                'method' => DeliveryMethod::Home,
+                'price_cents' => 350,
+                'sort_order' => 5,
+            ],
         ];
 
         foreach ($carriers as $carrier) {
