@@ -80,7 +80,7 @@
 
             <div class="admin-form-card">
                 <h3 class="admin-panel-title">Carrier prices</h3>
-                <p class="form-hint">Priced by weight tier. Falls back to a flat price until a carrier has tiers of its own.</p>
+                <p class="form-hint">Priced by weight tier, with a default price for anything a tier doesn't cover.</p>
 
                 <div class="admin-check-list admin-check-list--rows">
                     @foreach ($carriers as $carrier)
@@ -119,8 +119,25 @@
                     <p class="modal-kicker">{{ $carrier->localizedName() }}</p>
                     <h3 class="modal-title" id="carrier-price-tiers-{{ $carrier->id }}-title">Price tiers</h3>
                     <p class="modal-body">
-                        The price applies from its weight upward, until the next tier. Add a 0 g tier to cover every order.
+                        Tiers price applies from their weight upward, until the next tier. The default price below covers
+                        anything lighter than your lowest tier, or every order if you add no tiers at all.
                     </p>
+
+                    <div class="form-group">
+                        <label for="carrier-default-price-{{ $carrier->id }}">Default price (€)</label>
+                        <input
+                            type="number"
+                            id="carrier-default-price-{{ $carrier->id }}"
+                            name="default_price"
+                            class="form-control"
+                            min="0"
+                            max="9999.99"
+                            step="0.01"
+                            value="{{ old('default_price', number_format($carrier->price_cents / 100, 2, '.', '')) }}"
+                            required
+                        >
+                        @error('default_price', 'carrierTiers'.$carrier->id) <p class="form-error">{{ $message }}</p> @enderror
+                    </div>
 
                     <div class="tier-rows" data-tier-rows>
                         @forelse ($oldTiers as $index => $tier)
@@ -138,7 +155,7 @@
                                 <button type="button" class="btn btn-sm btn-secondary tier-remove" aria-label="Remove tier">Remove</button>
                             </div>
                         @empty
-                            <p class="tier-empty" data-tier-empty>No tiers yet — the flat price above applies.</p>
+                            <p class="tier-empty" data-tier-empty>No tiers yet — the default price above applies.</p>
                         @endforelse
                     </div>
 

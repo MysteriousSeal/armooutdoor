@@ -13,6 +13,10 @@ class CarrierPriceTierController extends Controller
     public function update(UpdateCarrierPriceTierRequest $request, Carrier $carrier): RedirectResponse
     {
         DB::transaction(function () use ($request, $carrier): void {
+            $carrier->update([
+                'price_cents' => (int) round(((float) $request->validated('default_price')) * 100),
+            ]);
+
             $carrier->priceTiers()->delete();
 
             foreach ($request->validated('tiers', []) as $tier) {

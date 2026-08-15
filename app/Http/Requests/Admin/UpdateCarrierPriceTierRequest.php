@@ -22,6 +22,7 @@ class UpdateCarrierPriceTierRequest extends FormRequest
         $this->errorBag = 'carrierTiers'.$this->route('carrier')->id;
 
         return [
+            'default_price' => ['required', 'numeric', 'min:0', 'max:9999.99'],
             'tiers' => ['nullable', 'array'],
             'tiers.*.min_weight' => ['required', 'integer', 'min:0', 'max:999999'],
             'tiers.*.price' => ['required', 'numeric', 'min:0', 'max:9999.99'],
