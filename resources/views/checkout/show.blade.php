@@ -360,7 +360,7 @@
                         <li class="checkout-line">
                             <a href="{{ localized_route('products.show', ['product' => $line->product->slug]) }}" class="checkout-line-media">
                                 <img
-                                    src="{{ $line->product->imageUrl() }}"
+                                    src="{{ $line->variant?->imageUrl() ?? $line->product->imageUrl() }}"
                                     alt=""
                                     width="72"
                                     height="72"
@@ -373,7 +373,9 @@
                                     </a>
                                 </p>
                                 @if ($line->variantLabel())
-                                    <p class="checkout-line-meta">{{ $line->variantLabel() }}</p>
+                                    <p class="checkout-line-variant">
+                                        <span class="checkout-line-variant-value">{{ $line->variantLabel() }}</span>
+                                    </p>
                                 @endif
                                 <p class="checkout-line-meta">× {{ $line->quantity }} · {{ $line->formattedUnitPrice() }}</p>
                             </div>

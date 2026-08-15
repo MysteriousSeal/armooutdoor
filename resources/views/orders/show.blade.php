@@ -35,13 +35,11 @@
                                 <div class="order-item-body">
                                     <p class="order-item-name">{{ $item->localizedName() }}</p>
                                     @if ($item->variant_label)
-                                        <p class="order-item-sku">
-                                            {{ $item->variant_label }}
-                                            @if ($item->resolvedSku())
-                                                · SKU : {{ $item->resolvedSku() }}
-                                            @endif
+                                        <p class="order-item-variant">
+                                            <span class="order-item-variant-value">{{ $item->variant_label }}</span>
                                         </p>
-                                    @elseif ($item->resolvedSku())
+                                    @endif
+                                    @if ($item->resolvedSku())
                                         <p class="order-item-sku">SKU : {{ $item->resolvedSku() }}</p>
                                     @endif
                                     <p class="order-item-meta">× {{ $item->quantity }} · {{ format_euros($item->unit_price_cents) }}</p>

@@ -31,7 +31,7 @@
                             <div class="cart-line-media-slot">
                                 <a href="{{ localized_route('products.show', ['product' => $line->product->slug]) }}" class="cart-line-media">
                                     <img
-                                        src="{{ $line->product->imageUrl() }}"
+                                        src="{{ $line->variant?->imageUrl() ?? $line->product->imageUrl() }}"
                                         alt="{{ $line->product->localizedName() }}"
                                         width="180"
                                         height="180"
@@ -53,14 +53,13 @@
                                     </a>
                                 </h3>
                                 @if ($line->variantLabel())
-                                    <p class="cart-line-sku">
-                                        {{ $line->variantLabel() }}
-                                        @if ($line->variant?->sku ?? $line->product->sku)
-                                            · SKU : {{ $line->variant?->sku ?? $line->product->sku }}
-                                        @endif
+                                    <p class="cart-line-variant">
+                                        <span class="cart-line-variant-kicker">{{ __('store.cart_variant') }}</span>
+                                        <span class="cart-line-variant-value">{{ $line->variantLabel() }}</span>
                                     </p>
-                                @elseif ($line->product->sku)
-                                    <p class="cart-line-sku">SKU : {{ $line->product->sku }}</p>
+                                @endif
+                                @if ($line->variant?->sku ?? $line->product->sku)
+                                    <p class="cart-line-sku">SKU : {{ $line->variant?->sku ?? $line->product->sku }}</p>
                                 @endif
 
                                 <div class="cart-line-actions">
