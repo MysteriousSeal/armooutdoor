@@ -23,6 +23,10 @@
                 <span class="admin-stat-label">Orders</span>
                 <span class="admin-stat-value admin-stat-value--sm">Marketplaces you also sell on</span>
             </a>
+            <a href="{{ route('admin.settings.invoice.edit') }}" class="admin-stat-card">
+                <span class="admin-stat-label">Invoice</span>
+                <span class="admin-stat-value admin-stat-value--sm">Footer link shown on invoice PDFs</span>
+            </a>
         </div>
     </div>
 @endsection

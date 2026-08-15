@@ -126,6 +126,8 @@
             font-size: 8px;
             color: #6b6b6b;
         }
+        .footer-link { margin-top: 4px; }
+        .footer-link a { color: #6b6b6b; }
     </style>
 </head>
 <body>
@@ -287,6 +289,18 @@
         </tr>
     </table>
 
-    <div class="footer">TVA non applicable - art. L. 223-3 du Code des impositions sur les biens et services (CIBS)</div>
+    <div class="footer">
+        TVA non applicable - art. L. 223-3 du Code des impositions sur les biens et services (CIBS)
+        @if ($company->invoice_footer_url || $company->invoice_footer_text)
+            <div class="footer-link">
+                @if ($company->invoice_footer_text)
+                    <div>{{ $company->invoice_footer_text }}</div>
+                @endif
+                @if ($company->invoice_footer_url)
+                    <div><a href="{{ $company->invoice_footer_url }}">{{ $company->invoice_footer_url }}</a></div>
+                @endif
+            </div>
+        @endif
+    </div>
 </body>
 </html>

@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\CompanySettingController as AdminCompanySettingController;
 use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\InvoiceSettingController as AdminInvoiceSettingController;
 use App\Http\Controllers\Admin\MarketplaceController as AdminMarketplaceController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PackageTypeController as AdminPackageTypeController;
@@ -81,6 +82,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('/settings/package-types/{packageType}', [AdminPackageTypeController::class, 'destroy'])->name('settings.package-types.destroy');
         Route::get('/settings/company', [AdminCompanySettingController::class, 'edit'])->name('settings.company.edit');
         Route::put('/settings/company', [AdminCompanySettingController::class, 'update'])->name('settings.company.update');
+        Route::get('/settings/invoice', [AdminInvoiceSettingController::class, 'edit'])->name('settings.invoice.edit');
+        Route::put('/settings/invoice', [AdminInvoiceSettingController::class, 'update'])->name('settings.invoice.update');
         Route::get('/settings/orders', [AdminSettingsController::class, 'orders'])->name('settings.orders.edit');
         Route::post('/settings/marketplaces', [AdminMarketplaceController::class, 'store'])->name('settings.marketplaces.store');
         Route::put('/settings/marketplaces/{marketplace}', [AdminMarketplaceController::class, 'update'])->name('settings.marketplaces.update');
