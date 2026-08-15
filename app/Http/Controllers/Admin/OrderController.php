@@ -306,7 +306,7 @@ class OrderController extends Controller
 
     public function show(Order $order): View
     {
-        $order->load(['user', 'items.product', 'statusHistories']);
+        $order->load(['user', 'items.product', 'items.variant', 'statusHistories']);
 
         return view('admin.orders.show', [
             'order' => $order,
@@ -346,7 +346,7 @@ class OrderController extends Controller
     {
         abort_unless($order->invoiceIsAvailable(), 404);
 
-        $order->load('items.product');
+        $order->load('items.product', 'items.variant');
 
         $pdf = Pdf::loadView('admin.orders.invoice-pdf', [
             'order' => $order,

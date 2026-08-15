@@ -53,7 +53,12 @@
                                     </a>
                                 </h3>
                                 @if ($line->variantLabel())
-                                    <p class="cart-line-sku">{{ $line->variantLabel() }}</p>
+                                    <p class="cart-line-sku">
+                                        {{ $line->variantLabel() }}
+                                        @if ($line->variant?->sku ?? $line->product->sku)
+                                            · SKU : {{ $line->variant?->sku ?? $line->product->sku }}
+                                        @endif
+                                    </p>
                                 @elseif ($line->product->sku)
                                     <p class="cart-line-sku">SKU : {{ $line->product->sku }}</p>
                                 @endif
