@@ -2544,37 +2544,94 @@ textarea.form-control {
     margin-top: 0.85rem;
 }
 
+.variant-section-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.variant-section-head .order-panel-title {
+    margin-bottom: 0.4rem;
+}
+
+.variant-section-head .form-hint {
+    margin: 0;
+}
+
+.variant-empty {
+    margin: 0;
+    padding: 1.25rem 0 0.25rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
 .variant-row {
-    padding: 1.1rem 1.15rem 0.35rem;
     margin-bottom: 0.85rem;
+    padding: 0;
     background: var(--bg);
     border: 1px solid var(--border);
 }
 
 .variant-row:last-child {
-    margin-bottom: 1rem;
+    margin-bottom: 0;
 }
 
-.variant-row-actions {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    gap: 0.65rem;
-}
-
-.variant-image-preview {
+.variant-card-head {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    margin-bottom: 0.5rem;
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--border);
 }
 
-.variant-image-preview img {
-    width: 3rem;
-    height: 3rem;
-    object-fit: contain;
+.variant-card-title {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 500;
+}
+
+.variant-card-body {
+    display: grid;
+    grid-template-columns: 8.5rem minmax(0, 1fr);
+    gap: 1rem 1.15rem;
+    padding: 1rem 1rem 0.35rem;
+}
+
+.variant-card-media {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.variant-card-preview {
+    display: block;
+    width: 8.5rem;
+    height: 8.5rem;
     background: var(--surface);
     border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.variant-card-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.variant-card-upload {
+    position: relative;
+    overflow: hidden;
+}
+
+.variant-card-upload input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
 }
 
 .variant-row.is-marked-for-delete {
@@ -4269,8 +4326,13 @@ a.admin-table-icon-btn:hover {
 
 @media (max-width: 900px) {
     .admin-order-create-grid,
-    .admin-choice-row {
+    .admin-choice-row,
+    .variant-card-body {
         grid-template-columns: 1fr;
+    }
+
+    .variant-section-head {
+        flex-direction: column;
     }
 }
 

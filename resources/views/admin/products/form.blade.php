@@ -239,115 +239,133 @@
             @endphp
 
             <section class="order-panel admin-product-variants">
-                <h3 class="order-panel-title">Variants</h3>
-                <p class="form-hint">
-                    Optional — one card per variant (e.g. a size or a color), each with its own SKU and GTIN.
-                    Attributes are free text like <code>Taille: L, Couleur: Rouge</code>.
-                    Leave price blank to use the product's price.
-                </p>
+                <div class="variant-section-head">
+                    <div>
+                        <h3 class="order-panel-title">Variants</h3>
+                        <p class="form-hint">
+                            One card per option. Attributes like <code>Groupe: A+</code> or <code>Taille: L, Couleur: Rouge</code>.
+                            Leave price blank to use the product price.
+                        </p>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-secondary" id="variant-add">Add variant</button>
+                </div>
 
                 <div id="variants-list">
-                    @foreach ($oldVariants as $index => $variant)
+                    @forelse ($oldVariants as $index => $variant)
+                        @php($variantTitle = filled($variant['attributes_text'] ?? null) ? $variant['attributes_text'] : 'New variant')
                         <div class="variant-row">
                             @if (! empty($variant['id']))
                                 <input type="hidden" name="variants[{{ $index }}][id]" value="{{ $variant['id'] }}">
                             @endif
                             <input type="hidden" name="variants[{{ $index }}][_delete]" value="" class="variant-delete-flag">
-                            <div class="form-group">
-                                <label>Attributes</label>
-                                <input type="text" name="variants[{{ $index }}][attributes_text]" class="form-control" placeholder="Taille: L, Couleur: Rouge" value="{{ $variant['attributes_text'] ?? '' }}">
-                                @error("variants.{$index}.attributes_text") <p class="form-error">{{ $message }}</p> @enderror
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>SKU</label>
-                                    <input type="text" name="variants[{{ $index }}][sku]" class="form-control" maxlength="64" value="{{ $variant['sku'] ?? '' }}">
-                                    @error("variants.{$index}.sku") <p class="form-error">{{ $message }}</p> @enderror
-                                </div>
-                                <div class="form-group">
-                                    <label>GTIN</label>
-                                    <input type="text" name="variants[{{ $index }}][gtin]" class="form-control" maxlength="14" value="{{ $variant['gtin'] ?? '' }}">
-                                    @error("variants.{$index}.gtin") <p class="form-error">{{ $message }}</p> @enderror
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Price (€)</label>
-                                    <input type="number" name="variants[{{ $index }}][price]" class="form-control" min="0" max="99999.99" step="0.01" placeholder="Same as product" value="{{ $variant['price'] ?? '' }}">
-                                    @error("variants.{$index}.price") <p class="form-error">{{ $message }}</p> @enderror
-                                </div>
-                                <div class="form-group">
-                                    <label>Quantity</label>
-                                    <input type="number" name="variants[{{ $index }}][quantity]" class="form-control" min="0" max="99999" step="1" value="{{ $variant['quantity'] ?? 0 }}">
-                                    @error("variants.{$index}.quantity") <p class="form-error">{{ $message }}</p> @enderror
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Image</label>
-                                    @if (! empty($variant['image_url']))
-                                        <div class="variant-image-preview">
+                            <header class="variant-card-head">
+                                <p class="variant-card-title">{{ $variantTitle }}</p>
+                                <label class="form-check">
+                                    <input type="checkbox" name="variants[{{ $index }}][is_active]" value="1" @checked($variant['is_active'] ?? true)>
+                                    Active
+                                </label>
+                                <button type="button" class="btn btn-sm btn-secondary variant-remove">Remove</button>
+                            </header>
+                            <div class="variant-card-body">
+                                <div class="variant-card-media">
+                                    <span class="variant-card-preview">
+                                        @if (! empty($variant['image_url']))
                                             <img src="{{ $variant['image_url'] }}" alt="">
-                                            <label class="form-check">
-                                                <input type="checkbox" name="variants[{{ $index }}][remove_image]" value="1">
-                                                Remove
-                                            </label>
-                                        </div>
+                                        @endif
+                                    </span>
+                                    @if (! empty($variant['image_url']))
+                                        <label class="form-check">
+                                            <input type="checkbox" name="variants[{{ $index }}][remove_image]" value="1">
+                                            Remove photo
+                                        </label>
                                     @endif
-                                    <input type="file" name="variant_images[{{ $index }}]" accept="image/jpeg,image/png,image/gif,image/webp">
-                                </div>
-                                <div class="form-group variant-row-actions">
-                                    <label class="form-check">
-                                        <input type="checkbox" name="variants[{{ $index }}][is_active]" value="1" @checked($variant['is_active'] ?? true)>
-                                        Active
+                                    <label class="btn btn-sm btn-secondary variant-card-upload">
+                                        {{ ! empty($variant['image_url']) ? 'Replace photo' : 'Add photo' }}
+                                        <input type="file" name="variant_images[{{ $index }}]" accept="image/jpeg,image/png,image/gif,image/webp">
                                     </label>
-                                    <button type="button" class="btn btn-sm btn-secondary variant-remove">Remove variant</button>
+                                </div>
+                                <div class="variant-card-fields">
+                                    <div class="form-group">
+                                        <label>Attributes</label>
+                                        <input type="text" name="variants[{{ $index }}][attributes_text]" class="form-control variant-attributes-input" placeholder="Groupe: A+" value="{{ $variant['attributes_text'] ?? '' }}">
+                                        @error("variants.{$index}.attributes_text") <p class="form-error">{{ $message }}</p> @enderror
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>SKU</label>
+                                            <input type="text" name="variants[{{ $index }}][sku]" class="form-control" maxlength="64" value="{{ $variant['sku'] ?? '' }}">
+                                            @error("variants.{$index}.sku") <p class="form-error">{{ $message }}</p> @enderror
+                                        </div>
+                                        <div class="form-group">
+                                            <label>GTIN</label>
+                                            <input type="text" name="variants[{{ $index }}][gtin]" class="form-control" maxlength="14" value="{{ $variant['gtin'] ?? '' }}">
+                                            @error("variants.{$index}.gtin") <p class="form-error">{{ $message }}</p> @enderror
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Price (€)</label>
+                                            <input type="number" name="variants[{{ $index }}][price]" class="form-control" min="0" max="99999.99" step="0.01" placeholder="Same as product" value="{{ $variant['price'] ?? '' }}">
+                                            @error("variants.{$index}.price") <p class="form-error">{{ $message }}</p> @enderror
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Quantity</label>
+                                            <input type="number" name="variants[{{ $index }}][quantity]" class="form-control" min="0" max="99999" step="1" value="{{ $variant['quantity'] ?? 0 }}">
+                                            @error("variants.{$index}.quantity") <p class="form-error">{{ $message }}</p> @enderror
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    @endforeach
+                    @empty
+                        <p class="variant-empty">No variants yet. Add one if this product has sizes, colors or other options.</p>
+                    @endforelse
                 </div>
-
-                <button type="button" class="btn btn-sm btn-secondary" id="variant-add">Add variant</button>
 
                 <template id="variant-row-template">
                     <div class="variant-row">
                         <input type="hidden" name="variants[__INDEX__][_delete]" value="" class="variant-delete-flag">
-                        <div class="form-group">
-                            <label>Attributes</label>
-                            <input type="text" name="variants[__INDEX__][attributes_text]" class="form-control" placeholder="Taille: L, Couleur: Rouge">
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>SKU</label>
-                                <input type="text" name="variants[__INDEX__][sku]" class="form-control" maxlength="64">
-                            </div>
-                            <div class="form-group">
-                                <label>GTIN</label>
-                                <input type="text" name="variants[__INDEX__][gtin]" class="form-control" maxlength="14">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Price (€)</label>
-                                <input type="number" name="variants[__INDEX__][price]" class="form-control" min="0" max="99999.99" step="0.01" placeholder="Same as product">
-                            </div>
-                            <div class="form-group">
-                                <label>Quantity</label>
-                                <input type="number" name="variants[__INDEX__][quantity]" class="form-control" min="0" max="99999" step="1" value="0">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Image</label>
-                                <input type="file" name="variant_images[__INDEX__]" accept="image/jpeg,image/png,image/gif,image/webp">
-                            </div>
-                            <div class="form-group variant-row-actions">
-                                <label class="form-check">
-                                    <input type="checkbox" name="variants[__INDEX__][is_active]" value="1" checked>
-                                    Active
+                        <header class="variant-card-head">
+                            <p class="variant-card-title">New variant</p>
+                            <label class="form-check">
+                                <input type="checkbox" name="variants[__INDEX__][is_active]" value="1" checked>
+                                Active
+                            </label>
+                            <button type="button" class="btn btn-sm btn-secondary variant-remove">Remove</button>
+                        </header>
+                        <div class="variant-card-body">
+                            <div class="variant-card-media">
+                                <span class="variant-card-preview"></span>
+                                <label class="btn btn-sm btn-secondary variant-card-upload">
+                                    Add photo
+                                    <input type="file" name="variant_images[__INDEX__]" accept="image/jpeg,image/png,image/gif,image/webp">
                                 </label>
-                                <button type="button" class="btn btn-sm btn-secondary variant-remove">Remove variant</button>
+                            </div>
+                            <div class="variant-card-fields">
+                                <div class="form-group">
+                                    <label>Attributes</label>
+                                    <input type="text" name="variants[__INDEX__][attributes_text]" class="form-control variant-attributes-input" placeholder="Groupe: A+">
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>SKU</label>
+                                        <input type="text" name="variants[__INDEX__][sku]" class="form-control" maxlength="64">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>GTIN</label>
+                                        <input type="text" name="variants[__INDEX__][gtin]" class="form-control" maxlength="14">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Price (€)</label>
+                                        <input type="number" name="variants[__INDEX__][price]" class="form-control" min="0" max="99999.99" step="0.01" placeholder="Same as product">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Quantity</label>
+                                        <input type="number" name="variants[__INDEX__][quantity]" class="form-control" min="0" max="99999" step="1" value="0">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -424,18 +442,60 @@
                     row.querySelectorAll('input:not(.variant-delete-flag):not([name$="[id]"]), select').forEach(function (field) {
                         field.disabled = !marked;
                     });
-                    event.target.textContent = marked ? 'Remove variant' : 'Undo removal';
+                    event.target.textContent = marked ? 'Remove' : 'Undo';
                 });
             }
 
-            list.querySelectorAll('.variant-row').forEach(bindRemove);
+            function bindTitle(row) {
+                var input = row.querySelector('.variant-attributes-input');
+                var title = row.querySelector('.variant-card-title');
+                if (!input || !title) {
+                    return;
+                }
+                input.addEventListener('input', function () {
+                    title.textContent = input.value.trim() || 'New variant';
+                });
+            }
+
+            function bindPreview(row) {
+                var file = row.querySelector('input[type="file"]');
+                var preview = row.querySelector('.variant-card-preview');
+                if (!file || !preview) {
+                    return;
+                }
+                file.addEventListener('change', function () {
+                    var chosen = file.files && file.files[0];
+                    if (!chosen) {
+                        return;
+                    }
+                    var img = preview.querySelector('img') || document.createElement('img');
+                    img.alt = '';
+                    img.src = URL.createObjectURL(chosen);
+                    preview.appendChild(img);
+                });
+            }
+
+            function bindRow(row) {
+                bindRemove(row);
+                bindTitle(row);
+                bindPreview(row);
+            }
+
+            list.querySelectorAll('.variant-row').forEach(bindRow);
 
             addBtn.addEventListener('click', function () {
+                var empty = list.querySelector('.variant-empty');
+                if (empty) {
+                    empty.remove();
+                }
                 var html = template.innerHTML.replaceAll('__INDEX__', String(counter));
                 list.insertAdjacentHTML('beforeend', html);
                 var row = list.lastElementChild;
-                bindRemove(row);
-                row.querySelector('input').focus();
+                bindRow(row);
+                var focus = row.querySelector('.variant-attributes-input');
+                if (focus) {
+                    focus.focus();
+                }
                 counter++;
             });
         })();
