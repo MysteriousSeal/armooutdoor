@@ -4,6 +4,7 @@ namespace App\Http\Requests\Admin;
 
 use App\Models\Product;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
@@ -37,6 +38,7 @@ class StoreManualOrderRequest extends FormRequest
 
             'items' => ['required', 'array'],
             'items.*.product_id' => ['nullable', 'exists:products,id'],
+            'items.*.variant_id' => ['nullable', 'integer'],
             'items.*.quantity' => ['nullable', 'integer', 'min:1'],
             'items.*.price' => ['nullable', 'numeric', 'min:0'],
 
@@ -79,7 +81,7 @@ class StoreManualOrderRequest extends FormRequest
                 }
 
                 foreach ($rows as $index => $row) {
-                    $product = Product::query()->find($row['product_id']);
+                    $product = Product::query()->with('variants')->find($row['product_id']);
 
                     if ($product === null || ! $product->is_active) {
                         $validator->errors()->add("items.{$index}.product_id", 'This product is not available.');
@@ -87,8 +89,28 @@ class StoreManualOrderRequest extends FormRequest
                         continue;
                     }
 
-                    if ((int) $row['quantity'] > $product->quantity) {
-                        $validator->errors()->add("items.{$index}.quantity", 'Only '.$product->quantity.' in stock.');
+                    $variant = filled($row['variant_id'] ?? null)
+                        ? $product->variants->firstWhere('id', (int) $row['variant_id'])
+                        : null;
+
+                    if ($product->hasVariants()) {
+                        if (blank($row['variant_id'] ?? null)) {
+                            $validator->errors()->add("items.{$index}.variant_id", 'Select a variant.');
+
+                            continue;
+                        }
+
+                        if ($variant === null || ! $variant->is_active) {
+                            $validator->errors()->add("items.{$index}.variant_id", 'This variant is not available.');
+
+                            continue;
+                        }
+                    }
+
+                    $availableQuantity = $variant?->quantity ?? $product->quantity;
+
+                    if ((int) $row['quantity'] > $availableQuantity) {
+                        $validator->errors()->add("items.{$index}.quantity", 'Only '.$availableQuantity.' in stock.');
                     }
                 }
             },
@@ -96,20 +118,27 @@ class StoreManualOrderRequest extends FormRequest
     }
 
     /**
-     * @return \Illuminate\Support\Collection<int, array{product_id: int, quantity: int, unit_price_cents: int}>
+     * @return Collection<int, array{product_id: int, variant_id: ?int, quantity: int, unit_price_cents: int}>
      */
-    public function validItems(): \Illuminate\Support\Collection
+    public function validItems(): Collection
     {
         return collect($this->input('items', []))
             ->filter(fn (array $row): bool => filled($row['product_id'] ?? null) && filled($row['quantity'] ?? null))
             ->map(function (array $row): array {
-                $product = Product::query()->find($row['product_id']);
-                $unitPriceCents = filled($row['price'] ?? null)
-                    ? (int) round(((float) $row['price']) * 100)
-                    : (int) ($product?->price_cents ?? 0);
+                $product = Product::query()->with('variants')->find($row['product_id']);
+                $variant = filled($row['variant_id'] ?? null)
+                    ? $product?->variants->firstWhere('id', (int) $row['variant_id'])
+                    : null;
+
+                $unitPriceCents = match (true) {
+                    filled($row['price'] ?? null) => (int) round(((float) $row['price']) * 100),
+                    $variant !== null => $variant->effectivePriceCents(),
+                    default => (int) ($product?->price_cents ?? 0),
+                };
 
                 return [
                     'product_id' => (int) $row['product_id'],
+                    'variant_id' => $variant?->id,
                     'quantity' => (int) $row['quantity'],
                     'unit_price_cents' => $unitPriceCents,
                 ];

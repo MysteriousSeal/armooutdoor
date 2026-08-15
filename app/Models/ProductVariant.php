@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Cart;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -53,6 +54,11 @@ class ProductVariant extends Model
     public function inStock(): bool
     {
         return $this->quantity > 0;
+    }
+
+    public function maxPurchasable(): int
+    {
+        return max(0, min(Cart::MAX_QUANTITY, $this->quantity));
     }
 
     public function lowStock(): bool

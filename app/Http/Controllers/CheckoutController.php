@@ -9,6 +9,7 @@ use App\Models\Address;
 use App\Models\Carrier;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\ProductVariant;
 use App\Models\RelayPoint;
 use App\Models\ShippingSetting;
 use App\Support\Cart;
@@ -133,19 +134,33 @@ class CheckoutController extends Controller
                 $cart->lines()->each(function (CartLine $line) use ($order): void {
                     $product = $line->product->newQuery()->lockForUpdate()->find($line->product->id);
 
-                    if ($product === null || $product->quantity < $line->quantity) {
+                    if ($product === null) {
                         throw new \RuntimeException('stock');
                     }
 
-                    $product->decrement('quantity', $line->quantity);
+                    if ($line->variant !== null) {
+                        $variant = ProductVariant::query()->lockForUpdate()->find($line->variant->id);
+
+                        if ($variant === null || $variant->quantity < $line->quantity) {
+                            throw new \RuntimeException('stock');
+                        }
+
+                        $variant->decrement('quantity', $line->quantity);
+                    } elseif ($product->quantity < $line->quantity) {
+                        throw new \RuntimeException('stock');
+                    } else {
+                        $product->decrement('quantity', $line->quantity);
+                    }
 
                     OrderItem::query()->create([
                         'order_id' => $order->id,
                         'product_id' => $line->product->id,
+                        'product_variant_id' => $line->variant?->id,
                         'product_slug' => $line->product->slug,
                         'name' => $line->product->name,
+                        'variant_label' => $line->variantLabel(),
                         'image' => $line->product->image,
-                        'unit_price_cents' => $line->product->price_cents,
+                        'unit_price_cents' => $line->unitPriceCents(),
                         'quantity' => $line->quantity,
                         'line_cents' => $line->lineCents(),
                     ]);

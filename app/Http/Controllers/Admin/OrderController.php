@@ -13,6 +13,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\PackageType;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\ShippingSetting;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -71,7 +72,7 @@ class OrderController extends Controller
         return view('admin.orders.create', [
             'order' => null,
             'customers' => $this->customerOptions(),
-            'products' => Product::query()->active()->orderBy('name')->get(),
+            'products' => Product::query()->active()->with('variants')->orderBy('name')->get(),
             'carriers' => Carrier::query()->active()->get(),
             'marketplaces' => Marketplace::query()->orderBy('name')->get(),
         ]);
@@ -81,10 +82,12 @@ class OrderController extends Controller
     {
         abort_unless($order->isDraft(), 404);
 
+        $order->load('items');
+
         return view('admin.orders.create', [
             'order' => $order,
             'customers' => $this->customerOptions(),
-            'products' => Product::query()->active()->orderBy('name')->get(),
+            'products' => Product::query()->active()->with('variants')->orderBy('name')->get(),
             'carriers' => Carrier::query()->active()->get(),
             'marketplaces' => Marketplace::query()->orderBy('name')->get(),
         ]);
@@ -211,12 +214,24 @@ class OrderController extends Controller
                 ? $productsQuery->lockForUpdate()->get()->keyBy('id')
                 : $productsQuery->get()->keyBy('id');
 
+            $variantIds = $items->pluck('variant_id')->filter();
+            $variants = collect();
+
+            if ($variantIds->isNotEmpty()) {
+                $variantsQuery = ProductVariant::query()->whereIn('id', $variantIds);
+                $variants = $finalize
+                    ? $variantsQuery->lockForUpdate()->get()->keyBy('id')
+                    : $variantsQuery->get()->keyBy('id');
+            }
+
             $subtotal = 0;
 
             foreach ($items as $item) {
                 $product = $products->get($item['product_id']);
+                $variant = $item['variant_id'] ? $variants->get($item['variant_id']) : null;
+                $availableQuantity = $variant?->quantity ?? $product?->quantity;
 
-                if ($product === null || ($finalize && $product->quantity < $item['quantity'])) {
+                if ($product === null || ($finalize && $availableQuantity < $item['quantity'])) {
                     throw new \RuntimeException('stock');
                 }
 
@@ -261,16 +276,23 @@ class OrderController extends Controller
 
             foreach ($items as $item) {
                 $product = $products->get($item['product_id']);
+                $variant = $item['variant_id'] ? $variants->get($item['variant_id']) : null;
 
                 if ($finalize) {
-                    $product->decrement('quantity', $item['quantity']);
+                    if ($variant !== null) {
+                        $variant->decrement('quantity', $item['quantity']);
+                    } else {
+                        $product->decrement('quantity', $item['quantity']);
+                    }
                 }
 
                 OrderItem::query()->create([
                     'order_id' => $savedOrder->id,
                     'product_id' => $product->id,
+                    'product_variant_id' => $variant?->id,
                     'product_slug' => $product->slug,
                     'name' => $product->name,
+                    'variant_label' => $variant?->label(),
                     'image' => $product->image,
                     'unit_price_cents' => $item['unit_price_cents'],
                     'quantity' => $item['quantity'],

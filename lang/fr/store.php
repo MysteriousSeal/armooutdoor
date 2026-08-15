@@ -62,6 +62,7 @@ return [
     'product_description' => 'Description',
     'product_characteristics' => 'Caractéristiques',
     'product_variants' => 'Variantes disponibles',
+    'select_variant_required' => 'Merci de choisir une variante.',
     'product_photos' => 'Photos du produit',
     'breadcrumb_home' => 'Accueil',
     'empty_category' => 'Rien dans cette catégorie pour le moment.',

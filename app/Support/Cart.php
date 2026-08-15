@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\CartItem;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -19,28 +20,44 @@ class Cart
      */
     public function lines(): Collection
     {
-        $quantities = $this->quantities();
+        $entries = $this->entries();
 
-        if ($quantities === []) {
+        if ($entries->isEmpty()) {
             return collect();
         }
 
         $products = Product::query()
             ->active()
             ->with('category.parent')
-            ->whereIn('id', array_keys($quantities))
+            ->whereIn('id', $entries->pluck('product_id')->unique())
             ->get()
             ->keyBy('id');
 
-        return collect($quantities)
-            ->map(function (int $quantity, int $productId) use ($products): ?CartLine {
-                $product = $products->get($productId);
+        $variantIds = $entries->pluck('variant_id')->filter()->unique();
+
+        $variants = $variantIds->isEmpty()
+            ? collect()
+            : ProductVariant::query()->whereIn('id', $variantIds)->get()->keyBy('id');
+
+        return $entries
+            ->map(function (array $entry) use ($products, $variants): ?CartLine {
+                $product = $products->get($entry['product_id']);
 
                 if ($product === null) {
                     return null;
                 }
 
-                return new CartLine($product, $quantity);
+                if ($entry['variant_id'] !== null) {
+                    $variant = $variants->get($entry['variant_id']);
+
+                    if ($variant === null) {
+                        return null;
+                    }
+
+                    return new CartLine($product, $entry['quantity'], $variant);
+                }
+
+                return new CartLine($product, $entry['quantity']);
             })
             ->filter()
             ->values();
@@ -48,12 +65,15 @@ class Cart
 
     public function quantity(): int
     {
-        return array_sum($this->quantities());
+        return $this->entries()->sum('quantity');
     }
 
-    public function quantityOf(Product $product): int
+    public function quantityOf(Product $product, ?ProductVariant $variant = null): int
     {
-        return $this->quantities()[$product->id] ?? 0;
+        $variantId = $variant?->id;
+
+        return $this->entries()
+            ->first(fn (array $entry): bool => $entry['product_id'] === $product->id && $entry['variant_id'] === $variantId)['quantity'] ?? 0;
     }
 
     public function totalCents(): int
@@ -66,20 +86,23 @@ class Cart
         return format_euros($this->totalCents());
     }
 
-    public function add(Product $product, int $quantity = 1): void
+    public function add(Product $product, int $quantity = 1, ?ProductVariant $variant = null): void
     {
-        $this->update($product, ($this->quantities()[$product->id] ?? 0) + $quantity);
+        $this->update($product, $this->quantityOf($product, $variant) + $quantity, $variant);
     }
 
-    public function update(Product $product, int $quantity): void
+    public function update(Product $product, int $quantity, ?ProductVariant $variant = null): void
     {
-        $quantity = max(0, min(self::MAX_QUANTITY, $product->quantity, $quantity));
+        $maxAllowed = $variant?->maxPurchasable() ?? $product->maxPurchasable();
+        $quantity = max(0, min(self::MAX_QUANTITY, $maxAllowed, $quantity));
+        $variantId = $variant?->id;
 
         if (Auth::check()) {
             if ($quantity === 0) {
                 CartItem::query()
                     ->where('user_id', Auth::id())
                     ->where('product_id', $product->id)
+                    ->where('product_variant_id', $variantId)
                     ->delete();
 
                 return;
@@ -89,6 +112,7 @@ class Cart
                 [
                     'user_id' => Auth::id(),
                     'product_id' => $product->id,
+                    'product_variant_id' => $variantId,
                 ],
                 ['quantity' => $quantity],
             );
@@ -97,19 +121,24 @@ class Cart
         }
 
         $items = $this->sessionItems();
+        $variantKey = $variantId ?? 0;
 
         if ($quantity === 0) {
-            unset($items[$product->id]);
+            unset($items[$product->id][$variantKey]);
+
+            if (empty($items[$product->id])) {
+                unset($items[$product->id]);
+            }
         } else {
-            $items[$product->id] = $quantity;
+            $items[$product->id][$variantKey] = $quantity;
         }
 
         session()->put(self::SESSION_KEY, $items);
     }
 
-    public function remove(Product $product): void
+    public function remove(Product $product, ?ProductVariant $variant = null): void
     {
-        $this->update($product, 0);
+        $this->update($product, 0, $variant);
     }
 
     public function clear(): void
@@ -130,39 +159,60 @@ class Cart
 
     public function claimFor(User $user): void
     {
-        $sessionItems = $this->sessionItems();
+        $items = $this->sessionItems();
 
-        foreach ($sessionItems as $productId => $quantity) {
-            $item = CartItem::query()->firstOrNew([
-                'user_id' => $user->id,
-                'product_id' => $productId,
-            ]);
+        foreach ($items as $productId => $variants) {
+            foreach ($variants as $variantKey => $quantity) {
+                $item = CartItem::query()->firstOrNew([
+                    'user_id' => $user->id,
+                    'product_id' => $productId,
+                    'product_variant_id' => $variantKey === 0 ? null : $variantKey,
+                ]);
 
-            $item->quantity = min(self::MAX_QUANTITY, (int) $item->quantity + (int) $quantity);
-            $item->save();
+                $item->quantity = min(self::MAX_QUANTITY, (int) $item->quantity + (int) $quantity);
+                $item->save();
+            }
         }
 
         session()->forget(self::SESSION_KEY);
     }
 
     /**
-     * @return array<int, int>
+     * @return Collection<int, array{product_id: int, variant_id: ?int, quantity: int}>
      */
-    private function quantities(): array
+    private function entries(): Collection
     {
         if (Auth::check()) {
             return CartItem::query()
                 ->where('user_id', Auth::id())
-                ->pluck('quantity', 'product_id')
-                ->map(fn ($quantity): int => (int) $quantity)
-                ->all();
+                ->get(['product_id', 'product_variant_id', 'quantity'])
+                ->map(fn (CartItem $item): array => [
+                    'product_id' => (int) $item->product_id,
+                    'variant_id' => $item->product_variant_id !== null ? (int) $item->product_variant_id : null,
+                    'quantity' => (int) $item->quantity,
+                ])
+                ->values();
         }
 
-        return $this->sessionItems();
+        $entries = collect();
+
+        foreach ($this->sessionItems() as $productId => $variants) {
+            foreach ($variants as $variantKey => $quantity) {
+                $entries->push([
+                    'product_id' => $productId,
+                    'variant_id' => $variantKey === 0 ? null : $variantKey,
+                    'quantity' => $quantity,
+                ]);
+            }
+        }
+
+        return $entries;
     }
 
     /**
-     * @return array<int, int>
+     * Guest cart storage, shaped as [productId => [variantId (0 = none) => quantity]].
+     *
+     * @return array<int, array<int, int>>
      */
     private function sessionItems(): array
     {
@@ -174,12 +224,22 @@ class Cart
 
         $normalized = [];
 
-        foreach ($items as $productId => $quantity) {
+        foreach ($items as $productId => $variants) {
             $productId = (int) $productId;
-            $quantity = (int) $quantity;
 
-            if ($productId > 0 && $quantity > 0) {
-                $normalized[$productId] = min(self::MAX_QUANTITY, $quantity);
+            if ($productId <= 0 || ! is_array($variants)) {
+                continue;
+            }
+
+            foreach ($variants as $variantKey => $quantity) {
+                $variantKey = (int) $variantKey;
+                $quantity = (int) $quantity;
+
+                if ($variantKey < 0 || $quantity <= 0) {
+                    continue;
+                }
+
+                $normalized[$productId][$variantKey] = min(self::MAX_QUANTITY, $quantity);
             }
         }
 

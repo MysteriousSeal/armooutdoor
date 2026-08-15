@@ -60,6 +60,12 @@
             </div>
 
             <div class="product-detail-buy">
+                @php
+                    $activeVariants = $product->variants->where('is_active', true);
+                    $selectedVariantId = old('variant_id', optional($activeVariants->first(fn ($variant) => $variant->inStock()))->id);
+                    $displayVariant = $product->hasVariants() ? $activeVariants->firstWhere('id', (int) $selectedVariantId) : null;
+                @endphp
+
                 @if ($product->category)
                     <p class="product-detail-category">
                         <a href="{{ localized_route('categories.show', ['category' => $product->category->slug]) }}">
@@ -70,16 +76,55 @@
 
                 <h2 class="product-detail-title">{{ $product->localizedName() }}</h2>
                 <div class="product-detail-meta">
-                    <p class="product-detail-price">{{ $product->formattedPrice() }}</p>
-                    <span class="stock-badge {{ $product->lowStock() ? 'is-low-stock' : ($product->inStock() ? 'is-in-stock' : 'is-out-of-stock') }}">
-                        {{ $product->lowStock() ? __('store.low_stock') : ($product->inStock() ? __('store.in_stock') : __('store.out_of_stock')) }}
+                    <p class="product-detail-price" id="product-detail-price">{{ ($displayVariant ?? $product)->formattedPrice() }}</p>
+                    <span class="stock-badge {{ ($displayVariant ?? $product)->lowStock() ? 'is-low-stock' : (($displayVariant ?? $product)->inStock() ? 'is-in-stock' : 'is-out-of-stock') }}" id="product-stock-badge">
+                        {{ ($displayVariant ?? $product)->lowStock() ? __('store.low_stock') : (($displayVariant ?? $product)->inStock() ? __('store.in_stock') : __('store.out_of_stock')) }}
                     </span>
                 </div>
 
-                @if ($product->inStock())
+                @if ($product->isPurchasable())
                     <form method="POST" action="{{ localized_route('cart.add') }}" class="add-to-cart-form">
                         @csrf
                         <input type="hidden" name="product_id" value="{{ $product->id }}">
+
+                        @if ($product->hasVariants())
+                            <fieldset class="product-variants-fieldset">
+                                <legend class="product-variants-legend">{{ __('store.product_variants') }}</legend>
+                                <div class="choice-grid choice-grid--variants" data-variant-options>
+                                    @foreach ($activeVariants as $variant)
+                                        <label class="choice-card">
+                                            <input
+                                                type="radio"
+                                                name="variant_id"
+                                                value="{{ $variant->id }}"
+                                                data-variant-price="{{ $variant->formattedPrice() }}"
+                                                data-variant-stock-class="{{ $variant->lowStock() ? 'is-low-stock' : ($variant->inStock() ? 'is-in-stock' : 'is-out-of-stock') }}"
+                                                data-variant-stock-label="{{ $variant->lowStock() ? __('store.low_stock') : ($variant->inStock() ? __('store.in_stock') : __('store.out_of_stock')) }}"
+                                                data-variant-max="{{ $variant->maxPurchasable() }}"
+                                                @checked((string) $selectedVariantId === (string) $variant->id)
+                                                {{ ! $variant->inStock() ? 'disabled' : '' }}
+                                            >
+                                            <span class="choice-card-body">
+                                                <span class="choice-card-title">
+                                                    {{ $variant->label() !== '' ? $variant->label() : $product->localizedName() }}
+                                                    <span class="choice-card-price">{{ $variant->formattedPrice() }}</span>
+                                                </span>
+                                                @if ($variant->sku)
+                                                    <span class="choice-card-meta">{{ $variant->sku }}</span>
+                                                @endif
+                                                <span class="choice-card-meta">
+                                                    {{ $variant->inStock() ? __('store.in_stock') : __('store.out_of_stock') }}
+                                                </span>
+                                            </span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                                @error('variant_id')
+                                    <p class="form-error">{{ $message }}</p>
+                                @enderror
+                            </fieldset>
+                        @endif
+
                         <div class="product-buy-row">
                             <div class="qty-stepper">
                                 <button type="button" class="qty-stepper-btn" data-qty-step="-1" aria-label="−">−</button>
@@ -91,7 +136,7 @@
                                     class="qty-stepper-input"
                                     value="{{ old('quantity', 1) }}"
                                     min="1"
-                                    max="{{ $product->maxPurchasable() }}"
+                                    max="{{ ($displayVariant ?? $product)->maxPurchasable() }}"
                                     required
                                 >
                                 <button type="button" class="qty-stepper-btn" data-qty-step="1" aria-label="+">+</button>
@@ -152,26 +197,6 @@
             </section>
         @endif
 
-        @if ($product->variants->where('is_active', true)->isNotEmpty())
-            <section class="product-specs" aria-labelledby="product-variants-title">
-                <h3 class="product-desc-title" id="product-variants-title">{{ __('store.product_variants') }}</h3>
-                <ul class="product-variants-list">
-                    @foreach ($product->variants->where('is_active', true) as $variant)
-                        <li class="product-variant-row">
-                            <span class="product-variant-label">{{ $variant->label() !== '' ? $variant->label() : $product->localizedName() }}</span>
-                            @if ($variant->sku)
-                                <span class="product-variant-sku">{{ $variant->sku }}</span>
-                            @endif
-                            <span class="product-variant-price">{{ $variant->formattedPrice() }}</span>
-                            <span class="product-variant-stock {{ $variant->inStock() ? 'is-in-stock' : 'is-out-of-stock' }}">
-                                {{ $variant->inStock() ? __('store.in_stock') : __('store.out_of_stock') }}
-                            </span>
-                        </li>
-                    @endforeach
-                </ul>
-            </section>
-        @endif
-
         @if ($related->isNotEmpty())
             <section class="shop-section">
                 <header class="section-header">
@@ -190,4 +215,5 @@
 @push('scripts')
     <script src="{{ asset('js/product-gallery.js') }}" defer></script>
     <script src="{{ asset('js/product-qty.js') }}" defer></script>
+    <script src="{{ asset('js/product-variant.js') }}" defer></script>
 @endpush

@@ -52,7 +52,9 @@
                                         {{ $line->product->localizedName() }}
                                     </a>
                                 </h3>
-                                @if ($line->product->sku)
+                                @if ($line->variantLabel())
+                                    <p class="cart-line-sku">{{ $line->variantLabel() }}</p>
+                                @elseif ($line->product->sku)
                                     <p class="cart-line-sku">SKU : {{ $line->product->sku }}</p>
                                 @endif
 
@@ -60,15 +62,18 @@
                                     <form method="POST" action="{{ localized_route('cart.update', ['product' => $line->product->slug]) }}" class="cart-qty-form">
                                         @csrf
                                         @method('PATCH')
-                                        <label class="sr-only" for="qty-{{ $line->product->id }}">{{ __('store.quantity') }}</label>
+                                        @if ($line->variant)
+                                            <input type="hidden" name="variant_id" value="{{ $line->variant->id }}">
+                                        @endif
+                                        <label class="sr-only" for="qty-{{ $line->product->id }}-{{ $line->variant->id ?? 0 }}">{{ __('store.quantity') }}</label>
                                         <input
                                             type="number"
-                                            id="qty-{{ $line->product->id }}"
+                                            id="qty-{{ $line->product->id }}-{{ $line->variant->id ?? 0 }}"
                                             name="quantity"
                                             class="form-control cart-qty-input"
                                             value="{{ $line->quantity }}"
                                             min="0"
-                                            max="{{ $line->product->maxPurchasable() }}"
+                                            max="{{ $line->variant?->maxPurchasable() ?? $line->product->maxPurchasable() }}"
                                         >
                                         <button type="submit" class="btn btn-sm btn-secondary">{{ __('store.update_quantity') }}</button>
                                     </form>
@@ -76,6 +81,9 @@
                                     <form method="POST" action="{{ localized_route('cart.remove', ['product' => $line->product->slug]) }}">
                                         @csrf
                                         @method('DELETE')
+                                        @if ($line->variant)
+                                            <input type="hidden" name="variant_id" value="{{ $line->variant->id }}">
+                                        @endif
                                         <button type="submit" class="btn btn-sm btn-secondary">{{ __('store.remove') }}</button>
                                     </form>
                                 </div>
@@ -83,7 +91,7 @@
 
                             <div class="cart-line-total-slot">
                                 @if ($line->quantity > 1)
-                                    <p class="cart-line-unit-price">{{ $line->product->formattedPrice() }} × {{ $line->quantity }}</p>
+                                    <p class="cart-line-unit-price">{{ $line->formattedUnitPrice() }} × {{ $line->quantity }}</p>
                                 @endif
                                 <p class="cart-line-total">{{ $line->formattedLineTotal() }}</p>
                             </div>

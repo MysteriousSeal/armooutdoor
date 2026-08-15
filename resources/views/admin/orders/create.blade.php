@@ -25,11 +25,19 @@
         'image' => $product->image ? $product->imageUrl() : '',
         'search' => $product->localizedName().' '.($product->sku ?? ''),
         'price' => number_format($product->price_cents / 100, 2, '.', ''),
+        'variants' => $product->variants->where('is_active', true)->map(fn ($variant) => [
+            'id' => $variant->id,
+            'label' => $variant->label() !== '' ? $variant->label() : $product->localizedName(),
+            'sku' => $variant->sku ?: '',
+            'price' => number_format($variant->effectivePriceCents() / 100, 2, '.', ''),
+            'quantity' => $variant->quantity,
+        ])->values(),
     ])->values();
     $selectedCustomerLabel = optional($customerOptions->firstWhere('id', (int) old('customer_id', $defaultCustomerId)))['label'] ?? '';
     $defaultItems = $isEdit
         ? $order->items->map(fn ($item) => [
             'product_id' => $item->product_id,
+            'variant_id' => $item->product_variant_id,
             'quantity' => $item->quantity,
             'price' => number_format($item->unit_price_cents / 100, 2, '.', ''),
         ])->values()->all()
@@ -160,7 +168,9 @@
                         <div id="item-rows">
                             @php($oldItems = old('items', $defaultItems))
                             @foreach ($oldItems as $index => $item)
-                                @php($selectedProductLabel = optional($productOptions->firstWhere('id', (int) ($item['product_id'] ?? 0)))['label'] ?? '')
+                                @php($selectedProductOption = $productOptions->firstWhere('id', (int) ($item['product_id'] ?? 0)))
+                                @php($selectedProductLabel = $selectedProductOption['label'] ?? '')
+                                @php($itemVariants = $selectedProductOption['variants'] ?? collect())
                                 <div class="form-row form-row--item">
                                     <div class="form-group">
                                         <label for="item-product-{{ $index }}">Product</label>
@@ -178,6 +188,22 @@
                                             <ul class="search-select-list" hidden></ul>
                                         </div>
                                         @error('items.'.$index.'.product_id') <p class="form-error">{{ $message }}</p> @enderror
+                                    </div>
+                                    <div class="form-group" data-variant-group @if ($itemVariants->isEmpty()) hidden @endif>
+                                        <label for="item-variant-{{ $index }}">Variant</label>
+                                        <select id="item-variant-{{ $index }}" name="items[{{ $index }}][variant_id]" class="form-control" data-item-variant>
+                                            <option value="">— Select a variant —</option>
+                                            @foreach ($itemVariants as $variantOption)
+                                                <option
+                                                    value="{{ $variantOption['id'] }}"
+                                                    data-price="{{ $variantOption['price'] }}"
+                                                    @selected((string) ($item['variant_id'] ?? '') === (string) $variantOption['id'])
+                                                >
+                                                    {{ $variantOption['label'] }}@if ($variantOption['sku']) ({{ $variantOption['sku'] }})@endif — {{ $variantOption['quantity'] }} in stock
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('items.'.$index.'.variant_id') <p class="form-error">{{ $message }}</p> @enderror
                                     </div>
                                     <div class="form-group">
                                         <label for="item-qty-{{ $index }}">Qty</label>
@@ -217,6 +243,12 @@
                                         >
                                         <ul class="search-select-list" hidden></ul>
                                     </div>
+                                </div>
+                                <div class="form-group" data-variant-group hidden>
+                                    <label>Variant</label>
+                                    <select name="items[__INDEX__][variant_id]" class="form-control" data-item-variant>
+                                        <option value="">— Select a variant —</option>
+                                    </select>
                                 </div>
                                 <div class="form-group">
                                     <label>Qty</label>
@@ -357,14 +389,49 @@
                 }
             });
 
+            function populateVariantSelect(row, variants) {
+                var group = row.querySelector('[data-variant-group]');
+                var select = row.querySelector('[data-item-variant]');
+                if (! group || ! select) {
+                    return;
+                }
+                select.innerHTML = '<option value="">— Select a variant —</option>';
+                (variants || []).forEach(function (variant) {
+                    var option = document.createElement('option');
+                    option.value = String(variant.id);
+                    option.setAttribute('data-price', variant.price);
+                    option.textContent = variant.label + (variant.sku ? ' (' + variant.sku + ')' : '') + ' — ' + variant.quantity + ' in stock';
+                    select.appendChild(option);
+                });
+                group.hidden = ! (variants && variants.length);
+            }
+
             itemRows.addEventListener('search-select:change', function (event) {
                 var row = event.target.closest('.form-row--item');
                 if (! row || ! event.detail) {
                     return;
                 }
+                var hasVariants = Boolean(event.detail.variants && event.detail.variants.length);
+                populateVariantSelect(row, event.detail.variants);
                 var price = row.querySelector('[data-item-price]');
-                if (price && event.detail.price != null) {
-                    price.value = event.detail.price;
+                var variantGroup = row.querySelector('[data-variant-group]');
+                if (price) {
+                    price.value = hasVariants ? '' : (event.detail.price != null ? event.detail.price : '');
+                }
+                if (variantGroup) {
+                    clearFieldError(row.querySelector('[data-item-variant]'));
+                }
+            });
+
+            itemRows.addEventListener('change', function (event) {
+                if (! event.target.hasAttribute('data-item-variant')) {
+                    return;
+                }
+                var row = event.target.closest('.form-row--item');
+                var price = row ? row.querySelector('[data-item-price]') : null;
+                var option = event.target.options[event.target.selectedIndex];
+                if (price && option && option.value !== '') {
+                    price.value = option.getAttribute('data-price') || '';
                 }
             });
 
@@ -603,6 +670,14 @@
                     }
                     if (quantity && (isBlank(quantity) || Number(quantity.value) < 1)) {
                         fail(quantity, 'Enter a quantity.');
+                    }
+
+                    var variantGroup = row.querySelector('[data-variant-group]');
+                    var variantSelect = row.querySelector('[data-item-variant]');
+                    if (variantGroup && ! variantGroup.hidden && variantSelect && isBlank(variantSelect)) {
+                        fail(variantSelect, 'Select a variant.');
+                    } else if (variantSelect) {
+                        clearFieldError(variantSelect);
                     }
                 });
 

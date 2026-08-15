@@ -372,7 +372,10 @@
                                         {{ $line->product->localizedName() }}
                                     </a>
                                 </p>
-                                <p class="checkout-line-meta">× {{ $line->quantity }} · {{ $line->product->formattedPrice() }}</p>
+                                @if ($line->variantLabel())
+                                    <p class="checkout-line-meta">{{ $line->variantLabel() }}</p>
+                                @endif
+                                <p class="checkout-line-meta">× {{ $line->quantity }} · {{ $line->formattedUnitPrice() }}</p>
                             </div>
                             <p class="checkout-line-price">{{ $line->formattedLineTotal() }}</p>
                         </li>

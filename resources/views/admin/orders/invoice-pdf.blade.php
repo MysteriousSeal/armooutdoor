@@ -228,7 +228,7 @@
                             <img src="{{ $item->imagePath() }}" alt="">
                         @endif
                     </td>
-                    <td class="col-name">{{ $item->localizedName() }}</td>
+                    <td class="col-name">{{ $item->localizedName() }}{{ $item->variant_label ? ' — '.$item->variant_label : '' }}</td>
                     <td class="col-sku">{{ $item->product?->sku ?? '—' }}</td>
                     <td class="col-num">× {{ $item->quantity }}</td>
                     <td class="col-num">{{ format_euros($item->unit_price_cents) }}</td>
