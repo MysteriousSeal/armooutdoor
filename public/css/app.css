@@ -2536,10 +2536,50 @@ textarea.form-control {
     gap: 0.75rem;
 }
 
+.admin-product-form {
+    max-width: none;
+}
+
+.admin-product-variants {
+    margin-top: 0.85rem;
+}
+
+.variant-row {
+    padding: 1.1rem 1.15rem 0.35rem;
+    margin-bottom: 0.85rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.variant-row:last-child {
+    margin-bottom: 1rem;
+}
+
+.variant-row-actions {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 0.65rem;
+}
+
+.variant-image-preview {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.variant-image-preview img {
+    width: 3rem;
+    height: 3rem;
+    object-fit: contain;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
 .variant-row.is-marked-for-delete {
-    opacity: 0.5;
-    background: color-mix(in srgb, #c44 8%, transparent);
-    padding: 0.5rem;
+    opacity: 0.55;
+    background: color-mix(in srgb, #c44 8%, var(--bg));
 }
 
 .variant-row.is-marked-for-delete .form-group label {

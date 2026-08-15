@@ -26,34 +26,112 @@
             method="POST"
             action="{{ $product->exists ? route('admin.products.update', $product) : route('admin.products.store') }}"
             enctype="multipart/form-data"
-            class="admin-form-card"
+            class="admin-product-form"
         >
             @csrf
             @if ($product->exists)
                 @method('PUT')
             @endif
 
-            <div class="form-group">
-                <label for="name">Name</label>
-                <input type="text" id="name" name="name" class="form-control" value="{{ old('name', $product->name['fr'] ?? '') }}" required maxlength="120">
-                @error('name') <p class="form-error">{{ $message }}</p> @enderror
-            </div>
+            <div class="admin-order-create-grid">
+                <div class="order-main">
+                    <section class="order-panel">
+                        <h3 class="order-panel-title">Images</h3>
+                        <p class="form-hint">Drag tiles to reorder — the first is the cover shown across the shop. Drop more below.</p>
 
-            <div class="form-group description-editor-group">
-                <label for="description">Description</label>
-                <div class="description-editor" aria-label="Description editor"></div>
-                <textarea id="description" name="description" class="description-editor-source" hidden placeholder="Rédigez une description…">{{ old('description', $product->description['fr'] ?? '') }}</textarea>
-                <p class="form-hint">Éditeur de texte enrichi — collez depuis d'autres sites pour garder le gras, les liens et les listes. Le HTML est nettoyé.</p>
-                @error('description') <p class="form-error">{{ $message }}</p> @enderror
-            </div>
+                        <div
+                            class="upload-images-list"
+                            id="gallery-images-list"
+                            @if ($hasMainImage) data-has-main="1" @endif
+                            aria-label="Image order"
+                        >
+                            @if ($hasMainImage)
+                                <div
+                                    class="additional-images-item is-cover"
+                                    data-image-key="main"
+                                    tabindex="0"
+                                    role="button"
+                                    aria-label="Cover image. Press arrow keys to reorder."
+                                >
+                                    <img src="{{ $product->imageUrl() }}" alt="" draggable="false">
+                                    <span class="additional-images-badge">Cover</span>
+                                    <button type="button" class="additional-images-remove" aria-label="Remove this image">&times;</button>
+                                    <input type="checkbox" name="remove_main" value="1" id="remove-main-checkbox" hidden>
+                                    <span class="upload-images-handle" aria-hidden="true" title="Drag to reorder">⋮⋮</span>
+                                </div>
+                            @endif
+                            @foreach ($product->images as $galleryImage)
+                                <div
+                                    class="additional-images-item"
+                                    data-image-key="{{ $galleryImage->id }}"
+                                    tabindex="0"
+                                    role="button"
+                                    aria-label="Existing image. Press arrow keys to reorder."
+                                >
+                                    <img src="{{ $galleryImage->imageUrl() }}" alt="" draggable="false">
+                                    <button type="button" class="additional-images-remove" aria-label="Remove this image">&times;</button>
+                                    <input type="checkbox" name="remove_gallery_images[]" value="{{ $galleryImage->id }}" hidden>
+                                    <span class="upload-images-handle" aria-hidden="true" title="Drag to reorder">⋮⋮</span>
+                                </div>
+                            @endforeach
+                        </div>
+                        <input type="hidden" name="gallery_order" id="gallery-order-input" value="">
+
+                        <div class="drop-zone" id="gallery-drop-zone">
+                            <p>Drag & drop images here, or <strong>click to browse</strong></p>
+                            <p class="drop-zone-hint">JPEG, PNG, GIF, WebP · Max 4 MB each · Multiple files allowed</p>
+                            <input
+                                type="file"
+                                id="gallery-files-picker"
+                                accept="image/jpeg,image/png,image/gif,image/webp"
+                                multiple
+                                @unless($hasMainImage) required @endunless
+                            >
+                        </div>
+
+                        <input type="file" name="image_file" id="image-file-input" accept="image/jpeg,image/png,image/gif,image/webp" hidden>
+                        <input type="file" name="gallery_images[]" id="gallery-images-input" accept="image/jpeg,image/png,image/gif,image/webp" multiple hidden>
+
+                        @error('image_file') <p class="form-error">{{ $message }}</p> @enderror
+                        @error('gallery_images') <p class="form-error">{{ $message }}</p> @enderror
+                        @error('gallery_images.*') <p class="form-error">{{ $message }}</p> @enderror
+                    </section>
+
+                    <section class="order-panel">
+                        <h3 class="order-panel-title">Product</h3>
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" id="name" name="name" class="form-control" value="{{ old('name', $product->name['fr'] ?? '') }}" required maxlength="120">
+                            @error('name') <p class="form-error">{{ $message }}</p> @enderror
+                        </div>
+                        <div class="form-group">
+                            <label for="category_id">Category</label>
+                            <select id="category_id" name="category_id" class="form-control" required>
+                                <option value="">Choose a category</option>
+                                @foreach ($categories as $category)
+                                    <option value="{{ $category->id }}" @selected((string) old('category_id', $product->category_id) === (string) $category->id)>
+                                        {{ $category->parent ? '— '.$category->localizedName() : ($category->name['fr'] ?? $category->localizedName()) }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('category_id') <p class="form-error">{{ $message }}</p> @enderror
+                        </div>
+                        <div class="form-group">
+                            <label class="form-check">
+                                <input type="checkbox" id="is_active" name="is_active" value="1" @checked(old('is_active', $product->exists ? $product->is_active : true))>
+                                Active — visible in the shop
+                            </label>
+                            <p class="form-hint">Disabled products are hidden from the storefront but stay in the catalog.</p>
+                        </div>
+                    </section>
 
             @php
                 $oldLabels = old('characteristic_label', collect($product->characteristics ?? [])->pluck('label')->all());
                 $oldValues = old('characteristic_value', collect($product->characteristics ?? [])->pluck('value')->all());
             @endphp
-            <div class="form-group">
-                <label>Characteristics</label>
-                <p class="form-hint">Key/value specs shown on the product page — e.g. Type, Diamètre, Couleur.</p>
+                    <section class="order-panel">
+                        <h3 class="order-panel-title">Characteristics</h3>
+                        <p class="form-hint">Key/value specs shown on the product page — e.g. Type, Diamètre, Couleur.</p>
 
                 <div class="characteristics-list" id="characteristics-list">
                     @forelse ($oldLabels as $i => $label)
@@ -81,70 +159,67 @@
                     </div>
                 </template>
 
-                @error('characteristic_label.*') <p class="form-error">{{ $message }}</p> @enderror
-                @error('characteristic_value.*') <p class="form-error">{{ $message }}</p> @enderror
-            </div>
+                        @error('characteristic_label.*') <p class="form-error">{{ $message }}</p> @enderror
+                        @error('characteristic_value.*') <p class="form-error">{{ $message }}</p> @enderror
+                    </section>
+                </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="category_id">Category</label>
-                    <select id="category_id" name="category_id" class="form-control" required>
-                        <option value="">Choose a category</option>
-                        @foreach ($categories as $category)
-                            <option value="{{ $category->id }}" @selected((string) old('category_id', $product->category_id) === (string) $category->id)>
-                                {{ $category->parent ? '— '.$category->localizedName() : ($category->name['fr'] ?? $category->localizedName()) }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('category_id') <p class="form-error">{{ $message }}</p> @enderror
-                </div>
-                <div class="form-group">
-                    <label for="price">Price (EUR)</label>
-                    <input type="number" id="price" name="price" class="form-control" value="{{ $priceValue }}" min="0" max="99999.99" step="0.01" required>
-                    @error('price') <p class="form-error">{{ $message }}</p> @enderror
-                </div>
-                <div class="form-group">
-                    <label for="quantity">Available quantity</label>
-                    <input
-                        type="number"
-                        id="quantity"
-                        name="quantity"
-                        class="form-control"
-                        value="{{ old('quantity', $product->exists ? $product->quantity : 0) }}"
-                        min="0"
-                        max="99999"
-                        step="1"
-                        required
-                        @if ($product->exists && $product->hasVariants()) readonly @endif
-                    >
-                    @if ($product->exists && $product->hasVariants())
-                        <p class="form-hint">Computed automatically from the variants below — edit their quantities instead.</p>
-                    @else
-                        <p class="form-hint">Units you can sell. 0 means out of stock.</p>
-                    @endif
-                    @error('quantity') <p class="form-error">{{ $message }}</p> @enderror
-                </div>
-            </div>
+                <div class="order-main">
+                    <section class="order-panel">
+                        <h3 class="order-panel-title">Description</h3>
+                        <div class="form-group description-editor-group">
+                            <label for="description" class="sr-only">Description</label>
+                            <div class="description-editor" aria-label="Description editor"></div>
+                            <textarea id="description" name="description" class="description-editor-source" hidden placeholder="Rédigez une description…">{{ old('description', $product->description['fr'] ?? '') }}</textarea>
+                            <p class="form-hint">Éditeur de texte enrichi — collez depuis d'autres sites pour garder le gras, les liens et les listes. Le HTML est nettoyé.</p>
+                            @error('description') <p class="form-error">{{ $message }}</p> @enderror
+                        </div>
+                    </section>
 
-            <div class="form-group">
-                <label class="form-check">
-                    <input type="checkbox" id="is_active" name="is_active" value="1" @checked(old('is_active', $product->exists ? $product->is_active : true))>
-                    Active — visible in the shop
-                </label>
-                <p class="form-hint">Disabled products are hidden from the storefront but stay in the catalog.</p>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="sku">SKU</label>
-                    <input type="text" id="sku" name="sku" class="form-control" value="{{ old('sku', $product->sku) }}" maxlength="64" placeholder="e.g. ARM-TENT-2P-GRN">
-                    @error('sku') <p class="form-error">{{ $message }}</p> @enderror
-                </div>
-                <div class="form-group">
-                    <label for="gtin">GTIN</label>
-                    <input type="text" id="gtin" name="gtin" class="form-control" value="{{ old('gtin', $product->gtin) }}" maxlength="14" placeholder="8, 12, 13, or 14 digits">
-                    <p class="form-hint">Barcode number — UPC, EAN, or ISBN.</p>
-                    @error('gtin') <p class="form-error">{{ $message }}</p> @enderror
+                    <section class="order-panel">
+                        <h3 class="order-panel-title">Price and stock</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="price">Price (EUR)</label>
+                                <input type="number" id="price" name="price" class="form-control" value="{{ $priceValue }}" min="0" max="99999.99" step="0.01" required>
+                                @error('price') <p class="form-error">{{ $message }}</p> @enderror
+                            </div>
+                            <div class="form-group">
+                                <label for="quantity">Available quantity</label>
+                                <input
+                                    type="number"
+                                    id="quantity"
+                                    name="quantity"
+                                    class="form-control"
+                                    value="{{ old('quantity', $product->exists ? $product->quantity : 0) }}"
+                                    min="0"
+                                    max="99999"
+                                    step="1"
+                                    required
+                                    @if ($product->exists && $product->hasVariants()) readonly @endif
+                                >
+                                @if ($product->exists && $product->hasVariants())
+                                    <p class="form-hint">Computed automatically from the variants below — edit their quantities instead.</p>
+                                @else
+                                    <p class="form-hint">Units you can sell. 0 means out of stock.</p>
+                                @endif
+                                @error('quantity') <p class="form-error">{{ $message }}</p> @enderror
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="sku">SKU</label>
+                                <input type="text" id="sku" name="sku" class="form-control" value="{{ old('sku', $product->sku) }}" maxlength="64" placeholder="e.g. ARM-TENT-2P-GRN">
+                                @error('sku') <p class="form-error">{{ $message }}</p> @enderror
+                            </div>
+                            <div class="form-group">
+                                <label for="gtin">GTIN</label>
+                                <input type="text" id="gtin" name="gtin" class="form-control" value="{{ old('gtin', $product->gtin) }}" maxlength="14" placeholder="8, 12, 13, or 14 digits">
+                                <p class="form-hint">Barcode number — UPC, EAN, or ISBN.</p>
+                                @error('gtin') <p class="form-error">{{ $message }}</p> @enderror
+                            </div>
+                        </div>
+                    </section>
                 </div>
             </div>
 
@@ -162,17 +237,18 @@
                     ])->values()->all()
                     : []);
             @endphp
-            <div class="form-group">
-                <label>Variants</label>
+
+            <section class="order-panel admin-product-variants">
+                <h3 class="order-panel-title">Variants</h3>
                 <p class="form-hint">
-                    Optional — one row per variant (e.g. a size or a color), each with its own SKU and GTIN.
+                    Optional — one card per variant (e.g. a size or a color), each with its own SKU and GTIN.
                     Attributes are free text like <code>Taille: L, Couleur: Rouge</code>.
                     Leave price blank to use the product's price.
                 </p>
 
                 <div id="variants-list">
                     @foreach ($oldVariants as $index => $variant)
-                        <div class="variant-row form-row">
+                        <div class="variant-row">
                             @if (! empty($variant['id']))
                                 <input type="hidden" name="variants[{{ $index }}][id]" value="{{ $variant['id'] }}">
                             @endif
@@ -182,44 +258,52 @@
                                 <input type="text" name="variants[{{ $index }}][attributes_text]" class="form-control" placeholder="Taille: L, Couleur: Rouge" value="{{ $variant['attributes_text'] ?? '' }}">
                                 @error("variants.{$index}.attributes_text") <p class="form-error">{{ $message }}</p> @enderror
                             </div>
-                            <div class="form-group">
-                                <label>SKU</label>
-                                <input type="text" name="variants[{{ $index }}][sku]" class="form-control" maxlength="64" value="{{ $variant['sku'] ?? '' }}">
-                                @error("variants.{$index}.sku") <p class="form-error">{{ $message }}</p> @enderror
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>SKU</label>
+                                    <input type="text" name="variants[{{ $index }}][sku]" class="form-control" maxlength="64" value="{{ $variant['sku'] ?? '' }}">
+                                    @error("variants.{$index}.sku") <p class="form-error">{{ $message }}</p> @enderror
+                                </div>
+                                <div class="form-group">
+                                    <label>GTIN</label>
+                                    <input type="text" name="variants[{{ $index }}][gtin]" class="form-control" maxlength="14" value="{{ $variant['gtin'] ?? '' }}">
+                                    @error("variants.{$index}.gtin") <p class="form-error">{{ $message }}</p> @enderror
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label>GTIN</label>
-                                <input type="text" name="variants[{{ $index }}][gtin]" class="form-control" maxlength="14" value="{{ $variant['gtin'] ?? '' }}">
-                                @error("variants.{$index}.gtin") <p class="form-error">{{ $message }}</p> @enderror
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Price (€)</label>
+                                    <input type="number" name="variants[{{ $index }}][price]" class="form-control" min="0" max="99999.99" step="0.01" placeholder="Same as product" value="{{ $variant['price'] ?? '' }}">
+                                    @error("variants.{$index}.price") <p class="form-error">{{ $message }}</p> @enderror
+                                </div>
+                                <div class="form-group">
+                                    <label>Quantity</label>
+                                    <input type="number" name="variants[{{ $index }}][quantity]" class="form-control" min="0" max="99999" step="1" value="{{ $variant['quantity'] ?? 0 }}">
+                                    @error("variants.{$index}.quantity") <p class="form-error">{{ $message }}</p> @enderror
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label>Price (€)</label>
-                                <input type="number" name="variants[{{ $index }}][price]" class="form-control" min="0" max="99999.99" step="0.01" placeholder="Same as product" value="{{ $variant['price'] ?? '' }}">
-                                @error("variants.{$index}.price") <p class="form-error">{{ $message }}</p> @enderror
-                            </div>
-                            <div class="form-group">
-                                <label>Quantity</label>
-                                <input type="number" name="variants[{{ $index }}][quantity]" class="form-control" min="0" max="99999" step="1" value="{{ $variant['quantity'] ?? 0 }}">
-                                @error("variants.{$index}.quantity") <p class="form-error">{{ $message }}</p> @enderror
-                            </div>
-                            <div class="form-group">
-                                <label>Image</label>
-                                @if (! empty($variant['image_url']))
-                                    <img src="{{ $variant['image_url'] }}" alt="" width="40" height="40" style="object-fit: cover">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Image</label>
+                                    @if (! empty($variant['image_url']))
+                                        <div class="variant-image-preview">
+                                            <img src="{{ $variant['image_url'] }}" alt="">
+                                            <label class="form-check">
+                                                <input type="checkbox" name="variants[{{ $index }}][remove_image]" value="1">
+                                                Remove
+                                            </label>
+                                        </div>
+                                    @endif
+                                    <input type="file" name="variant_images[{{ $index }}]" accept="image/jpeg,image/png,image/gif,image/webp">
+                                </div>
+                                <div class="form-group variant-row-actions">
                                     <label class="form-check">
-                                        <input type="checkbox" name="variants[{{ $index }}][remove_image]" value="1">
-                                        Remove
+                                        <input type="checkbox" name="variants[{{ $index }}][is_active]" value="1" @checked($variant['is_active'] ?? true)>
+                                        Active
                                     </label>
-                                @endif
-                                <input type="file" name="variant_images[{{ $index }}]" accept="image/jpeg,image/png,image/gif,image/webp">
+                                    <button type="button" class="btn btn-sm btn-secondary variant-remove">Remove variant</button>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label class="form-check">
-                                    <input type="checkbox" name="variants[{{ $index }}][is_active]" value="1" @checked($variant['is_active'] ?? true)>
-                                    Active
-                                </label>
-                            </div>
-                            <button type="button" class="btn btn-sm btn-secondary variant-remove">Remove variant</button>
                         </div>
                     @endforeach
                 </div>
@@ -227,111 +311,55 @@
                 <button type="button" class="btn btn-sm btn-secondary" id="variant-add">Add variant</button>
 
                 <template id="variant-row-template">
-                    <div class="variant-row form-row">
+                    <div class="variant-row">
                         <input type="hidden" name="variants[__INDEX__][_delete]" value="" class="variant-delete-flag">
                         <div class="form-group">
                             <label>Attributes</label>
                             <input type="text" name="variants[__INDEX__][attributes_text]" class="form-control" placeholder="Taille: L, Couleur: Rouge">
                         </div>
-                        <div class="form-group">
-                            <label>SKU</label>
-                            <input type="text" name="variants[__INDEX__][sku]" class="form-control" maxlength="64">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>SKU</label>
+                                <input type="text" name="variants[__INDEX__][sku]" class="form-control" maxlength="64">
+                            </div>
+                            <div class="form-group">
+                                <label>GTIN</label>
+                                <input type="text" name="variants[__INDEX__][gtin]" class="form-control" maxlength="14">
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>GTIN</label>
-                            <input type="text" name="variants[__INDEX__][gtin]" class="form-control" maxlength="14">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Price (€)</label>
+                                <input type="number" name="variants[__INDEX__][price]" class="form-control" min="0" max="99999.99" step="0.01" placeholder="Same as product">
+                            </div>
+                            <div class="form-group">
+                                <label>Quantity</label>
+                                <input type="number" name="variants[__INDEX__][quantity]" class="form-control" min="0" max="99999" step="1" value="0">
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Price (€)</label>
-                            <input type="number" name="variants[__INDEX__][price]" class="form-control" min="0" max="99999.99" step="0.01" placeholder="Same as product">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Image</label>
+                                <input type="file" name="variant_images[__INDEX__]" accept="image/jpeg,image/png,image/gif,image/webp">
+                            </div>
+                            <div class="form-group variant-row-actions">
+                                <label class="form-check">
+                                    <input type="checkbox" name="variants[__INDEX__][is_active]" value="1" checked>
+                                    Active
+                                </label>
+                                <button type="button" class="btn btn-sm btn-secondary variant-remove">Remove variant</button>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Quantity</label>
-                            <input type="number" name="variants[__INDEX__][quantity]" class="form-control" min="0" max="99999" step="1" value="0">
-                        </div>
-                        <div class="form-group">
-                            <label>Image</label>
-                            <input type="file" name="variant_images[__INDEX__]" accept="image/jpeg,image/png,image/gif,image/webp">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-check">
-                                <input type="checkbox" name="variants[__INDEX__][is_active]" value="1" checked>
-                                Active
-                            </label>
-                        </div>
-                        <button type="button" class="btn btn-sm btn-secondary variant-remove">Remove variant</button>
                     </div>
                 </template>
-            </div>
+            </section>
 
-            <div class="form-group">
-                <label>Images</label>
-                <p class="form-hint">Drag tiles to reorder — the first is the cover shown across the shop. Drop more below.</p>
-
-                <div
-                    class="upload-images-list"
-                    id="gallery-images-list"
-                    @if ($hasMainImage) data-has-main="1" @endif
-                    aria-label="Image order"
-                >
-                    @if ($hasMainImage)
-                        <div
-                            class="additional-images-item is-cover"
-                            data-image-key="main"
-                            tabindex="0"
-                            role="button"
-                            aria-label="Cover image. Press arrow keys to reorder."
-                        >
-                            <img src="{{ $product->imageUrl() }}" alt="" draggable="false">
-                            <span class="additional-images-badge">Cover</span>
-                            <button type="button" class="additional-images-remove" aria-label="Remove this image">&times;</button>
-                            <input type="checkbox" name="remove_main" value="1" id="remove-main-checkbox" hidden>
-                            <span class="upload-images-handle" aria-hidden="true" title="Drag to reorder">⋮⋮</span>
-                        </div>
-                    @endif
-                    @foreach ($product->images as $galleryImage)
-                        <div
-                            class="additional-images-item"
-                            data-image-key="{{ $galleryImage->id }}"
-                            tabindex="0"
-                            role="button"
-                            aria-label="Existing image. Press arrow keys to reorder."
-                        >
-                            <img src="{{ $galleryImage->imageUrl() }}" alt="" draggable="false">
-                            <button type="button" class="additional-images-remove" aria-label="Remove this image">&times;</button>
-                            <input type="checkbox" name="remove_gallery_images[]" value="{{ $galleryImage->id }}" hidden>
-                            <span class="upload-images-handle" aria-hidden="true" title="Drag to reorder">⋮⋮</span>
-                        </div>
-                    @endforeach
-                </div>
-                <input type="hidden" name="gallery_order" id="gallery-order-input" value="">
-
-                <div class="drop-zone" id="gallery-drop-zone">
-                    <p>Drag & drop images here, or <strong>click to browse</strong></p>
-                    <p class="drop-zone-hint">JPEG, PNG, GIF, WebP · Max 4 MB each · Multiple files allowed</p>
-                    <input
-                        type="file"
-                        id="gallery-files-picker"
-                        accept="image/jpeg,image/png,image/gif,image/webp"
-                        multiple
-                        @unless($hasMainImage) required @endunless
-                    >
-                </div>
-
-                <input type="file" name="image_file" id="image-file-input" accept="image/jpeg,image/png,image/gif,image/webp" hidden>
-                <input type="file" name="gallery_images[]" id="gallery-images-input" accept="image/jpeg,image/png,image/gif,image/webp" multiple hidden>
-
-                @error('image_file') <p class="form-error">{{ $message }}</p> @enderror
-                @error('gallery_images') <p class="form-error">{{ $message }}</p> @enderror
-                @error('gallery_images.*') <p class="form-error">{{ $message }}</p> @enderror
-            </div>
-
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">{{ $product->exists ? 'Save changes' : 'Create product' }}</button>
+            <div class="order-panel admin-order-create-actions">
                 <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">Cancel</a>
                 @if ($product->exists)
                     <a href="{{ localized_route('products.show', ['product' => $product->slug], 'fr') }}" class="btn btn-secondary" target="_blank" rel="noopener noreferrer">View in shop</a>
                 @endif
+                <button type="submit" class="btn btn-primary">{{ $product->exists ? 'Save changes' : 'Create product' }}</button>
             </div>
         </form>
     </div>
