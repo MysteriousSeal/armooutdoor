@@ -2338,6 +2338,16 @@ textarea.form-control {
     gap: 0.75rem;
 }
 
+.variant-row.is-marked-for-delete {
+    opacity: 0.5;
+    background: color-mix(in srgb, #c44 8%, transparent);
+    padding: 0.5rem;
+}
+
+.variant-row.is-marked-for-delete .form-group label {
+    text-decoration: line-through;
+}
+
 .form-row--item {
     grid-template-columns: minmax(0, 1fr) 5.5rem 7.25rem auto;
     align-items: start;

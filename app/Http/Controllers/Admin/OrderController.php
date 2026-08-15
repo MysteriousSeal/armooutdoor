@@ -293,6 +293,7 @@ class OrderController extends Controller
                     'product_slug' => $product->slug,
                     'name' => $product->name,
                     'variant_label' => $variant?->label(),
+                    'sku' => $variant?->sku ?? $product->sku,
                     'image' => $product->image,
                     'unit_price_cents' => $item['unit_price_cents'],
                     'quantity' => $item['quantity'],

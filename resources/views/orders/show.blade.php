@@ -37,12 +37,12 @@
                                     @if ($item->variant_label)
                                         <p class="order-item-sku">
                                             {{ $item->variant_label }}
-                                            @if ($item->variant?->sku ?? $item->product?->sku)
-                                                · SKU : {{ $item->variant?->sku ?? $item->product->sku }}
+                                            @if ($item->resolvedSku())
+                                                · SKU : {{ $item->resolvedSku() }}
                                             @endif
                                         </p>
-                                    @elseif ($item->product?->sku)
-                                        <p class="order-item-sku">SKU : {{ $item->product->sku }}</p>
+                                    @elseif ($item->resolvedSku())
+                                        <p class="order-item-sku">SKU : {{ $item->resolvedSku() }}</p>
                                     @endif
                                     <p class="order-item-meta">× {{ $item->quantity }} · {{ format_euros($item->unit_price_cents) }}</p>
                                 </div>

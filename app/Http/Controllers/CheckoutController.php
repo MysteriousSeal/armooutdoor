@@ -159,6 +159,7 @@ class CheckoutController extends Controller
                         'product_slug' => $line->product->slug,
                         'name' => $line->product->name,
                         'variant_label' => $line->variantLabel(),
+                        'sku' => $line->variant?->sku ?? $line->product->sku,
                         'image' => $line->product->image,
                         'unit_price_cents' => $line->unitPriceCents(),
                         'quantity' => $line->quantity,

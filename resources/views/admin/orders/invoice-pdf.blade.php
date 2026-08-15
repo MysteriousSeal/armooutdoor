@@ -229,7 +229,7 @@
                         @endif
                     </td>
                     <td class="col-name">{{ $item->localizedName() }}{{ $item->variant_label ? ' — '.$item->variant_label : '' }}</td>
-                    <td class="col-sku">{{ $item->variant?->sku ?? $item->product?->sku ?? '—' }}</td>
+                    <td class="col-sku">{{ $item->resolvedSku() ?? '—' }}</td>
                     <td class="col-num">× {{ $item->quantity }}</td>
                     <td class="col-num">{{ format_euros($item->unit_price_cents) }}</td>
                     <td class="col-num">{{ $item->formattedLineTotal() }}</td>

@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'product_slug',
     'name',
     'variant_label',
+    'sku',
     'image',
     'unit_price_cents',
     'quantity',
@@ -43,6 +44,17 @@ class OrderItem extends Model
     public function variant(): BelongsTo
     {
         return $this->belongsTo(ProductVariant::class, 'product_variant_id');
+    }
+
+    /**
+     * The SKU shown for this line. Prefers the value snapshotted at order
+     * time, so it survives the variant (or product) being renamed or
+     * deleted later; falls back to a live lookup for orders placed before
+     * this snapshot existed.
+     */
+    public function resolvedSku(): ?string
+    {
+        return $this->sku ?? $this->variant?->sku ?? $this->product?->sku;
     }
 
     public function localizedName(): string

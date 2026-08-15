@@ -382,17 +382,21 @@
             }
 
             function bindRemove(row) {
-                row.querySelector('.variant-remove').addEventListener('click', function () {
+                row.querySelector('.variant-remove').addEventListener('click', function (event) {
                     var hasId = row.querySelector('input[name$="[id]"]');
-                    if (hasId) {
-                        var flag = row.querySelector('.variant-delete-flag');
-                        if (flag) {
-                            flag.value = '1';
-                        }
-                        row.hidden = true;
-                    } else {
+                    if (!hasId) {
                         row.remove();
+                        return;
                     }
+
+                    var flag = row.querySelector('.variant-delete-flag');
+                    var marked = flag.value === '1';
+                    flag.value = marked ? '' : '1';
+                    row.classList.toggle('is-marked-for-delete', !marked);
+                    row.querySelectorAll('input:not(.variant-delete-flag):not([name$="[id]"]), select').forEach(function (field) {
+                        field.disabled = !marked;
+                    });
+                    event.target.textContent = marked ? 'Remove variant' : 'Undo removal';
                 });
             }
 
