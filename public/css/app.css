@@ -4955,6 +4955,36 @@ a.admin-table-icon-btn:hover {
     min-width: 7rem;
 }
 
+.tier-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
+}
+
+.tier-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.tier-row .form-group {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+}
+
+.tier-row .tier-remove {
+    flex-shrink: 0;
+    margin-top: 1.6rem;
+}
+
+.tier-empty {
+    margin: 0 0 0.75rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
 @keyframes modal-in {
     from {
         opacity: 0;

@@ -4,7 +4,7 @@ use App\Http\Controllers\Account\AccountController;
 use App\Http\Controllers\Account\AddressController;
 use App\Http\Controllers\Account\ProfileController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
-use App\Http\Controllers\Admin\CarrierSettingController as AdminCarrierSettingController;
+use App\Http\Controllers\Admin\CarrierPriceTierController as AdminCarrierPriceTierController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\CompanySettingController as AdminCompanySettingController;
 use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
@@ -85,8 +85,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/settings/company', [AdminCompanySettingController::class, 'update'])->name('settings.company.update');
         Route::get('/settings/invoice', [AdminInvoiceSettingController::class, 'edit'])->name('settings.invoice.edit');
         Route::put('/settings/invoice', [AdminInvoiceSettingController::class, 'update'])->name('settings.invoice.update');
-        Route::get('/settings/carriers', [AdminCarrierSettingController::class, 'edit'])->name('settings.carriers.edit');
-        Route::put('/settings/carriers', [AdminCarrierSettingController::class, 'update'])->name('settings.carriers.update');
+        Route::put('/settings/carriers/{carrier}/price-tiers', [AdminCarrierPriceTierController::class, 'update'])->name('settings.carriers.price-tiers.update');
         Route::get('/settings/orders', [AdminSettingsController::class, 'orders'])->name('settings.orders.edit');
         Route::post('/settings/marketplaces', [AdminMarketplaceController::class, 'store'])->name('settings.marketplaces.store');
         Route::put('/settings/marketplaces/{marketplace}', [AdminMarketplaceController::class, 'update'])->name('settings.marketplaces.update');

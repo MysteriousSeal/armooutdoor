@@ -37,9 +37,10 @@ class CheckoutController extends Controller
         $selectedCarrier = $carriers->firstWhere('id', (int) $selectedCarrierId) ?? $carriers->first();
 
         $subtotalCents = $cart->totalCents();
+        $weightGrams = $cart->totalWeightGrams();
         $shippingSetting = ShippingSetting::current();
         $carrierPricesCents = $carriers->mapWithKeys(
-            fn (Carrier $carrier): array => [$carrier->id => $shippingSetting->effectivePriceCents($carrier, $subtotalCents)],
+            fn (Carrier $carrier): array => [$carrier->id => $shippingSetting->effectivePriceCents($carrier, $subtotalCents, $weightGrams)],
         );
 
         return view('checkout.show', [
@@ -110,7 +111,7 @@ class CheckoutController extends Controller
         try {
             $order = DB::transaction(function () use ($request, $cart, $address, $billingAddress, $carrier, $relayPoint): Order {
                 $subtotal = $cart->totalCents();
-                $shipping = ShippingSetting::current()->effectivePriceCents($carrier, $subtotal);
+                $shipping = ShippingSetting::current()->effectivePriceCents($carrier, $subtotal, $cart->totalWeightGrams());
 
                 $order = Order::query()->create([
                     'number' => Order::generateNumber(),

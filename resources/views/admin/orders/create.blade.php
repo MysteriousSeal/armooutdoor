@@ -277,7 +277,7 @@
                                             data-price="{{ number_format($carrier->price_cents / 100, 2, '.', '') }}"
                                             @selected((string) old('carrier_id', $isEdit ? $order->carrier_id : '') === (string) $carrier->id)
                                         >
-                                            {{ $carrier->localizedName() }} — {{ $carrier->formattedPrice() }} ({{ $carrier->method->value }})
+                                            {{ $carrier->localizedName() }} — {{ $carrier->formattedStartingPrice() }} ({{ $carrier->method->value }})
                                         </option>
                                     @endforeach
                                 </select>

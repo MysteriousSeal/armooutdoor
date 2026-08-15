@@ -83,6 +83,15 @@ class Cart
     }
 
     /**
+     * Total weight of the cart's products (variants don't carry a weight of
+     * their own), used to resolve carrier price tiers.
+     */
+    public function totalWeightGrams(): int
+    {
+        return $this->lines()->sum(fn (CartLine $line): int => ($line->product->weight_grams ?? 0) * $line->quantity);
+    }
+
+    /**
      * False if any product currently in the cart restricts its carriers and
      * doesn't include this one.
      */

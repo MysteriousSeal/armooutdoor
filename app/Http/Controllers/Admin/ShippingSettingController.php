@@ -16,7 +16,7 @@ class ShippingSettingController extends Controller
     {
         return view('admin.settings.shipping', [
             'setting' => ShippingSetting::current(),
-            'carriers' => Carrier::query()->orderBy('sort_order')->get(),
+            'carriers' => Carrier::query()->orderBy('sort_order')->with('priceTiers')->get(),
             'packageTypes' => PackageType::query()->orderBy('name')->get(),
         ]);
     }

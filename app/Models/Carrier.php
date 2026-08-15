@@ -6,6 +6,7 @@ use App\Enums\DeliveryMethod;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'slug',
@@ -37,6 +38,11 @@ class Carrier extends Model
         return $query->where('active', true)->orderBy('sort_order');
     }
 
+    public function priceTiers(): HasMany
+    {
+        return $this->hasMany(CarrierPriceTier::class)->orderBy('min_weight_grams');
+    }
+
     public function localizedName(): string
     {
         return $this->localized('name');
@@ -55,6 +61,26 @@ class Carrier extends Model
     public function formattedPrice(): string
     {
         return format_euros($this->price_cents);
+    }
+
+    /**
+     * The price for a cart of the given weight, based on this carrier's
+     * price tiers (the highest tier whose min weight the cart meets or
+     * exceeds). Falls back to the flat price_cents when no tiers are set.
+     */
+    public function effectivePriceCentsForWeight(int $weightGrams): int
+    {
+        $tier = $this->priceTiers()
+            ->where('min_weight_grams', '<=', $weightGrams)
+            ->reorder('min_weight_grams', 'desc')
+            ->first();
+
+        return $tier?->price_cents ?? $this->price_cents;
+    }
+
+    public function formattedStartingPrice(): string
+    {
+        return format_euros($this->effectivePriceCentsForWeight(0));
     }
 
     public function isRelay(): bool

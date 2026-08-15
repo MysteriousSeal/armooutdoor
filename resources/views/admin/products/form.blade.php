@@ -248,7 +248,7 @@
                                         @checked(in_array($carrier->id, $selectedCarrierIds))
                                     >
                                     {{ $carrier->localizedName() }}
-                                    <span class="admin-check-list-meta">— {{ $carrier->formattedPrice() }}, {{ $carrier->method->value }}</span>
+                                    <span class="admin-check-list-meta">— {{ $carrier->formattedStartingPrice() }}, {{ $carrier->method->value }}</span>
                                 </label>
                             @endforeach
                         </div>

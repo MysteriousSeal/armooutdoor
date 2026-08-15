@@ -34,9 +34,9 @@ class ShippingSetting extends Model
         return in_array($carrier->id, $this->free_shipping_carrier_ids ?? [], true);
     }
 
-    public function effectivePriceCents(Carrier $carrier, int $subtotalCents): int
+    public function effectivePriceCents(Carrier $carrier, int $subtotalCents, int $weightGrams = 0): int
     {
-        return $this->isFreeFor($carrier, $subtotalCents) ? 0 : $carrier->price_cents;
+        return $this->isFreeFor($carrier, $subtotalCents) ? 0 : $carrier->effectivePriceCentsForWeight($weightGrams);
     }
 
     public function isUnlockedBy(int $subtotalCents): bool

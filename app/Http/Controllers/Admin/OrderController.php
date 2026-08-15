@@ -225,6 +225,7 @@ class OrderController extends Controller
             }
 
             $subtotal = 0;
+            $weightGrams = 0;
 
             foreach ($items as $item) {
                 $product = $products->get($item['product_id']);
@@ -236,11 +237,12 @@ class OrderController extends Controller
                 }
 
                 $subtotal += $item['unit_price_cents'] * $item['quantity'];
+                $weightGrams += ($product->weight_grams ?? 0) * $item['quantity'];
             }
 
             $shipping = filled($shippingPrice)
                 ? (int) round(((float) $shippingPrice) * 100)
-                : ShippingSetting::current()->effectivePriceCents($carrier, $subtotal);
+                : ShippingSetting::current()->effectivePriceCents($carrier, $subtotal, $weightGrams);
 
             $attributes = [
                 'is_manual' => true,

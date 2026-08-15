@@ -13,11 +13,7 @@
         <div class="admin-stat-grid">
             <a href="{{ route('admin.settings.shipping.edit') }}" class="admin-stat-card">
                 <span class="admin-stat-label">Shipping</span>
-                <span class="admin-stat-value admin-stat-value--sm">Free shipping threshold &amp; carriers</span>
-            </a>
-            <a href="{{ route('admin.settings.carriers.edit') }}" class="admin-stat-card">
-                <span class="admin-stat-label">Carriers</span>
-                <span class="admin-stat-value admin-stat-value--sm">Shipping price per carrier</span>
+                <span class="admin-stat-value admin-stat-value--sm">Free shipping, carrier prices &amp; package types</span>
             </a>
             <a href="{{ route('admin.settings.company.edit') }}" class="admin-stat-card">
                 <span class="admin-stat-label">Company &amp; legal</span>
