@@ -66,6 +66,7 @@ class ProductController extends Controller
         $product = Product::query()->create($this->payload($request));
         $this->syncImages($request, $product, null);
         $this->syncVariants($request, $product);
+        $this->reconcileQuantity($product);
 
         return redirect()
             ->route('admin.products.edit', $product)
@@ -86,10 +87,24 @@ class ProductController extends Controller
         $product->update($this->payload($request, $product));
         $this->syncImages($request, $product, $oldCoverImage);
         $this->syncVariants($request, $product);
+        $this->reconcileQuantity($product);
 
         return redirect()
             ->route('admin.products.edit', $product)
             ->with('status', 'Product saved.');
+    }
+
+    /**
+     * Once a product has variants, its own quantity is no longer meaningful —
+     * it's kept in sync with the sum of variant stock instead of being edited directly.
+     */
+    private function reconcileQuantity(Product $product): void
+    {
+        $product->refresh();
+
+        if ($product->hasVariants()) {
+            $product->update(['quantity' => $product->variants()->sum('quantity')]);
+        }
     }
 
     public function toggleStatus(Product $product): RedirectResponse

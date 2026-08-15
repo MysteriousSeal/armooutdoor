@@ -113,7 +113,7 @@
                                                     <span class="choice-card-meta">{{ $variant->sku }}</span>
                                                 @endif
                                                 <span class="choice-card-meta">
-                                                    {{ $variant->inStock() ? __('store.in_stock') : __('store.out_of_stock') }}
+                                                    {{ $variant->lowStock() ? __('store.low_stock') : ($variant->inStock() ? __('store.in_stock') : __('store.out_of_stock')) }}
                                                 </span>
                                             </span>
                                         </label>

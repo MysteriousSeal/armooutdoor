@@ -105,8 +105,23 @@
                 </div>
                 <div class="form-group">
                     <label for="quantity">Available quantity</label>
-                    <input type="number" id="quantity" name="quantity" class="form-control" value="{{ old('quantity', $product->exists ? $product->quantity : 0) }}" min="0" max="99999" step="1" required>
-                    <p class="form-hint">Units you can sell. 0 means out of stock.</p>
+                    <input
+                        type="number"
+                        id="quantity"
+                        name="quantity"
+                        class="form-control"
+                        value="{{ old('quantity', $product->exists ? $product->quantity : 0) }}"
+                        min="0"
+                        max="99999"
+                        step="1"
+                        required
+                        @if ($product->exists && $product->hasVariants()) readonly @endif
+                    >
+                    @if ($product->exists && $product->hasVariants())
+                        <p class="form-hint">Computed automatically from the variants below — edit their quantities instead.</p>
+                    @else
+                        <p class="form-hint">Units you can sell. 0 means out of stock.</p>
+                    @endif
                     @error('quantity') <p class="form-error">{{ $message }}</p> @enderror
                 </div>
             </div>
