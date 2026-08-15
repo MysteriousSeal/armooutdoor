@@ -66,7 +66,7 @@ class ProductController extends Controller
         $product = Product::query()->create($this->payload($request));
         $this->syncImages($request, $product, null);
         $this->syncVariants($request, $product);
-        $this->reconcileQuantity($product);
+        $product->refresh()->reconcileQuantity();
 
         return redirect()
             ->route('admin.products.edit', $product)
@@ -83,28 +83,25 @@ class ProductController extends Controller
 
     public function update(StoreProductRequest $request, Product $product): RedirectResponse
     {
+        $hadVariants = $product->hasVariants();
         $oldCoverImage = $product->image;
         $product->update($this->payload($request, $product));
         $this->syncImages($request, $product, $oldCoverImage);
         $this->syncVariants($request, $product);
-        $this->reconcileQuantity($product);
+        $product->refresh();
+
+        if ($product->hasVariants()) {
+            $product->reconcileQuantity();
+        } elseif ($hadVariants) {
+            // The last variant was just removed: its stock sum is stale
+            // and no longer tracks anything real, so reset to zero rather
+            // than leaving the product looking in stock by accident.
+            $product->update(['quantity' => 0]);
+        }
 
         return redirect()
             ->route('admin.products.edit', $product)
             ->with('status', 'Product saved.');
-    }
-
-    /**
-     * Once a product has variants, its own quantity is no longer meaningful —
-     * it's kept in sync with the sum of variant stock instead of being edited directly.
-     */
-    private function reconcileQuantity(Product $product): void
-    {
-        $product->refresh();
-
-        if ($product->hasVariants()) {
-            $product->update(['quantity' => $product->variants()->sum('quantity')]);
-        }
     }
 
     public function toggleStatus(Product $product): RedirectResponse

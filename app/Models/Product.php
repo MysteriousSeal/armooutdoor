@@ -81,6 +81,19 @@ class Product extends Model
             : $this->variants()->exists();
     }
 
+    /**
+     * Keeps quantity mirroring the sum of variant stock. Call this after
+     * anything changes a variant's quantity (a sale, a restock, an admin
+     * edit) — quantity itself must never be treated as authoritative once
+     * a product has variants.
+     */
+    public function reconcileQuantity(): void
+    {
+        if ($this->hasVariants()) {
+            $this->update(['quantity' => $this->variants()->sum('quantity')]);
+        }
+    }
+
     public function wishlistItems(): HasMany
     {
         return $this->hasMany(WishlistItem::class);

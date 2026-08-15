@@ -14,6 +14,8 @@
     var priceEl = document.getElementById('product-detail-price');
     var badgeEl = document.getElementById('product-stock-badge');
     var qtyInput = form.querySelector('.qty-stepper-input');
+    var submitBtn = form.querySelector('button[type="submit"]');
+    var stepperButtons = form.querySelectorAll('.qty-stepper-btn');
 
     function applyVariant(radio) {
         if (priceEl && radio.hasAttribute('data-variant-price')) {
@@ -25,13 +27,28 @@
             badgeEl.textContent = radio.getAttribute('data-variant-stock-label') || '';
         }
 
-        if (qtyInput) {
-            var max = parseInt(radio.getAttribute('data-variant-max'), 10) || 0;
-            qtyInput.max = max;
+        var max = parseInt(radio.getAttribute('data-variant-max'), 10) || 0;
+        var outOfStock = max < 1;
 
-            if ((parseInt(qtyInput.value, 10) || 0) > max) {
-                qtyInput.value = Math.max(1, max);
+        if (qtyInput) {
+            qtyInput.max = max;
+            qtyInput.disabled = outOfStock;
+
+            if (outOfStock) {
+                qtyInput.value = 1;
+            } else if ((parseInt(qtyInput.value, 10) || 0) > max) {
+                qtyInput.value = max;
+            } else if ((parseInt(qtyInput.value, 10) || 0) < 1) {
+                qtyInput.value = 1;
             }
+        }
+
+        stepperButtons.forEach(function (button) {
+            button.disabled = outOfStock;
+        });
+
+        if (submitBtn) {
+            submitBtn.disabled = outOfStock;
         }
     }
 

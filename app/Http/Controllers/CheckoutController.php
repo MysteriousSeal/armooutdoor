@@ -146,6 +146,7 @@ class CheckoutController extends Controller
                         }
 
                         $variant->decrement('quantity', $line->quantity);
+                        $product->reconcileQuantity();
                     } elseif ($product->quantity < $line->quantity) {
                         throw new \RuntimeException('stock');
                     } else {

@@ -281,6 +281,7 @@ class OrderController extends Controller
                 if ($finalize) {
                     if ($variant !== null) {
                         $variant->decrement('quantity', $item['quantity']);
+                        $product->reconcileQuantity();
                     } else {
                         $product->decrement('quantity', $item['quantity']);
                     }

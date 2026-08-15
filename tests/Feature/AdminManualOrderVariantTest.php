@@ -71,7 +71,6 @@ class AdminManualOrderVariantTest extends TestCase
         $admin = User::factory()->admin()->create();
         $customer = User::factory()->create();
         $product = Product::query()->where('slug', 'ridge-tent')->firstOrFail();
-        $productQuantityBefore = $product->quantity;
         $variant = ProductVariant::query()->create([
             'product_id' => $product->id,
             'attribute_values' => [['label' => 'Taille', 'value' => 'Taille M']],
@@ -101,6 +100,6 @@ class AdminManualOrderVariantTest extends TestCase
         $this->assertSame('Taille M', $item->variant_label);
         $this->assertSame(79800, $item->line_cents);
         $this->assertSame(3, $variant->fresh()->quantity);
-        $this->assertSame($productQuantityBefore, $product->fresh()->quantity);
+        $this->assertSame(3, $product->fresh()->quantity, 'product quantity must mirror the sum of its variants, not stay frozen');
     }
 }
