@@ -62,6 +62,8 @@
                             <th>Category</th>
                             <th>Price</th>
                             <th>Stock</th>
+                            <th>Variants</th>
+                            <th>Weight</th>
                             <th>GTIN</th>
                             <th>Status</th>
                             <th></th>
@@ -81,7 +83,7 @@
                                     </a>
                                 </td>
                                 <td>
-                                    <a href="{{ route('admin.products.edit', $product) }}" class="admin-table-strong">
+                                    <a href="{{ route('admin.products.edit', $product) }}" class="admin-table-strong admin-table-truncate" title="{{ $product->name['fr'] ?? $product->localizedName() }}">
                                         {{ $product->name['fr'] ?? $product->localizedName() }}
                                     </a>
                                     @if (filled($product->sku))
@@ -91,6 +93,8 @@
                                 <td>{{ $product->category?->name['fr'] ?? '—' }}</td>
                                 <td>{{ $product->formattedPrice() }}</td>
                                 <td>{{ $product->quantity }}</td>
+                                <td>{{ $product->variants_count > 0 ? $product->variants_count : '—' }}</td>
+                                <td>{{ $product->weight_grams ? number_format($product->weight_grams).' g' : '—' }}</td>
                                 <td>{{ filled($product->gtin) ? $product->gtin : '—' }}</td>
                                 <td>
                                     <form method="POST" action="{{ route('admin.products.status', $product) }}">

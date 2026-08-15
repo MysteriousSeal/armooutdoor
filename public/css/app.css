@@ -1877,6 +1877,12 @@ textarea.form-control {
     border-bottom: none;
 }
 
+.admin-check-list-row .form-group {
+    flex-shrink: 0;
+    width: 8rem;
+    margin: 0;
+}
+
 #customer-new-fields[hidden],
 #customer-existing-fields[hidden],
 #billing-address-fields[hidden] {
@@ -3942,6 +3948,14 @@ a.admin-stat-card:hover {
 
 .admin-table-strong {
     font-weight: 500;
+}
+
+.admin-table-truncate {
+    display: block;
+    max-width: 22rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .admin-table-primary {

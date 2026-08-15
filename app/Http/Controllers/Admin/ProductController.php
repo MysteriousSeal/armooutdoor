@@ -24,6 +24,7 @@ class ProductController extends Controller
 
         $products = Product::query()
             ->with('category')
+            ->withCount('variants')
             ->when($search !== '', function ($query) use ($search): void {
                 $query->where(function ($query) use ($search): void {
                     $query->where('slug', 'like', '%'.$search.'%')
@@ -151,6 +152,7 @@ class ProductController extends Controller
             'is_active' => $request->boolean('is_active'),
             'sku' => $request->filled('sku') ? $request->string('sku')->trim()->toString() : null,
             'gtin' => $request->filled('gtin') ? $request->string('gtin')->trim()->toString() : null,
+            'weight_grams' => $request->filled('weight_grams') ? $request->integer('weight_grams') : null,
             'name' => [
                 'fr' => $request->string('name')->toString(),
             ],

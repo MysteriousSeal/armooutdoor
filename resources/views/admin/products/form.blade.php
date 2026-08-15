@@ -219,6 +219,11 @@
                                 @error('gtin') <p class="form-error">{{ $message }}</p> @enderror
                             </div>
                         </div>
+                        <div class="form-group">
+                            <label for="weight_grams">Weight (g)</label>
+                            <input type="number" id="weight_grams" name="weight_grams" class="form-control" value="{{ old('weight_grams', $product->weight_grams) }}" min="0" max="99999" step="1" placeholder="e.g. 850">
+                            @error('weight_grams') <p class="form-error">{{ $message }}</p> @enderror
+                        </div>
                     </section>
                 </div>
             </div>
