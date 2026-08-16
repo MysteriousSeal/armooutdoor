@@ -91,6 +91,11 @@
                     </span>
                 </div>
 
+                @if ($product->age_restricted)
+                    <p class="age-restricted-notice">{{ __('store.age_restricted_notice') }}</p>
+                    <p class="age-restricted-notice">{{ __('store.age_restricted_proof_notice') }}</p>
+                @endif
+
                 @if ($product->isPurchasable() || $product->hasVariants())
                     <form method="POST" action="{{ localized_route('cart.add') }}" class="add-to-cart-form">
                         @csrf

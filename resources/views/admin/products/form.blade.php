@@ -123,6 +123,13 @@
                             </label>
                             <p class="form-hint">Disabled products are hidden from the storefront but stay in the catalog.</p>
                         </div>
+                        <div class="form-group">
+                            <label class="form-check">
+                                <input type="checkbox" id="age_restricted" name="age_restricted" value="1" @checked(old('age_restricted', $product->exists ? $product->age_restricted : false))>
+                                Vente libre aux plus de 18 ans
+                            </label>
+                            <p class="form-hint">Shows an age-restriction notice on the product page.</p>
+                        </div>
                     </section>
 
             @php

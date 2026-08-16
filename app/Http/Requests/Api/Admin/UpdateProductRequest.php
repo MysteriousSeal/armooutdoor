@@ -26,6 +26,7 @@ class UpdateProductRequest extends FormRequest
             'price' => ['sometimes', 'numeric', 'min:0', 'max:99999.99'],
             'quantity' => ['sometimes', 'integer', 'min:0', 'max:99999'],
             'is_active' => ['sometimes', 'boolean'],
+            'age_restricted' => ['sometimes', 'boolean'],
             'sku' => [
                 'sometimes',
                 'nullable',

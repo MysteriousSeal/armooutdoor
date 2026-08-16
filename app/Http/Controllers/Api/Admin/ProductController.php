@@ -39,7 +39,7 @@ class ProductController extends Controller
             $payload['description'] = ['fr' => HtmlSanitizer::clean($validated['description']) ?? ''];
         }
 
-        foreach (['category_id', 'quantity', 'is_active', 'sku', 'gtin', 'characteristics'] as $field) {
+        foreach (['category_id', 'quantity', 'is_active', 'age_restricted', 'sku', 'gtin', 'characteristics'] as $field) {
             if (array_key_exists($field, $validated)) {
                 $payload[$field] = $validated[$field];
             }

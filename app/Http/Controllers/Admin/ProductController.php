@@ -161,6 +161,7 @@ class ProductController extends Controller
             'category_id' => $request->integer('category_id'),
             'slug' => $slug,
             'is_active' => $request->boolean('is_active'),
+            'age_restricted' => $request->boolean('age_restricted'),
             'sku' => $request->filled('sku') ? $request->string('sku')->trim()->toString() : null,
             'gtin' => $request->filled('gtin') ? $request->string('gtin')->trim()->toString() : null,
             'weight_grams' => $request->filled('weight_grams') ? $request->integer('weight_grams') : null,

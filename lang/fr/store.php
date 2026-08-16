@@ -53,6 +53,8 @@ return [
     'price' => 'Prix',
     'in_stock' => 'En stock',
     'low_stock' => 'Derniers stock disponibles',
+    'age_restricted_notice' => 'Vente libre aux plus de 18 ans.',
+    'age_restricted_proof_notice' => 'Une preuve de majorité sera demandée au passage de la commande.',
     'out_of_stock' => 'Rupture de stock',
     'variant_stock_ok' => 'En stock',
     'variant_stock_low' => 'Limité',
