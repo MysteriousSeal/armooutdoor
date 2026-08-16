@@ -21,6 +21,7 @@
                     <h2 class="admin-list-title">Shipping</h2>
                     <p class="admin-list-lede">Free shipping rules, carrier prices, and package types.</p>
                 </div>
+                <a href="{{ route('admin.settings.index') }}" class="btn btn-secondary">Back to settings</a>
             </div>
         </header>
 
@@ -28,15 +29,16 @@
             <form
                 method="POST"
                 action="{{ route('admin.settings.shipping.update') }}"
-                class="admin-form-card"
+                class="order-panel"
             >
                 @csrf
                 @method('PUT')
 
-                <h3 class="admin-panel-title">Free shipping</h3>
+                <h3 class="order-panel-title">Free shipping</h3>
+                <p class="form-hint">Leave the amount blank to turn free shipping off.</p>
 
                 <div class="form-group">
-                    <label for="free_shipping_threshold">Free shipping above (EUR)</label>
+                    <label for="free_shipping_threshold">Free above (EUR)</label>
                     <input
                         type="number"
                         id="free_shipping_threshold"
@@ -48,25 +50,26 @@
                         step="0.01"
                         placeholder="e.g. 50.00"
                     >
-                    <p class="form-hint">Leave blank to disable free shipping entirely.</p>
                     @error('free_shipping_threshold') <p class="form-error">{{ $message }}</p> @enderror
                 </div>
 
                 <div class="form-group">
                     <label>Eligible carriers</label>
-                    <p class="form-hint">Shipping is free on these carriers once the order subtotal reaches the amount above. Other carriers keep their normal price.</p>
+                    <p class="form-hint">These carriers become free once the order subtotal reaches the amount. Others keep their price.</p>
 
-                    <div class="admin-check-list">
+                    <div class="shipping-carrier-options">
                         @foreach ($carriers as $carrier)
-                            <label class="form-check">
+                            <label class="admin-choice {{ in_array($carrier->id, $selectedCarrierIds) ? 'is-selected' : '' }}">
                                 <input
                                     type="checkbox"
                                     name="free_shipping_carrier_ids[]"
                                     value="{{ $carrier->id }}"
                                     @checked(in_array($carrier->id, $selectedCarrierIds))
                                 >
-                                {{ $carrier->localizedName() }}
-                                <span class="admin-check-list-meta">— {{ $carrier->formattedStartingPrice() }}, {{ $carrier->method->value }}</span>
+                                <span class="shipping-carrier-copy">
+                                    <span class="admin-table-strong">{{ $carrier->localizedName() }}</span>
+                                    <span class="admin-table-sub">{{ $carrier->formattedStartingPrice() }} · {{ $carrier->method->value }}</span>
+                                </span>
                             </label>
                         @endforeach
                     </div>
@@ -74,26 +77,26 @@
                 </div>
 
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Save changes</button>
+                    <button type="submit" class="btn btn-primary">Save free shipping</button>
                 </div>
             </form>
 
-            <div class="admin-form-card">
-                <h3 class="admin-panel-title">Carrier prices</h3>
-                <p class="form-hint">Priced by weight tier, with a default price for anything a tier doesn't cover.</p>
+            <section class="order-panel">
+                <h3 class="order-panel-title">Carrier prices</h3>
+                <p class="form-hint">Priced by weight tier, with a default for anything a tier doesn’t cover.</p>
 
-                <div class="admin-check-list admin-check-list--rows">
+                <ul class="admin-dash-list">
                     @foreach ($carriers as $carrier)
-                        <div class="admin-check-list-row">
-                            <div>
+                        <li>
+                            <div class="admin-dash-list-main">
                                 <span class="admin-table-strong">{{ $carrier->localizedName() }}</span>
-                                <span class="admin-check-list-meta">— from {{ $carrier->formattedStartingPrice() }}, {{ $carrier->method->value }}</span>
+                                <span class="admin-table-sub">From {{ $carrier->formattedStartingPrice() }} · {{ $carrier->method->value }}</span>
                             </div>
                             <button type="button" class="btn btn-sm btn-secondary" data-modal-open="carrier-price-tiers-{{ $carrier->id }}">Edit price</button>
-                        </div>
+                        </li>
                     @endforeach
-                </div>
-            </div>
+                </ul>
+            </section>
         </div>
 
         @foreach ($carriers as $carrier)
@@ -183,15 +186,15 @@
             </dialog>
         @endforeach
 
-        <div class="admin-form-card admin-form-card--solo">
-            <h3 class="admin-panel-title">Package types</h3>
-            <p class="form-hint">Used when adding tracking to an order. Removing one here doesn't change orders that already used it.</p>
+        <section class="order-panel admin-shipping-packages">
+            <h3 class="order-panel-title">Package types</h3>
+            <p class="form-hint">Used when adding tracking to an order. Removing one here doesn’t change orders that already used it.</p>
 
             @if ($packageTypes->isNotEmpty())
-                <ul class="admin-check-list admin-check-list--rows">
+                <ul class="admin-dash-list">
                     @foreach ($packageTypes as $packageType)
-                        <li class="admin-check-list-row">
-                            <span>{{ $packageType->name }}</span>
+                        <li>
+                            <span class="admin-table-primary">{{ $packageType->name }}</span>
                             <form method="POST" action="{{ route('admin.settings.package-types.destroy', $packageType) }}">
                                 @csrf
                                 @method('DELETE')
@@ -200,9 +203,11 @@
                         </li>
                     @endforeach
                 </ul>
+            @else
+                <p class="variant-empty">No package types yet.</p>
             @endif
 
-            <form method="POST" action="{{ route('admin.settings.package-types.store') }}" class="form-row form-row--inline">
+            <form method="POST" action="{{ route('admin.settings.package-types.store') }}" class="shipping-package-add">
                 @csrf
                 <div class="form-group">
                     <label for="package_type_name" class="sr-only">Package type name</label>
@@ -211,7 +216,7 @@
                 </div>
                 <button type="submit" class="btn btn-secondary">Add package type</button>
             </form>
-        </div>
+        </section>
     </div>
 @endsection
 

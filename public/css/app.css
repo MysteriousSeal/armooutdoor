@@ -1883,6 +1883,35 @@ textarea.form-control {
     margin: 0;
 }
 
+.shipping-carrier-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.shipping-carrier-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.12rem;
+    min-width: 0;
+}
+
+.admin-shipping-packages {
+    margin-top: 0.85rem;
+}
+
+.shipping-package-add {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.shipping-package-add .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
 #customer-new-fields[hidden],
 #customer-existing-fields[hidden],
 #billing-address-fields[hidden] {
@@ -4213,7 +4242,8 @@ a.admin-table-icon-btn:hover {
     cursor: pointer;
 }
 
-.admin-choice.is-selected {
+.admin-choice.is-selected,
+.admin-choice:has(input:checked) {
     border-color: var(--accent);
     background: color-mix(in srgb, var(--accent) 8%, var(--surface));
 }
