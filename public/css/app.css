@@ -2151,35 +2151,48 @@
 
 .store-toast {
     position: fixed;
-    top: 1.5rem;
-    right: 1.5rem;
-    z-index: 1000;
-    max-width: 22rem;
-    padding: 1rem 1.25rem;
+    left: 50%;
+    bottom: 1.75rem;
+    z-index: 1100;
+    width: min(26rem, calc(100vw - 2rem));
+    padding: 1rem 1.15rem 1rem 1.2rem;
     font-size: 0.9375rem;
     font-weight: 500;
-    line-height: 1.4;
-    color: #fff;
-    background: #2c2c2c;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-hover);
+    line-height: 1.45;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 0.35rem solid var(--accent);
+    box-shadow: 0 10px 32px rgba(28, 27, 26, 0.16);
     opacity: 0;
-    transform: translateY(-0.5rem);
+    transform: translate(-50%, 0.6rem);
     pointer-events: none;
-    transition: opacity 0.15s ease, transform 0.15s ease;
+    transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .store-toast.is-visible {
     opacity: 1;
-    transform: none;
+    transform: translate(-50%, 0);
 }
 
 .store-toast.is-success {
-    background: #2f6b3f;
+    border-left-color: #3d6b4e;
 }
 
 .store-toast.is-error {
-    background: #a13d3d;
+    border-left-color: #a44;
+}
+
+[data-theme='dark'] .store-toast {
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme='dark'] .store-toast.is-success {
+    border-left-color: #9dccab;
+}
+
+[data-theme='dark'] .store-toast.is-error {
+    border-left-color: #e08585;
 }
 
 .cart-line {

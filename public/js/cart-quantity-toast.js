@@ -11,13 +11,14 @@
         }
 
         toast.className = 'store-toast is-' + (type || 'success');
+        toast.setAttribute('role', 'status');
         toast.textContent = text;
         toast.classList.add('is-visible');
 
         clearTimeout(toastTimeout);
         toastTimeout = setTimeout(function () {
             toast.classList.remove('is-visible');
-        }, 2500);
+        }, 4500);
     }
 
     function updateCartBadges(count) {
