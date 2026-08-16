@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\ShippingSetting;
 use App\Support\Cart;
+use App\Support\CartLine;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,20 +18,13 @@ class CartController extends Controller
 {
     public function show(Cart $cart): View
     {
-        $shippingSetting = ShippingSetting::current();
-        $subtotalCents = $cart->totalCents();
-        $weightGrams = $cart->totalWeightGrams();
-
-        $cheapestShippingCents = Carrier::query()->active()->get()
-            ->filter(fn (Carrier $carrier): bool => $cart->allowsCarrier($carrier))
-            ->map(fn (Carrier $carrier): int => $shippingSetting->effectivePriceCents($carrier, $subtotalCents, $weightGrams))
-            ->min();
+        [$freeShippingUnlocked, $cheapestShippingCents] = $this->shippingEstimate($cart);
 
         return view('cart.show', [
             'lines' => $cart->lines(),
             'total' => $cart->formattedTotal(),
             'itemCount' => $cart->quantity(),
-            'freeShippingUnlocked' => $shippingSetting->isUnlockedBy($subtotalCents),
+            'freeShippingUnlocked' => $freeShippingUnlocked,
             'cheapestShippingCents' => $cheapestShippingCents,
         ]);
     }
@@ -120,7 +114,7 @@ class CartController extends Controller
         ]));
     }
 
-    public function update(Request $request, Cart $cart, Product $product): RedirectResponse
+    public function update(Request $request, Cart $cart, Product $product): RedirectResponse|JsonResponse
     {
         $validated = $request->validate([
             'variant_id' => ['nullable', 'integer', Rule::exists('product_variants', 'id')->where('product_id', $product->id)],
@@ -137,10 +131,39 @@ class CartController extends Controller
             ? __('store.removed_from_cart', ['product' => $product->localizedName()])
             : __('store.cart_updated');
 
+        if ($request->wantsJson()) {
+            $line = $cart->lines()->first(
+                fn (CartLine $l): bool => $l->product->id === $product->id && $l->variant?->id === $variant?->id
+            );
+
+            [$freeShippingUnlocked, $cheapestShippingCents] = $this->shippingEstimate($cart);
+            $shippingIsFree = $freeShippingUnlocked || $cheapestShippingCents === 0;
+            $shippingVisible = $shippingIsFree || $cheapestShippingCents !== null;
+
+            return response()->json([
+                'removed' => $line === null,
+                'quantity' => $line?->quantity,
+                'unitPrice' => $line?->formattedUnitPrice(),
+                'lineTotal' => $line?->formattedLineTotal(),
+                'itemCount' => $cart->quantity(),
+                'itemCountLabel' => $cart->quantity() > 0
+                    ? trans_choice('store.cart_count', $cart->quantity(), ['count' => $cart->quantity()])
+                    : null,
+                'isEmpty' => $cart->isEmpty(),
+                'subtotal' => $cart->formattedTotal(),
+                'shippingVisible' => $shippingVisible,
+                'shippingIsFree' => $shippingIsFree,
+                'shippingValueText' => $shippingIsFree
+                    ? __('store.shipping_free')
+                    : ($cheapestShippingCents !== null ? __('store.shipping_from_amount', ['price' => format_euros($cheapestShippingCents)]) : null),
+                'message' => $status,
+            ]);
+        }
+
         return back()->with('status', $status);
     }
 
-    public function destroy(Request $request, Cart $cart, Product $product): RedirectResponse
+    public function destroy(Request $request, Cart $cart, Product $product): RedirectResponse|JsonResponse
     {
         $validated = $request->validate([
             'variant_id' => ['nullable', 'integer', Rule::exists('product_variants', 'id')->where('product_id', $product->id)],
@@ -152,8 +175,47 @@ class CartController extends Controller
 
         $cart->remove($product, $variant);
 
-        return back()->with('status', __('store.removed_from_cart', [
-            'product' => $product->localizedName(),
-        ]));
+        $message = __('store.removed_from_cart', ['product' => $product->localizedName()]);
+
+        if ($request->wantsJson()) {
+            [$freeShippingUnlocked, $cheapestShippingCents] = $this->shippingEstimate($cart);
+            $shippingIsFree = $freeShippingUnlocked || $cheapestShippingCents === 0;
+            $shippingVisible = $shippingIsFree || $cheapestShippingCents !== null;
+
+            return response()->json([
+                'removed' => true,
+                'itemCount' => $cart->quantity(),
+                'itemCountLabel' => $cart->quantity() > 0
+                    ? trans_choice('store.cart_count', $cart->quantity(), ['count' => $cart->quantity()])
+                    : null,
+                'isEmpty' => $cart->isEmpty(),
+                'subtotal' => $cart->formattedTotal(),
+                'shippingVisible' => $shippingVisible,
+                'shippingIsFree' => $shippingIsFree,
+                'shippingValueText' => $shippingIsFree
+                    ? __('store.shipping_free')
+                    : ($cheapestShippingCents !== null ? __('store.shipping_from_amount', ['price' => format_euros($cheapestShippingCents)]) : null),
+                'message' => $message,
+            ]);
+        }
+
+        return back()->with('status', $message);
+    }
+
+    /**
+     * @return array{0: bool, 1: ?int} [freeShippingUnlocked, cheapestShippingCents]
+     */
+    private function shippingEstimate(Cart $cart): array
+    {
+        $shippingSetting = ShippingSetting::current();
+        $subtotalCents = $cart->totalCents();
+        $weightGrams = $cart->totalWeightGrams();
+
+        $cheapestShippingCents = Carrier::query()->active()->get()
+            ->filter(fn (Carrier $carrier): bool => $cart->allowsCarrier($carrier))
+            ->map(fn (Carrier $carrier): int => $shippingSetting->effectivePriceCents($carrier, $subtotalCents, $weightGrams))
+            ->min();
+
+        return [$shippingSetting->isUnlockedBy($subtotalCents), $cheapestShippingCents];
     }
 }

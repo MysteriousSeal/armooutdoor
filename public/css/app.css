@@ -2149,6 +2149,31 @@
     gap: 1rem;
 }
 
+.store-toast {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 1000;
+    max-width: 22rem;
+    padding: 1rem 1.25rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: #fff;
+    background: #2c2c2c;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-hover);
+    opacity: 0;
+    transform: translateY(-0.5rem);
+    pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.store-toast.is-visible {
+    opacity: 1;
+    transform: none;
+}
+
 .cart-line {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;

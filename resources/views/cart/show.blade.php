@@ -14,7 +14,7 @@
         <header class="page-header">
             <h2 class="page-title">{{ __('store.cart_title') }}</h2>
             @if ($itemCount > 0)
-                <p class="page-meta">{{ trans_choice('store.cart_count', $itemCount, ['count' => $itemCount]) }}</p>
+                <p class="page-meta" id="cart-item-count-header">{{ trans_choice('store.cart_count', $itemCount, ['count' => $itemCount]) }}</p>
             @endif
         </header>
 
@@ -63,7 +63,13 @@
                                 @endif
 
                                 <div class="cart-line-actions">
-                                    <form method="POST" action="{{ localized_route('cart.update', ['product' => $line->product->slug]) }}" class="cart-qty-form">
+                                    <form
+                                        method="POST"
+                                        action="{{ localized_route('cart.update', ['product' => $line->product->slug]) }}"
+                                        class="cart-qty-form"
+                                        novalidate
+                                        data-stock-limit-label="{{ __('store.stock_limit') }}"
+                                    >
                                         @csrf
                                         @method('PATCH')
                                         @if ($line->variant)
@@ -88,19 +94,15 @@
                                 @if ($line->hasDiscount())
                                     <span class="badge badge-active cart-line-discount-badge">{{ $line->product->discount->label() }}</span>
                                 @endif
-                                @if ($line->quantity > 1)
-                                    <p class="cart-line-unit-price">
-                                        @if ($line->hasDiscount())
-                                            <span class="card-price-original">{{ $line->formattedOriginalUnitPrice() }}</span>
-                                        @endif
-                                        {{ $line->formattedUnitPrice() }} × {{ $line->quantity }}
-                                    </p>
-                                @endif
-                                <p class="cart-line-total">
-                                    @if ($line->hasDiscount() && $line->quantity <= 1)
+                                <p class="cart-line-unit-price" @if ($line->quantity <= 1) hidden @endif>
+                                    @if ($line->hasDiscount())
                                         <span class="card-price-original">{{ $line->formattedOriginalUnitPrice() }}</span>
                                     @endif
-                                    {{ $line->formattedLineTotal() }}
+                                    <span class="cart-line-unit-price-value">{{ $line->formattedUnitPrice() }}</span> × <span class="cart-line-unit-price-qty">{{ $line->quantity }}</span>
+                                </p>
+                                <p class="cart-line-total" data-has-discount="{{ $line->hasDiscount() ? '1' : '0' }}">
+                                    <span class="card-price-original" @if (! ($line->hasDiscount() && $line->quantity <= 1)) hidden @endif>{{ $line->formattedOriginalUnitPrice() }}</span>
+                                    <span class="cart-line-total-value">{{ $line->formattedLineTotal() }}</span>
                                 </p>
                                 <form method="POST" action="{{ localized_route('cart.remove', ['product' => $line->product->slug]) }}" class="cart-line-remove">
                                     @csrf
@@ -121,17 +123,12 @@
                         <span class="cart-summary-count">{{ trans_choice('store.cart_count', $itemCount, ['count' => $itemCount]) }}</span>
                     </div>
                     <p class="cart-summary-total">{{ $total }}</p>
-                    @if ($freeShippingUnlocked || $cheapestShippingCents === 0)
-                        <div class="cart-summary-shipping is-free">
-                            <span class="cart-summary-shipping-label">{{ __('store.shipping') }}</span>
-                            <span class="cart-summary-shipping-value">{{ __('store.shipping_free') }}</span>
-                        </div>
-                    @elseif ($cheapestShippingCents !== null)
-                        <div class="cart-summary-shipping">
-                            <span class="cart-summary-shipping-label">{{ __('store.shipping') }}</span>
-                            <span class="cart-summary-shipping-value">{{ __('store.shipping_from_amount', ['price' => format_euros($cheapestShippingCents)]) }}</span>
-                        </div>
-                    @endif
+                    <div class="cart-summary-shipping {{ ($freeShippingUnlocked || $cheapestShippingCents === 0) ? 'is-free' : '' }}" @if ($cheapestShippingCents === null && ! $freeShippingUnlocked) hidden @endif>
+                        <span class="cart-summary-shipping-label">{{ __('store.shipping') }}</span>
+                        <span class="cart-summary-shipping-value">
+                            {{ ($freeShippingUnlocked || $cheapestShippingCents === 0) ? __('store.shipping_free') : __('store.shipping_from_amount', ['price' => format_euros($cheapestShippingCents ?? 0)]) }}
+                        </span>
+                    </div>
                     <ul class="cart-summary-hints">
                         <li>
                             <span class="cart-summary-hints-label">{{ __('store.shipping') }}</span>

@@ -64,10 +64,18 @@
     </form>
 
     @if ($product->inStock())
-        <form method="POST" action="{{ localized_route('cart.add') }}" class="card-cart">
-            @csrf
-            <input type="hidden" name="product_id" value="{{ $product->id }}">
-            <button type="submit" class="btn btn-sm btn-primary">{{ __('store.add_to_cart') }}</button>
-        </form>
+        @if ($variantCount > 0)
+            <div class="card-cart">
+                <a href="{{ localized_route('products.show', ['product' => $product->slug]) }}" class="btn btn-sm btn-primary">
+                    {{ __('store.view_options') }}
+                </a>
+            </div>
+        @else
+            <form method="POST" action="{{ localized_route('cart.add') }}" class="card-cart">
+                @csrf
+                <input type="hidden" name="product_id" value="{{ $product->id }}">
+                <button type="submit" class="btn btn-sm btn-primary">{{ __('store.add_to_cart') }}</button>
+            </form>
+        @endif
     @endif
 </article>
