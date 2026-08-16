@@ -70,13 +70,33 @@
             <p class="empty-state">{{ __('store.empty_category') }}</p>
         @else
             <form method="GET" class="sort-form" action="{{ localized_route('categories.show', ['category' => $category->slug]) }}">
-                <label for="category-sort">{{ __('store.sort_label') }}</label>
-                <div class="sort-select-wrap">
-                    <select id="category-sort" name="sort" class="sort-select" onchange="this.form.submit()">
-                        <option value="name" @selected($sort === 'name')>{{ __('store.sort_name') }}</option>
-                        <option value="price-asc" @selected($sort === 'price-asc')>{{ __('store.sort_price_asc') }}</option>
-                        <option value="price-desc" @selected($sort === 'price-desc')>{{ __('store.sort_price_desc') }}</option>
-                    </select>
+                @if (! empty($filterGroups))
+                    <div class="category-filters">
+                        @foreach ($filterGroups as $label => $values)
+                            @php($filterId = 'filter-'.\Illuminate\Support\Str::slug($label))
+                            <div class="category-filter">
+                                <label for="{{ $filterId }}">{{ $label }}</label>
+                                <div class="sort-select-wrap">
+                                    <select id="{{ $filterId }}" name="filter[{{ $label }}]" class="sort-select" onchange="this.form.submit()">
+                                        <option value="">{{ __('store.filter_all') }}</option>
+                                        @foreach ($values as $option)
+                                            <option value="{{ $option['value'] }}" @selected(($selectedFilters[$label] ?? null) === $option['value'])>{{ $option['value'] }} ({{ $option['count'] }})</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+                <div class="sort-field">
+                    <label for="category-sort">{{ __('store.sort_label') }}</label>
+                    <div class="sort-select-wrap">
+                        <select id="category-sort" name="sort" class="sort-select" onchange="this.form.submit()">
+                            <option value="name" @selected($sort === 'name')>{{ __('store.sort_name') }}</option>
+                            <option value="price-asc" @selected($sort === 'price-asc')>{{ __('store.sort_price_asc') }}</option>
+                            <option value="price-desc" @selected($sort === 'price-desc')>{{ __('store.sort_price_desc') }}</option>
+                        </select>
+                    </div>
                 </div>
                 <noscript>
                     <button type="submit" class="btn btn-sm btn-secondary">{{ __('store.sort_label') }}</button>
