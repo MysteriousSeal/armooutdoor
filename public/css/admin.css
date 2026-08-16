@@ -982,6 +982,16 @@ a.admin-stat-card:hover {
     align-items: stretch;
 }
 
+.discount-code-field {
+    display: flex;
+    align-items: stretch;
+    gap: 0.5rem;
+}
+
+.discount-code-field .form-control {
+    flex: 1;
+}
+
 .discount-value-suffix {
     display: inline-flex;
     align-items: center;

@@ -13,6 +13,8 @@
                 </div>
                 @if ($tab === 'products')
                     <a href="{{ route('admin.discounts.create') }}" class="btn btn-primary">Add discount</a>
+                @else
+                    <a href="{{ route('admin.discount-codes.create') }}" class="btn btn-primary">Add code</a>
                 @endif
             </div>
         </header>
@@ -22,7 +24,7 @@
                 Product discounts <span class="admin-tab-count">{{ number_format($discountCount) }}</span>
             </a>
             <a href="{{ route('admin.discounts.index', ['tab' => 'codes']) }}" class="{{ $tab === 'codes' ? 'active' : '' }}">
-                Discount codes
+                Discount codes <span class="admin-tab-count">{{ number_format($discountCodes->count()) }}</span>
             </a>
         </nav>
 
@@ -139,11 +141,50 @@
                 </ul>
             @endif
         @else
-            <div class="admin-coming-soon">
-                <p class="admin-coming-soon-kicker">Coming soon</p>
-                <h3 class="admin-coming-soon-title">Discount codes</h3>
-                <p class="admin-coming-soon-lede">Coupon codes customers can enter at checkout. Not available yet.</p>
-            </div>
+            @if ($discountCodes->isEmpty())
+                <div class="empty-state">
+                    <p>No discount codes yet.</p>
+                    <a href="{{ route('admin.discount-codes.create') }}" class="btn btn-primary">Add code</a>
+                </div>
+            @else
+                <div class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Discount</th>
+                                <th>Customer</th>
+                                <th>Quantity available</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($discountCodes as $discountCode)
+                                <tr>
+                                    <td><span class="admin-table-strong">{{ $discountCode->code }}</span></td>
+                                    <td>{{ $discountCode->label() }} <span class="admin-table-sub">off cart total</span></td>
+                                    <td>
+                                        @if ($discountCode->user)
+                                            {{ $discountCode->user->name }}
+                                        @else
+                                            <span class="admin-table-sub">Any customer</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ $discountCode->quantityLabel() }}</td>
+                                    <td>
+                                        <a href="{{ route('admin.discount-codes.edit', $discountCode) }}" class="btn btn-sm btn-secondary">Edit</a>
+                                        <form method="POST" action="{{ route('admin.discount-codes.destroy', $discountCode) }}" style="display: inline;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-secondary">Remove</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
         @endif
     </div>
 @endsection

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreDiscountRequest;
 use App\Models\Discount;
+use App\Models\DiscountCode;
 use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -34,11 +35,17 @@ class DiscountController extends Controller
         $scheduledCount = $allDiscounts->filter(fn (Discount $discount): bool => $discount->status() === 'scheduled')->count();
         $expiredCount = $allDiscounts->filter(fn (Discount $discount): bool => $discount->status() === 'expired')->count();
 
+        $discountCodes = DiscountCode::query()
+            ->with('user')
+            ->orderByDesc('created_at')
+            ->get();
+
         return view('admin.discounts.index', [
             'discounts' => $allDiscounts
                 ->filter(fn (Discount $discount): bool => $discount->status() === $status)
                 ->values(),
             'discountCount' => $allDiscounts->count(),
+            'discountCodes' => $discountCodes,
             'tab' => $tab,
             'status' => $status,
             'activeCount' => $activeCount,

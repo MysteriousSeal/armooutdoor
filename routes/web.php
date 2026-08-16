@@ -1,15 +1,19 @@
 <?php
 
+// Account (customer profile, addresses)
 use App\Http\Controllers\Account\AccountController;
 use App\Http\Controllers\Account\AddressController;
 use App\Http\Controllers\Account\ProfileController;
+
+// Admin (back office)
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\CarrierPriceTierController as AdminCarrierPriceTierController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
-use App\Http\Controllers\Admin\DiscountController as AdminDiscountController;
 use App\Http\Controllers\Admin\CompanySettingController as AdminCompanySettingController;
 use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\DiscountCodeController as AdminDiscountCodeController;
+use App\Http\Controllers\Admin\DiscountController as AdminDiscountController;
 use App\Http\Controllers\Admin\InvoiceSettingController as AdminInvoiceSettingController;
 use App\Http\Controllers\Admin\MarketplaceController as AdminMarketplaceController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
@@ -17,10 +21,14 @@ use App\Http\Controllers\Admin\PackageTypeController as AdminPackageTypeControll
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\ShippingSettingController as AdminShippingSettingController;
+
+// Auth (customer-facing login/register/password reset)
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+
+// Storefront (shop, cart, checkout, orders, etc.)
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CheckoutController;
@@ -34,12 +42,31 @@ use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\WishlistController;
 use Illuminate\Support\Facades\Route;
 
+/*
+|--------------------------------------------------------------------------
+| Sitemap
+|--------------------------------------------------------------------------
+*/
+
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
 Route::get('/sitemap-pages.xml', [SitemapController::class, 'pages'])->name('sitemap.pages');
 Route::get('/sitemap-categories.xml', [SitemapController::class, 'categories'])->name('sitemap.categories');
 Route::get('/sitemap-products.xml', [SitemapController::class, 'products'])->name('sitemap.products');
 
+/*
+|--------------------------------------------------------------------------
+| Preferences (theme, etc. — no auth required)
+|--------------------------------------------------------------------------
+*/
+
 Route::post('/preferences/theme', [PreferenceController::class, 'theme'])->name('preferences.theme');
+
+/*
+|--------------------------------------------------------------------------
+| Admin (back office)
+|--------------------------------------------------------------------------
+| Login is public; everything else sits behind the `admin` middleware.
+*/
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminAuthController::class, 'create'])->name('login');
@@ -51,6 +78,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/logout', [AdminAuthController::class, 'destroy'])->name('logout');
         Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
         Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');
+
+        // Products
         Route::get('/products', [AdminProductController::class, 'index'])->name('products.index');
         Route::get('/products/create', [AdminProductController::class, 'create'])->name('products.create');
         Route::post('/products', [AdminProductController::class, 'store'])->name('products.store');
@@ -58,6 +87,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/products/{product}', [AdminProductController::class, 'update'])->name('products.update');
         Route::patch('/products/{product}/status', [AdminProductController::class, 'toggleStatus'])->name('products.status');
 
+        // Product discounts (sale price on a single product, no code needed)
         Route::get('/discounts', [AdminDiscountController::class, 'index'])->name('discounts.index');
         Route::get('/discounts/create', [AdminDiscountController::class, 'create'])->name('discounts.create');
         Route::post('/discounts', [AdminDiscountController::class, 'store'])->name('discounts.store');
@@ -65,12 +95,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/discounts/{discount}', [AdminDiscountController::class, 'update'])->name('discounts.update');
         Route::delete('/discounts/{discount}', [AdminDiscountController::class, 'destroy'])->name('discounts.destroy');
 
+        // Discount codes (cart-wide coupon codes)
+        Route::get('/discount-codes/check-code', [AdminDiscountCodeController::class, 'checkCode'])->name('discount-codes.check-code');
+        Route::get('/discount-codes/create', [AdminDiscountCodeController::class, 'create'])->name('discount-codes.create');
+        Route::post('/discount-codes', [AdminDiscountCodeController::class, 'store'])->name('discount-codes.store');
+        Route::get('/discount-codes/{discountCode}/edit', [AdminDiscountCodeController::class, 'edit'])->name('discount-codes.edit');
+        Route::put('/discount-codes/{discountCode}', [AdminDiscountCodeController::class, 'update'])->name('discount-codes.update');
+        Route::delete('/discount-codes/{discountCode}', [AdminDiscountCodeController::class, 'destroy'])->name('discount-codes.destroy');
+
+        // Categories
         Route::get('/categories', [AdminCategoryController::class, 'index'])->name('categories.index');
         Route::get('/categories/create', [AdminCategoryController::class, 'create'])->name('categories.create');
         Route::post('/categories', [AdminCategoryController::class, 'store'])->name('categories.store');
         Route::get('/categories/{category}/edit', [AdminCategoryController::class, 'edit'])->name('categories.edit');
         Route::put('/categories/{category}', [AdminCategoryController::class, 'update'])->name('categories.update');
 
+        // Orders
         Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/create', [AdminOrderController::class, 'create'])->name('orders.create');
         Route::post('/orders', [AdminOrderController::class, 'store'])->name('orders.store');
@@ -86,6 +126,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/orders/{order}/shipping-address', [AdminOrderController::class, 'updateShippingAddress'])->name('orders.address.shipping');
         Route::patch('/orders/{order}/billing-address', [AdminOrderController::class, 'updateBillingAddress'])->name('orders.address.billing');
 
+        // Settings
         Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings.index');
         Route::get('/settings/shipping', [AdminShippingSettingController::class, 'edit'])->name('settings.shipping.edit');
         Route::put('/settings/shipping', [AdminShippingSettingController::class, 'update'])->name('settings.shipping.update');
@@ -103,20 +144,39 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 });
 
+/*
+|--------------------------------------------------------------------------
+| Storefront — public pages
+|--------------------------------------------------------------------------
+*/
+
 Route::get('/', HomeController::class)->name('home');
 Route::get('/categories/{category:slug}', [CategoryController::class, 'show'])->name('categories.show');
 Route::get('/products/{product:slug}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/search', [SearchController::class, 'index'])->name('search');
 
+// Legal pages
 Route::view('/cgv', 'legal.terms')->name('legal.terms');
 Route::view('/mentions-legales', 'legal.notice')->name('legal.notice');
 Route::view('/confidentialite', 'legal.privacy')->name('legal.privacy');
 Route::view('/droit-de-retractation', 'legal.withdrawal')->name('legal.withdrawal');
 
+/*
+|--------------------------------------------------------------------------
+| Cart (guests and customers alike)
+|--------------------------------------------------------------------------
+*/
+
 Route::get('/cart', [CartController::class, 'show'])->name('cart.show');
 Route::post('/cart', [CartController::class, 'add'])->name('cart.add');
 Route::patch('/cart/{product:slug}', [CartController::class, 'update'])->name('cart.update');
 Route::delete('/cart/{product:slug}', [CartController::class, 'destroy'])->name('cart.remove');
+
+/*
+|--------------------------------------------------------------------------
+| Customer auth — login, register, password reset
+|--------------------------------------------------------------------------
+*/
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
@@ -137,6 +197,12 @@ Route::middleware('guest')->group(function () {
 Route::post('/logout', [LoginController::class, 'destroy'])
     ->middleware('auth')
     ->name('logout');
+
+/*
+|--------------------------------------------------------------------------
+| Customer account (profile, addresses, wishlist, reviews, checkout, orders)
+|--------------------------------------------------------------------------
+*/
 
 Route::middleware('auth')->group(function () {
     Route::get('/account', AccountController::class)->name('account.index');
