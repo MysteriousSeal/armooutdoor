@@ -9,69 +9,140 @@
                 <div>
                     <p class="admin-list-kicker">Catalog</p>
                     <h2 class="admin-list-title">Discounts</h2>
-                    <p class="admin-list-lede">A simple discount for a single product, no code needed — the reduced price shows everywhere automatically.</p>
+                    <p class="admin-list-lede">A reduced price on a single product — no coupon code needed. The sale price shows everywhere automatically.</p>
                 </div>
-                <a href="{{ route('admin.discounts.create') }}" class="btn btn-primary">Add discount</a>
+                @if ($tab === 'products')
+                    <a href="{{ route('admin.discounts.create') }}" class="btn btn-primary">Add discount</a>
+                @endif
             </div>
         </header>
 
-        @if ($discounts->isEmpty())
-            <div class="empty-state">
-                <p>No discounts yet.</p>
-                <a href="{{ route('admin.discounts.create') }}" class="btn btn-primary">Add discount</a>
-            </div>
-        @else
-            <div class="admin-table-wrap">
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Discount</th>
-                            <th>Price</th>
-                            <th>Window</th>
-                            <th>Status</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($discounts as $discount)
-                            <tr>
-                                <td>
-                                    <a href="{{ route('admin.products.edit', $discount->product) }}">
-                                        {{ $discount->product->name['fr'] ?? $discount->product->localizedName() }}
-                                    </a>
-                                </td>
-                                <td>{{ $discount->label() }}</td>
-                                <td>
-                                    @if ($discount->isActive())
-                                        <span class="card-price-original">{{ $discount->product->formattedOriginalPrice() }}</span>
-                                    @endif
-                                    {{ $discount->product->formattedPrice() }}
-                                </td>
-                                <td>
-                                    {{ $discount->starts_at?->format('d/m/Y H:i') ?? '—' }} → {{ $discount->ends_at?->format('d/m/Y H:i') ?? '—' }}
-                                </td>
-                                <td>
-                                    @if ($discount->isActive())
-                                        <span class="badge badge-active">Active</span>
-                                    @elseif ($discount->starts_at?->isFuture())
-                                        <span class="badge badge-placed">Scheduled</span>
+        <nav class="admin-tabs" aria-label="Discount tabs">
+            <a href="{{ route('admin.discounts.index', ['tab' => 'products', 'status' => $status]) }}" class="{{ $tab === 'products' ? 'active' : '' }}">
+                Product discounts <span class="admin-tab-count">{{ number_format($discountCount) }}</span>
+            </a>
+            <a href="{{ route('admin.discounts.index', ['tab' => 'codes']) }}" class="{{ $tab === 'codes' ? 'active' : '' }}">
+                Discount codes
+            </a>
+        </nav>
+
+        @if ($tab === 'products')
+            <nav class="admin-subtabs" aria-label="Discount status">
+                <a href="{{ route('admin.discounts.index', ['tab' => 'products', 'status' => 'active']) }}" class="{{ $status === 'active' ? 'active' : '' }}">
+                    Active <span class="admin-tab-count">{{ number_format($activeCount) }}</span>
+                </a>
+                <a href="{{ route('admin.discounts.index', ['tab' => 'products', 'status' => 'scheduled']) }}" class="{{ $status === 'scheduled' ? 'active' : '' }}">
+                    Scheduled <span class="admin-tab-count">{{ number_format($scheduledCount) }}</span>
+                </a>
+                <a href="{{ route('admin.discounts.index', ['tab' => 'products', 'status' => 'expired']) }}" class="{{ $status === 'expired' ? 'active' : '' }}">
+                    Expired <span class="admin-tab-count">{{ number_format($expiredCount) }}</span>
+                </a>
+            </nav>
+
+            @if ($discountCount === 0)
+                <div class="empty-state">
+                    <p>No product discounts yet.</p>
+                    <a href="{{ route('admin.discounts.create') }}" class="btn btn-primary">Add discount</a>
+                </div>
+            @elseif ($discounts->isEmpty())
+                <div class="empty-state">
+                    <p>
+                        @switch($status)
+                            @case('scheduled')
+                                No scheduled discounts.
+                                @break
+                            @case('expired')
+                                No expired discounts.
+                                @break
+                            @default
+                                No active discounts.
+                        @endswitch
+                    </p>
+                </div>
+            @else
+                <ul class="admin-discount-list">
+                    @foreach ($discounts as $discount)
+                        @php
+                            $product = $discount->product;
+                            $status = $discount->status();
+                        @endphp
+                        <li class="admin-discount-card">
+                            @if ($product)
+                                <a href="{{ route('admin.products.edit', $product) }}" class="admin-discount-media">
+                                    <img
+                                        src="{{ $product->imageUrl() }}"
+                                        alt=""
+                                        width="72"
+                                        height="72"
+                                        loading="lazy"
+                                    >
+                                </a>
+                            @else
+                                <span class="admin-discount-media is-empty"></span>
+                            @endif
+
+                            <div class="admin-discount-main">
+                                <p class="admin-discount-name">
+                                    @if ($product)
+                                        <a href="{{ route('admin.products.edit', $product) }}">
+                                            {{ $product->name['fr'] ?? $product->localizedName() }}
+                                        </a>
                                     @else
-                                        <span class="badge badge-disabled">Expired</span>
+                                        Deleted product
                                     @endif
-                                </td>
-                                <td>
-                                    <a href="{{ route('admin.discounts.edit', $discount) }}" class="btn btn-sm btn-secondary">Edit</a>
-                                    <form method="POST" action="{{ route('admin.discounts.destroy', $discount) }}" style="display: inline;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-secondary">Remove</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                                </p>
+                                @if ($product?->sku)
+                                    <p class="admin-discount-sku">SKU {{ $product->sku }}</p>
+                                @endif
+                                <p class="admin-discount-price">
+                                    @if ($product)
+                                        <span>{{ $product->formattedOriginalPrice() }}</span>
+                                        <span class="admin-discount-price-sep" aria-hidden="true">→</span>
+                                        <span>{{ format_euros($discount->apply($product->price_cents)) }}</span>
+                                    @else
+                                        —
+                                    @endif
+                                </p>
+                            </div>
+
+                            <div class="admin-discount-offer">
+                                <span class="order-discount-badge">{{ $discount->label() }}</span>
+                                <span class="admin-discount-offer-type">{{ $discount->typeLabel() }}</span>
+                            </div>
+
+                            <div class="admin-discount-schedule">
+                                <span class="badge {{ $status === 'active' ? 'badge-active' : ($status === 'scheduled' ? 'badge-placed' : 'badge-disabled') }}">
+                                    {{ $discount->statusLabel() }}
+                                </span>
+                                <p class="admin-discount-remaining">{{ $discount->remainingLabel() }}</p>
+                                <p class="admin-discount-window">
+                                    @if ($discount->starts_at || $discount->ends_at)
+                                        {{ $discount->formattedStartsAt() ?? 'No start date' }}
+                                        <span aria-hidden="true">→</span>
+                                        {{ $discount->formattedEndsAt() ?? 'No end date' }}
+                                    @else
+                                        Always on
+                                    @endif
+                                </p>
+                            </div>
+
+                            <div class="admin-discount-actions">
+                                <a href="{{ route('admin.discounts.edit', $discount) }}" class="btn btn-sm btn-secondary">Edit</a>
+                                <form method="POST" action="{{ route('admin.discounts.destroy', $discount) }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-secondary">Remove</button>
+                                </form>
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+        @else
+            <div class="admin-coming-soon">
+                <p class="admin-coming-soon-kicker">Coming soon</p>
+                <h3 class="admin-coming-soon-title">Discount codes</h3>
+                <p class="admin-coming-soon-lede">Coupon codes customers can enter at checkout. Not available yet.</p>
             </div>
         @endif
     </div>

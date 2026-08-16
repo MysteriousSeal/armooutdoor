@@ -7,25 +7,43 @@ use App\Http\Requests\Admin\StoreDiscountRequest;
 use App\Models\Discount;
 use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class DiscountController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $tab = $request->query('tab') === 'codes' ? 'codes' : 'products';
+        $status = in_array($request->query('status'), ['active', 'scheduled', 'expired'], true)
+            ? $request->query('status')
+            : 'active';
+
         $nameSql = Discount::query()->getConnection()->getDriverName() === 'sqlite'
             ? "json_extract(products.name, '$.fr')"
             : "json_unquote(json_extract(products.name, '$.fr'))";
 
-        $discounts = Discount::query()
+        $allDiscounts = Discount::query()
             ->with('product')
             ->join('products', 'products.id', '=', 'discounts.product_id')
             ->orderByRaw($nameSql)
             ->select('discounts.*')
             ->get();
 
+        $activeCount = $allDiscounts->filter(fn (Discount $discount): bool => $discount->status() === 'active')->count();
+        $scheduledCount = $allDiscounts->filter(fn (Discount $discount): bool => $discount->status() === 'scheduled')->count();
+        $expiredCount = $allDiscounts->filter(fn (Discount $discount): bool => $discount->status() === 'expired')->count();
+
         return view('admin.discounts.index', [
-            'discounts' => $discounts,
+            'discounts' => $allDiscounts
+                ->filter(fn (Discount $discount): bool => $discount->status() === $status)
+                ->values(),
+            'discountCount' => $allDiscounts->count(),
+            'tab' => $tab,
+            'status' => $status,
+            'activeCount' => $activeCount,
+            'scheduledCount' => $scheduledCount,
+            'expiredCount' => $expiredCount,
         ]);
     }
 
@@ -39,10 +57,10 @@ class DiscountController extends Controller
 
     public function store(StoreDiscountRequest $request): RedirectResponse
     {
-        Discount::query()->create($this->payload($request));
+        $discount = Discount::query()->create($this->payload($request));
 
         return redirect()
-            ->route('admin.discounts.index')
+            ->route('admin.discounts.index', ['tab' => 'products', 'status' => $discount->status()])
             ->with('status', 'Discount created.');
     }
 
@@ -59,7 +77,7 @@ class DiscountController extends Controller
         $discount->update($this->payload($request));
 
         return redirect()
-            ->route('admin.discounts.index')
+            ->route('admin.discounts.index', ['tab' => 'products', 'status' => $discount->status()])
             ->with('status', 'Discount saved.');
     }
 

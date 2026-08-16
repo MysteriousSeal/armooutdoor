@@ -67,4 +67,64 @@ class Discount extends Model
             ? '-'.$this->value.'%'
             : '-'.format_euros($this->value);
     }
+
+    /**
+     * Admin-facing status. Separate from isActive() so a future window
+     * can be labelled Scheduled instead of just "not active".
+     */
+    public function status(): string
+    {
+        if ($this->starts_at !== null && $this->starts_at->isFuture()) {
+            return 'scheduled';
+        }
+
+        return $this->isActive() ? 'active' : 'expired';
+    }
+
+    public function statusLabel(): string
+    {
+        return match ($this->status()) {
+            'scheduled' => 'Scheduled',
+            'active' => 'Active',
+            default => 'Expired',
+        };
+    }
+
+    public function typeLabel(): string
+    {
+        return $this->type === 'percentage' ? 'Percentage off' : 'Fixed amount off';
+    }
+
+    public function formattedStartsAt(): ?string
+    {
+        return $this->starts_at?->format('d M Y · H:i');
+    }
+
+    public function formattedEndsAt(): ?string
+    {
+        return $this->ends_at?->format('d M Y · H:i');
+    }
+
+    /**
+     * English relative time for the admin list. The shop locale is French,
+     * so Carbon's default diffForHumans() would otherwise leak FR copy.
+     */
+    public function remainingLabel(): string
+    {
+        $relative = fn ($date): string => $date->copy()->locale('en')->diffForHumans();
+
+        if ($this->starts_at !== null && $this->starts_at->isFuture()) {
+            return 'Starts '.$relative($this->starts_at);
+        }
+
+        if ($this->isActive()) {
+            return $this->ends_at ? 'Ends '.$relative($this->ends_at) : 'No end date';
+        }
+
+        if ($this->ends_at !== null) {
+            return 'Ended '.$relative($this->ends_at);
+        }
+
+        return '—';
+    }
 }

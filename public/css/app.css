@@ -4135,6 +4135,42 @@ textarea.form-control {
     background: color-mix(in srgb, var(--accent) 10%, var(--surface));
 }
 
+.admin-subtabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin: -0.25rem 0 1.25rem;
+}
+
+.admin-subtabs a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    height: 2.05rem;
+    padding: 0 0.7rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.admin-subtabs a:hover {
+    color: var(--text);
+}
+
+.admin-subtabs a.active {
+    color: var(--text);
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+}
+
+.admin-subtabs a.active .admin-tab-count {
+    color: var(--accent-hover);
+    border-color: color-mix(in srgb, var(--accent) 32%, var(--border));
+    background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+}
+
 .admin-list-chip {
     display: inline-flex;
     align-items: center;
@@ -4483,6 +4519,283 @@ a.admin-table-icon-btn:hover {
     object-fit: cover;
     background: var(--bg);
     border: 1px solid var(--border);
+}
+
+.admin-discount-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.admin-discount-card {
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1.4fr) 8.5rem minmax(12rem, 1fr) auto;
+    align-items: center;
+    gap: 1.15rem 1.25rem;
+    padding: 1.1rem 1.2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.admin-discount-media {
+    display: block;
+    width: 4.5rem;
+    aspect-ratio: 1 / 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.admin-discount-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.admin-discount-main {
+    min-width: 0;
+}
+
+.admin-discount-name {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1.35;
+}
+
+.admin-discount-name a {
+    color: inherit;
+}
+
+.admin-discount-name a:hover {
+    color: var(--accent-hover);
+}
+
+.admin-discount-sku {
+    margin: 0.25rem 0 0;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.admin-discount-price {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0.45rem 0 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+}
+
+.admin-discount-price-sep {
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+.admin-discount-offer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+}
+
+.admin-discount-offer-type {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.admin-discount-schedule {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+    min-width: 0;
+}
+
+.admin-discount-remaining {
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text);
+}
+
+.admin-discount-window {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.admin-discount-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.4rem;
+}
+
+.admin-coming-soon {
+    padding: 3.25rem 1.5rem;
+    text-align: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.admin-coming-soon-kicker {
+    margin: 0 0 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.admin-coming-soon-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+.admin-coming-soon-lede {
+    margin: 0.55rem auto 0;
+    max-width: 26rem;
+    font-size: 0.9375rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.admin-discount-form .form-group:last-child {
+    margin-bottom: 0;
+}
+
+.admin-discount-form .form-hint {
+    margin-bottom: 0.85rem;
+}
+
+.admin-discount-form .form-group .form-hint,
+.admin-discount-form .form-row + .form-hint,
+.admin-discount-form .form-hint:last-child {
+    margin-bottom: 0;
+}
+
+.discount-type-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.discount-value-field {
+    display: flex;
+    align-items: stretch;
+}
+
+.discount-value-field .form-control {
+    border-right: 0;
+}
+
+.discount-value-suffix {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.75rem;
+    padding: 0 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.discount-value-field .form-control:focus {
+    position: relative;
+    z-index: 1;
+}
+
+.discount-value-field .form-control:focus + .discount-value-suffix {
+    border-color: var(--accent);
+}
+
+.admin-discount-preview {
+    position: sticky;
+    top: 1rem;
+}
+
+.admin-discount-preview-empty p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.admin-discount-preview-body {
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    gap: 0.15rem 0.85rem;
+    align-items: start;
+}
+
+.admin-discount-preview-media {
+    grid-row: 1 / span 2;
+    width: 4.5rem;
+    aspect-ratio: 1 / 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.admin-discount-preview-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.admin-discount-preview-name {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1.35;
+}
+
+.admin-discount-preview-sku {
+    margin: 0.15rem 0 0;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.admin-discount-preview-prices,
+.admin-discount-preview-meta {
+    grid-column: 1 / -1;
+}
+
+.admin-discount-preview-prices {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.85rem 0 0;
+    font-size: 1.15rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+}
+
+.admin-discount-preview-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.45rem;
+    margin-top: 0.85rem;
+}
+
+.admin-discount-preview-window {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    line-height: 1.4;
 }
 
 .admin-pagination {
@@ -5339,6 +5652,21 @@ a.admin-pagination-page:hover {
     .admin-list-hero-row {
         flex-direction: column;
         align-items: stretch;
+    }
+
+    .admin-discount-card {
+        grid-template-columns: 4rem minmax(0, 1fr);
+        align-items: start;
+    }
+
+    .admin-discount-offer,
+    .admin-discount-schedule,
+    .admin-discount-actions {
+        grid-column: 2;
+    }
+
+    .admin-discount-actions {
+        justify-content: flex-start;
     }
 
     .admin-order-actions {
