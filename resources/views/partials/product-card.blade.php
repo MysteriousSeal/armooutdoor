@@ -25,6 +25,10 @@
                     {{ $product->lowStock() ? __('store.low_stock') : ($product->inStock() ? __('store.in_stock') : __('store.out_of_stock')) }}
                 </span>
             </div>
+            <div class="card-rating">
+                <span class="star-rating" aria-hidden="true">{{ str_repeat('★', (int) round($product->averageRating() ?? 0)) }}{{ str_repeat('☆', 5 - (int) round($product->averageRating() ?? 0)) }}</span>
+                <span class="card-rating-count">({{ $product->reviewsCount() }})</span>
+            </div>
         </div>
     </a>
 

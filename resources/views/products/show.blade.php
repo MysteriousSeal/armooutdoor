@@ -80,6 +80,10 @@
                 @endif
 
                 <h2 class="product-detail-title">{{ $product->localizedName() }}</h2>
+                <div class="product-detail-rating">
+                    <span class="star-rating" aria-hidden="true">{{ str_repeat('★', (int) round($product->averageRating() ?? 0)) }}{{ str_repeat('☆', 5 - (int) round($product->averageRating() ?? 0)) }}</span>
+                    <span class="card-rating-count">({{ $product->reviewsCount() }})</span>
+                </div>
                 <div class="product-detail-meta">
                     <p class="product-detail-price" id="product-detail-price">{{ ($displayVariant ?? $product)->formattedPrice() }}</p>
                     <span class="stock-badge {{ $product->lowStock() ? 'is-low-stock' : ($product->inStock() ? 'is-in-stock' : 'is-out-of-stock') }}" id="product-stock-badge">

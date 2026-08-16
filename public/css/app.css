@@ -1169,6 +1169,22 @@ button.btn {
     margin-top: 0.4rem;
 }
 
+.card-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.3rem;
+}
+
+.card-rating .star-rating {
+    font-size: 0.8125rem;
+}
+
+.card-rating-count {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
 .product-card.is-out-of-stock .card-caption {
     padding-bottom: 1rem;
 }
@@ -1354,6 +1370,13 @@ button.btn {
     font-weight: 500;
     letter-spacing: -0.025em;
     line-height: 1.25;
+}
+
+.product-detail-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.5rem;
 }
 
 .product-detail-meta {
