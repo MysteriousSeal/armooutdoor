@@ -45,7 +45,7 @@ class AppServiceProvider extends ServiceProvider
             $view->with([
                 'navCategories' => Category::query()
                     ->whereNull('parent_id')
-                    ->with(['children' => fn ($query) => $query->orderBy('sort_order')->withCount('products')])
+                    ->with(['children' => fn ($query) => $query->orderBy('sort_order')->withCount(['products as products_count' => fn ($q) => $q->active()])])
                     ->orderBy('sort_order')
                     ->get(),
                 'cartCount' => app(Cart::class)->quantity(),
