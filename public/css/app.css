@@ -56,6 +56,10 @@
     padding: 0;
 }
 
+[hidden] {
+    display: none !important;
+}
+
 html {
     font-size: 16px;
     -webkit-font-smoothing: antialiased;
@@ -1278,6 +1282,30 @@ button.btn {
     border: 1px solid transparent;
 }
 
+.card-discount-chip {
+    position: absolute;
+    top: 0.55rem;
+    left: 0.55rem;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    height: 2rem;
+    padding: 0 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: #3d6b4e;
+    background: #eef4ef;
+    border: 1px solid #d5e4d8;
+    box-shadow: var(--shadow);
+}
+
+[data-theme='dark'] .card-discount-chip {
+    color: #b7d4c0;
+    background: color-mix(in srgb, #3d6b4e 28%, var(--surface));
+    border-color: color-mix(in srgb, #3d6b4e 45%, var(--border));
+}
+
 .card-variant-chip {
     position: absolute;
     right: 0.55rem;
@@ -1476,6 +1504,67 @@ button.btn {
     color: #e0b673;
     background: #362c1c;
     border-color: #4d3f28;
+}
+
+.discount-countdown {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.55rem;
+    width: fit-content;
+    max-width: 100%;
+    margin: 1.1rem 0 1.05rem;
+    padding: 0.8rem 0.9rem 0.85rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.discount-countdown[hidden] {
+    display: none;
+}
+
+.discount-countdown-label {
+    margin: 0;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.discount-countdown-timer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.discount-countdown-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 3rem;
+    padding: 0.4rem 0.45rem 0.35rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.discount-countdown-value {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+}
+
+.discount-countdown-unit-label {
+    margin-top: 0.12rem;
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
 }
 
 .stock-badge.is-out-of-stock,

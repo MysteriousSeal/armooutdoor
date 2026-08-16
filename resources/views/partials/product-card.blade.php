@@ -13,6 +13,9 @@
                 height="1200"
                 loading="{{ $lazy ?? true ? 'lazy' : 'eager' }}"
             >
+            @if ($product->hasDiscount())
+                <span class="card-discount-chip">{{ $product->discount->label() }}</span>
+            @endif
             @if ($variantCount > 0)
                 <span class="card-variant-chip">{{ trans_choice('store.variants_count', $variantCount, ['count' => $variantCount]) }}</span>
             @endif

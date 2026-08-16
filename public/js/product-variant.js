@@ -14,6 +14,7 @@
     var priceEl = document.getElementById('product-detail-price-current');
     var priceOriginalEl = document.getElementById('product-detail-price-original');
     var discountBadgeEl = document.getElementById('product-detail-discount-badge');
+    var countdownEl = document.getElementById('discount-countdown');
     var currentEl = document.getElementById('product-variant-current');
     var mainImage = document.getElementById('product-detail-main-image');
     var qtyInput = form.querySelector('.qty-stepper-input');
@@ -51,6 +52,17 @@
                 discountBadgeEl.hidden = false;
             } else {
                 discountBadgeEl.hidden = true;
+            }
+        }
+
+        if (countdownEl) {
+            var endsAt = radio.getAttribute('data-variant-discount-ends-at');
+
+            countdownEl.dataset.endsAt = endsAt || '';
+            countdownEl.hidden = !endsAt;
+
+            if (window.ProductDiscountCountdown) {
+                window.ProductDiscountCountdown.refresh();
             }
         }
 

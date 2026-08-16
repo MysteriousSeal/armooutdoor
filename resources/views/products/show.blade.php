@@ -104,6 +104,20 @@
                     </span>
                 </div>
 
+                <div
+                    class="discount-countdown"
+                    id="discount-countdown"
+                    data-ends-at="{{ (! $variantHasOwnPrice && $product->hasDiscount() && $product->discount->ends_at) ? $product->discount->ends_at->toIso8601String() : '' }}"
+                    data-label-days="{{ __('store.discount_countdown_days') }}"
+                    data-label-hours="{{ __('store.discount_countdown_hours') }}"
+                    data-label-minutes="{{ __('store.discount_countdown_minutes') }}"
+                    data-label-seconds="{{ __('store.discount_countdown_seconds') }}"
+                    @if ($variantHasOwnPrice || ! $product->hasDiscount() || ! $product->discount->ends_at) hidden @endif
+                >
+                    <p class="discount-countdown-label">{{ __('store.discount_ends_in') }}</p>
+                    <div class="discount-countdown-timer" id="discount-countdown-timer" aria-live="off"></div>
+                </div>
+
                 @if ($product->age_restricted)
                     <p class="age-restricted-notice">{{ __('store.age_restricted_notice') }}</p>
                     <p class="age-restricted-notice">{{ __('store.age_restricted_proof_notice') }}</p>
@@ -138,6 +152,7 @@
                                                 data-variant-price="{{ $variant->formattedPrice() }}"
                                                 data-variant-original-price="{{ ($variant->price_cents === null && $product->hasDiscount()) ? $product->formattedOriginalPrice() : '' }}"
                                                 data-variant-discount-label="{{ ($variant->price_cents === null && $product->hasDiscount()) ? $product->discount->label() : '' }}"
+                                                data-variant-discount-ends-at="{{ ($variant->price_cents === null && $product->hasDiscount() && $product->discount->ends_at) ? $product->discount->ends_at->toIso8601String() : '' }}"
                                                 data-variant-max="{{ $variant->maxPurchasable() }}"
                                                 @if ($variant->image)
                                                     data-variant-image="{{ $variant->imageUrl() }}"
@@ -324,4 +339,5 @@
     <script src="{{ asset('js/product-gallery.js') }}" defer></script>
     <script src="{{ asset('js/product-qty.js') }}" defer></script>
     <script src="{{ asset('js/product-variant.js') }}" defer></script>
+    <script src="{{ asset('js/product-discount-countdown.js') }}" defer></script>
 @endpush

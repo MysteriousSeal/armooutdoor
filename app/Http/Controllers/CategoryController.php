@@ -20,6 +20,7 @@ class CategoryController extends Controller
             'products' => fn ($query) => $query->active(),
             'products.category',
             'products.discount',
+            'children.products.discount',
         ]);
 
         $sort = $request->query('sort', 'name');
