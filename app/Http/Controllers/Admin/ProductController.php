@@ -40,7 +40,7 @@ class ProductController extends Controller
             })
             ->orderBy('sort_order')
             ->orderBy('id')
-            ->simplePaginate(24)
+            ->paginate(24)
             ->withQueryString();
 
         return view('admin.products.index', [

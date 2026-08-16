@@ -57,6 +57,7 @@
                 <table class="admin-table">
                     <thead>
                         <tr>
+                            <th>ID</th>
                             <th></th>
                             <th>Name</th>
                             <th>Category</th>
@@ -72,6 +73,7 @@
                     <tbody>
                         @foreach ($products as $product)
                             <tr>
+                                <td><strong>{{ $product->id }}</strong></td>
                                 <td>
                                     <a href="{{ route('admin.products.edit', $product) }}">
                                         <img

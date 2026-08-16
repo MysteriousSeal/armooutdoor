@@ -4085,9 +4085,43 @@ a.admin-table-icon-btn:hover {
     margin-top: 1.25rem;
 }
 
+.admin-pagination .btn[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.45;
+    pointer-events: none;
+}
+
 .admin-pagination-status {
     font-size: 0.8125rem;
     color: var(--text-muted);
+}
+
+.admin-pagination-pages {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.admin-pagination-page {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.75rem;
+    height: 1.75rem;
+    padding: 0 0.35rem;
+    font-size: 0.8125rem;
+    color: var(--text);
+    border: 1px solid transparent;
+}
+
+a.admin-pagination-page:hover {
+    border-color: var(--border);
+}
+
+.admin-pagination-page.is-current {
+    font-weight: 600;
+    color: var(--accent);
+    border-color: var(--accent);
 }
 
 .admin-list-hero-row {

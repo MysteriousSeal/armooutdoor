@@ -12,6 +12,9 @@
             ->filter()
             ->unique()
             ->values();
+        $allowedCarriers = \App\Models\Carrier::active()->get()->filter(fn ($carrier) => $product->isCarrierAllowed($carrier));
+        $allowedHomeCarriers = $allowedCarriers->where('method', \App\Enums\DeliveryMethod::Home)->map->localizedName();
+        $allowedRelayCarriers = $allowedCarriers->where('method', \App\Enums\DeliveryMethod::Relay)->map->localizedName();
     @endphp
     <div class="container">
         <nav class="breadcrumbs" aria-label="breadcrumb">
@@ -185,8 +188,12 @@
                 </form>
 
                 <ul class="product-detail-perks">
-                    <li>{{ __('store.home_trust_ship_title') }} — {{ __('store.footer_delivery_home') }}</li>
-                    <li>{{ __('store.home_trust_ship_title') }} — {{ __('store.footer_delivery_relay') }}</li>
+                    @if ($allowedHomeCarriers->isNotEmpty())
+                        <li>{{ __('store.home_trust_ship_title') }} — À domicile : {{ $allowedHomeCarriers->join(', ', ' et ') }}</li>
+                    @endif
+                    @if ($allowedRelayCarriers->isNotEmpty())
+                        <li>{{ __('store.home_trust_ship_title') }} — Point relais : {{ $allowedRelayCarriers->join(', ', ' et ') }}</li>
+                    @endif
                     <li>{{ __('store.home_trust_pay_title') }} — {{ __('store.footer_payment_card') }}, {{ __('store.footer_payment_paypal') }}</li>
                 </ul>
             </div>
