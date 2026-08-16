@@ -133,6 +133,44 @@
                     </section>
 
             @php
+                $oldFilterLabels = old('filter_label', collect($product->filter_attributes ?? [])->pluck('label')->all());
+                $oldFilterValues = old('filter_value', collect($product->filter_attributes ?? [])->pluck('value')->all());
+            @endphp
+                    <section class="order-panel">
+                        <h3 class="order-panel-title">Filters</h3>
+                        <p class="form-hint">Key/value attributes to filter products on in the shop — e.g. Calibre, Marque. Front-office filtering isn't built yet; this just records the data.</p>
+
+                <div class="characteristics-list" id="filters-list">
+                    @forelse ($oldFilterLabels as $i => $label)
+                        <div class="characteristic-row">
+                            <input type="text" name="filter_label[]" class="form-control" placeholder="Label (ex. Calibre)" value="{{ $label }}">
+                            <input type="text" name="filter_value[]" class="form-control" placeholder="Valeur" value="{{ $oldFilterValues[$i] ?? '' }}">
+                            <button type="button" class="btn btn-sm btn-secondary characteristic-remove" aria-label="Remove filter">&times;</button>
+                        </div>
+                    @empty
+                        <div class="characteristic-row">
+                            <input type="text" name="filter_label[]" class="form-control" placeholder="Label (ex. Calibre)" value="">
+                            <input type="text" name="filter_value[]" class="form-control" placeholder="Valeur" value="">
+                            <button type="button" class="btn btn-sm btn-secondary characteristic-remove" aria-label="Remove filter">&times;</button>
+                        </div>
+                    @endforelse
+                </div>
+
+                <button type="button" class="btn btn-sm btn-secondary" id="filter-add">Add filter</button>
+
+                <template id="filter-row-template">
+                    <div class="characteristic-row">
+                        <input type="text" name="filter_label[]" class="form-control" placeholder="Label (ex. Calibre)">
+                        <input type="text" name="filter_value[]" class="form-control" placeholder="Valeur">
+                        <button type="button" class="btn btn-sm btn-secondary characteristic-remove" aria-label="Remove filter">&times;</button>
+                    </div>
+                </template>
+
+                        @error('filter_label.*') <p class="form-error">{{ $message }}</p> @enderror
+                        @error('filter_value.*') <p class="form-error">{{ $message }}</p> @enderror
+                    </section>
+
+            @php
                 $oldLabels = old('characteristic_label', collect($product->characteristics ?? [])->pluck('label')->all());
                 $oldValues = old('characteristic_value', collect($product->characteristics ?? [])->pluck('value')->all());
             @endphp
@@ -437,6 +475,31 @@
             var list = document.getElementById('characteristics-list');
             var addBtn = document.getElementById('characteristic-add');
             var template = document.getElementById('characteristic-row-template');
+
+            if (!list || !addBtn || !template) {
+                return;
+            }
+
+            function bindRemove(row) {
+                row.querySelector('.characteristic-remove').addEventListener('click', function () {
+                    row.remove();
+                });
+            }
+
+            list.querySelectorAll('.characteristic-row').forEach(bindRemove);
+
+            addBtn.addEventListener('click', function () {
+                var row = template.content.firstElementChild.cloneNode(true);
+                bindRemove(row);
+                list.appendChild(row);
+                row.querySelector('input').focus();
+            });
+        })();
+
+        (function () {
+            var list = document.getElementById('filters-list');
+            var addBtn = document.getElementById('filter-add');
+            var template = document.getElementById('filter-row-template');
 
             if (!list || !addBtn || !template) {
                 return;

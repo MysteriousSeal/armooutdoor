@@ -173,6 +173,7 @@ class ProductController extends Controller
                 'fr' => HtmlSanitizer::clean($request->input('description')) ?? '',
             ],
             'characteristics' => $this->characteristicsPayload($request),
+            'filter_attributes' => $this->filterAttributesPayload($request),
             'price_cents' => (int) round(((float) $request->input('price')) * 100),
             'quantity' => $request->integer('quantity'),
             'image' => $this->resolveImage($request, $product, $slug),
@@ -202,6 +203,30 @@ class ProductController extends Controller
         }
 
         return $characteristics;
+    }
+
+    /**
+     * @return list<array{label: string, value: string}>
+     */
+    private function filterAttributesPayload(StoreProductRequest $request): array
+    {
+        $labels = (array) $request->input('filter_label', []);
+        $values = (array) $request->input('filter_value', []);
+
+        $filterAttributes = [];
+
+        foreach ($labels as $index => $label) {
+            $label = trim((string) $label);
+            $value = trim((string) ($values[$index] ?? ''));
+
+            if ($label === '' || $value === '') {
+                continue;
+            }
+
+            $filterAttributes[] = ['label' => $label, 'value' => $value];
+        }
+
+        return $filterAttributes;
     }
 
     /**

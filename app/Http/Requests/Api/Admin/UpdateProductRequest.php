@@ -44,6 +44,9 @@ class UpdateProductRequest extends FormRequest
             'characteristics' => ['sometimes', 'array'],
             'characteristics.*.label' => ['required', 'string', 'max:120'],
             'characteristics.*.value' => ['required', 'string', 'max:500'],
+            'filter_attributes' => ['sometimes', 'array'],
+            'filter_attributes.*.label' => ['required', 'string', 'max:120'],
+            'filter_attributes.*.value' => ['required', 'string', 'max:500'],
         ];
     }
 }
