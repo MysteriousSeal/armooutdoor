@@ -28,22 +28,24 @@ class CategoryController extends Controller
         }
 
         $listingProducts = $category->listingProducts();
-        $filterGroups = $this->filterGroups($listingProducts);
-        $selectedFilters = $this->selectedFilters($request, $filterGroups);
+        $availableFilterValues = $this->availableFilterValues($listingProducts);
+        $selectedFilters = $this->selectedFilters($request, $availableFilterValues);
 
         $products = $this->sortedProducts(
             $this->filteredProducts($listingProducts, $selectedFilters),
             $sort
         );
 
+        $filterGroups = $this->facetedFilterGroups($listingProducts, $availableFilterValues, $selectedFilters);
+
         return view('categories.show', compact('category', 'products', 'sort', 'filterGroups', 'selectedFilters'));
     }
 
     /**
      * @param  Collection<int, Product>  $products
-     * @return array<string, list<array{value: string, count: int}>>
+     * @return array<string, list<string>>
      */
-    private function filterGroups(Collection $products): array
+    private function availableFilterValues(Collection $products): array
     {
         $groups = [];
 
@@ -56,38 +58,79 @@ class CategoryController extends Controller
                     continue;
                 }
 
-                $groups[$label][$value] = ($groups[$label][$value] ?? 0) + 1;
+                $groups[$label][$value] = true;
             }
         }
 
         return collect($groups)
-            ->map(fn (array $values): array => collect($values)
-                ->sortKeys(SORT_NATURAL)
-                ->map(fn (int $count, string $value): array => ['value' => $value, 'count' => $count])
-                ->values()
-                ->all())
+            ->map(fn (array $values): array => collect(array_keys($values))->sort(SORT_NATURAL)->values()->all())
             ->all();
     }
 
     /**
-     * @param  array<string, list<array{value: string, count: int}>>  $filterGroups
+     * @param  array<string, list<string>>  $availableFilterValues
      * @return array<string, string>
      */
-    private function selectedFilters(Request $request, array $filterGroups): array
+    private function selectedFilters(Request $request, array $availableFilterValues): array
     {
         $requested = (array) $request->query('filter', []);
         $selected = [];
 
-        foreach ($filterGroups as $label => $values) {
+        foreach ($availableFilterValues as $label => $values) {
             $value = $requested[$label] ?? null;
-            $knownValues = array_column($values, 'value');
 
-            if (is_string($value) && $value !== '' && in_array($value, $knownValues, true)) {
+            if (is_string($value) && $value !== '' && in_array($value, $values, true)) {
                 $selected[$label] = $value;
             }
         }
 
         return $selected;
+    }
+
+    /**
+     * Counts each label's values against products already narrowed by every
+     * *other* selected filter, so picking one filter updates the counts shown
+     * in the rest instead of freezing them at the unfiltered totals.
+     *
+     * @param  Collection<int, Product>  $products
+     * @param  array<string, list<string>>  $availableFilterValues
+     * @param  array<string, string>  $selectedFilters
+     * @return array<string, list<array{value: string, count: int}>>
+     */
+    private function facetedFilterGroups(Collection $products, array $availableFilterValues, array $selectedFilters): array
+    {
+        $groups = [];
+
+        foreach ($availableFilterValues as $label => $values) {
+            $otherFilters = collect($selectedFilters)->except($label)->all();
+            $scoped = $this->filteredProducts($products, $otherFilters);
+
+            $counts = [];
+
+            foreach ($scoped as $product) {
+                foreach ($product->filter_attributes ?? [] as $attribute) {
+                    if (($attribute['label'] ?? '') !== $label) {
+                        continue;
+                    }
+
+                    $value = $attribute['value'] ?? '';
+
+                    if ($value === '') {
+                        continue;
+                    }
+
+                    $counts[$value] = ($counts[$value] ?? 0) + 1;
+                }
+            }
+
+            $groups[$label] = collect($values)
+                ->filter(fn (string $value): bool => ($counts[$value] ?? 0) > 0 || ($selectedFilters[$label] ?? null) === $value)
+                ->map(fn (string $value): array => ['value' => $value, 'count' => $counts[$value] ?? 0])
+                ->values()
+                ->all();
+        }
+
+        return $groups;
     }
 
     /**
