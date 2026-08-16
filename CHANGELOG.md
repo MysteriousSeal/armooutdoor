@@ -2,6 +2,13 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-17
+
+### Storefront
+
+- **Mobile responsive layout**: the header now collapses to a grid (logo/cart/menu row, then a full-width search row) with the tagline hidden below 640px; the product detail page, category filters, and sort controls also get tighter mobile spacing and full-width stacking.
+- **Website version**: now shown in the footer next to the copyright line (`shop.version` config, starting at 0.1.14).
+
 ## 2026-08-16
 
 ### Discounts
