@@ -16,6 +16,7 @@ use App\Models\ShippingSetting;
 use App\Models\User;
 use App\Support\Cart;
 use App\Support\CartLine;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -91,34 +92,74 @@ class CheckoutController extends Controller
             ->withInput(['address_id' => $address->id]);
     }
 
-    public function applyDiscountCode(Request $request): RedirectResponse
+    public function applyDiscountCode(Request $request, Cart $cart): RedirectResponse|JsonResponse
     {
         $code = strtoupper(trim((string) $request->input('code')));
 
         $discountCode = $code !== '' ? DiscountCode::query()->where('code', $code)->first() : null;
 
         if ($discountCode === null) {
-            return back()->withErrors(['discount_code' => __('store.discount_code_error_not_found')]);
+            $error = __('store.discount_code_error_not_found');
+
+            return $request->wantsJson()
+                ? $this->discountCodeSectionResponse($cart, null, $error, $error)
+                : back()->withErrors(['discount_code' => $error]);
         }
 
         $error = $discountCode->eligibilityError($request->user());
 
         if ($error !== null) {
-            return back()->withErrors(['discount_code' => $error]);
+            return $request->wantsJson()
+                ? $this->discountCodeSectionResponse($cart, null, $error, $error)
+                : back()->withErrors(['discount_code' => $error]);
         }
 
         session()->put(self::DISCOUNT_CODE_SESSION_KEY, $discountCode->id);
+        $message = __('store.discount_code_applied', ['code' => $discountCode->code]);
 
-        return redirect(localized_route('checkout.show'))
-            ->with('status', __('store.discount_code_applied', ['code' => $discountCode->code]));
+        if ($request->wantsJson()) {
+            return $this->discountCodeSectionResponse($cart, $discountCode, $message);
+        }
+
+        return redirect(localized_route('checkout.show'))->with('status', $message);
     }
 
-    public function removeDiscountCode(): RedirectResponse
+    public function removeDiscountCode(Request $request, Cart $cart): RedirectResponse|JsonResponse
     {
         session()->forget(self::DISCOUNT_CODE_SESSION_KEY);
+        $message = __('store.discount_code_removed');
 
-        return redirect(localized_route('checkout.show'))
-            ->with('status', __('store.discount_code_removed'));
+        if ($request->wantsJson()) {
+            return $this->discountCodeSectionResponse($cart, null, $message);
+        }
+
+        return redirect(localized_route('checkout.show'))->with('status', $message);
+    }
+
+    private function discountCodeSectionResponse(Cart $cart, ?DiscountCode $discountCode, string $message, ?string $errorMessage = null): JsonResponse
+    {
+        $subtotalCents = $cart->totalCents();
+        $discountCents = $discountCode ? $subtotalCents - $discountCode->apply($subtotalCents) : 0;
+
+        $errors = new \Illuminate\Support\ViewErrorBag();
+
+        if ($errorMessage !== null) {
+            $errors->put('default', new \Illuminate\Support\MessageBag(['discount_code' => [$errorMessage]]));
+        }
+
+        $sectionHtml = view('partials.checkout-discount-code', [
+            'discountCode' => $discountCode,
+            'discountCents' => $discountCents,
+        ])->with('errors', $errors)->render();
+
+        return response()->json([
+            'applied' => $discountCode !== null,
+            'discountCents' => $discountCents,
+            'discountLabel' => $discountCode ? __('store.order_discount_code', ['code' => $discountCode->code]) : null,
+            'discountValueText' => '-'.format_euros($discountCents),
+            'sectionHtml' => $sectionHtml,
+            'message' => $message,
+        ], $errorMessage !== null ? 422 : 200);
     }
 
     public function store(PlaceOrderRequest $request, Cart $cart): RedirectResponse

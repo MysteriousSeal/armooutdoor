@@ -1,16 +1,16 @@
 (function () {
     var toastTimeout = null;
 
-    function showToast(text) {
+    function showToast(text, type) {
         var toast = document.getElementById('store-toast');
 
         if (!toast) {
             toast = document.createElement('div');
             toast.id = 'store-toast';
-            toast.className = 'store-toast';
             document.body.appendChild(toast);
         }
 
+        toast.className = 'store-toast is-' + (type || 'success');
         toast.textContent = text;
         toast.classList.add('is-visible');
 
@@ -111,7 +111,7 @@
 
         if (input && !isNaN(max) && !isNaN(value) && value > max) {
             var label = form.getAttribute('data-stock-limit-label') || 'Plus que :count disponible(s) pour cet article.';
-            showToast(label.replace(':count', max));
+            showToast(label.replace(':count', max), 'error');
             return;
         }
 

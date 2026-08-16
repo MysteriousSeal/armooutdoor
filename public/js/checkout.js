@@ -99,6 +99,8 @@
         sameBilling.addEventListener('change', syncBillingPicker);
     }
 
+    config.syncTotals = syncTotals;
+
     syncRelayPicker();
     syncTotals();
     syncBillingPicker();

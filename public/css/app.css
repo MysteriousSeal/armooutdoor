@@ -2174,6 +2174,14 @@
     transform: none;
 }
 
+.store-toast.is-success {
+    background: #2f6b3f;
+}
+
+.store-toast.is-error {
+    background: #a13d3d;
+}
+
 .cart-line {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
