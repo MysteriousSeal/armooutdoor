@@ -42,4 +42,21 @@ class RelayPoint extends Model
             $this->city,
         ]));
     }
+
+    /**
+     * Opening hours as one [day, "HH:MM-HH:MM[, HH:MM-HH:MM]"] pair per day.
+     *
+     * @return array<int, array{0: string, 1: string}>
+     */
+    public function hoursLines(): array
+    {
+        if (! $this->hours) {
+            return [];
+        }
+
+        return array_map(
+            fn (string $line): array => array_pad(explode(' ', $line, 2), 2, ''),
+            explode(' · ', $this->hours),
+        );
+    }
 }

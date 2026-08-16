@@ -14,11 +14,14 @@ use App\Models\ProductVariant;
 use App\Models\RelayPoint;
 use App\Models\ShippingSetting;
 use App\Models\User;
+use App\Services\MondialRelayClient;
 use App\Support\Cart;
 use App\Support\CartLine;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -62,7 +65,7 @@ class CheckoutController extends Controller
             'addresses' => $addresses,
             'homeCarriers' => $carriers->filter(fn (Carrier $carrier): bool => $carrier->method === DeliveryMethod::Home)->values(),
             'relayCarriers' => $carriers->filter(fn (Carrier $carrier): bool => $carrier->method === DeliveryMethod::Relay)->values(),
-            'relayPoints' => RelayPoint::query()->orderBy('sort_order')->get(),
+            'relayPoints' => new Collection(),
             'selectedAddressId' => $selectedAddressId,
             'sameBillingAddress' => $sameBillingAddress,
             'selectedBillingAddressId' => $selectedBillingAddressId,
@@ -90,6 +93,64 @@ class CheckoutController extends Controller
         return redirect(localized_route('checkout.show'))
             ->with('status', __('store.address_saved'))
             ->withInput(['address_id' => $address->id]);
+    }
+
+    public function relayPoints(Request $request): JsonResponse
+    {
+        $postalCode = trim((string) $request->query('postal_code'));
+        $country = strtoupper((string) $request->query('country', 'FR'));
+
+        $points = $this->relayPointsFor($postalCode, $country);
+
+        return response()->json([
+            'points' => $points->map(fn (RelayPoint $point): array => [
+                'id' => $point->id,
+                'name' => $point->name,
+                'line1' => $point->line1,
+                'postal_code' => $point->postal_code,
+                'city' => $point->city,
+                'hours' => $point->hours,
+                'search' => $point->searchBlob(),
+            ])->values(),
+        ]);
+    }
+
+    public function postalCodeSearch(Request $request): JsonResponse
+    {
+        $query = mb_strtolower(trim((string) $request->query('q')));
+
+        if ($query === '') {
+            return response()->json(['results' => []]);
+        }
+
+        $isNumeric = ctype_digit($query[0]);
+
+        $matches = collect($this->postalCodes())
+            ->filter(function (array $pair) use ($query, $isNumeric): bool {
+                return $isNumeric
+                    ? str_starts_with($pair[0], $query)
+                    : str_starts_with(mb_strtolower($pair[1]), $query);
+            })
+            ->take(8)
+            ->values();
+
+        return response()->json(['results' => $matches]);
+    }
+
+    /**
+     * @return array<int, array{0: string, 1: string}>
+     */
+    private function postalCodes(): array
+    {
+        return Cache::rememberForever('fr_postal_codes', function (): array {
+            $path = resource_path('data/fr-postal-codes.json');
+
+            if (! is_file($path)) {
+                return [];
+            }
+
+            return json_decode(file_get_contents($path), true) ?? [];
+        });
     }
 
     public function applyDiscountCode(Request $request, Cart $cart): RedirectResponse|JsonResponse
@@ -313,5 +374,58 @@ class CheckoutController extends Controller
         }
 
         return $discountCode;
+    }
+
+    /**
+     * Relay points near a postal code, sourced live from Mondial Relay and
+     * cached locally (so the picked point still resolves to a stable local
+     * row for order snapshots). Falls back to whatever is already cached
+     * for that postal code if the live call is unavailable.
+     *
+     * @return Collection<int, RelayPoint>
+     */
+    private function relayPointsFor(?string $postalCode, string $country = 'FR'): Collection
+    {
+        if (blank($postalCode)) {
+            return new Collection();
+        }
+
+        $results = app(MondialRelayClient::class)->searchByPostalCode($postalCode, $country);
+
+        if ($results === []) {
+            return RelayPoint::query()
+                ->where('postal_code', $postalCode)
+                ->orderBy('sort_order')
+                ->get();
+        }
+
+        $slugs = [];
+
+        foreach ($results as $index => $point) {
+            $slug = 'mr-'.$point['num'];
+            $slugs[] = $slug;
+
+            RelayPoint::query()->updateOrCreate(
+                ['slug' => $slug],
+                [
+                    'name' => $point['name'],
+                    'line1' => $point['line1'],
+                    'postal_code' => $point['postal_code'],
+                    'city' => $point['city'],
+                    'country' => $point['country'] ?: $country,
+                    'hours' => $point['hours'] ?? null,
+                    'sort_order' => $index,
+                ],
+            );
+        }
+
+        $points = RelayPoint::query()
+            ->whereIn('slug', $slugs)
+            ->orderBy('sort_order')
+            ->get();
+
+        return $points
+            ->sortBy(fn (RelayPoint $point): int => $point->postal_code === $postalCode ? 0 : 1)
+            ->values();
     }
 }

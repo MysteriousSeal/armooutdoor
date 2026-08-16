@@ -222,6 +222,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/products/{product:slug}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
 
     Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
+    Route::get('/checkout/relay-points', [CheckoutController::class, 'relayPoints'])->name('checkout.relay-points');
+    Route::get('/checkout/postal-codes', [CheckoutController::class, 'postalCodeSearch'])->name('checkout.postal-codes');
     Route::post('/checkout/addresses', [CheckoutController::class, 'storeAddress'])->name('checkout.addresses.store');
     Route::post('/checkout/discount-code', [CheckoutController::class, 'applyDiscountCode'])->name('checkout.discount-code.store');
     Route::delete('/checkout/discount-code', [CheckoutController::class, 'removeDiscountCode'])->name('checkout.discount-code.destroy');

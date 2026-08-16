@@ -192,6 +192,7 @@ return [
     'relay_search_placeholder' => 'Lyon, 75004…',
     'relay_hours' => 'Horaires',
     'relay_required' => 'Choisissez un point relais pour ce transporteur.',
+    'relay_empty' => 'Aucun point relais trouvé pour cette adresse.',
     'carrier_unavailable' => "Ce transporteur n'est plus disponible pour les articles de votre panier.",
     'place_order' => 'Valider la commande',
     'payment_section' => 'Paiement',
