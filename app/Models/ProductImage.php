@@ -33,4 +33,9 @@ class ProductImage extends Model
 
         return asset('images/'.$this->image);
     }
+
+    public function thumbnailUrl(): string
+    {
+        return \App\Support\ImageThumbnailer::urlFor($this->image);
+    }
 }

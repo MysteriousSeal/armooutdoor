@@ -115,4 +115,9 @@ class ProductVariant extends Model
 
         return asset('images/'.$image);
     }
+
+    public function thumbnailUrl(): string
+    {
+        return \App\Support\ImageThumbnailer::urlFor($this->image ?: $this->product->image);
+    }
 }

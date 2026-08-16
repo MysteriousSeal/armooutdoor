@@ -247,6 +247,11 @@ class Product extends Model
         return asset('images/'.$this->image);
     }
 
+    public function thumbnailUrl(): string
+    {
+        return \App\Support\ImageThumbnailer::urlFor($this->image);
+    }
+
     private function localized(string $attribute): string
     {
         $value = $this->{$attribute};

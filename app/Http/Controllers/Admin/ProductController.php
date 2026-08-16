@@ -401,7 +401,11 @@ class ProductController extends Controller
         $name = Str::slug($slug).'-'.Str::lower(Str::random(6)).'.'.$file->getClientOriginalExtension();
         $file->move($directory, $name);
 
-        return 'products/'.$name;
+        $relativePath = \App\Support\ImageThumbnailer::normalizeMain('products/'.$name) ?? 'products/'.$name;
+
+        \App\Support\ImageThumbnailer::generate($relativePath);
+
+        return $relativePath;
     }
 
     /**

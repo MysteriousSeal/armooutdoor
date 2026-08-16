@@ -7,10 +7,10 @@
 @section('content')
     @php
         $inWishlist = ($wishlistProductIds ?? collect())->contains($product->id);
-        $gallery = collect([$product->imageUrl()])
-            ->concat($product->images->map->imageUrl())
-            ->filter()
-            ->unique()
+        $gallery = collect([['full' => $product->imageUrl(), 'thumb' => $product->thumbnailUrl()]])
+            ->concat($product->images->map(fn ($image) => ['full' => $image->imageUrl(), 'thumb' => $image->thumbnailUrl()]))
+            ->filter(fn (array $entry) => $entry['full'] !== '')
+            ->unique('full')
             ->values();
         $allowedCarriers = \App\Models\Carrier::active()->get()->filter(fn ($carrier) => $product->isCarrierAllowed($carrier));
         $allowedHomeCarriers = $allowedCarriers->where('method', \App\Enums\DeliveryMethod::Home)->map->localizedName();
@@ -53,9 +53,9 @@
                             <button
                                 type="button"
                                 class="product-detail-thumb {{ $loop->first ? 'is-active' : '' }}"
-                                data-full-src="{{ $src }}"
+                                data-full-src="{{ $src['full'] }}"
                             >
-                                <img src="{{ $src }}" alt="" loading="lazy">
+                                <img src="{{ $src['thumb'] }}" alt="" loading="lazy">
                             </button>
                         @endforeach
                     </div>

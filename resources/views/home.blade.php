@@ -96,7 +96,7 @@
                         @if ($cover)
                             <span class="home-cat-media">
                                 <img
-                                    src="{{ $cover->imageUrl() }}"
+                                    src="{{ $cover->thumbnailUrl() }}"
                                     alt=""
                                     width="600"
                                     height="600"

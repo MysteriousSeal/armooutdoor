@@ -364,7 +364,7 @@
                         <li class="checkout-line">
                             <a href="{{ localized_route('products.show', ['product' => $line->product->slug]) }}" class="checkout-line-media">
                                 <img
-                                    src="{{ $line->variant?->imageUrl() ?? $line->product->imageUrl() }}"
+                                    src="{{ $line->variant?->thumbnailUrl() ?? $line->product->thumbnailUrl() }}"
                                     alt=""
                                     width="72"
                                     height="72"

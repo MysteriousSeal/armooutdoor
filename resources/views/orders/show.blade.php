@@ -29,7 +29,7 @@
                             <li class="order-item">
                                 @if ($item->image)
                                     <span class="order-item-media">
-                                        <img src="{{ $item->imageUrl() }}" alt="" width="96" height="96">
+                                        <img src="{{ $item->thumbnailUrl() }}" alt="" width="96" height="96">
                                     </span>
                                 @endif
                                 <div class="order-item-body">

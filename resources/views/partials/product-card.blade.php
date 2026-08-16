@@ -7,7 +7,7 @@
     <a href="{{ localized_route('products.show', ['product' => $product->slug]) }}" class="masonry-card-link">
         <div class="masonry-card-media">
             <img
-                src="{{ $product->imageUrl() }}"
+                src="{{ $product->thumbnailUrl() }}"
                 alt="{{ $product->localizedName() }}"
                 width="900"
                 height="1200"

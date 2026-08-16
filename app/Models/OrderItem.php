@@ -118,6 +118,11 @@ class OrderItem extends Model
         return asset('images/'.$this->image);
     }
 
+    public function thumbnailUrl(): string
+    {
+        return \App\Support\ImageThumbnailer::urlFor($this->image);
+    }
+
     /**
      * Filesystem path for local images, for use in PDF rendering (dompdf
      * embeds local files far more reliably than it fetches its own HTTP URLs).

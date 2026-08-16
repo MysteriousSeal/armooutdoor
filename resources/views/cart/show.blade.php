@@ -31,7 +31,7 @@
                             <div class="cart-line-media-slot">
                                 <a href="{{ localized_route('products.show', ['product' => $line->product->slug]) }}" class="cart-line-media">
                                     <img
-                                        src="{{ $line->variant?->imageUrl() ?? $line->product->imageUrl() }}"
+                                        src="{{ $line->variant?->thumbnailUrl() ?? $line->product->thumbnailUrl() }}"
                                         alt="{{ $line->product->localizedName() }}"
                                         width="180"
                                         height="180"
