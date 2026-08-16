@@ -46,6 +46,10 @@ class ProductController extends Controller
         return view('admin.products.index', [
             'products' => $products,
             'productCount' => Product::query()->count(),
+            'disabledCount' => Product::query()->where('is_active', false)->count(),
+            'outOfStockCount' => Product::query()->where('quantity', '<=', 0)->count(),
+            'noGtinCount' => Product::query()->whereNull('gtin')->count(),
+            'noWeightCount' => Product::query()->whereNull('weight_grams')->count(),
             'categories' => $this->categoryOptions(),
             'search' => $search,
             'categorySlug' => $categorySlug,

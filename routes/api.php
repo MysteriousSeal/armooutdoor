@@ -6,10 +6,15 @@ use App\Http\Controllers\Api\Admin\ProductController as ApiAdminProductControlle
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('admin.api')->prefix('admin')->name('api.admin.')->group(function () {
+    // Categories
     Route::get('/categories', [ApiAdminCategoryController::class, 'index'])->name('categories.index');
+
+    // Products
     Route::get('/products', [ApiAdminProductController::class, 'index'])->name('products.index');
     Route::get('/products/{product}', [ApiAdminProductController::class, 'show'])->name('products.show');
     Route::patch('/products/{product}', [ApiAdminProductController::class, 'update'])->name('products.update');
+
+    // Orders
     Route::post('/orders', [ApiAdminOrderController::class, 'createDraft'])->name('orders.store');
     Route::patch('/orders/{order}', [ApiAdminOrderController::class, 'updateDraft'])->name('orders.update');
 });

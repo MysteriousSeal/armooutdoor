@@ -15,6 +15,10 @@
             </div>
             <div class="admin-list-meta">
                 <span class="admin-list-chip">{{ number_format($productCount) }} products</span>
+                <span class="admin-list-chip">{{ number_format($disabledCount) }} disabled</span>
+                <span class="admin-list-chip">{{ number_format($outOfStockCount) }} out of stock</span>
+                <span class="admin-list-chip">{{ number_format($noGtinCount) }} without GTIN</span>
+                <span class="admin-list-chip">{{ number_format($noWeightCount) }} without weight</span>
                 @if ($search !== '' || $categorySlug !== '')
                     <span class="admin-list-chip is-filtered">Filtered</span>
                 @endif
