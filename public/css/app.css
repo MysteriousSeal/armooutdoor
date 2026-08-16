@@ -2204,8 +2204,39 @@
     font-variant-numeric: tabular-nums;
 }
 
-.cart-summary-free-shipping {
-    margin-top: 0.6rem;
+.cart-summary-shipping {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+    padding: 0.7rem 0.8rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.cart-summary-shipping-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.cart-summary-shipping-value {
+    font-size: 0.875rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+    text-align: right;
+}
+
+.cart-summary-shipping.is-free .cart-summary-shipping-value {
+    color: #3d6b4e;
+}
+
+[data-theme='dark'] .cart-summary-shipping.is-free .cart-summary-shipping-value {
+    color: #9dbea8;
 }
 
 .cart-summary-note {

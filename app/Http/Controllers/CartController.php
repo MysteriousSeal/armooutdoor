@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Carrier;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\ShippingSetting;
@@ -15,11 +16,21 @@ class CartController extends Controller
 {
     public function show(Cart $cart): View
     {
+        $shippingSetting = ShippingSetting::current();
+        $subtotalCents = $cart->totalCents();
+        $weightGrams = $cart->totalWeightGrams();
+
+        $cheapestShippingCents = Carrier::query()->active()->get()
+            ->filter(fn (Carrier $carrier): bool => $cart->allowsCarrier($carrier))
+            ->map(fn (Carrier $carrier): int => $shippingSetting->effectivePriceCents($carrier, $subtotalCents, $weightGrams))
+            ->min();
+
         return view('cart.show', [
             'lines' => $cart->lines(),
             'total' => $cart->formattedTotal(),
             'itemCount' => $cart->quantity(),
-            'freeShippingUnlocked' => ShippingSetting::current()->isUnlockedBy($cart->totalCents()),
+            'freeShippingUnlocked' => $shippingSetting->isUnlockedBy($subtotalCents),
+            'cheapestShippingCents' => $cheapestShippingCents,
         ]);
     }
 

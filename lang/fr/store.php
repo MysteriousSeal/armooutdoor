@@ -161,6 +161,7 @@ return [
     'country_LU' => 'Luxembourg',
     'shipping_free' => 'Gratuite',
     'free_shipping_badge' => 'Livraison gratuite',
+    'shipping_from_amount' => 'À partir de :price',
     'shipping_section' => 'Livraison',
     'shipping_home' => 'À domicile',
     'shipping_relay' => 'Point relais',

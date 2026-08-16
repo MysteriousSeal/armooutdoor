@@ -121,8 +121,16 @@
                         <span class="cart-summary-count">{{ trans_choice('store.cart_count', $itemCount, ['count' => $itemCount]) }}</span>
                     </div>
                     <p class="cart-summary-total">{{ $total }}</p>
-                    @if ($freeShippingUnlocked)
-                        <span class="badge badge-active cart-summary-free-shipping">{{ __('store.free_shipping_badge') }}</span>
+                    @if ($freeShippingUnlocked || $cheapestShippingCents === 0)
+                        <div class="cart-summary-shipping is-free">
+                            <span class="cart-summary-shipping-label">{{ __('store.shipping') }}</span>
+                            <span class="cart-summary-shipping-value">{{ __('store.shipping_free') }}</span>
+                        </div>
+                    @elseif ($cheapestShippingCents !== null)
+                        <div class="cart-summary-shipping">
+                            <span class="cart-summary-shipping-label">{{ __('store.shipping') }}</span>
+                            <span class="cart-summary-shipping-value">{{ __('store.shipping_from_amount', ['price' => format_euros($cheapestShippingCents)]) }}</span>
+                        </div>
                     @endif
                     <p class="cart-summary-note">{{ __('store.cart_note') }}</p>
                     <a href="{{ localized_route('checkout.show') }}" class="btn btn-primary btn-block">{{ __('store.checkout') }}</a>
