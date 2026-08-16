@@ -14,7 +14,7 @@ use App\Models\ProductVariant;
 use App\Models\RelayPoint;
 use App\Models\ShippingSetting;
 use App\Models\User;
-use App\Services\MondialRelayClient;
+use App\Services\SendcloudRelayClient;
 use App\Support\Cart;
 use App\Support\CartLine;
 use Illuminate\Database\Eloquent\Collection;
@@ -99,8 +99,9 @@ class CheckoutController extends Controller
     {
         $postalCode = trim((string) $request->query('postal_code'));
         $country = strtoupper((string) $request->query('country', 'FR'));
+        $provider = $request->query('provider') === 'chronopost' ? 'chronopost' : 'mondial_relay';
 
-        $points = $this->relayPointsFor($postalCode, $country);
+        $points = $this->relayPointsFor($postalCode, $country, $provider);
 
         return response()->json([
             'points' => $points->map(fn (RelayPoint $point): array => [
@@ -377,24 +378,28 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Relay points near a postal code, sourced live from Mondial Relay and
-     * cached locally (so the picked point still resolves to a stable local
-     * row for order snapshots). Falls back to whatever is already cached
-     * for that postal code if the live call is unavailable.
+     * Relay points near a postal code, sourced live from the given
+     * provider's network and cached locally (so the picked point still
+     * resolves to a stable local row for order snapshots). Falls back to
+     * whatever is already cached for that postal code if the live call is
+     * unavailable.
      *
      * @return Collection<int, RelayPoint>
      */
-    private function relayPointsFor(?string $postalCode, string $country = 'FR'): Collection
+    private function relayPointsFor(?string $postalCode, string $country = 'FR', string $provider = 'mondial_relay'): Collection
     {
         if (blank($postalCode)) {
             return new Collection();
         }
 
-        $results = app(MondialRelayClient::class)->searchByPostalCode($postalCode, $country);
+        $prefix = $provider === 'chronopost' ? 'cp-' : 'mr-';
+
+        $results = app(SendcloudRelayClient::class)->searchByPostalCode($provider, $postalCode, $country);
 
         if ($results === []) {
             return RelayPoint::query()
                 ->where('postal_code', $postalCode)
+                ->where('slug', 'like', $prefix.'%')
                 ->orderBy('sort_order')
                 ->get();
         }
@@ -402,7 +407,7 @@ class CheckoutController extends Controller
         $slugs = [];
 
         foreach ($results as $index => $point) {
-            $slug = 'mr-'.$point['num'];
+            $slug = $prefix.$point['num'];
             $slugs[] = $slug;
 
             RelayPoint::query()->updateOrCreate(

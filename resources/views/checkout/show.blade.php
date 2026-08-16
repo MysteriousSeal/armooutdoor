@@ -283,50 +283,68 @@
                     <div id="relay-picker" class="relay-picker" @if (! $selectedCarrierIsRelay) hidden @endif>
                         <h4 class="shipping-group-title">{{ __('store.relay_section') }}</h4>
 
-                        <div class="form-group relay-search-wrap">
-                            <label for="relay-search">{{ __('store.relay_search') }}</label>
-                            <input
-                                type="search"
-                                id="relay-search"
-                                class="form-control"
-                                placeholder="{{ __('store.relay_search_placeholder') }}"
-                                autocomplete="off"
-                            >
-                            <ul class="relay-search-results" id="relay-search-results" hidden></ul>
+                        <div id="relay-list" @if ($selectedRelayPointId) hidden @endif>
+                            <div class="form-group relay-search-wrap">
+                                <label for="relay-search">{{ __('store.relay_search') }}</label>
+                                <input
+                                    type="search"
+                                    id="relay-search"
+                                    class="form-control"
+                                    placeholder="{{ __('store.relay_search_placeholder') }}"
+                                    autocomplete="off"
+                                >
+                                <ul class="relay-search-results" id="relay-search-results" hidden></ul>
+                            </div>
+
+                            <div class="choice-grid choice-grid--relay" id="relay-points-grid">
+                                @foreach ($relayPoints as $point)
+                                    <label class="choice-card relay-option" data-search="{{ $point->searchBlob() }}">
+                                        <input
+                                            type="radio"
+                                            name="relay_point_id"
+                                            value="{{ $point->id }}"
+                                            form="checkout-form"
+                                            @checked((string) $selectedRelayPointId === (string) $point->id)
+                                            @disabled(! $selectedCarrierIsRelay)
+                                        >
+                                        <span class="choice-card-body">
+                                            <span class="choice-card-title relay-title">{{ $point->name }}</span>
+                                            <span class="choice-card-meta relay-address">{{ $point->line1 }}</span>
+                                            <span class="choice-card-meta relay-address">{{ $point->postal_code }} {{ $point->city }}</span>
+                                            @if ($point->hoursLines() !== [])
+                                                <span class="choice-card-meta relay-hours-label">{{ __('store.relay_hours') }}</span>
+                                                <ul class="relay-hours">
+                                                    @foreach ($point->hoursLines() as [$day, $range])
+                                                        <li><span class="relay-hours-day">{{ $day }}</span><span class="relay-hours-range">{{ $range }}</span></li>
+                                                    @endforeach
+                                                </ul>
+                                            @endif
+                                        </span>
+                                    </label>
+                                @endforeach
+                            </div>
+                            <p class="checkout-hint" id="relay-points-empty" @unless ($relayPoints->isEmpty()) hidden @endunless>
+                                {{ __('store.relay_empty') }}
+                            </p>
+                            <div class="relay-points-more-wrap">
+                                <button type="button" class="btn btn-secondary" id="relay-points-more" hidden>
+                                    {{ __('store.relay_show_more') }}
+                                </button>
+                            </div>
                         </div>
 
-                        <div class="choice-grid choice-grid--relay" id="relay-points-grid">
-                            @foreach ($relayPoints as $point)
-                                <label class="choice-card relay-option" data-search="{{ $point->searchBlob() }}">
-                                    <input
-                                        type="radio"
-                                        name="relay_point_id"
-                                        value="{{ $point->id }}"
-                                        form="checkout-form"
-                                        @checked((string) $selectedRelayPointId === (string) $point->id)
-                                        @disabled(! $selectedCarrierIsRelay)
-                                    >
-                                    <span class="choice-card-body">
-                                        <span class="choice-card-title relay-title">{{ $point->name }}</span>
-                                        <span class="choice-card-meta">{{ $point->line1 }}</span>
-                                        <span class="choice-card-meta">{{ $point->postal_code }} {{ $point->city }}</span>
-                                        @if ($point->hoursLines() !== [])
-                                            <span class="choice-card-meta relay-hours-label">{{ __('store.relay_hours') }}</span>
-                                            <ul class="relay-hours">
-                                                @foreach ($point->hoursLines() as [$day, $range])
-                                                    <li><span class="relay-hours-day">{{ $day }}</span><span class="relay-hours-range">{{ $range }}</span></li>
-                                                @endforeach
-                                            </ul>
-                                        @endif
-                                    </span>
-                                </label>
-                            @endforeach
+                        <div class="relay-selected" id="relay-selected" @unless ($selectedRelayPointId) hidden @endunless>
+                            <p class="relay-selected-kicker">{{ __('store.relay_selected_kicker') }}</p>
+                            <div class="relay-selected-card">
+                                <div class="relay-selected-copy" id="relay-selected-body"></div>
+                                <button type="button" class="btn btn-secondary" id="relay-selected-change">
+                                    {{ __('store.relay_change') }}
+                                </button>
+                            </div>
                         </div>
-                        <p class="checkout-hint" id="relay-points-empty" @unless ($relayPoints->isEmpty()) hidden @endunless>
-                            {{ __('store.relay_empty') }}
-                        </p>
+
                         @error('relay_point_id')
-                            <p class="form-error">{{ $message }}</p>
+                            <p class="form-error" id="relay-point-error">{{ $message }}</p>
                         @enderror
                     </div>
                 </section>

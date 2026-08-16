@@ -11,9 +11,12 @@ All notable changes to this project since the initial commit are documented here
 
 ### Shipping & carriers
 
-- **Live Mondial Relay pickup points**: checkout now calls Mondial Relay's real web service instead of a static seeded list, fetched for the customer's selected delivery address's postal code (exact-postcode matches sorted first) and cached locally so order snapshots keep working unchanged. Only fetched once the customer actually selects Mondial Relay (not on page load, which was adding significant load time) and re-fetched when they switch address; Chronopost Shop2Shop — a separate relay-type carrier — doesn't trigger it.
+- **Live relay/pickup points for Mondial Relay and Chronopost Shop2Shop**: checkout fetches real pickup points instead of a static seeded list, via Sendcloud's Service Points API (one account, both carrier networks — no separate Mondial Relay or Chronopost webservice integration needed). Points are searched by proximity (15 km radius around the postal code, not a strict postal-code-boundary match) so sparse/rural postal codes that used to return zero or one point now return a proper nearby list; results are capped at 40, sorted nearest-first, exact-postcode matches first. Cached locally so order snapshots keep working unchanged.
+  - Only fetched once the customer actually selects a relay carrier (not on page load, which was adding significant load time) and re-fetched when they switch address. Mondial Relay and Chronopost Shop2Shop are fetched independently — selecting one never triggers a lookup for the other.
+  - The list shows 10 points at a time with an "Afficher plus" button for more, 2 per row on desktop. Selecting a point collapses the search/list down to just that point's details, with a "Changer de point relais" button to go back.
+  - Point titles and addresses always render uppercase.
 - **Postcode/city autocomplete**: a new "Rechercher par ville ou code postal" search on the relay picker suggests matches as you type, backed by a new `GET /checkout/postal-codes` endpoint over a downloaded official French postcode dataset kept server-side (never shipped to the client).
-- **Relay point opening hours**: now shown, condensed so consecutive days with the same hours collapse into one line ("Lun-Ven 09:00-19:00") instead of repeating per day. Point titles always render uppercase; the list shows 2 per row on desktop.
+- **Relay point opening hours**: now shown, condensed so consecutive days with the same hours collapse into one line ("Lun-Ven 09:00-19:00") instead of repeating per day.
 
 ## 2026-08-16
 

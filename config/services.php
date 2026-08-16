@@ -39,9 +39,9 @@ return [
         'token' => env('ADMIN_API_TOKEN'),
     ],
 
-    'mondial_relay' => [
-        'enseigne' => env('MONDIAL_RELAY_ENSEIGNE'),
-        'private_key' => env('MONDIAL_RELAY_PRIVATE_KEY'),
+    'sendcloud' => [
+        'public_key' => env('SENDCLOUD_PUBLIC_KEY'),
+        'secret_key' => env('SENDCLOUD_SECRET_KEY'),
     ],
 
 ];

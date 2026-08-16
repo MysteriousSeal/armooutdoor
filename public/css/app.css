@@ -2660,7 +2660,8 @@
     color: var(--checkout-muted);
 }
 
-.relay-title {
+.relay-title,
+.relay-address {
     text-transform: uppercase;
 }
 
@@ -2719,11 +2720,75 @@
     margin-bottom: 0.7rem;
 }
 
+.relay-points-more-wrap {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.25rem;
+}
+
+.relay-points-more-wrap:has([hidden]) {
+    display: none;
+}
+
 .relay-picker {
     margin-top: 1.5rem;
     padding: 1.15rem 1.15rem 1.25rem;
     background: var(--surface);
     border: 1px solid var(--border);
+}
+
+.relay-selected {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.55rem;
+}
+
+.relay-selected-kicker {
+    margin: 0;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.relay-selected-card {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    padding: 1.05rem 1.1rem 1.05rem;
+    background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+    border: 1px solid var(--accent);
+}
+
+.relay-selected-copy,
+.relay-selected .choice-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+}
+
+.relay-selected .choice-card-body::before {
+    display: none;
+}
+
+.relay-selected .relay-title {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.relay-selected .relay-hours-label {
+    margin-top: 0.55rem;
+}
+
+.relay-selected-card .btn {
+    align-self: flex-start;
 }
 
 .relay-search-wrap {
