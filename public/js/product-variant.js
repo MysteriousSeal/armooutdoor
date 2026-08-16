@@ -11,7 +11,9 @@
         return;
     }
 
-    var priceEl = document.getElementById('product-detail-price');
+    var priceEl = document.getElementById('product-detail-price-current');
+    var priceOriginalEl = document.getElementById('product-detail-price-original');
+    var discountBadgeEl = document.getElementById('product-detail-discount-badge');
     var currentEl = document.getElementById('product-variant-current');
     var mainImage = document.getElementById('product-detail-main-image');
     var qtyInput = form.querySelector('.qty-stepper-input');
@@ -28,6 +30,28 @@
 
         if (priceEl && radio.hasAttribute('data-variant-price')) {
             priceEl.textContent = radio.getAttribute('data-variant-price');
+        }
+
+        if (priceOriginalEl) {
+            var originalPrice = radio.getAttribute('data-variant-original-price');
+
+            if (originalPrice) {
+                priceOriginalEl.textContent = originalPrice;
+                priceOriginalEl.hidden = false;
+            } else {
+                priceOriginalEl.hidden = true;
+            }
+        }
+
+        if (discountBadgeEl) {
+            var discountLabel = radio.getAttribute('data-variant-discount-label');
+
+            if (discountLabel) {
+                discountBadgeEl.textContent = discountLabel;
+                discountBadgeEl.hidden = false;
+            } else {
+                discountBadgeEl.hidden = true;
+            }
         }
 
         var max = parseInt(radio.getAttribute('data-variant-max'), 10) || 0;

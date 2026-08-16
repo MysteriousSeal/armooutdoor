@@ -69,6 +69,7 @@
                         ->values();
                     $selectedVariantId = old('variant_id', optional($activeVariants->first(fn ($variant) => $variant->inStock()) ?? $activeVariants->first())->id);
                     $displayVariant = $product->hasVariants() ? $activeVariants->firstWhere('id', (int) $selectedVariantId) : null;
+                    $variantHasOwnPrice = $displayVariant?->price_cents !== null;
                 @endphp
 
                 @if ($product->category)
@@ -85,11 +86,18 @@
                     <span class="card-rating-count">({{ $product->reviewsCount() }})</span>
                 </div>
                 <div class="product-detail-meta">
+                    <span
+                        class="badge badge-active cart-line-discount-badge"
+                        id="product-detail-discount-badge"
+                        @if ($variantHasOwnPrice || ! $product->hasDiscount()) hidden @endif
+                    >{{ $product->hasDiscount() ? $product->discount->label() : '' }}</span>
                     <p class="product-detail-price" id="product-detail-price">
-                        @if ($product->hasDiscount())
-                            <span class="product-detail-price-original">{{ $product->formattedOriginalPrice() }}</span>
-                        @endif
-                        {{ ($displayVariant ?? $product)->formattedPrice() }}
+                        <span
+                            class="product-detail-price-original"
+                            id="product-detail-price-original"
+                            @if ($variantHasOwnPrice || ! $product->hasDiscount()) hidden @endif
+                        >{{ $product->formattedOriginalPrice() }}</span>
+                        <span id="product-detail-price-current">{{ ($displayVariant ?? $product)->formattedPrice() }}</span>
                     </p>
                     <span class="stock-badge {{ $product->lowStock() ? 'is-low-stock' : ($product->inStock() ? 'is-in-stock' : 'is-out-of-stock') }}" id="product-stock-badge">
                         {{ $product->lowStock() ? __('store.low_stock') : ($product->inStock() ? __('store.in_stock') : __('store.out_of_stock')) }}
@@ -128,6 +136,8 @@
                                                 value="{{ $variant->id }}"
                                                 data-variant-label="{{ $variantLabel }}"
                                                 data-variant-price="{{ $variant->formattedPrice() }}"
+                                                data-variant-original-price="{{ ($variant->price_cents === null && $product->hasDiscount()) ? $product->formattedOriginalPrice() : '' }}"
+                                                data-variant-discount-label="{{ ($variant->price_cents === null && $product->hasDiscount()) ? $product->discount->label() : '' }}"
                                                 data-variant-max="{{ $variant->maxPurchasable() }}"
                                                 @if ($variant->image)
                                                     data-variant-image="{{ $variant->imageUrl() }}"

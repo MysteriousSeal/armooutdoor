@@ -2567,6 +2567,10 @@ textarea.form-control {
     margin-bottom: 0.35rem;
 }
 
+.product-detail-meta .cart-line-discount-badge {
+    margin: 0;
+}
+
 .cart-line-unit-price {
     margin: 0 0 0.2rem;
     font-size: 0.75rem;
