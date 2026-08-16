@@ -357,7 +357,7 @@ class OrderController extends Controller
             'company' => CompanySetting::current(),
         ])->setPaper('a4');
 
-        return $pdf->download('inv-'.$order->number.'.pdf');
+        return $pdf->download('facture-'.$order->number.'.pdf');
     }
 
     public function deliverySlip(Order $order): Response
@@ -371,7 +371,7 @@ class OrderController extends Controller
             'company' => CompanySetting::current(),
         ])->setPaper('a4');
 
-        return $pdf->download('ds-'.$order->number.'.pdf');
+        return $pdf->download('bdl-'.$order->number.'.pdf');
     }
 
     public function updateTracking(Request $request, Order $order): RedirectResponse

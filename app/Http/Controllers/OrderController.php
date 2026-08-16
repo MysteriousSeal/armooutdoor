@@ -38,6 +38,6 @@ class OrderController extends Controller
             'company' => CompanySetting::current(),
         ])->setPaper('a4');
 
-        return $pdf->download('invoice-'.$order->number.'.pdf');
+        return $pdf->download('facture-'.$order->number.'.pdf');
     }
 }
