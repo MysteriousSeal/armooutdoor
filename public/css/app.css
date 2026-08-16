@@ -1215,9 +1215,7 @@ button.btn {
     font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.02em;
-    color: #7a4a45;
-    background: #f6eeec;
-    border: 1px solid #e6d4d0;
+    border: 1px solid transparent;
 }
 
 .card-variant-chip {
@@ -1380,19 +1378,22 @@ button.btn {
     background: currentColor;
 }
 
-.stock-badge.is-in-stock {
+.stock-badge.is-in-stock,
+.card-stock-chip.is-in-stock {
     color: #3d6b4e;
     background: #eef4ef;
     border-color: #d5e4d8;
 }
 
-.stock-badge.is-low-stock {
+.stock-badge.is-low-stock,
+.card-stock-chip.is-low-stock {
     color: #8a5a12;
     background: #faf1e2;
     border-color: #edddb8;
 }
 
-.stock-badge.is-out-of-stock {
+.stock-badge.is-out-of-stock,
+.card-stock-chip.is-out-of-stock {
     color: #7a4a45;
     background: #f6eeec;
     border-color: #e6d4d0;
@@ -3295,19 +3296,22 @@ textarea.form-control {
     color: #e08585;
 }
 
-[data-theme='dark'] .stock-badge.is-in-stock {
+[data-theme='dark'] .stock-badge.is-in-stock,
+[data-theme='dark'] .card-stock-chip.is-in-stock {
     color: #9dccab;
     background: #2a332c;
     border-color: #3d4d40;
 }
 
-[data-theme='dark'] .stock-badge.is-low-stock {
+[data-theme='dark'] .stock-badge.is-low-stock,
+[data-theme='dark'] .card-stock-chip.is-low-stock {
     color: #e0b673;
     background: #362c1c;
     border-color: #4d3f28;
 }
 
-[data-theme='dark'] .stock-badge.is-out-of-stock {
+[data-theme='dark'] .stock-badge.is-out-of-stock,
+[data-theme='dark'] .card-stock-chip.is-out-of-stock {
     color: #d4a39d;
     background: #352826;
     border-color: #4d3835;

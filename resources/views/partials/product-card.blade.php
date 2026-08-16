@@ -21,9 +21,9 @@
             <h2>{{ $product->localizedName() }}</h2>
             <div class="card-caption-meta">
                 <p class="card-price">{{ $product->formattedPrice() }}</p>
-                @unless ($product->inStock())
-                    <span class="card-stock-chip">{{ __('store.variant_stock_out') }}</span>
-                @endunless
+                <span class="card-stock-chip {{ $product->lowStock() ? 'is-low-stock' : ($product->inStock() ? 'is-in-stock' : 'is-out-of-stock') }}">
+                    {{ $product->lowStock() ? __('store.low_stock') : ($product->inStock() ? __('store.in_stock') : __('store.out_of_stock')) }}
+                </span>
             </div>
         </div>
     </a>
