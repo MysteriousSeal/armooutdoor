@@ -3938,7 +3938,8 @@ textarea.form-control {
 
 .admin-tabs {
     display: flex;
-    gap: 1.5rem;
+    flex-wrap: wrap;
+    gap: 0 1.25rem;
     margin-bottom: 1.25rem;
     border-bottom: 1px solid var(--border);
 }
@@ -4193,6 +4194,24 @@ a.admin-stat-card:hover {
     text-transform: uppercase;
     color: var(--text-muted);
     background: color-mix(in srgb, var(--bg) 55%, var(--surface));
+}
+
+.admin-sort-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: inherit;
+    white-space: nowrap;
+}
+
+.admin-sort-link:hover,
+.admin-sort-link.is-active {
+    color: var(--text);
+}
+
+.admin-sort-dir {
+    font-size: 0.7rem;
+    color: var(--accent-hover);
 }
 
 .admin-table tbody tr:hover td {

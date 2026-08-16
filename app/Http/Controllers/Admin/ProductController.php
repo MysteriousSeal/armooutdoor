@@ -10,6 +10,7 @@ use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\ProductVariant;
 use App\Support\HtmlSanitizer;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -22,12 +23,17 @@ class ProductController extends Controller
     {
         $search = trim((string) $request->query('search', ''));
         $categorySlug = (string) $request->query('category', '');
-        $tab = $request->query('tab') === 'disabled' ? 'disabled' : 'active';
+        $tab = in_array($request->query('tab'), ['active', 'disabled', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight'], true)
+            ? (string) $request->query('tab')
+            : 'active';
+        $sort = in_array($request->query('sort'), ['id-asc', 'id-desc', 'name-asc', 'name-desc', 'stock-asc', 'stock-desc'], true)
+            ? (string) $request->query('sort')
+            : 'id-asc';
 
         $products = Product::query()
             ->with('category')
             ->withCount('variants')
-            ->where('is_active', $tab !== 'disabled')
+            ->tap(fn ($query) => $this->applyProductTab($query, $tab))
             ->when($search !== '', function ($query) use ($search): void {
                 $query->where(function ($query) use ($search): void {
                     $query->where('slug', 'like', '%'.$search.'%')
@@ -40,20 +46,21 @@ class ProductController extends Controller
                         ->orWhereHas('parent', fn ($query) => $query->where('slug', $categorySlug));
                 });
             })
-            ->orderBy('sort_order')
-            ->orderBy('id')
+            ->tap(fn ($query) => $this->applyProductSort($query, $sort))
             ->paginate(24)
             ->withQueryString();
 
         return view('admin.products.index', [
             'products' => $products,
             'tab' => $tab,
+            'sort' => $sort,
             'productCount' => Product::query()->count(),
             'activeCount' => Product::query()->where('is_active', true)->count(),
             'disabledCount' => Product::query()->where('is_active', false)->count(),
             'outOfStockCount' => Product::query()->where('quantity', '<=', 0)->count(),
-            'noGtinCount' => Product::query()->whereNull('gtin')->count(),
-            'noWeightCount' => Product::query()->whereNull('weight_grams')->count(),
+            'noSkuCount' => Product::query()->where(fn ($query) => $query->whereNull('sku')->orWhere('sku', ''))->count(),
+            'noGtinCount' => Product::query()->where(fn ($query) => $query->whereNull('gtin')->orWhere('gtin', ''))->count(),
+            'noWeightCount' => Product::query()->where(fn ($query) => $query->whereNull('weight_grams')->orWhere('weight_grams', 0))->count(),
             'categories' => $this->categoryOptions(),
             'search' => $search,
             'categorySlug' => $categorySlug,
@@ -121,6 +128,46 @@ class ProductController extends Controller
         $product->update(['is_active' => ! $product->is_active]);
 
         return back()->with('status', $product->is_active ? 'Product activated.' : 'Product disabled.');
+    }
+
+    private function applyProductSort(Builder $query, string $sort): void
+    {
+        [$column, $direction] = match ($sort) {
+            'id-desc' => ['id', 'desc'],
+            'name-asc' => ['name', 'asc'],
+            'name-desc' => ['name', 'desc'],
+            'stock-asc' => ['quantity', 'asc'],
+            'stock-desc' => ['quantity', 'desc'],
+            default => ['id', 'asc'],
+        };
+
+        if ($column === 'name') {
+            $nameSql = $query->getConnection()->getDriverName() === 'sqlite'
+                ? "json_extract(name, '$.fr')"
+                : "json_unquote(json_extract(name, '$.fr'))";
+
+            $query->orderByRaw($nameSql.' '.$direction)->orderBy('id');
+
+            return;
+        }
+
+        $query->orderBy($column, $direction);
+
+        if ($column !== 'id') {
+            $query->orderBy('id');
+        }
+    }
+
+    private function applyProductTab(Builder $query, string $tab): void
+    {
+        match ($tab) {
+            'disabled' => $query->where('is_active', false),
+            'out-of-stock' => $query->where('quantity', '<=', 0),
+            'no-sku' => $query->where(fn (Builder $query) => $query->whereNull('sku')->orWhere('sku', '')),
+            'no-gtin' => $query->where(fn (Builder $query) => $query->whereNull('gtin')->orWhere('gtin', '')),
+            'no-weight' => $query->where(fn (Builder $query) => $query->whereNull('weight_grams')->orWhere('weight_grams', 0)),
+            default => $query->where('is_active', true),
+        };
     }
 
     private function categoryOptions()

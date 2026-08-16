@@ -17,6 +17,7 @@
                 <span class="admin-list-chip">{{ number_format($productCount) }} products</span>
                 <span class="admin-list-chip">{{ number_format($disabledCount) }} disabled</span>
                 <span class="admin-list-chip">{{ number_format($outOfStockCount) }} out of stock</span>
+                <span class="admin-list-chip">{{ number_format($noSkuCount) }} without SKU</span>
                 <span class="admin-list-chip">{{ number_format($noGtinCount) }} without GTIN</span>
                 <span class="admin-list-chip">{{ number_format($noWeightCount) }} without weight</span>
                 @if ($search !== '' || $categorySlug !== '')
@@ -26,16 +27,48 @@
         </header>
 
         <nav class="admin-tabs" aria-label="Product tabs">
-            <a href="{{ route('admin.products.index', array_filter(['tab' => 'active', 'search' => $search ?: null, 'category' => $categorySlug ?: null])) }}" class="{{ $tab === 'active' ? 'active' : '' }}">
+            @php
+                $listQuery = fn (array $overrides = []) => array_filter([
+                    'tab' => $overrides['tab'] ?? $tab,
+                    'sort' => ($overrides['sort'] ?? $sort) !== 'id-asc' ? ($overrides['sort'] ?? $sort) : null,
+                    'search' => $search !== '' ? $search : null,
+                    'category' => $categorySlug !== '' ? $categorySlug : null,
+                ]);
+                $tabQuery = fn (string $name) => $listQuery(['tab' => $name]);
+                $sortLink = function (string $column) use ($sort, $listQuery): array {
+                    $next = $sort === $column.'-asc' ? $column.'-desc' : $column.'-asc';
+
+                    return [
+                        'url' => route('admin.products.index', $listQuery(['sort' => $next])),
+                        'state' => str_starts_with($sort, $column.'-') ? substr($sort, strlen($column) + 1) : null,
+                    ];
+                };
+            @endphp
+            <a href="{{ route('admin.products.index', $tabQuery('active')) }}" class="{{ $tab === 'active' ? 'active' : '' }}">
                 Products <span class="admin-tab-count">{{ number_format($activeCount) }}</span>
             </a>
-            <a href="{{ route('admin.products.index', array_filter(['tab' => 'disabled', 'search' => $search ?: null, 'category' => $categorySlug ?: null])) }}" class="{{ $tab === 'disabled' ? 'active' : '' }}">
+            <a href="{{ route('admin.products.index', $tabQuery('disabled')) }}" class="{{ $tab === 'disabled' ? 'active' : '' }}">
                 Disabled <span class="admin-tab-count">{{ number_format($disabledCount) }}</span>
+            </a>
+            <a href="{{ route('admin.products.index', $tabQuery('out-of-stock')) }}" class="{{ $tab === 'out-of-stock' ? 'active' : '' }}">
+                Out of stock <span class="admin-tab-count">{{ number_format($outOfStockCount) }}</span>
+            </a>
+            <a href="{{ route('admin.products.index', $tabQuery('no-sku')) }}" class="{{ $tab === 'no-sku' ? 'active' : '' }}">
+                Missing SKU <span class="admin-tab-count">{{ number_format($noSkuCount) }}</span>
+            </a>
+            <a href="{{ route('admin.products.index', $tabQuery('no-gtin')) }}" class="{{ $tab === 'no-gtin' ? 'active' : '' }}">
+                Missing GTIN <span class="admin-tab-count">{{ number_format($noGtinCount) }}</span>
+            </a>
+            <a href="{{ route('admin.products.index', $tabQuery('no-weight')) }}" class="{{ $tab === 'no-weight' ? 'active' : '' }}">
+                Missing weight <span class="admin-tab-count">{{ number_format($noWeightCount) }}</span>
             </a>
         </nav>
 
         <form method="GET" action="{{ route('admin.products.index') }}" class="admin-toolbar">
             <input type="hidden" name="tab" value="{{ $tab }}">
+            @if ($sort !== 'id-asc')
+                <input type="hidden" name="sort" value="{{ $sort }}">
+            @endif
             <input
                 type="search"
                 name="search"
@@ -53,13 +86,33 @@
             </select>
             <button type="submit" class="btn btn-secondary">Filter</button>
             @if ($search !== '' || $categorySlug !== '')
-                <a href="{{ route('admin.products.index', array_filter(['tab' => $tab !== 'active' ? $tab : null])) }}" class="btn btn-secondary">Clear</a>
+                <a href="{{ route('admin.products.index', $listQuery(['search' => null, 'category' => null])) }}" class="btn btn-secondary">Clear</a>
             @endif
         </form>
 
         @if ($products->isEmpty())
             <div class="empty-state">
-                <p>{{ $tab === 'disabled' ? 'No disabled products.' : 'No products found.' }}</p>
+                <p>
+                    @switch($tab)
+                        @case('disabled')
+                            No disabled products.
+                            @break
+                        @case('out-of-stock')
+                            No out of stock products.
+                            @break
+                        @case('no-sku')
+                            No products missing a SKU.
+                            @break
+                        @case('no-gtin')
+                            No products missing a GTIN.
+                            @break
+                        @case('no-weight')
+                            No products missing a weight.
+                            @break
+                        @default
+                            No products found.
+                    @endswitch
+                </p>
                 @if ($tab === 'active')
                     <a href="{{ route('admin.products.create') }}" class="btn btn-primary">Add product</a>
                 @endif
@@ -73,12 +126,36 @@
                 <table class="admin-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            @php
+                                $idSort = $sortLink('id');
+                                $nameSort = $sortLink('name');
+                                $stockSort = $sortLink('stock');
+                            @endphp
+                            <th>
+                                <a href="{{ $idSort['url'] }}" class="admin-sort-link {{ $idSort['state'] ? 'is-active' : '' }}">
+                                    ID
+                                    <span class="admin-sort-dir" aria-hidden="true">{{ $idSort['state'] === 'desc' ? '↓' : '↑' }}</span>
+                                </a>
+                            </th>
                             <th></th>
-                            <th>Name</th>
+                            <th>
+                                <a href="{{ $nameSort['url'] }}" class="admin-sort-link {{ $nameSort['state'] ? 'is-active' : '' }}">
+                                    Name
+                                    @if ($nameSort['state'])
+                                        <span class="admin-sort-dir" aria-hidden="true">{{ $nameSort['state'] === 'desc' ? '↓' : '↑' }}</span>
+                                    @endif
+                                </a>
+                            </th>
                             <th>Category</th>
                             <th>Price</th>
-                            <th>Stock</th>
+                            <th>
+                                <a href="{{ $stockSort['url'] }}" class="admin-sort-link {{ $stockSort['state'] ? 'is-active' : '' }}">
+                                    Stock
+                                    @if ($stockSort['state'])
+                                        <span class="admin-sort-dir" aria-hidden="true">{{ $stockSort['state'] === 'desc' ? '↓' : '↑' }}</span>
+                                    @endif
+                                </a>
+                            </th>
                             <th>Variants</th>
                             <th>Weight</th>
                             <th>GTIN</th>
