@@ -75,6 +75,7 @@ return [
     'empty_category' => 'Rien dans cette catégorie pour le moment.',
     'sort_label' => 'Trier',
     'filter_all' => 'Tous',
+    'filter_reset' => 'Réinitialiser les filtres',
     'sort_name' => 'Nom',
     'sort_price_asc' => 'Prix croissant',
     'sort_price_desc' => 'Prix décroissant',

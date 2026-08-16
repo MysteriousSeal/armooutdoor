@@ -86,6 +86,11 @@
                                 </div>
                             </div>
                         @endforeach
+                        @if (! empty($selectedFilters))
+                            <a href="{{ localized_route('categories.show', ['category' => $category->slug, 'sort' => $sort]) }}" class="btn btn-sm btn-secondary category-filters-reset">
+                                {{ __('store.filter_reset') }}
+                            </a>
+                        @endif
                     </div>
                 @endif
                 <div class="sort-field">
