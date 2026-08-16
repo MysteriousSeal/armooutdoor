@@ -49,6 +49,7 @@ class StoreDiscountCodeRequest extends FormRequest
                 'min:1',
                 Rule::when($this->filled('quantity'), ['lte:quantity']),
             ],
+            'ends_at' => ['nullable', 'date'],
         ];
     }
 
@@ -64,6 +65,7 @@ class StoreDiscountCodeRequest extends FormRequest
             'user_id' => 'customer',
             'quantity' => 'quantity',
             'max_uses_per_customer' => 'max uses per customer',
+            'ends_at' => 'deadline',
         ];
     }
 

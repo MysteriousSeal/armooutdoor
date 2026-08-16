@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'user_id',
     'quantity',
     'max_uses_per_customer',
+    'ends_at',
 ])]
 class DiscountCode extends Model
 {
@@ -22,6 +23,7 @@ class DiscountCode extends Model
             'value' => 'integer',
             'quantity' => 'integer',
             'max_uses_per_customer' => 'integer',
+            'ends_at' => 'datetime',
         ];
     }
 
@@ -60,6 +62,11 @@ class DiscountCode extends Model
             : '-'.format_euros($this->value);
     }
 
+    public function typeLabel(): string
+    {
+        return $this->type === 'percentage' ? 'Percentage off' : 'Fixed amount off';
+    }
+
     public function quantityLabel(): string
     {
         return $this->hasLimitedQuantity() ? (string) $this->quantity : 'Unlimited';
@@ -73,5 +80,30 @@ class DiscountCode extends Model
     public function maxUsesPerCustomerLabel(): string
     {
         return $this->hasMaxUsesPerCustomer() ? (string) $this->max_uses_per_customer : 'Unlimited';
+    }
+
+    public function isExpired(): bool
+    {
+        return $this->ends_at !== null && $this->ends_at->isPast();
+    }
+
+    public function formattedEndsAt(): ?string
+    {
+        return $this->ends_at?->format('d M Y · H:i');
+    }
+
+    /**
+     * English relative time for the admin list. The shop locale is French,
+     * so Carbon's default diffForHumans() would otherwise leak FR copy.
+     */
+    public function remainingLabel(): string
+    {
+        if ($this->ends_at === null) {
+            return 'No deadline';
+        }
+
+        $relative = $this->ends_at->copy()->locale('en')->diffForHumans();
+
+        return $this->isExpired() ? 'Expired '.$relative : 'Expires '.$relative;
     }
 }

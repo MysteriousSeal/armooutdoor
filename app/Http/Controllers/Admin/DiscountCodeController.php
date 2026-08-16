@@ -80,6 +80,7 @@ class DiscountCodeController extends Controller
             'user_id' => $request->filled('user_id') ? $request->integer('user_id') : null,
             'quantity' => $request->filled('quantity') ? $request->integer('quantity') : null,
             'max_uses_per_customer' => $request->filled('max_uses_per_customer') ? $request->integer('max_uses_per_customer') : null,
+            'ends_at' => $request->filled('ends_at') ? $request->date('ends_at') : null,
         ];
     }
 
