@@ -752,6 +752,50 @@ a.admin-stat-card:hover {
     font-weight: 500;
 }
 
+.admin-copy-code {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    margin-left: 0.35rem;
+    padding: 0;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+.admin-copy-code:hover {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.admin-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 1.5rem;
+    z-index: 1000;
+    padding: 0.65rem 1.1rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #fff;
+    background: #2c2c2c;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-hover);
+    opacity: 0;
+    transform: translate(-50%, 0.5rem);
+    pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.admin-toast.is-visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
 .admin-table-truncate {
     display: block;
     max-width: 22rem;

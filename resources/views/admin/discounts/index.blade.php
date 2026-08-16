@@ -151,6 +151,7 @@
                     <table class="admin-table">
                         <thead>
                             <tr>
+                                <th>ID</th>
                                 <th>Code</th>
                                 <th>Discount</th>
                                 <th>Customer</th>
@@ -162,7 +163,16 @@
                         <tbody>
                             @foreach ($discountCodes as $discountCode)
                                 <tr>
-                                    <td><span class="admin-table-strong">{{ $discountCode->code }}</span></td>
+                                    <td>{{ $discountCode->id }}</td>
+                                    <td>
+                                        <a href="{{ route('admin.discount-codes.edit', $discountCode) }}" class="admin-table-strong">{{ $discountCode->code }}</a>
+                                        <button type="button" class="admin-copy-code" data-copy-code="{{ $discountCode->code }}" title="Copy code" aria-label="Copy code">
+                                            <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+                                                <rect x="9" y="9" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.75"/>
+                                                <path d="M6 15H4.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V6" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                        </button>
+                                    </td>
                                     <td>{{ $discountCode->label() }} <span class="admin-table-sub">off cart total</span></td>
                                     <td>
                                         @if ($discountCode->user)
@@ -190,3 +200,7 @@
         @endif
     </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('js/admin-copy-code.js') }}" defer></script>
+@endpush
