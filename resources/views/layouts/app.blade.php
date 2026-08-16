@@ -88,20 +88,21 @@
                                 $currentCategory = request()->route('category') ?? request()->route('product')?->category;
                                 $navActive = $currentCategory
                                     && ($currentCategory->is($navCategory) || $currentCategory->parent_id === $navCategory->id);
+                                $visibleChildren = $navCategory->children->where('products_count', '>', 0);
                             @endphp
-                            <div class="nav-item {{ $navActive ? 'is-active' : '' }} {{ $navCategory->children->isNotEmpty() ? 'has-sub' : '' }}">
+                            <div class="nav-item {{ $navActive ? 'is-active' : '' }} {{ $visibleChildren->isNotEmpty() ? 'has-sub' : '' }}">
                                 <a
                                     href="{{ localized_route('categories.show', ['category' => $navCategory->slug]) }}"
                                     class="sort-tab {{ $navActive ? 'active' : '' }}"
-                                    @if ($navCategory->children->isNotEmpty())
+                                    @if ($visibleChildren->isNotEmpty())
                                         aria-haspopup="true"
                                     @endif
                                 >
                                     {{ $navCategory->localizedName() }}
                                 </a>
-                                @if ($navCategory->children->isNotEmpty())
+                                @if ($visibleChildren->isNotEmpty())
                                     <ul class="nav-sub">
-                                        @foreach ($navCategory->children as $child)
+                                        @foreach ($visibleChildren as $child)
                                             <li>
                                                 <a
                                                     href="{{ localized_route('categories.show', ['category' => $child->slug]) }}"

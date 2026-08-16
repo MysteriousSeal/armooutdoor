@@ -35,6 +35,7 @@
                     {{ __('store.all_products') }}
                 </a>
                 @foreach ($category->children as $child)
+                    @continue($child->products->isEmpty())
                     <a
                         href="{{ localized_route('categories.show', ['category' => $child->slug, 'sort' => $sort]) }}"
                         class="subcat-chip"
@@ -53,6 +54,7 @@
                     {{ __('store.all_products') }}
                 </a>
                 @foreach ($category->parent->children as $sibling)
+                    @continue($sibling->products->isEmpty() && ! $sibling->is($category))
                     <a
                         href="{{ localized_route('categories.show', ['category' => $sibling->slug, 'sort' => $sort]) }}"
                         class="subcat-chip {{ $sibling->is($category) ? 'is-active' : '' }}"
