@@ -1,6 +1,7 @@
 @php
     /** @var \App\Models\Product $product */
     $inWishlist = ($wishlistProductIds ?? collect())->contains($product->id);
+    $variantCount = $product->variants_count ?? $product->variants()->count();
 @endphp
 <article class="masonry-card product-card {{ $product->inStock() ? '' : 'is-out-of-stock' }}">
     <a href="{{ localized_route('products.show', ['product' => $product->slug]) }}" class="masonry-card-link">
@@ -12,6 +13,9 @@
                 height="1200"
                 loading="{{ $lazy ?? true ? 'lazy' : 'eager' }}"
             >
+            @if ($variantCount > 0)
+                <span class="card-variant-chip">{{ trans_choice('store.variants_count', $variantCount, ['count' => $variantCount]) }}</span>
+            @endif
         </div>
         <div class="card-caption">
             <h2>{{ $product->localizedName() }}</h2>

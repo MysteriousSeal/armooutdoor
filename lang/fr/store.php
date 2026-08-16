@@ -48,6 +48,7 @@ return [
     'all_products' => 'Tous les produits',
     'shop_subcategories' => 'Sous-catégories',
     'products_count' => ':count pièce|:count pièces',
+    'variants_count' => ':count variante|:count variantes',
     'from_price' => 'À partir de :price',
     'price' => 'Prix',
     'in_stock' => 'En stock',
