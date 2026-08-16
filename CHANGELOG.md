@@ -9,6 +9,12 @@ All notable changes to this project since the initial commit are documented here
 - **Mobile responsive layout**: the header now collapses to a grid (logo/cart/menu row, then a full-width search row) with the tagline hidden below 640px; the product detail page, category filters, and sort controls also get tighter mobile spacing and full-width stacking.
 - **Website version**: now shown in the footer next to the copyright line (`shop.version` config, starting at 0.1.14).
 
+### Shipping & carriers
+
+- **Live Mondial Relay pickup points**: checkout now calls Mondial Relay's real web service instead of a static seeded list, fetched for the customer's selected delivery address's postal code (exact-postcode matches sorted first) and cached locally so order snapshots keep working unchanged. Only fetched once the customer actually selects Mondial Relay (not on page load, which was adding significant load time) and re-fetched when they switch address; Chronopost Shop2Shop — a separate relay-type carrier — doesn't trigger it.
+- **Postcode/city autocomplete**: a new "Rechercher par ville ou code postal" search on the relay picker suggests matches as you type, backed by a new `GET /checkout/postal-codes` endpoint over a downloaded official French postcode dataset kept server-side (never shipped to the client).
+- **Relay point opening hours**: now shown, condensed so consecutive days with the same hours collapse into one line ("Lun-Ven 09:00-19:00") instead of repeating per day. Point titles always render uppercase; the list shows 2 per row on desktop.
+
 ## 2026-08-16
 
 ### Discounts
