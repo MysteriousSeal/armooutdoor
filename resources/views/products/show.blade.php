@@ -91,7 +91,7 @@
                     </span>
                 </div>
 
-                @if ($product->isPurchasable())
+                @if ($product->isPurchasable() || $product->hasVariants())
                     <form method="POST" action="{{ localized_route('cart.add') }}" class="add-to-cart-form">
                         @csrf
                         <input type="hidden" name="product_id" value="{{ $product->id }}">
@@ -150,27 +150,29 @@
                             </fieldset>
                         @endif
 
-                        <div class="product-buy-row">
-                            <div class="qty-stepper">
-                                <button type="button" class="qty-stepper-btn" data-qty-step="-1" aria-label="−">−</button>
-                                <label class="sr-only" for="quantity">{{ __('store.quantity') }}</label>
-                                <input
-                                    type="number"
-                                    id="quantity"
-                                    name="quantity"
-                                    class="qty-stepper-input"
-                                    value="{{ old('quantity', 1) }}"
-                                    min="1"
-                                    max="{{ ($displayVariant ?? $product)->maxPurchasable() }}"
-                                    required
-                                >
-                                <button type="button" class="qty-stepper-btn" data-qty-step="1" aria-label="+">+</button>
+                        @if ($product->isPurchasable())
+                            <div class="product-buy-row">
+                                <div class="qty-stepper">
+                                    <button type="button" class="qty-stepper-btn" data-qty-step="-1" aria-label="−">−</button>
+                                    <label class="sr-only" for="quantity">{{ __('store.quantity') }}</label>
+                                    <input
+                                        type="number"
+                                        id="quantity"
+                                        name="quantity"
+                                        class="qty-stepper-input"
+                                        value="{{ old('quantity', 1) }}"
+                                        min="1"
+                                        max="{{ ($displayVariant ?? $product)->maxPurchasable() }}"
+                                        required
+                                    >
+                                    <button type="button" class="qty-stepper-btn" data-qty-step="1" aria-label="+">+</button>
+                                </div>
+                                <button type="submit" class="btn btn-primary product-buy-submit">{{ __('store.add_to_cart') }}</button>
                             </div>
-                            <button type="submit" class="btn btn-primary product-buy-submit">{{ __('store.add_to_cart') }}</button>
-                        </div>
-                        @error('quantity')
-                            <p class="form-error">{{ $message }}</p>
-                        @enderror
+                            @error('quantity')
+                                <p class="form-error">{{ $message }}</p>
+                            @enderror
+                        @endif
                     </form>
                 @endif
 
