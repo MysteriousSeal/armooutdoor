@@ -113,7 +113,7 @@
             button.className = 'search-select-option';
             button.setAttribute('data-id', item.id);
 
-            if (item.image !== undefined || item.sku !== undefined || item.name) {
+            if (item.image !== undefined || item.sku !== undefined) {
                 button.classList.add('search-select-option--rich');
 
                 var thumb = document.createElement('span');
@@ -147,6 +147,25 @@
                 }
 
                 button.appendChild(copy);
+            } else if (item.email) {
+                button.classList.add('search-select-option--person');
+
+                var personCopy = document.createElement('span');
+                personCopy.className = 'search-select-copy';
+
+                var personName = document.createElement('span');
+                personName.className = 'search-select-name';
+                personName.textContent = item.name
+                    || [item.first_name, item.last_name].filter(Boolean).join(' ')
+                    || item.label;
+                personCopy.appendChild(personName);
+
+                var email = document.createElement('span');
+                email.className = 'search-select-email';
+                email.textContent = item.email;
+                personCopy.appendChild(email);
+
+                button.appendChild(personCopy);
             } else {
                 button.textContent = item.label;
             }
