@@ -2,7 +2,7 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
-## 2026-08-17
+## 2026-08-17 — v0.1.15
 
 ### Storefront
 
