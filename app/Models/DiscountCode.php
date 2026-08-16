@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'value',
     'user_id',
     'quantity',
+    'max_uses_per_customer',
 ])]
 class DiscountCode extends Model
 {
@@ -20,6 +21,7 @@ class DiscountCode extends Model
         return [
             'value' => 'integer',
             'quantity' => 'integer',
+            'max_uses_per_customer' => 'integer',
         ];
     }
 
@@ -61,5 +63,15 @@ class DiscountCode extends Model
     public function quantityLabel(): string
     {
         return $this->hasLimitedQuantity() ? (string) $this->quantity : 'Unlimited';
+    }
+
+    public function hasMaxUsesPerCustomer(): bool
+    {
+        return $this->max_uses_per_customer !== null;
+    }
+
+    public function maxUsesPerCustomerLabel(): string
+    {
+        return $this->hasMaxUsesPerCustomer() ? (string) $this->max_uses_per_customer : 'Unlimited';
     }
 }

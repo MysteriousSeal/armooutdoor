@@ -79,6 +79,7 @@ class DiscountCodeController extends Controller
             'value' => $type === 'percentage' ? (int) round($value) : (int) round($value * 100),
             'user_id' => $request->filled('user_id') ? $request->integer('user_id') : null,
             'quantity' => $request->filled('quantity') ? $request->integer('quantity') : null,
+            'max_uses_per_customer' => $request->filled('max_uses_per_customer') ? $request->integer('max_uses_per_customer') : null,
         ];
     }
 

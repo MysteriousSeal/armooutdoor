@@ -43,6 +43,12 @@ class StoreDiscountCodeRequest extends FormRequest
             ],
             'user_id' => ['nullable', 'exists:users,id'],
             'quantity' => ['nullable', 'integer', 'min:1'],
+            'max_uses_per_customer' => [
+                'nullable',
+                'integer',
+                'min:1',
+                Rule::when($this->filled('quantity'), ['lte:quantity']),
+            ],
         ];
     }
 
@@ -57,6 +63,7 @@ class StoreDiscountCodeRequest extends FormRequest
             'value' => 'value',
             'user_id' => 'customer',
             'quantity' => 'quantity',
+            'max_uses_per_customer' => 'max uses per customer',
         ];
     }
 
@@ -74,6 +81,8 @@ class StoreDiscountCodeRequest extends FormRequest
             'value.max' => 'The value is too high for this discount type.',
             'user_id.exists' => 'That customer could not be found.',
             'quantity.min' => 'Quantity must be at least 1, or left blank for unlimited.',
+            'max_uses_per_customer.min' => 'Max uses per customer must be at least 1, or left blank for unlimited.',
+            'max_uses_per_customer.lte' => 'Max uses per customer can\'t be higher than the total quantity available.',
         ];
     }
 }

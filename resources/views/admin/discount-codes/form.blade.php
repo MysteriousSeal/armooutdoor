@@ -121,20 +121,37 @@
                 @error('user_id') <p class="form-error">{{ $message }}</p> @enderror
             </div>
 
-            <div class="form-group">
-                <label for="quantity">Quantity available</label>
-                <input
-                    type="number"
-                    id="quantity"
-                    name="quantity"
-                    class="form-control"
-                    value="{{ old('quantity', $discountCode->quantity) }}"
-                    min="1"
-                    step="1"
-                    placeholder="Unlimited"
-                >
-                <p class="form-hint">Leave blank for unlimited uses.</p>
-                @error('quantity') <p class="form-error">{{ $message }}</p> @enderror
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="quantity">Quantity available</label>
+                    <input
+                        type="number"
+                        id="quantity"
+                        name="quantity"
+                        class="form-control"
+                        value="{{ old('quantity', $discountCode->quantity) }}"
+                        min="1"
+                        step="1"
+                        placeholder="Unlimited"
+                    >
+                    <p class="form-hint">Leave blank for unlimited uses.</p>
+                    @error('quantity') <p class="form-error">{{ $message }}</p> @enderror
+                </div>
+                <div class="form-group">
+                    <label for="max_uses_per_customer">Max uses per customer</label>
+                    <input
+                        type="number"
+                        id="max_uses_per_customer"
+                        name="max_uses_per_customer"
+                        class="form-control"
+                        value="{{ old('max_uses_per_customer', $discountCode->max_uses_per_customer) }}"
+                        min="1"
+                        step="1"
+                        placeholder="Unlimited"
+                    >
+                    <p class="form-hint">Independent of quantity available. Leave blank for unlimited uses per customer. Can't exceed the total quantity available.</p>
+                    @error('max_uses_per_customer') <p class="form-error">{{ $message }}</p> @enderror
+                </div>
             </div>
 
             <div class="form-actions">
@@ -209,6 +226,26 @@
                 button.textContent = 'Generating…';
                 generate(0);
             });
+        })();
+
+        (function () {
+            var quantityInput = document.getElementById('quantity');
+            var maxPerCustomerInput = document.getElementById('max_uses_per_customer');
+
+            function syncMax() {
+                if (quantityInput.value) {
+                    maxPerCustomerInput.max = quantityInput.value;
+
+                    if (Number(maxPerCustomerInput.value) > Number(quantityInput.value)) {
+                        maxPerCustomerInput.value = quantityInput.value;
+                    }
+                } else {
+                    maxPerCustomerInput.removeAttribute('max');
+                }
+            }
+
+            quantityInput.addEventListener('input', syncMax);
+            syncMax();
         })();
     </script>
 @endpush

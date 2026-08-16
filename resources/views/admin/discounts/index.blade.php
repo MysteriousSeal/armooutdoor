@@ -155,6 +155,7 @@
                                 <th>Discount</th>
                                 <th>Customer</th>
                                 <th>Quantity available</th>
+                                <th>Max per customer</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -171,6 +172,7 @@
                                         @endif
                                     </td>
                                     <td>{{ $discountCode->quantityLabel() }}</td>
+                                    <td>{{ $discountCode->maxUsesPerCustomerLabel() }}</td>
                                     <td>
                                         <a href="{{ route('admin.discount-codes.edit', $discountCode) }}" class="btn btn-sm btn-secondary">Edit</a>
                                         <form method="POST" action="{{ route('admin.discount-codes.destroy', $discountCode) }}" style="display: inline;">
