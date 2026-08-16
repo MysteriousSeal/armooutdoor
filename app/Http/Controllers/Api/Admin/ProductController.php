@@ -10,6 +10,11 @@ use Illuminate\Http\JsonResponse;
 
 class ProductController extends Controller
 {
+    public function show(Product $product): JsonResponse
+    {
+        return response()->json(['data' => $product->load('category', 'images', 'variants')]);
+    }
+
     public function update(UpdateProductRequest $request, Product $product): JsonResponse
     {
         $validated = $request->validated();
