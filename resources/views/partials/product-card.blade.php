@@ -2,7 +2,7 @@
     /** @var \App\Models\Product $product */
     $inWishlist = ($wishlistProductIds ?? collect())->contains($product->id);
 @endphp
-<article class="masonry-card product-card">
+<article class="masonry-card product-card {{ $product->inStock() ? '' : 'is-out-of-stock' }}">
     <a href="{{ localized_route('products.show', ['product' => $product->slug]) }}" class="masonry-card-link">
         <div class="masonry-card-media">
             <img
@@ -15,7 +15,12 @@
         </div>
         <div class="card-caption">
             <h2>{{ $product->localizedName() }}</h2>
-            <p class="card-price">{{ $product->formattedPrice() }}</p>
+            <div class="card-caption-meta">
+                <p class="card-price">{{ $product->formattedPrice() }}</p>
+                @unless ($product->inStock())
+                    <span class="card-stock-chip">{{ __('store.variant_stock_out') }}</span>
+                @endunless
+            </div>
         </div>
     </a>
 
@@ -48,7 +53,5 @@
             <input type="hidden" name="product_id" value="{{ $product->id }}">
             <button type="submit" class="btn btn-sm btn-primary">{{ __('store.add_to_cart') }}</button>
         </form>
-    @else
-        <p class="card-cart card-out-of-stock">{{ __('store.out_of_stock') }}</p>
     @endif
 </article>

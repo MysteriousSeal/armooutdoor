@@ -15,7 +15,7 @@ class CategoryController extends Controller
     public function show(Request $request, Category $category): View
     {
         $category->load([
-            'parent.children',
+            'parent.children.products' => fn ($query) => $query->active(),
             'children.products' => fn ($query) => $query->active(),
             'products' => fn ($query) => $query->active(),
             'products.category',

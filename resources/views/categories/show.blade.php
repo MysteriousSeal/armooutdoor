@@ -58,6 +58,7 @@
                         class="subcat-chip {{ $sibling->is($category) ? 'is-active' : '' }}"
                     >
                         {{ $sibling->localizedName() }}
+                        <span>{{ $sibling->products->count() }}</span>
                     </a>
                 @endforeach
             </nav>

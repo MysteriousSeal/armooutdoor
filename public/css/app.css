@@ -1126,7 +1126,7 @@ button.btn {
     font-size: 0.875rem;
     font-weight: 500;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -1139,10 +1139,22 @@ button.btn {
 }
 
 .card-price {
-    margin-top: 0.35rem;
+    margin: 0;
     font-size: 0.875rem;
     font-weight: 500;
     font-variant-numeric: tabular-nums;
+}
+
+.card-caption-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.4rem;
+}
+
+.product-card.is-out-of-stock .card-caption {
+    padding-bottom: 1rem;
 }
 
 .card-cart {
@@ -1189,9 +1201,29 @@ button.btn {
     color: #fff;
 }
 
-.card-out-of-stock {
-    font-size: 0.8125rem;
-    color: var(--text-muted);
+.product-card.is-out-of-stock .masonry-card-media img {
+    filter: grayscale(0.2);
+    opacity: 0.88;
+}
+
+.card-stock-chip {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    height: 1.4rem;
+    padding: 0 0.45rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #7a4a45;
+    background: #f6eeec;
+    border: 1px solid #e6d4d0;
+}
+
+[data-theme='dark'] .card-stock-chip {
+    color: #e08585;
+    background: #3a2b29;
+    border-color: #5a3d3a;
 }
 
 .card-cart .btn {
