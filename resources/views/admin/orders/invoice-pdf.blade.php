@@ -87,8 +87,9 @@
         .col-thumb { width: 42px; }
         .col-thumb img { width: 36px; height: 36px; }
         .col-name { font-size: 10px; }
-        .col-sku { width: 18%; font-size: 9px; color: #6b6b6b; }
-        .col-num { width: 12%; text-align: right; white-space: nowrap; }
+        .col-variant { width: 15%; font-size: 9px; color: #6b6b6b; }
+        .col-sku { width: 15%; font-size: 9px; color: #6b6b6b; }
+        .col-num { width: 10%; text-align: right; white-space: nowrap; }
 
         .bottom { width: 100%; border-collapse: collapse; }
         .bottom td { vertical-align: top; }
@@ -216,6 +217,7 @@
             <tr>
                 <td class="col-thumb"></td>
                 <td class="col-name">Désignation</td>
+                <td class="col-variant">Variante</td>
                 <td class="col-sku">Article</td>
                 <td class="col-num">Qté</td>
                 <td class="col-num">Prix</td>
@@ -230,7 +232,8 @@
                             <img src="{{ $item->imagePath() }}" alt="">
                         @endif
                     </td>
-                    <td class="col-name">{{ $item->localizedName() }}{{ $item->variant_label ? ' — '.$item->variant_label : '' }}</td>
+                    <td class="col-name">{{ $item->localizedName() }}</td>
+                    <td class="col-variant">{{ $item->variant_label ?: '-' }}</td>
                     <td class="col-sku">{{ $item->resolvedSku() ?? '—' }}</td>
                     <td class="col-num">× {{ $item->quantity }}</td>
                     <td class="col-num">{{ format_euros($item->unit_price_cents) }}</td>

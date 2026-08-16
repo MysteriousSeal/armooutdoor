@@ -357,7 +357,21 @@ class OrderController extends Controller
             'company' => CompanySetting::current(),
         ])->setPaper('a4');
 
-        return $pdf->download('invoice-'.$order->number.'.pdf');
+        return $pdf->download('inv-'.$order->number.'.pdf');
+    }
+
+    public function deliverySlip(Order $order): Response
+    {
+        abort_if($order->isDraft(), 404);
+
+        $order->load('items.product', 'items.variant');
+
+        $pdf = Pdf::loadView('admin.orders.delivery-slip-pdf', [
+            'order' => $order,
+            'company' => CompanySetting::current(),
+        ])->setPaper('a4');
+
+        return $pdf->download('ds-'.$order->number.'.pdf');
     }
 
     public function updateTracking(Request $request, Order $order): RedirectResponse

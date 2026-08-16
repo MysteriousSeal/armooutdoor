@@ -107,9 +107,14 @@
                     <p class="order-total-amount">{{ $order->formattedTotal() }}</p>
                 </section>
 
-                @if ($order->invoiceIsAvailable())
+                @if (! $order->isDraft() || $order->invoiceIsAvailable())
                     <div class="order-panel-actions">
-                        <a href="{{ route('admin.orders.invoice', $order) }}" class="btn btn-secondary">Download invoice</a>
+                        @if (! $order->isDraft())
+                            <a href="{{ route('admin.orders.delivery-slip', $order) }}" class="btn btn-secondary">Download delivery slip</a>
+                        @endif
+                        @if ($order->invoiceIsAvailable())
+                            <a href="{{ route('admin.orders.invoice', $order) }}" class="btn btn-secondary">Download invoice</a>
+                        @endif
                     </div>
                 @endif
 
