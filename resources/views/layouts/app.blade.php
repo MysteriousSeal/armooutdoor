@@ -242,8 +242,11 @@
         </div>
     </footer>
 
+    @include('partials.add-to-cart-modal')
+
     <script src="{{ asset('js/site-menu-toggle.js') }}" defer></script>
     <script src="{{ asset('js/theme-toggle.js') }}" defer></script>
+    <script src="{{ asset('js/cart-modal.js') }}" defer></script>
     @stack('scripts')
 </body>
 </html>

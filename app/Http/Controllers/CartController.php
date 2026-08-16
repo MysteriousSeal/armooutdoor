@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\ShippingSetting;
 use App\Support\Cart;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -34,7 +35,7 @@ class CartController extends Controller
         ]);
     }
 
-    public function add(Request $request, Cart $cart): RedirectResponse
+    public function add(Request $request, Cart $cart): RedirectResponse|JsonResponse
     {
         $validated = $request->validate([
             'product_id' => ['required', 'integer', 'exists:products,id'],
@@ -55,6 +56,10 @@ class CartController extends Controller
         }
 
         if ($product->hasVariants() && empty($validated['variant_id'])) {
+            if ($request->wantsJson()) {
+                return response()->json(['message' => __('store.select_variant_required')], 422);
+            }
+
             return back()->withErrors(['variant_id' => __('store.select_variant_required')]);
         }
 
@@ -63,6 +68,10 @@ class CartController extends Controller
             : null;
 
         if (! ($variant?->inStock() ?? $product->inStock())) {
+            if ($request->wantsJson()) {
+                return response()->json(['message' => __('store.out_of_stock')], 422);
+            }
+
             return back()->with('status', __('store.out_of_stock'));
         }
 
@@ -72,10 +81,39 @@ class CartController extends Controller
         $allowed = max(0, $maxPurchasable - $alreadyInCart);
 
         if ($allowed < 1) {
-            return back()->with('status', __('store.stock_limit', ['count' => $variant?->quantity ?? $product->quantity]));
+            $message = __('store.stock_limit', ['count' => $variant?->quantity ?? $product->quantity]);
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'code' => 'stock_limit',
+                    'message' => $message,
+                ], 422);
+            }
+
+            return back()->with('status', $message);
         }
 
-        $cart->add($product, min($wanted, $allowed), $variant);
+        $addedQuantity = min($wanted, $allowed);
+        $cart->add($product, $addedQuantity, $variant);
+
+        if ($request->wantsJson()) {
+            $product->loadMissing('discount');
+            $hasDiscount = ($variant === null || $variant->price_cents === null) && $product->hasDiscount();
+
+            return response()->json([
+                'product' => [
+                    'name' => $product->localizedName(),
+                    'image' => $variant?->imageUrl() ?? $product->thumbnailUrl(),
+                    'price' => $variant ? format_euros($variant->effectivePriceCents()) : $product->formattedPrice(),
+                    'original_price' => $hasDiscount ? $product->formattedOriginalPrice() : null,
+                    'variant' => $variant?->label() ?: null,
+                    'url' => localized_route('products.show', ['product' => $product->slug]),
+                ],
+                'quantity' => $addedQuantity,
+                'cartCount' => $cart->quantity(),
+                'cartUrl' => localized_route('cart.show'),
+            ]);
+        }
 
         return back()->with('status', __('store.added_to_cart', [
             'product' => $product->localizedName(),
