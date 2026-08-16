@@ -35,22 +35,37 @@ class DiscountController extends Controller
         $scheduledCount = $allDiscounts->filter(fn (Discount $discount): bool => $discount->status() === 'scheduled')->count();
         $expiredCount = $allDiscounts->filter(fn (Discount $discount): bool => $discount->status() === 'expired')->count();
 
-        $discountCodes = DiscountCode::query()
+        $codeStatus = in_array($request->query('code_status'), ['active', 'expired', 'sold_out'], true)
+            ? $request->query('code_status')
+            : 'active';
+
+        $allDiscountCodes = DiscountCode::query()
             ->with('user')
-            ->orderByDesc('created_at')
+            ->orderByDesc('id')
             ->get();
+
+        $activeCodesCount = $allDiscountCodes->filter(fn (DiscountCode $code): bool => $code->status() === 'active')->count();
+        $expiredCodesCount = $allDiscountCodes->filter(fn (DiscountCode $code): bool => $code->status() === 'expired')->count();
+        $soldOutCodesCount = $allDiscountCodes->filter(fn (DiscountCode $code): bool => $code->status() === 'sold_out')->count();
 
         return view('admin.discounts.index', [
             'discounts' => $allDiscounts
                 ->filter(fn (Discount $discount): bool => $discount->status() === $status)
                 ->values(),
             'discountCount' => $allDiscounts->count(),
-            'discountCodes' => $discountCodes,
+            'discountCodes' => $allDiscountCodes
+                ->filter(fn (DiscountCode $code): bool => $code->status() === $codeStatus)
+                ->values(),
+            'discountCodeCount' => $allDiscountCodes->count(),
             'tab' => $tab,
             'status' => $status,
+            'codeStatus' => $codeStatus,
             'activeCount' => $activeCount,
             'scheduledCount' => $scheduledCount,
             'expiredCount' => $expiredCount,
+            'activeCodesCount' => $activeCodesCount,
+            'expiredCodesCount' => $expiredCodesCount,
+            'soldOutCodesCount' => $soldOutCodesCount,
         ]);
     }
 

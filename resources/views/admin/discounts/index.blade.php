@@ -30,9 +30,23 @@
                 Product discounts <span class="admin-tab-count">{{ number_format($discountCount) }}</span>
             </a>
             <a href="{{ route('admin.discounts.index', ['tab' => 'codes']) }}" class="{{ $tab === 'codes' ? 'active' : '' }}">
-                Discount codes <span class="admin-tab-count">{{ number_format($discountCodes->count()) }}</span>
+                Discount codes <span class="admin-tab-count">{{ number_format($discountCodeCount) }}</span>
             </a>
         </nav>
+
+        @if ($tab === 'codes')
+            <nav class="admin-subtabs" aria-label="Discount code status">
+                <a href="{{ route('admin.discounts.index', ['tab' => 'codes', 'code_status' => 'active']) }}" class="{{ $codeStatus === 'active' ? 'active' : '' }}">
+                    Active <span class="admin-tab-count">{{ number_format($activeCodesCount) }}</span>
+                </a>
+                <a href="{{ route('admin.discounts.index', ['tab' => 'codes', 'code_status' => 'expired']) }}" class="{{ $codeStatus === 'expired' ? 'active' : '' }}">
+                    Expired <span class="admin-tab-count">{{ number_format($expiredCodesCount) }}</span>
+                </a>
+                <a href="{{ route('admin.discounts.index', ['tab' => 'codes', 'code_status' => 'sold_out']) }}" class="{{ $codeStatus === 'sold_out' ? 'active' : '' }}">
+                    No usage remaining <span class="admin-tab-count">{{ number_format($soldOutCodesCount) }}</span>
+                </a>
+            </nav>
+        @endif
 
         @if ($tab === 'products')
             <nav class="admin-subtabs" aria-label="Discount status">
@@ -147,10 +161,25 @@
                 </ul>
             @endif
         @else
-            @if ($discountCodes->isEmpty())
+            @if ($discountCodeCount === 0)
                 <div class="empty-state">
                     <p>No discount codes yet.</p>
                     <a href="{{ route('admin.discount-codes.create') }}" class="btn btn-primary">Add code</a>
+                </div>
+            @elseif ($discountCodes->isEmpty())
+                <div class="empty-state">
+                    <p>
+                        @switch($codeStatus)
+                            @case('expired')
+                                No expired codes.
+                                @break
+                            @case('sold_out')
+                                No codes with usage remaining.
+                                @break
+                            @default
+                                No active codes.
+                        @endswitch
+                    </p>
                 </div>
             @else
                 <div class="admin-table-wrap">
@@ -185,8 +214,8 @@
                                         <span class="order-discount-badge">{{ $discountCode->label() }}</span>
                                     </td>
                                     <td>
-                                        <span class="badge {{ $discountCode->isExpired() ? 'badge-disabled' : 'badge-active' }}">
-                                            {{ $discountCode->isExpired() ? 'Expired' : 'Active' }}
+                                        <span class="badge {{ $discountCode->status() === 'active' ? 'badge-active' : ($discountCode->status() === 'sold_out' ? 'badge-placed' : 'badge-disabled') }}">
+                                            {{ $discountCode->statusLabel() }}
                                         </span>
                                     </td>
                                     <td>{{ $discountCode->remainingLabel() }}</td>

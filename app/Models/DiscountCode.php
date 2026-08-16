@@ -113,9 +113,45 @@ class DiscountCode extends Model
         return $this->isExpired() ? 'Expired '.$relative : 'Expires '.$relative;
     }
 
+    /**
+     * Out of uses — either the shared quantity pool is exhausted, or the
+     * code is restricted to one customer who has already hit their own
+     * per-customer cap (so no one else can ever use it either).
+     */
     public function isSoldOut(): bool
     {
-        return $this->hasLimitedQuantity() && $this->quantity <= 0;
+        if ($this->hasLimitedQuantity() && $this->quantity <= 0) {
+            return true;
+        }
+
+        if ($this->isForCustomer() && $this->hasMaxUsesPerCustomer()
+            && $this->customerUsageCount($this->user_id) >= $this->max_uses_per_customer) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function status(): string
+    {
+        if ($this->isExpired()) {
+            return 'expired';
+        }
+
+        if ($this->isSoldOut()) {
+            return 'sold_out';
+        }
+
+        return 'active';
+    }
+
+    public function statusLabel(): string
+    {
+        return match ($this->status()) {
+            'expired' => 'Expired',
+            'sold_out' => 'No usage remaining',
+            default => 'Active',
+        };
     }
 
     public function customerUsageCount(int $userId): int
