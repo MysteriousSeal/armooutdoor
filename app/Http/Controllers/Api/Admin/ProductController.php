@@ -7,9 +7,20 @@ use App\Http\Requests\Api\Admin\UpdateProductRequest;
 use App\Models\Product;
 use App\Support\HtmlSanitizer;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
+    public function index(Request $request): JsonResponse
+    {
+        $products = Product::query()
+            ->with('category', 'images', 'variants')
+            ->orderBy('id')
+            ->paginate(50);
+
+        return response()->json($products);
+    }
+
     public function show(Product $product): JsonResponse
     {
         return response()->json(['data' => $product->load('category', 'images', 'variants')]);
