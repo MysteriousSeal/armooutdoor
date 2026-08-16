@@ -15,8 +15,7 @@
     var currentEl = document.getElementById('product-variant-current');
     var mainImage = document.getElementById('product-detail-main-image');
     var qtyInput = form.querySelector('.qty-stepper-input');
-    var submitBtn = form.querySelector('button[type="submit"]');
-    var stepperButtons = form.querySelectorAll('.qty-stepper-btn');
+    var buyRow = form.querySelector('.product-buy-row');
 
     function applyVariant(radio) {
         if (currentEl && radio.hasAttribute('data-variant-label')) {
@@ -34,9 +33,12 @@
         var max = parseInt(radio.getAttribute('data-variant-max'), 10) || 0;
         var outOfStock = max < 1;
 
+        if (buyRow) {
+            buyRow.hidden = outOfStock;
+        }
+
         if (qtyInput) {
             qtyInput.max = max;
-            qtyInput.disabled = outOfStock;
 
             if (outOfStock) {
                 qtyInput.value = 1;
@@ -46,14 +48,6 @@
                 qtyInput.value = 1;
             }
         }
-
-        stepperButtons.forEach(function (button) {
-            button.disabled = outOfStock;
-        });
-
-        if (submitBtn) {
-            submitBtn.disabled = outOfStock;
-        }
     }
 
     radios.forEach(function (radio) {
@@ -61,4 +55,10 @@
             applyVariant(radio);
         });
     });
+
+    var checkedRadio = form.querySelector('input[name="variant_id"]:checked');
+
+    if (checkedRadio) {
+        applyVariant(checkedRadio);
+    }
 })();

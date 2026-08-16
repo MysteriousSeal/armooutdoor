@@ -67,7 +67,7 @@
                     $activeVariants = $product->variants->where('is_active', true)
                         ->sortBy(fn ($variant) => $variant->sizeSortRank() ?? $variant->sort_order)
                         ->values();
-                    $selectedVariantId = old('variant_id', optional($activeVariants->first(fn ($variant) => $variant->inStock()))->id);
+                    $selectedVariantId = old('variant_id', optional($activeVariants->first(fn ($variant) => $variant->inStock()) ?? $activeVariants->first())->id);
                     $displayVariant = $product->hasVariants() ? $activeVariants->firstWhere('id', (int) $selectedVariantId) : null;
                 @endphp
 
@@ -123,7 +123,6 @@
                                                     data-variant-image="{{ $variant->imageUrl() }}"
                                                 @endif
                                                 @checked((string) $selectedVariantId === (string) $variant->id)
-                                                {{ ! $variant->inStock() ? 'disabled' : '' }}
                                             >
                                             <span class="product-variant-chip-face">
                                                 @if ($variant->image)
@@ -151,7 +150,7 @@
                         @endif
 
                         @if ($product->isPurchasable())
-                            <div class="product-buy-row">
+                            <div class="product-buy-row" @if (($displayVariant ?? $product)->maxPurchasable() < 1) hidden @endif>
                                 <div class="qty-stepper">
                                     <button type="button" class="qty-stepper-btn" data-qty-step="-1" aria-label="−">−</button>
                                     <label class="sr-only" for="quantity">{{ __('store.quantity') }}</label>

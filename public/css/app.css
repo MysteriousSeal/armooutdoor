@@ -1448,6 +1448,10 @@ button.btn {
     gap: 0.65rem;
 }
 
+.product-buy-row[hidden] {
+    display: none;
+}
+
 .qty-stepper {
     display: inline-flex;
     align-items: stretch;
