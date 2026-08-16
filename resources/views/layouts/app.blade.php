@@ -231,6 +231,8 @@
                     <a href="{{ localized_route('home') }}">Armo Outdoor</a>
                     <span class="site-footer-copy-sep" aria-hidden="true">·</span>
                     <span class="site-footer-copy-note">{{ __('store.footer_note') }}</span>
+                    <span class="site-footer-copy-sep" aria-hidden="true">·</span>
+                    <span class="site-footer-version">v{{ config('shop.version') }}</span>
                 </p>
                 <nav class="site-footer-legal" aria-label="{{ __('store.legal_notice_title') }}">
                     <a href="{{ route('legal.terms') }}">{{ __('store.legal_terms_title') }}</a>
