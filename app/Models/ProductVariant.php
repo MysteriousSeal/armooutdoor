@@ -20,6 +20,22 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class ProductVariant extends Model
 {
+    private const SIZE_ORDER = [
+        'XXS' => 0,
+        '2XS' => 0,
+        'XS' => 1,
+        'S' => 2,
+        'M' => 3,
+        'L' => 4,
+        'XL' => 5,
+        'XXL' => 6,
+        '2XL' => 6,
+        'XXXL' => 7,
+        '3XL' => 7,
+        'XXXXL' => 8,
+        '4XL' => 8,
+    ];
+
     protected function casts(): array
     {
         return [
@@ -49,6 +65,29 @@ class ProductVariant extends Model
     public function label(): string
     {
         return collect($this->getAttribute('attribute_values') ?? [])->pluck('value')->implode(' / ');
+    }
+
+    /**
+     * Rank for sorting by size (XXS, XS, S, M, L, XL, ...) when this variant
+     * has a "Size"/"Taille" attribute. Null if it has no such attribute, so
+     * callers can fall back to the admin-defined sort_order.
+     */
+    public function sizeSortRank(): ?int
+    {
+        $sizeAttribute = collect($this->getAttribute('attribute_values') ?? [])
+            ->first(fn (array $attribute): bool => in_array(
+                mb_strtolower(trim($attribute['label'] ?? '')),
+                ['size', 'taille'],
+                true,
+            ));
+
+        if ($sizeAttribute === null) {
+            return null;
+        }
+
+        $value = mb_strtoupper(trim($sizeAttribute['value'] ?? ''));
+
+        return self::SIZE_ORDER[$value] ?? 999;
     }
 
     public function inStock(): bool

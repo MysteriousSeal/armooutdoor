@@ -64,7 +64,9 @@
 
             <div class="product-detail-buy">
                 @php
-                    $activeVariants = $product->variants->where('is_active', true);
+                    $activeVariants = $product->variants->where('is_active', true)
+                        ->sortBy(fn ($variant) => $variant->sizeSortRank() ?? $variant->sort_order)
+                        ->values();
                     $selectedVariantId = old('variant_id', optional($activeVariants->first(fn ($variant) => $variant->inStock()))->id);
                     $displayVariant = $product->hasVariants() ? $activeVariants->firstWhere('id', (int) $selectedVariantId) : null;
                 @endphp
