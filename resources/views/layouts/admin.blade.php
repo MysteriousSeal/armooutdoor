@@ -71,6 +71,7 @@
         @yield('content')
     </main>
 
+    <script src="{{ asset('js/pretty-select.js') }}" defer></script>
     <script src="{{ asset('js/theme-toggle.js') }}" defer></script>
     <script src="{{ asset('js/admin-modal.js') }}" defer></script>
     @stack('scripts')
