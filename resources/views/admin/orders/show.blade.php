@@ -81,7 +81,21 @@
                                     @if ($item->resolvedSku())
                                         <p class="order-item-sku">SKU {{ $item->resolvedSku() }}</p>
                                     @endif
-                                    <p class="order-item-meta">× {{ $item->quantity }} · {{ format_euros($item->unit_price_cents) }}</p>
+                                    <p class="order-item-meta">
+                                        × {{ $item->quantity }}
+                                        @unless ($item->hasDiscount())
+                                            · {{ format_euros($item->unit_price_cents) }}
+                                        @endunless
+                                    </p>
+                                    @if ($item->hasDiscount())
+                                        <div class="order-item-discount">
+                                            <span class="order-discount-badge">{{ $item->discount_label }}</span>
+                                            <span class="order-item-discount-prices">
+                                                <span class="card-price-original">{{ $item->formattedOriginalUnitPrice() }}</span>
+                                                <span class="order-item-discount-now">{{ format_euros($item->unit_price_cents) }}</span>
+                                            </span>
+                                        </div>
+                                    @endif
                                 </div>
                                 <p class="order-item-price">{{ $item->formattedLineTotal() }}</p>
                             </li>
@@ -90,11 +104,30 @@
                 </section>
 
                 <section class="order-panel">
+                    @php($discountedItems = $order->discountedItems())
                     <dl class="order-totals">
                         <div>
                             <dt>Subtotal</dt>
-                            <dd>{{ $order->formattedSubtotal() }}</dd>
+                            <dd>{{ $order->formattedFullSubtotal() }}</dd>
                         </div>
+                    </dl>
+                    @if ($discountedItems->isNotEmpty())
+                        <div class="order-reductions">
+                            <p class="order-reductions-title">Discount</p>
+                            <ul class="order-reductions-list">
+                                @foreach ($discountedItems as $item)
+                                    <li class="order-reductions-row">
+                                        <div class="order-reductions-copy">
+                                            <p class="order-reductions-name">{{ $item->localizedName() }}</p>
+                                            <span class="order-discount-badge">{{ $item->discount_label }}</span>
+                                        </div>
+                                        <p class="order-reductions-amount">−{{ format_euros($item->discountCents()) }}</p>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                    <dl class="order-totals">
                         <div>
                             <dt>Shipping</dt>
                             <dd>{{ $order->formattedShipping() }}</dd>

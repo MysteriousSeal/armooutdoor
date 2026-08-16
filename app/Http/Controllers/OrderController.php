@@ -21,7 +21,7 @@ class OrderController extends Controller
     {
         abort_unless($order->user_id === request()->user()->id && ! $order->isDraft(), 404);
 
-        $order->load(['items.product', 'items.variant', 'statusHistories', 'trackingCarrier']);
+        $order->load(['items.product.discount', 'items.variant', 'statusHistories', 'trackingCarrier']);
 
         return view('orders.show', compact('order'));
     }

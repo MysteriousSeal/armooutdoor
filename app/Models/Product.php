@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable([
     'category_id',
@@ -177,7 +178,29 @@ class Product extends Model
         return HtmlSanitizer::toPlainText($this->localized('description'));
     }
 
+    public function discount(): HasOne
+    {
+        return $this->hasOne(Discount::class);
+    }
+
+    public function hasDiscount(): bool
+    {
+        $discount = $this->relationLoaded('discount') ? $this->discount : $this->discount()->first();
+
+        return $discount !== null && $discount->isActive();
+    }
+
+    public function effectivePriceCents(): int
+    {
+        return $this->hasDiscount() ? $this->discount->apply($this->price_cents) : $this->price_cents;
+    }
+
     public function formattedPrice(): string
+    {
+        return format_euros($this->effectivePriceCents());
+    }
+
+    public function formattedOriginalPrice(): string
     {
         return format_euros($this->price_cents);
     }

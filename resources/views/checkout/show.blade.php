@@ -381,7 +381,16 @@
                                         <span class="checkout-line-variant-value">{{ $line->variantLabel() }}</span>
                                     </p>
                                 @endif
-                                <p class="checkout-line-meta">× {{ $line->quantity }} · {{ $line->formattedUnitPrice() }}</p>
+                                @if ($line->hasDiscount())
+                                    <span class="badge badge-active cart-line-discount-badge">{{ $line->product->discount->label() }}</span>
+                                @endif
+                                <p class="checkout-line-meta">
+                                    × {{ $line->quantity }} ·
+                                    @if ($line->hasDiscount())
+                                        <span class="card-price-original">{{ $line->formattedOriginalUnitPrice() }}</span>
+                                    @endif
+                                    {{ $line->formattedUnitPrice() }}
+                                </p>
                             </div>
                             <p class="checkout-line-price">{{ $line->formattedLineTotal() }}</p>
                         </li>

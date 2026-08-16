@@ -20,7 +20,12 @@
         <div class="card-caption">
             <h2>{{ $product->localizedName() }}</h2>
             <div class="card-caption-meta">
-                <p class="card-price">{{ $product->formattedPrice() }}</p>
+                <p class="card-price">
+                    @if ($product->hasDiscount())
+                        <span class="card-price-original">{{ $product->formattedOriginalPrice() }}</span>
+                    @endif
+                    {{ $product->formattedPrice() }}
+                </p>
                 <span class="card-stock-chip {{ $product->lowStock() ? 'is-low-stock' : ($product->inStock() ? 'is-in-stock' : 'is-out-of-stock') }}">
                     {{ $product->lowStock() ? __('store.low_stock') : ($product->inStock() ? __('store.in_stock') : __('store.out_of_stock')) }}
                 </span>

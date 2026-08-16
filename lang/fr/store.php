@@ -124,6 +124,7 @@ return [
     'update_quantity' => 'Mettre à jour',
     'remove' => 'Retirer',
     'subtotal' => 'Sous-total',
+    'order_discount' => 'Réduction',
     'line_total' => 'Total',
     'cart_note' => 'Les frais de port se calculent à la commande, en euros.',
     'checkout' => 'Commander',

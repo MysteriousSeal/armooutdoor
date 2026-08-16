@@ -54,7 +54,7 @@ class ProductVariant extends Model
 
     public function effectivePriceCents(): int
     {
-        return $this->price_cents ?? $this->product->price_cents;
+        return $this->price_cents ?? $this->product->effectivePriceCents();
     }
 
     public function formattedPrice(): string

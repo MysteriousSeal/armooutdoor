@@ -123,6 +123,25 @@ class Order extends Model
         return format_euros($this->subtotal_cents);
     }
 
+    /**
+     * The subtotal before any per-product discounts — subtotal_cents stays
+     * the actual (discounted) figure the total is built from.
+     */
+    public function fullSubtotalCents(): int
+    {
+        return $this->items->sum(fn (OrderItem $item): int => $item->fullLineCents());
+    }
+
+    public function formattedFullSubtotal(): string
+    {
+        return format_euros($this->fullSubtotalCents());
+    }
+
+    public function discountedItems()
+    {
+        return $this->items->filter(fn (OrderItem $item): bool => $item->hasDiscount());
+    }
+
     public function formattedShipping(): string
     {
         return format_euros($this->shipping_cents);

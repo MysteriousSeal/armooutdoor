@@ -16,6 +16,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'sku',
     'image',
     'unit_price_cents',
+    'original_unit_price_cents',
+    'discount_label',
     'quantity',
     'line_cents',
 ])]
@@ -26,6 +28,7 @@ class OrderItem extends Model
         return [
             'name' => 'array',
             'unit_price_cents' => 'integer',
+            'original_unit_price_cents' => 'integer',
             'quantity' => 'integer',
             'line_cents' => 'integer',
         ];
@@ -71,6 +74,39 @@ class OrderItem extends Model
     public function formattedLineTotal(): string
     {
         return format_euros($this->line_cents);
+    }
+
+    /**
+     * Whether a discount applied to this line at the time of purchase —
+     * snapshotted at checkout, so this stays true even if the discount is
+     * later deleted or expires.
+     */
+    public function hasDiscount(): bool
+    {
+        return $this->original_unit_price_cents !== null;
+    }
+
+    public function formattedOriginalUnitPrice(): ?string
+    {
+        return $this->original_unit_price_cents !== null ? format_euros($this->original_unit_price_cents) : null;
+    }
+
+    /**
+     * What this line cost at its full, pre-discount price — equal to
+     * line_cents when there was no discount in play.
+     */
+    public function fullLineCents(): int
+    {
+        if (! $this->hasDiscount()) {
+            return $this->line_cents;
+        }
+
+        return $this->original_unit_price_cents * $this->quantity;
+    }
+
+    public function discountCents(): int
+    {
+        return $this->fullLineCents() - $this->line_cents;
     }
 
     public function imageUrl(): string

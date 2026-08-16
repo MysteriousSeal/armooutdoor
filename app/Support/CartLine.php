@@ -15,7 +15,7 @@ class CartLine
 
     public function unitPriceCents(): int
     {
-        return $this->variant?->effectivePriceCents() ?? $this->product->price_cents;
+        return $this->variant?->effectivePriceCents() ?? $this->product->effectivePriceCents();
     }
 
     public function lineCents(): int
@@ -31,6 +31,21 @@ class CartLine
     public function formattedLineTotal(): string
     {
         return format_euros($this->lineCents());
+    }
+
+    /**
+     * A variant's own price (when set) overrides the product price
+     * entirely, so a product-level discount only actually applies when
+     * there's no variant, or the variant just inherits the product price.
+     */
+    public function hasDiscount(): bool
+    {
+        return $this->variant?->price_cents === null && $this->product->hasDiscount();
+    }
+
+    public function formattedOriginalUnitPrice(): string
+    {
+        return format_euros($this->product->price_cents);
     }
 
     public function variantLabel(): ?string

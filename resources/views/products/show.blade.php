@@ -85,7 +85,12 @@
                     <span class="card-rating-count">({{ $product->reviewsCount() }})</span>
                 </div>
                 <div class="product-detail-meta">
-                    <p class="product-detail-price" id="product-detail-price">{{ ($displayVariant ?? $product)->formattedPrice() }}</p>
+                    <p class="product-detail-price" id="product-detail-price">
+                        @if ($product->hasDiscount())
+                            <span class="product-detail-price-original">{{ $product->formattedOriginalPrice() }}</span>
+                        @endif
+                        {{ ($displayVariant ?? $product)->formattedPrice() }}
+                    </p>
                     <span class="stock-badge {{ $product->lowStock() ? 'is-low-stock' : ($product->inStock() ? 'is-in-stock' : 'is-out-of-stock') }}" id="product-stock-badge">
                         {{ $product->lowStock() ? __('store.low_stock') : ($product->inStock() ? __('store.in_stock') : __('store.out_of_stock')) }}
                     </span>

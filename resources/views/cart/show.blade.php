@@ -85,10 +85,23 @@
                             </div>
 
                             <div class="cart-line-total-slot">
-                                @if ($line->quantity > 1)
-                                    <p class="cart-line-unit-price">{{ $line->formattedUnitPrice() }} × {{ $line->quantity }}</p>
+                                @if ($line->hasDiscount())
+                                    <span class="badge badge-active cart-line-discount-badge">{{ $line->product->discount->label() }}</span>
                                 @endif
-                                <p class="cart-line-total">{{ $line->formattedLineTotal() }}</p>
+                                @if ($line->quantity > 1)
+                                    <p class="cart-line-unit-price">
+                                        @if ($line->hasDiscount())
+                                            <span class="card-price-original">{{ $line->formattedOriginalUnitPrice() }}</span>
+                                        @endif
+                                        {{ $line->formattedUnitPrice() }} × {{ $line->quantity }}
+                                    </p>
+                                @endif
+                                <p class="cart-line-total">
+                                    @if ($line->hasDiscount() && $line->quantity <= 1)
+                                        <span class="card-price-original">{{ $line->formattedOriginalUnitPrice() }}</span>
+                                    @endif
+                                    {{ $line->formattedLineTotal() }}
+                                </p>
                                 <form method="POST" action="{{ localized_route('cart.remove', ['product' => $line->product->slug]) }}" class="cart-line-remove">
                                     @csrf
                                     @method('DELETE')
