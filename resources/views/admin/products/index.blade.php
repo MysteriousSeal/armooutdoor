@@ -25,7 +25,17 @@
             </div>
         </header>
 
+        <nav class="admin-tabs" aria-label="Product tabs">
+            <a href="{{ route('admin.products.index', array_filter(['tab' => 'active', 'search' => $search ?: null, 'category' => $categorySlug ?: null])) }}" class="{{ $tab === 'active' ? 'active' : '' }}">
+                Products <span class="admin-tab-count">{{ number_format($activeCount) }}</span>
+            </a>
+            <a href="{{ route('admin.products.index', array_filter(['tab' => 'disabled', 'search' => $search ?: null, 'category' => $categorySlug ?: null])) }}" class="{{ $tab === 'disabled' ? 'active' : '' }}">
+                Disabled <span class="admin-tab-count">{{ number_format($disabledCount) }}</span>
+            </a>
+        </nav>
+
         <form method="GET" action="{{ route('admin.products.index') }}" class="admin-toolbar">
+            <input type="hidden" name="tab" value="{{ $tab }}">
             <input
                 type="search"
                 name="search"
@@ -43,14 +53,16 @@
             </select>
             <button type="submit" class="btn btn-secondary">Filter</button>
             @if ($search !== '' || $categorySlug !== '')
-                <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">Clear</a>
+                <a href="{{ route('admin.products.index', array_filter(['tab' => $tab !== 'active' ? $tab : null])) }}" class="btn btn-secondary">Clear</a>
             @endif
         </form>
 
         @if ($products->isEmpty())
             <div class="empty-state">
-                <p>No products found.</p>
-                <a href="{{ route('admin.products.create') }}" class="btn btn-primary">Add product</a>
+                <p>{{ $tab === 'disabled' ? 'No disabled products.' : 'No products found.' }}</p>
+                @if ($tab === 'active')
+                    <a href="{{ route('admin.products.create') }}" class="btn btn-primary">Add product</a>
+                @endif
             </div>
         @else
             <p class="admin-result-count">

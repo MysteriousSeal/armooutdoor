@@ -22,10 +22,12 @@ class ProductController extends Controller
     {
         $search = trim((string) $request->query('search', ''));
         $categorySlug = (string) $request->query('category', '');
+        $tab = $request->query('tab') === 'disabled' ? 'disabled' : 'active';
 
         $products = Product::query()
             ->with('category')
             ->withCount('variants')
+            ->where('is_active', $tab !== 'disabled')
             ->when($search !== '', function ($query) use ($search): void {
                 $query->where(function ($query) use ($search): void {
                     $query->where('slug', 'like', '%'.$search.'%')
@@ -45,7 +47,9 @@ class ProductController extends Controller
 
         return view('admin.products.index', [
             'products' => $products,
+            'tab' => $tab,
             'productCount' => Product::query()->count(),
+            'activeCount' => Product::query()->where('is_active', true)->count(),
             'disabledCount' => Product::query()->where('is_active', false)->count(),
             'outOfStockCount' => Product::query()->where('quantity', '<=', 0)->count(),
             'noGtinCount' => Product::query()->whereNull('gtin')->count(),
