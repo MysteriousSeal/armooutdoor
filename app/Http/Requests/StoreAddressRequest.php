@@ -25,7 +25,7 @@ class StoreAddressRequest extends FormRequest
             'line2' => ['nullable', 'string', 'max:120'],
             'postal_code' => ['required', 'string', 'max:12'],
             'city' => ['required', 'string', 'max:80'],
-            'country' => ['required', 'string', Rule::in(config('shop.countries'))],
+            'country' => ['required', 'string', Rule::in(config('shop.customer_countries'))],
             'phone' => ['required', 'string', 'max:30'],
             'is_default' => ['sometimes', 'boolean'],
         ];

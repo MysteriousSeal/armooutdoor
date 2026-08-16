@@ -121,7 +121,7 @@
                                     <div class="form-group">
                                         <label for="country">{{ __('store.country') }}</label>
                                         <select id="country" name="country" class="form-control" required autocomplete="country">
-                                            @foreach (config('shop.countries') as $country)
+                                            @foreach (config('shop.customer_countries') as $country)
                                                 <option value="{{ $country }}" @selected(old('country', 'FR') === $country)>{{ __('store.country_'.$country) }}</option>
                                             @endforeach
                                         </select>
