@@ -2418,6 +2418,9 @@ textarea.form-control {
 .product-qty-input,
 .cart-qty-input {
     width: 5rem;
+    height: 2.25rem;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 .cart-layout {
@@ -2539,7 +2542,15 @@ textarea.form-control {
 }
 
 .cart-line-total-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
     text-align: right;
+    height: 100%;
+}
+
+.cart-line-remove {
+    margin: auto 0 0;
 }
 
 .cart-line-unit-price {

@@ -81,15 +81,6 @@
                                         >
                                         <button type="submit" class="btn btn-sm btn-secondary">{{ __('store.update_quantity') }}</button>
                                     </form>
-
-                                    <form method="POST" action="{{ localized_route('cart.remove', ['product' => $line->product->slug]) }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        @if ($line->variant)
-                                            <input type="hidden" name="variant_id" value="{{ $line->variant->id }}">
-                                        @endif
-                                        <button type="submit" class="btn btn-sm btn-secondary">{{ __('store.remove') }}</button>
-                                    </form>
                                 </div>
                             </div>
 
@@ -98,6 +89,14 @@
                                     <p class="cart-line-unit-price">{{ $line->formattedUnitPrice() }} × {{ $line->quantity }}</p>
                                 @endif
                                 <p class="cart-line-total">{{ $line->formattedLineTotal() }}</p>
+                                <form method="POST" action="{{ localized_route('cart.remove', ['product' => $line->product->slug]) }}" class="cart-line-remove">
+                                    @csrf
+                                    @method('DELETE')
+                                    @if ($line->variant)
+                                        <input type="hidden" name="variant_id" value="{{ $line->variant->id }}">
+                                    @endif
+                                    <button type="submit" class="btn btn-sm btn-secondary">{{ __('store.remove') }}</button>
+                                </form>
                             </div>
                         </li>
                     @endforeach
