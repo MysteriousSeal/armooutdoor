@@ -132,7 +132,16 @@
                             <span class="cart-summary-shipping-value">{{ __('store.shipping_from_amount', ['price' => format_euros($cheapestShippingCents)]) }}</span>
                         </div>
                     @endif
-                    <p class="cart-summary-note">{{ __('store.cart_note') }}</p>
+                    <ul class="cart-summary-hints">
+                        <li>
+                            <span class="cart-summary-hints-label">{{ __('store.shipping') }}</span>
+                            <span class="cart-summary-hints-text">{{ __('store.cart_note') }}</span>
+                        </li>
+                        <li>
+                            <span class="cart-summary-hints-label">{{ __('store.cart_discount_code_kicker') }}</span>
+                            <span class="cart-summary-hints-text">{{ __('store.cart_discount_code_note') }}</span>
+                        </li>
+                    </ul>
                     <a href="{{ localized_route('checkout.show') }}" class="btn btn-primary btn-block">{{ __('store.checkout') }}</a>
                     <a href="{{ localized_route('home') }}" class="btn btn-secondary btn-block">{{ __('store.cart_continue') }}</a>
                 </aside>

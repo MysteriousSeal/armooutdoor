@@ -223,6 +223,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
     Route::post('/checkout/addresses', [CheckoutController::class, 'storeAddress'])->name('checkout.addresses.store');
+    Route::post('/checkout/discount-code', [CheckoutController::class, 'applyDiscountCode'])->name('checkout.discount-code.store');
+    Route::delete('/checkout/discount-code', [CheckoutController::class, 'removeDiscountCode'])->name('checkout.discount-code.destroy');
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');

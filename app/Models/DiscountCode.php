@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'code',
@@ -30,6 +31,11 @@ class DiscountCode extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
     }
 
     public function isForCustomer(): bool
@@ -105,5 +111,40 @@ class DiscountCode extends Model
         $relative = $this->ends_at->copy()->locale('en')->diffForHumans();
 
         return $this->isExpired() ? 'Expired '.$relative : 'Expires '.$relative;
+    }
+
+    public function isSoldOut(): bool
+    {
+        return $this->hasLimitedQuantity() && $this->quantity <= 0;
+    }
+
+    public function customerUsageCount(int $userId): int
+    {
+        return $this->orders()->where('user_id', $userId)->count();
+    }
+
+    /**
+     * Null when the code can be redeemed by this customer right now,
+     * otherwise a translated reason to show them.
+     */
+    public function eligibilityError(?User $user): ?string
+    {
+        if ($this->isExpired()) {
+            return __('store.discount_code_error_expired');
+        }
+
+        if ($this->isForCustomer() && (! $user || $user->id !== $this->user_id)) {
+            return __('store.discount_code_error_not_for_you');
+        }
+
+        if ($this->isSoldOut()) {
+            return __('store.discount_code_error_sold_out');
+        }
+
+        if ($this->hasMaxUsesPerCustomer() && $user && $this->customerUsageCount($user->id) >= $this->max_uses_per_customer) {
+            return __('store.discount_code_error_limit_reached');
+        }
+
+        return null;
     }
 }

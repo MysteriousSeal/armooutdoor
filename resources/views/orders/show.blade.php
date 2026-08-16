@@ -72,6 +72,12 @@
                             <dt>{{ __('store.subtotal') }}</dt>
                             <dd>{{ $order->formattedFullSubtotal() }}</dd>
                         </div>
+                        @if ($order->hasDiscountCode())
+                            <div>
+                                <dt>{{ __('store.order_discount_code', ['code' => $order->discountCodeCode()]) }}</dt>
+                                <dd>-{{ $order->formattedDiscountCents() }}</dd>
+                            </div>
+                        @endif
                     </dl>
                     @if ($discountedItems->isNotEmpty())
                         <div class="order-reductions">

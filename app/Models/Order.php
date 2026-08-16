@@ -34,6 +34,9 @@ use Illuminate\Support\Str;
     'relay_snapshot',
     'subtotal_cents',
     'shipping_cents',
+    'discount_code_id',
+    'discount_code_snapshot',
+    'discount_cents',
     'total_cents',
     'payment_method',
 ])]
@@ -57,6 +60,8 @@ class Order extends Model
             'relay_snapshot' => 'array',
             'subtotal_cents' => 'integer',
             'shipping_cents' => 'integer',
+            'discount_code_snapshot' => 'array',
+            'discount_cents' => 'integer',
             'total_cents' => 'integer',
             'payment_method' => PaymentMethod::class,
         ];
@@ -95,6 +100,11 @@ class Order extends Model
     public function marketplace(): BelongsTo
     {
         return $this->belongsTo(Marketplace::class);
+    }
+
+    public function discountCode(): BelongsTo
+    {
+        return $this->belongsTo(DiscountCode::class);
     }
 
     public function statusHistories(): HasMany
@@ -145,6 +155,21 @@ class Order extends Model
     public function formattedShipping(): string
     {
         return format_euros($this->shipping_cents);
+    }
+
+    public function hasDiscountCode(): bool
+    {
+        return $this->discount_code_snapshot !== null;
+    }
+
+    public function discountCodeCode(): ?string
+    {
+        return $this->discount_code_snapshot['code'] ?? null;
+    }
+
+    public function formattedDiscountCents(): string
+    {
+        return format_euros($this->discount_cents);
     }
 
     public function formattedTotal(): string

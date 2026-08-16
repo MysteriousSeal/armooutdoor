@@ -2239,10 +2239,37 @@
     color: #9dbea8;
 }
 
-.cart-summary-note {
+.cart-summary-hints {
+    list-style: none;
     margin: 0.85rem 0 1.25rem;
+    padding: 0;
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.cart-summary-hints li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.7rem 0.8rem;
+}
+
+.cart-summary-hints li + li {
+    border-top: 1px solid var(--border);
+}
+
+.cart-summary-hints-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.cart-summary-hints-text {
     font-size: 0.8125rem;
-    color: var(--text-muted);
+    line-height: 1.45;
+    color: var(--text);
 }
 
 .checkout-layout,
@@ -2281,6 +2308,77 @@
     font-size: 0.875rem;
     color: var(--checkout-muted);
     margin-bottom: 1rem;
+}
+
+.checkout-section--discount-code {
+    padding: 1rem 1.1rem 1.05rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.checkout-section--discount-code + .checkout-section {
+    margin-top: 1.75rem;
+    padding-top: 0;
+    border-top: 0;
+}
+
+.discount-code-heading {
+    margin: 0 0 0.75rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.discount-code-form {
+    display: flex;
+    align-items: stretch;
+    gap: 0.5rem;
+}
+
+.discount-code-form .form-control {
+    flex: 1;
+    min-width: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.discount-code-form .btn {
+    flex-shrink: 0;
+}
+
+.discount-code-applied {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.85rem;
+    padding: 0.7rem 0.8rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.discount-code-applied-copy {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.55rem 0.7rem;
+    min-width: 0;
+}
+
+.discount-code-applied-amount {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: #3d6b4e;
+}
+
+[data-theme='dark'] .discount-code-applied-amount {
+    color: #9dbea8;
+}
+
+.checkout-section--discount-code .form-error {
+    margin-top: 0.55rem;
 }
 
 .choice-grid {

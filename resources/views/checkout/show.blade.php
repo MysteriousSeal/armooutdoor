@@ -22,6 +22,41 @@
 
         <div class="checkout-layout">
             <div class="checkout-main">
+                    <section class="checkout-section checkout-section--discount-code">
+                        <h3 class="discount-code-heading">{{ __('store.discount_code_section') }}</h3>
+
+                        @if ($discountCode)
+                            <div class="discount-code-applied">
+                                <div class="discount-code-applied-copy">
+                                    <span class="order-discount-badge">{{ $discountCode->code }}</span>
+                                    <span class="discount-code-applied-amount">-{{ format_euros($discountCents) }}</span>
+                                </div>
+                                <form method="POST" action="{{ localized_route('checkout.discount-code.destroy') }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-secondary">{{ __('store.discount_code_remove') }}</button>
+                                </form>
+                            </div>
+                        @else
+                            <form method="POST" action="{{ localized_route('checkout.discount-code.store') }}" class="discount-code-form">
+                                @csrf
+                                <input
+                                    type="text"
+                                    name="code"
+                                    class="form-control"
+                                    placeholder="{{ __('store.discount_code_placeholder') }}"
+                                    maxlength="40"
+                                    autocomplete="off"
+                                    spellcheck="false"
+                                >
+                                <button type="submit" class="btn btn-secondary">{{ __('store.discount_code_apply') }}</button>
+                            </form>
+                            @error('discount_code')
+                                <p class="form-error">{{ $message }}</p>
+                            @enderror
+                        @endif
+                    </section>
+
                     <section class="checkout-section checkout-section--address">
                         <h3 class="checkout-heading">
                             <span class="home-kicker">01</span>
@@ -402,13 +437,19 @@
                         <dt>{{ __('store.subtotal') }}</dt>
                         <dd>{{ $subtotal }}</dd>
                     </div>
+                    @if ($discountCode)
+                        <div>
+                            <dt>{{ __('store.order_discount_code', ['code' => $discountCode->code]) }}</dt>
+                            <dd>-{{ format_euros($discountCents) }}</dd>
+                        </div>
+                    @endif
                     <div>
                         <dt>{{ __('store.shipping') }}</dt>
                         <dd id="checkout-shipping-price">—</dd>
                     </div>
                     <div class="checkout-totals-grand">
                         <dt>{{ __('store.line_total') }}</dt>
-                        <dd id="checkout-grand-total">{{ $subtotal }}</dd>
+                        <dd id="checkout-grand-total">{{ format_euros($subtotalCents - $discountCents) }}</dd>
                     </div>
                 </dl>
 
@@ -430,6 +471,7 @@
     <script>
         window.armoCheckout = {
             subtotalCents: {{ $subtotalCents }},
+            discountCents: {{ $discountCents }},
             locale: @json(app()->getLocale()),
             carriers: {
                 @foreach ($homeCarriers->concat($relayCarriers) as $carrier)

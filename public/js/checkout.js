@@ -58,7 +58,7 @@
         }
 
         if (grandTotal) {
-            grandTotal.textContent = formatEuros(config.subtotalCents + shippingCents);
+            grandTotal.textContent = formatEuros(config.subtotalCents - (config.discountCents || 0) + shippingCents);
         }
     }
 

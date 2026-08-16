@@ -7,19 +7,24 @@ use App\Http\Requests\PlaceOrderRequest;
 use App\Http\Requests\StoreAddressRequest;
 use App\Models\Address;
 use App\Models\Carrier;
+use App\Models\DiscountCode;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\ProductVariant;
 use App\Models\RelayPoint;
 use App\Models\ShippingSetting;
+use App\Models\User;
 use App\Support\Cart;
 use App\Support\CartLine;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class CheckoutController extends Controller
 {
+    private const DISCOUNT_CODE_SESSION_KEY = 'checkout.discount_code_id';
+
     public function show(Cart $cart): View|RedirectResponse
     {
         if ($cart->isEmpty()) {
@@ -43,11 +48,16 @@ class CheckoutController extends Controller
             fn (Carrier $carrier): array => [$carrier->id => $shippingSetting->effectivePriceCents($carrier, $subtotalCents, $weightGrams)],
         );
 
+        $discountCode = $this->resolveAppliedDiscountCode($user);
+        $discountCents = $discountCode ? $subtotalCents - $discountCode->apply($subtotalCents) : 0;
+
         return view('checkout.show', [
             'lines' => $cart->lines(),
             'subtotal' => $cart->formattedTotal(),
             'subtotalCents' => $subtotalCents,
             'carrierPricesCents' => $carrierPricesCents,
+            'discountCode' => $discountCode,
+            'discountCents' => $discountCents,
             'addresses' => $addresses,
             'homeCarriers' => $carriers->filter(fn (Carrier $carrier): bool => $carrier->method === DeliveryMethod::Home)->values(),
             'relayCarriers' => $carriers->filter(fn (Carrier $carrier): bool => $carrier->method === DeliveryMethod::Relay)->values(),
@@ -79,6 +89,36 @@ class CheckoutController extends Controller
         return redirect(localized_route('checkout.show'))
             ->with('status', __('store.address_saved'))
             ->withInput(['address_id' => $address->id]);
+    }
+
+    public function applyDiscountCode(Request $request): RedirectResponse
+    {
+        $code = strtoupper(trim((string) $request->input('code')));
+
+        $discountCode = $code !== '' ? DiscountCode::query()->where('code', $code)->first() : null;
+
+        if ($discountCode === null) {
+            return back()->withErrors(['discount_code' => __('store.discount_code_error_not_found')]);
+        }
+
+        $error = $discountCode->eligibilityError($request->user());
+
+        if ($error !== null) {
+            return back()->withErrors(['discount_code' => $error]);
+        }
+
+        session()->put(self::DISCOUNT_CODE_SESSION_KEY, $discountCode->id);
+
+        return redirect(localized_route('checkout.show'))
+            ->with('status', __('store.discount_code_applied', ['code' => $discountCode->code]));
+    }
+
+    public function removeDiscountCode(): RedirectResponse
+    {
+        session()->forget(self::DISCOUNT_CODE_SESSION_KEY);
+
+        return redirect(localized_route('checkout.show'))
+            ->with('status', __('store.discount_code_removed'));
     }
 
     public function store(PlaceOrderRequest $request, Cart $cart): RedirectResponse
@@ -113,6 +153,24 @@ class CheckoutController extends Controller
                 $subtotal = $cart->totalCents();
                 $shipping = ShippingSetting::current()->effectivePriceCents($carrier, $subtotal, $cart->totalWeightGrams());
 
+                $discountCode = null;
+                $discountCents = 0;
+                $discountCodeId = session(self::DISCOUNT_CODE_SESSION_KEY);
+
+                if ($discountCodeId !== null) {
+                    $discountCode = DiscountCode::query()->lockForUpdate()->find($discountCodeId);
+
+                    if ($discountCode !== null && $discountCode->eligibilityError($request->user()) === null) {
+                        $discountCents = $subtotal - $discountCode->apply($subtotal);
+
+                        if ($discountCode->hasLimitedQuantity()) {
+                            $discountCode->decrement('quantity');
+                        }
+                    } else {
+                        $discountCode = null;
+                    }
+                }
+
                 $order = Order::query()->create([
                     'number' => Order::generateNumber(),
                     'user_id' => $request->user()->id,
@@ -128,7 +186,14 @@ class CheckoutController extends Controller
                     'relay_snapshot' => $relayPoint?->toSnapshot(),
                     'subtotal_cents' => $subtotal,
                     'shipping_cents' => $shipping,
-                    'total_cents' => $subtotal + $shipping,
+                    'discount_code_id' => $discountCode?->id,
+                    'discount_code_snapshot' => $discountCode ? [
+                        'code' => $discountCode->code,
+                        'type' => $discountCode->type,
+                        'value' => $discountCode->value,
+                    ] : null,
+                    'discount_cents' => $discountCents,
+                    'total_cents' => $subtotal - $discountCents + $shipping,
                     'payment_method' => $request->validated('payment_method'),
                 ]);
 
@@ -184,7 +249,28 @@ class CheckoutController extends Controller
             throw $exception;
         }
 
+        session()->forget(self::DISCOUNT_CODE_SESSION_KEY);
+
         return redirect(localized_route('orders.show', ['order' => $order->number]))
             ->with('status', __('store.order_placed'));
+    }
+
+    private function resolveAppliedDiscountCode(User $user): ?DiscountCode
+    {
+        $id = session(self::DISCOUNT_CODE_SESSION_KEY);
+
+        if ($id === null) {
+            return null;
+        }
+
+        $discountCode = DiscountCode::query()->find($id);
+
+        if ($discountCode === null || $discountCode->eligibilityError($user) !== null) {
+            session()->forget(self::DISCOUNT_CODE_SESSION_KEY);
+
+            return null;
+        }
+
+        return $discountCode;
     }
 }

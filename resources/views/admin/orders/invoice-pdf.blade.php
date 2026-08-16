@@ -273,6 +273,12 @@
                         <td class="t-label">Sous-total</td>
                         <td class="t-value">{{ $order->formattedSubtotal() }}</td>
                     </tr>
+                    @if ($order->hasDiscountCode())
+                        <tr>
+                            <td class="t-label">Réduction</td>
+                            <td class="t-value">-{{ $order->formattedDiscountCents() }}</td>
+                        </tr>
+                    @endif
                     <tr>
                         <td class="t-label">Livraison</td>
                         <td class="t-value">{{ $order->formattedShipping() }}</td>
