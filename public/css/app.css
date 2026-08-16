@@ -95,8 +95,8 @@
 
 @media (max-width: 640px) {
 .site-search {
-        width: min(12.5rem, 42vw);
-        min-width: 8.5rem;
+        width: 100%;
+        min-width: 0;
     }
 }
 
@@ -3073,8 +3073,42 @@
         font-size: 1.5rem;
     }
 
+.site-header-inner {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto auto;
+        grid-template-areas:
+            "logo cart menu"
+            "search search search";
+        align-items: center;
+        gap: 0.75rem 0.5rem;
+        padding: 0.9rem 1.5rem 0.85rem;
+    }
+
+.site-tagline {
+        display: none;
+    }
+
+.site-header-main {
+        grid-area: logo;
+        min-width: 0;
+    }
+
 .site-header-actions {
-        align-self: center;
+        display: contents;
+    }
+
+.site-header-actions .cart-btn--header {
+        grid-area: cart;
+    }
+
+.site-menu-toggle {
+        grid-area: menu;
+    }
+
+.site-header-actions .site-search {
+        grid-area: search;
+        width: 100%;
+        min-width: 0;
     }
 
 .site-subheader {
@@ -3114,6 +3148,108 @@
         width: 100%;
         flex: none;
         justify-content: flex-start;
+    }
+
+.product-detail {
+        gap: 1.15rem;
+        margin-bottom: 1.5rem;
+    }
+
+.product-detail-stage {
+        padding: 0.85rem;
+    }
+
+.product-detail-thumbs {
+        gap: 0.4rem;
+        margin-top: 0.55rem;
+    }
+
+.product-detail-thumb {
+        width: 3.25rem;
+        height: 3.25rem;
+    }
+
+.product-detail-buy {
+        position: static;
+        padding: 1.1rem 1rem 1rem;
+    }
+
+.product-detail-title {
+        font-size: 1.25rem;
+    }
+
+.product-detail-meta {
+        gap: 0.5rem 0.65rem;
+        padding-bottom: 0.85rem;
+    }
+
+.product-variant-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+.product-variants-legend {
+        flex-wrap: wrap;
+        gap: 0.25rem 0.6rem;
+    }
+
+.product-buy-row {
+        flex-wrap: wrap;
+    }
+
+.product-buy-submit {
+        flex: 1 1 10rem;
+    }
+
+.product-detail-perks li {
+        line-height: 1.45;
+    }
+
+.page-title {
+        font-size: 1.4rem;
+    }
+
+.page-lede {
+        font-size: 0.9375rem;
+    }
+
+.subcat-nav {
+        flex-wrap: wrap;
+        overflow: visible;
+        margin: 0 0 1.15rem;
+        padding: 0;
+    }
+
+.sort-form {
+        align-items: stretch;
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+
+.category-filters {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        margin-right: 0;
+        width: 100%;
+    }
+
+.category-filter,
+    .sort-field {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.35rem;
+        width: 100%;
+    }
+
+.category-filters-reset {
+        grid-column: 1 / -1;
+        justify-content: center;
+    }
+
+.sort-select-wrap,
+    .sort-select {
+        width: 100%;
+        min-width: 0;
     }
 
 .sort-tabs {
@@ -3165,6 +3301,13 @@
 
 .cart-btn--header {
         display: inline-flex;
+        width: auto;
+        height: 2.75rem;
+        padding: 0 0.7rem;
+    }
+
+.cart-btn--header .cart-btn-label {
+        display: inline;
     }
 
 .cart-btn--nav {
