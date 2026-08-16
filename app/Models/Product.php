@@ -103,6 +103,61 @@ class Product extends Model
         return $this->hasMany(WishlistItem::class);
     }
 
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(ProductReview::class)->latest();
+    }
+
+    public function reviewsCount(): int
+    {
+        return $this->relationLoaded('reviews') ? $this->reviews->count() : $this->reviews()->count();
+    }
+
+    public function averageRating(): ?float
+    {
+        $average = $this->relationLoaded('reviews')
+            ? $this->reviews->avg('rating')
+            : $this->reviews()->avg('rating');
+
+        return $average !== null ? round((float) $average, 1) : null;
+    }
+
+    public function hasBeenReviewedBy(?User $user): bool
+    {
+        if ($user === null) {
+            return false;
+        }
+
+        return $this->reviews()->where('user_id', $user->id)->exists();
+    }
+
+    /**
+     * The oldest shipped order belonging to the user that contains this
+     * product and doesn't already have a review — i.e. the order a new
+     * review would be attached to. A customer can review each qualifying
+     * order once, so this keeps returning orders as long as any are left
+     * unreviewed. Null once every eligible order has been reviewed.
+     */
+    public function eligibleOrderFor(?User $user): ?Order
+    {
+        if ($user === null) {
+            return null;
+        }
+
+        return Order::query()
+            ->where('user_id', $user->id)
+            ->where('status', 'shipped')
+            ->whereHas('items', fn (Builder $query) => $query->where('product_id', $this->id))
+            ->whereDoesntHave('reviews', fn (Builder $query) => $query->where('product_id', $this->id))
+            ->oldest()
+            ->first();
+    }
+
+    public function canBeReviewedBy(?User $user): bool
+    {
+        return $this->eligibleOrderFor($user) !== null;
+    }
+
     public function localizedName(): string
     {
         return $this->localized('name');

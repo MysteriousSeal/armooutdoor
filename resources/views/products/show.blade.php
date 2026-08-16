@@ -222,6 +222,64 @@
             </section>
         @endif
 
+        <section class="product-reviews" aria-labelledby="product-reviews-title">
+            <h3 class="product-desc-title" id="product-reviews-title">{{ __('store.reviews_title') }}</h3>
+
+            <div class="reviews-summary">
+                @if ($product->averageRating() !== null)
+                    <span class="star-rating" aria-hidden="true">{{ str_repeat('★', (int) round($product->averageRating())) }}{{ str_repeat('☆', 5 - (int) round($product->averageRating())) }}</span>
+                    <span class="reviews-summary-value">{{ number_format($product->averageRating(), 1) }} / 5</span>
+                @endif
+                <span class="reviews-summary-count">{{ trans_choice('store.reviews_count', $product->reviewsCount(), ['count' => $product->reviewsCount()]) }}</span>
+            </div>
+
+            @auth
+                @if ($product->canBeReviewedBy(auth()->user()))
+                    <form method="POST" action="{{ localized_route('reviews.store', ['product' => $product->slug]) }}" class="review-form">
+                        @csrf
+                        <h4 class="review-form-title">{{ __('store.review_form_title') }}</h4>
+
+                        <div class="star-input" role="radiogroup" aria-label="{{ __('store.review_rating_label') }}">
+                            @for ($value = 5; $value >= 1; $value--)
+                                <input type="radio" name="rating" id="rating-{{ $value }}" value="{{ $value }}" @checked((int) old('rating') === $value) required>
+                                <label for="rating-{{ $value }}">★</label>
+                            @endfor
+                        </div>
+                        @error('rating') <p class="form-error">{{ $message }}</p> @enderror
+
+                        <div class="form-group">
+                            <label for="review-comment" class="sr-only">{{ __('store.review_comment_label') }}</label>
+                            <textarea id="review-comment" name="comment" class="form-control" rows="3" placeholder="{{ __('store.review_comment_label') }}">{{ old('comment') }}</textarea>
+                            @error('comment') <p class="form-error">{{ $message }}</p> @enderror
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">{{ __('store.review_submit') }}</button>
+                    </form>
+                @elseif ($product->hasBeenReviewedBy(auth()->user()))
+                    <p class="reviews-already">{{ __('store.review_already_submitted') }}</p>
+                @endif
+            @endauth
+
+            @if ($product->reviews->isEmpty())
+                <p class="reviews-empty">{{ __('store.reviews_empty') }}</p>
+            @else
+                <ul class="reviews-list">
+                    @foreach ($product->reviews as $review)
+                        <li class="review-item">
+                            <div class="review-item-head">
+                                <span class="star-rating" aria-hidden="true">{{ str_repeat('★', $review->rating) }}{{ str_repeat('☆', 5 - $review->rating) }}</span>
+                                <span class="review-item-author">{{ $review->reviewerName() }}</span>
+                                <span class="review-item-date">{{ $review->created_at->translatedFormat('d F Y') }}</span>
+                            </div>
+                            @if (filled($review->comment))
+                                <p class="review-item-comment">{{ $review->comment }}</p>
+                            @endif
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+        </section>
+
         @if ($related->isNotEmpty())
             <section class="shop-section">
                 <header class="section-header">

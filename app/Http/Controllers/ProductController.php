@@ -11,7 +11,7 @@ class ProductController extends Controller
     {
         abort_unless($product->is_active, 404);
 
-        $product->load('category.parent', 'images', 'variants');
+        $product->load('category.parent', 'images', 'variants', 'reviews.user');
 
         $related = Product::query()
             ->active()
