@@ -207,8 +207,10 @@ class OrderController extends Controller
         $marketplace = $request->input('marketplace_id')
             ? Marketplace::query()->find($request->input('marketplace_id'))
             : null;
+        $discountType = $request->input('discount_type');
+        $discountValue = $request->input('discount_value');
 
-        return DB::transaction(function () use ($order, $customer, $carrier, $shippingSnapshot, $billingSnapshot, $items, $shippingPrice, $marketplace, $finalize): Order {
+        return DB::transaction(function () use ($order, $customer, $carrier, $shippingSnapshot, $billingSnapshot, $items, $shippingPrice, $marketplace, $discountType, $discountValue, $finalize): Order {
             $productsQuery = Product::query()->whereIn('id', $items->pluck('product_id'));
             $products = $finalize
                 ? $productsQuery->lockForUpdate()->get()->keyBy('id')
@@ -244,6 +246,21 @@ class OrderController extends Controller
                 ? (int) round(((float) $shippingPrice) * 100)
                 : ShippingSetting::current()->effectivePriceCents($carrier, $subtotal, $weightGrams);
 
+            $discountCents = 0;
+            $discountSnapshot = null;
+
+            if (filled($discountType) && filled($discountValue)) {
+                $value = $discountType === 'percentage'
+                    ? (int) round((float) $discountValue)
+                    : (int) round(((float) $discountValue) * 100);
+
+                $discountCents = $discountType === 'percentage'
+                    ? (int) round($subtotal * $value / 100)
+                    : min($subtotal, $value);
+
+                $discountSnapshot = ['code' => null, 'type' => $discountType, 'value' => $value];
+            }
+
             $attributes = [
                 'is_manual' => true,
                 'user_id' => $customer->id,
@@ -255,7 +272,10 @@ class OrderController extends Controller
                 'carrier_snapshot' => $carrier->toSnapshot(),
                 'subtotal_cents' => $subtotal,
                 'shipping_cents' => $shipping,
-                'total_cents' => $subtotal + $shipping,
+                'discount_code_id' => null,
+                'discount_code_snapshot' => $discountSnapshot,
+                'discount_cents' => $discountCents,
+                'total_cents' => $subtotal - $discountCents + $shipping,
                 'payment_method' => 'card',
                 'marketplace_id' => $marketplace?->id,
                 'marketplace_name' => $marketplace?->name,

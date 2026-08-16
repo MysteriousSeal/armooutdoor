@@ -42,6 +42,11 @@
             'price' => number_format($item->unit_price_cents / 100, 2, '.', ''),
         ])->values()->all()
         : [['product_id' => '', 'quantity' => 1], ['product_id' => '', 'quantity' => 1]];
+    $manualDiscount = $isEdit && $order->discount_code_id === null ? $order->discount_code_snapshot : null;
+    $defaultDiscountType = $manualDiscount['type'] ?? '';
+    $defaultDiscountValue = $manualDiscount
+        ? ($manualDiscount['type'] === 'percentage' ? $manualDiscount['value'] : number_format($manualDiscount['value'] / 100, 2, '.', ''))
+        : '';
     $customerAddresses = $customers->mapWithKeys(function ($customer) {
         return [
             $customer->id => $customer->addresses->map(fn ($address) => [
@@ -266,54 +271,107 @@
 
                     <section class="order-panel">
                         <h3 class="order-panel-title">Carrier</h3>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="carrier_id">Carrier</label>
-                                <select id="carrier_id" name="carrier_id" class="form-control">
-                                    <option value="" data-price="">— Select a carrier —</option>
-                                    @foreach ($carriers as $carrier)
-                                        <option
+                        @php($selectedCarrierId = (string) old('carrier_id', $isEdit ? $order->carrier_id : ''))
+                        <div class="form-group">
+                            <label>Carrier</label>
+                            <input type="hidden" id="carrier_id" name="carrier_id" value="{{ $selectedCarrierId }}">
+                            <div class="admin-choice-row admin-choice-row--stack">
+                                @foreach ($carriers as $carrier)
+                                    <label class="admin-choice">
+                                        <input
+                                            type="radio"
+                                            name="carrier_id_choice"
                                             value="{{ $carrier->id }}"
+                                            data-sync-field="carrier_id"
                                             data-price="{{ number_format($carrier->price_cents / 100, 2, '.', '') }}"
-                                            @selected((string) old('carrier_id', $isEdit ? $order->carrier_id : '') === (string) $carrier->id)
+                                            @checked($selectedCarrierId === (string) $carrier->id)
                                         >
-                                            {{ $carrier->localizedName() }} — {{ $carrier->formattedStartingPrice() }} ({{ $carrier->method->value }})
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('carrier_id') <p class="form-error">{{ $message }}</p> @enderror
+                                        <span class="admin-choice-line">
+                                            <span class="admin-table-strong">{{ $carrier->localizedName() }}</span>
+                                            <span>{{ $carrier->formattedStartingPrice() }} · {{ $carrier->method === \App\Enums\DeliveryMethod::Home ? 'Home delivery' : 'Relay' }}</span>
+                                        </span>
+                                    </label>
+                                @endforeach
                             </div>
-                            <div class="form-group">
-                                <label for="shipping_price">Shipping (€)</label>
-                                <input
-                                    type="number"
-                                    id="shipping_price"
-                                    name="shipping_price"
-                                    class="form-control"
-                                    value="{{ old('shipping_price', $isEdit ? number_format($order->shipping_cents / 100, 2, '.', '') : '') }}"
-                                    min="0"
-                                    step="0.01"
-                                >
-                                @error('shipping_price') <p class="form-error">{{ $message }}</p> @enderror
-                            </div>
+                            @error('carrier_id') <p class="form-error">{{ $message }}</p> @enderror
+                        </div>
+                        <div class="form-group">
+                            <label for="shipping_price">Shipping (€)</label>
+                            <input
+                                type="number"
+                                id="shipping_price"
+                                name="shipping_price"
+                                class="form-control"
+                                value="{{ old('shipping_price', $isEdit ? number_format($order->shipping_cents / 100, 2, '.', '') : '') }}"
+                                min="0"
+                                step="0.01"
+                            >
+                            @error('shipping_price') <p class="form-error">{{ $message }}</p> @enderror
                         </div>
                     </section>
 
                     <section class="order-panel">
-                        <h3 class="order-panel-title">Marketplace</h3>
+                        <h3 class="order-panel-title">Discount</h3>
+                        @php($selectedDiscountType = old('discount_type', $defaultDiscountType))
                         <div class="form-group">
-                            <label for="marketplace_id">Marketplace (optional)</label>
-                            <select id="marketplace_id" name="marketplace_id" class="form-control">
-                                <option value="">— None —</option>
+                            <label>Type</label>
+                            <input type="hidden" id="discount_type" name="discount_type" value="{{ $selectedDiscountType }}">
+                            <div class="admin-choice-row admin-choice-row--3">
+                                <label class="admin-choice">
+                                    <input type="radio" name="discount_type_choice" value="" data-sync-field="discount_type" @checked($selectedDiscountType === '' || $selectedDiscountType === null)>
+                                    <span class="admin-table-strong">None</span>
+                                </label>
+                                <label class="admin-choice">
+                                    <input type="radio" name="discount_type_choice" value="percentage" data-sync-field="discount_type" @checked($selectedDiscountType === 'percentage')>
+                                    <span class="admin-table-strong">Percentage</span>
+                                </label>
+                                <label class="admin-choice">
+                                    <input type="radio" name="discount_type_choice" value="fixed" data-sync-field="discount_type" @checked($selectedDiscountType === 'fixed')>
+                                    <span class="admin-table-strong">Fixed amount</span>
+                                </label>
+                            </div>
+                            @error('discount_type') <p class="form-error">{{ $message }}</p> @enderror
+                        </div>
+                        <div class="form-group" id="discount-value-group" @if ($selectedDiscountType === '' || $selectedDiscountType === null) hidden @endif>
+                            <label for="discount_value">Value</label>
+                            <input
+                                type="number"
+                                id="discount_value"
+                                name="discount_value"
+                                class="form-control"
+                                value="{{ old('discount_value', $defaultDiscountValue) }}"
+                                min="0.01"
+                                step="0.01"
+                            >
+                            @error('discount_value') <p class="form-error">{{ $message }}</p> @enderror
+                        </div>
+                        <p class="form-hint">Percentage (1–100) or a fixed euro amount off the order subtotal. No discount code is created.</p>
+                    </section>
+
+                    <section class="order-panel">
+                        <h3 class="order-panel-title">Marketplace</h3>
+                        @php($selectedMarketplaceId = (string) old('marketplace_id', $isEdit ? $order->marketplace_id : ''))
+                        <div class="form-group">
+                            <label>Marketplace (optional)</label>
+                            <input type="hidden" id="marketplace_id" name="marketplace_id" value="{{ $selectedMarketplaceId }}">
+                            <div class="admin-choice-row">
+                                <label class="admin-choice">
+                                    <input type="radio" name="marketplace_id_choice" value="" data-sync-field="marketplace_id" @checked($selectedMarketplaceId === '')>
+                                    <span class="admin-table-strong">None</span>
+                                </label>
                                 @foreach ($marketplaces as $marketplace)
-                                    <option
-                                        value="{{ $marketplace->id }}"
-                                        @selected((string) old('marketplace_id', $isEdit ? $order->marketplace_id : '') === (string) $marketplace->id)
-                                    >
-                                        {{ $marketplace->name }}
-                                    </option>
+                                    <label class="admin-choice">
+                                        <input
+                                            type="radio"
+                                            name="marketplace_id_choice"
+                                            value="{{ $marketplace->id }}"
+                                            data-sync-field="marketplace_id"
+                                            @checked($selectedMarketplaceId === (string) $marketplace->id)
+                                        >
+                                        <span class="admin-table-strong">{{ $marketplace->name }}</span>
+                                    </label>
                                 @endforeach
-                            </select>
+                            </div>
                             @error('marketplace_id') <p class="form-error">{{ $message }}</p> @enderror
                         </div>
                     </section>
@@ -444,8 +502,11 @@
                 var isNew = modeNew.checked;
                 existingFields.hidden = isNew;
                 newFields.hidden = ! isNew;
-                document.querySelectorAll('.admin-choice').forEach(function (choice) {
-                    choice.classList.toggle('is-selected', choice.querySelector('input').checked);
+                document.querySelectorAll('input[name="customer_mode"]').forEach(function (input) {
+                    var choice = input.closest('.admin-choice');
+                    if (choice) {
+                        choice.classList.toggle('is-selected', input.checked);
+                    }
                 });
                 if (typeof syncAddressPickers === 'function') {
                     if (isNew) {
@@ -470,16 +531,42 @@
             var carrierSelect = document.getElementById('carrier_id');
             var shippingPrice = document.getElementById('shipping_price');
 
-            carrierSelect.addEventListener('change', function () {
-                var selected = carrierSelect.options[carrierSelect.selectedIndex];
-                shippingPrice.value = selected ? (selected.getAttribute('data-price') || '') : '';
+            function selectedCarrierRadio() {
+                return document.querySelector('input[data-sync-field="carrier_id"]:checked');
+            }
+
+            function applyCarrierPrice(radio) {
+                if (! radio) {
+                    return;
+                }
+                shippingPrice.value = radio.getAttribute('data-price') || '';
+            }
+
+            document.addEventListener('change', function (event) {
+                var radio = event.target.closest('[data-sync-field]');
+                if (! radio) {
+                    return;
+                }
+                var target = document.getElementById(radio.getAttribute('data-sync-field'));
+                if (target) {
+                    target.value = radio.value;
+                    target.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+                if (radio.getAttribute('data-sync-field') === 'carrier_id') {
+                    applyCarrierPrice(radio);
+                }
             });
 
             if (shippingPrice.value === '' && carrierSelect.value !== '') {
-                var current = carrierSelect.options[carrierSelect.selectedIndex];
-                if (current) {
-                    shippingPrice.value = current.getAttribute('data-price') || '';
-                }
+                applyCarrierPrice(selectedCarrierRadio());
+            }
+
+            var discountType = document.getElementById('discount_type');
+            var discountValueGroup = document.getElementById('discount-value-group');
+            if (discountType && discountValueGroup) {
+                discountType.addEventListener('change', function () {
+                    discountValueGroup.hidden = discountType.value === '';
+                });
             }
 
             var customerIdInput = document.getElementById('customer_id');

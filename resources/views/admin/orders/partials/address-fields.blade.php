@@ -51,7 +51,7 @@
         <label for="{{ $prefix }}_country">Country</label>
         <select id="{{ $prefix }}_country" name="{{ $field('country') }}" class="form-control" required>
             @foreach (config('shop.countries') as $country)
-                <option value="{{ $country }}" @selected($val('country') === $country)>{{ __('store.country_'.$country) }}</option>
+                <option value="{{ $country }}" @selected($val('country') === $country || ($val('country') === '' && $country === 'FR'))>{{ __('store.country_'.$country) }}</option>
             @endforeach
         </select>
         @if ($bagErrors->has($field('country'))) <p class="form-error">{{ $bagErrors->first($field('country')) }}</p> @endif

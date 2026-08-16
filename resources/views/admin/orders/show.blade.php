@@ -113,7 +113,7 @@
                         </div>
                         @if ($order->hasDiscountCode())
                             <div>
-                                <dt>Code {{ $order->discountCodeCode() }}</dt>
+                                <dt>{{ $order->discountCodeCode() ? 'Code '.$order->discountCodeCode() : 'Discount' }}</dt>
                                 <dd>-{{ $order->formattedDiscountCents() }}</dd>
                             </div>
                         @endif

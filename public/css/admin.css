@@ -1316,6 +1316,18 @@ a.admin-pagination-page:hover {
     margin-bottom: 0.65rem;
 }
 
+.admin-choice-row--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin-choice-row--stack {
+    grid-template-columns: 1fr;
+}
+
+.admin-choice-row--countries {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .admin-choice {
     display: flex;
     align-items: center;
@@ -1337,6 +1349,21 @@ a.admin-pagination-page:hover {
 
 .admin-choice input {
     margin: 0;
+}
+
+.admin-choice-line {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: nowrap;
+    gap: 0.45rem;
+    min-width: 0;
+}
+
+.admin-choice-line span:last-child {
+    font-size: 0.8125rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    white-space: nowrap;
 }
 
 .admin-order-create-actions {
@@ -1454,6 +1481,8 @@ a.admin-pagination-page:hover {
 @media (max-width: 900px) {
 .admin-order-create-grid,
     .admin-choice-row,
+    .admin-choice-row--3,
+    .admin-choice-row--countries,
     .variant-card-body {
         grid-template-columns: 1fr;
     }

@@ -46,6 +46,15 @@ class StoreManualOrderRequest extends FormRequest
             'shipping_price' => ['nullable', 'numeric', 'min:0'],
             'marketplace_id' => ['nullable', 'exists:marketplaces,id'],
 
+            'discount_type' => ['nullable', Rule::in(['percentage', 'fixed'])],
+            'discount_value' => [
+                'nullable',
+                Rule::requiredIf(fn (): bool => filled($this->input('discount_type'))),
+                'numeric',
+                'min:0.01',
+                $this->input('discount_type') === 'percentage' ? 'max:100' : 'max:99999.99',
+            ],
+
             'first_name' => ['required', 'string', 'max:80'],
             'last_name' => ['required', 'string', 'max:80'],
             'line1' => ['required', 'string', 'max:120'],
