@@ -153,56 +153,66 @@
                     <a href="{{ route('admin.discount-codes.create') }}" class="btn btn-primary">Add code</a>
                 </div>
             @else
-                <ul class="admin-discount-list">
-                    @foreach ($discountCodes as $discountCode)
-                        <li class="admin-discount-card admin-discount-card--code">
-                            <div class="admin-discount-main">
-                                <p class="admin-discount-code">
-                                    <a href="{{ route('admin.discount-codes.edit', $discountCode) }}">{{ $discountCode->code }}</a>
-                                    <button type="button" class="admin-copy-code" data-copy-code="{{ $discountCode->code }}" title="Copy code" aria-label="Copy code">
-                                        <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
-                                            <rect x="9" y="9" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.75"/>
-                                            <path d="M6 15H4.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V6" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-                                        </svg>
-                                    </button>
-                                </p>
-                                <p class="admin-discount-sku">#{{ $discountCode->id }}</p>
-                            </div>
-
-                            <div class="admin-discount-offer">
-                                <span class="order-discount-badge">{{ $discountCode->label() }}</span>
-                                <span class="admin-discount-offer-type">{{ $discountCode->typeLabel() }} · cart total</span>
-                            </div>
-
-                            <div class="admin-discount-schedule">
-                                <span class="badge {{ $discountCode->isExpired() ? 'badge-disabled' : 'badge-active' }}">
-                                    {{ $discountCode->isExpired() ? 'Expired' : 'Active' }}
-                                </span>
-                                <p class="admin-discount-remaining">{{ $discountCode->remainingLabel() }}</p>
-                                <p class="admin-discount-window">
-                                    {{ $discountCode->user?->name ?? 'Any customer' }}
-                                </p>
-                                @if ($discountCode->user?->email)
-                                    <p class="admin-discount-window">{{ $discountCode->user->email }}</p>
-                                @endif
-                                <p class="admin-discount-window">
-                                    {{ $discountCode->hasLimitedQuantity() ? $discountCode->quantity.' remaining' : 'Unlimited uses' }}
-                                    ·
-                                    {{ $discountCode->hasMaxUsesPerCustomer() ? 'Max '.$discountCode->max_uses_per_customer.' per customer' : 'No per-customer limit' }}
-                                </p>
-                            </div>
-
-                            <div class="admin-discount-actions">
-                                <a href="{{ route('admin.discount-codes.edit', $discountCode) }}" class="btn btn-sm btn-secondary">Edit</a>
-                                <form method="POST" action="{{ route('admin.discount-codes.destroy', $discountCode) }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-secondary">Remove</button>
-                                </form>
-                            </div>
-                        </li>
-                    @endforeach
-                </ul>
+                <div class="admin-table-wrap">
+                    <table class="admin-table admin-discount-codes-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Code</th>
+                                <th>Discount</th>
+                                <th>Status</th>
+                                <th>Expires</th>
+                                <th>Customer</th>
+                                <th>Uses</th>
+                                <th>Per customer</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($discountCodes as $discountCode)
+                                <tr>
+                                    <td>{{ $discountCode->id }}</td>
+                                    <td>
+                                        <a href="{{ route('admin.discount-codes.edit', $discountCode) }}" class="admin-table-strong">{{ $discountCode->code }}</a>
+                                        <button type="button" class="admin-copy-code" data-copy-code="{{ $discountCode->code }}" title="Copy code" aria-label="Copy code">
+                                            <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+                                                <rect x="9" y="9" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.75"/>
+                                                <path d="M6 15H4.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V6" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <span class="order-discount-badge">{{ $discountCode->label() }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge {{ $discountCode->isExpired() ? 'badge-disabled' : 'badge-active' }}">
+                                            {{ $discountCode->isExpired() ? 'Expired' : 'Active' }}
+                                        </span>
+                                    </td>
+                                    <td>{{ $discountCode->remainingLabel() }}</td>
+                                    <td>
+                                        <span class="admin-table-primary">{{ $discountCode->user?->name ?? 'Any customer' }}</span>
+                                        @if ($discountCode->user?->email)
+                                            <span class="admin-table-sub">{{ $discountCode->user->email }}</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ $discountCode->hasLimitedQuantity() ? $discountCode->quantity.' remaining' : 'Unlimited' }}</td>
+                                    <td>{{ $discountCode->hasMaxUsesPerCustomer() ? $discountCode->max_uses_per_customer : 'Unlimited' }}</td>
+                                    <td>
+                                        <div class="admin-table-actions">
+                                            <a href="{{ route('admin.discount-codes.edit', $discountCode) }}" class="btn btn-sm btn-secondary">Edit</a>
+                                            <form method="POST" action="{{ route('admin.discount-codes.destroy', $discountCode) }}">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-secondary">Remove</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             @endif
         @endif
     </div>

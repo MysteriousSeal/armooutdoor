@@ -60,11 +60,11 @@
                     <ul class="order-items">
                         @foreach ($order->items as $item)
                             <li class="order-item">
-                                @if ($item->image)
-                                    <span class="order-item-media">
+                                <span class="order-item-media">
+                                    @if ($item->image)
                                         <img src="{{ $item->imageUrl() }}" alt="" width="96" height="96">
-                                    </span>
-                                @endif
+                                    @endif
+                                </span>
                                 <div class="order-item-body">
                                     <p class="order-item-name">
                                         @if ($item->product)
@@ -81,23 +81,24 @@
                                     @if ($item->resolvedSku())
                                         <p class="order-item-sku">SKU {{ $item->resolvedSku() }}</p>
                                     @endif
-                                    <p class="order-item-meta">
-                                        × {{ $item->quantity }}
-                                        @unless ($item->hasDiscount())
-                                            · {{ format_euros($item->unit_price_cents) }}
-                                        @endunless
-                                    </p>
-                                    @if ($item->hasDiscount())
+                                    @if ($item->hasDiscount() && $item->discount_label)
                                         <div class="order-item-discount">
                                             <span class="order-discount-badge">{{ $item->discount_label }}</span>
-                                            <span class="order-item-discount-prices">
-                                                <span class="card-price-original">{{ $item->formattedOriginalUnitPrice() }}</span>
-                                                <span class="order-item-discount-now">{{ format_euros($item->unit_price_cents) }}</span>
-                                            </span>
                                         </div>
                                     @endif
                                 </div>
-                                <p class="order-item-price">{{ $item->formattedLineTotal() }}</p>
+                                <div class="order-item-pricing">
+                                    @if ($item->quantity > 1 || $item->hasDiscount())
+                                        <p class="order-item-qty">× {{ $item->quantity }}</p>
+                                        <p class="order-item-unit">
+                                            @if ($item->hasDiscount())
+                                                <span class="card-price-original">{{ $item->formattedOriginalUnitPrice() }}</span>
+                                            @endif
+                                            {{ format_euros($item->unit_price_cents) }}
+                                        </p>
+                                    @endif
+                                    <p class="order-item-price">{{ $item->formattedLineTotal() }}</p>
+                                </div>
                             </li>
                         @endforeach
                     </ul>
