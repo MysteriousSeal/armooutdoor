@@ -31,8 +31,8 @@
                 $listQuery = fn (array $overrides = []) => array_filter([
                     'tab' => $overrides['tab'] ?? $tab,
                     'sort' => ($overrides['sort'] ?? $sort) !== 'id-asc' ? ($overrides['sort'] ?? $sort) : null,
-                    'search' => $search !== '' ? $search : null,
-                    'category' => $categorySlug !== '' ? $categorySlug : null,
+                    'search' => array_key_exists('search', $overrides) ? $overrides['search'] : ($search !== '' ? $search : null),
+                    'category' => array_key_exists('category', $overrides) ? $overrides['category'] : ($categorySlug !== '' ? $categorySlug : null),
                 ]);
                 $tabQuery = fn (string $name) => $listQuery(['tab' => $name]);
                 $sortLink = function (string $column) use ($sort, $listQuery): array {
