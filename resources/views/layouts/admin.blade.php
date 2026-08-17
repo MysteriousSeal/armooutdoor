@@ -73,6 +73,7 @@
             <a href="{{ route('admin.categories.index') }}" class="{{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">Categories</a>
             <a href="{{ route('admin.discounts.index') }}" class="{{ request()->routeIs('admin.discounts.*', 'admin.discount-codes.*') ? 'active' : '' }}">Discounts</a>
             <a href="{{ route('admin.settings.index') }}" class="{{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">Settings</a>
+            <a href="{{ route('admin.activity') }}" class="{{ request()->routeIs('admin.activity') ? 'active' : '' }}">Activity</a>
             <a href="{{ route('admin.changelog') }}" class="{{ request()->routeIs('admin.changelog') ? 'active' : '' }}">Changelog</a>
         </nav>
     </header>

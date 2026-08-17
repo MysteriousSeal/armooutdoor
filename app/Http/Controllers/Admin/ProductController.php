@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreProductRequest;
+use App\Models\AdminActivityLog;
 use App\Models\Carrier;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\ProductVariant;
+use App\Support\Csv;
 use App\Support\HtmlSanitizer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -16,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProductController extends Controller
 {
@@ -30,22 +33,9 @@ class ProductController extends Controller
             ? (string) $request->query('sort')
             : 'id-asc';
 
-        $products = Product::query()
+        $products = $this->filteredProductsQuery($search, $categorySlug, $tab)
             ->with('category')
             ->withCount('variants')
-            ->tap(fn ($query) => $this->applyProductTab($query, $tab))
-            ->when($search !== '', function ($query) use ($search): void {
-                $query->where(function ($query) use ($search): void {
-                    $query->where('slug', 'like', '%'.$search.'%')
-                        ->orWhere('name', 'like', '%'.$search.'%');
-                });
-            })
-            ->when($categorySlug !== '', function ($query) use ($categorySlug): void {
-                $query->whereHas('category', function ($query) use ($categorySlug): void {
-                    $query->where('slug', $categorySlug)
-                        ->orWhereHas('parent', fn ($query) => $query->where('slug', $categorySlug));
-                });
-            })
             ->tap(fn ($query) => $this->applyProductSort($query, $sort))
             ->paginate(24)
             ->withQueryString();
@@ -67,6 +57,54 @@ class ProductController extends Controller
         ]);
     }
 
+    public function export(Request $request): StreamedResponse
+    {
+        $search = trim((string) $request->query('search', ''));
+        $categorySlug = (string) $request->query('category', '');
+        $tab = in_array($request->query('tab'), ['active', 'disabled', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight'], true)
+            ? (string) $request->query('tab')
+            : 'active';
+
+        $products = $this->filteredProductsQuery($search, $categorySlug, $tab)
+            ->with('category')
+            ->orderBy('id')
+            ->get();
+
+        return Csv::download(
+            'products-'.now()->format('Y-m-d').'.csv',
+            ['ID', 'Name', 'SKU', 'GTIN', 'Category', 'Price', 'Stock', 'Weight (g)', 'Active'],
+            $products->map(fn (Product $product): array => [
+                $product->id,
+                $product->localizedName(),
+                $product->sku ?? '',
+                $product->gtin ?? '',
+                $product->category?->localizedName() ?? '',
+                number_format($product->price_cents / 100, 2, '.', ''),
+                $product->quantity,
+                $product->weight_grams ?? '',
+                $product->is_active ? 'yes' : 'no',
+            ])
+        );
+    }
+
+    private function filteredProductsQuery(string $search, string $categorySlug, string $tab): Builder
+    {
+        return Product::query()
+            ->tap(fn ($query) => $this->applyProductTab($query, $tab))
+            ->when($search !== '', function ($query) use ($search): void {
+                $query->where(function ($query) use ($search): void {
+                    $query->where('slug', 'like', '%'.$search.'%')
+                        ->orWhere('name', 'like', '%'.$search.'%');
+                });
+            })
+            ->when($categorySlug !== '', function ($query) use ($categorySlug): void {
+                $query->whereHas('category', function ($query) use ($categorySlug): void {
+                    $query->where('slug', $categorySlug)
+                        ->orWhereHas('parent', fn ($query) => $query->where('slug', $categorySlug));
+                });
+            });
+    }
+
     public function create(): View
     {
         return view('admin.products.form', [
@@ -85,6 +123,7 @@ class ProductController extends Controller
         $this->syncImages($request, $product, null);
         $this->syncVariants($request, $product);
         $product->refresh()->reconcileQuantity();
+        AdminActivityLog::record('product.created', $product, 'Created product '.$product->localizedName());
 
         return redirect()
             ->route('admin.products.edit', $product)
@@ -118,6 +157,8 @@ class ProductController extends Controller
             $product->update(['quantity' => 0]);
         }
 
+        AdminActivityLog::record('product.updated', $product, 'Updated product '.$product->localizedName());
+
         return redirect()
             ->route('admin.products.edit', $product)
             ->with('status', 'Product saved.');
@@ -126,6 +167,11 @@ class ProductController extends Controller
     public function toggleStatus(Product $product): RedirectResponse
     {
         $product->update(['is_active' => ! $product->is_active]);
+        AdminActivityLog::record(
+            $product->is_active ? 'product.activated' : 'product.disabled',
+            $product,
+            ($product->is_active ? 'Activated ' : 'Disabled ').$product->localizedName()
+        );
 
         return back()->with('status', $product->is_active ? 'Product activated.' : 'Product disabled.');
     }
@@ -136,7 +182,13 @@ class ProductController extends Controller
             'quantity' => ['required', 'integer', 'min:0'],
         ]);
 
+        $previousQuantity = $product->quantity;
         $product->update(['quantity' => $validated['quantity']]);
+        AdminActivityLog::record(
+            'product.restocked',
+            $product,
+            'Set stock for '.$product->localizedName().' from '.$previousQuantity.' to '.$validated['quantity']
+        );
 
         return back()->with('status', 'Stock updated for '.$product->localizedName().'.');
     }

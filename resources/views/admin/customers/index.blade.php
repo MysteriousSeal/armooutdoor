@@ -3,6 +3,23 @@
 @section('title', 'Customers')
 
 @section('content')
+    @php
+        $baseFilters = array_filter([
+            'search' => $search ?: null,
+            'date_from' => $dateFrom ?: null,
+            'date_to' => $dateTo ?: null,
+        ]);
+        $hasFilters = $baseFilters !== [];
+        $filterUrl = function (array $overrides = []) use ($tab, $search, $dateFrom, $dateTo): string {
+            return route('admin.customers.index', array_filter([
+                'tab' => $tab !== 'all' ? $tab : null,
+                'search' => array_key_exists('search', $overrides) ? $overrides['search'] : ($search ?: null),
+                'date_from' => array_key_exists('date_from', $overrides) ? $overrides['date_from'] : ($dateFrom ?: null),
+                'date_to' => array_key_exists('date_to', $overrides) ? $overrides['date_to'] : ($dateTo ?: null),
+            ]));
+        };
+    @endphp
+
     <div class="admin-list-page">
         <header class="admin-list-hero">
             <div class="admin-list-hero-row">
@@ -11,46 +28,103 @@
                     <h2 class="admin-list-title">Customers</h2>
                     <p class="admin-list-lede">People who have created a shop account.</p>
                 </div>
-                <a href="{{ route('admin.orders.create') }}" class="btn btn-primary">Create manual order</a>
+                <div class="admin-list-hero-actions">
+                    <a href="{{ route('admin.customers.export', request()->query()) }}" class="btn btn-secondary">Export CSV</a>
+                    <a href="{{ route('admin.orders.create') }}" class="btn btn-primary">Create manual order</a>
+                </div>
             </div>
             <div class="admin-list-meta">
                 <span class="admin-list-chip">{{ number_format($customerCount) }} {{ \Illuminate\Support\Str::plural('customer', $customerCount) }}</span>
                 <span class="admin-list-chip">{{ number_format($withOrdersCount) }} with orders</span>
                 <span class="admin-list-chip">+{{ number_format($newCustomers30d) }} last 30 days</span>
-                @if ($search !== '')
+                @if ($hasFilters)
                     <span class="admin-list-chip is-filtered">Filtered</span>
                 @endif
             </div>
         </header>
 
         <nav class="admin-tabs" aria-label="Customer tabs">
-            <a href="{{ route('admin.customers.index', array_filter(['tab' => 'all', 'search' => $search ?: null])) }}" class="{{ $tab === 'all' ? 'active' : '' }}">
+            <a href="{{ route('admin.customers.index', [...$baseFilters, 'tab' => 'all']) }}" class="{{ $tab === 'all' ? 'active' : '' }}">
                 All <span class="admin-tab-count">{{ number_format($customerCount) }}</span>
             </a>
-            <a href="{{ route('admin.customers.index', array_filter(['tab' => 'with-orders', 'search' => $search ?: null])) }}" class="{{ $tab === 'with-orders' ? 'active' : '' }}">
+            <a href="{{ route('admin.customers.index', [...$baseFilters, 'tab' => 'with-orders']) }}" class="{{ $tab === 'with-orders' ? 'active' : '' }}">
                 With orders <span class="admin-tab-count">{{ number_format($withOrdersCount) }}</span>
             </a>
-            <a href="{{ route('admin.customers.index', array_filter(['tab' => 'no-orders', 'search' => $search ?: null])) }}" class="{{ $tab === 'no-orders' ? 'active' : '' }}">
+            <a href="{{ route('admin.customers.index', [...$baseFilters, 'tab' => 'no-orders']) }}" class="{{ $tab === 'no-orders' ? 'active' : '' }}">
                 No orders <span class="admin-tab-count">{{ number_format($noOrdersCount) }}</span>
             </a>
         </nav>
 
-        <form method="GET" action="{{ route('admin.customers.index') }}" class="admin-toolbar">
+        <form method="GET" action="{{ route('admin.customers.index') }}" class="admin-filter-bar">
             @if ($tab !== 'all')
                 <input type="hidden" name="tab" value="{{ $tab }}">
             @endif
-            <input
-                type="search"
-                name="search"
-                class="form-control admin-toolbar-search"
-                placeholder="Search name or email…"
-                value="{{ $search }}"
-            >
-            <button type="submit" class="btn btn-secondary">Search</button>
-            @if ($search !== '')
-                <a href="{{ route('admin.customers.index', array_filter(['tab' => $tab !== 'all' ? $tab : null])) }}" class="btn btn-secondary">Clear</a>
-            @endif
+
+            <div class="admin-filter-row admin-filter-row--customers">
+                <div class="admin-filter-field admin-filter-field--search">
+                    <label class="admin-filter-label" for="customer-search">Search</label>
+                    <input
+                        id="customer-search"
+                        type="search"
+                        name="search"
+                        class="form-control admin-toolbar-search"
+                        placeholder="Name or email…"
+                        value="{{ $search }}"
+                    >
+                </div>
+                <div class="admin-filter-field admin-filter-field--dates">
+                    <span class="admin-filter-label" id="customer-dates-label">Joined between</span>
+                    <div class="admin-filter-date-range" role="group" aria-labelledby="customer-dates-label">
+                        <label class="sr-only" for="customer-date-from">From</label>
+                        <input
+                            id="customer-date-from"
+                            type="date"
+                            name="date_from"
+                            class="form-control"
+                            value="{{ $dateFrom }}"
+                        >
+                        <span class="admin-filter-date-sep" aria-hidden="true">to</span>
+                        <label class="sr-only" for="customer-date-to">To</label>
+                        <input
+                            id="customer-date-to"
+                            type="date"
+                            name="date_to"
+                            class="form-control"
+                            value="{{ $dateTo }}"
+                        >
+                    </div>
+                </div>
+                <div class="admin-filter-actions">
+                    <button type="submit" class="btn btn-primary">Apply</button>
+                    @if ($hasFilters)
+                        <a href="{{ route('admin.customers.index', ['tab' => $tab !== 'all' ? $tab : null]) }}" class="btn btn-secondary">Clear</a>
+                    @endif
+                </div>
+            </div>
         </form>
+
+        @if ($hasFilters)
+            <div class="admin-filter-chips" aria-label="Active filters">
+                @if ($search !== '')
+                    <a href="{{ $filterUrl(['search' => null]) }}" class="admin-filter-chip">
+                        Search · {{ $search }}
+                        <span aria-hidden="true">×</span>
+                    </a>
+                @endif
+                @if ($dateFrom !== '')
+                    <a href="{{ $filterUrl(['date_from' => null]) }}" class="admin-filter-chip">
+                        From · {{ \Illuminate\Support\Carbon::parse($dateFrom)->format('d M Y') }}
+                        <span aria-hidden="true">×</span>
+                    </a>
+                @endif
+                @if ($dateTo !== '')
+                    <a href="{{ $filterUrl(['date_to' => null]) }}" class="admin-filter-chip">
+                        To · {{ \Illuminate\Support\Carbon::parse($dateTo)->format('d M Y') }}
+                        <span aria-hidden="true">×</span>
+                    </a>
+                @endif
+            </div>
+        @endif
 
         @php
             $tabLabel = match ($tab) {
@@ -62,8 +136,8 @@
 
         @if ($customers->isEmpty())
             <p class="empty-state">
-                @if ($search !== '')
-                    No {{ $tabLabel }} match this search.
+                @if ($hasFilters)
+                    No {{ $tabLabel }} match these filters.
                 @else
                     No {{ $tabLabel }} yet.
                 @endif

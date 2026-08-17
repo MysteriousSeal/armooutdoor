@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreDiscountRequest;
+use App\Models\AdminActivityLog;
 use App\Models\Discount;
 use App\Models\DiscountCode;
 use App\Models\Product;
@@ -80,6 +81,7 @@ class DiscountController extends Controller
     public function store(StoreDiscountRequest $request): RedirectResponse
     {
         $discount = Discount::query()->create($this->payload($request));
+        AdminActivityLog::record('discount.created', $discount, 'Created discount for '.$discount->product->localizedName());
 
         return redirect()
             ->route('admin.discounts.index', ['tab' => 'products', 'status' => $discount->status()])
@@ -97,6 +99,7 @@ class DiscountController extends Controller
     public function update(StoreDiscountRequest $request, Discount $discount): RedirectResponse
     {
         $discount->update($this->payload($request));
+        AdminActivityLog::record('discount.updated', $discount, 'Updated discount for '.$discount->product->localizedName());
 
         return redirect()
             ->route('admin.discounts.index', ['tab' => 'products', 'status' => $discount->status()])
@@ -105,7 +108,9 @@ class DiscountController extends Controller
 
     public function destroy(Discount $discount): RedirectResponse
     {
+        $productName = $discount->product->localizedName();
         $discount->delete();
+        AdminActivityLog::record('discount.deleted', null, 'Removed discount for '.$productName);
 
         return redirect()
             ->route('admin.discounts.index')

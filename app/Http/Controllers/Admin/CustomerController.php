@@ -4,54 +4,121 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\Csv;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CustomerController extends Controller
 {
     public function index(Request $request): View
     {
-        $search = trim((string) $request->query('search', ''));
-        $tab = in_array($request->query('tab'), ['with-orders', 'no-orders'], true)
-            ? $request->query('tab')
-            : 'all';
+        $filters = $this->customerFilters($request);
+        $countedOrders = $this->countedOrdersScope();
 
-        $shopCustomers = fn () => User::query()->where('is_admin', false)->where('external', false);
-        $countedOrders = fn ($query) => $query->whereNull('archived_at')->where('status', '!=', 'draft');
-        $spentOrders = fn ($query) => $query->whereNull('archived_at')->whereNotIn('status', ['draft', 'refunded']);
-
-        $customers = $shopCustomers()
+        $customers = $this->filteredCustomersQuery($filters)
             ->withCount([
                 'orders' => $countedOrders,
                 'addresses',
             ])
-            ->withSum(['orders as spent_cents' => $spentOrders], 'total_cents')
+            ->withSum(['orders as spent_cents' => $this->spentOrdersScope()], 'total_cents')
             ->withMax(['orders as last_order_at' => $countedOrders], 'created_at')
-            ->when($search !== '', function ($query) use ($search): void {
-                $query->where(function ($query) use ($search): void {
-                    $query->where('first_name', 'like', '%'.$search.'%')
-                        ->orWhere('last_name', 'like', '%'.$search.'%')
-                        ->orWhere('email', 'like', '%'.$search.'%');
-                });
-            })
-            ->when($tab === 'with-orders', fn ($query) => $query->whereHas('orders', $countedOrders))
-            ->when($tab === 'no-orders', fn ($query) => $query->whereDoesntHave('orders', $countedOrders))
             ->latest()
             ->simplePaginate(20)
             ->withQueryString();
 
-        $customerCount = $shopCustomers()->count();
-        $withOrdersCount = $shopCustomers()->whereHas('orders', $countedOrders)->count();
+        $customerCount = $this->shopCustomers()->count();
+        $withOrdersCount = $this->shopCustomers()->whereHas('orders', $countedOrders)->count();
 
         return view('admin.customers.index', [
             'customers' => $customers,
             'customerCount' => $customerCount,
             'withOrdersCount' => $withOrdersCount,
             'noOrdersCount' => $customerCount - $withOrdersCount,
-            'newCustomers30d' => $shopCustomers()->where('created_at', '>=', now()->subDays(30))->count(),
-            'search' => $search,
-            'tab' => $tab,
+            'newCustomers30d' => $this->shopCustomers()->where('created_at', '>=', now()->subDays(30))->count(),
+            'search' => $filters['search'],
+            'tab' => $filters['tab'],
+            'dateFrom' => $filters['date_from'],
+            'dateTo' => $filters['date_to'],
         ]);
+    }
+
+    public function export(Request $request): StreamedResponse
+    {
+        $filters = $this->customerFilters($request);
+        $countedOrders = $this->countedOrdersScope();
+
+        $customers = $this->filteredCustomersQuery($filters)
+            ->withCount(['orders' => $countedOrders, 'addresses'])
+            ->withSum(['orders as spent_cents' => $this->spentOrdersScope()], 'total_cents')
+            ->latest()
+            ->get();
+
+        return Csv::download(
+            'customers-'.now()->format('Y-m-d').'.csv',
+            ['Name', 'Email', 'Orders', 'Spent', 'Addresses', 'Joined'],
+            $customers->map(fn (User $customer): array => [
+                $customer->name,
+                $customer->email,
+                $customer->orders_count,
+                number_format(((int) $customer->spent_cents) / 100, 2, '.', ''),
+                $customer->addresses_count,
+                $customer->created_at->format('Y-m-d'),
+            ])
+        );
+    }
+
+    private function shopCustomers()
+    {
+        return User::query()->where('is_admin', false)->where('external', false);
+    }
+
+    private function countedOrdersScope(): \Closure
+    {
+        return fn ($query) => $query->whereNull('archived_at')->where('status', '!=', 'draft');
+    }
+
+    private function spentOrdersScope(): \Closure
+    {
+        return fn ($query) => $query->whereNull('archived_at')->whereNotIn('status', ['draft', 'refunded']);
+    }
+
+    /**
+     * @return array{tab: string, search: string, date_from: string, date_to: string}
+     */
+    private function customerFilters(Request $request): array
+    {
+        return [
+            'tab' => in_array($request->query('tab'), ['with-orders', 'no-orders'], true)
+                ? $request->query('tab')
+                : 'all',
+            'search' => trim((string) $request->query('search', '')),
+            'date_from' => (string) $request->query('date_from', ''),
+            'date_to' => (string) $request->query('date_to', ''),
+        ];
+    }
+
+    /**
+     * @param  array{tab: string, search: string, date_from: string, date_to: string}  $filters
+     */
+    private function filteredCustomersQuery(array $filters)
+    {
+        $countedOrders = $this->countedOrdersScope();
+
+        return $this->shopCustomers()
+            ->when($filters['search'] !== '', function ($query) use ($filters): void {
+                $search = $filters['search'];
+                $query->where(function ($query) use ($search): void {
+                    $query->where('first_name', 'like', '%'.$search.'%')
+                        ->orWhere('last_name', 'like', '%'.$search.'%')
+                        ->orWhere('email', 'like', '%'.$search.'%');
+                });
+            })
+            ->when($filters['date_from'] !== '', fn ($query) => $query->whereDate('created_at', '>=', $filters['date_from']))
+            ->when($filters['date_to'] !== '', fn ($query) => $query->whereDate('created_at', '<=', $filters['date_to']))
+            ->when($filters['tab'] === 'with-orders', fn ($query) => $query->whereHas('orders', $countedOrders))
+            ->when($filters['tab'] === 'no-orders', fn ($query) => $query->whereDoesntHave('orders', $countedOrders));
     }
 
     public function show(User $customer): View
@@ -59,14 +126,32 @@ class CustomerController extends Controller
         abort_if($customer->is_admin, 404);
 
         $customer->load('addresses');
+        $orders = $customer->orders()->whereNull('archived_at')->withCount('items')->get();
+        $paidOrders = $orders->whereNotIn('status', ['draft', 'refunded']);
+        $spentCents = (int) $paidOrders->sum('total_cents');
 
         return view('admin.customers.show', [
             'customer' => $customer,
-            'orders' => $customer->orders()->whereNull('archived_at')->withCount('items')->get(),
-            'spentCents' => (int) $customer->orders()
-                ->whereNull('archived_at')
-                ->whereNotIn('status', ['draft', 'refunded'])
-                ->sum('total_cents'),
+            'orders' => $orders,
+            'spentCents' => $spentCents,
+            'averageOrderCents' => $paidOrders->isNotEmpty()
+                ? (int) round($spentCents / $paidOrders->count())
+                : 0,
+            'wishlistCount' => $customer->wishlistItems()->count(),
+            'discountCodes' => $customer->discountCodes()->withCount('orders')->get(),
         ]);
+    }
+
+    public function updateNotes(Request $request, User $customer): RedirectResponse
+    {
+        abort_if($customer->is_admin, 404);
+
+        $validated = $request->validate([
+            'notes' => ['nullable', 'string', 'max:5000'],
+        ]);
+
+        $customer->update(['notes' => $validated['notes'] ?? null]);
+
+        return back()->with('status', 'Notes saved.');
     }
 }

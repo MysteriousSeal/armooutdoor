@@ -65,6 +65,7 @@ class AdminTest extends TestCase
             ->assertSee('jane@example.com')
             ->assertSee('With orders')
             ->assertSee('No orders')
+            ->assertSee('Joined between')
             ->assertDontSee('admin@armooutdoor.test');
 
         $this->get('/admin/products')

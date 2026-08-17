@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreDiscountCodeRequest;
+use App\Models\AdminActivityLog;
 use App\Models\DiscountCode;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -22,17 +23,24 @@ class DiscountCodeController extends Controller
         ]);
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
+        $discountCode = new DiscountCode();
+
+        if ($request->filled('user_id')) {
+            $discountCode->user_id = $request->integer('user_id');
+        }
+
         return view('admin.discount-codes.form', [
-            'discountCode' => new DiscountCode(),
+            'discountCode' => $discountCode,
             'customers' => $this->customerOptions(),
         ]);
     }
 
     public function store(StoreDiscountCodeRequest $request): RedirectResponse
     {
-        DiscountCode::query()->create($this->payload($request));
+        $discountCode = DiscountCode::query()->create($this->payload($request));
+        AdminActivityLog::record('discount_code.created', $discountCode, 'Created discount code '.$discountCode->code);
 
         return redirect()
             ->route('admin.discounts.index', ['tab' => 'codes'])
@@ -50,6 +58,7 @@ class DiscountCodeController extends Controller
     public function update(StoreDiscountCodeRequest $request, DiscountCode $discountCode): RedirectResponse
     {
         $discountCode->update($this->payload($request));
+        AdminActivityLog::record('discount_code.updated', $discountCode, 'Updated discount code '.$discountCode->code);
 
         return redirect()
             ->route('admin.discounts.index', ['tab' => 'codes'])
@@ -58,7 +67,9 @@ class DiscountCodeController extends Controller
 
     public function destroy(DiscountCode $discountCode): RedirectResponse
     {
+        $code = $discountCode->code;
         $discountCode->delete();
+        AdminActivityLog::record('discount_code.deleted', null, 'Removed discount code '.$code);
 
         return redirect()
             ->route('admin.discounts.index', ['tab' => 'codes'])

@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['first_name', 'last_name', 'email', 'password', 'external'])]
+#[Fillable(['first_name', 'last_name', 'email', 'password', 'external', 'notes'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -47,6 +47,11 @@ class User extends Authenticatable
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class)->latest();
+    }
+
+    public function discountCodes(): HasMany
+    {
+        return $this->hasMany(DiscountCode::class)->latest();
     }
 
     public function wishlistItems(): HasMany

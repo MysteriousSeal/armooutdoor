@@ -50,8 +50,16 @@
         buttons.forEach(function (button, i) {
             button.classList.toggle('is-active', i === index);
         });
-        if (buttons[index]) {
-            buttons[index].scrollIntoView({ block: 'nearest' });
+        var item = buttons[index];
+        if (!item) {
+            return;
+        }
+        var listRect = list.getBoundingClientRect();
+        var itemRect = item.getBoundingClientRect();
+        if (itemRect.bottom > listRect.bottom) {
+            list.scrollTop += itemRect.bottom - listRect.bottom;
+        } else if (itemRect.top < listRect.top) {
+            list.scrollTop -= listRect.top - itemRect.top;
         }
     }
 
@@ -182,7 +190,12 @@
         }
     });
 
-    document.addEventListener('scroll', closeOpen, true);
+    document.addEventListener('scroll', function (event) {
+        if (openWrap && openWrap.contains(event.target)) {
+            return;
+        }
+        closeOpen();
+    }, true);
 
     function mountAll(scope) {
         (scope || document).querySelectorAll(selector()).forEach(mount);

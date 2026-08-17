@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreManualOrderRequest;
 use App\Http\Requests\Admin\UpdateOrderBillingAddressRequest;
 use App\Http\Requests\Admin\UpdateOrderShippingAddressRequest;
+use App\Models\AdminActivityLog;
 use App\Models\Carrier;
 use App\Models\CompanySetting;
 use App\Models\Marketplace;
@@ -16,7 +17,9 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\ShippingSetting;
 use App\Models\User;
+use App\Support\Csv;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -24,38 +27,24 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class OrderController extends Controller
 {
     public function index(Request $request): View
     {
-        $search = trim((string) $request->query('search', ''));
-        $tab = in_array($request->query('tab'), ['draft', 'archived'], true) ? $request->query('tab') : 'orders';
+        $filters = $this->orderFilters($request);
 
-        $orders = Order::query()
+        $orders = $this->filteredOrdersQuery($filters)
             ->with('user')
             ->withCount('items')
-            ->when($tab === 'archived', fn ($query) => $query->whereNotNull('archived_at'))
-            ->when($tab !== 'archived', fn ($query) => $query->whereNull('archived_at'))
-            ->when($tab === 'draft', fn ($query) => $query->where('status', 'draft'))
-            ->when($tab === 'orders', fn ($query) => $query->where('status', '!=', 'draft'))
-            ->when($search !== '', function ($query) use ($search): void {
-                $query->where(function ($query) use ($search): void {
-                    $query->where('number', 'like', '%'.$search.'%')
-                        ->orWhereHas('user', function ($query) use ($search): void {
-                            $query->where('first_name', 'like', '%'.$search.'%')
-                                ->orWhere('last_name', 'like', '%'.$search.'%')
-                                ->orWhere('email', 'like', '%'.$search.'%');
-                        });
-                });
-            })
             ->latest()
             ->simplePaginate(20)
             ->withQueryString();
 
         return view('admin.orders.index', [
             'orders' => $orders,
-            'tab' => $tab,
+            'tab' => $filters['tab'],
             'orderCount' => Order::query()->whereNull('archived_at')->where('status', '!=', 'draft')->count(),
             'draftCount' => Order::query()->whereNull('archived_at')->where('status', 'draft')->count(),
             'archivedCount' => Order::query()->whereNotNull('archived_at')->count(),
@@ -67,8 +56,84 @@ class OrderController extends Controller
                     $query->whereNull('tracking_number')->orWhere('tracking_number', '');
                 })
                 ->count(),
-            'search' => $search,
+            'search' => $filters['search'],
+            'status' => $filters['status'],
+            'marketplaceId' => $filters['marketplace_id'],
+            'dateFrom' => $filters['date_from'],
+            'dateTo' => $filters['date_to'],
+            'marketplaces' => Marketplace::query()->orderBy('name')->get(),
+            'statuses' => ['placed', 'preparing', 'shipped', 'refunded'],
         ]);
+    }
+
+    public function export(Request $request): StreamedResponse
+    {
+        $filters = $this->orderFilters($request);
+
+        $orders = $this->filteredOrdersQuery($filters)->with('user')->latest()->get();
+
+        return Csv::download(
+            'orders-'.now()->format('Y-m-d').'.csv',
+            ['Number', 'Date', 'Customer', 'Email', 'Status', 'Archived', 'Marketplace', 'Carrier', 'Subtotal', 'Shipping', 'Discount', 'Total'],
+            $orders->map(fn (Order $order): array => [
+                $order->number,
+                $order->created_at->format('Y-m-d H:i'),
+                $order->user?->name ?? '',
+                $order->user?->email ?? '',
+                $order->status,
+                $order->isArchived() ? 'yes' : 'no',
+                $order->marketplace_name ?: '',
+                $order->carrierName(),
+                number_format($order->subtotal_cents / 100, 2, '.', ''),
+                number_format($order->shipping_cents / 100, 2, '.', ''),
+                number_format($order->discount_cents / 100, 2, '.', ''),
+                number_format($order->total_cents / 100, 2, '.', ''),
+            ])
+        );
+    }
+
+    /**
+     * @return array{tab: string, search: string, status: string, marketplace_id: ?int, date_from: string, date_to: string}
+     */
+    private function orderFilters(Request $request): array
+    {
+        return [
+            'tab' => in_array($request->query('tab'), ['draft', 'archived'], true) ? $request->query('tab') : 'orders',
+            'search' => trim((string) $request->query('search', '')),
+            'status' => in_array($request->query('status'), ['placed', 'preparing', 'shipped', 'refunded'], true)
+                ? $request->query('status')
+                : '',
+            'marketplace_id' => $request->filled('marketplace_id') ? (int) $request->query('marketplace_id') : null,
+            'date_from' => (string) $request->query('date_from', ''),
+            'date_to' => (string) $request->query('date_to', ''),
+        ];
+    }
+
+    /**
+     * @param  array{tab: string, search: string, status: string, marketplace_id: ?int, date_from: string, date_to: string}  $filters
+     */
+    private function filteredOrdersQuery(array $filters): Builder
+    {
+        return Order::query()
+            ->when($filters['tab'] === 'archived', fn ($query) => $query->whereNotNull('archived_at'))
+            ->when($filters['tab'] !== 'archived', fn ($query) => $query->whereNull('archived_at'))
+            ->when($filters['tab'] === 'draft', fn ($query) => $query->where('status', 'draft'))
+            ->when($filters['tab'] === 'orders', fn ($query) => $query->where('status', '!=', 'draft'))
+            ->when($filters['status'] !== '', fn ($query) => $query->where('status', $filters['status']))
+            ->when($filters['marketplace_id'] !== null, fn ($query) => $query->where('marketplace_id', $filters['marketplace_id']))
+            ->when($filters['date_from'] !== '', fn ($query) => $query->whereDate('created_at', '>=', $filters['date_from']))
+            ->when($filters['date_to'] !== '', fn ($query) => $query->whereDate('created_at', '<=', $filters['date_to']))
+            ->when($filters['search'] !== '', function ($query) use ($filters): void {
+                $search = $filters['search'];
+                $query->where(function ($query) use ($search): void {
+                    $query->where('number', 'like', '%'.$search.'%')
+                        ->orWhereHas('user', function ($query) use ($search): void {
+                            $query->where('first_name', 'like', '%'.$search.'%')
+                                ->orWhere('last_name', 'like', '%'.$search.'%')
+                                ->orWhere('email', 'like', '%'.$search.'%');
+                        });
+                });
+            });
     }
 
     public function create(): View
@@ -371,6 +436,7 @@ class OrderController extends Controller
     public function archive(Order $order): RedirectResponse
     {
         $order->archive();
+        AdminActivityLog::record('order.archived', $order, 'Archived order '.$order->number);
 
         return back()->with('status', 'Order archived.');
     }
@@ -378,6 +444,7 @@ class OrderController extends Controller
     public function unarchive(Order $order): RedirectResponse
     {
         $order->unarchive();
+        AdminActivityLog::record('order.unarchived', $order, 'Unarchived order '.$order->number);
 
         return back()->with('status', 'Order unarchived.');
     }

@@ -392,7 +392,9 @@ select.form-control:hover {
     right: 0;
     top: calc(100% + 0.25rem);
     max-height: 16rem;
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
     margin: 0;
     padding: 0.3rem 0;
     list-style: none;

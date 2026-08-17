@@ -11,7 +11,10 @@
                     <h2 class="admin-list-title">Products</h2>
                     <p class="admin-list-lede">Everything in the shop, in euros. Add a piece or open one to edit it.</p>
                 </div>
-                <a href="{{ route('admin.products.create') }}" class="btn btn-primary">Add product</a>
+                <div class="admin-list-hero-actions">
+                    <a href="{{ route('admin.products.export', request()->query()) }}" class="btn btn-secondary">Export CSV</a>
+                    <a href="{{ route('admin.products.create') }}" class="btn btn-primary">Add product</a>
+                </div>
             </div>
             <div class="admin-list-meta">
                 <span class="admin-list-chip">{{ number_format($productCount) }} products</span>
@@ -26,24 +29,29 @@
             </div>
         </header>
 
-        <nav class="admin-tabs" aria-label="Product tabs">
-            @php
-                $listQuery = fn (array $overrides = []) => array_filter([
-                    'tab' => $overrides['tab'] ?? $tab,
-                    'sort' => ($overrides['sort'] ?? $sort) !== 'id-asc' ? ($overrides['sort'] ?? $sort) : null,
-                    'search' => array_key_exists('search', $overrides) ? $overrides['search'] : ($search !== '' ? $search : null),
-                    'category' => array_key_exists('category', $overrides) ? $overrides['category'] : ($categorySlug !== '' ? $categorySlug : null),
-                ]);
-                $tabQuery = fn (string $name) => $listQuery(['tab' => $name]);
-                $sortLink = function (string $column) use ($sort, $listQuery): array {
-                    $next = $sort === $column.'-asc' ? $column.'-desc' : $column.'-asc';
+        @php
+            $listQuery = fn (array $overrides = []) => array_filter([
+                'tab' => $overrides['tab'] ?? $tab,
+                'sort' => ($overrides['sort'] ?? $sort) !== 'id-asc' ? ($overrides['sort'] ?? $sort) : null,
+                'search' => array_key_exists('search', $overrides) ? $overrides['search'] : ($search !== '' ? $search : null),
+                'category' => array_key_exists('category', $overrides) ? $overrides['category'] : ($categorySlug !== '' ? $categorySlug : null),
+            ]);
+            $tabQuery = fn (string $name) => $listQuery(['tab' => $name]);
+            $sortLink = function (string $column) use ($sort, $listQuery): array {
+                $next = $sort === $column.'-asc' ? $column.'-desc' : $column.'-asc';
 
-                    return [
-                        'url' => route('admin.products.index', $listQuery(['sort' => $next])),
-                        'state' => str_starts_with($sort, $column.'-') ? substr($sort, strlen($column) + 1) : null,
-                    ];
-                };
-            @endphp
+                return [
+                    'url' => route('admin.products.index', $listQuery(['sort' => $next])),
+                    'state' => str_starts_with($sort, $column.'-') ? substr($sort, strlen($column) + 1) : null,
+                ];
+            };
+            $hasFilters = $search !== '' || $categorySlug !== '';
+            $activeCategory = $categorySlug !== ''
+                ? $categories->firstWhere('slug', $categorySlug)
+                : null;
+        @endphp
+
+        <nav class="admin-tabs" aria-label="Product tabs">
             <a href="{{ route('admin.products.index', $tabQuery('active')) }}" class="{{ $tab === 'active' ? 'active' : '' }}">
                 Products <span class="admin-tab-count">{{ number_format($activeCount) }}</span>
             </a>
@@ -64,54 +72,91 @@
             </a>
         </nav>
 
-        <form method="GET" action="{{ route('admin.products.index') }}" class="admin-toolbar">
+        <form method="GET" action="{{ route('admin.products.index') }}" class="admin-filter-bar">
             <input type="hidden" name="tab" value="{{ $tab }}">
             @if ($sort !== 'id-asc')
                 <input type="hidden" name="sort" value="{{ $sort }}">
             @endif
-            <input
-                type="search"
-                name="search"
-                class="form-control"
-                placeholder="Search name or slug…"
-                value="{{ $search }}"
-            >
-            <select name="category" class="form-control">
-                <option value="">All categories</option>
-                @foreach ($categories as $category)
-                    <option value="{{ $category->slug }}" @selected($categorySlug === $category->slug)>
-                        {{ $category->name['fr'] ?? $category->localizedName() }}
-                    </option>
-                @endforeach
-            </select>
-            <button type="submit" class="btn btn-secondary">Filter</button>
-            @if ($search !== '' || $categorySlug !== '')
-                <a href="{{ route('admin.products.index', $listQuery(['search' => null, 'category' => null])) }}" class="btn btn-secondary">Clear</a>
-            @endif
+
+            <div class="admin-filter-row admin-filter-row--products">
+                <div class="admin-filter-field admin-filter-field--search">
+                    <label class="admin-filter-label" for="product-search">Search</label>
+                    <input
+                        id="product-search"
+                        type="search"
+                        name="search"
+                        class="form-control admin-toolbar-search"
+                        placeholder="Name or slug…"
+                        value="{{ $search }}"
+                    >
+                </div>
+                <div class="admin-filter-field">
+                    <label class="admin-filter-label" for="product-category">Category</label>
+                    <select id="product-category" name="category" class="form-control">
+                        <option value="">All categories</option>
+                        @foreach ($categories as $category)
+                            <option value="{{ $category->slug }}" @selected($categorySlug === $category->slug)>
+                                @if ($category->parent_id)
+                                    — {{ $category->name['fr'] ?? $category->localizedName() }}
+                                @else
+                                    {{ $category->name['fr'] ?? $category->localizedName() }}
+                                @endif
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="admin-filter-actions">
+                    <button type="submit" class="btn btn-primary">Apply</button>
+                    @if ($hasFilters)
+                        <a href="{{ route('admin.products.index', $listQuery(['search' => null, 'category' => null])) }}" class="btn btn-secondary">Clear</a>
+                    @endif
+                </div>
+            </div>
         </form>
+
+        @if ($hasFilters)
+            <div class="admin-filter-chips" aria-label="Active filters">
+                @if ($search !== '')
+                    <a href="{{ route('admin.products.index', $listQuery(['search' => null])) }}" class="admin-filter-chip">
+                        Search · {{ $search }}
+                        <span aria-hidden="true">×</span>
+                    </a>
+                @endif
+                @if ($activeCategory)
+                    <a href="{{ route('admin.products.index', $listQuery(['category' => null])) }}" class="admin-filter-chip">
+                        Category · {{ $activeCategory->name['fr'] ?? $activeCategory->localizedName() }}
+                        <span aria-hidden="true">×</span>
+                    </a>
+                @endif
+            </div>
+        @endif
 
         @if ($products->isEmpty())
             <div class="empty-state">
                 <p>
-                    @switch($tab)
-                        @case('disabled')
-                            No disabled products.
-                            @break
-                        @case('out-of-stock')
-                            No out of stock products.
-                            @break
-                        @case('no-sku')
-                            No products missing a SKU.
-                            @break
-                        @case('no-gtin')
-                            No products missing a GTIN.
-                            @break
-                        @case('no-weight')
-                            No products missing a weight.
-                            @break
-                        @default
-                            No products found.
-                    @endswitch
+                    @if ($hasFilters)
+                        No products match these filters.
+                    @else
+                        @switch($tab)
+                            @case('disabled')
+                                No disabled products.
+                                @break
+                            @case('out-of-stock')
+                                No out of stock products.
+                                @break
+                            @case('no-sku')
+                                No products missing a SKU.
+                                @break
+                            @case('no-gtin')
+                                No products missing a GTIN.
+                                @break
+                            @case('no-weight')
+                                No products missing a weight.
+                                @break
+                            @default
+                                No products found.
+                        @endswitch
+                    @endif
                 </p>
                 @if ($tab === 'active')
                     <a href="{{ route('admin.products.create') }}" class="btn btn-primary">Add product</a>

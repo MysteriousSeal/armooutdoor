@@ -6,6 +6,7 @@ use App\Http\Controllers\Account\AddressController;
 use App\Http\Controllers\Account\ProfileController;
 
 // Admin (back office)
+use App\Http\Controllers\Admin\ActivityController as AdminActivityController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\CarrierPriceTierController as AdminCarrierPriceTierController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
@@ -81,11 +82,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
         Route::get('/changelog', AdminChangelogController::class)->name('changelog');
         Route::get('/search', [AdminSearchController::class, 'index'])->name('search');
+        Route::get('/activity', [AdminActivityController::class, 'index'])->name('activity');
         Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');
+        Route::get('/customers/export', [AdminCustomerController::class, 'export'])->name('customers.export');
         Route::get('/customers/{customer}', [AdminCustomerController::class, 'show'])->name('customers.show');
+        Route::patch('/customers/{customer}/notes', [AdminCustomerController::class, 'updateNotes'])->name('customers.notes.update');
 
         // Products
         Route::get('/products', [AdminProductController::class, 'index'])->name('products.index');
+        Route::get('/products/export', [AdminProductController::class, 'export'])->name('products.export');
         Route::get('/products/create', [AdminProductController::class, 'create'])->name('products.create');
         Route::post('/products', [AdminProductController::class, 'store'])->name('products.store');
         Route::get('/products/{product}/edit', [AdminProductController::class, 'edit'])->name('products.edit');
@@ -118,6 +123,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Orders
         Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
+        Route::get('/orders/export', [AdminOrderController::class, 'export'])->name('orders.export');
         Route::get('/orders/create', [AdminOrderController::class, 'create'])->name('orders.create');
         Route::post('/orders', [AdminOrderController::class, 'store'])->name('orders.store');
         Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
