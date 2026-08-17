@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-17 — v0.1.20
+
+### Orders
+
+- **Manual order form's pickup point search**: a postal code field now sits above the relay/pickup point list, defaulting to the billing address postal code — editing it re-searches that postal code independently, without touching the billing address.
+
 ## 2026-08-17 — v0.1.19
 
 ### Orders

@@ -248,6 +248,9 @@
             <td class="notes-col">
                 <div class="section-label">Notes</div>
                 <div class="notes-body">
+                    @if (! ($order->is_manual && ($order->marketplace_id || $order->marketplace_name)) && $order->payment_method)
+                        <div class="notes-line">Paiement : {{ $order->payment_method->label() }}</div>
+                    @endif
                     @if ($order->carrierName() !== '')
                         <div class="notes-line">Transporteur : {{ $order->carrierName() }}</div>
                     @endif

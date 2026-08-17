@@ -322,8 +322,15 @@
                             @error('shipping_price') <p class="form-error">{{ $message }}</p> @enderror
                         </div>
                         <div class="form-group" id="admin-relay-picker" hidden>
-                            <label>Pickup point</label>
-                            <p class="form-hint">Searched near the billing address postal code. Click one to fill it into the shipping address.</p>
+                            <label for="admin-relay-postal-code">Pickup point</label>
+                            <p class="form-hint">Defaults to the billing address postal code. Click a point to fill it into the shipping address.</p>
+                            <input
+                                type="text"
+                                id="admin-relay-postal-code"
+                                class="form-control"
+                                placeholder="Postal code"
+                                maxlength="12"
+                            >
                             <div class="admin-relay-list" id="admin-relay-list"></div>
                             <p class="form-hint" id="admin-relay-empty" hidden>No pickup points found for this postal code.</p>
                         </div>
@@ -639,9 +646,16 @@
             var relayPicker = document.getElementById('admin-relay-picker');
             var relayList = document.getElementById('admin-relay-list');
             var relayEmpty = document.getElementById('admin-relay-empty');
+            var relaySearchInput = document.getElementById('admin-relay-postal-code');
             var billingPostalCode = document.getElementById('billing_postal_code');
             var billingCountry = document.getElementById('billing_country');
             var relayPointsLoadedFor = null;
+            var relaySearchTouched = false;
+
+            relaySearchInput.addEventListener('input', function () {
+                relaySearchTouched = true;
+                searchRelayPoints();
+            });
 
             function fillShippingFromRelayPoint(point) {
                 document.getElementById('shipping_line1').value = point.name;
@@ -701,6 +715,26 @@
                     .catch(function () {});
             }
 
+            function searchRelayPoints() {
+                var carrier = selectedCarrierRadio();
+                var provider = carrier ? RELAY_PROVIDERS[carrier.getAttribute('data-carrier-slug')] : null;
+
+                if (! provider) {
+                    return;
+                }
+
+                var postalCode = (relaySearchInput.value || '').trim();
+
+                if (postalCode === '') {
+                    relayList.innerHTML = '';
+                    relayEmpty.hidden = true;
+                    relayPointsLoadedFor = null;
+                    return;
+                }
+
+                loadRelayPoints(postalCode, billingCountry.value, provider);
+            }
+
             function syncRelayPicker() {
                 var carrier = selectedCarrierRadio();
                 var provider = carrier ? RELAY_PROVIDERS[carrier.getAttribute('data-carrier-slug')] : null;
@@ -712,16 +746,12 @@
                 }
 
                 relayPicker.hidden = false;
-                var postalCode = (billingPostalCode.value || '').trim();
 
-                if (postalCode === '') {
-                    relayList.innerHTML = '';
-                    relayEmpty.hidden = true;
-                    relayPointsLoadedFor = null;
-                    return;
+                if (! relaySearchTouched) {
+                    relaySearchInput.value = billingPostalCode.value || '';
                 }
 
-                loadRelayPoints(postalCode, billingCountry.value, provider);
+                searchRelayPoints();
             }
 
             document.addEventListener('change', function (event) {
