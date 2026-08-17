@@ -53,12 +53,18 @@ class AdminTest extends TestCase
             ->assertSee('Customers')
             ->assertSee('Products');
 
-        User::factory()->create(['name' => 'Jane Shopper', 'email' => 'jane@example.com']);
+        User::factory()->create([
+            'first_name' => 'Jane',
+            'last_name' => 'Shopper',
+            'email' => 'jane@example.com',
+        ]);
 
         $this->get('/admin/customers')
             ->assertOk()
             ->assertSee('Jane Shopper')
             ->assertSee('jane@example.com')
+            ->assertSee('With orders')
+            ->assertSee('No orders')
             ->assertDontSee('admin@armooutdoor.test');
 
         $this->get('/admin/products')
@@ -131,5 +137,34 @@ class AdminTest extends TestCase
         $this->assertSame('Bivy forêt II', $product->fresh()->name['fr']);
         $this->assertSame(9900, $product->fresh()->price_cents);
         $this->assertSame(4, $product->fresh()->quantity);
+    }
+
+    public function test_an_admin_can_search_customers_and_products(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        User::factory()->create([
+            'first_name' => 'Jane',
+            'last_name' => 'Shopper',
+            'email' => 'jane@example.com',
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/admin/search')
+            ->assertOk()
+            ->assertSee('Type something above to search.');
+
+        $this->actingAs($admin)
+            ->get('/admin/search?q=jane')
+            ->assertOk()
+            ->assertSee('Jane Shopper')
+            ->assertSee('jane@example.com')
+            ->assertSee('View in customers');
+
+        $this->actingAs($admin)
+            ->get('/admin/search?q=tente')
+            ->assertOk()
+            ->assertSee('Tente crête deux places')
+            ->assertSee('View in products');
     }
 }

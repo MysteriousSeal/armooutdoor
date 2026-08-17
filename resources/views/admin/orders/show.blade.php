@@ -13,6 +13,9 @@
                         <span class="badge badge-{{ $order->status }}">
                             {{ ucfirst($order->status) }}
                         </span>
+                        @if ($order->isArchived())
+                            <span class="badge badge-disabled">Archived</span>
+                        @endif
                     </div>
                 </div>
                 <div class="admin-order-actions">
@@ -28,12 +31,17 @@
                             <button type="button" class="btn btn-secondary" data-modal-open="refund-confirm-modal">Mark as refunded</button>
                         @endif
                     @endif
+                    @if ($order->isArchived())
+                        <button type="button" class="btn btn-secondary" data-modal-open="unarchive-confirm-modal">Unarchive</button>
+                    @else
+                        <button type="button" class="btn btn-secondary" data-modal-open="archive-confirm-modal">Archive</button>
+                    @endif
                 </div>
             </div>
             <p class="admin-list-lede admin-list-lede--wide">
                 {{ $order->created_at->format('d M Y · H:i') }}
                 @if ($order->user)
-                    · {{ $order->user->name }}
+                    · <a href="{{ route('admin.customers.show', $order->user) }}">{{ $order->user->name }}</a>
                     @if ($order->user->email)
                         · {{ $order->user->email }}
                     @endif
@@ -374,6 +382,40 @@
                     <div class="modal-actions">
                         <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
                         <button type="submit" class="btn btn-primary">Mark as refunded</button>
+                    </div>
+                </form>
+            </dialog>
+        @endif
+
+        @if ($order->isArchived())
+            <dialog id="unarchive-confirm-modal" class="modal" aria-labelledby="unarchive-confirm-title">
+                <form method="POST" action="{{ route('admin.orders.unarchive', $order) }}">
+                    @csrf
+                    @method('PATCH')
+                    <p class="modal-kicker">{{ $order->number }}</p>
+                    <h3 class="modal-title" id="unarchive-confirm-title">Unarchive this order?</h3>
+                    <p class="modal-body">
+                        It will reappear in the orders list and dashboard stats.
+                    </p>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                        <button type="submit" class="btn btn-primary">Unarchive order</button>
+                    </div>
+                </form>
+            </dialog>
+        @else
+            <dialog id="archive-confirm-modal" class="modal" aria-labelledby="archive-confirm-title">
+                <form method="POST" action="{{ route('admin.orders.archive', $order) }}">
+                    @csrf
+                    @method('PATCH')
+                    <p class="modal-kicker">{{ $order->number }}</p>
+                    <h3 class="modal-title" id="archive-confirm-title">Archive this order?</h3>
+                    <p class="modal-body">
+                        It will be hidden from the orders list and dashboard stats until unarchived.
+                    </p>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                        <button type="submit" class="btn btn-primary">Archive order</button>
                     </div>
                 </form>
             </dialog>

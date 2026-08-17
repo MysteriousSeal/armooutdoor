@@ -37,6 +37,15 @@
             </div>
 
             <div class="admin-nav-actions">
+                <form action="{{ route('admin.search') }}" method="GET" class="admin-nav-search">
+                    <input
+                        type="search"
+                        name="q"
+                        class="admin-nav-search-input"
+                        placeholder="Search orders, customers, products…"
+                        value="{{ request()->routeIs('admin.search') ? request()->query('q') : '' }}"
+                    >
+                </form>
                 <button
                     type="button"
                     class="theme-toggle-btn"

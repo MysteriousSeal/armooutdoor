@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-17 — v0.1.21
+
+### Admin
+
+- **Customer detail page**: clicking a customer now opens their profile — order history, addresses, and total spent, all excluding archived orders.
+- **Global search**: a search box in the admin header looks up orders, customers, and products from one place, excluding archived orders.
+- **Archive/unarchive from the order page**: same confirm popup as the orders list, now also available directly on an order's detail page, with an "Archived" badge next to its status.
+- **Inline restock**: the dashboard's stock alerts list now has a quantity field and Save button per product instead of a read-only count.
+- **Dashboard "External" stat**: now counts non-archived manual orders instead of external customer records, so archiving a manual order removes it from this count.
+
 ## 2026-08-17 — v0.1.20
 
 ### Orders

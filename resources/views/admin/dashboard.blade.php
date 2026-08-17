@@ -68,12 +68,73 @@
                 <span class="admin-stat-value">{{ number_format($productCount) }}</span>
                 <span class="admin-stat-value--sm">{{ number_format($activeProductCount) }} active</span>
             </a>
-            <a href="{{ route('admin.products.index') }}" class="admin-stat-card admin-stat-card--compact">
+            <a href="{{ route('admin.products.index', ['tab' => 'out-of-stock', 'sort' => 'stock-asc']) }}" class="admin-stat-card admin-stat-card--compact">
                 <span class="admin-stat-label">Stock alerts</span>
                 <span class="admin-stat-value">{{ number_format($lowStockCount) }} / {{ number_format($outOfStockCount) }}</span>
                 <span class="admin-stat-value--sm">Low / out</span>
             </a>
         </div>
+
+        @if ($stockAlertProducts->isNotEmpty())
+            <section class="order-panel admin-stock-panel">
+                <div class="admin-stock-head">
+                    <div>
+                        <h3 class="order-panel-title">Stock alerts</h3>
+                        <p class="admin-stock-lede">Products with two or fewer left — restock them here.</p>
+                    </div>
+                    <div class="admin-stock-head-meta">
+                        <span class="admin-list-chip">{{ number_format($lowStockCount) }} low</span>
+                        <span class="admin-list-chip">{{ number_format($outOfStockCount) }} out</span>
+                        <a href="{{ route('admin.products.index', ['tab' => $outOfStockCount > 0 ? 'out-of-stock' : 'active', 'sort' => 'stock-asc']) }}" class="btn btn-sm btn-secondary">View products</a>
+                    </div>
+                </div>
+
+                <ul class="admin-stock-list">
+                    @foreach ($stockAlertProducts as $product)
+                        @php
+                            $isOut = $product->quantity <= 0;
+                            $productName = $product->name['fr'] ?? $product->localizedName();
+                        @endphp
+                        <li>
+                            <a href="{{ route('admin.products.edit', $product) }}" class="admin-stock-media">
+                                <img
+                                    src="{{ $product->imageUrl() }}"
+                                    alt=""
+                                    width="44"
+                                    height="44"
+                                    loading="lazy"
+                                >
+                            </a>
+                            <div class="admin-dash-list-main">
+                                <a href="{{ route('admin.products.edit', $product) }}" class="admin-table-strong admin-table-truncate" title="{{ $productName }}">
+                                    {{ $productName }}
+                                </a>
+                                <span class="admin-table-sub">
+                                    {{ filled($product->sku) ? $product->sku : 'No SKU' }}
+                                </span>
+                            </div>
+                            <span class="admin-stock-chip {{ $isOut ? 'is-out' : 'is-low' }}">
+                                {{ $isOut ? 'Out of stock' : $product->quantity.' left' }}
+                            </span>
+                            <form method="POST" action="{{ route('admin.products.quantity', $product) }}" class="admin-restock-form">
+                                @csrf
+                                @method('PATCH')
+                                <label class="sr-only" for="stock-qty-{{ $product->id }}">Quantity for {{ $productName }}</label>
+                                <input
+                                    id="stock-qty-{{ $product->id }}"
+                                    type="number"
+                                    name="quantity"
+                                    value="{{ $product->quantity }}"
+                                    min="0"
+                                    class="admin-restock-input"
+                                >
+                                <button type="submit" class="btn btn-sm btn-secondary">Save</button>
+                            </form>
+                        </li>
+                    @endforeach
+                </ul>
+            </section>
+        @endif
 
         <div class="admin-order-layout">
             <div class="order-main">
@@ -173,23 +234,6 @@
                     @endif
                 </section>
 
-                <section class="order-fact">
-                    <h3 class="order-fact-title">Low stock</h3>
-                    @if ($lowStockProducts->isEmpty())
-                        <p>Nothing running low.</p>
-                    @else
-                        <ul class="admin-dash-list">
-                            @foreach ($lowStockProducts as $product)
-                                <li>
-                                    <a href="{{ route('admin.products.edit', $product) }}" class="admin-dash-list-main">
-                                        <span class="admin-table-primary">{{ $product->localizedName() }}</span>
-                                    </a>
-                                    <span class="admin-dash-list-value">{{ $product->quantity }} left</span>
-                                </li>
-                            @endforeach
-                        </ul>
-                    @endif
-                </section>
             </aside>
         </div>
     </div>

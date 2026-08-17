@@ -87,10 +87,10 @@ class DashboardController extends Controller
             ->take(5)
             ->values();
 
-        $lowStockProducts = Product::query()
-            ->where('quantity', '>', 0)
+        $stockAlertProducts = Product::query()
             ->where('quantity', '<=', 2)
             ->orderBy('quantity')
+            ->orderBy('id')
             ->limit(8)
             ->get();
 
@@ -98,7 +98,7 @@ class DashboardController extends Controller
 
         return view('admin.dashboard', [
             'customerCount' => User::query()->where('is_admin', false)->where('external', false)->count(),
-            'externalCustomerCount' => User::query()->where('external', true)->count(),
+            'externalCustomerCount' => Order::query()->whereNull('archived_at')->where('is_manual', true)->count(),
             'newCustomers30d' => User::query()->where('is_admin', false)->where('external', false)->where('created_at', '>=', $last30Start)->count(),
             'productCount' => Product::query()->count(),
             'activeProductCount' => Product::query()->active()->count(),
@@ -122,7 +122,7 @@ class DashboardController extends Controller
             'last7Days' => $last7Days,
             'marketplaceStats' => $marketplaceStats,
             'topProducts' => $topProducts,
-            'lowStockProducts' => $lowStockProducts,
+            'stockAlertProducts' => $stockAlertProducts,
             'recentOrders' => $recentOrders,
         ]);
     }

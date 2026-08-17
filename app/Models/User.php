@@ -59,6 +59,15 @@ class User extends Authenticatable
         return $this->is_admin === true;
     }
 
+    public function initials(): string
+    {
+        $first = mb_substr(trim((string) $this->first_name), 0, 1);
+        $last = mb_substr(trim((string) $this->last_name), 0, 1);
+        $initials = strtoupper($first.$last);
+
+        return $initials !== '' ? $initials : strtoupper(mb_substr((string) $this->email, 0, 1));
+    }
+
     /**
      * Computed for backward compatibility with the many places that display
      * a single "name" (order facts, greetings, admin lists, ...).

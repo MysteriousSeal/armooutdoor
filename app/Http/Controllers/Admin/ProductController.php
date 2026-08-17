@@ -130,6 +130,17 @@ class ProductController extends Controller
         return back()->with('status', $product->is_active ? 'Product activated.' : 'Product disabled.');
     }
 
+    public function updateQuantity(Request $request, Product $product): RedirectResponse
+    {
+        $validated = $request->validate([
+            'quantity' => ['required', 'integer', 'min:0'],
+        ]);
+
+        $product->update(['quantity' => $validated['quantity']]);
+
+        return back()->with('status', 'Stock updated for '.$product->localizedName().'.');
+    }
+
     private function applyProductSort(Builder $query, string $sort): void
     {
         [$column, $direction] = match ($sort) {
