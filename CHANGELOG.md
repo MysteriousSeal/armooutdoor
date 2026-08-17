@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-17 — v0.1.24
+
+### Housekeeping
+
+- **Rewrote README.md**: full description of the shop (catalog, storefront features, admin back office, brand/design notes), not just the old dev-setup summary.
+
 ## 2026-08-17 — v0.1.23
 
 ### Housekeeping
