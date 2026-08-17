@@ -959,13 +959,17 @@ textarea.form-control {
     width: 2.25rem;
     height: 2.25rem;
     flex-shrink: 0;
+    padding: 0;
+    font: inherit;
     color: var(--text-muted);
     border: 1px solid var(--border);
     background: var(--surface);
+    cursor: pointer;
     transition: color 0.15s, border-color 0.15s;
 }
 
-a.admin-table-icon-btn:hover {
+a.admin-table-icon-btn:hover,
+button.admin-table-icon-btn:hover {
     color: var(--text);
     border-color: var(--text-muted);
 }

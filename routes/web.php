@@ -124,6 +124,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/orders/{order}/prepare', [AdminOrderController::class, 'prepare'])->name('orders.prepare');
         Route::patch('/orders/{order}/ship', [AdminOrderController::class, 'ship'])->name('orders.ship');
         Route::patch('/orders/{order}/refund', [AdminOrderController::class, 'refund'])->name('orders.refund');
+        Route::patch('/orders/{order}/archive', [AdminOrderController::class, 'archive'])->name('orders.archive');
+        Route::patch('/orders/{order}/unarchive', [AdminOrderController::class, 'unarchive'])->name('orders.unarchive');
         Route::patch('/orders/{order}/tracking', [AdminOrderController::class, 'updateTracking'])->name('orders.tracking.update');
         Route::patch('/orders/{order}/shipping-address', [AdminOrderController::class, 'updateShippingAddress'])->name('orders.address.shipping');
         Route::patch('/orders/{order}/billing-address', [AdminOrderController::class, 'updateBillingAddress'])->name('orders.address.billing');

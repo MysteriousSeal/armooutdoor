@@ -17,21 +17,23 @@ class DashboardController extends Controller
         $last7Start = $now->copy()->subDays(6)->startOfDay();
         $last30Start = $now->copy()->subDays(29)->startOfDay();
 
-        $nonRefunded = fn () => Order::query()->whereNotIn('status', ['refunded', 'draft']);
+        $nonRefunded = fn () => Order::query()->whereNull('archived_at')->whereNotIn('status', ['refunded', 'draft']);
 
-        $orderCount = Order::query()->where('status', '!=', 'draft')->count();
-        $draftCount = Order::query()->where('status', 'draft')->count();
+        $orderCount = Order::query()->whereNull('archived_at')->where('status', '!=', 'draft')->count();
+        $draftCount = Order::query()->whereNull('archived_at')->where('status', 'draft')->count();
         $nonRefundedCount = $nonRefunded()->count();
         $netRevenueCents = (int) $nonRefunded()->sum('total_cents');
-        $refundedCents = (int) Order::query()->where('status', 'refunded')->sum('total_cents');
+        $refundedCents = (int) Order::query()->whereNull('archived_at')->where('status', 'refunded')->sum('total_cents');
         $averageOrderCents = $nonRefundedCount > 0 ? (int) round($netRevenueCents / $nonRefundedCount) : 0;
 
         $statusCounts = Order::query()
+            ->whereNull('archived_at')
             ->selectRaw('status, count(*) as count')
             ->groupBy('status')
             ->pluck('count', 'status');
 
         $dailyRows = Order::query()
+            ->whereNull('archived_at')
             ->where('created_at', '>=', $last7Start)
             ->where('status', '!=', 'draft')
             ->selectRaw("strftime('%Y-%m-%d', created_at) as day, count(*) as orders, sum(case when status != 'refunded' then total_cents else 0 end) as revenue_cents")
@@ -39,6 +41,7 @@ class DashboardController extends Controller
             ->pluck('revenue_cents', 'day')
             ->all();
         $dailyOrderRows = Order::query()
+            ->whereNull('archived_at')
             ->where('created_at', '>=', $last7Start)
             ->where('status', '!=', 'draft')
             ->selectRaw("strftime('%Y-%m-%d', created_at) as day, count(*) as orders")
@@ -65,6 +68,7 @@ class DashboardController extends Controller
 
         $topProducts = OrderItem::query()
             ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->whereNull('orders.archived_at')
             ->whereNotIn('orders.status', ['refunded', 'draft'])
             ->select('order_items.*')
             ->get()
@@ -90,7 +94,7 @@ class DashboardController extends Controller
             ->limit(8)
             ->get();
 
-        $recentOrders = Order::query()->where('status', '!=', 'draft')->with('user')->latest()->limit(8)->get();
+        $recentOrders = Order::query()->whereNull('archived_at')->where('status', '!=', 'draft')->with('user')->latest()->limit(8)->get();
 
         return view('admin.dashboard', [
             'customerCount' => User::query()->where('is_admin', false)->where('external', false)->count(),
@@ -104,8 +108,9 @@ class DashboardController extends Controller
             'netRevenueCents' => $netRevenueCents,
             'refundedCents' => $refundedCents,
             'averageOrderCents' => $averageOrderCents,
-            'toPrepareCount' => Order::query()->whereIn('status', ['placed', 'preparing'])->count(),
+            'toPrepareCount' => Order::query()->whereNull('archived_at')->whereIn('status', ['placed', 'preparing'])->count(),
             'missingTrackingCount' => Order::query()
+                ->whereNull('archived_at')
                 ->where('status', 'shipped')
                 ->where(function ($query): void {
                     $query->whereNull('tracking_number')->orWhere('tracking_number', '');

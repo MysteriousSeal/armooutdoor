@@ -30,11 +30,13 @@ class OrderController extends Controller
     public function index(Request $request): View
     {
         $search = trim((string) $request->query('search', ''));
-        $tab = $request->query('tab') === 'draft' ? 'draft' : 'orders';
+        $tab = in_array($request->query('tab'), ['draft', 'archived'], true) ? $request->query('tab') : 'orders';
 
         $orders = Order::query()
             ->with('user')
             ->withCount('items')
+            ->when($tab === 'archived', fn ($query) => $query->whereNotNull('archived_at'))
+            ->when($tab !== 'archived', fn ($query) => $query->whereNull('archived_at'))
             ->when($tab === 'draft', fn ($query) => $query->where('status', 'draft'))
             ->when($tab === 'orders', fn ($query) => $query->where('status', '!=', 'draft'))
             ->when($search !== '', function ($query) use ($search): void {
@@ -54,10 +56,12 @@ class OrderController extends Controller
         return view('admin.orders.index', [
             'orders' => $orders,
             'tab' => $tab,
-            'orderCount' => Order::query()->where('status', '!=', 'draft')->count(),
-            'draftCount' => Order::query()->where('status', 'draft')->count(),
-            'toPrepareCount' => Order::query()->whereIn('status', ['placed', 'preparing'])->count(),
+            'orderCount' => Order::query()->whereNull('archived_at')->where('status', '!=', 'draft')->count(),
+            'draftCount' => Order::query()->whereNull('archived_at')->where('status', 'draft')->count(),
+            'archivedCount' => Order::query()->whereNotNull('archived_at')->count(),
+            'toPrepareCount' => Order::query()->whereNull('archived_at')->whereIn('status', ['placed', 'preparing'])->count(),
             'missingTrackingCount' => Order::query()
+                ->whereNull('archived_at')
                 ->where('status', 'shipped')
                 ->where(function ($query): void {
                     $query->whereNull('tracking_number')->orWhere('tracking_number', '');
@@ -362,6 +366,20 @@ class OrderController extends Controller
         $order->markStatus('refunded');
 
         return back()->with('status', 'Order marked as refunded.');
+    }
+
+    public function archive(Order $order): RedirectResponse
+    {
+        $order->archive();
+
+        return back()->with('status', 'Order archived.');
+    }
+
+    public function unarchive(Order $order): RedirectResponse
+    {
+        $order->unarchive();
+
+        return back()->with('status', 'Order unarchived.');
     }
 
     public function invoice(Order $order): Response

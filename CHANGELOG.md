@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-17 — v0.1.19
+
+### Orders
+
+- **Archive orders**: new "Archived" tab on the admin orders list, with an archive/unarchive icon button per row (confirm popup before either action). Archived orders drop out of the Orders/Drafts tabs, the admin dashboard's counts, charts, and top-products/marketplace stats, and the customer's own order list — direct links to an archived order now 404 for the customer, same as a draft.
+
 ## 2026-08-17 — v0.1.18
 
 ### Admin

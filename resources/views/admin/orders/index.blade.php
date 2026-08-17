@@ -29,6 +29,9 @@
             <a href="{{ route('admin.orders.index', array_filter(['tab' => 'draft', 'search' => $search ?: null])) }}" class="{{ $tab === 'draft' ? 'active' : '' }}">
                 Drafts <span class="admin-tab-count">{{ number_format($draftCount) }}</span>
             </a>
+            <a href="{{ route('admin.orders.index', array_filter(['tab' => 'archived', 'search' => $search ?: null])) }}" class="{{ $tab === 'archived' ? 'active' : '' }}">
+                Archived <span class="admin-tab-count">{{ number_format($archivedCount) }}</span>
+            </a>
         </nav>
 
         <form method="GET" action="{{ route('admin.orders.index') }}" class="admin-toolbar">
@@ -46,12 +49,20 @@
             @endif
         </form>
 
+        @php
+            $tabLabel = match ($tab) {
+                'draft' => 'drafts',
+                'archived' => 'archived orders',
+                default => 'orders',
+            };
+        @endphp
+
         @if ($orders->isEmpty())
             <p class="empty-state">
                 @if ($search !== '')
-                    No {{ $tab === 'draft' ? 'drafts' : 'orders' }} match this search.
+                    No {{ $tabLabel }} match this search.
                 @else
-                    {{ $tab === 'draft' ? 'No drafts yet.' : 'No orders yet.' }}
+                    No {{ $tabLabel }} yet.
                 @endif
             </p>
         @else
@@ -137,6 +148,30 @@
                                                 </svg>
                                             </span>
                                         @endif
+                                        <button
+                                            type="button"
+                                            class="admin-table-icon-btn"
+                                            data-archive-toggle
+                                            data-action="{{ route($order->isArchived() ? 'admin.orders.unarchive' : 'admin.orders.archive', $order) }}"
+                                            data-order="{{ $order->number }}"
+                                            data-archived="{{ $order->isArchived() ? '1' : '0' }}"
+                                            title="{{ $order->isArchived() ? 'Unarchive order' : 'Archive order' }}"
+                                            aria-label="{{ $order->isArchived() ? 'Unarchive order' : 'Archive order' }}"
+                                        >
+                                            @if ($order->isArchived())
+                                                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                                                    <rect x="4" y="4" width="16" height="4" rx="1" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
+                                                    <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
+                                                    <path d="M14 12.5 12 10.5 10 12.5m2-2v6" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
+                                            @else
+                                                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                                                    <rect x="4" y="4" width="16" height="4" rx="1" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
+                                                    <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
+                                                    <path d="M10 14.5 12 16.5l2-2m-2 2v-6" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
+                                            @endif
+                                        </button>
                                         <a href="{{ route('admin.orders.show', $order) }}" class="btn btn-sm btn-primary">View</a>
                                     </div>
                                 </td>
@@ -148,5 +183,44 @@
 
             @include('admin.partials.pager', ['paginator' => $orders])
         @endif
+
+        <dialog id="archive-confirm-modal" class="modal" aria-labelledby="archive-confirm-title">
+            <form method="POST" id="archive-confirm-form">
+                @csrf
+                @method('PATCH')
+                <h3 class="modal-title" id="archive-confirm-title">Are you sure?</h3>
+                <p class="modal-body" id="archive-confirm-body"></p>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="archive-confirm-submit"></button>
+                </div>
+            </form>
+        </dialog>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        (function () {
+            var modal = document.getElementById('archive-confirm-modal');
+            var form = document.getElementById('archive-confirm-form');
+            var body = document.getElementById('archive-confirm-body');
+            var submitBtn = document.getElementById('archive-confirm-submit');
+
+            document.querySelectorAll('[data-archive-toggle]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var archived = btn.getAttribute('data-archived') === '1';
+                    var number = btn.getAttribute('data-order');
+
+                    form.action = btn.getAttribute('data-action');
+                    body.textContent = archived
+                        ? 'Are you sure you want to unarchive order ' + number + '?'
+                        : 'Are you sure you want to archive order ' + number + '?';
+                    submitBtn.textContent = archived ? 'Unarchive order' : 'Archive order';
+
+                    modal.showModal();
+                });
+            });
+        })();
+    </script>
+@endpush

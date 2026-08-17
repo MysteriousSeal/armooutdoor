@@ -16,6 +16,7 @@ use Illuminate\Support\Str;
     'is_manual',
     'user_id',
     'status',
+    'archived_at',
     'address_id',
     'address_snapshot',
     'billing_address_id',
@@ -53,6 +54,7 @@ class Order extends Model
     {
         return [
             'is_manual' => 'boolean',
+            'archived_at' => 'datetime',
             'address_snapshot' => 'array',
             'billing_address_snapshot' => 'array',
             'carrier_snapshot' => 'array',
@@ -195,6 +197,21 @@ class Order extends Model
     public function isDraft(): bool
     {
         return $this->status === 'draft';
+    }
+
+    public function isArchived(): bool
+    {
+        return $this->archived_at !== null;
+    }
+
+    public function archive(): void
+    {
+        $this->update(['archived_at' => now()]);
+    }
+
+    public function unarchive(): void
+    {
+        $this->update(['archived_at' => null]);
     }
 
     public function statusMessage(): string

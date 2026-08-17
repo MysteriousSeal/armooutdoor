@@ -16,7 +16,7 @@ class CustomerController extends Controller
         $customers = User::query()
             ->where('is_admin', false)
             ->where('external', false)
-            ->withCount(['orders', 'addresses'])
+            ->withCount(['orders' => fn ($query) => $query->whereNull('archived_at'), 'addresses'])
             ->when($search !== '', function ($query) use ($search): void {
                 $query->where(function ($query) use ($search): void {
                     $query->where('first_name', 'like', '%'.$search.'%')
