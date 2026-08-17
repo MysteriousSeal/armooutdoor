@@ -189,19 +189,17 @@ class OrderController extends Controller
             'phone' => $request->input('phone'),
         ];
 
-        $billingSnapshot = $request->boolean('billing_same_as_shipping')
-            ? $shippingSnapshot
-            : [
-                'label' => null,
-                'first_name' => $request->input('billing_first_name'),
-                'last_name' => $request->input('billing_last_name'),
-                'line1' => $request->input('billing_line1'),
-                'line2' => $request->input('billing_line2'),
-                'postal_code' => $request->input('billing_postal_code'),
-                'city' => $request->input('billing_city'),
-                'country' => $request->input('billing_country'),
-                'phone' => $request->input('billing_phone'),
-            ];
+        $billingSnapshot = [
+            'label' => null,
+            'first_name' => $request->input('billing_first_name'),
+            'last_name' => $request->input('billing_last_name'),
+            'line1' => $request->input('billing_line1'),
+            'line2' => $request->input('billing_line2'),
+            'postal_code' => $request->input('billing_postal_code'),
+            'city' => $request->input('billing_city'),
+            'country' => $request->input('billing_country'),
+            'phone' => $request->input('billing_phone'),
+        ];
 
         $shippingPrice = $request->input('shipping_price');
         $marketplace = $request->input('marketplace_id')

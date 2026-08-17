@@ -64,14 +64,13 @@ class StoreManualOrderRequest extends FormRequest
             'country' => ['required', 'string', Rule::in(config('shop.countries'))],
             'phone' => ['nullable', 'string', 'max:30'],
 
-            'billing_same_as_shipping' => ['nullable', 'boolean'],
-            'billing_first_name' => ['nullable', Rule::requiredIf(! $this->boolean('billing_same_as_shipping')), 'string', 'max:80'],
-            'billing_last_name' => ['nullable', Rule::requiredIf(! $this->boolean('billing_same_as_shipping')), 'string', 'max:80'],
-            'billing_line1' => ['nullable', Rule::requiredIf(! $this->boolean('billing_same_as_shipping')), 'string', 'max:120'],
+            'billing_first_name' => ['required', 'string', 'max:80'],
+            'billing_last_name' => ['required', 'string', 'max:80'],
+            'billing_line1' => ['required', 'string', 'max:120'],
             'billing_line2' => ['nullable', 'string', 'max:120'],
-            'billing_postal_code' => ['nullable', Rule::requiredIf(! $this->boolean('billing_same_as_shipping')), 'string', 'max:12'],
-            'billing_city' => ['nullable', Rule::requiredIf(! $this->boolean('billing_same_as_shipping')), 'string', 'max:80'],
-            'billing_country' => ['nullable', Rule::requiredIf(! $this->boolean('billing_same_as_shipping')), 'string', Rule::in(config('shop.countries'))],
+            'billing_postal_code' => ['required', 'string', 'max:12'],
+            'billing_city' => ['required', 'string', 'max:80'],
+            'billing_country' => ['required', 'string', Rule::in(config('shop.countries'))],
             'billing_phone' => ['nullable', 'string', 'max:30'],
         ];
     }

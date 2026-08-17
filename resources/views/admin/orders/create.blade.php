@@ -270,6 +270,17 @@
                     </section>
 
                     <section class="order-panel">
+                        <h3 class="order-panel-title">Billing address</h3>
+                        <div class="form-group" id="saved-billing-wrap" hidden>
+                            <label for="saved-billing-address">Saved address</label>
+                            <select id="saved-billing-address" class="form-control" data-address-picker="billing">
+                                <option value="">New address</option>
+                            </select>
+                        </div>
+                        @include('admin.orders.partials.address-fields', ['snapshot' => $isEdit ? ($order->billing_address_snapshot ?? $order->address_snapshot ?? []) : [], 'prefix' => 'billing', 'bag' => 'default', 'fieldPrefix' => 'billing_', 'phoneOptional' => true])
+                    </section>
+
+                    <section class="order-panel">
                         <h3 class="order-panel-title">Carrier</h3>
                         @php($selectedCarrierId = (string) old('carrier_id', $isEdit ? $order->carrier_id : ''))
                         <div class="form-group">
@@ -284,6 +295,8 @@
                                             value="{{ $carrier->id }}"
                                             data-sync-field="carrier_id"
                                             data-price="{{ number_format($carrier->price_cents / 100, 2, '.', '') }}"
+                                            data-method="{{ $carrier->method === \App\Enums\DeliveryMethod::Relay ? 'relay' : 'home' }}"
+                                            data-carrier-slug="{{ $carrier->slug }}"
                                             @checked($selectedCarrierId === (string) $carrier->id)
                                         >
                                         <span class="admin-choice-line">
@@ -308,6 +321,23 @@
                             >
                             @error('shipping_price') <p class="form-error">{{ $message }}</p> @enderror
                         </div>
+                        <div class="form-group" id="admin-relay-picker" hidden>
+                            <label>Pickup point</label>
+                            <p class="form-hint">Searched near the billing address postal code. Click one to fill it into the shipping address.</p>
+                            <div class="admin-relay-list" id="admin-relay-list"></div>
+                            <p class="form-hint" id="admin-relay-empty" hidden>No pickup points found for this postal code.</p>
+                        </div>
+                    </section>
+
+                    <section class="order-panel">
+                        <h3 class="order-panel-title">Shipping address</h3>
+                        <div class="form-group" id="saved-shipping-wrap" hidden>
+                            <label for="saved-shipping-address">Saved address</label>
+                            <select id="saved-shipping-address" class="form-control" data-address-picker="shipping">
+                                <option value="">New address</option>
+                            </select>
+                        </div>
+                        @include('admin.orders.partials.address-fields', ['snapshot' => $isEdit ? ($order->address_snapshot ?? []) : [], 'prefix' => 'shipping', 'bag' => 'default', 'phoneOptional' => true])
                     </section>
 
                     <section class="order-panel">
@@ -377,46 +407,93 @@
                     </section>
                 </div>
 
-                <div class="order-main">
-                    <section class="order-panel">
-                        <h3 class="order-panel-title">Shipping address</h3>
-                        <div class="form-group" id="saved-shipping-wrap" hidden>
-                            <label for="saved-shipping-address">Saved address</label>
-                            <select id="saved-shipping-address" class="form-control" data-address-picker="shipping">
-                                <option value="">New address</option>
-                            </select>
-                        </div>
-                        @include('admin.orders.partials.address-fields', ['snapshot' => $isEdit ? ($order->address_snapshot ?? []) : [], 'prefix' => 'shipping', 'bag' => 'default', 'phoneOptional' => true])
-                    </section>
-
-                    <section class="order-panel">
-                        <h3 class="order-panel-title">Billing address</h3>
-                        @php($defaultBillingSameAsShipping = $isEdit ? ! $order->hasSeparateBillingAddress() : true)
-                        <div class="form-group">
-                            <label class="form-check">
-                                <input type="checkbox" name="billing_same_as_shipping" value="1" id="billing-same-as-shipping" @checked(old('billing_same_as_shipping', $defaultBillingSameAsShipping))>
-                                Same as shipping address
-                            </label>
-                        </div>
-                        <div id="billing-address-fields" @if (old('billing_same_as_shipping', $defaultBillingSameAsShipping)) hidden @endif>
-                            <div class="form-group" id="saved-billing-wrap" hidden>
-                                <label for="saved-billing-address">Saved address</label>
-                                <select id="saved-billing-address" class="form-control" data-address-picker="billing">
-                                    <option value="">New address</option>
-                                </select>
+                <aside class="admin-order-create-aside">
+                    <section class="order-panel admin-order-preview" id="order-preview">
+                        <h3 class="order-panel-title">Preview</h3>
+                        <dl class="admin-order-preview-facts">
+                            <div>
+                                <dt>Customer</dt>
+                                <dd id="order-preview-customer">—</dd>
                             </div>
-                            @include('admin.orders.partials.address-fields', ['snapshot' => $isEdit ? ($order->billing_address_snapshot ?? $order->address_snapshot ?? []) : [], 'prefix' => 'billing', 'bag' => 'default', 'fieldPrefix' => 'billing_', 'phoneOptional' => true])
+                            <div>
+                                <dt>Carrier</dt>
+                                <dd id="order-preview-carrier">—</dd>
+                            </div>
+                            <div>
+                                <dt>Marketplace</dt>
+                                <dd id="order-preview-marketplace">—</dd>
+                            </div>
+                        </dl>
+                        <ul class="admin-order-preview-items" id="order-preview-items"></ul>
+                        <p class="admin-order-preview-empty" id="order-preview-empty">Add products to preview the order.</p>
+                        <dl class="order-totals" id="order-preview-totals">
+                            <div>
+                                <dt>Subtotal</dt>
+                                <dd id="order-preview-subtotal">—</dd>
+                            </div>
+                            <div id="order-preview-discount-row" hidden>
+                                <dt id="order-preview-discount-label">Discount</dt>
+                                <dd id="order-preview-discount">—</dd>
+                            </div>
+                            <div>
+                                <dt>Shipping</dt>
+                                <dd id="order-preview-shipping">—</dd>
+                            </div>
+                        </dl>
+                        <div class="admin-order-preview-total">
+                            <span>Total</span>
+                            <strong id="order-preview-total">—</strong>
+                        </div>
+                        <div class="admin-order-preview-addresses">
+                            <div>
+                                <p class="admin-order-preview-address-label">Shipping</p>
+                                <dl class="admin-order-preview-address-fields" id="order-preview-shipping-address">
+                                    <div><dt>First name</dt><dd data-field="first_name">—</dd></div>
+                                    <div><dt>Last name</dt><dd data-field="last_name">—</dd></div>
+                                    <div><dt>Address</dt><dd data-field="line1">—</dd></div>
+                                    <div><dt>Line 2</dt><dd data-field="line2">—</dd></div>
+                                    <div><dt>Postal code</dt><dd data-field="postal_code">—</dd></div>
+                                    <div><dt>City</dt><dd data-field="city">—</dd></div>
+                                    <div><dt>Country</dt><dd data-field="country">—</dd></div>
+                                    <div><dt>Phone</dt><dd data-field="phone">—</dd></div>
+                                </dl>
+                            </div>
+                            <div>
+                                <p class="admin-order-preview-address-label">Billing</p>
+                                <dl class="admin-order-preview-address-fields" id="order-preview-billing-address">
+                                    <div><dt>First name</dt><dd data-field="first_name">—</dd></div>
+                                    <div><dt>Last name</dt><dd data-field="last_name">—</dd></div>
+                                    <div><dt>Address</dt><dd data-field="line1">—</dd></div>
+                                    <div><dt>Line 2</dt><dd data-field="line2">—</dd></div>
+                                    <div><dt>Postal code</dt><dd data-field="postal_code">—</dd></div>
+                                    <div><dt>City</dt><dd data-field="city">—</dd></div>
+                                    <div><dt>Country</dt><dd data-field="country">—</dd></div>
+                                    <div><dt>Phone</dt><dd data-field="phone">—</dd></div>
+                                </dl>
+                            </div>
                         </div>
                     </section>
-                </div>
-            </div>
 
-            <div class="order-panel admin-order-create-actions">
-                <a href="{{ $isEdit ? route('admin.orders.show', $order) : route('admin.orders.index') }}" class="btn btn-secondary">Cancel</a>
-                <button type="submit" name="action" value="draft" class="btn btn-secondary">Save as draft</button>
-                <button type="submit" name="action" value="placed" class="btn btn-primary">{{ $isEdit ? 'Finalize order' : 'Create order' }}</button>
+                    <div class="order-panel admin-order-create-actions">
+                        <a href="{{ $isEdit ? route('admin.orders.show', $order) : route('admin.orders.index') }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" name="action" value="draft" class="btn btn-secondary">Save as draft</button>
+                        <button type="submit" name="action" value="placed" class="btn btn-primary">{{ $isEdit ? 'Finalize order' : 'Create order' }}</button>
+                    </div>
+                </aside>
             </div>
         </form>
+
+        <dialog id="marketplace-confirm-modal" class="modal" aria-labelledby="marketplace-confirm-title">
+            <p class="modal-kicker">Marketplace</p>
+            <h3 class="modal-title" id="marketplace-confirm-title">No marketplace selected</h3>
+            <p class="modal-body">
+                Are you sure you don't want to select a marketplace for this order?
+            </p>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                <button type="button" class="btn btn-primary" id="marketplace-confirm-continue">Continue without marketplace</button>
+            </div>
+        </dialog>
     </div>
 @endsection
 
@@ -427,6 +504,7 @@
         AdminSearchSelect.catalogs.products = @json($productOptions);
         AdminSearchSelect.mountAll();
         var customerAddresses = @json($customerAddresses);
+        var relayPointsUrl = @json(route('checkout.relay-points'));
 
         (function () {
             var itemRows = document.getElementById('item-rows');
@@ -521,13 +599,6 @@
             modeExisting.addEventListener('change', syncCustomerMode);
             modeNew.addEventListener('change', syncCustomerMode);
 
-            var billingSame = document.getElementById('billing-same-as-shipping');
-            var billingFields = document.getElementById('billing-address-fields');
-
-            billingSame.addEventListener('change', function () {
-                billingFields.hidden = billingSame.checked;
-            });
-
             var carrierSelect = document.getElementById('carrier_id');
             var shippingPrice = document.getElementById('shipping_price');
 
@@ -560,6 +631,107 @@
             if (shippingPrice.value === '' && carrierSelect.value !== '') {
                 applyCarrierPrice(selectedCarrierRadio());
             }
+
+            var RELAY_PROVIDERS = {
+                'mondial-relay': 'mondial_relay',
+                'relais-pickup': 'chronopost',
+            };
+            var relayPicker = document.getElementById('admin-relay-picker');
+            var relayList = document.getElementById('admin-relay-list');
+            var relayEmpty = document.getElementById('admin-relay-empty');
+            var billingPostalCode = document.getElementById('billing_postal_code');
+            var billingCountry = document.getElementById('billing_country');
+            var relayPointsLoadedFor = null;
+
+            function fillShippingFromRelayPoint(point) {
+                document.getElementById('shipping_line1').value = point.name;
+                document.getElementById('shipping_line2').value = point.line1;
+                document.getElementById('shipping_postal_code').value = point.postal_code;
+                document.getElementById('shipping_city').value = point.city;
+                updateOrderPreview();
+                syncSubmitButtons();
+            }
+
+            function renderRelayPoints(points) {
+                relayList.innerHTML = '';
+                points.slice(0, 10).forEach(function (point) {
+                    var button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'admin-relay-point';
+
+                    var name = document.createElement('span');
+                    name.className = 'admin-relay-point-name';
+                    name.textContent = point.name;
+                    button.appendChild(name);
+
+                    var address = document.createElement('span');
+                    address.className = 'admin-relay-point-address';
+                    address.textContent = point.line1 + ', ' + point.postal_code + ' ' + point.city;
+                    button.appendChild(address);
+
+                    button.addEventListener('click', function () {
+                        relayList.querySelectorAll('.admin-relay-point').forEach(function (el) {
+                            el.classList.remove('is-selected');
+                        });
+                        button.classList.add('is-selected');
+                        fillShippingFromRelayPoint(point);
+                    });
+
+                    relayList.appendChild(button);
+                });
+                relayEmpty.hidden = points.length > 0;
+            }
+
+            function loadRelayPoints(postalCode, country, provider) {
+                var cacheKey = provider + ':' + postalCode + ':' + country;
+                if (cacheKey === relayPointsLoadedFor) {
+                    return;
+                }
+                relayPointsLoadedFor = cacheKey;
+
+                var url = relayPointsUrl + '?postal_code=' + encodeURIComponent(postalCode)
+                    + '&country=' + encodeURIComponent(country || 'FR')
+                    + '&provider=' + encodeURIComponent(provider);
+
+                fetch(url, { headers: { Accept: 'application/json' } })
+                    .then(function (response) { return response.json(); })
+                    .then(function (data) {
+                        renderRelayPoints((data && data.points) || []);
+                    })
+                    .catch(function () {});
+            }
+
+            function syncRelayPicker() {
+                var carrier = selectedCarrierRadio();
+                var provider = carrier ? RELAY_PROVIDERS[carrier.getAttribute('data-carrier-slug')] : null;
+
+                if (! provider) {
+                    relayPicker.hidden = true;
+                    relayPointsLoadedFor = null;
+                    return;
+                }
+
+                relayPicker.hidden = false;
+                var postalCode = (billingPostalCode.value || '').trim();
+
+                if (postalCode === '') {
+                    relayList.innerHTML = '';
+                    relayEmpty.hidden = true;
+                    relayPointsLoadedFor = null;
+                    return;
+                }
+
+                loadRelayPoints(postalCode, billingCountry.value, provider);
+            }
+
+            document.addEventListener('change', function (event) {
+                if (event.target.matches('input[data-sync-field="carrier_id"]')) {
+                    syncRelayPicker();
+                }
+            });
+            billingPostalCode.addEventListener('input', syncRelayPicker);
+            billingCountry.addEventListener('change', syncRelayPicker);
+            syncRelayPicker();
 
             var discountType = document.getElementById('discount_type');
             var discountValueGroup = document.getElementById('discount-value-group');
@@ -604,7 +776,32 @@
                         input.value = address[field] || '';
                     }
                 });
+                if (prefix === 'billing') {
+                    syncShippingNameFromBilling();
+                }
+                updateOrderPreview();
+                syncSubmitButtons();
             }
+
+            var billingFirstName = document.getElementById('billing_first_name');
+            var billingLastName = document.getElementById('billing_last_name');
+            var shippingFirstName = document.getElementById('shipping_first_name');
+            var shippingLastName = document.getElementById('shipping_last_name');
+            var shippingNameTouched = false;
+
+            shippingFirstName.addEventListener('input', function () { shippingNameTouched = true; });
+            shippingLastName.addEventListener('input', function () { shippingNameTouched = true; });
+
+            function syncShippingNameFromBilling() {
+                if (shippingNameTouched) {
+                    return;
+                }
+                shippingFirstName.value = billingFirstName.value;
+                shippingLastName.value = billingLastName.value;
+            }
+
+            billingFirstName.addEventListener('input', syncShippingNameFromBilling);
+            billingLastName.addEventListener('input', syncShippingNameFromBilling);
 
             function syncAddressPickers(autofill) {
                 var addresses = addressesForCustomer();
@@ -619,8 +816,8 @@
                 }
 
                 var preferred = addresses.find(function (address) { return address.is_default; }) || addresses[0];
-                shippingPicker.value = String(preferred.id);
-                fillAddress('shipping', preferred);
+                billingPicker.value = String(preferred.id);
+                fillAddress('billing', preferred);
             }
 
             customerIdInput.addEventListener('search-select:change', function () {
@@ -799,17 +996,15 @@
                     }
                 });
 
-                if (! billingSame.checked) {
-                    ['first_name', 'last_name', 'line1', 'postal_code', 'city', 'country'].forEach(function (field) {
-                        var input = document.getElementById('billing_' + field);
-                        if (! validateRequired(input, 'This field is required.')) {
-                            if (! firstInvalid) {
-                                firstInvalid = input;
-                            }
-                            ok = false;
+                ['first_name', 'last_name', 'line1', 'postal_code', 'city', 'country'].forEach(function (field) {
+                    var input = document.getElementById('billing_' + field);
+                    if (! validateRequired(input, 'This field is required.')) {
+                        if (! firstInvalid) {
+                            firstInvalid = input;
                         }
-                    });
-                }
+                        ok = false;
+                    }
+                });
 
                 if (firstInvalid) {
                     firstInvalid.focus();
@@ -819,11 +1014,106 @@
                 return ok;
             }
 
+            function isFormComplete() {
+                if (modeExisting.checked) {
+                    if (isBlank(customerIdInput)) {
+                        return false;
+                    }
+                } else {
+                    var newFirstName = document.getElementById('new_customer_first_name');
+                    var newLastName = document.getElementById('new_customer_last_name');
+                    var newEmail = document.getElementById('new_customer_email');
+                    if (isBlank(newFirstName) || isBlank(newLastName)) {
+                        return false;
+                    }
+                    if (! isBlank(newEmail) && ! /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail.value.trim())) {
+                        return false;
+                    }
+                }
+
+                var completeItems = 0;
+                var itemsOk = true;
+                itemRows.querySelectorAll('.form-row--item').forEach(function (row) {
+                    var product = row.querySelector('input[type="hidden"][name*="[product_id]"]');
+                    var quantity = row.querySelector('input[name*="[quantity]"]');
+
+                    if (isBlank(product)) {
+                        return;
+                    }
+
+                    completeItems++;
+                    if (isBlank(quantity) || Number(quantity.value) < 1) {
+                        itemsOk = false;
+                    }
+
+                    var variantGroup = row.querySelector('[data-variant-group]');
+                    var variantSelect = row.querySelector('[data-item-variant]');
+                    if (variantGroup && ! variantGroup.hidden && variantSelect && isBlank(variantSelect)) {
+                        itemsOk = false;
+                    }
+                });
+
+                if (completeItems === 0 || ! itemsOk) {
+                    return false;
+                }
+
+                if (isBlank(carrierSelect)) {
+                    return false;
+                }
+
+                var requiredAddressFields = ['first_name', 'last_name', 'line1', 'postal_code', 'city', 'country'];
+                for (var i = 0; i < requiredAddressFields.length; i++) {
+                    if (isBlank(document.getElementById('shipping_' + requiredAddressFields[i]))) {
+                        return false;
+                    }
+                    if (isBlank(document.getElementById('billing_' + requiredAddressFields[i]))) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            var draftButton = document.querySelector('button[name="action"][value="draft"]');
+            var placeButton = document.querySelector('button[name="action"][value="placed"]');
+
+            function syncSubmitButtons() {
+                var ready = isFormComplete();
+                if (draftButton) {
+                    draftButton.disabled = ! ready;
+                }
+                if (placeButton) {
+                    placeButton.disabled = ! ready;
+                }
+            }
+
+            var marketplaceModal = document.getElementById('marketplace-confirm-modal');
+            var marketplaceConfirmBtn = document.getElementById('marketplace-confirm-continue');
+            var marketplaceConfirmed = false;
+            var pendingSubmitter = null;
+
             form.addEventListener('submit', function (event) {
                 if (! validateForm()) {
                     event.preventDefault();
+                    return;
+                }
+
+                if (! marketplaceConfirmed && marketplaceModal && isBlank(document.getElementById('marketplace_id'))) {
+                    event.preventDefault();
+                    pendingSubmitter = event.submitter;
+                    marketplaceModal.showModal();
                 }
             });
+
+            if (marketplaceConfirmBtn) {
+                marketplaceConfirmBtn.addEventListener('click', function () {
+                    var submitter = pendingSubmitter;
+                    marketplaceConfirmed = true;
+                    pendingSubmitter = null;
+                    marketplaceModal.close();
+                    form.requestSubmit(submitter);
+                });
+            }
 
             form.addEventListener('input', function (event) {
                 var group = fieldGroup(event.target);
@@ -849,6 +1139,179 @@
                     clearFieldError(visible);
                 }
             });
+
+            var productsCatalog = AdminSearchSelect.catalogs.products || [];
+            var customersCatalog = AdminSearchSelect.catalogs.customers || [];
+
+            function formatEuros(amount) {
+                var value = Number(amount);
+                if (isNaN(value)) {
+                    return '—';
+                }
+                return value.toFixed(2).replace('.', ',') + ' €';
+            }
+
+            function productById(id) {
+                return productsCatalog.find(function (item) {
+                    return String(item.id) === String(id);
+                }) || null;
+            }
+
+            function customerById(id) {
+                return customersCatalog.find(function (item) {
+                    return String(item.id) === String(id);
+                }) || null;
+            }
+
+            function updateOrderPreview() {
+                var customerEl = document.getElementById('order-preview-customer');
+                var carrierEl = document.getElementById('order-preview-carrier');
+                var marketplaceEl = document.getElementById('order-preview-marketplace');
+                var itemsEl = document.getElementById('order-preview-items');
+                var emptyEl = document.getElementById('order-preview-empty');
+                var subtotalEl = document.getElementById('order-preview-subtotal');
+                var discountRow = document.getElementById('order-preview-discount-row');
+                var discountLabel = document.getElementById('order-preview-discount-label');
+                var discountEl = document.getElementById('order-preview-discount');
+                var shippingEl = document.getElementById('order-preview-shipping');
+                var totalEl = document.getElementById('order-preview-total');
+                var shippingAddressEl = document.getElementById('order-preview-shipping-address');
+                var billingAddressEl = document.getElementById('order-preview-billing-address');
+
+                if (! itemsEl) {
+                    return;
+                }
+
+                if (modeNew.checked) {
+                    var newName = [document.getElementById('new_customer_first_name').value, document.getElementById('new_customer_last_name').value].filter(Boolean).join(' ');
+                    customerEl.textContent = newName !== '' ? newName : 'New customer';
+                } else {
+                    var customer = customerById(document.getElementById('customer_id').value);
+                    customerEl.textContent = customer ? customer.label : '—';
+                }
+
+                var carrierRadio = document.querySelector('input[data-sync-field="carrier_id"]:checked');
+                if (carrierRadio) {
+                    var carrierName = carrierRadio.closest('.admin-choice').querySelector('.admin-table-strong');
+                    carrierEl.textContent = carrierName ? carrierName.textContent : '—';
+                } else {
+                    carrierEl.textContent = '—';
+                }
+
+                var marketplaceRadio = document.querySelector('input[data-sync-field="marketplace_id"]:checked');
+                marketplaceEl.textContent = marketplaceRadio && marketplaceRadio.value
+                    ? marketplaceRadio.closest('.admin-choice').querySelector('.admin-table-strong').textContent
+                    : 'None';
+
+                itemsEl.innerHTML = '';
+                var subtotal = 0;
+                var hasItems = false;
+
+                itemRows.querySelectorAll('.form-row--item').forEach(function (row) {
+                    var productId = row.querySelector('input[type="hidden"][name$="[product_id]"]');
+                    var qtyInput = row.querySelector('input[name$="[quantity]"]');
+                    var priceInput = row.querySelector('[data-item-price]');
+                    var variantSelect = row.querySelector('[data-item-variant]');
+                    var product = productId ? productById(productId.value) : null;
+                    var qty = qtyInput ? parseInt(qtyInput.value, 10) : 0;
+                    var price = priceInput ? parseFloat(priceInput.value) : NaN;
+
+                    if (! product || ! qty || qty < 1 || isNaN(price)) {
+                        return;
+                    }
+
+                    hasItems = true;
+                    var line = price * qty;
+                    subtotal += line;
+
+                    var variantText = '';
+                    if (variantSelect && variantSelect.value && variantSelect.selectedOptions[0]) {
+                        variantText = variantSelect.selectedOptions[0].textContent.split(' — ')[0];
+                    }
+
+                    var li = document.createElement('li');
+                    li.innerHTML = '<div><p class="admin-order-preview-item-name"></p><p class="admin-order-preview-item-meta"></p></div><p class="admin-order-preview-item-total"></p>';
+                    li.querySelector('.admin-order-preview-item-name').textContent = product.name || product.label;
+                    li.querySelector('.admin-order-preview-item-meta').textContent = (variantText ? variantText + ' · ' : '') + qty + ' × ' + formatEuros(price);
+                    li.querySelector('.admin-order-preview-item-total').textContent = formatEuros(line);
+                    itemsEl.appendChild(li);
+                });
+
+                emptyEl.hidden = hasItems;
+                subtotalEl.textContent = hasItems ? formatEuros(subtotal) : '—';
+
+                var discountType = document.getElementById('discount_type').value;
+                var discountValue = parseFloat(document.getElementById('discount_value').value);
+                var discountAmount = 0;
+                if (discountType && ! isNaN(discountValue) && discountValue > 0 && hasItems) {
+                    discountAmount = discountType === 'percentage'
+                        ? subtotal * discountValue / 100
+                        : discountValue;
+                    discountAmount = Math.min(discountAmount, subtotal);
+                    discountRow.hidden = false;
+                    discountLabel.textContent = discountType === 'percentage' ? 'Discount (−' + Math.round(discountValue) + '%)' : 'Discount';
+                    discountEl.textContent = '−' + formatEuros(discountAmount);
+                } else {
+                    discountRow.hidden = true;
+                }
+
+                var shipping = parseFloat(document.getElementById('shipping_price').value);
+                shippingEl.textContent = isNaN(shipping) ? '—' : formatEuros(shipping);
+
+                var total = (hasItems ? subtotal : 0) - discountAmount + (isNaN(shipping) ? 0 : shipping);
+                totalEl.textContent = hasItems || ! isNaN(shipping) ? formatEuros(total) : '—';
+
+                function fieldValue(id) {
+                    var el = document.getElementById(id);
+                    return el ? String(el.value || '').trim() : '';
+                }
+
+                function fillPreviewAddress(root, prefix) {
+                    if (! root) {
+                        return;
+                    }
+                    var source = prefix;
+                    var sameAsShipping = document.getElementById('billing-same-as-shipping');
+                    if (prefix === 'billing' && sameAsShipping && sameAsShipping.checked) {
+                        source = 'shipping';
+                    }
+                    ['first_name', 'last_name', 'line1', 'line2', 'postal_code', 'city', 'phone'].forEach(function (field) {
+                        var dd = root.querySelector('[data-field="' + field + '"]');
+                        if (dd) {
+                            dd.textContent = fieldValue(source + '_' + field) || '—';
+                        }
+                    });
+                    var countryDd = root.querySelector('[data-field="country"]');
+                    var countrySelect = document.getElementById(source + '_country');
+                    if (countryDd) {
+                        countryDd.textContent = countrySelect && countrySelect.selectedOptions[0]
+                            ? countrySelect.selectedOptions[0].textContent
+                            : '—';
+                    }
+                }
+
+                fillPreviewAddress(shippingAddressEl, 'shipping');
+                fillPreviewAddress(billingAddressEl, 'billing');
+            }
+
+            form.addEventListener('input', updateOrderPreview);
+            form.addEventListener('change', updateOrderPreview);
+            form.addEventListener('search-select:change', updateOrderPreview);
+            form.addEventListener('input', syncSubmitButtons);
+            form.addEventListener('change', syncSubmitButtons);
+            form.addEventListener('search-select:change', syncSubmitButtons);
+            addItemBtn.addEventListener('click', function () {
+                updateOrderPreview();
+                syncSubmitButtons();
+            });
+            itemRows.addEventListener('click', function (event) {
+                if (event.target.hasAttribute('data-remove-item')) {
+                    updateOrderPreview();
+                    syncSubmitButtons();
+                }
+            });
+            updateOrderPreview();
+            syncSubmitButtons();
         })();
     </script>
 @endpush
