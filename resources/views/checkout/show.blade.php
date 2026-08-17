@@ -216,6 +216,16 @@
                         {{ __('store.shipping_section') }}
                     </h3>
 
+                    @php
+                        $carrierLogos = [
+                            'lettre-suivie' => 'poste.png',
+                            'colissimo-home' => 'colissimo.png',
+                            'chronopost-home' => 'chronopost.png',
+                            'relais-pickup' => 'chronopost.png',
+                            'mondial-relay' => 'mondialrelay.png',
+                        ];
+                    @endphp
+
                     @if ($homeCarriers->isNotEmpty())
                         <div class="shipping-group">
                             <h4 class="shipping-group-title">{{ __('store.shipping_home') }}</h4>
@@ -232,6 +242,9 @@
                                         >
                                         <span class="choice-card-body">
                                             <span class="choice-card-title">
+                                                @if (isset($carrierLogos[$carrier->slug]))
+                                                    <img src="{{ asset('images/carriers/'.$carrierLogos[$carrier->slug]) }}" alt="" class="carrier-logo">
+                                                @endif
                                                 {{ $carrier->localizedName() }}
                                                 <span class="choice-card-price">
                                                     {{ $carrierPricesCents[$carrier->id] === 0 ? __('store.shipping_free') : format_euros($carrierPricesCents[$carrier->id]) }}
@@ -263,6 +276,9 @@
                                         >
                                         <span class="choice-card-body">
                                             <span class="choice-card-title">
+                                                @if (isset($carrierLogos[$carrier->slug]))
+                                                    <img src="{{ asset('images/carriers/'.$carrierLogos[$carrier->slug]) }}" alt="" class="carrier-logo">
+                                                @endif
                                                 {{ $carrier->localizedName() }}
                                                 <span class="choice-card-price">
                                                     {{ $carrierPricesCents[$carrier->id] === 0 ? __('store.shipping_free') : format_euros($carrierPricesCents[$carrier->id]) }}
@@ -369,7 +385,10 @@
                                 @checked($selectedPaymentMethod === 'card')
                             >
                             <span class="choice-card-body">
-                                <span class="choice-card-title">{{ __('store.payment_card') }}</span>
+                                <span class="choice-card-title">
+                                    <img src="{{ asset('images/payments/cb.png') }}" alt="" class="carrier-logo">
+                                    {{ __('store.payment_card') }}
+                                </span>
                                 <span class="choice-card-meta">{{ __('store.payment_card_lede') }}</span>
                             </span>
                         </label>
@@ -383,7 +402,10 @@
                                 @checked($selectedPaymentMethod === 'paypal')
                             >
                             <span class="choice-card-body">
-                                <span class="choice-card-title">{{ __('store.payment_paypal') }}</span>
+                                <span class="choice-card-title">
+                                    <img src="{{ asset('images/payments/paypal.png') }}" alt="" class="carrier-logo">
+                                    {{ __('store.payment_paypal') }}
+                                </span>
                                 <span class="choice-card-meta">{{ __('store.payment_paypal_lede') }}</span>
                             </span>
                         </label>

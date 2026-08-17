@@ -2634,6 +2634,13 @@
     color: var(--text);
 }
 
+.carrier-logo {
+    width: 1.25rem;
+    height: 1.25rem;
+    object-fit: contain;
+    align-self: center;
+}
+
 .choice-card-price {
     margin-left: auto;
     font-variant-numeric: tabular-nums;
