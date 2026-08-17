@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-17 — v0.1.18
+
+### Admin
+
+- **Changelog page**: this file is now browsable at Admin → Changelog, parsed into cards (version, date, category, bullets) newest first, with the latest release flagged and the version number in the admin header linking straight to it.
+
 ## 2026-08-17 — v0.1.17
 
 ### Orders

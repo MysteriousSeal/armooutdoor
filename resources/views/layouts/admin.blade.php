@@ -26,12 +26,15 @@
 <body class="admin-body">
     <header class="admin-nav">
         <div class="admin-nav-bar">
-            <a href="{{ route('admin.dashboard') }}" class="admin-brand">
-                <span class="admin-brand-mark">
-                    <span class="logo-primary">Armo</span><span class="logo-secondary">Outdoor</span>
-                </span>
-                <span class="admin-brand-badge">Admin</span>
-            </a>
+            <div class="admin-brand-wrap">
+                <a href="{{ route('admin.dashboard') }}" class="admin-brand">
+                    <span class="admin-brand-mark">
+                        <span class="logo-primary">Armo</span><span class="logo-secondary">Outdoor</span>
+                    </span>
+                    <span class="admin-brand-badge">Admin</span>
+                </a>
+                <a href="{{ route('admin.changelog') }}" class="admin-brand-version">v{{ config('shop.version') }}</a>
+            </div>
 
             <div class="admin-nav-actions">
                 <button
@@ -61,6 +64,7 @@
             <a href="{{ route('admin.categories.index') }}" class="{{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">Categories</a>
             <a href="{{ route('admin.discounts.index') }}" class="{{ request()->routeIs('admin.discounts.*', 'admin.discount-codes.*') ? 'active' : '' }}">Discounts</a>
             <a href="{{ route('admin.settings.index') }}" class="{{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">Settings</a>
+            <a href="{{ route('admin.changelog') }}" class="{{ request()->routeIs('admin.changelog') ? 'active' : '' }}">Changelog</a>
         </nav>
     </header>
 

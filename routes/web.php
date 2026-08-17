@@ -9,6 +9,7 @@ use App\Http\Controllers\Account\ProfileController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\CarrierPriceTierController as AdminCarrierPriceTierController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\ChangelogController as AdminChangelogController;
 use App\Http\Controllers\Admin\CompanySettingController as AdminCompanySettingController;
 use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
@@ -77,6 +78,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('admin')->group(function () {
         Route::post('/logout', [AdminAuthController::class, 'destroy'])->name('logout');
         Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
+        Route::get('/changelog', AdminChangelogController::class)->name('changelog');
         Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');
 
         // Products
