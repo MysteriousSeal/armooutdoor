@@ -94,6 +94,186 @@
                 </span>
             </li>
         </ul>
+
+        @if ($categories->isNotEmpty())
+            <section class="home-cats-section" id="categories" aria-labelledby="home-categories-title">
+                <header class="home-cats-header">
+                    <h2 class="home-cats-title" id="home-categories-title">{{ __('store.shop_by_category') }}</h2>
+                    <a href="{{ $shopUrl }}" class="home-cats-link">
+                        {{ __('store.see_all_categories') }} <span aria-hidden="true">→</span>
+                    </a>
+                </header>
+                <div class="home-cats">
+                    @foreach ($categories as $category)
+                        @php
+                            $blurbKey = 'store.home_cat_blurb_'.str_replace('-', '_', $category->slug);
+                            $blurb = trans()->has($blurbKey)
+                                ? __($blurbKey)
+                                : ($category->localizedDescription() !== ''
+                                    ? $category->localizedDescription()
+                                    : trans_choice('store.products_count', $category->listingCount(), ['count' => $category->listingCount()]));
+                        @endphp
+                        <a href="{{ localized_route('categories.show', ['category' => $category->slug]) }}" class="home-cat">
+                            <span class="home-cat-icon">
+                                @include('partials.category-icon', ['slug' => $category->slug])
+                            </span>
+                            <span class="home-cat-copy">
+                                <span class="home-cat-name">{{ $category->localizedName() }}</span>
+                                <span class="home-cat-desc">{{ $blurb }}</span>
+                            </span>
+                        </a>
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
+        @if ($featured->isNotEmpty())
+            <section class="home-featured" id="featured" aria-labelledby="home-featured-title">
+                <header class="home-cats-header">
+                    <h2 class="home-cats-title" id="home-featured-title">{{ __('store.featured') }}</h2>
+                    <a href="{{ $shopUrl }}" class="home-cats-link">
+                        {{ __('store.see_all_products') }} <span aria-hidden="true">→</span>
+                    </a>
+                </header>
+                <div class="product-grid">
+                    @foreach ($featured as $product)
+                        @include('partials.product-card', ['product' => $product, 'lazy' => $loop->index > 1])
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
+        <aside class="home-ship-banner">
+            <span class="home-ship-banner-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 8.5 12 4l8 4.5v7L12 20l-8-4.5z"/>
+                    <path d="M12 12v8"/>
+                    <path d="M12 12 4.4 8.2"/>
+                    <path d="m12 12 7.6-3.8"/>
+                </svg>
+            </span>
+            <div class="home-ship-banner-copy">
+                <p class="home-ship-banner-title">
+                    @if ($freeShippingAmount)
+                        {{ __('store.home_ship_banner_title', ['amount' => $freeShippingAmount]) }}
+                    @else
+                        {{ __('store.home_ship_banner_title_plain') }}
+                    @endif
+                </p>
+                <p class="home-ship-banner-text">{{ __('store.home_ship_banner_text') }}</p>
+            </div>
+            <a href="{{ route('legal.withdrawal') }}" class="btn btn-primary home-ship-banner-cta">
+                {{ __('store.home_ship_banner_cta') }}
+            </a>
+        </aside>
+
+        @if ($more->isNotEmpty())
+            <section class="home-more" id="more" aria-labelledby="home-more-title">
+                <header class="home-cats-header">
+                    <h2 class="home-cats-title" id="home-more-title">{{ __('store.home_more') }}</h2>
+                    <a href="{{ $shopUrl }}" class="home-cats-link">
+                        {{ __('store.see_all_products') }} <span aria-hidden="true">→</span>
+                    </a>
+                </header>
+                <div class="product-grid product-grid--five">
+                    @foreach ($more as $product)
+                        @include('partials.product-card', ['product' => $product, 'lazy' => true])
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
+        <section class="home-why" aria-labelledby="home-why-title">
+            <div class="home-why-intro">
+                <span class="home-why-mark" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3 5 6v6c0 5 3.2 8.2 7 9 3.8-.8 7-4 7-9V6z"/>
+                        <path d="m9 12 2 2 4-4"/>
+                    </svg>
+                </span>
+                <div class="home-why-intro-copy">
+                    <h2 class="home-why-title" id="home-why-title">{{ __('store.home_why_title') }}</h2>
+                    <p class="home-why-text">{{ __('store.home_why_text') }}</p>
+                </div>
+            </div>
+            <ul class="home-why-list">
+                <li class="home-why-item">
+                    <span class="home-why-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 3 5 6v6c0 5 3.2 8.2 7 9 3.8-.8 7-4 7-9V6z"/>
+                            <path d="m9 12 2 2 4-4"/>
+                        </svg>
+                    </span>
+                    <span class="home-why-copy">
+                        <strong>{{ __('store.home_why_useful_title') }}</strong>
+                        <span>{{ __('store.home_why_useful_text') }}</span>
+                    </span>
+                </li>
+                <li class="home-why-item">
+                    <span class="home-why-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3.8 12.2 12 4h7.2v7.2l-8.2 8.2z"/>
+                            <circle cx="16.2" cy="7.8" r="1.15"/>
+                        </svg>
+                    </span>
+                    <span class="home-why-copy">
+                        <strong>{{ __('store.home_why_price_title') }}</strong>
+                        <span>{{ __('store.home_why_price_text') }}</span>
+                    </span>
+                </li>
+                <li class="home-why-item">
+                    <span class="home-why-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 8.5h16v10.5H4z"/>
+                            <path d="M4 8.5 12 4l8 4.5"/>
+                            <path d="M12 4v15"/>
+                        </svg>
+                    </span>
+                    <span class="home-why-copy">
+                        <strong>{{ __('store.home_why_ship_title') }}</strong>
+                        <span>{{ __('store.home_why_ship_text') }}</span>
+                    </span>
+                </li>
+                <li class="home-why-item">
+                    <span class="home-why-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 11v-1a7 7 0 0 1 14 0v1"/>
+                            <path d="M4 11h3v6H4z"/>
+                            <path d="M17 11h3v6h-3z"/>
+                            <path d="M20 16v1a3 3 0 0 1-3 3h-2"/>
+                        </svg>
+                    </span>
+                    <span class="home-why-copy">
+                        <strong>{{ __('store.home_why_support_title') }}</strong>
+                        <span>{{ __('store.home_why_support_text') }}</span>
+                    </span>
+                </li>
+            </ul>
+        </section>
+
+        <section class="home-about" aria-labelledby="home-about-title">
+            <div class="home-about-media">
+                <img
+                    src="{{ asset('images/about.jpg') }}"
+                    alt=""
+                    width="1280"
+                    height="720"
+                    loading="lazy"
+                >
+            </div>
+            <div class="home-about-copy">
+                <p class="home-about-kicker">{{ __('store.home_about_kicker') }}</p>
+                <h2 class="home-about-title" id="home-about-title">{{ __('store.home_about_heading') }}</h2>
+                <div class="home-about-text">
+                    <p>{{ __('store.home_about_lead') }}</p>
+                    <p>{{ __('store.home_about_quality') }}</p>
+                    <p>{{ __('store.home_about_goal') }}</p>
+                </div>
+                <a href="{{ $shopUrl }}" class="btn btn-primary home-about-cta">
+                    {{ __('store.home_about_cta') }}
+                </a>
+            </div>
+        </section>
     </div>
 @endsection
 

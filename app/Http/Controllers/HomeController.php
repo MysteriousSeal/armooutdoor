@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\ShippingSetting;
+use App\Support\HomepageCatalog;
 use Illuminate\View\View;
 
 class HomeController extends Controller
@@ -11,7 +12,15 @@ class HomeController extends Controller
     public function __invoke(): View
     {
         $thresholdCents = ShippingSetting::current()->free_shipping_threshold_cents;
-        $firstCategory = Category::query()->whereNull('parent_id')->orderBy('sort_order')->first();
+        $categories = Category::query()
+            ->whereNull('parent_id')
+            ->with([
+                'products' => fn ($query) => $query->active(),
+                'children.products' => fn ($query) => $query->active(),
+            ])
+            ->orderBy('sort_order')
+            ->get();
+        $firstCategory = $categories->first();
 
         $freeShippingAmount = null;
         if ($thresholdCents !== null && $thresholdCents > 0) {
@@ -21,9 +30,18 @@ class HomeController extends Controller
                 : format_euros($thresholdCents);
         }
 
+        $featured = HomepageCatalog::featured();
+        $featured->load('discount');
+
+        $more = HomepageCatalog::more($featured, 5);
+        $more->load('discount');
+
         return view('home', [
             'freeShippingAmount' => $freeShippingAmount,
             'firstCategory' => $firstCategory,
+            'categories' => $categories,
+            'featured' => $featured,
+            'more' => $more,
         ]);
     }
 }
