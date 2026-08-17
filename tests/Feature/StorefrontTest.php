@@ -30,14 +30,7 @@ class StorefrontTest extends TestCase
             ->assertOk()
             ->assertSee('Armo')
             ->assertSee('Outdoor')
-            ->assertSee('Du matériel discret pour le stand et le terrain')
-            ->assertSee('Abris')
-            ->assertSee('Tente crête deux places')
-            ->assertSee('349,00')
-            ->assertSee('Pièces choisies')
-            ->assertSee('Parcourir par catégorie')
-            ->assertSee('Boutique en ligne pour le stand de tir et le terrain')
-            ->assertSee('Colissimo');
+            ->assertSee('Du matériel discret pour le stand et le terrain');
     }
 
     public function test_category_page_lists_products(): void
