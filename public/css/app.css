@@ -2481,6 +2481,23 @@
     margin-bottom: 1rem;
 }
 
+.payment-locked-hint {
+    margin: 0 0 1rem;
+    padding: 0.75rem 0.9rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.45;
+    color: #8a5a12;
+    background: #faf1e2;
+    border: 1px solid #edddb8;
+}
+
+[data-theme='dark'] .payment-locked-hint {
+    color: #e0b673;
+    background: #362c1c;
+    border-color: #4d3f28;
+}
+
 .checkout-section--discount-code {
     padding: 1rem 1.1rem 1.05rem;
     background: var(--surface);
@@ -2587,6 +2604,15 @@
     border: 1px solid var(--border);
     color: var(--text);
     transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+.choice-card:has(input:disabled) {
+    cursor: default;
+}
+
+.choice-card:has(input:disabled) .choice-card-body {
+    opacity: 0.5;
+    pointer-events: none;
 }
 
 .choice-card-body::before {
@@ -2742,6 +2768,17 @@
     padding: 1.15rem 1.15rem 1.25rem;
     background: var(--surface);
     border: 1px solid var(--border);
+}
+
+/*
+ * No-JS fallback: JS toggles #relay-picker's [hidden] attribute when a
+ * relay carrier is picked, but without JS that never runs, so the server
+ * only knows the right state after a full page reload. This CSS-only rule
+ * shows it immediately on click regardless, via :has() — harmlessly
+ * redundant with the JS behavior when JS is active.
+ */
+.checkout-section:has(input[data-method="relay"]:checked) #relay-picker[hidden] {
+    display: block !important;
 }
 
 .relay-selected {

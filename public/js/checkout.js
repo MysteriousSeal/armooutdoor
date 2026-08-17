@@ -2,11 +2,13 @@
     var config = window.armoCheckout;
     var picker = document.getElementById('relay-picker');
     var payment = document.getElementById('payment-section');
+    var paymentLockedHint = document.getElementById('payment-locked-hint');
     var search = document.getElementById('relay-search');
     var shippingPrice = document.getElementById('checkout-shipping-price');
     var grandTotal = document.getElementById('checkout-grand-total');
     var sameBilling = document.getElementById('same-billing-address');
     var billingPicker = document.getElementById('billing-address-picker');
+    var submitButton = document.getElementById('checkout-submit');
 
     if (!config) {
         return;
@@ -90,6 +92,50 @@
         }
     }
 
+    function syncPaymentAvailability() {
+        var carrier = selectedCarrier();
+        var isRelay = carrier && carrier.getAttribute('data-method') === 'relay';
+        var hasRelayPoint = !!document.querySelector('input[name="relay_point_id"]:checked');
+        var locked = !!isRelay && !hasRelayPoint;
+
+        document.querySelectorAll('input[name="payment_method"]').forEach(function (input) {
+            input.disabled = locked;
+            if (locked) {
+                input.checked = false;
+            }
+        });
+
+        if (payment) {
+            payment.classList.toggle('is-locked', locked);
+        }
+
+        if (paymentLockedHint) {
+            paymentLockedHint.hidden = !locked;
+        }
+    }
+
+    function syncSubmitAvailability() {
+        if (!submitButton) {
+            return;
+        }
+
+        var hasAddress = !!document.querySelector('input[name="address_id"]:checked');
+        var carrier = selectedCarrier();
+        var isRelay = carrier && carrier.getAttribute('data-method') === 'relay';
+        var hasRelayPoint = !!document.querySelector('input[name="relay_point_id"]:checked');
+        var hasBilling = !sameBilling || sameBilling.checked
+            || !!document.querySelector('input[name="billing_address_id"]:checked');
+        var hasPayment = !!document.querySelector('input[name="payment_method"]:checked');
+
+        var ready = hasAddress
+            && !!carrier
+            && (!isRelay || hasRelayPoint)
+            && hasBilling
+            && hasPayment;
+
+        submitButton.disabled = !ready;
+    }
+
     function syncTotals() {
         var carrier = selectedCarrier();
         var shippingCents = carrier ? (config.carriers[carrier.value] || 0) : 0;
@@ -109,6 +155,8 @@
         input.addEventListener('change', function () {
             syncRelayPicker();
             syncTotals();
+            syncPaymentAvailability();
+            syncSubmitAvailability();
         });
     });
 
@@ -350,6 +398,8 @@
             if (label) {
                 showRelaySelectionFromLabel(label);
             }
+            syncPaymentAvailability();
+            syncSubmitAvailability();
         }
     });
 
@@ -369,6 +419,8 @@
     if (relaySelectedChange) {
         relaySelectedChange.addEventListener('click', function () {
             hideRelaySelection();
+            syncPaymentAvailability();
+            syncSubmitAvailability();
         });
     }
 
@@ -430,6 +482,9 @@
                     hideRelaySelection();
                 }
 
+                syncPaymentAvailability();
+                syncSubmitAvailability();
+
                 relayPointsLoadedFor = provider + ':' + postalCode;
             })
             .catch(function () {});
@@ -466,9 +521,19 @@
         sameBilling.addEventListener('change', syncBillingPicker);
     }
 
+    document.addEventListener('change', function (event) {
+        var name = event.target.name;
+
+        if (name === 'address_id' || name === 'billing_address_id' || name === 'payment_method' || event.target === sameBilling) {
+            syncSubmitAvailability();
+        }
+    });
+
     config.syncTotals = syncTotals;
 
     syncRelayPicker();
     syncTotals();
     syncBillingPicker();
+    syncPaymentAvailability();
+    syncSubmitAvailability();
 })();

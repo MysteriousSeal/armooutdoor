@@ -40,9 +40,10 @@ class CheckoutController extends Controller
         $addresses = $user->addresses()->get();
         $carriers = Carrier::query()->active()->get()->filter(fn (Carrier $carrier): bool => $cart->allowsCarrier($carrier))->values();
         $selectedAddressId = old('address_id', $addresses->firstWhere('is_default', true)?->id ?? $addresses->first()?->id);
+        $selectedAddress = $addresses->firstWhere('id', (int) $selectedAddressId);
         $sameBillingAddress = old('same_billing_address', true);
         $selectedBillingAddressId = old('billing_address_id', $selectedAddressId);
-        $selectedCarrierId = old('carrier_id', $carriers->first()?->id);
+        $selectedCarrierId = old('carrier_id', request()->query('carrier_id', $carriers->first()?->id));
         $selectedCarrier = $carriers->firstWhere('id', (int) $selectedCarrierId) ?? $carriers->first();
 
         $subtotalCents = $cart->totalCents();
@@ -55,6 +56,16 @@ class CheckoutController extends Controller
         $discountCode = $this->resolveAppliedDiscountCode($user);
         $discountCents = $discountCode ? $subtotalCents - $discountCode->apply($subtotalCents) : 0;
 
+        // No-JS fallback: the relay list is normally only ever populated by
+        // the AJAX endpoint (fetching live on every page load would slow it
+        // down for everyone), but a <noscript> form on the page can submit
+        // a plain GET with this param to get a real, server-rendered list.
+        $relayPostalCode = trim((string) request()->query('relay_postal_code', ''));
+        $relayProvider = $selectedCarrier ? $this->providerForCarrier($selectedCarrier) : null;
+        $relayPoints = ($relayPostalCode !== '' && $relayProvider !== null)
+            ? $this->relayPointsFor($relayPostalCode, $selectedAddress?->country ?? 'FR', $relayProvider)
+            : new Collection();
+
         return view('checkout.show', [
             'lines' => $cart->lines(),
             'subtotal' => $cart->formattedTotal(),
@@ -65,7 +76,8 @@ class CheckoutController extends Controller
             'addresses' => $addresses,
             'homeCarriers' => $carriers->filter(fn (Carrier $carrier): bool => $carrier->method === DeliveryMethod::Home)->values(),
             'relayCarriers' => $carriers->filter(fn (Carrier $carrier): bool => $carrier->method === DeliveryMethod::Relay)->values(),
-            'relayPoints' => new Collection(),
+            'relayPoints' => $relayPoints,
+            'relayPostalCode' => $relayPostalCode !== '' ? $relayPostalCode : ($selectedAddress?->postal_code ?? ''),
             'selectedAddressId' => $selectedAddressId,
             'sameBillingAddress' => $sameBillingAddress,
             'selectedBillingAddressId' => $selectedBillingAddressId,
@@ -74,6 +86,15 @@ class CheckoutController extends Controller
             'selectedRelayPointId' => old('relay_point_id'),
             'selectedPaymentMethod' => old('payment_method'),
         ]);
+    }
+
+    private function providerForCarrier(Carrier $carrier): ?string
+    {
+        return match ($carrier->slug) {
+            'mondial-relay' => 'mondial_relay',
+            'relais-pickup' => 'chronopost',
+            default => null,
+        };
     }
 
     public function storeAddress(StoreAddressRequest $request): RedirectResponse

@@ -312,6 +312,33 @@
                                 <ul class="relay-search-results" id="relay-search-results" hidden></ul>
                             </div>
 
+                            <noscript>
+                                <div class="form-row relay-noscript-search">
+                                    <div class="form-group">
+                                        <label for="relay-noscript-postal-code">{{ __('store.relay_noscript_label') }}</label>
+                                        <input
+                                            type="text"
+                                            id="relay-noscript-postal-code"
+                                            name="relay_postal_code"
+                                            form="checkout-form"
+                                            class="form-control"
+                                            value="{{ $relayPostalCode }}"
+                                            maxlength="12"
+                                        >
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        form="checkout-form"
+                                        formaction="{{ localized_route('checkout.show') }}"
+                                        formmethod="GET"
+                                        formnovalidate
+                                        class="btn btn-secondary"
+                                    >
+                                        {{ __('store.relay_search_submit') }}
+                                    </button>
+                                </div>
+                            </noscript>
+
                             <div class="choice-grid choice-grid--relay" id="relay-points-grid">
                                 @foreach ($relayPoints as $point)
                                     <label class="choice-card relay-option" data-search="{{ $point->searchBlob() }}">
@@ -374,6 +401,10 @@
                         <span class="home-kicker">04</span>
                         {{ __('store.payment_section') }}
                     </h3>
+
+                    <p class="checkout-hint payment-locked-hint" id="payment-locked-hint" hidden>
+                        {{ __('store.payment_locked_relay') }}
+                    </p>
 
                     <div class="choice-grid">
                         <label class="choice-card">
@@ -478,6 +509,7 @@
 
                 <button
                     type="submit"
+                    id="checkout-submit"
                     form="checkout-form"
                     class="btn btn-primary btn-block"
                     @disabled($addresses->isEmpty())
