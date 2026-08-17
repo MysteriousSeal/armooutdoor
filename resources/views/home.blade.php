@@ -180,8 +180,11 @@
 
 @push('head')
     <script type="application/ld+json">
+        {{-- The key is written @@context so Blade emits a literal "@context":
+             left bare, Blade compiles it as its own @context directive and the
+             key is replaced by PHP, leaving the JSON-LD without @context. --}}
         {!! json_encode([
-            '@context' => 'https://schema.org',
+            '@@context' => 'https://schema.org',
             '@type' => 'WebSite',
             'name' => config('app.name'),
             'url' => localized_route('home'),

@@ -86,6 +86,24 @@ class StorefrontTest extends TestCase
         $this->get('/de')->assertNotFound();
     }
 
+    public function test_homepage_exposes_valid_json_ld(): void
+    {
+        $html = $this->get('/')->assertOk()->getContent();
+
+        $this->assertSame(
+            1,
+            preg_match('~<script type="application/ld\+json">(.*?)</script>~s', $html, $matches),
+            'the homepage should expose a JSON-LD block',
+        );
+
+        $data = json_decode(trim($matches[1]), true, 512, JSON_THROW_ON_ERROR);
+
+        // Blade owns a bare @context directive, so this key silently turns into
+        // compiled PHP unless it is escaped in the template.
+        $this->assertSame('https://schema.org', $data['@context'] ?? null);
+        $this->assertSame('WebSite', $data['@type'] ?? null);
+    }
+
     public function test_each_category_has_ten_products(): void
     {
         $this->assertSame(4, Category::query()->count());
