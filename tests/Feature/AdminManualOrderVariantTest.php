@@ -33,7 +33,12 @@ class AdminManualOrderVariantTest extends TestCase
             'postal_code' => '75000',
             'city' => 'Paris',
             'country' => 'FR',
-            'billing_same_as_shipping' => '1',
+            'billing_first_name' => 'Colas',
+            'billing_last_name' => 'Client',
+            'billing_line1' => '1 rue du Test',
+            'billing_postal_code' => '75000',
+            'billing_city' => 'Paris',
+            'billing_country' => 'FR',
         ];
     }
 

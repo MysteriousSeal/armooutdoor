@@ -21,19 +21,19 @@ class AccountTest extends TestCase
 
     public function test_guests_cannot_open_account_pages(): void
     {
-        $this->get('/fr/account')->assertRedirect('/fr/login');
-        $this->get('/fr/account/profile')->assertRedirect('/fr/login');
-        $this->get('/fr/account/addresses')->assertRedirect('/fr/login');
+        $this->get('/account')->assertRedirect('/login');
+        $this->get('/account/profile')->assertRedirect('/login');
+        $this->get('/account/addresses')->assertRedirect('/login');
     }
 
     public function test_account_hub_links_to_profile_and_addresses(): void
     {
-        $user = User::factory()->create(['name' => 'Colas']);
+        $user = User::factory()->create(['first_name' => 'Colas', 'last_name' => 'Martin']);
 
         $this->actingAs($user)
-            ->get('/fr/account')
+            ->get('/account')
             ->assertOk()
-            ->assertSee('Bonjour, Colas')
+            ->assertSee('Bonjour, Colas Martin')
             ->assertSee('Informations du compte')
             ->assertSee('Adresses');
     }
@@ -41,23 +41,26 @@ class AccountTest extends TestCase
     public function test_a_user_can_update_their_profile(): void
     {
         $user = User::factory()->create([
-            'name' => 'Old Name',
+            'first_name' => 'Old',
+            'last_name' => 'Name',
             'email' => 'old@example.com',
             'password' => 'secret-pass',
         ]);
 
         $this->actingAs($user)
-            ->from('/fr/account/profile')
-            ->put('/fr/account/profile', [
-                'name' => 'New Name',
+            ->from('/account/profile')
+            ->put('/account/profile', [
+                'first_name' => 'New',
+                'last_name' => 'Name',
                 'email' => 'new@example.com',
             ])
-            ->assertRedirect('/fr/account/profile')
+            ->assertRedirect('/account/profile')
             ->assertSessionHas('status');
 
         $this->assertDatabaseHas('users', [
             'id' => $user->id,
-            'name' => 'New Name',
+            'first_name' => 'New',
+            'last_name' => 'Name',
             'email' => 'new@example.com',
         ]);
     }
@@ -67,14 +70,15 @@ class AccountTest extends TestCase
         $user = User::factory()->create(['password' => 'secret-pass']);
 
         $this->actingAs($user)
-            ->from('/fr/account/profile')
-            ->put('/fr/account/profile', [
-                'name' => $user->name,
+            ->from('/account/profile')
+            ->put('/account/profile', [
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
                 'email' => $user->email,
                 'password' => 'new-secret',
                 'password_confirmation' => 'new-secret',
             ])
-            ->assertRedirect('/fr/account/profile')
+            ->assertRedirect('/account/profile')
             ->assertSessionHasErrors('current_password');
     }
 
@@ -83,8 +87,8 @@ class AccountTest extends TestCase
         $user = User::factory()->create();
 
         $this->actingAs($user)
-            ->from('/fr/account/addresses')
-            ->post('/fr/account/addresses', [
+            ->from('/account/addresses')
+            ->post('/account/addresses', [
                 'label' => 'Home',
                 'first_name' => 'Colas',
                 'last_name' => 'Martin',
@@ -92,19 +96,20 @@ class AccountTest extends TestCase
                 'postal_code' => '75004',
                 'city' => 'Paris',
                 'country' => 'FR',
+                'phone' => '0611223344',
                 'is_default' => '1',
             ])
-            ->assertRedirect('/fr/account/addresses');
+            ->assertRedirect('/account/addresses');
 
         $address = Address::query()->firstOrFail();
 
         $this->actingAs($user)
-            ->get('/fr/account/addresses/'.$address->id.'/edit')
+            ->get('/account/addresses/'.$address->id.'/edit')
             ->assertOk()
             ->assertSee('12 rue des Archives');
 
         $this->actingAs($user)
-            ->put('/fr/account/addresses/'.$address->id, [
+            ->put('/account/addresses/'.$address->id, [
                 'label' => 'Studio',
                 'first_name' => 'Colas',
                 'last_name' => 'Martin',
@@ -112,9 +117,10 @@ class AccountTest extends TestCase
                 'postal_code' => '69002',
                 'city' => 'Lyon',
                 'country' => 'FR',
+                'phone' => '0611223344',
                 'is_default' => '1',
             ])
-            ->assertRedirect('/fr/account/addresses');
+            ->assertRedirect('/account/addresses');
 
         $this->assertDatabaseHas('addresses', [
             'id' => $address->id,
@@ -129,7 +135,7 @@ class AccountTest extends TestCase
         $address = Address::factory()->create();
 
         $this->actingAs($user)
-            ->get('/fr/account/addresses/'.$address->id.'/edit')
+            ->get('/account/addresses/'.$address->id.'/edit')
             ->assertNotFound();
     }
 }

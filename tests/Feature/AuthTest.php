@@ -20,47 +20,50 @@ class AuthTest extends TestCase
 
     public function test_registration_page_is_available(): void
     {
-        $this->get('/fr/register')
+        $this->get('/register')
             ->assertOk()
             ->assertSee('Créer un compte');
     }
 
     public function test_login_page_is_available(): void
     {
-        $this->get('/fr/login')
+        $this->get('/login')
             ->assertOk()
             ->assertSee('Se connecter');
     }
 
     public function test_a_visitor_can_create_an_account(): void
     {
-        $this->from('/fr/register')
-            ->post('/fr/register', [
-                'name' => 'Colas',
+        $this->from('/register')
+            ->post('/register', [
+                'first_name' => 'Colas',
+                'last_name' => 'Test',
                 'email' => 'colas@example.com',
                 'password' => 'secret-pass',
                 'password_confirmation' => 'secret-pass',
             ])
-            ->assertRedirect('/fr')
+            ->assertRedirect('/')
             ->assertSessionHas('status');
 
         $this->assertAuthenticated();
         $this->assertDatabaseHas('users', [
-            'name' => 'Colas',
+            'first_name' => 'Colas',
+            'last_name' => 'Test',
             'email' => 'colas@example.com',
         ]);
     }
 
     public function test_registration_requires_a_confirmed_password(): void
     {
-        $this->from('/fr/register')
-            ->post('/fr/register', [
-                'name' => 'Colas',
+        $this->from('/register')
+            ->post('/register', [
+                'first_name' => 'Colas',
+                'last_name' => 'Test',
                 'email' => 'colas@example.com',
                 'password' => 'secret-pass',
                 'password_confirmation' => 'different',
             ])
-            ->assertRedirect('/fr/register')
+            ->assertRedirect('/register')
             ->assertSessionHasErrors('password');
 
         $this->assertGuest();
@@ -73,18 +76,18 @@ class AuthTest extends TestCase
             'password' => 'secret-pass',
         ]);
 
-        $this->from('/fr/login')
-            ->post('/fr/login', [
+        $this->from('/login')
+            ->post('/login', [
                 'email' => 'colas@example.com',
                 'password' => 'secret-pass',
             ])
-            ->assertRedirect('/fr');
+            ->assertRedirect('/');
 
         $this->assertAuthenticatedAs($user);
 
-        $this->from('/fr')
-            ->post('/fr/logout')
-            ->assertRedirect('/fr');
+        $this->from('/')
+            ->post('/logout')
+            ->assertRedirect('/');
 
         $this->assertGuest();
     }
@@ -96,12 +99,12 @@ class AuthTest extends TestCase
             'password' => 'secret-pass',
         ]);
 
-        $this->from('/fr/login')
-            ->post('/fr/login', [
+        $this->from('/login')
+            ->post('/login', [
                 'email' => 'colas@example.com',
                 'password' => 'wrong-password',
             ])
-            ->assertRedirect('/fr/login')
+            ->assertRedirect('/login')
             ->assertSessionHasErrors('email');
 
         $this->assertGuest();
@@ -112,11 +115,11 @@ class AuthTest extends TestCase
         $user = User::factory()->create();
 
         $this->actingAs($user)
-            ->get('/fr/login')
-            ->assertRedirect('/fr');
+            ->get('/login')
+            ->assertRedirect('/');
 
         $this->actingAs($user)
-            ->get('/fr/register')
-            ->assertRedirect('/fr');
+            ->get('/register')
+            ->assertRedirect('/');
     }
 }

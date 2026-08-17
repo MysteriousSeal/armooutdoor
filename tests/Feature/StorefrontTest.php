@@ -18,15 +18,15 @@ class StorefrontTest extends TestCase
         $this->seed(CatalogSeeder::class);
     }
 
-    public function test_root_redirects_to_french_by_default(): void
+    public function test_root_shows_the_storefront(): void
     {
         $this->get('/')
-            ->assertRedirect('/fr');
+            ->assertOk();
     }
 
     public function test_homepage_shows_catalog(): void
     {
-        $this->get('/fr')
+        $this->get('/')
             ->assertOk()
             ->assertSee('Armo')
             ->assertSee('Outdoor')
@@ -42,7 +42,7 @@ class StorefrontTest extends TestCase
 
     public function test_category_page_lists_products(): void
     {
-        $this->get('/fr/categories/packs')
+        $this->get('/categories/packs')
             ->assertOk()
             ->assertSee('Sacs')
             ->assertSee('Sac Daylight 28 L')
@@ -51,14 +51,14 @@ class StorefrontTest extends TestCase
 
     public function test_category_page_can_be_sorted_by_price(): void
     {
-        $this->get('/fr/categories/shelters')
+        $this->get('/categories/shelters')
             ->assertOk()
             ->assertSee('Trier')
             ->assertSee('Prix croissant')
             ->assertSee('Prix décroissant');
 
-        $asc = $this->get('/fr/categories/shelters?sort=price-asc')->assertOk()->getContent();
-        $desc = $this->get('/fr/categories/shelters?sort=price-desc')->assertOk()->getContent();
+        $asc = $this->get('/categories/shelters?sort=price-asc')->assertOk()->getContent();
+        $desc = $this->get('/categories/shelters?sort=price-desc')->assertOk()->getContent();
 
         $this->assertLessThan(
             strpos($asc, 'Tente crête deux places'),
@@ -73,7 +73,7 @@ class StorefrontTest extends TestCase
 
     public function test_product_page_shows_euro_price(): void
     {
-        $this->get('/fr/products/cast-iron-skillet')
+        $this->get('/products/cast-iron-skillet')
             ->assertOk()
             ->assertSee('Poêle en fonte')
             ->assertSee('Cuisine de camp')
@@ -94,11 +94,11 @@ class StorefrontTest extends TestCase
             $this->assertSame(10, $category->products_count, $category->slug);
         });
 
-        $this->get('/fr/categories/shelters')
+        $this->get('/categories/shelters')
             ->assertOk()
             ->assertSee('Tente cerceau solo');
 
-        $this->get('/fr/categories/camp-kitchen')
+        $this->get('/categories/camp-kitchen')
             ->assertOk()
             ->assertSee('Crémaillère de camp');
     }
