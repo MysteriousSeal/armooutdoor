@@ -689,7 +689,8 @@ textarea.form-control {
     color: var(--text-muted);
 }
 
-.order-item-supplier-note {
+.order-item-supplier-note,
+.order-item-backorder-note {
     display: inline-block;
     margin-top: 0.35rem;
     padding: 0.15rem 0.5rem;

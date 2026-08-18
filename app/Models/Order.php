@@ -85,6 +85,49 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    /**
+     * The estimated shipping date shown to the customer: orders placed
+     * before 10am ship the same day, otherwise the next day — pushed past
+     * the weekend when it lands on one. Backordered items add their own
+     * order-date-plus-supplier-lead-time estimate to the mix; whichever
+     * candidate date is latest is the one shown, since that's the item
+     * holding up the whole shipment.
+     */
+    public function estimatedShippingDate(): \Illuminate\Support\Carbon
+    {
+        $candidates = collect([$this->standardShippingEstimate()]);
+
+        foreach ($this->items as $item) {
+            if ($item->was_backordered && $item->supplier_lead_time_days !== null) {
+                $candidates->push(self::nextBusinessDay(
+                    $this->created_at->copy()->timezone('Europe/Paris')->addDays($item->supplier_lead_time_days)->startOfDay()
+                ));
+            }
+        }
+
+        return $candidates->max();
+    }
+
+    private function standardShippingEstimate(): \Illuminate\Support\Carbon
+    {
+        $placedAt = $this->created_at->copy()->timezone('Europe/Paris');
+
+        $base = $placedAt->hour < 10
+            ? $placedAt->copy()->startOfDay()
+            : $placedAt->copy()->addDay()->startOfDay();
+
+        return self::nextBusinessDay($base);
+    }
+
+    private static function nextBusinessDay(\Illuminate\Support\Carbon $date): \Illuminate\Support\Carbon
+    {
+        return match ($date->dayOfWeekIso) {
+            6 => $date->addDays(2),
+            7 => $date->addDays(1),
+            default => $date,
+        };
+    }
+
     public function reviews(): HasMany
     {
         return $this->hasMany(ProductReview::class);

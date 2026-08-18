@@ -322,11 +322,14 @@ class CheckoutController extends Controller
                 ]);
 
                 $cart->lines()->each(function (CartLine $line) use ($order): void {
-                    $product = $line->product->newQuery()->lockForUpdate()->find($line->product->id);
+                    $product = $line->product->newQuery()->lockForUpdate()->with('supplier')->find($line->product->id);
 
                     if ($product === null) {
                         throw new \RuntimeException('stock');
                     }
+
+                    $wasBackordered = false;
+                    $supplierLeadTimeDays = null;
 
                     if ($line->variant !== null) {
                         $variant = ProductVariant::query()->lockForUpdate()->find($line->variant->id);
@@ -345,6 +348,9 @@ class CheckoutController extends Controller
                         if ($product->quantity > 0) {
                             $product->decrement('quantity', $product->quantity);
                         }
+
+                        $wasBackordered = true;
+                        $supplierLeadTimeDays = $product->supplier?->lead_time_days;
                     } else {
                         $product->decrement('quantity', $line->quantity);
                     }
@@ -358,6 +364,8 @@ class CheckoutController extends Controller
                         'variant_label' => $line->variantLabel(),
                         'sku' => $line->variant?->sku ?? $line->product->sku,
                         'image' => $line->product->image,
+                        'was_backordered' => $wasBackordered,
+                        'supplier_lead_time_days' => $supplierLeadTimeDays,
                         'unit_price_cents' => $line->unitPriceCents(),
                         'original_unit_price_cents' => $line->hasDiscount() ? $line->product->price_cents : null,
                         'discount_label' => $line->hasDiscount() ? $line->product->discount->label() : null,

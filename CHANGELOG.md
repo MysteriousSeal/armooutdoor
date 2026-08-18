@@ -2,7 +2,13 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
-## 2026-08-19 — v0.1.48
+## 2026-08-19 — v0.1.49
+
+### Storefront
+
+- **Estimated shipping date**: the customer order page now shows an estimated shipping date (before 10am ships same day, otherwise next day; weekends push to Monday), accounting for backordered items' supplier lead time — whichever is latest wins. Backordered line items also show a note under the SKU. Not shown on the admin order page.
+
+## 2026-08-18 — v0.1.48
 
 ### Admin
 

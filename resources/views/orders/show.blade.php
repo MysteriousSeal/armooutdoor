@@ -42,6 +42,9 @@
                                     @if ($item->resolvedSku())
                                         <p class="order-item-sku">SKU : {{ $item->resolvedSku() }}</p>
                                     @endif
+                                    @if ($item->was_backordered)
+                                        <p class="order-item-backorder-note">{{ __('store.order_item_backordered') }}</p>
+                                    @endif
                                     @if ($item->hasDiscount() && $item->discount_label)
                                         <div class="order-item-discount">
                                             <span class="order-discount-badge">{{ $item->discount_label }}</span>
@@ -123,6 +126,13 @@
                             {{ __('store.order_download_invoice') }}
                         </a>
                     </div>
+                @endif
+
+                @if (! $order->hasTracking() && in_array($order->status, ['placed', 'preparing'], true))
+                    <section class="order-panel" aria-labelledby="order-shipping-estimate-title">
+                        <h3 class="order-panel-title" id="order-shipping-estimate-title">{{ __('store.order_estimated_shipping') }}</h3>
+                        <p class="order-shipping-estimate-date">{{ $order->estimatedShippingDate()->translatedFormat('d F Y') }}</p>
+                    </section>
                 @endif
 
                 @if ($order->hasTracking())

@@ -277,6 +277,8 @@ return [
     'order_status_shipped' => 'Expédiée',
     'order_status_refunded' => 'Remboursée',
     'order_history' => 'Historique de la commande',
+    'order_estimated_shipping' => "Date d'expédition estimée",
+    'order_item_backordered' => "Commandé sur stock fournisseur, délais d'expédition plus longs.",
     'order_tracking' => 'Suivi de livraison',
     'order_tracking_number' => 'Numéro de suivi',
     'order_tracking_carrier' => 'Transporteur',

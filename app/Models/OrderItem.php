@@ -20,6 +20,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'discount_label',
     'quantity',
     'line_cents',
+    'was_backordered',
+    'supplier_lead_time_days',
 ])]
 class OrderItem extends Model
 {
@@ -31,6 +33,8 @@ class OrderItem extends Model
             'original_unit_price_cents' => 'integer',
             'quantity' => 'integer',
             'line_cents' => 'integer',
+            'was_backordered' => 'boolean',
+            'supplier_lead_time_days' => 'integer',
         ];
     }
 
