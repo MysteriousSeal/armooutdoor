@@ -5,7 +5,7 @@
 @section('canonical', route('help.shipping-returns'))
 
 @push('head')
-    <link rel="stylesheet" href="{{ asset('css/help.css') }}">
+    <link rel="stylesheet" href="{{ versioned_asset('css/help.css') }}">
     <script type="application/ld+json">
         {!! json_encode([
             '@@context' => 'https://schema.org',

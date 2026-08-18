@@ -2,6 +2,13 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-18 — v0.1.31
+
+### Storefront
+
+- **New catalog products**: added two ASG Blaster 6 mm airsoft BB bottles (0,12 g and 0,20 g), in a new "Billes airsoft" subcategory under Munitions et Consommables.
+- **CSS cache busting**: every stylesheet link now carries `?v=<site version>`, so a version bump forces browsers to fetch the latest CSS instead of a stale cached copy.
+
 ## 2026-08-18 — v0.1.30
 
 ### Storefront

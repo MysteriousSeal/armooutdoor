@@ -78,7 +78,7 @@
 @section('canonical', route('faq'))
 
 @push('head')
-    <link rel="stylesheet" href="{{ asset('css/faq.css') }}">
+    <link rel="stylesheet" href="{{ versioned_asset('css/faq.css') }}">
     <script type="application/ld+json">
         {!! json_encode([
             '@@context' => 'https://schema.org',

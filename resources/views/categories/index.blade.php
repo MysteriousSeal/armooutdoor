@@ -5,7 +5,7 @@
 @section('canonical', route('categories.index'))
 
 @push('head')
-    <link rel="stylesheet" href="{{ asset('css/categories.css') }}">
+    <link rel="stylesheet" href="{{ versioned_asset('css/categories.css') }}">
     <script type="application/ld+json">
         {!! json_encode([
             '@@context' => 'https://schema.org',

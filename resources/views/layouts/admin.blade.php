@@ -19,8 +19,8 @@
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
     <meta name="theme-color" content="#8b7e74">
     <link rel="preload" href="{{ asset('fonts/inter-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="{{ asset('css/base.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+    <link rel="stylesheet" href="{{ versioned_asset('css/base.css') }}">
+    <link rel="stylesheet" href="{{ versioned_asset('css/admin.css') }}">
     @stack('styles')
 </head>
 <body class="admin-body">

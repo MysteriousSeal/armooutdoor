@@ -262,7 +262,7 @@
 @endsection
 
 @push('head')
-    <link rel="stylesheet" href="{{ asset('css/home.css') }}">
+    <link rel="stylesheet" href="{{ versioned_asset('css/home.css') }}">
     <script type="application/ld+json">
         {{-- The key is written @@context so Blade emits a literal "@context":
              left bare, Blade compiles it as its own @context directive and the

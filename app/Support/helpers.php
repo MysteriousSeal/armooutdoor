@@ -29,6 +29,17 @@ if (! function_exists('format_person_name')) {
     }
 }
 
+if (! function_exists('versioned_asset')) {
+    /**
+     * Appends the site version as a cache-busting query string, so a version
+     * bump forces browsers to fetch fresh CSS instead of a stale cached copy.
+     */
+    function versioned_asset(string $path): string
+    {
+        return asset($path).'?v='.config('shop.version');
+    }
+}
+
 if (! function_exists('format_euros')) {
     /**
      * Format an integer cent amount as euros in the current locale.

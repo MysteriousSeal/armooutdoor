@@ -101,5 +101,5 @@
 @endsection
 
 @push('head')
-    <link rel="stylesheet" href="{{ asset('css/sitemap.css') }}">
+    <link rel="stylesheet" href="{{ versioned_asset('css/sitemap.css') }}">
 @endpush

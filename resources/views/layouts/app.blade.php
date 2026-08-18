@@ -24,8 +24,8 @@
         <link rel="canonical" href="@yield('canonical')">
     @endif
     <link rel="preload" href="{{ asset('fonts/inter-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="{{ asset('css/base.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="stylesheet" href="{{ versioned_asset('css/base.css') }}">
+    <link rel="stylesheet" href="{{ versioned_asset('css/app.css') }}">
     @stack('head')
 </head>
 <body>
