@@ -30,7 +30,16 @@ class HomeController extends Controller
                 : format_euros($thresholdCents);
         }
 
-        $featured = HomepageCatalog::featured();
+        $featured = HomepageCatalog::featured(10);
+
+        // Only one product per root category is picked, so with 6 categories
+        // "featured" tops out at 6 — fill the rest from the same pool "more"
+        // draws from so the section still shows a full 10.
+        if ($featured->count() < 10) {
+            $featured = $featured->concat(
+                HomepageCatalog::more($featured, 10 - $featured->count())
+            );
+        }
         $featured->load('discount');
 
         $more = HomepageCatalog::more($featured, 5);

@@ -39,12 +39,7 @@
         <ul class="home-trust">
             <li class="home-trust-item">
                 <span class="home-trust-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 7h11v10H3z"/>
-                        <path d="M14 10h4l3 3v4h-7"/>
-                        <circle cx="7" cy="18" r="1.5"/>
-                        <circle cx="18" cy="18" r="1.5"/>
-                    </svg>
+                    @include('partials.icon', ['name' => 'truck-fast', 'size' => 19])
                 </span>
                 <span class="home-trust-copy">
                     <strong>{{ __('store.home_hero_ship_title') }}</strong>
@@ -59,10 +54,7 @@
             </li>
             <li class="home-trust-item">
                 <span class="home-trust-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 3 5 6v6c0 5 3.2 8.2 7 9 3.8-.8 7-4 7-9V6z"/>
-                        <path d="m9 12 2 2 4-4"/>
-                    </svg>
+                    @include('partials.icon', ['name' => 'shield-halved', 'size' => 19])
                 </span>
                 <span class="home-trust-copy">
                     <strong>{{ __('store.home_hero_pay_title') }}</strong>
@@ -71,12 +63,7 @@
             </li>
             <li class="home-trust-item">
                 <span class="home-trust-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 8.5 12 4l8 4.5v7L12 20l-8-4.5z"/>
-                        <path d="M12 12v8"/>
-                        <path d="M12 12 4.4 8.2"/>
-                        <path d="m12 12 7.6-3.8"/>
-                    </svg>
+                    @include('partials.icon', ['name' => 'box', 'size' => 19])
                 </span>
                 <span class="home-trust-copy">
                     <strong>{{ __('store.home_hero_track_title') }}</strong>
@@ -85,10 +72,7 @@
             </li>
             <li class="home-trust-item">
                 <span class="home-trust-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3.5" y="6" width="17" height="13" rx="1.5"/>
-                        <path d="m4.5 8 7.5 6 7.5-6"/>
-                    </svg>
+                    @include('partials.icon', ['name' => 'headset', 'size' => 19])
                 </span>
                 <span class="home-trust-copy">
                     <strong>{{ __('store.home_hero_help_title') }}</strong>
@@ -106,6 +90,16 @@
                     </a>
                 </header>
                 <div class="home-cats">
+                    @php
+                        $categoryIconNames = [
+                            'targets' => 'bullseye',
+                            'range' => 'toolbox',
+                            'apparel' => 'shirt',
+                            'field-gear' => 'campground',
+                            'everyday' => 'screwdriver-wrench',
+                            'munitions' => 'box-open',
+                        ];
+                    @endphp
                     @foreach ($categories as $category)
                         @php
                             $blurbKey = 'store.home_cat_blurb_'.str_replace('-', '_', $category->slug);
@@ -117,7 +111,7 @@
                         @endphp
                         <a href="{{ localized_route('categories.show', ['category' => $category->slug]) }}" class="home-cat">
                             <span class="home-cat-icon">
-                                @include('partials.category-icon', ['slug' => $category->slug])
+                                @include('partials.icon', ['name' => $categoryIconNames[$category->slug] ?? 'default', 'size' => 30])
                             </span>
                             <span class="home-cat-copy">
                                 <span class="home-cat-name">{{ $category->localizedName() }}</span>
@@ -138,7 +132,7 @@
                         {{ __('store.see_all_products') }} <span aria-hidden="true">→</span>
                     </a>
                 </header>
-                <div class="product-grid">
+                <div class="product-grid product-grid--five">
                     @foreach ($featured as $product)
                         @include('partials.product-card', ['product' => $product, 'lazy' => $loop->index > 1])
                     @endforeach
@@ -148,12 +142,7 @@
 
         <aside class="home-ship-banner">
             <span class="home-ship-banner-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M4 8.5 12 4l8 4.5v7L12 20l-8-4.5z"/>
-                    <path d="M12 12v8"/>
-                    <path d="M12 12 4.4 8.2"/>
-                    <path d="m12 12 7.6-3.8"/>
-                </svg>
+                @include('partials.icon', ['name' => 'truck-fast', 'size' => 28])
             </span>
             <div class="home-ship-banner-copy">
                 <p class="home-ship-banner-title">
@@ -195,10 +184,7 @@
             <ul class="home-why-list">
                 <li class="home-why-item">
                     <span class="home-why-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 3 5 6v6c0 5 3.2 8.2 7 9 3.8-.8 7-4 7-9V6z"/>
-                            <path d="m9 12 2 2 4-4"/>
-                        </svg>
+                        @include('partials.icon', ['name' => 'award', 'size' => 22])
                     </span>
                     <span class="home-why-index" aria-hidden="true">01</span>
                     <span class="home-why-copy">
@@ -208,10 +194,7 @@
                 </li>
                 <li class="home-why-item">
                     <span class="home-why-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M3.8 12.2 12 4h7.2v7.2l-8.2 8.2z"/>
-                            <circle cx="16.2" cy="7.8" r="1.15"/>
-                        </svg>
+                        @include('partials.icon', ['name' => 'tag', 'size' => 22])
                     </span>
                     <span class="home-why-index" aria-hidden="true">02</span>
                     <span class="home-why-copy">
@@ -221,11 +204,7 @@
                 </li>
                 <li class="home-why-item">
                     <span class="home-why-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M4 8.5h16v10.5H4z"/>
-                            <path d="M4 8.5 12 4l8 4.5"/>
-                            <path d="M12 4v15"/>
-                        </svg>
+                        @include('partials.icon', ['name' => 'truck-fast', 'size' => 22])
                     </span>
                     <span class="home-why-index" aria-hidden="true">03</span>
                     <span class="home-why-copy">
@@ -235,12 +214,7 @@
                 </li>
                 <li class="home-why-item">
                     <span class="home-why-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M5 11v-1a7 7 0 0 1 14 0v1"/>
-                            <path d="M4 11h3v6H4z"/>
-                            <path d="M17 11h3v6h-3z"/>
-                            <path d="M20 16v1a3 3 0 0 1-3 3h-2"/>
-                        </svg>
+                        @include('partials.icon', ['name' => 'headset', 'size' => 22])
                     </span>
                     <span class="home-why-index" aria-hidden="true">04</span>
                     <span class="home-why-copy">
@@ -268,19 +242,13 @@
                 <ul class="home-about-points">
                     <li>
                         <span class="home-about-point-mark" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 3 5 6v6c0 5 3.2 8.2 7 9 3.8-.8 7-4 7-9V6z"/>
-                                <path d="m9 12 2 2 4-4"/>
-                            </svg>
+                            @include('partials.icon', ['name' => 'circle-check', 'size' => 16])
                         </span>
                         <span>{{ __('store.home_about_quality') }}</span>
                     </li>
                     <li>
                         <span class="home-about-point-mark" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 3 5 6v6c0 5 3.2 8.2 7 9 3.8-.8 7-4 7-9V6z"/>
-                                <path d="m9 12 2 2 4-4"/>
-                            </svg>
+                            @include('partials.icon', ['name' => 'circle-check', 'size' => 16])
                         </span>
                         <span>{{ __('store.home_about_goal') }}</span>
                     </li>
