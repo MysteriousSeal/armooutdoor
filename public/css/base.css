@@ -893,6 +893,7 @@ textarea.form-control {
 .category-grid,
     .product-grid,
     .product-grid--related,
+    .category-layout .product-grid,
     .choice-grid,
     .form-row {
         grid-template-columns: 1fr;

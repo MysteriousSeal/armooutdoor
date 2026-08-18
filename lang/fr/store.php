@@ -127,6 +127,7 @@ return [
     'sort_label' => 'Trier',
     'filter_all' => 'Tous',
     'filter_reset' => 'Réinitialiser les filtres',
+    'filters_title' => 'Filtres',
     'sort_relevance' => 'Pertinence',
     'sort_name' => 'Nom',
     'sort_price_asc' => 'Prix croissant',
