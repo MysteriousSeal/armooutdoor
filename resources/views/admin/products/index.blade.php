@@ -261,14 +261,22 @@
                                     </a>
                                 </td>
                                 <td>
-                                    <a href="{{ route('admin.products.edit', $product) }}" class="admin-table-strong admin-table-truncate" title="{{ $product->name['fr'] ?? $product->localizedName() }}">
-                                        {{ $product->name['fr'] ?? $product->localizedName() }}
+                                    <a href="{{ route('admin.products.edit', $product) }}" class="admin-table-strong" title="{{ $product->name['fr'] ?? $product->localizedName() }}">
+                                        {{ \Illuminate\Support\Str::limit($product->name['fr'] ?? $product->localizedName(), 30) }}
                                     </a>
                                     @if (filled($product->sku))
                                         <span class="admin-table-sub">{{ $product->sku }}</span>
                                     @endif
                                 </td>
-                                <td>{{ $product->category?->name['fr'] ?? '—' }}</td>
+                                <td>
+                                    @if ($product->category)
+                                        <span title="{{ $product->category->name['fr'] ?? $product->category->localizedName() }}">
+                                            {{ \Illuminate\Support\Str::limit($product->category->name['fr'] ?? $product->category->localizedName(), 20) }}
+                                        </span>
+                                    @else
+                                        —
+                                    @endif
+                                </td>
                                 <td>{{ $product->supplier?->name ?? '—' }}</td>
                                 <td>{{ $product->formattedPrice() }}</td>
                                 <td>{{ $product->quantity }}</td>
