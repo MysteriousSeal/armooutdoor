@@ -196,6 +196,8 @@
                                 $idSort = $sortLink('id');
                                 $nameSort = $sortLink('name');
                                 $stockSort = $sortLink('stock');
+                                $supplierSort = $sortLink('supplier');
+                                $priceSort = $sortLink('price');
                             @endphp
                             <th>
                                 <a href="{{ $idSort['url'] }}" class="admin-sort-link {{ $idSort['state'] ? 'is-active' : '' }}">
@@ -213,8 +215,22 @@
                                 </a>
                             </th>
                             <th>Category</th>
-                            <th>Supplier</th>
-                            <th>Price</th>
+                            <th>
+                                <a href="{{ $supplierSort['url'] }}" class="admin-sort-link {{ $supplierSort['state'] ? 'is-active' : '' }}">
+                                    Supplier
+                                    @if ($supplierSort['state'])
+                                        <span class="admin-sort-dir" aria-hidden="true">{{ $supplierSort['state'] === 'desc' ? '↓' : '↑' }}</span>
+                                    @endif
+                                </a>
+                            </th>
+                            <th>
+                                <a href="{{ $priceSort['url'] }}" class="admin-sort-link {{ $priceSort['state'] ? 'is-active' : '' }}">
+                                    Price
+                                    @if ($priceSort['state'])
+                                        <span class="admin-sort-dir" aria-hidden="true">{{ $priceSort['state'] === 'desc' ? '↓' : '↑' }}</span>
+                                    @endif
+                                </a>
+                            </th>
                             <th>
                                 <a href="{{ $stockSort['url'] }}" class="admin-sort-link {{ $stockSort['state'] ? 'is-active' : '' }}">
                                     Stock

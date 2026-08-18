@@ -16,6 +16,7 @@ use App\Support\HtmlSanitizer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -23,7 +24,11 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProductController extends Controller
 {
-    public function index(Request $request): View
+    private const SORTS = ['id-asc', 'id-desc', 'name-asc', 'name-desc', 'stock-asc', 'stock-desc', 'supplier-asc', 'supplier-desc', 'price-asc', 'price-desc'];
+
+    private const SORT_COOKIE = 'admin_products_sort';
+
+    public function index(Request $request): Response
     {
         $search = trim((string) $request->query('search', ''));
         $categorySlug = (string) $request->query('category', '');
@@ -31,9 +36,12 @@ class ProductController extends Controller
         $tab = in_array($request->query('tab'), ['active', 'disabled', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight'], true)
             ? (string) $request->query('tab')
             : 'active';
-        $sort = in_array($request->query('sort'), ['id-asc', 'id-desc', 'name-asc', 'name-desc', 'stock-asc', 'stock-desc'], true)
+
+        // An explicit ?sort= always wins; otherwise fall back to the last
+        // sort remembered from a previous visit, via cookie.
+        $sort = in_array($request->query('sort'), self::SORTS, true)
             ? (string) $request->query('sort')
-            : 'id-asc';
+            : (in_array($request->cookie(self::SORT_COOKIE), self::SORTS, true) ? $request->cookie(self::SORT_COOKIE) : 'id-asc');
 
         $products = $this->filteredProductsQuery($search, $categorySlug, $tab, $supplierId)
             ->with('category', 'supplier')
@@ -42,7 +50,7 @@ class ProductController extends Controller
             ->paginate(24)
             ->withQueryString();
 
-        return view('admin.products.index', [
+        return response()->view('admin.products.index', [
             'products' => $products,
             'tab' => $tab,
             'sort' => $sort,
@@ -58,7 +66,7 @@ class ProductController extends Controller
             'search' => $search,
             'categorySlug' => $categorySlug,
             'supplierId' => $supplierId,
-        ]);
+        ])->cookie(self::SORT_COOKIE, $sort, 60 * 24 * 365);
     }
 
     public function export(Request $request): StreamedResponse
@@ -210,6 +218,10 @@ class ProductController extends Controller
             'name-desc' => ['name', 'desc'],
             'stock-asc' => ['quantity', 'asc'],
             'stock-desc' => ['quantity', 'desc'],
+            'supplier-asc' => ['supplier', 'asc'],
+            'supplier-desc' => ['supplier', 'desc'],
+            'price-asc' => ['price_cents', 'asc'],
+            'price-desc' => ['price_cents', 'desc'],
             default => ['id', 'asc'],
         };
 
@@ -219,6 +231,19 @@ class ProductController extends Controller
                 : "json_unquote(json_extract(name, '$.fr'))";
 
             $query->orderByRaw($nameSql.' '.$direction)->orderBy('id');
+
+            return;
+        }
+
+        if ($column === 'supplier') {
+            if (empty($query->getQuery()->columns)) {
+                $query->select('products.*');
+            }
+
+            $query->leftJoin('suppliers', 'suppliers.id', '=', 'products.supplier_id')
+                ->orderByRaw('suppliers.name IS NULL')
+                ->orderBy('suppliers.name', $direction)
+                ->orderBy('products.id');
 
             return;
         }
