@@ -32,7 +32,7 @@
         @php
             $listQuery = fn (array $overrides = []) => array_filter([
                 'tab' => $overrides['tab'] ?? $tab,
-                'sort' => ($overrides['sort'] ?? $sort) !== 'id-asc' ? ($overrides['sort'] ?? $sort) : null,
+                'sort' => $overrides['sort'] ?? $sort,
                 'search' => array_key_exists('search', $overrides) ? $overrides['search'] : ($search !== '' ? $search : null),
                 'category' => array_key_exists('category', $overrides) ? $overrides['category'] : ($categorySlug !== '' ? $categorySlug : null),
                 'supplier' => array_key_exists('supplier', $overrides) ? $overrides['supplier'] : $supplierId,
