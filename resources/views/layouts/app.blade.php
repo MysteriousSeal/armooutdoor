@@ -200,9 +200,9 @@
                 <nav class="site-footer-col" aria-labelledby="footer-help-heading">
                     <h2 id="footer-help-heading" class="site-footer-heading">{{ __('store.footer_help') }}</h2>
                     <ul class="site-footer-links">
-                        <li><a href="#">{{ __('store.footer_help_faq') }}</a></li>
-                        <li><a href="#">{{ __('store.footer_help_shipping_returns') }}</a></li>
-                        <li><a href="#">{{ __('store.footer_help_secure_payment') }}</a></li>
+                        <li><a href="{{ route('faq') }}">{{ __('store.footer_help_faq') }}</a></li>
+                        <li><a href="{{ route('help.shipping-returns') }}">{{ __('store.footer_help_shipping_returns') }}</a></li>
+                        <li><a href="{{ route('help.secure-payment') }}">{{ __('store.footer_help_secure_payment') }}</a></li>
                         <li><a href="#">{{ __('store.footer_help_contact') }}</a></li>
                     </ul>
                 </nav>

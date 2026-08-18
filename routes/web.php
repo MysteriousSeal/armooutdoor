@@ -35,6 +35,8 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\FaqController;
+use App\Http\Controllers\HelpController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PreferenceController;
@@ -176,6 +178,9 @@ Route::view('/cgv', 'legal.terms')->name('legal.terms');
 Route::view('/mentions-legales', 'legal.notice')->name('legal.notice');
 Route::view('/confidentialite', 'legal.privacy')->name('legal.privacy');
 Route::view('/droit-de-retractation', 'legal.withdrawal')->name('legal.withdrawal');
+Route::get('/faq', [FaqController::class, 'index'])->name('faq');
+Route::get('/livraison-et-retours', [HelpController::class, 'shippingReturns'])->name('help.shipping-returns');
+Route::get('/paiement-securise', [HelpController::class, 'securePayment'])->name('help.secure-payment');
 
 /*
 |--------------------------------------------------------------------------
