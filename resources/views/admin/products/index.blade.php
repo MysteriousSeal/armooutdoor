@@ -303,6 +303,52 @@
                                     </div>
                                 </td>
                             </tr>
+                            @if ($product->variants->isNotEmpty())
+                                <tr class="admin-variant-row">
+                                    <td colspan="12">
+                                        <table class="admin-variant-table">
+                                            <thead>
+                                                <tr>
+                                                    <th></th>
+                                                    <th>Variant</th>
+                                                    <th>SKU</th>
+                                                    <th>GTIN</th>
+                                                    <th>Supplier</th>
+                                                    <th>Supplier ref.</th>
+                                                    <th>Price</th>
+                                                    <th>Stock</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($product->variants as $variant)
+                                                    @php
+                                                        $variantAttrLabel = collect($variant->attribute_values ?? [])
+                                                            ->map(fn ($attribute) => $attribute['label'].': '.$attribute['value'])
+                                                            ->implode(', ');
+                                                    @endphp
+                                                    <tr>
+                                                        <td>
+                                                            <img
+                                                                class="admin-product-thumb admin-product-thumb--sm"
+                                                                src="{{ $variant->imageUrl() }}"
+                                                                alt="{{ $variantAttrLabel !== '' ? $variantAttrLabel : 'Variant' }}"
+                                                                loading="lazy"
+                                                            >
+                                                        </td>
+                                                        <td>{{ $variantAttrLabel !== '' ? $variantAttrLabel : 'Variant' }}</td>
+                                                        <td>{{ $variant->sku ?: '—' }}</td>
+                                                        <td>{{ $variant->gtin ?: '—' }}</td>
+                                                        <td>{{ $variant->supplier?->name ?? '—' }}</td>
+                                                        <td>{{ $variant->supplier_reference ?: '—' }}</td>
+                                                        <td>{{ $variant->formattedPrice() }}</td>
+                                                        <td>{{ $variant->quantity }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            @endif
                         @endforeach
                     </tbody>
                 </table>
