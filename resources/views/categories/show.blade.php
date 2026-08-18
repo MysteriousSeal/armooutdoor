@@ -22,30 +22,13 @@
             <span>{{ $category->localizedName() }}</span>
         </nav>
 
-        <header class="cat-hero {{ $category->imageUrl() ? 'has-image' : '' }}" @if ($category->imageUrl()) style="--cat-hero-image: url('{{ $category->imageUrl() }}')" @endif>
-            @if ($category->imageUrl())
-                <div class="cat-hero-overlay" aria-hidden="true"></div>
-            @endif
-            @if ($category->isRoot() && ! $category->imageUrl())
-                <span class="cat-hero-icon" aria-hidden="true">
-                    @include('partials.icon', ['name' => $category->iconName(), 'size' => 34])
-                </span>
-            @endif
-            <div class="cat-hero-copy">
-                <p class="cat-hero-kicker">
-                    {{ $category->isRoot() ? __('store.hero_kicker') : $category->parent->localizedName() }}
-                </p>
-                <h1 class="cat-hero-title">
-                    <span class="cat-hero-title-accent">{{ $category->localizedName() }}</span>
-                </h1>
-                @if ($category->localizedDescription() !== '')
-                    <p class="cat-hero-desc">{{ $category->localizedDescription() }}</p>
-                @endif
-                <ul class="cat-hero-tags">
-                    <li>{{ trans_choice('store.products_count', $products->count(), ['count' => $products->count()]) }}</li>
-                </ul>
-            </div>
-        </header>
+        @include('partials.page-hero', [
+            'kicker' => $category->isRoot() ? __('store.hero_kicker') : $category->parent->localizedName(),
+            'title' => $category->localizedName(),
+            'description' => $category->localizedDescription(),
+            'tags' => [trans_choice('store.products_count', $products->count(), ['count' => $products->count()])],
+            'imageUrl' => $category->imageUrl(),
+        ])
 
         @php
             $showSidebar = ! empty($filterGroups) && $category->children->isEmpty();

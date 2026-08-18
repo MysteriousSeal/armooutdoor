@@ -5,6 +5,7 @@
 @section('canonical', route('products.new-arrivals'))
 
 @push('head')
+    <link rel="stylesheet" href="{{ versioned_asset('css/categories.css') }}">
     <script type="application/ld+json">
         {!! json_encode([
             '@@context' => 'https://schema.org',
@@ -55,11 +56,12 @@
             <span>Nouveautés</span>
         </nav>
 
-        <header class="page-header">
-            <p class="home-kicker">{{ __('store.hero_kicker') }}</p>
-            <h1 class="page-title">Nouveautés</h1>
-            <p class="page-lede">Les derniers produits ajoutés à la boutique.</p>
-        </header>
+        @include('partials.page-hero', [
+            'kicker' => __('store.hero_kicker'),
+            'title' => 'Nouveautés',
+            'description' => 'Les derniers produits ajoutés à la boutique.',
+            'tags' => [trans_choice('store.products_count', $products->count(), ['count' => $products->count()])],
+        ])
 
         @if ($products->isEmpty())
             <p class="empty-state">{{ __('store.search_empty') }}</p>

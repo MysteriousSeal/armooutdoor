@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-19 — v0.1.76
+
+### Storefront
+
+- **Shared page hero partial**: extracted a `partials.page-hero` component (kicker, title, description, tag chips) and adopted it on the all-categories, best-sellers, new-arrivals and promotions pages for a consistent header.
+
 ## 2026-08-19 — v0.1.75
 
 ### Storefront

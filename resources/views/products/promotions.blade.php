@@ -5,6 +5,7 @@
 @section('canonical', route('products.promotions'))
 
 @push('head')
+    <link rel="stylesheet" href="{{ versioned_asset('css/categories.css') }}">
     <script type="application/ld+json">
         {!! json_encode([
             '@@context' => 'https://schema.org',
@@ -56,11 +57,12 @@
             <span>Promotions</span>
         </nav>
 
-        <header class="page-header">
-            <p class="home-kicker">{{ __('store.hero_kicker') }}</p>
-            <h1 class="page-title">Promotions</h1>
-            <p class="page-lede">Les produits actuellement en promotion.</p>
-        </header>
+        @include('partials.page-hero', [
+            'kicker' => __('store.hero_kicker'),
+            'title' => 'Promotions',
+            'description' => 'Les produits actuellement en promotion.',
+            'tags' => [trans_choice('store.products_count', $products->count(), ['count' => $products->count()])],
+        ])
 
         @if ($products->isEmpty())
             <p class="empty-state">{{ __('store.search_empty') }}</p>

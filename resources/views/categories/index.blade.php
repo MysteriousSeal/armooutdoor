@@ -57,11 +57,12 @@
             <span>Toutes les catégories</span>
         </nav>
 
-        <header class="page-header">
-            <p class="home-kicker">{{ __('store.hero_kicker') }}</p>
-            <h1 class="page-title">Toutes les catégories</h1>
-            <p class="page-lede">Parcourez l'ensemble du catalogue par catégorie.</p>
-        </header>
+        @include('partials.page-hero', [
+            'kicker' => __('store.hero_kicker'),
+            'title' => 'Toutes les catégories',
+            'description' => 'Parcourez l\'ensemble du catalogue par catégorie.',
+            'tags' => [trans_choice('store.categories_count', $categories->count(), ['count' => $categories->count()])],
+        ])
 
         <div class="cat-index-grid">
             @foreach ($categories as $category)
