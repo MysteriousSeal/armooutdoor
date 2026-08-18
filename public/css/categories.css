@@ -1,3 +1,101 @@
+.cat-hero {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.35rem;
+    margin: 0 0 1.5rem;
+    padding: 1.45rem 1.55rem 1.4rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.cat-hero-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 4.25rem;
+    height: 4.25rem;
+    flex-shrink: 0;
+    color: #5b5c3b;
+    background: color-mix(in srgb, var(--bg) 70%, var(--surface));
+    border: 1.5px solid color-mix(in srgb, #5b5c3b 35%, var(--border));
+    border-radius: 50%;
+}
+
+.cat-hero-copy {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding-top: 0.1rem;
+}
+
+.cat-hero-kicker {
+    margin: 0 0 0.45rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #5b5c3b;
+}
+
+.cat-hero-title {
+    margin: 0;
+    font-size: clamp(1.85rem, 3.4vw, 2.65rem);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 0.95;
+    text-transform: uppercase;
+}
+
+.cat-hero-desc {
+    margin: 0.7rem 0 0;
+    max-width: 36rem;
+    font-size: 1.02rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+.cat-hero-meta {
+    margin: 0.85rem 0 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #5b5c3b;
+}
+
+[data-theme='dark'] .cat-hero-icon,
+[data-theme='dark'] .cat-hero-kicker,
+[data-theme='dark'] .cat-hero-meta {
+    color: var(--accent);
+}
+
+[data-theme='dark'] .cat-hero-icon {
+    border-color: color-mix(in srgb, var(--accent) 38%, var(--border));
+    background: color-mix(in srgb, var(--bg) 55%, var(--surface));
+}
+
+@media (max-width: 640px) {
+    .cat-hero {
+        gap: 0.95rem;
+        padding: 1.15rem 1.1rem 1.1rem;
+    }
+
+    .cat-hero-icon {
+        width: 3.25rem;
+        height: 3.25rem;
+    }
+
+    .cat-hero-icon svg {
+        width: 26px;
+        height: 26px;
+    }
+
+    .cat-hero-desc {
+        font-size: 0.95rem;
+    }
+}
+
 .cat-index {
     padding-bottom: 4rem;
 }

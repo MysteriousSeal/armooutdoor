@@ -4,6 +4,10 @@
 @section('meta_description', $category->localizedDescription())
 @section('canonical', localized_route('categories.show', ['category' => $category->slug]))
 
+@push('head')
+    <link rel="stylesheet" href="{{ versioned_asset('css/categories.css') }}">
+@endpush
+
 @section('content')
     <div class="container">
         <nav class="breadcrumbs" aria-label="breadcrumb">
@@ -18,12 +22,35 @@
             <span>{{ $category->localizedName() }}</span>
         </nav>
 
-        <header class="page-header">
-            <h2 class="page-title">{{ $category->localizedName() }}</h2>
-            <p class="page-lede">{{ $category->localizedDescription() }}</p>
-            <p class="page-meta">
-                {{ trans_choice('store.products_count', $products->count(), ['count' => $products->count()]) }}
-            </p>
+        @php
+            $categoryIconNames = [
+                'targets' => 'bullseye',
+                'range' => 'toolbox',
+                'apparel' => 'shirt',
+                'field-gear' => 'campground',
+                'everyday' => 'screwdriver-wrench',
+                'munitions' => 'box-open',
+                'repliques-airsoft' => 'gun',
+            ];
+        @endphp
+        <header class="cat-hero">
+            @if ($category->isRoot())
+                <span class="cat-hero-icon" aria-hidden="true">
+                    @include('partials.icon', ['name' => $categoryIconNames[$category->slug] ?? 'default', 'size' => 34])
+                </span>
+            @endif
+            <div class="cat-hero-copy">
+                <p class="cat-hero-kicker">
+                    {{ $category->isRoot() ? __('store.hero_kicker') : $category->parent->localizedName() }}
+                </p>
+                <h1 class="cat-hero-title">{{ $category->localizedName() }}</h1>
+                @if ($category->localizedDescription() !== '')
+                    <p class="cat-hero-desc">{{ $category->localizedDescription() }}</p>
+                @endif
+                <p class="cat-hero-meta">
+                    {{ trans_choice('store.products_count', $products->count(), ['count' => $products->count()]) }}
+                </p>
+            </div>
         </header>
 
         @php
