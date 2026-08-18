@@ -80,7 +80,11 @@ class CategoryController extends Controller
         }
 
         return collect($groups)
-            ->map(fn (array $values): array => collect(array_keys($values))->sort(SORT_NATURAL)->values()->all())
+            ->map(fn (array $values): array => collect(array_keys($values))
+                ->map(fn ($value): string => (string) $value)
+                ->sort(SORT_NATURAL)
+                ->values()
+                ->all())
             ->all();
     }
 
