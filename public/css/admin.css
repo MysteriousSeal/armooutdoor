@@ -1541,6 +1541,12 @@ a.admin-stat-card:hover {
     border-color: #e6d4d0;
 }
 
+.tracking-flag.is-na {
+    color: var(--text-muted);
+    background: var(--bg);
+    border-color: var(--border);
+}
+
 [data-theme='dark'] .tracking-flag.is-available {
     color: #9dccab;
     background: #2a332c;

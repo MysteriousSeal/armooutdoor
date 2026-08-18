@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-19 — v0.1.73
+
+### Admin
+
+- **Tracking status "N/A"**: the orders list's tracking column now shows "N/A" for orders that have never been shipped, instead of "Missing" — "Missing" is reserved for orders that were shipped but have no tracking number. Orders with a tracking number always show "Available", regardless of status.
+
 ## 2026-08-19 — v0.1.72
 
 ### Admin

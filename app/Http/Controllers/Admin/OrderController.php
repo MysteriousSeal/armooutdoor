@@ -36,7 +36,7 @@ class OrderController extends Controller
         $filters = $this->orderFilters($request);
 
         $orders = $this->filteredOrdersQuery($filters)
-            ->with('user')
+            ->with('user', 'statusHistories')
             ->withCount('items')
             ->latest()
             ->simplePaginate(20)

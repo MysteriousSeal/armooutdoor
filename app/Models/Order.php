@@ -207,6 +207,11 @@ class Order extends Model
         return filled($this->tracking_number);
     }
 
+    public function hasBeenShipped(): bool
+    {
+        return $this->statusHistories->contains('status', 'shipped');
+    }
+
     public function trackingCarrierName(): string
     {
         return $this->trackingCarrier?->localizedName() ?: $this->carrierName();

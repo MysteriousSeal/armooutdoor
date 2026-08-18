@@ -233,9 +233,13 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="tracking-flag {{ $order->hasTracking() ? 'is-available' : 'is-missing' }}">
-                                        {{ $order->hasTracking() ? 'Available' : 'Missing' }}
-                                    </span>
+                                    @if ($order->hasTracking())
+                                        <span class="tracking-flag is-available">Available</span>
+                                    @elseif ($order->hasBeenShipped())
+                                        <span class="tracking-flag is-missing">Missing</span>
+                                    @else
+                                        <span class="tracking-flag is-na">N/A</span>
+                                    @endif
                                 </td>
                                 <td class="admin-table-num">
                                     <span class="admin-order-total">{{ $order->formattedTotal() }}</span>
