@@ -23,7 +23,10 @@
         </nav>
 
         <header class="cat-hero {{ $category->imageUrl() ? 'has-image' : '' }}" @if ($category->imageUrl()) style="--cat-hero-image: url('{{ $category->imageUrl() }}')" @endif>
-            @if ($category->isRoot())
+            @if ($category->imageUrl())
+                <div class="cat-hero-overlay" aria-hidden="true"></div>
+            @endif
+            @if ($category->isRoot() && ! $category->imageUrl())
                 <span class="cat-hero-icon" aria-hidden="true">
                     @include('partials.icon', ['name' => $category->iconName(), 'size' => 34])
                 </span>
@@ -32,13 +35,15 @@
                 <p class="cat-hero-kicker">
                     {{ $category->isRoot() ? __('store.hero_kicker') : $category->parent->localizedName() }}
                 </p>
-                <h1 class="cat-hero-title">{{ $category->localizedName() }}</h1>
+                <h1 class="cat-hero-title">
+                    <span class="cat-hero-title-accent">{{ $category->localizedName() }}</span>
+                </h1>
                 @if ($category->localizedDescription() !== '')
                     <p class="cat-hero-desc">{{ $category->localizedDescription() }}</p>
                 @endif
-                <p class="cat-hero-meta">
-                    {{ trans_choice('store.products_count', $products->count(), ['count' => $products->count()]) }}
-                </p>
+                <ul class="cat-hero-tags">
+                    <li>{{ trans_choice('store.products_count', $products->count(), ['count' => $products->count()]) }}</li>
+                </ul>
             </div>
         </header>
 

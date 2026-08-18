@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-19 — v0.1.70
+
+### Storefront
+
+- **Category hero redesign**: photo now bleeds from the right edge and fades into the page background on the left, with the title/description in a blurred glass card over the fade — replaces the flat dark-scrim overlay. Added hero photos for Stand de tir, Vêtements, Terrain, Quotidien, Munitions and Répliques airsoft.
+
 ## 2026-08-19 — v0.1.69
 
 ### Admin
