@@ -22,21 +22,10 @@
             <span>{{ $category->localizedName() }}</span>
         </nav>
 
-        @php
-            $categoryIconNames = [
-                'targets' => 'bullseye',
-                'range' => 'toolbox',
-                'apparel' => 'shirt',
-                'field-gear' => 'campground',
-                'everyday' => 'screwdriver-wrench',
-                'munitions' => 'box-open',
-                'repliques-airsoft' => 'gun',
-            ];
-        @endphp
         <header class="cat-hero">
             @if ($category->isRoot())
                 <span class="cat-hero-icon" aria-hidden="true">
-                    @include('partials.icon', ['name' => $categoryIconNames[$category->slug] ?? 'default', 'size' => 34])
+                    @include('partials.icon', ['name' => $category->iconName(), 'size' => 34])
                 </span>
             @endif
             <div class="cat-hero-copy">

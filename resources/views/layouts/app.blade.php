@@ -84,17 +84,6 @@
                         <a href="{{ localized_route('home') }}" class="sort-tab {{ request()->routeIs('home') ? 'active' : '' }}">
                             {{ __('store.nav_home') }}
                         </a>
-                        @php
-                            $navCategoryIconNames = [
-                                'targets' => 'bullseye',
-                                'range' => 'toolbox',
-                                'apparel' => 'shirt',
-                                'field-gear' => 'campground',
-                                'everyday' => 'screwdriver-wrench',
-                                'munitions' => 'box-open',
-                                'repliques-airsoft' => 'gun',
-                            ];
-                        @endphp
                         @foreach ($navCategories as $navCategory)
                             @php
                                 $currentCategory = request()->route('category') ?? request()->route('product')?->category;
@@ -119,7 +108,7 @@
                                             class="nav-sub-head"
                                         >
                                             <span class="nav-sub-icon" aria-hidden="true">
-                                                @include('partials.icon', ['name' => $navCategoryIconNames[$navCategory->slug] ?? 'default', 'size' => 18])
+                                                @include('partials.icon', ['name' => $navCategory->iconName(), 'size' => 18])
                                             </span>
                                             <span class="nav-sub-head-copy">
                                                 <span class="nav-sub-kicker">{{ __('store.shop_subcategories') }}</span>

@@ -90,17 +90,6 @@
                     </a>
                 </header>
                 <div class="home-cats">
-                    @php
-                        $categoryIconNames = [
-                            'targets' => 'bullseye',
-                            'range' => 'toolbox',
-                            'apparel' => 'shirt',
-                            'field-gear' => 'campground',
-                            'everyday' => 'screwdriver-wrench',
-                            'munitions' => 'box-open',
-                            'repliques-airsoft' => 'gun',
-                        ];
-                    @endphp
                     @foreach ($categories as $category)
                         @php
                             $blurbKey = 'store.home_cat_blurb_'.str_replace('-', '_', $category->slug);
@@ -112,7 +101,7 @@
                         @endphp
                         <a href="{{ localized_route('categories.show', ['category' => $category->slug]) }}" class="home-cat">
                             <span class="home-cat-icon">
-                                @include('partials.icon', ['name' => $categoryIconNames[$category->slug] ?? 'default', 'size' => 30])
+                                @include('partials.icon', ['name' => $category->iconName(), 'size' => 30])
                             </span>
                             <span class="home-cat-copy">
                                 <span class="home-cat-name">{{ $category->localizedName() }}</span>

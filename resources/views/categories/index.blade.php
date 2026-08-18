@@ -63,18 +63,6 @@
             <p class="page-lede">Parcourez l'ensemble du catalogue par catégorie.</p>
         </header>
 
-        @php
-            $categoryIconNames = [
-                'targets' => 'bullseye',
-                'range' => 'toolbox',
-                'apparel' => 'shirt',
-                'field-gear' => 'campground',
-                'everyday' => 'screwdriver-wrench',
-                'munitions' => 'box-open',
-                'repliques-airsoft' => 'gun',
-            ];
-        @endphp
-
         <div class="cat-index-grid">
             @foreach ($categories as $category)
                 @php
@@ -90,7 +78,7 @@
                 <article class="cat-index-card">
                     <a href="{{ localized_route('categories.show', ['category' => $category->slug]) }}" class="cat-index-head">
                         <span class="cat-index-icon" aria-hidden="true">
-                            @include('partials.icon', ['name' => $categoryIconNames[$category->slug] ?? 'default', 'size' => 28])
+                            @include('partials.icon', ['name' => $category->iconName(), 'size' => 28])
                         </span>
                         <span class="cat-index-copy">
                             <h2 class="cat-index-name">{{ $category->localizedName() }}</h2>

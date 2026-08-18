@@ -15,6 +15,16 @@ class Category extends Model
     /** @use HasFactory<CategoryFactory> */
     use HasFactory;
 
+    private const ROOT_ICON_NAMES = [
+        'targets' => 'bullseye',
+        'range' => 'toolbox',
+        'apparel' => 'shirt',
+        'field-gear' => 'campground',
+        'everyday' => 'screwdriver-wrench',
+        'munitions' => 'box-open',
+        'repliques-airsoft' => 'gun',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -81,6 +91,15 @@ class Category extends Model
     public function localizedDescription(): string
     {
         return $this->localized('description');
+    }
+
+    /**
+     * Font Awesome icon name for this category's root, used wherever a
+     * category needs a visual icon (nav, homepage, category pages).
+     */
+    public function iconName(): string
+    {
+        return self::ROOT_ICON_NAMES[$this->root()->slug] ?? 'default';
     }
 
     private function localized(string $attribute): string
