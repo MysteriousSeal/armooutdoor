@@ -19,7 +19,10 @@ class InvoiceSettingController extends Controller
 
     public function update(UpdateInvoiceSettingRequest $request): RedirectResponse
     {
-        CompanySetting::current()->update($request->validated());
+        CompanySetting::current()->update([
+            ...$request->validated(),
+            'invoice_footer_enabled' => $request->boolean('invoice_footer_enabled'),
+        ]);
 
         return redirect()
             ->route('admin.settings.invoice.edit')

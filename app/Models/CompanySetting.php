@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Model;
     'return_address',
     'invoice_footer_url',
     'invoice_footer_text',
+    'invoice_footer_enabled',
 ])]
 class CompanySetting extends Model
 {
@@ -35,6 +36,7 @@ class CompanySetting extends Model
     {
         return [
             'vat_exempt' => 'boolean',
+            'invoice_footer_enabled' => 'boolean',
         ];
     }
 
@@ -104,7 +106,7 @@ class CompanySetting extends Model
     public function isComplete(): bool
     {
         foreach ($this->getFillable() as $field) {
-            if ($field === 'vat_exempt' || in_array($field, self::OPTIONAL_FIELDS, true)) {
+            if (in_array($field, ['vat_exempt', 'invoice_footer_enabled'], true) || in_array($field, self::OPTIONAL_FIELDS, true)) {
                 continue;
             }
 

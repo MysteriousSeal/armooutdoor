@@ -19,6 +19,7 @@ class UpdateInvoiceSettingRequest extends FormRequest
         return [
             'invoice_footer_url' => ['nullable', 'url', 'max:255'],
             'invoice_footer_text' => ['nullable', 'string', 'max:255'],
+            'invoice_footer_enabled' => ['sometimes', 'boolean'],
         ];
     }
 }

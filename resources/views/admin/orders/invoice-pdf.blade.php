@@ -303,7 +303,7 @@
 
     <div class="footer">
         TVA non applicable - art. L. 223-3 du Code des impositions sur les biens et services (CIBS)
-        @if ($company->invoice_footer_url || $company->invoice_footer_text)
+        @if ($company->invoice_footer_enabled && ($company->invoice_footer_url || $company->invoice_footer_text))
             <div class="footer-link">
                 @if ($company->invoice_footer_text)
                     <div>{{ $company->invoice_footer_text }}</div>

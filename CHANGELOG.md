@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-19 — v0.1.69
+
+### Admin
+
+- **Invoice footer toggle**: the invoice settings page now has a "Show footer on invoices" switch, so the footer line can be hidden on PDFs without losing the saved text and URL.
+
 ## 2026-08-19 — v0.1.68
 
 ### Admin

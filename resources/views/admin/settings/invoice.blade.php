@@ -22,6 +22,14 @@
 
             <h3 class="admin-panel-title">Invoice footer</h3>
 
+            <div class="form-group">
+                <label class="form-check">
+                    <input type="checkbox" name="invoice_footer_enabled" value="1" @checked(old('invoice_footer_enabled', $setting->invoice_footer_enabled))>
+                    Show footer on invoices
+                </label>
+                <p class="form-hint">Turn off to hide the footer line without losing the text and URL below.</p>
+            </div>
+
             <div class="form-row">
                 <div class="form-group">
                     <label for="invoice_footer_text">Footer text</label>
