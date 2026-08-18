@@ -107,8 +107,8 @@ class ProductController extends Controller
             ->tap(fn ($query) => $this->applyProductTab($query, $tab))
             ->when($search !== '', function ($query) use ($search): void {
                 $query->where(function ($query) use ($search): void {
-                    $query->where('slug', 'like', '%'.$search.'%')
-                        ->orWhere('name', 'like', '%'.$search.'%');
+                    $query->where('products.slug', 'like', '%'.$search.'%')
+                        ->orWhere('products.name', 'like', '%'.$search.'%');
                 });
             })
             ->when($categorySlug !== '', function ($query) use ($categorySlug): void {

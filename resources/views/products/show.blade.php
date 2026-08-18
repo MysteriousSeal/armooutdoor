@@ -99,10 +99,28 @@
                         >{{ $product->formattedOriginalPrice() }}</span>
                         <span id="product-detail-price-current">{{ ($displayVariant ?? $product)->formattedPrice() }}</span>
                     </p>
-                    <span class="stock-badge {{ $product->lowStock() ? 'is-low-stock' : ($product->inStock() ? 'is-in-stock' : 'is-out-of-stock') }}" id="product-stock-badge">
-                        {{ $product->lowStock() ? __('store.low_stock') : ($product->inStock() ? __('store.in_stock') : __('store.out_of_stock')) }}
+                    @php
+                        $availableAtSupplier = ! $product->inStock() && $product->supplier_id !== null && $product->available_at_supplier;
+                    @endphp
+                    <span class="stock-badge {{ $product->lowStock() ? 'is-low-stock' : ($product->inStock() ? 'is-in-stock' : ($availableAtSupplier ? 'is-low-stock' : 'is-out-of-stock')) }}" id="product-stock-badge">
+                        {{ $product->lowStock() ? __('store.low_stock') : ($product->inStock() ? __('store.in_stock') : ($availableAtSupplier ? __('store.available_at_supplier') : __('store.out_of_stock'))) }}
                     </span>
                 </div>
+                @if ($availableAtSupplier)
+                    <p class="product-lead-time">
+                        <span class="product-lead-time-icon" aria-hidden="true">
+                            @include('partials.icon', ['name' => 'hourglass-half', 'size' => 16])
+                        </span>
+                        <span class="product-lead-time-copy">
+                            <strong>{{ __('store.supplier_lead_time_label') }}</strong>
+                            <span>
+                                {{ $product->supplier->lead_time_days !== null
+                                    ? trans_choice('store.supplier_lead_time_value', $product->supplier->lead_time_days, ['days' => $product->supplier->lead_time_days])
+                                    : __('store.supplier_lead_time_unknown') }}
+                            </span>
+                        </span>
+                    </p>
+                @endif
 
                 <div
                     class="discount-countdown"
@@ -186,21 +204,25 @@
 
                         @if ($product->isPurchasable())
                             <div class="product-buy-row" @if (($displayVariant ?? $product)->maxPurchasable() < 1) hidden @endif>
-                                <div class="qty-stepper">
-                                    <button type="button" class="qty-stepper-btn" data-qty-step="-1" aria-label="−">−</button>
-                                    <label class="sr-only" for="quantity">{{ __('store.quantity') }}</label>
-                                    <input
-                                        type="number"
-                                        id="quantity"
-                                        name="quantity"
-                                        class="qty-stepper-input"
-                                        value="{{ old('quantity', 1) }}"
-                                        min="1"
-                                        max="{{ ($displayVariant ?? $product)->maxPurchasable() }}"
-                                        required
-                                    >
-                                    <button type="button" class="qty-stepper-btn" data-qty-step="1" aria-label="+">+</button>
-                                </div>
+                                @if ($availableAtSupplier)
+                                    <input type="hidden" name="quantity" value="1">
+                                @else
+                                    <div class="qty-stepper">
+                                        <button type="button" class="qty-stepper-btn" data-qty-step="-1" aria-label="−">−</button>
+                                        <label class="sr-only" for="quantity">{{ __('store.quantity') }}</label>
+                                        <input
+                                            type="number"
+                                            id="quantity"
+                                            name="quantity"
+                                            class="qty-stepper-input"
+                                            value="{{ old('quantity', 1) }}"
+                                            min="1"
+                                            max="{{ ($displayVariant ?? $product)->maxPurchasable() }}"
+                                            required
+                                        >
+                                        <button type="button" class="qty-stepper-btn" data-qty-step="1" aria-label="+">+</button>
+                                    </div>
+                                @endif
                                 <button type="submit" class="btn btn-primary product-buy-submit">{{ __('store.add_to_cart') }}</button>
                             </div>
                             @error('quantity')

@@ -61,7 +61,7 @@ class CartController extends Controller
             ? $product->variants->firstWhere('id', $validated['variant_id'])
             : null;
 
-        if (! ($variant?->inStock() ?? $product->inStock())) {
+        if (! ($variant?->inStock() ?? ($product->inStock() || $product->isBackorderable()))) {
             if ($request->wantsJson()) {
                 return response()->json(['message' => __('store.out_of_stock')], 422);
             }

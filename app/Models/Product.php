@@ -224,7 +224,16 @@ class Product extends Model
             return $this->variants->contains(fn (ProductVariant $variant): bool => $variant->is_active && $variant->inStock());
         }
 
-        return $this->inStock();
+        return $this->inStock() || $this->isBackorderable();
+    }
+
+    /**
+     * Out of stock, but the supplier can still get it — sold as a
+     * one-unit backorder. Only applies to products without variants.
+     */
+    public function isBackorderable(): bool
+    {
+        return ! $this->hasVariants() && $this->supplier_id !== null && $this->available_at_supplier;
     }
 
     public function lowStock(): bool
@@ -243,6 +252,10 @@ class Product extends Model
 
     public function maxPurchasable(): int
     {
+        if (! $this->inStock() && $this->isBackorderable()) {
+            return 1;
+        }
+
         return max(0, min(10, $this->quantity));
     }
 

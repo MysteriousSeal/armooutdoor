@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-18 — v0.1.45
+
+### Storefront
+
+- **Backorder from supplier**: an out-of-stock product with a supplier assigned and "Available at supplier" checked can now be added to cart and ordered, capped at 1 unit, showing the supplier's estimated lead time with a Font Awesome hourglass icon.
+
+### Admin
+
+- **Fixed a 500 error** when sorting the products list by Supplier while also searching: the search filter's unqualified `name` column collided with the joined suppliers table's own `name` column. Now qualified as `products.name`.
+
 ## 2026-08-18 — v0.1.44
 
 ### Admin
