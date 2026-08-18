@@ -83,6 +83,22 @@
             });
         }
 
+        var shippingEstimateEl = document.querySelector('.cart-shipping-estimate');
+        if (shippingEstimateEl) {
+            if (data.estimatedShippingDateText) {
+                shippingEstimateEl.hidden = false;
+                var timeEl = shippingEstimateEl.querySelector('time');
+                if (timeEl) {
+                    timeEl.textContent = data.estimatedShippingDateText;
+                    if (data.estimatedShippingDate) {
+                        timeEl.setAttribute('datetime', data.estimatedShippingDate);
+                    }
+                }
+            } else {
+                shippingEstimateEl.hidden = true;
+            }
+        }
+
         var shippingWrap = document.querySelector('.cart-summary-shipping');
         if (shippingWrap) {
             shippingWrap.hidden = !data.shippingVisible;

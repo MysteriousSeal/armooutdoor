@@ -163,13 +163,15 @@ class CartController extends Controller
             : __('store.cart_updated');
 
         if ($request->wantsJson()) {
-            $line = $cart->lines()->first(
+            $lines = $cart->lines();
+            $line = $lines->first(
                 fn (CartLine $l): bool => $l->product->id === $product->id && $l->variant?->id === $variant?->id
             );
 
             [$freeShippingUnlocked, $cheapestShippingCents] = $this->shippingEstimate($cart);
             $shippingIsFree = $freeShippingUnlocked || $cheapestShippingCents === 0;
             $shippingVisible = $shippingIsFree || $cheapestShippingCents !== null;
+            $estimatedShippingDate = $this->estimatedShippingDate($lines);
 
             return response()->json([
                 'removed' => $line === null,
@@ -187,6 +189,8 @@ class CartController extends Controller
                 'shippingValueText' => $shippingIsFree
                     ? __('store.shipping_free')
                     : ($cheapestShippingCents !== null ? __('store.shipping_from_amount', ['price' => format_euros($cheapestShippingCents)]) : null),
+                'estimatedShippingDate' => $estimatedShippingDate?->toDateString(),
+                'estimatedShippingDateText' => $estimatedShippingDate?->translatedFormat('d F Y'),
                 'message' => $status,
             ]);
         }
@@ -212,6 +216,7 @@ class CartController extends Controller
             [$freeShippingUnlocked, $cheapestShippingCents] = $this->shippingEstimate($cart);
             $shippingIsFree = $freeShippingUnlocked || $cheapestShippingCents === 0;
             $shippingVisible = $shippingIsFree || $cheapestShippingCents !== null;
+            $estimatedShippingDate = $this->estimatedShippingDate($cart->lines());
 
             return response()->json([
                 'removed' => true,
@@ -226,6 +231,8 @@ class CartController extends Controller
                 'shippingValueText' => $shippingIsFree
                     ? __('store.shipping_free')
                     : ($cheapestShippingCents !== null ? __('store.shipping_from_amount', ['price' => format_euros($cheapestShippingCents)]) : null),
+                'estimatedShippingDate' => $estimatedShippingDate?->toDateString(),
+                'estimatedShippingDateText' => $estimatedShippingDate?->translatedFormat('d F Y'),
                 'message' => $message,
             ]);
         }

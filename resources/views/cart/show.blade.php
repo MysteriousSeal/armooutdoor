@@ -104,32 +104,34 @@
                                     </p>
                                 @endif
 
-                                <div class="cart-line-actions">
-                                    <form
-                                        method="POST"
-                                        action="{{ localized_route('cart.update', ['product' => $line->product->slug]) }}"
-                                        class="cart-qty-form"
-                                        novalidate
-                                        data-stock-limit-label="{{ __('store.stock_limit') }}"
-                                    >
-                                        @csrf
-                                        @method('PATCH')
-                                        @if ($line->variant)
-                                            <input type="hidden" name="variant_id" value="{{ $line->variant->id }}">
-                                        @endif
-                                        <label class="sr-only" for="qty-{{ $line->product->id }}-{{ $line->variant->id ?? 0 }}">{{ __('store.quantity') }}</label>
-                                        <input
-                                            type="number"
-                                            id="qty-{{ $line->product->id }}-{{ $line->variant->id ?? 0 }}"
-                                            name="quantity"
-                                            class="form-control cart-qty-input"
-                                            value="{{ $line->quantity }}"
-                                            min="0"
-                                            max="{{ $line->variant?->maxPurchasable() ?? $line->product->maxPurchasable() }}"
+                                @unless ($lineAvailableAtSupplier)
+                                    <div class="cart-line-actions">
+                                        <form
+                                            method="POST"
+                                            action="{{ localized_route('cart.update', ['product' => $line->product->slug]) }}"
+                                            class="cart-qty-form"
+                                            novalidate
+                                            data-stock-limit-label="{{ __('store.stock_limit') }}"
                                         >
-                                        <button type="submit" class="btn btn-sm btn-secondary">{{ __('store.update_quantity') }}</button>
-                                    </form>
-                                </div>
+                                            @csrf
+                                            @method('PATCH')
+                                            @if ($line->variant)
+                                                <input type="hidden" name="variant_id" value="{{ $line->variant->id }}">
+                                            @endif
+                                            <label class="sr-only" for="qty-{{ $line->product->id }}-{{ $line->variant->id ?? 0 }}">{{ __('store.quantity') }}</label>
+                                            <input
+                                                type="number"
+                                                id="qty-{{ $line->product->id }}-{{ $line->variant->id ?? 0 }}"
+                                                name="quantity"
+                                                class="form-control cart-qty-input"
+                                                value="{{ $line->quantity }}"
+                                                min="0"
+                                                max="{{ $line->variant?->maxPurchasable() ?? $line->product->maxPurchasable() }}"
+                                            >
+                                            <button type="submit" class="btn btn-sm btn-secondary">{{ __('store.update_quantity') }}</button>
+                                        </form>
+                                    </div>
+                                @endunless
                             </div>
 
                             <div class="cart-line-total-slot">
