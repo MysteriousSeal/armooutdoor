@@ -24,7 +24,7 @@ class BestSellersController extends Controller
         $products = Product::query()
             ->active()
             ->whereIn('id', $soldQuantities->keys())
-            ->with('category', 'discount')
+            ->with('category', 'discount', 'variants.supplier')
             ->get()
             ->sortByDesc(fn (Product $product): int => $soldQuantities[$product->id])
             ->values();

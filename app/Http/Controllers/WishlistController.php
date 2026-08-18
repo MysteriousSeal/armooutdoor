@@ -15,7 +15,7 @@ class WishlistController extends Controller
         $products = Product::query()
             ->active()
             ->whereHas('wishlistItems', fn ($query) => $query->where('user_id', $request->user()->id))
-            ->with('category')
+            ->with('category', 'variants.supplier')
             ->get();
 
         return view('account.wishlist', [

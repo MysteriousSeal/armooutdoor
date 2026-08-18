@@ -18,8 +18,10 @@ class CategoryController extends Controller
             ->whereNull('parent_id')
             ->with([
                 'products' => fn ($query) => $query->active(),
+                'products.variants.supplier',
                 'children' => fn ($query) => $query->orderBy('sort_order'),
                 'children.products' => fn ($query) => $query->active(),
+                'children.products.variants.supplier',
             ])
             ->orderBy('sort_order')
             ->get();
@@ -35,7 +37,9 @@ class CategoryController extends Controller
             'products' => fn ($query) => $query->active(),
             'products.category',
             'products.discount',
+            'products.variants.supplier',
             'children.products.discount',
+            'children.products.variants.supplier',
         ]);
 
         $sort = $request->query('sort', 'relevance');

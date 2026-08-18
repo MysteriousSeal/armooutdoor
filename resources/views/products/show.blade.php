@@ -112,20 +112,44 @@
                         {{ $product->lowStock() ? __('store.low_stock') : ($product->inStock() ? __('store.in_stock') : ($availableAtSupplier ? __('store.available_at_supplier') : __('store.out_of_stock'))) }}
                     </span>
                 </div>
-                @if ($availableAtSupplier)
-                    <p class="product-lead-time">
-                        <span class="product-lead-time-icon" aria-hidden="true">
-                            @include('partials.icon', ['name' => 'hourglass-half', 'size' => 16])
+                @php
+                    $displayLeadTimeSource = $product->hasVariants() ? $displayVariant : $product;
+                    $displayLeadTimeVisible = $product->hasVariants()
+                        ? ($displayLeadTimeSource !== null && ! $displayLeadTimeSource->inStock() && $displayLeadTimeSource->isBackorderable())
+                        : $availableAtSupplier;
+                    $displayLeadTimeSupplier = $product->hasVariants() ? $displayLeadTimeSource?->supplier : $supplierForLeadTime;
+                @endphp
+                <p class="product-lead-time" id="product-lead-time" @if (! $displayLeadTimeVisible) hidden @endif>
+                    <span class="product-lead-time-icon" aria-hidden="true">
+                        @include('partials.icon', ['name' => 'hourglass-half', 'size' => 16])
+                    </span>
+                    <span class="product-lead-time-copy">
+                        <strong>{{ __('store.supplier_lead_time_label') }}</strong>
+                        <span id="product-lead-time-value">
+                            {{ $displayLeadTimeSupplier?->lead_time_days !== null
+                                ? trans_choice('store.supplier_lead_time_value', $displayLeadTimeSupplier->lead_time_days, ['days' => $displayLeadTimeSupplier->lead_time_days])
+                                : __('store.supplier_lead_time_unknown') }}
                         </span>
-                        <span class="product-lead-time-copy">
-                            <strong>{{ __('store.supplier_lead_time_label') }}</strong>
-                            <span>
-                                {{ $supplierForLeadTime?->lead_time_days !== null
-                                    ? trans_choice('store.supplier_lead_time_value', $supplierForLeadTime->lead_time_days, ['days' => $supplierForLeadTime->lead_time_days])
-                                    : __('store.supplier_lead_time_unknown') }}
-                            </span>
-                        </span>
-                    </p>
+                    </span>
+                </p>
+                @if ($product->hasVariants())
+                    <template id="variant-lead-times">
+                        @foreach ($activeVariants as $variant)
+                            @php
+                                $variantBackorderable = ! $variant->inStock() && $variant->isBackorderable();
+                                $variantLeadTimeText = $variantBackorderable
+                                    ? ($variant->supplier?->lead_time_days !== null
+                                        ? trans_choice('store.supplier_lead_time_value', $variant->supplier->lead_time_days, ['days' => $variant->supplier->lead_time_days])
+                                        : __('store.supplier_lead_time_unknown'))
+                                    : '';
+                            @endphp
+                            <span
+                                data-variant-id="{{ $variant->id }}"
+                                data-lead-time-visible="{{ $variantBackorderable ? '1' : '' }}"
+                                data-lead-time-text="{{ $variantLeadTimeText }}"
+                            ></span>
+                        @endforeach
+                    </template>
                 @endif
 
                 <div

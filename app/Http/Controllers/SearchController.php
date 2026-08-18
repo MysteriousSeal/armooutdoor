@@ -16,7 +16,7 @@ class SearchController extends Controller
             ? collect()
             : Product::query()
                 ->active()
-                ->with('category')
+                ->with('category', 'variants.supplier')
                 ->where(function ($q) use ($query): void {
                     $q->where('name', 'like', '%'.$query.'%')
                         ->orWhere('sku', 'like', '%'.$query.'%');

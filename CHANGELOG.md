@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-19 — v0.1.59
+
+### Store
+
+- **Dynamic shipping delay on variant selection**: the "Délai d'expédition estimé" note on a product page now updates as you switch variants, showing/hiding and changing its day count based on the selected variant's own supplier.
+- **Variant-aware product card badge**: category, home, search, wishlist and other product-card listings now show "Dispo fournisseur" when every variant is out of stock but at least one can still be backordered, instead of always showing "Épuisé".
+- Renamed the product page's per-variant backorder chip label from "Sur commande" to "Dispo fournisseur".
+
 ## 2026-08-19 — v0.1.58
 
 ### Store

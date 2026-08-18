@@ -12,7 +12,7 @@ class PromotionsController extends Controller
         $products = Product::query()
             ->active()
             ->whereHas('discount')
-            ->with('category', 'discount')
+            ->with('category', 'discount', 'variants.supplier')
             ->orderBy('sort_order')
             ->orderBy('id')
             ->get()

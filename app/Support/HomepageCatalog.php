@@ -17,7 +17,9 @@ class HomepageCatalog
             ->whereNull('parent_id')
             ->with([
                 'products' => fn ($query) => $query->active(),
+                'products.variants.supplier',
                 'children.products' => fn ($query) => $query->active(),
+                'children.products.variants.supplier',
             ])
             ->orderBy('sort_order')
             ->get();
@@ -54,7 +56,7 @@ class HomepageCatalog
     {
         return Product::query()
             ->active()
-            ->with('category')
+            ->with('category', 'variants.supplier')
             ->whereNotIn('id', $featured->modelKeys())
             ->orderBy('sort_order')
             ->orderBy('id')

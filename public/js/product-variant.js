@@ -19,6 +19,19 @@
     var mainImage = document.getElementById('product-detail-main-image');
     var qtyInput = form.querySelector('.qty-stepper-input');
     var buyRow = form.querySelector('.product-buy-row');
+    var leadTimeEl = document.getElementById('product-lead-time');
+    var leadTimeValueEl = document.getElementById('product-lead-time-value');
+    var leadTimeTemplate = document.getElementById('variant-lead-times');
+    var leadTimesByVariant = {};
+
+    if (leadTimeTemplate) {
+        leadTimeTemplate.content.querySelectorAll('[data-variant-id]').forEach(function (node) {
+            leadTimesByVariant[node.getAttribute('data-variant-id')] = {
+                visible: node.getAttribute('data-lead-time-visible') === '1',
+                text: node.getAttribute('data-lead-time-text') || '',
+            };
+        });
+    }
 
     function applyVariant(radio) {
         if (currentEl && radio.hasAttribute('data-variant-label')) {
@@ -63,6 +76,17 @@
 
             if (window.ProductDiscountCountdown) {
                 window.ProductDiscountCountdown.refresh();
+            }
+        }
+
+        if (leadTimeEl && leadTimeValueEl) {
+            var leadTime = leadTimesByVariant[radio.value];
+
+            if (leadTime && leadTime.visible) {
+                leadTimeValueEl.textContent = leadTime.text;
+                leadTimeEl.hidden = false;
+            } else {
+                leadTimeEl.hidden = true;
             }
         }
 

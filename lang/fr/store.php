@@ -115,7 +115,7 @@ return [
     'variant_stock_ok' => 'En stock',
     'variant_stock_low' => 'Limité',
     'variant_stock_out' => 'Épuisé',
-    'variant_stock_backorder' => 'Sur commande',
+    'variant_stock_backorder' => 'Dispo fournisseur',
     'stock_note' => 'Tous nos produits marqués en stock le sont réellement, et sont expédiés dans la journée.',
     'stock_left' => ':count en stock|:count en stock',
     'stock_limit' => 'Plus que :count disponible(s) pour cet article.',

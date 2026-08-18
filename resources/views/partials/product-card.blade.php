@@ -1,8 +1,13 @@
 @php
     /** @var \App\Models\Product $product */
     $inWishlist = ($wishlistProductIds ?? collect())->contains($product->id);
-    $variantCount = $product->variants_count ?? $product->variants()->count();
-    $availableAtSupplier = ! $product->inStock() && $product->isBackorderable();
+    $cardVariants = $product->relationLoaded('variants') ? $product->variants : $product->variants()->with('supplier')->get();
+    $variantCount = $cardVariants->count();
+    $activeCardVariants = $cardVariants->where('is_active', true);
+    $backorderableCardVariant = $activeCardVariants->first(fn ($variant) => ! $variant->inStock() && $variant->isBackorderable());
+    $availableAtSupplier = $product->hasVariants()
+        ? ($activeCardVariants->isNotEmpty() && $activeCardVariants->every(fn ($variant) => ! $variant->inStock()) && $backorderableCardVariant !== null)
+        : (! $product->inStock() && $product->isBackorderable());
     $fiveColumn = $fiveColumn ?? false;
 @endphp
 <article class="masonry-card product-card {{ $product->inStock() || $availableAtSupplier ? '' : 'is-out-of-stock' }}">

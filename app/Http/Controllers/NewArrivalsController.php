@@ -13,7 +13,7 @@ class NewArrivalsController extends Controller
     {
         $products = Product::query()
             ->active()
-            ->with('category', 'discount')
+            ->with('category', 'discount', 'variants.supplier')
             ->latest()
             ->limit(self::LIMIT)
             ->get();

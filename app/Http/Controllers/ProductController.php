@@ -11,11 +11,11 @@ class ProductController extends Controller
     {
         abort_unless($product->is_active, 404);
 
-        $product->load('category.parent', 'images', 'variants', 'reviews.user', 'discount', 'supplier');
+        $product->load('category.parent', 'images', 'variants.supplier', 'reviews.user', 'discount', 'supplier');
 
         $related = Product::query()
             ->active()
-            ->with('category', 'discount')
+            ->with('category', 'discount', 'variants.supplier')
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
             ->orderBy('sort_order')
