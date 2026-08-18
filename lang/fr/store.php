@@ -105,6 +105,7 @@ return [
     'discount_countdown_seconds' => 's',
     'out_of_stock' => 'Rupture de stock',
     'available_at_supplier' => 'Disponible chez notre fournisseur',
+    'card_available_at_supplier' => 'Disponibilité fournisseur',
     'supplier_lead_time' => 'Délai d’expédition estimé : :days jour|Délai d’expédition estimé : :days jours',
     'supplier_lead_time_label' => 'Délai d’expédition estimé',
     'supplier_lead_time_value' => ':days jour|:days jours',

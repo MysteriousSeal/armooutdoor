@@ -2,8 +2,9 @@
     /** @var \App\Models\Product $product */
     $inWishlist = ($wishlistProductIds ?? collect())->contains($product->id);
     $variantCount = $product->variants_count ?? $product->variants()->count();
+    $availableAtSupplier = ! $product->inStock() && $product->isBackorderable();
 @endphp
-<article class="masonry-card product-card {{ $product->inStock() ? '' : 'is-out-of-stock' }}">
+<article class="masonry-card product-card {{ $product->inStock() || $availableAtSupplier ? '' : 'is-out-of-stock' }}">
     <a href="{{ localized_route('products.show', ['product' => $product->slug]) }}" class="masonry-card-link">
         <div class="masonry-card-media">
             <img
@@ -29,8 +30,8 @@
                     @endif
                     {{ $product->formattedPrice() }}
                 </p>
-                <span class="card-stock-chip {{ $product->lowStock() ? 'is-low-stock' : ($product->inStock() ? 'is-in-stock' : 'is-out-of-stock') }}">
-                    {{ $product->lowStock() ? __('store.low_stock') : ($product->inStock() ? __('store.in_stock') : __('store.out_of_stock')) }}
+                <span class="card-stock-chip {{ $product->lowStock() ? 'is-low-stock' : ($product->inStock() ? 'is-in-stock' : ($availableAtSupplier ? 'is-low-stock' : 'is-out-of-stock')) }}">
+                    {{ $product->lowStock() ? __('store.low_stock') : ($product->inStock() ? __('store.in_stock') : ($availableAtSupplier ? __('store.card_available_at_supplier') : __('store.out_of_stock'))) }}
                 </span>
             </div>
             <div class="card-rating">
@@ -63,7 +64,7 @@
         </button>
     </form>
 
-    @if ($product->inStock())
+    @if ($product->isPurchasable())
         @if ($variantCount > 0)
             <div class="card-cart">
                 <a href="{{ localized_route('products.show', ['product' => $product->slug]) }}" class="btn btn-sm btn-primary">
