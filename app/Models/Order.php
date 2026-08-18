@@ -32,6 +32,7 @@ use Illuminate\Support\Str;
     'marketplace_name',
     'marketplace_note',
     'marketplace_commission_cents',
+    'shipping_paid_cents',
     'relay_point_id',
     'relay_snapshot',
     'subtotal_cents',

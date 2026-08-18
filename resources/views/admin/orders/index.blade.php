@@ -238,9 +238,16 @@
                                     </span>
                                 </td>
                                 <td class="admin-table-num">
-                                    {{ $order->formattedTotal() }}
-                                    @if ($order->marketplace_commission_cents)
-                                        <br><span class="admin-table-sub">− {{ format_euros($order->marketplace_commission_cents) }} commission</span>
+                                    <span class="admin-order-total">{{ $order->formattedTotal() }}</span>
+                                    @if ($order->marketplace_commission_cents || $order->shipping_paid_cents)
+                                        <span class="admin-order-deductions">
+                                            @if ($order->marketplace_commission_cents)
+                                                <span class="admin-order-deduction" title="Commission">−{{ format_euros($order->marketplace_commission_cents) }} comm.</span>
+                                            @endif
+                                            @if ($order->shipping_paid_cents)
+                                                <span class="admin-order-deduction" title="Shipping paid">−{{ format_euros($order->shipping_paid_cents) }} ship.</span>
+                                            @endif
+                                        </span>
                                     @endif
                                 </td>
                                 <td>

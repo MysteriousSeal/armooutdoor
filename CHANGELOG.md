@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-19 — v0.1.72
+
+### Admin
+
+- **Shipping paid field for manual orders**: marketplace-linked manual orders now have a "Shipping paid" field, next to Commission, to record what you actually paid for shipping. Shown as a deduction chip on the orders list too.
+
 ## 2026-08-19 — v0.1.71
 
 ### Storefront

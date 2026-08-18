@@ -518,6 +518,25 @@ class OrderController extends Controller
         return back()->with('status', 'Marketplace commission saved.');
     }
 
+    public function updateShippingPaid(Request $request, Order $order): RedirectResponse
+    {
+        abort_unless($order->is_manual && $order->marketplace_id, 404);
+
+        $validated = $request->validate([
+            'shipping_paid' => ['nullable', 'numeric', 'min:0', 'max:99999.99'],
+        ]);
+
+        $shippingPaid = $validated['shipping_paid'] ?? null;
+
+        $order->update([
+            'shipping_paid_cents' => $shippingPaid === null || $shippingPaid === ''
+                ? null
+                : (int) round(((float) $shippingPaid) * 100),
+        ]);
+
+        return back()->with('status', 'Shipping paid saved.');
+    }
+
     public function updateShippingAddress(UpdateOrderShippingAddressRequest $request, Order $order): RedirectResponse
     {
         abort_unless($order->addressIsEditable(), 403);
