@@ -32,6 +32,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 
 // Storefront (shop, cart, checkout, orders, etc.)
+use App\Http\Controllers\BestSellersController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CheckoutController;
@@ -42,6 +43,7 @@ use App\Http\Controllers\NewArrivalsController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PreferenceController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\PromotionsController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SitemapController;
@@ -172,6 +174,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 Route::get('/', HomeController::class)->name('home');
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 Route::get('/nouveautes', [NewArrivalsController::class, 'index'])->name('products.new-arrivals');
+Route::get('/promotions', [PromotionsController::class, 'index'])->name('products.promotions');
+Route::get('/meilleures-ventes', [BestSellersController::class, 'index'])->name('products.best-sellers');
 Route::get('/categories/{category:slug}', [CategoryController::class, 'show'])->name('categories.show');
 Route::get('/products/{product:slug}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/search', [SearchController::class, 'index'])->name('search');

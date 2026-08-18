@@ -24,6 +24,8 @@
                 <li><a href="{{ localized_route('home') }}">{{ __('store.nav_home') }}</a></li>
                 <li><a href="{{ route('categories.index') }}">Toutes les catégories</a></li>
                 <li><a href="{{ route('products.new-arrivals') }}">Nouveautés</a></li>
+                <li><a href="{{ route('products.promotions') }}">Promotions</a></li>
+                <li><a href="{{ route('products.best-sellers') }}">Meilleures ventes</a></li>
                 <li><a href="{{ route('faq') }}">FAQ</a></li>
                 <li><a href="{{ route('help.shipping-returns') }}">Livraison & Retours</a></li>
                 <li><a href="{{ route('help.secure-payment') }}">Paiement sécurisé</a></li>

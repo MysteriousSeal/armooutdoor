@@ -182,8 +182,8 @@
                     <ul class="site-footer-links">
                         <li><a href="{{ route('categories.index') }}">{{ __('store.footer_shop_all_categories') }}</a></li>
                         <li><a href="{{ route('products.new-arrivals') }}">{{ __('store.footer_shop_new') }}</a></li>
-                        <li><a href="#">{{ __('store.footer_shop_promotions') }}</a></li>
-                        <li><a href="#">{{ __('store.footer_shop_best_sellers') }}</a></li>
+                        <li><a href="{{ route('products.promotions') }}">{{ __('store.footer_shop_promotions') }}</a></li>
+                        <li><a href="{{ route('products.best-sellers') }}">{{ __('store.footer_shop_best_sellers') }}</a></li>
                     </ul>
                 </nav>
 
