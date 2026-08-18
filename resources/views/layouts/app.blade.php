@@ -60,84 +60,43 @@
                     >
                 </form>
                 @include('partials.cart-button', ['class' => 'cart-btn--header'])
-                <button
-                    type="button"
-                    class="site-menu-toggle"
-                    id="site-menu-toggle"
-                    aria-expanded="false"
-                    aria-controls="site-menu-panel"
-                    aria-label="{{ __('store.menu_toggle') }}"
-                >
-                    <svg class="site-menu-toggle-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                        <path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
-                    </svg>
-                </button>
             </div>
         </div>
     </header>
 
     <div class="site-subheader" id="site-subheader">
         <div class="site-subheader-inner">
-            <div class="site-menu-panel" id="site-menu-panel">
+            <div class="site-menu-panel">
                 <div class="site-subheader-nav">
+                    <button
+                        type="button"
+                        class="site-menu-toggle {{ request()->routeIs('categories.*') ? 'is-active' : '' }}"
+                        id="site-menu-toggle"
+                        aria-expanded="false"
+                        aria-controls="site-cat-menu"
+                        aria-label="{{ __('store.menu_toggle') }}"
+                    >
+                        <svg class="site-menu-toggle-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                            <path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+                        </svg>
+                        <span>{{ __('store.nav_categories') }}</span>
+                    </button>
                     <nav class="sort-tabs" aria-label="{{ __('store.footer_shop') }}">
                         <a href="{{ localized_route('home') }}" class="sort-tab {{ request()->routeIs('home') ? 'active' : '' }}">
                             {{ __('store.nav_home') }}
                         </a>
-                        @foreach ($navCategories as $navCategory)
-                            @php
-                                $currentCategory = request()->route('category') ?? request()->route('product')?->category;
-                                $navActive = $currentCategory
-                                    && ($currentCategory->is($navCategory) || $currentCategory->parent_id === $navCategory->id);
-                                $visibleChildren = $navCategory->children->where('products_count', '>', 0);
-                            @endphp
-                            <div class="nav-item {{ $navActive ? 'is-active' : '' }} {{ $visibleChildren->isNotEmpty() ? 'has-sub' : '' }}">
-                                <a
-                                    href="{{ localized_route('categories.show', ['category' => $navCategory->slug]) }}"
-                                    class="sort-tab {{ $navActive ? 'active' : '' }}"
-                                    @if ($visibleChildren->isNotEmpty())
-                                        aria-haspopup="true"
-                                    @endif
-                                >
-                                    {{ $navCategory->localizedName() }}
-                                </a>
-                                @if ($visibleChildren->isNotEmpty())
-                                    <div class="nav-sub-panel {{ $visibleChildren->count() > 8 ? 'is-wide' : '' }}">
-                                        <a
-                                            href="{{ localized_route('categories.show', ['category' => $navCategory->slug]) }}"
-                                            class="nav-sub-head"
-                                        >
-                                            <span class="nav-sub-icon" aria-hidden="true">
-                                                @include('partials.icon', ['name' => $navCategory->iconName(), 'size' => 18])
-                                            </span>
-                                            <span class="nav-sub-head-copy">
-                                                <span class="nav-sub-kicker">{{ __('store.shop_subcategories') }}</span>
-                                                <span class="nav-sub-title">{{ $navCategory->localizedName() }}</span>
-                                            </span>
-                                        </a>
-                                        <ul class="nav-sub {{ $visibleChildren->count() > 8 ? 'nav-sub--wide' : ($visibleChildren->count() > 4 ? 'nav-sub--columns' : '') }}">
-                                            @foreach ($visibleChildren as $child)
-                                                <li>
-                                                    <a
-                                                        href="{{ localized_route('categories.show', ['category' => $child->slug]) }}"
-                                                        class="{{ $currentCategory?->is($child) ? 'is-active' : '' }}"
-                                                    >
-                                                        <span class="nav-sub-name">{{ $child->localizedName() }}</span>
-                                                        <span class="nav-sub-count">{{ $child->products_count }}</span>
-                                                    </a>
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                        <a
-                                            href="{{ localized_route('categories.show', ['category' => $navCategory->slug]) }}"
-                                            class="nav-sub-more"
-                                        >
-                                            {{ __('store.view_category') }}
-                                        </a>
-                                    </div>
-                                @endif
-                            </div>
-                        @endforeach
+                        <a href="{{ route('products.new-arrivals') }}" class="sort-tab {{ request()->routeIs('products.new-arrivals') ? 'active' : '' }}">
+                            {{ __('store.footer_shop_new') }}
+                        </a>
+                        <a href="{{ route('products.promotions') }}" class="sort-tab {{ request()->routeIs('products.promotions') ? 'active' : '' }}">
+                            {{ __('store.footer_shop_promotions') }}
+                        </a>
+                        <a href="{{ route('products.best-sellers') }}" class="sort-tab {{ request()->routeIs('products.best-sellers') ? 'active' : '' }}">
+                            {{ __('store.footer_shop_best_sellers') }}
+                        </a>
+                        <a href="#" class="sort-tab">
+                            {{ __('store.footer_help_contact') }}
+                        </a>
                     </nav>
                 </div>
 
@@ -173,6 +132,59 @@
                         <a href="{{ localized_route('register') }}" class="btn btn-sm btn-primary {{ request()->routeIs('register') ? 'is-active' : '' }}">{{ __('store.register') }}</a>
                     @endauth
                 </div>
+            </div>
+        </div>
+
+        @php
+            $currentCategory = request()->route('category') ?? request()->route('product')?->category;
+        @endphp
+        <div class="site-cat-menu" id="site-cat-menu" hidden>
+            <div class="site-cat-menu-inner">
+                @foreach ($navCategories as $navCategory)
+                    @php
+                        $visibleChildren = $navCategory->children->where('products_count', '>', 0);
+                        $navActive = $currentCategory
+                            && ($currentCategory->is($navCategory) || $currentCategory->parent_id === $navCategory->id);
+                    @endphp
+                    <section class="site-cat-group {{ $navActive ? 'is-active' : '' }}">
+                        <a
+                            href="{{ localized_route('categories.show', ['category' => $navCategory->slug]) }}"
+                            class="site-cat-group-head"
+                        >
+                            <span class="site-cat-group-icon" aria-hidden="true">
+                                @include('partials.icon', ['name' => $navCategory->iconName(), 'size' => 18])
+                            </span>
+                            <span class="site-cat-group-copy">
+                                <span class="site-cat-group-kicker">{{ __('store.shop_subcategories') }}</span>
+                                <span class="site-cat-group-name">{{ $navCategory->localizedName() }}</span>
+                            </span>
+                        </a>
+                        @if ($visibleChildren->isNotEmpty())
+                            <ul class="site-cat-group-links">
+                                @foreach ($visibleChildren->take(4) as $child)
+                                    <li>
+                                        <a
+                                            href="{{ localized_route('categories.show', ['category' => $child->slug]) }}"
+                                            class="{{ $currentCategory?->is($child) ? 'is-active' : '' }}"
+                                        >
+                                            <span class="site-cat-group-link-name">{{ $child->localizedName() }}</span>
+                                            <span class="site-cat-group-link-count">{{ $child->products_count }}</span>
+                                        </a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endif
+                        <a
+                            href="{{ localized_route('categories.show', ['category' => $navCategory->slug]) }}"
+                            class="site-cat-group-more"
+                        >
+                            {{ $visibleChildren->count() > 4 ? __('store.nav_see_more') : __('store.view_category') }}
+                        </a>
+                    </section>
+                @endforeach
+            </div>
+            <div class="site-cat-menu-footer">
+                <a href="{{ route('categories.index') }}">{{ __('store.see_all_categories') }}</a>
             </div>
         </div>
     </div>

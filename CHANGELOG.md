@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-19 — v0.1.75
+
+### Storefront
+
+- **"Nous contacter" in the main nav**: added as the last item in the top nav bar, alongside Accueil, Nouveautés, Promotions and Meilleures ventes.
+
 ## 2026-08-19 — v0.1.74
 
 ### Storefront
