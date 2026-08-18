@@ -22,7 +22,7 @@
             <span>{{ $category->localizedName() }}</span>
         </nav>
 
-        <header class="cat-hero">
+        <header class="cat-hero {{ $category->imageUrl() ? 'has-image' : '' }}" @if ($category->imageUrl()) style="--cat-hero-image: url('{{ $category->imageUrl() }}')" @endif>
             @if ($category->isRoot())
                 <span class="cat-hero-icon" aria-hidden="true">
                     @include('partials.icon', ['name' => $category->iconName(), 'size' => 34])

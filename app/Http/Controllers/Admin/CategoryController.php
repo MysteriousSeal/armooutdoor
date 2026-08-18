@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\StoreCategoryRequest;
 use App\Models\Category;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -36,7 +37,11 @@ class CategoryController extends Controller
 
     public function store(StoreCategoryRequest $request): RedirectResponse
     {
-        Category::query()->create($this->payload($request));
+        $category = Category::query()->create($this->payload($request));
+
+        if ($request->hasFile('image')) {
+            $category->update(['image' => $this->storeHeroImage($request->file('image'))]);
+        }
 
         return redirect()
             ->route('admin.categories.index')
@@ -55,9 +60,64 @@ class CategoryController extends Controller
     {
         $category->update($this->payload($request, $category));
 
+        if ($request->hasFile('image')) {
+            $this->deleteStoredImageFile($category->image);
+            $category->update(['image' => $this->storeHeroImage($request->file('image'))]);
+        } elseif ($request->boolean('remove_image')) {
+            $this->deleteStoredImageFile($category->image);
+            $category->update(['image' => null]);
+        }
+
         return redirect()
             ->route('admin.categories.index')
             ->with('status', 'Category saved.');
+    }
+
+    /**
+     * Resizes and center-crops to a 1890×810 (21:9) WebP hero banner.
+     */
+    private function storeHeroImage(UploadedFile $file): string
+    {
+        $directory = public_path('images/categories');
+
+        if (! is_dir($directory)) {
+            mkdir($directory, 0755, true);
+        }
+
+        $source = imagecreatefromstring(file_get_contents($file->getRealPath()));
+        $sourceWidth = imagesx($source);
+        $sourceHeight = imagesy($source);
+
+        $targetWidth = 1890;
+        $targetHeight = 810;
+        $scale = max($targetWidth / $sourceWidth, $targetHeight / $sourceHeight);
+        $cropWidth = (int) round($targetWidth / $scale);
+        $cropHeight = (int) round($targetHeight / $scale);
+        $cropX = (int) round(($sourceWidth - $cropWidth) / 2);
+        $cropY = (int) round(($sourceHeight - $cropHeight) / 2);
+
+        $target = imagecreatetruecolor($targetWidth, $targetHeight);
+        imagecopyresampled($target, $source, 0, 0, $cropX, $cropY, $targetWidth, $targetHeight, $cropWidth, $cropHeight);
+
+        $name = 'category-'.Str::lower(Str::random(8)).'.webp';
+        imagewebp($target, $directory.'/'.$name, 85);
+        imagedestroy($source);
+        imagedestroy($target);
+
+        return 'categories/'.$name;
+    }
+
+    private function deleteStoredImageFile(?string $image): void
+    {
+        if ($image === null || $image === '' || str_starts_with($image, 'http')) {
+            return;
+        }
+
+        $path = public_path('images/'.$image);
+
+        if (is_file($path)) {
+            @unlink($path);
+        }
     }
 
     /**

@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-19 — v0.1.68
+
+### Admin
+
+- **Category hero images**: category edit pages now have an optional hero image field. Uploads are center-cropped to 21:9 and converted to WebP automatically. Shown as a full-bleed banner behind the category page header on the storefront.
+
 ## 2026-08-19 — v0.1.67
 
 ### Storefront

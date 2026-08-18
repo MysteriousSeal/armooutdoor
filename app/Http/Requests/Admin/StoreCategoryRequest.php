@@ -35,6 +35,8 @@ class StoreCategoryRequest extends FormRequest
                 Rule::unique('categories', 'slug')->ignore($category),
             ],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:9999'],
+            'image' => ['nullable', 'image', 'max:8192'],
+            'remove_image' => ['nullable', 'boolean'],
         ];
     }
 

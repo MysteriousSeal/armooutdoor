@@ -75,6 +75,38 @@
     background: color-mix(in srgb, var(--bg) 55%, var(--surface));
 }
 
+.cat-hero.has-image {
+    position: relative;
+    align-items: flex-start;
+    min-height: 15rem;
+    background-image: linear-gradient(180deg, rgba(20, 18, 16, 0.7) 0%, rgba(20, 18, 16, 0.15) 100%), var(--cat-hero-image);
+    background-size: cover;
+    background-position: center;
+    border: none;
+}
+
+.cat-hero.has-image .cat-hero-title,
+.cat-hero.has-image .cat-hero-desc {
+    color: #fff;
+}
+
+.cat-hero.has-image .cat-hero-kicker,
+.cat-hero.has-image .cat-hero-meta {
+    color: #e7dfce;
+}
+
+.cat-hero.has-image .cat-hero-icon {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+@media (max-width: 640px) {
+    .cat-hero.has-image {
+        min-height: 11rem;
+    }
+}
+
 @media (max-width: 640px) {
     .cat-hero {
         gap: 0.95rem;

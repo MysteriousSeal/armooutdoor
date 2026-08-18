@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['parent_id', 'slug', 'name', 'description', 'sort_order'])]
+#[Fillable(['parent_id', 'slug', 'name', 'description', 'image', 'sort_order'])]
 class Category extends Model
 {
     /** @use HasFactory<CategoryFactory> */
@@ -100,6 +100,19 @@ class Category extends Model
     public function iconName(): string
     {
         return self::ROOT_ICON_NAMES[$this->root()->slug] ?? 'default';
+    }
+
+    public function imageUrl(): ?string
+    {
+        if ($this->image === null || $this->image === '') {
+            return null;
+        }
+
+        if (str_starts_with($this->image, 'https://') || str_starts_with($this->image, 'http://')) {
+            return $this->image;
+        }
+
+        return asset('images/'.$this->image);
     }
 
     private function localized(string $attribute): string

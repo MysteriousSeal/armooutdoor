@@ -19,6 +19,7 @@
             method="POST"
             action="{{ $category->exists ? route('admin.categories.update', $category) : route('admin.categories.store') }}"
             class="admin-form-card admin-form-card--solo"
+            enctype="multipart/form-data"
         >
             @csrf
             @if ($category->exists)
@@ -35,6 +36,23 @@
                 <label for="description">Description</label>
                 <textarea id="description" name="description" class="form-control" rows="4" required maxlength="2000">{{ old('description', $category->description['fr'] ?? '') }}</textarea>
                 @error('description') <p class="form-error">{{ $message }}</p> @enderror
+            </div>
+
+            <div class="form-group">
+                <label for="image">Hero image</label>
+                @if ($category->imageUrl())
+                    <p class="form-hint">
+                        <img src="{{ $category->imageUrl() }}" alt="" style="width: 100%; max-width: 24rem; aspect-ratio: 21/9; object-fit: cover; display: block; margin-bottom: 0.5rem;">
+                    </p>
+                @endif
+                <input type="file" id="image" name="image" class="form-control" accept="image/jpeg,image/png,image/webp">
+                <p class="form-hint">Optional 21:9 banner shown behind the category page header. Resized and converted to WebP automatically.</p>
+                @if ($category->imageUrl())
+                    <label class="form-check">
+                        <input type="checkbox" name="remove_image" value="1"> Remove current image
+                    </label>
+                @endif
+                @error('image') <p class="form-error">{{ $message }}</p> @enderror
             </div>
 
             <div class="form-row">
