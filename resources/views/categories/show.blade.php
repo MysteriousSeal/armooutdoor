@@ -70,7 +70,7 @@
             <p class="empty-state">{{ __('store.empty_category') }}</p>
         @else
             <form method="GET" class="sort-form" action="{{ localized_route('categories.show', ['category' => $category->slug]) }}">
-                @if (! empty($filterGroups))
+                @if (! empty($filterGroups) && $category->children->isEmpty())
                     <div class="category-filters">
                         @foreach ($filterGroups as $label => $values)
                             @php($filterId = 'filter-'.\Illuminate\Support\Str::slug($label))
