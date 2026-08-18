@@ -10,7 +10,7 @@ use Illuminate\View\View;
 
 class CategoryController extends Controller
 {
-    public const SORTS = ['name', 'price-asc', 'price-desc'];
+    public const SORTS = ['relevance', 'name', 'price-asc', 'price-desc', 'newest'];
 
     public function index(): View
     {
@@ -38,10 +38,10 @@ class CategoryController extends Controller
             'children.products.discount',
         ]);
 
-        $sort = $request->query('sort', 'name');
+        $sort = $request->query('sort', 'relevance');
 
         if (! in_array($sort, self::SORTS, true)) {
-            $sort = 'name';
+            $sort = 'relevance';
         }
 
         $listingProducts = $category->listingProducts();
@@ -181,11 +181,14 @@ class CategoryController extends Controller
     private function sortedProducts(Collection $products, string $sort): Collection
     {
         return match ($sort) {
-            'price-asc' => $products->sortBy('price_cents')->values(),
-            'price-desc' => $products->sortByDesc('price_cents')->values(),
-            default => $products
+            'name' => $products
                 ->sortBy(fn (Product $product): string => mb_strtolower($product->localizedName()), SORT_NATURAL)
                 ->values(),
+            'price-asc' => $products->sortBy('price_cents')->values(),
+            'price-desc' => $products->sortByDesc('price_cents')->values(),
+            // "Pertinence" has no scoring yet — same ordering as "Nouveautés" for now.
+            'newest', 'relevance' => $products->sortByDesc('created_at')->values(),
+            default => $products->values(),
         };
     }
 }
