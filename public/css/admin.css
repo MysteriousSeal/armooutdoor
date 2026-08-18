@@ -239,8 +239,68 @@
 .changelog-list {
     display: flex;
     flex-direction: column;
-    gap: 0.85rem;
-    max-width: 52rem;
+    max-width: 54rem;
+}
+
+.changelog-entry {
+    display: grid;
+    grid-template-columns: 1.1rem minmax(0, 1fr);
+    column-gap: 1.15rem;
+}
+
+.changelog-rail {
+    position: relative;
+}
+
+.changelog-rail::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1.5px;
+    background: var(--border);
+    transform: translateX(-50%);
+}
+
+.changelog-entry:first-child .changelog-rail::before {
+    top: 1.7rem;
+}
+
+.changelog-entry:last-child .changelog-rail::before {
+    bottom: auto;
+    height: 1.7rem;
+}
+
+.changelog-entry:only-child .changelog-rail::before {
+    display: none;
+}
+
+.changelog-dot {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 0.72rem;
+    height: 0.72rem;
+    margin: 1.55rem auto 0;
+    background: var(--surface);
+    border: 2px solid color-mix(in srgb, var(--accent) 55%, var(--border));
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px var(--bg);
+}
+
+.changelog-entry.is-latest .changelog-dot {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 16%, var(--bg));
+}
+
+.changelog-entry .changelog-release {
+    margin-bottom: 0.85rem;
+}
+
+.changelog-entry:last-child .changelog-release {
+    margin-bottom: 0;
 }
 
 .changelog-release.is-latest {

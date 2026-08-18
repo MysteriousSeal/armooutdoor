@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-18 — v0.1.43
+
+### Admin
+
+- **Changelog page**: releases now sit on a vertical timeline rail instead of a plain stacked list.
+
 ## 2026-08-18 — v0.1.42
 
 ### Storefront

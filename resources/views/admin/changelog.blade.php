@@ -26,7 +26,11 @@
                         $displayDate = $release['date'];
                     }
                 @endphp
-                <section class="order-panel changelog-release{{ $loop->first ? ' is-latest' : '' }}">
+                <article class="changelog-entry{{ $loop->first ? ' is-latest' : '' }}">
+                    <div class="changelog-rail" aria-hidden="true">
+                        <span class="changelog-dot"></span>
+                    </div>
+                    <section class="order-panel changelog-release{{ $loop->first ? ' is-latest' : '' }}">
                     <div class="changelog-release-head">
                         <div class="changelog-release-titles">
                             @if ($release['version'])
@@ -61,6 +65,7 @@
                         </div>
                     @endforeach
                 </section>
+                </article>
             @empty
                 <div class="empty-state">
                     <p>No changelog entries yet.</p>
