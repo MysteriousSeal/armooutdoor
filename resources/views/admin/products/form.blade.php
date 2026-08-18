@@ -254,13 +254,20 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="sku">SKU</label>
-                                <input type="text" id="sku" name="sku" class="form-control" value="{{ old('sku', $product->sku) }}" maxlength="64" placeholder="e.g. ARM-TENT-2P-GRN">
+                                <input type="text" id="sku" name="sku" class="form-control" value="{{ old('sku', $product->hasVariants() ? null : $product->sku) }}" maxlength="64" placeholder="e.g. ARM-TENT-2P-GRN" @if ($product->exists && $product->hasVariants()) disabled @endif>
+                                @if ($product->exists && $product->hasVariants())
+                                    <p class="form-hint">Set per variant below instead.</p>
+                                @endif
                                 @error('sku') <p class="form-error">{{ $message }}</p> @enderror
                             </div>
                             <div class="form-group">
                                 <label for="gtin">GTIN</label>
-                                <input type="text" id="gtin" name="gtin" class="form-control" value="{{ old('gtin', $product->gtin) }}" maxlength="14" placeholder="8, 12, 13, or 14 digits">
-                                <p class="form-hint">Barcode number — UPC, EAN, or ISBN.</p>
+                                <input type="text" id="gtin" name="gtin" class="form-control" value="{{ old('gtin', $product->hasVariants() ? null : $product->gtin) }}" maxlength="14" placeholder="8, 12, 13, or 14 digits" @if ($product->exists && $product->hasVariants()) disabled @endif>
+                                @if ($product->exists && $product->hasVariants())
+                                    <p class="form-hint">Set per variant below instead.</p>
+                                @else
+                                    <p class="form-hint">Barcode number — UPC, EAN, or ISBN.</p>
+                                @endif
                                 @error('gtin') <p class="form-error">{{ $message }}</p> @enderror
                             </div>
                         </div>
@@ -302,14 +309,22 @@
 
                     <section class="order-panel">
                         <h3 class="order-panel-title">Supplier</h3>
-                        <p class="form-hint">Which supplier this product is ordered from, if any.</p>
+                        @if ($product->exists && $product->hasVariants())
+                            <p class="form-hint">Set per variant below instead.</p>
+                        @else
+                            <p class="form-hint">Which supplier this product is ordered from, if any.</p>
+                        @endif
+
+                        @php
+                            $disableSupplierFields = $product->exists && $product->hasVariants();
+                        @endphp
 
                         <div class="form-group">
                             <label for="supplier_id" class="sr-only">Supplier</label>
-                            <select id="supplier_id" name="supplier_id" class="form-control">
+                            <select id="supplier_id" name="supplier_id" class="form-control" @if ($disableSupplierFields) disabled @endif>
                                 <option value="">No supplier</option>
                                 @foreach ($suppliers as $supplier)
-                                    <option value="{{ $supplier->id }}" @selected(old('supplier_id', $product->supplier_id) == $supplier->id)>
+                                    <option value="{{ $supplier->id }}" @selected(! $disableSupplierFields && old('supplier_id', $product->supplier_id) == $supplier->id)>
                                         {{ $supplier->name }}
                                     </option>
                                 @endforeach
@@ -319,7 +334,7 @@
 
                         <div class="form-group">
                             <label class="form-check">
-                                <input type="checkbox" id="available_at_supplier" name="available_at_supplier" value="1" @checked(old('available_at_supplier', $product->exists ? $product->available_at_supplier : true))>
+                                <input type="checkbox" id="available_at_supplier" name="available_at_supplier" value="1" @checked(! $disableSupplierFields && old('available_at_supplier', $product->exists ? $product->available_at_supplier : true)) @if ($disableSupplierFields) disabled @endif>
                                 Available at supplier
                             </label>
                             <p class="form-hint">Whether the supplier currently has this item in stock for reordering.</p>
@@ -332,9 +347,10 @@
                                 id="supplier_reference"
                                 name="supplier_reference"
                                 class="form-control"
-                                value="{{ old('supplier_reference', $product->supplier_reference) }}"
+                                value="{{ old('supplier_reference', $disableSupplierFields ? null : $product->supplier_reference) }}"
                                 maxlength="120"
                                 placeholder="e.g. SA-BB-020-1000-BIO"
+                                @if ($disableSupplierFields) disabled @endif
                             >
                             <p class="form-hint">The supplier's own product code, for reordering.</p>
                             @error('supplier_reference') <p class="form-error">{{ $message }}</p> @enderror
@@ -347,11 +363,12 @@
                                 id="supplier_product_url"
                                 name="supplier_product_url"
                                 class="form-control"
-                                value="{{ old('supplier_product_url', $product->supplier_product_url) }}"
+                                value="{{ old('supplier_product_url', $disableSupplierFields ? null : $product->supplier_product_url) }}"
                                 maxlength="2048"
                                 placeholder="https://…"
+                                @if ($disableSupplierFields) disabled @endif
                             >
-                            @if ($product->supplier_product_url)
+                            @if (! $disableSupplierFields && $product->supplier_product_url)
                                 <p class="form-hint">
                                     <a href="{{ $product->supplier_product_url }}" target="_blank" rel="noopener noreferrer">Open on supplier website ↗</a>
                                 </p>
@@ -652,9 +669,24 @@
             var addBtn = document.getElementById('variant-add');
             var template = document.getElementById('variant-row-template');
             var counter = list ? list.querySelectorAll('.variant-row').length : 0;
+            var mainFieldIds = ['sku', 'gtin', 'quantity', 'supplier_id', 'available_at_supplier', 'supplier_reference', 'supplier_product_url'];
 
             if (!list || !addBtn || !template) {
                 return;
+            }
+
+            function syncMainProductFieldLocks() {
+                var remaining = Array.prototype.filter.call(
+                    list.querySelectorAll('.variant-row'),
+                    function (row) { return !row.classList.contains('is-marked-for-delete'); }
+                ).length;
+
+                mainFieldIds.forEach(function (id) {
+                    var field = document.getElementById(id);
+                    if (field) {
+                        field.disabled = remaining > 0;
+                    }
+                });
             }
 
             function bindRemove(row) {
@@ -662,6 +694,7 @@
                     var hasId = row.querySelector('input[name$="[id]"]');
                     if (!hasId) {
                         row.remove();
+                        syncMainProductFieldLocks();
                         return;
                     }
 
@@ -673,6 +706,7 @@
                         field.disabled = !marked;
                     });
                     event.target.textContent = marked ? 'Remove' : 'Undo';
+                    syncMainProductFieldLocks();
                 });
             }
 
@@ -712,6 +746,7 @@
             }
 
             list.querySelectorAll('.variant-row').forEach(bindRow);
+            syncMainProductFieldLocks();
 
             addBtn.addEventListener('click', function () {
                 var empty = list.querySelector('.variant-empty');
@@ -727,6 +762,7 @@
                     focus.focus();
                 }
                 counter++;
+                syncMainProductFieldLocks();
             });
         })();
     </script>

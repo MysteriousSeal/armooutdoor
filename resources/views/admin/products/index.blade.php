@@ -304,48 +304,82 @@
                                 </td>
                             </tr>
                             @if ($product->variants->isNotEmpty())
+                                @php
+                                    $variantAttributeLabels = $product->variants
+                                        ->flatMap(fn ($variant) => collect($variant->attribute_values ?? [])->pluck('label'))
+                                        ->filter(fn ($label) => filled($label))
+                                        ->unique()
+                                        ->values();
+                                @endphp
                                 <tr class="admin-variant-row">
                                     <td colspan="12">
-                                        <table class="admin-variant-table">
-                                            <thead>
-                                                <tr>
-                                                    <th></th>
-                                                    <th>Variant</th>
-                                                    <th>SKU</th>
-                                                    <th>GTIN</th>
-                                                    <th>Supplier</th>
-                                                    <th>Supplier ref.</th>
-                                                    <th>Price</th>
-                                                    <th>Stock</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach ($product->variants as $variant)
-                                                    @php
-                                                        $variantAttrLabel = collect($variant->attribute_values ?? [])
-                                                            ->map(fn ($attribute) => $attribute['label'].': '.$attribute['value'])
-                                                            ->implode(', ');
-                                                    @endphp
+                                        <div class="admin-variant-panel">
+                                            <table class="admin-variant-table">
+                                                <thead>
                                                     <tr>
-                                                        <td>
-                                                            <img
-                                                                class="admin-product-thumb admin-product-thumb--sm"
-                                                                src="{{ $variant->imageUrl() }}"
-                                                                alt="{{ $variantAttrLabel !== '' ? $variantAttrLabel : 'Variant' }}"
-                                                                loading="lazy"
-                                                            >
-                                                        </td>
-                                                        <td>{{ $variantAttrLabel !== '' ? $variantAttrLabel : 'Variant' }}</td>
-                                                        <td>{{ $variant->sku ?: '—' }}</td>
-                                                        <td>{{ $variant->gtin ?: '—' }}</td>
-                                                        <td>{{ $variant->supplier?->name ?? '—' }}</td>
-                                                        <td>{{ $variant->supplier_reference ?: '—' }}</td>
-                                                        <td>{{ $variant->formattedPrice() }}</td>
-                                                        <td>{{ $variant->quantity }}</td>
+                                                        <th class="admin-variant-table-media"></th>
+                                                        @forelse ($variantAttributeLabels as $attributeLabel)
+                                                            <th>{{ $attributeLabel }}</th>
+                                                        @empty
+                                                            <th>Variant</th>
+                                                        @endforelse
+                                                        <th>SKU</th>
+                                                        <th>GTIN</th>
+                                                        <th>Supplier</th>
+                                                        <th>Supplier ref.</th>
+                                                        <th class="admin-table-num">Price</th>
+                                                        <th class="admin-table-num">Stock</th>
                                                     </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($product->variants as $variant)
+                                                        @php
+                                                            $variantLabel = $variant->label() !== '' ? $variant->label() : 'Variant';
+                                                            $variantValues = collect($variant->attribute_values ?? []);
+                                                        @endphp
+                                                        <tr @class([
+                                                            'is-inactive' => ! $variant->is_active,
+                                                            'is-out' => ! $variant->inStock(),
+                                                        ])>
+                                                            <td class="admin-variant-table-media">
+                                                                <a href="{{ route('admin.products.edit', $product) }}">
+                                                                    <img
+                                                                        class="admin-variant-thumb {{ $variant->image ? '' : 'is-inherited' }}"
+                                                                        src="{{ $variant->thumbnailUrl() }}"
+                                                                        alt="{{ $variantLabel }}"
+                                                                        loading="lazy"
+                                                                    >
+                                                                </a>
+                                                            </td>
+                                                            @forelse ($variantAttributeLabels as $attributeLabel)
+                                                                @php
+                                                                    $attribute = $variantValues->first(
+                                                                        fn ($value) => ($value['label'] ?? '') === $attributeLabel
+                                                                    );
+                                                                @endphp
+                                                                <td>{{ filled($attribute['value'] ?? null) ? $attribute['value'] : '—' }}</td>
+                                                            @empty
+                                                                <td>{{ $variantLabel }}</td>
+                                                            @endforelse
+                                                            <td><span class="admin-variant-code">{{ $variant->sku ?: '—' }}</span></td>
+                                                            <td><span class="admin-variant-code">{{ $variant->gtin ?: '—' }}</span></td>
+                                                            <td>{{ $variant->supplier?->name ?? '—' }}</td>
+                                                            <td>{{ $variant->supplier_reference ?: '—' }}</td>
+                                                            <td class="admin-table-num">{{ $variant->formattedPrice() }}</td>
+                                                            <td class="admin-table-num">
+                                                                @if (! $variant->inStock())
+                                                                    <span class="admin-stock-chip is-out">Out</span>
+                                                                @elseif ($variant->lowStock())
+                                                                    <span class="admin-stock-chip is-low">{{ $variant->quantity }} left</span>
+                                                                @else
+                                                                    {{ $variant->quantity }}
+                                                                @endif
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </td>
                                 </tr>
                             @endif

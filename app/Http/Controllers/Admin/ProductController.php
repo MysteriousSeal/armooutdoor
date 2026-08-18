@@ -140,7 +140,9 @@ class ProductController extends Controller
         $product = Product::query()->create($this->payload($request));
         $this->syncImages($request, $product, null);
         $this->syncVariants($request, $product);
-        $product->refresh()->reconcileQuantity();
+        $product->refresh();
+        $this->clearMainProductFieldsIfHasVariants($product);
+        $product->reconcileQuantity();
         AdminActivityLog::record('product.created', $product, 'Created product '.$product->localizedName());
 
         return redirect()
@@ -166,6 +168,7 @@ class ProductController extends Controller
         $this->syncImages($request, $product, $oldCoverImage);
         $this->syncVariants($request, $product);
         $product->refresh();
+        $this->clearMainProductFieldsIfHasVariants($product);
 
         if ($product->hasVariants()) {
             $product->reconcileQuantity();
@@ -377,6 +380,26 @@ class ProductController extends Controller
         }
 
         return $filterAttributes;
+    }
+
+    /**
+     * SKU, GTIN and supplier fields live on variants once a product has
+     * them — the main product's own values would be stale/ambiguous, so
+     * they're cleared regardless of what the (disabled) form fields sent.
+     */
+    private function clearMainProductFieldsIfHasVariants(Product $product): void
+    {
+        if (! $product->hasVariants()) {
+            return;
+        }
+
+        $product->update([
+            'sku' => null,
+            'gtin' => null,
+            'supplier_id' => null,
+            'supplier_reference' => null,
+            'supplier_product_url' => null,
+        ]);
     }
 
     /**

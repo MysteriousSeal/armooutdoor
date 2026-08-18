@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\User;
 use Database\Seeders\AdminSeeder;
 use Database\Seeders\CatalogSeeder;
@@ -91,6 +92,40 @@ class AdminTest extends TestCase
             ->get('/admin/products?sort=id-asc')
             ->assertOk()
             ->assertSeeInOrder($lowestIds, false);
+    }
+
+    public function test_admin_products_list_shows_variant_subtable(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $category = Category::query()->where('slug', 'shelters')->firstOrFail();
+        $product = Product::factory()->create([
+            'category_id' => $category->id,
+            'is_active' => true,
+            'name' => ['en' => 'Variant parent', 'fr' => 'Produit à variantes'],
+        ]);
+        ProductVariant::query()->create([
+            'product_id' => $product->id,
+            'attribute_values' => [['label' => 'Taille', 'value' => 'M']],
+            'sku' => 'VAR-M',
+            'gtin' => '1234567890123',
+            'price_cents' => 1999,
+            'quantity' => 1,
+            'is_active' => true,
+        ]);
+        ProductVariant::query()->create([
+            'product_id' => $product->id,
+            'attribute_values' => [['label' => 'Taille', 'value' => 'L']],
+            'sku' => 'VAR-L',
+            'price_cents' => 1999,
+            'quantity' => 0,
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/admin/products')
+            ->assertOk()
+            ->assertSee('admin-variant-panel', false)
+            ->assertSeeInOrder(['M', 'VAR-M', '1234567890123', '1 left', 'L', 'VAR-L', 'Out'], false);
     }
 
     public function test_admin_login_rejects_store_customers(): void
