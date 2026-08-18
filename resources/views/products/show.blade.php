@@ -100,7 +100,13 @@
                         <span id="product-detail-price-current">{{ ($displayVariant ?? $product)->formattedPrice() }}</span>
                     </p>
                     @php
-                        $availableAtSupplier = ! $product->inStock() && $product->supplier_id !== null && $product->available_at_supplier;
+                        $backorderableVariant = $product->hasVariants()
+                            ? $activeVariants->first(fn ($variant) => ! $variant->inStock() && $variant->isBackorderable())
+                            : null;
+                        $availableAtSupplier = $product->hasVariants()
+                            ? ($activeVariants->isNotEmpty() && $activeVariants->every(fn ($variant) => ! $variant->inStock()) && $backorderableVariant !== null)
+                            : (! $product->inStock() && $product->supplier_id !== null && $product->available_at_supplier);
+                        $supplierForLeadTime = $backorderableVariant?->supplier ?? $product->supplier;
                     @endphp
                     <span class="stock-badge {{ $product->lowStock() ? 'is-low-stock' : ($product->inStock() ? 'is-in-stock' : ($availableAtSupplier ? 'is-low-stock' : 'is-out-of-stock')) }}" id="product-stock-badge">
                         {{ $product->lowStock() ? __('store.low_stock') : ($product->inStock() ? __('store.in_stock') : ($availableAtSupplier ? __('store.available_at_supplier') : __('store.out_of_stock'))) }}
@@ -114,8 +120,8 @@
                         <span class="product-lead-time-copy">
                             <strong>{{ __('store.supplier_lead_time_label') }}</strong>
                             <span>
-                                {{ $product->supplier->lead_time_days !== null
-                                    ? trans_choice('store.supplier_lead_time_value', $product->supplier->lead_time_days, ['days' => $product->supplier->lead_time_days])
+                                {{ $supplierForLeadTime?->lead_time_days !== null
+                                    ? trans_choice('store.supplier_lead_time_value', $supplierForLeadTime->lead_time_days, ['days' => $supplierForLeadTime->lead_time_days])
                                     : __('store.supplier_lead_time_unknown') }}
                             </span>
                         </span>
