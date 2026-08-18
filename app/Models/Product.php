@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable([
     'category_id',
+    'supplier_id',
     'slug',
     'is_active',
     'sku',
@@ -66,6 +67,11 @@ class Product extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class);
     }
 
     public function scopeActive(Builder $query): void

@@ -2,6 +2,13 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-18 — v0.1.37
+
+### Admin
+
+- **Product supplier**: products can now be linked to a supplier (optional, one per product) via a dropdown on the product edit page, below Carriers.
+- **Products list**: shows the supplier per product, with a filter dropdown and a Supplier column in the CSV export.
+
 ## 2026-08-18 — v0.1.36
 
 ### Admin

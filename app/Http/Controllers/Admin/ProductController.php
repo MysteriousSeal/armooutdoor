@@ -10,6 +10,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\ProductVariant;
+use App\Models\Supplier;
 use App\Support\Csv;
 use App\Support\HtmlSanitizer;
 use Illuminate\Database\Eloquent\Builder;
@@ -26,6 +27,7 @@ class ProductController extends Controller
     {
         $search = trim((string) $request->query('search', ''));
         $categorySlug = (string) $request->query('category', '');
+        $supplierId = $request->filled('supplier') ? (int) $request->query('supplier') : null;
         $tab = in_array($request->query('tab'), ['active', 'disabled', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight'], true)
             ? (string) $request->query('tab')
             : 'active';
@@ -33,8 +35,8 @@ class ProductController extends Controller
             ? (string) $request->query('sort')
             : 'id-asc';
 
-        $products = $this->filteredProductsQuery($search, $categorySlug, $tab)
-            ->with('category')
+        $products = $this->filteredProductsQuery($search, $categorySlug, $tab, $supplierId)
+            ->with('category', 'supplier')
             ->withCount('variants')
             ->tap(fn ($query) => $this->applyProductSort($query, $sort))
             ->paginate(24)
@@ -52,8 +54,10 @@ class ProductController extends Controller
             'noGtinCount' => Product::query()->where('is_active', true)->where(fn ($query) => $query->whereNull('gtin')->orWhere('gtin', ''))->count(),
             'noWeightCount' => Product::query()->where('is_active', true)->where(fn ($query) => $query->whereNull('weight_grams')->orWhere('weight_grams', 0))->count(),
             'categories' => $this->categoryOptions(),
+            'suppliers' => Supplier::query()->orderBy('name')->get(),
             'search' => $search,
             'categorySlug' => $categorySlug,
+            'supplierId' => $supplierId,
         ]);
     }
 
@@ -61,24 +65,26 @@ class ProductController extends Controller
     {
         $search = trim((string) $request->query('search', ''));
         $categorySlug = (string) $request->query('category', '');
+        $supplierId = $request->filled('supplier') ? (int) $request->query('supplier') : null;
         $tab = in_array($request->query('tab'), ['active', 'disabled', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight'], true)
             ? (string) $request->query('tab')
             : 'active';
 
-        $products = $this->filteredProductsQuery($search, $categorySlug, $tab)
-            ->with('category')
+        $products = $this->filteredProductsQuery($search, $categorySlug, $tab, $supplierId)
+            ->with('category', 'supplier')
             ->orderBy('id')
             ->get();
 
         return Csv::download(
             'products-'.now()->format('Y-m-d').'.csv',
-            ['ID', 'Name', 'SKU', 'GTIN', 'Category', 'Price', 'Stock', 'Weight (g)', 'Active'],
+            ['ID', 'Name', 'SKU', 'GTIN', 'Category', 'Supplier', 'Price', 'Stock', 'Weight (g)', 'Active'],
             $products->map(fn (Product $product): array => [
                 $product->id,
                 $product->localizedName(),
                 $product->sku ?? '',
                 $product->gtin ?? '',
                 $product->category?->localizedName() ?? '',
+                $product->supplier?->name ?? '',
                 number_format($product->price_cents / 100, 2, '.', ''),
                 $product->quantity,
                 $product->weight_grams ?? '',
@@ -87,7 +93,7 @@ class ProductController extends Controller
         );
     }
 
-    private function filteredProductsQuery(string $search, string $categorySlug, string $tab): Builder
+    private function filteredProductsQuery(string $search, string $categorySlug, string $tab, ?int $supplierId = null): Builder
     {
         return Product::query()
             ->tap(fn ($query) => $this->applyProductTab($query, $tab))
@@ -102,7 +108,8 @@ class ProductController extends Controller
                     $query->where('slug', $categorySlug)
                         ->orWhereHas('parent', fn ($query) => $query->where('slug', $categorySlug));
                 });
-            });
+            })
+            ->when($supplierId !== null, fn ($query) => $query->where('supplier_id', $supplierId));
     }
 
     public function create(): View
@@ -114,6 +121,7 @@ class ProductController extends Controller
             ]),
             'categories' => $this->categoryOptions(),
             'carriers' => Carrier::query()->orderBy('sort_order')->get(),
+            'suppliers' => Supplier::query()->orderBy('name')->get(),
         ]);
     }
 
@@ -136,6 +144,7 @@ class ProductController extends Controller
             'product' => $product->load('images', 'variants'),
             'categories' => $this->categoryOptions(),
             'carriers' => Carrier::query()->orderBy('sort_order')->get(),
+            'suppliers' => Supplier::query()->orderBy('name')->get(),
         ]);
     }
 
@@ -269,6 +278,7 @@ class ProductController extends Controller
 
         return [
             'category_id' => $request->integer('category_id'),
+            'supplier_id' => $request->filled('supplier_id') ? $request->integer('supplier_id') : null,
             'slug' => $slug,
             'is_active' => $request->boolean('is_active'),
             'age_restricted' => $request->boolean('age_restricted'),

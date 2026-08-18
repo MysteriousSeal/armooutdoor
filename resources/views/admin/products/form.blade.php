@@ -299,6 +299,24 @@
                         </div>
                         @error('carrier_ids') <p class="form-error">{{ $message }}</p> @enderror
                     </section>
+
+                    <section class="order-panel">
+                        <h3 class="order-panel-title">Supplier</h3>
+                        <p class="form-hint">Which supplier this product is ordered from, if any.</p>
+
+                        <div class="form-group">
+                            <label for="supplier_id" class="sr-only">Supplier</label>
+                            <select id="supplier_id" name="supplier_id" class="form-control">
+                                <option value="">No supplier</option>
+                                @foreach ($suppliers as $supplier)
+                                    <option value="{{ $supplier->id }}" @selected(old('supplier_id', $product->supplier_id) == $supplier->id)>
+                                        {{ $supplier->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('supplier_id') <p class="form-error">{{ $message }}</p> @enderror
+                        </div>
+                    </section>
                 </div>
             </div>
 
