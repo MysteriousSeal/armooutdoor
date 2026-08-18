@@ -2083,6 +2083,51 @@
     padding-bottom: 0;
 }
 
+.cart-shipping-estimate {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin: 0 0 1.15rem;
+    padding: 0.8rem 1rem;
+    background: var(--surface);
+}
+
+.cart-shipping-estimate-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    flex-shrink: 0;
+    color: #5b5c3b;
+    border: 1.5px solid color-mix(in srgb, #5b5c3b 45%, var(--border));
+    border-radius: 50%;
+}
+
+.cart-shipping-estimate-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.12rem;
+    min-width: 0;
+}
+
+.cart-shipping-estimate-copy strong {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.cart-shipping-estimate-copy time {
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+[data-theme='dark'] .cart-shipping-estimate-icon {
+    color: var(--accent);
+    border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+}
+
 .cart-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 18rem;

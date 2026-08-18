@@ -95,37 +95,15 @@ class Order extends Model
      */
     public function estimatedShippingDate(): \Illuminate\Support\Carbon
     {
-        $candidates = collect([$this->standardShippingEstimate()]);
+        $candidates = collect([\App\Support\ShippingEstimate::standard($this->created_at)]);
 
         foreach ($this->items as $item) {
             if ($item->was_backordered && $item->supplier_lead_time_days !== null) {
-                $candidates->push(self::nextBusinessDay(
-                    $this->created_at->copy()->timezone('Europe/Paris')->addDays($item->supplier_lead_time_days)->startOfDay()
-                ));
+                $candidates->push(\App\Support\ShippingEstimate::backordered($this->created_at, $item->supplier_lead_time_days));
             }
         }
 
         return $candidates->max();
-    }
-
-    private function standardShippingEstimate(): \Illuminate\Support\Carbon
-    {
-        $placedAt = $this->created_at->copy()->timezone('Europe/Paris');
-
-        $base = $placedAt->hour < 10
-            ? $placedAt->copy()->startOfDay()
-            : $placedAt->copy()->addDay()->startOfDay();
-
-        return self::nextBusinessDay($base);
-    }
-
-    private static function nextBusinessDay(\Illuminate\Support\Carbon $date): \Illuminate\Support\Carbon
-    {
-        return match ($date->dayOfWeekIso) {
-            6 => $date->addDays(2),
-            7 => $date->addDays(1),
-            default => $date,
-        };
     }
 
     public function reviews(): HasMany

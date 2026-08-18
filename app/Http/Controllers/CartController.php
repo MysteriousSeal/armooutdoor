@@ -8,9 +8,12 @@ use App\Models\ProductVariant;
 use App\Models\ShippingSetting;
 use App\Support\Cart;
 use App\Support\CartLine;
+use App\Support\ShippingEstimate;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -19,14 +22,42 @@ class CartController extends Controller
     public function show(Cart $cart): View
     {
         [$freeShippingUnlocked, $cheapestShippingCents] = $this->shippingEstimate($cart);
+        $lines = $cart->lines();
 
         return view('cart.show', [
-            'lines' => $cart->lines(),
+            'lines' => $lines,
             'total' => $cart->formattedTotal(),
             'itemCount' => $cart->quantity(),
             'freeShippingUnlocked' => $freeShippingUnlocked,
             'cheapestShippingCents' => $cheapestShippingCents,
+            'estimatedShippingDate' => $this->estimatedShippingDate($lines),
         ]);
+    }
+
+    /**
+     * "If you ordered right now" — same 10am/weekend rules as a placed
+     * order, using the current moment as the reference instead of a
+     * fixed order date, plus each backordered line's own supplier lead
+     * time. Null when the cart is empty.
+     */
+    private function estimatedShippingDate(Collection $lines): ?Carbon
+    {
+        if ($lines->isEmpty()) {
+            return null;
+        }
+
+        $now = now();
+        $candidates = collect([ShippingEstimate::standard($now)]);
+
+        foreach ($lines as $line) {
+            $product = $line->product;
+
+            if (! $product->inStock() && $product->isBackorderable() && $product->supplier?->lead_time_days !== null) {
+                $candidates->push(ShippingEstimate::backordered($now, $product->supplier->lead_time_days));
+            }
+        }
+
+        return $candidates->max();
     }
 
     public function add(Request $request, Cart $cart): RedirectResponse|JsonResponse
