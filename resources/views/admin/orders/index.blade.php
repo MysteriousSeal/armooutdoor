@@ -237,7 +237,12 @@
                                         {{ $order->hasTracking() ? 'Available' : 'Missing' }}
                                     </span>
                                 </td>
-                                <td class="admin-table-num">{{ $order->formattedTotal() }}</td>
+                                <td class="admin-table-num">
+                                    {{ $order->formattedTotal() }}
+                                    @if ($order->marketplace_commission_cents)
+                                        <br><span class="admin-table-sub">− {{ format_euros($order->marketplace_commission_cents) }} commission</span>
+                                    @endif
+                                </td>
                                 <td>
                                     <div class="admin-table-actions">
                                         @if ($order->invoiceIsAvailable())

@@ -40,7 +40,7 @@ class Address extends Model
 
     public function recipientName(): string
     {
-        return trim($this->first_name.' '.$this->last_name);
+        return format_person_name($this->first_name, $this->last_name);
     }
 
     public function countryName(): string

@@ -160,7 +160,7 @@
 
     <div class="addr-label">Adresse de livraison</div>
     <div class="addr-body" style="margin-bottom: 20px;">
-        {{ $order->address_snapshot['first_name'] }} {{ $order->address_snapshot['last_name'] }}<br>
+        {{ format_person_name($order->address_snapshot['first_name'], $order->address_snapshot['last_name']) }}<br>
         @if ($order->relay_snapshot)
             {{ $order->relay_snapshot['name'] }}<br>
             {{ $order->relay_snapshot['line1'] }}<br>

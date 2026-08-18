@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Number;
+use Illuminate\Support\Str;
 
 if (! function_exists('localized_route')) {
     /**
@@ -11,6 +12,20 @@ if (! function_exists('localized_route')) {
     function localized_route(string $name, array $parameters = [], ?string $locale = null): string
     {
         return route($name, $parameters);
+    }
+}
+
+if (! function_exists('format_person_name')) {
+    /**
+     * Format a person's name for display: last name in uppercase, first name
+     * capitalized (French administrative convention).
+     */
+    function format_person_name(?string $firstName, ?string $lastName): string
+    {
+        $first = Str::title(trim((string) $firstName));
+        $last = Str::upper(trim((string) $lastName));
+
+        return trim("{$first} {$last}");
     }
 }
 

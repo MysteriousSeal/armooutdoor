@@ -499,6 +499,25 @@ class OrderController extends Controller
         return back()->with('status', 'Tracking details saved.');
     }
 
+    public function updateMarketplaceCommission(Request $request, Order $order): RedirectResponse
+    {
+        abort_unless($order->is_manual && $order->marketplace_id, 404);
+
+        $validated = $request->validate([
+            'marketplace_commission' => ['nullable', 'numeric', 'min:0', 'max:99999.99'],
+        ]);
+
+        $commission = $validated['marketplace_commission'] ?? null;
+
+        $order->update([
+            'marketplace_commission_cents' => $commission === null || $commission === ''
+                ? null
+                : (int) round(((float) $commission) * 100),
+        ]);
+
+        return back()->with('status', 'Marketplace commission saved.');
+    }
+
     public function updateShippingAddress(UpdateOrderShippingAddressRequest $request, Order $order): RedirectResponse
     {
         abort_unless($order->addressIsEditable(), 403);

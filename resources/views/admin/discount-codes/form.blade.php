@@ -16,12 +16,12 @@
         $selectedEndsAt = old('ends_at', optional($discountCode->ends_at)->format('Y-m-d\TH:i') ?: $defaultDeadline->format('Y-m-d\TH:i'));
         $customerOptions = $customers->map(fn ($customer) => [
             'id' => $customer->id,
-            'label' => trim($customer->first_name.' '.$customer->last_name),
-            'name' => trim($customer->first_name.' '.$customer->last_name),
+            'label' => $customer->name,
+            'name' => $customer->name,
             'first_name' => $customer->first_name,
             'last_name' => $customer->last_name,
             'email' => $customer->email,
-            'search' => trim($customer->first_name.' '.$customer->last_name).' '.$customer->email,
+            'search' => $customer->name.' '.$customer->email,
         ])->values();
         $selectedCustomerId = old('user_id', $discountCode->user_id);
         $selectedCustomer = $customerOptions->firstWhere('id', (int) $selectedCustomerId);

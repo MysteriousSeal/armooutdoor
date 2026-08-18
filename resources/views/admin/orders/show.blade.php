@@ -185,10 +185,31 @@
             </div>
 
             <aside class="order-facts">
-                @if ($order->marketplace_name)
+                @if ($order->is_manual && $order->marketplace_id)
                     <section class="order-fact">
                         <h3 class="order-fact-title">Marketplace</h3>
                         <p>{{ $order->marketplace_name }}</p>
+
+                        <form method="POST" action="{{ route('admin.orders.marketplace-commission.update', $order) }}" class="order-shipping-form">
+                            @csrf
+                            @method('PATCH')
+                            <div class="order-shipping-field">
+                                <label for="marketplace_commission">Commission (EUR)</label>
+                                <input
+                                    type="number"
+                                    id="marketplace_commission"
+                                    name="marketplace_commission"
+                                    class="order-shipping-input"
+                                    value="{{ old('marketplace_commission', $order->marketplace_commission_cents !== null ? number_format($order->marketplace_commission_cents / 100, 2, '.', '') : '') }}"
+                                    min="0"
+                                    max="99999.99"
+                                    step="0.01"
+                                    placeholder="e.g. 5.00"
+                                >
+                                @error('marketplace_commission') <p class="form-error">{{ $message }}</p> @enderror
+                            </div>
+                            <button type="submit" class="btn btn-secondary btn-block">Save commission</button>
+                        </form>
                     </section>
                 @endif
 
@@ -287,7 +308,7 @@
                         @endif
                     </div>
                     <p>
-                        {{ $order->address_snapshot['first_name'] }} {{ $order->address_snapshot['last_name'] }}<br>
+                        {{ format_person_name($order->address_snapshot['first_name'], $order->address_snapshot['last_name']) }}<br>
                         {{ $order->address_snapshot['line1'] }}
                         @if (! empty($order->address_snapshot['line2']))
                             <br>{{ $order->address_snapshot['line2'] }}
@@ -309,7 +330,7 @@
                             @endif
                         </div>
                         <p>
-                            {{ $order->billing_address_snapshot['first_name'] }} {{ $order->billing_address_snapshot['last_name'] }}<br>
+                            {{ format_person_name($order->billing_address_snapshot['first_name'], $order->billing_address_snapshot['last_name']) }}<br>
                             {{ $order->billing_address_snapshot['line1'] }}
                             @if (! empty($order->billing_address_snapshot['line2']))
                                 <br>{{ $order->billing_address_snapshot['line2'] }}

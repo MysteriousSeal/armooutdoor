@@ -171,7 +171,7 @@
                 <section class="order-fact">
                     <h3 class="order-fact-title">{{ __('store.order_address') }}</h3>
                     <p>
-                        {{ $order->address_snapshot['first_name'] }} {{ $order->address_snapshot['last_name'] }}<br>
+                        {{ format_person_name($order->address_snapshot['first_name'], $order->address_snapshot['last_name']) }}<br>
                         {{ $order->address_snapshot['line1'] }}
                         @if (! empty($order->address_snapshot['line2']))
                             <br>{{ $order->address_snapshot['line2'] }}
@@ -189,7 +189,7 @@
                         <h3 class="order-fact-title">{{ __('store.order_billing_address') }}</h3>
                         @if ($order->hasSeparateBillingAddress())
                             <p>
-                                {{ $order->billing_address_snapshot['first_name'] }} {{ $order->billing_address_snapshot['last_name'] }}<br>
+                                {{ format_person_name($order->billing_address_snapshot['first_name'], $order->billing_address_snapshot['last_name']) }}<br>
                                 {{ $order->billing_address_snapshot['line1'] }}
                                 @if (! empty($order->billing_address_snapshot['line2']))
                                     <br>{{ $order->billing_address_snapshot['line2'] }}

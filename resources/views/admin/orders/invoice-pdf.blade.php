@@ -181,7 +181,7 @@
             <td>
                 <div class="addr-label">Adresse d'expédition</div>
                 <div class="addr-body">
-                    {{ $order->address_snapshot['first_name'] }} {{ $order->address_snapshot['last_name'] }}<br>
+                    {{ format_person_name($order->address_snapshot['first_name'], $order->address_snapshot['last_name']) }}<br>
                     @if ($order->relay_snapshot)
                         {{ $order->relay_snapshot['name'] }}<br>
                         {{ $order->relay_snapshot['line1'] }}<br>
@@ -200,7 +200,7 @@
                 <div class="addr-label">Adresse de facturation</div>
                 <div class="addr-body">
                     @php($billing = $order->billing_address_snapshot ?? $order->address_snapshot)
-                    {{ $billing['first_name'] }} {{ $billing['last_name'] }}<br>
+                    {{ format_person_name($billing['first_name'], $billing['last_name']) }}<br>
                     {{ $billing['line1'] }}<br>
                     @if (! empty($billing['line2']))
                         {{ $billing['line2'] }}<br>
