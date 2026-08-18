@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-19 — v0.1.74
+
+### Storefront
+
+- **Fixed account page order count**: it included archived orders; now only counts non-archived ones.
+
 ## 2026-08-19 — v0.1.73
 
 ### Admin
