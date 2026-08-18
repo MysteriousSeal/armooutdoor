@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 #[Fillable([
     'category_id',
     'supplier_id',
+    'available_at_supplier',
     'slug',
     'is_active',
     'sku',
@@ -59,6 +60,7 @@ class Product extends Model
             'carrier_ids' => 'array',
             'age_restricted' => 'boolean',
             'is_active' => 'boolean',
+            'available_at_supplier' => 'boolean',
             'featured' => 'boolean',
             'sort_order' => 'integer',
         ];

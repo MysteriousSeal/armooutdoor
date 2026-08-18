@@ -316,6 +316,14 @@
                             </select>
                             @error('supplier_id') <p class="form-error">{{ $message }}</p> @enderror
                         </div>
+
+                        <div class="form-group">
+                            <label class="form-check">
+                                <input type="checkbox" id="available_at_supplier" name="available_at_supplier" value="1" @checked(old('available_at_supplier', $product->exists ? $product->available_at_supplier : true))>
+                                Available at supplier
+                            </label>
+                            <p class="form-hint">Whether the supplier currently has this item in stock for reordering.</p>
+                        </div>
                     </section>
                 </div>
             </div>

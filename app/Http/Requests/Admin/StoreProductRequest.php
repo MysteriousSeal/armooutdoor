@@ -24,6 +24,7 @@ class StoreProductRequest extends FormRequest
             'description' => ['required', 'string', 'max:50000'],
             'category_id' => ['required', 'exists:categories,id'],
             'supplier_id' => ['nullable', 'exists:suppliers,id'],
+            'available_at_supplier' => ['sometimes', 'boolean'],
             'price' => ['required', 'numeric', 'min:0', 'max:99999.99'],
             'quantity' => ['required', 'integer', 'min:0', 'max:99999'],
             'weight_grams' => ['nullable', 'integer', 'min:0', 'max:99999'],

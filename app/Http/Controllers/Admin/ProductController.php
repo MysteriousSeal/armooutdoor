@@ -279,6 +279,7 @@ class ProductController extends Controller
         return [
             'category_id' => $request->integer('category_id'),
             'supplier_id' => $request->filled('supplier_id') ? $request->integer('supplier_id') : null,
+            'available_at_supplier' => $request->boolean('available_at_supplier'),
             'slug' => $slug,
             'is_active' => $request->boolean('is_active'),
             'age_restricted' => $request->boolean('age_restricted'),
