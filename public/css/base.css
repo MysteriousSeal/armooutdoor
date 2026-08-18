@@ -281,7 +281,7 @@ button.btn {
 }
 
 .card-cart .btn {
-    width: 100%;
+    width: auto;
 }
 
 .category-card-meta {

@@ -269,6 +269,14 @@
 
 .home .product-grid--five {
     grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 1.85rem 0.85rem;
+}
+
+.home .product-grid--five .card-cart .btn {
+    min-height: 2rem;
+    padding: 0.4rem 0.65rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.04em;
 }
 
 .home .home-why {

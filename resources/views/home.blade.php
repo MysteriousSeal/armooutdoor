@@ -98,6 +98,7 @@
                             'field-gear' => 'campground',
                             'everyday' => 'screwdriver-wrench',
                             'munitions' => 'box-open',
+                            'repliques-airsoft' => 'gun',
                         ];
                     @endphp
                     @foreach ($categories as $category)
