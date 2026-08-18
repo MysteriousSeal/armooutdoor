@@ -1318,6 +1318,14 @@ button.admin-table-icon-btn:hover {
     font-variant-numeric: tabular-nums;
 }
 
+.order-timeline-note {
+    grid-column: 2;
+    margin: 0.2rem 0 0;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    color: var(--text-muted);
+}
+
 [data-theme='dark'] .order-timeline-item.is-preparing {
     --history-tone: #e0c36a;
 }

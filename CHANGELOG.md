@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-19 — v0.1.71
+
+### Storefront
+
+- **Order history explanations**: each status in "Historique de la commande" now shows a short note explaining what it means.
+
 ## 2026-08-19 — v0.1.70
 
 ### Storefront

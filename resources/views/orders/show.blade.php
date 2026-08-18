@@ -171,6 +171,7 @@
                                         {{ $entry->created_at->translatedFormat('d F Y · H:i') }}
                                     </time>
                                 </div>
+                                <p class="order-timeline-note">{{ __('store.order_status_note_'.$entry->status) }}</p>
                             </li>
                         @endforeach
                     </ol>
