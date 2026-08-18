@@ -82,7 +82,8 @@
                 <h2 id="help-invoice-title">Facture</h2>
                 <p>
                     Une facture est disponible pour chaque commande, téléchargeable depuis
-                    <a href="{{ route('orders.index') }}">Mes commandes</a> dans votre compte.
+                    <a href="{{ route('orders.index') }}">Mes commandes</a> dans votre compte, au moment de
+                    l'expédition de la commande ou lors du remboursement.
                 </p>
             </section>
         </article>

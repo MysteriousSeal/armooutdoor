@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-18 — v0.1.29
+
+### Storefront
+
+- **Paiement sécurisé page**: clarified that the invoice becomes available once the order ships or is refunded.
+
 ## 2026-08-18 — v0.1.28
 
 ### Storefront
