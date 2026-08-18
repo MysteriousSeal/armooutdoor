@@ -28,7 +28,7 @@ class StoreProductRequest extends FormRequest
             'supplier_product_url' => ['nullable', 'url', 'max:2048'],
             'supplier_reference' => ['nullable', 'string', 'max:120'],
             'price' => ['required', 'numeric', 'min:0', 'max:99999.99'],
-            'quantity' => ['required', 'integer', 'min:0', 'max:99999'],
+            'quantity' => ['sometimes', 'integer', 'min:0', 'max:99999'],
             'weight_grams' => ['nullable', 'integer', 'min:0', 'max:99999'],
             'carrier_ids' => ['nullable', 'array'],
             'carrier_ids.*' => ['integer', 'exists:carriers,id'],

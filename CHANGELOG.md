@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-19 — v0.1.63
+
+### Admin
+
+- **Fixed "quantité obligatoire" error on saving a variant product**: the quantity field was being fully disabled (not just read-only) once a product had variants, so browsers stopped submitting it and the required-field check failed. It's now read-only instead, and the server no longer requires it.
+
+### Catalog
+
+- **Added Mechanix M-Pact gloves (Noir)**: 1 product with 5 size variants (S–XXL) from DM Diffusion, filed under the existing Gants category.
+
 ## 2026-08-19 — v0.1.62
 
 ### Admin

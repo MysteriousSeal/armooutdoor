@@ -669,7 +669,7 @@
             var addBtn = document.getElementById('variant-add');
             var template = document.getElementById('variant-row-template');
             var counter = list ? list.querySelectorAll('.variant-row').length : 0;
-            var mainFieldIds = ['sku', 'gtin', 'quantity', 'supplier_id', 'available_at_supplier', 'supplier_reference', 'supplier_product_url'];
+            var mainFieldIds = ['sku', 'gtin', 'supplier_id', 'available_at_supplier', 'supplier_reference', 'supplier_product_url'];
 
             if (!list || !addBtn || !template) {
                 return;
@@ -687,6 +687,11 @@
                         field.disabled = remaining > 0;
                     }
                 });
+
+                var quantityField = document.getElementById('quantity');
+                if (quantityField) {
+                    quantityField.readOnly = remaining > 0;
+                }
             }
 
             function bindRemove(row) {
