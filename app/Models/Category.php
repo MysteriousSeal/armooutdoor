@@ -16,11 +16,11 @@ class Category extends Model
     use HasFactory;
 
     private const ROOT_ICON_NAMES = [
-        'targets' => 'bullseye',
-        'range' => 'toolbox',
-        'apparel' => 'shirt',
-        'field-gear' => 'campground',
-        'everyday' => 'screwdriver-wrench',
+        'cibles' => 'bullseye',
+        'stand-de-tir' => 'toolbox',
+        'vetements' => 'shirt',
+        'terrain' => 'campground',
+        'quotidien' => 'screwdriver-wrench',
         'munitions' => 'box-open',
         'repliques-airsoft' => 'gun',
     ];

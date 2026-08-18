@@ -183,7 +183,7 @@ Route::get('/categories', [CategoryController::class, 'index'])->name('categorie
 Route::get('/nouveautes', [NewArrivalsController::class, 'index'])->name('products.new-arrivals');
 Route::get('/promotions', [PromotionsController::class, 'index'])->name('products.promotions');
 Route::get('/meilleures-ventes', [BestSellersController::class, 'index'])->name('products.best-sellers');
-Route::get('/categories/{category:slug}', [CategoryController::class, 'show'])->name('categories.show');
+Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
 Route::get('/products/{product:slug}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/search', [SearchController::class, 'index'])->name('search');
 

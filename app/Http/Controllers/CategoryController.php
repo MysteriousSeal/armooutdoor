@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
@@ -29,8 +30,25 @@ class CategoryController extends Controller
         return view('categories.index', compact('categories'));
     }
 
-    public function show(Request $request, Category $category): View
+    public function show(Request $request, string $category): View|RedirectResponse
     {
+        $slug = $category;
+        $category = Category::where('slug', $slug)->first();
+
+        if ($category === null) {
+            $newSlug = config('category_slug_redirects.'.$slug);
+
+            if ($newSlug !== null) {
+                return redirect(localized_route('categories.show', ['category' => $newSlug]), 301);
+            }
+
+            abort(404);
+        }
+
+        // Other code (e.g. the nav) reads request()->route('category')
+        // expecting a Category model, matching the old implicit binding.
+        $request->route()->setParameter('category', $category);
+
         $category->load([
             'parent.children.products' => fn ($query) => $query->active(),
             'children.products' => fn ($query) => $query->active(),
