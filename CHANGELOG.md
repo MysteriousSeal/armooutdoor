@@ -6,7 +6,7 @@ All notable changes to this project since the initial commit are documented here
 
 ### Catalog
 
-- **Added Mechanix M-Pact gloves (Coyote)**: 5 sizes (S–XXL) from DM Diffusion, new "Gants" subcategory under Vêtements.
+- **Added Mechanix M-Pact gloves (Coyote)**: 1 product with 5 size variants (S–XXL) from DM Diffusion, new "Gants" subcategory under Vêtements.
 
 ## 2026-08-19 — v0.1.55
 
