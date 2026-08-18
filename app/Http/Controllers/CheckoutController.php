@@ -334,11 +334,25 @@ class CheckoutController extends Controller
                     if ($line->variant !== null) {
                         $variant = ProductVariant::query()->lockForUpdate()->find($line->variant->id);
 
-                        if ($variant === null || $variant->quantity < $line->quantity) {
+                        if ($variant === null) {
                             throw new \RuntimeException('stock');
                         }
 
-                        $variant->decrement('quantity', $line->quantity);
+                        if ($variant->quantity < $line->quantity) {
+                            if (! $variant->isBackorderable()) {
+                                throw new \RuntimeException('stock');
+                            }
+
+                            if ($variant->quantity > 0) {
+                                $variant->decrement('quantity', $variant->quantity);
+                            }
+
+                            $wasBackordered = true;
+                            $supplierLeadTimeDays = $variant->supplier?->lead_time_days;
+                        } else {
+                            $variant->decrement('quantity', $line->quantity);
+                        }
+
                         $product->reconcileQuantity();
                     } elseif ($product->quantity < $line->quantity) {
                         if (! $product->isBackorderable()) {

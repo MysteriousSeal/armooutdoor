@@ -373,6 +373,10 @@
                         'quantity' => $variant->quantity,
                         'is_active' => $variant->is_active,
                         'image_url' => $variant->image ? $variant->imageUrl() : null,
+                        'supplier_id' => $variant->supplier_id,
+                        'available_at_supplier' => $variant->available_at_supplier,
+                        'supplier_reference' => $variant->supplier_reference,
+                        'supplier_product_url' => $variant->supplier_product_url,
                     ])->values()->all()
                     : []);
             @endphp
@@ -453,6 +457,38 @@
                                             @error("variants.{$index}.quantity") <p class="form-error">{{ $message }}</p> @enderror
                                         </div>
                                     </div>
+                                    <div class="variant-supplier-fields">
+                                        <p class="form-hint">Supplier — independent from the main product's supplier.</p>
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label>Supplier</label>
+                                                <select name="variants[{{ $index }}][supplier_id]" class="form-control">
+                                                    <option value="">No supplier</option>
+                                                    @foreach ($suppliers as $supplier)
+                                                        <option value="{{ $supplier->id }}" @selected(($variant['supplier_id'] ?? null) == $supplier->id)>
+                                                            {{ $supplier->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-check">
+                                                    <input type="checkbox" name="variants[{{ $index }}][available_at_supplier]" value="1" @checked($variant['available_at_supplier'] ?? true)>
+                                                    Available at supplier
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label>Supplier reference</label>
+                                                <input type="text" name="variants[{{ $index }}][supplier_reference]" class="form-control" maxlength="120" value="{{ $variant['supplier_reference'] ?? '' }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Supplier product URL</label>
+                                                <input type="url" name="variants[{{ $index }}][supplier_product_url]" class="form-control" maxlength="2048" value="{{ $variant['supplier_product_url'] ?? '' }}">
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -503,6 +539,36 @@
                                     <div class="form-group">
                                         <label>Quantity</label>
                                         <input type="number" name="variants[__INDEX__][quantity]" class="form-control" min="0" max="99999" step="1" value="0">
+                                    </div>
+                                </div>
+                                <div class="variant-supplier-fields">
+                                    <p class="form-hint">Supplier — independent from the main product's supplier.</p>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Supplier</label>
+                                            <select name="variants[__INDEX__][supplier_id]" class="form-control">
+                                                <option value="">No supplier</option>
+                                                @foreach ($suppliers as $supplier)
+                                                    <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-check">
+                                                <input type="checkbox" name="variants[__INDEX__][available_at_supplier]" value="1" checked>
+                                                Available at supplier
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Supplier reference</label>
+                                            <input type="text" name="variants[__INDEX__][supplier_reference]" class="form-control" maxlength="120">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Supplier product URL</label>
+                                            <input type="url" name="variants[__INDEX__][supplier_product_url]" class="form-control" maxlength="2048">
+                                        </div>
                                     </div>
                                 </div>
                             </div>

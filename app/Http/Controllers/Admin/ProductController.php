@@ -423,6 +423,10 @@ class ProductController extends Controller
                 'quantity' => (int) ($row['quantity'] ?? 0),
                 'is_active' => ! empty($row['is_active']),
                 'sort_order' => (int) $index,
+                'supplier_id' => filled($row['supplier_id'] ?? null) ? (int) $row['supplier_id'] : null,
+                'available_at_supplier' => ! empty($row['available_at_supplier']),
+                'supplier_reference' => filled($row['supplier_reference'] ?? null) ? trim((string) $row['supplier_reference']) : null,
+                'supplier_product_url' => filled($row['supplier_product_url'] ?? null) ? trim((string) $row['supplier_product_url']) : null,
             ];
 
             $uploadedImage = $files[$index] ?? null;

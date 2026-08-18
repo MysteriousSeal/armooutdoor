@@ -50,10 +50,10 @@ class CartController extends Controller
         $candidates = collect([ShippingEstimate::standard($now)]);
 
         foreach ($lines as $line) {
-            $product = $line->product;
+            $source = $line->variant ?? $line->product;
 
-            if (! $product->inStock() && $product->isBackorderable() && $product->supplier?->lead_time_days !== null) {
-                $candidates->push(ShippingEstimate::backordered($now, $product->supplier->lead_time_days));
+            if (! $source->inStock() && $source->isBackorderable() && $source->supplier?->lead_time_days !== null) {
+                $candidates->push(ShippingEstimate::backordered($now, $source->supplier->lead_time_days));
             }
         }
 
@@ -92,7 +92,9 @@ class CartController extends Controller
             ? $product->variants->firstWhere('id', $validated['variant_id'])
             : null;
 
-        if (! ($variant?->inStock() ?? ($product->inStock() || $product->isBackorderable()))) {
+        $source = $variant ?? $product;
+
+        if (! ($source->inStock() || $source->isBackorderable())) {
             if ($request->wantsJson()) {
                 return response()->json(['message' => __('store.out_of_stock')], 422);
             }

@@ -82,9 +82,8 @@
                                 @endif
 
                                 @php
-                                    $lineAvailableAtSupplier = ! $line->product->inStock()
-                                        && $line->product->supplier_id !== null
-                                        && $line->product->available_at_supplier;
+                                    $lineSupplierSource = $line->variant ?? $line->product;
+                                    $lineAvailableAtSupplier = ! $lineSupplierSource->inStock() && $lineSupplierSource->isBackorderable();
                                 @endphp
                                 @if ($lineAvailableAtSupplier)
                                     <p class="cart-line-supplier">
@@ -96,8 +95,8 @@
                                             <span>
                                                 {{ __('store.supplier_lead_time_label') }}
                                                 ·
-                                                {{ $line->product->supplier->lead_time_days !== null
-                                                    ? trans_choice('store.supplier_lead_time_value', $line->product->supplier->lead_time_days, ['days' => $line->product->supplier->lead_time_days])
+                                                {{ $lineSupplierSource->supplier->lead_time_days !== null
+                                                    ? trans_choice('store.supplier_lead_time_value', $lineSupplierSource->supplier->lead_time_days, ['days' => $lineSupplierSource->supplier->lead_time_days])
                                                     : __('store.supplier_lead_time_unknown') }}
                                             </span>
                                         </span>

@@ -9,6 +9,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
     'product_id',
+    'supplier_id',
+    'available_at_supplier',
+    'supplier_product_url',
+    'supplier_reference',
     'attribute_values',
     'sku',
     'gtin',
@@ -44,12 +48,18 @@ class ProductVariant extends Model
             'quantity' => 'integer',
             'is_active' => 'boolean',
             'sort_order' => 'integer',
+            'available_at_supplier' => 'boolean',
         ];
     }
 
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class);
     }
 
     public function effectivePriceCents(): int
@@ -95,8 +105,22 @@ class ProductVariant extends Model
         return $this->quantity > 0;
     }
 
+    /**
+     * Out of stock, but the supplier can still get it — sold as a
+     * one-unit backorder, independently from the parent product's
+     * own supplier fields.
+     */
+    public function isBackorderable(): bool
+    {
+        return $this->supplier_id !== null && $this->available_at_supplier;
+    }
+
     public function maxPurchasable(): int
     {
+        if (! $this->inStock() && $this->isBackorderable()) {
+            return 1;
+        }
+
         return max(0, min(Cart::MAX_QUANTITY, $this->quantity));
     }
 

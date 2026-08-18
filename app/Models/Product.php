@@ -223,7 +223,7 @@ class Product extends Model
     public function isPurchasable(): bool
     {
         if ($this->hasVariants()) {
-            return $this->variants->contains(fn (ProductVariant $variant): bool => $variant->is_active && $variant->inStock());
+            return $this->variants->contains(fn (ProductVariant $variant): bool => $variant->is_active && ($variant->inStock() || $variant->isBackorderable()));
         }
 
         return $this->inStock() || $this->isBackorderable();

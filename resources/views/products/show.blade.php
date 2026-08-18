@@ -161,7 +161,7 @@
                                 <div class="product-variant-grid" data-variant-options>
                                     @foreach ($activeVariants as $variant)
                                         @php($variantLabel = $variant->label() !== '' ? $variant->label() : $product->localizedName())
-                                        <label class="product-variant-chip {{ ! $variant->inStock() ? 'is-unavailable' : '' }}">
+                                        <label class="product-variant-chip {{ (! $variant->inStock() && ! $variant->isBackorderable()) ? 'is-unavailable' : '' }}">
                                             <input
                                                 type="radio"
                                                 name="variant_id"
@@ -188,8 +188,9 @@
                                                     @if ($variantPricesDiffer)
                                                         <span class="product-variant-chip-price">{{ $variant->formattedPrice() }}</span>
                                                     @endif
-                                                    <span class="product-variant-chip-stock {{ $variant->lowStock() ? 'is-low-stock' : ($variant->inStock() ? 'is-in-stock' : 'is-out-of-stock') }}">
-                                                        {{ $variant->lowStock() ? __('store.variant_stock_low') : ($variant->inStock() ? __('store.variant_stock_ok') : __('store.variant_stock_out')) }}
+                                                    @php($variantBackorderable = ! $variant->inStock() && $variant->isBackorderable())
+                                                    <span class="product-variant-chip-stock {{ $variant->lowStock() ? 'is-low-stock' : ($variant->inStock() ? 'is-in-stock' : ($variantBackorderable ? 'is-low-stock' : 'is-out-of-stock')) }}">
+                                                        {{ $variant->lowStock() ? __('store.variant_stock_low') : ($variant->inStock() ? __('store.variant_stock_ok') : ($variantBackorderable ? __('store.variant_stock_backorder') : __('store.variant_stock_out'))) }}
                                                     </span>
                                                 </span>
                                             </span>
