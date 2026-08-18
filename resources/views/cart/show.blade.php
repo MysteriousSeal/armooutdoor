@@ -62,6 +62,29 @@
                                     <p class="cart-line-sku">SKU : {{ $line->variant?->sku ?? $line->product->sku }}</p>
                                 @endif
 
+                                @php
+                                    $lineAvailableAtSupplier = ! $line->product->inStock()
+                                        && $line->product->supplier_id !== null
+                                        && $line->product->available_at_supplier;
+                                @endphp
+                                @if ($lineAvailableAtSupplier)
+                                    <p class="cart-line-supplier">
+                                        <span class="cart-line-supplier-icon" aria-hidden="true">
+                                            @include('partials.icon', ['name' => 'hourglass-half', 'size' => 14])
+                                        </span>
+                                        <span class="cart-line-supplier-copy">
+                                            <strong>{{ __('store.available_at_supplier') }}</strong>
+                                            <span>
+                                                {{ __('store.supplier_lead_time_label') }}
+                                                ·
+                                                {{ $line->product->supplier->lead_time_days !== null
+                                                    ? trans_choice('store.supplier_lead_time_value', $line->product->supplier->lead_time_days, ['days' => $line->product->supplier->lead_time_days])
+                                                    : __('store.supplier_lead_time_unknown') }}
+                                            </span>
+                                        </span>
+                                    </p>
+                                @endif
+
                                 <div class="cart-line-actions">
                                     <form
                                         method="POST"

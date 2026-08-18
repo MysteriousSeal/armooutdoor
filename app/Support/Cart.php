@@ -29,7 +29,7 @@ class Cart
 
         $products = Product::query()
             ->active()
-            ->with('category.parent', 'discount')
+            ->with('category.parent', 'discount', 'supplier')
             ->whereIn('id', $entries->pluck('product_id')->unique())
             ->get()
             ->keyBy('id');

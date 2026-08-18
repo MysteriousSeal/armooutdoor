@@ -2232,6 +2232,53 @@
     color: var(--text-muted);
 }
 
+.cart-line-supplier {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0.65rem 0 0;
+    padding: 0.55rem 0.75rem;
+    background: var(--bg);
+}
+
+.cart-line-supplier-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.85rem;
+    height: 1.85rem;
+    flex-shrink: 0;
+    color: #5b5c3b;
+    border: 1.5px solid color-mix(in srgb, #5b5c3b 45%, var(--border));
+    border-radius: 50%;
+}
+
+.cart-line-supplier-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+}
+
+.cart-line-supplier-copy strong {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.cart-line-supplier-copy span {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+
+[data-theme='dark'] .cart-line-supplier-icon {
+    color: var(--accent);
+    border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+}
+
 .cart-line-actions {
     display: flex;
     flex-wrap: wrap;
