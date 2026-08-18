@@ -12,6 +12,21 @@ class CategoryController extends Controller
 {
     public const SORTS = ['name', 'price-asc', 'price-desc'];
 
+    public function index(): View
+    {
+        $categories = Category::query()
+            ->whereNull('parent_id')
+            ->with([
+                'products' => fn ($query) => $query->active(),
+                'children' => fn ($query) => $query->orderBy('sort_order'),
+                'children.products' => fn ($query) => $query->active(),
+            ])
+            ->orderBy('sort_order')
+            ->get();
+
+        return view('categories.index', compact('categories'));
+    }
+
     public function show(Request $request, Category $category): View
     {
         $category->load([

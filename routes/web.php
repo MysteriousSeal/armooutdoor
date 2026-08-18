@@ -169,6 +169,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 */
 
 Route::get('/', HomeController::class)->name('home');
+Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 Route::get('/categories/{category:slug}', [CategoryController::class, 'show'])->name('categories.show');
 Route::get('/products/{product:slug}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/search', [SearchController::class, 'index'])->name('search');

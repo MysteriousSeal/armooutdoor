@@ -85,7 +85,7 @@
             <section class="home-cats-section" id="categories" aria-labelledby="home-categories-title">
                 <header class="home-cats-header">
                     <h2 class="home-cats-title" id="home-categories-title">{{ __('store.shop_by_category') }}</h2>
-                    <a href="{{ $shopUrl }}" class="home-cats-link">
+                    <a href="{{ route('categories.index') }}" class="home-cats-link">
                         {{ __('store.see_all_categories') }} <span aria-hidden="true">→</span>
                     </a>
                 </header>

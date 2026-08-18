@@ -22,6 +22,7 @@
             <h2 class="sitemap-heading" id="sitemap-pages-heading">{{ __('store.sitemap_pages') }}</h2>
             <ul class="sitemap-pages">
                 <li><a href="{{ localized_route('home') }}">{{ __('store.nav_home') }}</a></li>
+                <li><a href="{{ route('categories.index') }}">Toutes les catégories</a></li>
                 <li><a href="{{ route('faq') }}">FAQ</a></li>
                 <li><a href="{{ route('help.shipping-returns') }}">Livraison & Retours</a></li>
                 <li><a href="{{ route('help.secure-payment') }}">Paiement sécurisé</a></li>
