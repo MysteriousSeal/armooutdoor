@@ -5,9 +5,28 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Response;
+use Illuminate\View\View;
 
 class SitemapController extends Controller
 {
+    public function html(): View
+    {
+        $categories = Category::query()
+            ->whereNull('parent_id')
+            ->with('children')
+            ->orderBy('sort_order')
+            ->get();
+
+        $products = Product::query()
+            ->active()
+            ->with('category')
+            ->orderBy('id')
+            ->get()
+            ->groupBy(fn (Product $product) => $product->category?->id);
+
+        return view('sitemap.html', compact('categories', 'products'));
+    }
+
     public function index(): Response
     {
         $sitemaps = [

@@ -55,9 +55,6 @@
             <a href="{{ route('admin.products.index', $tabQuery('active')) }}" class="{{ $tab === 'active' ? 'active' : '' }}">
                 Products <span class="admin-tab-count">{{ number_format($activeCount) }}</span>
             </a>
-            <a href="{{ route('admin.products.index', $tabQuery('disabled')) }}" class="{{ $tab === 'disabled' ? 'active' : '' }}">
-                Disabled <span class="admin-tab-count">{{ number_format($disabledCount) }}</span>
-            </a>
             <a href="{{ route('admin.products.index', $tabQuery('out-of-stock')) }}" class="{{ $tab === 'out-of-stock' ? 'active' : '' }}">
                 Out of stock <span class="admin-tab-count">{{ number_format($outOfStockCount) }}</span>
             </a>
@@ -69,6 +66,9 @@
             </a>
             <a href="{{ route('admin.products.index', $tabQuery('no-weight')) }}" class="{{ $tab === 'no-weight' ? 'active' : '' }}">
                 Missing weight <span class="admin-tab-count">{{ number_format($noWeightCount) }}</span>
+            </a>
+            <a href="{{ route('admin.products.index', $tabQuery('disabled')) }}" class="{{ $tab === 'disabled' ? 'active' : '' }}">
+                Disabled <span class="admin-tab-count">{{ number_format($disabledCount) }}</span>
             </a>
         </nav>
 

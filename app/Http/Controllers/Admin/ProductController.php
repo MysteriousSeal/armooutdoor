@@ -47,10 +47,10 @@ class ProductController extends Controller
             'productCount' => Product::query()->count(),
             'activeCount' => Product::query()->where('is_active', true)->count(),
             'disabledCount' => Product::query()->where('is_active', false)->count(),
-            'outOfStockCount' => Product::query()->where('quantity', '<=', 0)->count(),
-            'noSkuCount' => Product::query()->where(fn ($query) => $query->whereNull('sku')->orWhere('sku', ''))->count(),
-            'noGtinCount' => Product::query()->where(fn ($query) => $query->whereNull('gtin')->orWhere('gtin', ''))->count(),
-            'noWeightCount' => Product::query()->where(fn ($query) => $query->whereNull('weight_grams')->orWhere('weight_grams', 0))->count(),
+            'outOfStockCount' => Product::query()->where('is_active', true)->where('quantity', '<=', 0)->count(),
+            'noSkuCount' => Product::query()->where('is_active', true)->where(fn ($query) => $query->whereNull('sku')->orWhere('sku', ''))->count(),
+            'noGtinCount' => Product::query()->where('is_active', true)->where(fn ($query) => $query->whereNull('gtin')->orWhere('gtin', ''))->count(),
+            'noWeightCount' => Product::query()->where('is_active', true)->where(fn ($query) => $query->whereNull('weight_grams')->orWhere('weight_grams', 0))->count(),
             'categories' => $this->categoryOptions(),
             'search' => $search,
             'categorySlug' => $categorySlug,
@@ -225,10 +225,10 @@ class ProductController extends Controller
     {
         match ($tab) {
             'disabled' => $query->where('is_active', false),
-            'out-of-stock' => $query->where('quantity', '<=', 0),
-            'no-sku' => $query->where(fn (Builder $query) => $query->whereNull('sku')->orWhere('sku', '')),
-            'no-gtin' => $query->where(fn (Builder $query) => $query->whereNull('gtin')->orWhere('gtin', '')),
-            'no-weight' => $query->where(fn (Builder $query) => $query->whereNull('weight_grams')->orWhere('weight_grams', 0)),
+            'out-of-stock' => $query->where('is_active', true)->where('quantity', '<=', 0),
+            'no-sku' => $query->where('is_active', true)->where(fn (Builder $query) => $query->whereNull('sku')->orWhere('sku', '')),
+            'no-gtin' => $query->where('is_active', true)->where(fn (Builder $query) => $query->whereNull('gtin')->orWhere('gtin', '')),
+            'no-weight' => $query->where('is_active', true)->where(fn (Builder $query) => $query->whereNull('weight_grams')->orWhere('weight_grams', 0)),
             default => $query->where('is_active', true),
         };
     }

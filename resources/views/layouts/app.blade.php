@@ -180,47 +180,30 @@
                 <nav class="site-footer-col" aria-labelledby="footer-shop-heading">
                     <h2 id="footer-shop-heading" class="site-footer-heading">{{ __('store.footer_shop') }}</h2>
                     <ul class="site-footer-links">
-                        @foreach ($navCategories as $navCategory)
-                            <li>
-                                <a href="{{ localized_route('categories.show', ['category' => $navCategory->slug]) }}">
-                                    {{ $navCategory->localizedName() }}
-                                </a>
-                            </li>
-                        @endforeach
+                        <li><a href="#">{{ __('store.footer_shop_all_categories') }}</a></li>
+                        <li><a href="#">{{ __('store.footer_shop_new') }}</a></li>
+                        <li><a href="#">{{ __('store.footer_shop_promotions') }}</a></li>
+                        <li><a href="#">{{ __('store.footer_shop_best_sellers') }}</a></li>
                     </ul>
                 </nav>
-
-                <div class="site-footer-col" aria-labelledby="footer-delivery-heading">
-                    <h2 id="footer-delivery-heading" class="site-footer-heading">{{ __('store.footer_delivery') }}</h2>
-                    <ul class="site-footer-links">
-                        <li>{{ __('store.footer_delivery_home') }}</li>
-                        <li>{{ __('store.footer_delivery_relay') }}</li>
-                        <li>{{ __('store.footer_delivery_track') }}</li>
-                    </ul>
-                    <h2 class="site-footer-heading site-footer-heading--spaced">{{ __('store.footer_payment') }}</h2>
-                    <ul class="site-footer-links">
-                        <li>{{ __('store.footer_payment_card') }}</li>
-                        <li>{{ __('store.footer_payment_paypal') }}</li>
-                    </ul>
-                </div>
 
                 <nav class="site-footer-col" aria-labelledby="footer-site-heading">
                     <h2 id="footer-site-heading" class="site-footer-heading">{{ __('store.footer_site') }}</h2>
                     <ul class="site-footer-links">
-                        <li><a href="{{ localized_route('home') }}">{{ __('store.nav_home') }}</a></li>
-                        <li><a href="{{ localized_route('cart.show') }}">{{ __('store.cart') }}</a></li>
-                        @auth
-                            <li><a href="{{ localized_route('account.index') }}">{{ __('store.account') }}</a></li>
-                            <li>
-                                <form action="{{ localized_route('logout') }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="footer-text-btn">{{ __('store.logout') }}</button>
-                                </form>
-                            </li>
-                        @else
-                            <li><a href="{{ localized_route('login') }}">{{ __('store.login') }}</a></li>
-                            <li><a href="{{ localized_route('register') }}">{{ __('store.register') }}</a></li>
-                        @endauth
+                        <li><a href="{{ localized_route('orders.index') }}">{{ __('store.footer_account_orders') }}</a></li>
+                        <li><a href="{{ localized_route('account.addresses.index') }}">{{ __('store.footer_account_addresses') }}</a></li>
+                        <li><a href="{{ localized_route('account.wishlist.index') }}">{{ __('store.footer_account_wishlist') }}</a></li>
+                        <li><a href="{{ localized_route('account.profile.edit') }}">{{ __('store.footer_account_profile') }}</a></li>
+                    </ul>
+                </nav>
+
+                <nav class="site-footer-col" aria-labelledby="footer-help-heading">
+                    <h2 id="footer-help-heading" class="site-footer-heading">{{ __('store.footer_help') }}</h2>
+                    <ul class="site-footer-links">
+                        <li><a href="#">{{ __('store.footer_help_faq') }}</a></li>
+                        <li><a href="#">{{ __('store.footer_help_shipping_returns') }}</a></li>
+                        <li><a href="#">{{ __('store.footer_help_secure_payment') }}</a></li>
+                        <li><a href="#">{{ __('store.footer_help_contact') }}</a></li>
                     </ul>
                 </nav>
             </div>
@@ -239,6 +222,7 @@
                     <a href="{{ route('legal.notice') }}">{{ __('store.legal_notice_title') }}</a>
                     <a href="{{ route('legal.privacy') }}">{{ __('store.legal_privacy_title') }}</a>
                     <a href="{{ route('legal.withdrawal') }}">{{ __('store.legal_withdrawal_title') }}</a>
+                    <a href="{{ route('sitemap.html') }}">{{ __('store.footer_sitemap') }}</a>
                 </nav>
             </div>
         </div>
