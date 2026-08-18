@@ -324,6 +324,40 @@
                             </label>
                             <p class="form-hint">Whether the supplier currently has this item in stock for reordering.</p>
                         </div>
+
+                        <div class="form-group">
+                            <label for="supplier_reference">Supplier reference</label>
+                            <input
+                                type="text"
+                                id="supplier_reference"
+                                name="supplier_reference"
+                                class="form-control"
+                                value="{{ old('supplier_reference', $product->supplier_reference) }}"
+                                maxlength="120"
+                                placeholder="e.g. SA-BB-020-1000-BIO"
+                            >
+                            <p class="form-hint">The supplier's own product code, for reordering.</p>
+                            @error('supplier_reference') <p class="form-error">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="supplier_product_url">Link to product on supplier website</label>
+                            <input
+                                type="url"
+                                id="supplier_product_url"
+                                name="supplier_product_url"
+                                class="form-control"
+                                value="{{ old('supplier_product_url', $product->supplier_product_url) }}"
+                                maxlength="2048"
+                                placeholder="https://…"
+                            >
+                            @if ($product->supplier_product_url)
+                                <p class="form-hint">
+                                    <a href="{{ $product->supplier_product_url }}" target="_blank" rel="noopener noreferrer">Open on supplier website ↗</a>
+                                </p>
+                            @endif
+                            @error('supplier_product_url') <p class="form-error">{{ $message }}</p> @enderror
+                        </div>
                     </section>
                 </div>
             </div>

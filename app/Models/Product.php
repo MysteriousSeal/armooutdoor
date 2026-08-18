@@ -16,6 +16,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'category_id',
     'supplier_id',
     'available_at_supplier',
+    'supplier_product_url',
+    'supplier_reference',
     'slug',
     'is_active',
     'sku',

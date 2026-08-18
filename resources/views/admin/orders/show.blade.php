@@ -89,6 +89,14 @@
                                     @if ($item->resolvedSku())
                                         <p class="order-item-sku">SKU {{ $item->resolvedSku() }}</p>
                                     @endif
+                                    @if ($item->product && ! $item->product->inStock() && $item->product->supplier_id && $item->product->available_at_supplier)
+                                        <p class="order-item-supplier-note">
+                                            Out of stock — available from {{ $item->product->supplier->name }}
+                                            @if ($item->product->supplier->lead_time_days !== null)
+                                                ({{ $item->product->supplier->lead_time_days }} day{{ $item->product->supplier->lead_time_days === 1 ? '' : 's' }} lead time)
+                                            @endif
+                                        </p>
+                                    @endif
                                     @if ($item->hasDiscount() && $item->discount_label)
                                         <div class="order-item-discount">
                                             <span class="order-discount-badge">{{ $item->discount_label }}</span>

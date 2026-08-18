@@ -305,6 +305,8 @@ class ProductController extends Controller
             'category_id' => $request->integer('category_id'),
             'supplier_id' => $request->filled('supplier_id') ? $request->integer('supplier_id') : null,
             'available_at_supplier' => $request->boolean('available_at_supplier'),
+            'supplier_product_url' => $request->filled('supplier_product_url') ? $request->string('supplier_product_url')->trim()->toString() : null,
+            'supplier_reference' => $request->filled('supplier_reference') ? $request->string('supplier_reference')->trim()->toString() : null,
             'slug' => $slug,
             'is_active' => $request->boolean('is_active'),
             'age_restricted' => $request->boolean('age_restricted'),

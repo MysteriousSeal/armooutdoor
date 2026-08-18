@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-19 — v0.1.47
+
+### Admin
+
+- **Supplier reference & product link**: the product edit page's Supplier section now has fields for the supplier's own product code and a link to the product on the supplier's website.
+- **Order detail supplier note**: when an order item is out of stock but available at its supplier, the order page now shows a note with the supplier name and lead time.
+- **New catalog product**: added Specna Arms BIO Core 0,20 g airsoft BBs (3000-count bottle), filed under the existing Billes airsoft subcategory.
+
 ## 2026-08-18 — v0.1.46
 
 ### Storefront
