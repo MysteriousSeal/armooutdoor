@@ -78,7 +78,7 @@
 
         <form method="GET" action="{{ route('admin.products.index') }}" class="admin-filter-bar">
             <input type="hidden" name="tab" value="{{ $tab }}">
-            @if ($sort !== 'id-asc')
+            @if ($sort !== 'id-desc')
                 <input type="hidden" name="sort" value="{{ $sort }}">
             @endif
 

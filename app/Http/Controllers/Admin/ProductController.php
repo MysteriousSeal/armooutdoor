@@ -26,7 +26,9 @@ class ProductController extends Controller
 {
     private const SORTS = ['id-asc', 'id-desc', 'name-asc', 'name-desc', 'stock-asc', 'stock-desc', 'supplier-asc', 'supplier-desc', 'price-asc', 'price-desc'];
 
-    private const SORT_COOKIE = 'admin_products_sort';
+    private const DEFAULT_SORT = 'id-desc';
+
+    private const SORT_COOKIE = 'admin_products_sort_v2';
 
     public function index(Request $request): Response
     {
@@ -41,7 +43,7 @@ class ProductController extends Controller
         // sort remembered from a previous visit, via cookie.
         $sort = in_array($request->query('sort'), self::SORTS, true)
             ? (string) $request->query('sort')
-            : (in_array($request->cookie(self::SORT_COOKIE), self::SORTS, true) ? $request->cookie(self::SORT_COOKIE) : 'id-asc');
+            : (in_array($request->cookie(self::SORT_COOKIE), self::SORTS, true) ? $request->cookie(self::SORT_COOKIE) : self::DEFAULT_SORT);
 
         $products = $this->filteredProductsQuery($search, $categorySlug, $tab, $supplierId)
             ->with('category', 'supplier')

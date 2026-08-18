@@ -74,6 +74,25 @@ class AdminTest extends TestCase
             ->assertSee('Abris');
     }
 
+    public function test_admin_products_default_to_id_descending(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $cell = fn (int $id): string => '<strong>'.$id.'</strong>';
+        $highestIds = Product::query()->orderByDesc('id')->limit(3)->pluck('id')->map($cell)->all();
+        $lowestIds = Product::query()->orderBy('id')->limit(3)->pluck('id')->map($cell)->all();
+
+        $this->actingAs($admin)
+            ->get('/admin/products')
+            ->assertOk()
+            ->assertSeeInOrder($highestIds, false)
+            ->assertSee('sort=id-asc', false);
+
+        $this->actingAs($admin)
+            ->get('/admin/products?sort=id-asc')
+            ->assertOk()
+            ->assertSeeInOrder($lowestIds, false);
+    }
+
     public function test_admin_login_rejects_store_customers(): void
     {
         User::factory()->create([
