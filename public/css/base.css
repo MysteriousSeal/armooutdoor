@@ -110,7 +110,7 @@ button {
 .nav-sub a:hover,
 .nav-sub a.is-active {
     color: var(--text);
-    background: var(--bg);
+    background: color-mix(in srgb, var(--accent) 10%, var(--bg));
 }
 
 .locale-switch {

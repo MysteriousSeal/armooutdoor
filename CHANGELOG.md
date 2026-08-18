@@ -2,6 +2,13 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-19 — v0.1.64
+
+### Storefront
+
+- **Category icon in nav dropdowns**: each header submenu now shows the parent category's icon next to its subcategory list.
+- **Multi-column nav dropdowns**: submenus with more than 6 subcategories now flow into 3 columns instead of one long list.
+
 ## 2026-08-19 — v0.1.63
 
 ### Admin

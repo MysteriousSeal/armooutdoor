@@ -84,6 +84,17 @@
                         <a href="{{ localized_route('home') }}" class="sort-tab {{ request()->routeIs('home') ? 'active' : '' }}">
                             {{ __('store.nav_home') }}
                         </a>
+                        @php
+                            $navCategoryIconNames = [
+                                'targets' => 'bullseye',
+                                'range' => 'toolbox',
+                                'apparel' => 'shirt',
+                                'field-gear' => 'campground',
+                                'everyday' => 'screwdriver-wrench',
+                                'munitions' => 'box-open',
+                                'repliques-airsoft' => 'gun',
+                            ];
+                        @endphp
                         @foreach ($navCategories as $navCategory)
                             @php
                                 $currentCategory = request()->route('category') ?? request()->route('product')?->category;
@@ -102,18 +113,39 @@
                                     {{ $navCategory->localizedName() }}
                                 </a>
                                 @if ($visibleChildren->isNotEmpty())
-                                    <ul class="nav-sub">
-                                        @foreach ($visibleChildren as $child)
-                                            <li>
-                                                <a
-                                                    href="{{ localized_route('categories.show', ['category' => $child->slug]) }}"
-                                                    class="{{ $currentCategory?->is($child) ? 'is-active' : '' }}"
-                                                >
-                                                    {{ $child->localizedName() }}
-                                                </a>
-                                            </li>
-                                        @endforeach
-                                    </ul>
+                                    <div class="nav-sub-panel {{ $visibleChildren->count() > 8 ? 'is-wide' : '' }}">
+                                        <a
+                                            href="{{ localized_route('categories.show', ['category' => $navCategory->slug]) }}"
+                                            class="nav-sub-head"
+                                        >
+                                            <span class="nav-sub-icon" aria-hidden="true">
+                                                @include('partials.icon', ['name' => $navCategoryIconNames[$navCategory->slug] ?? 'default', 'size' => 18])
+                                            </span>
+                                            <span class="nav-sub-head-copy">
+                                                <span class="nav-sub-kicker">{{ __('store.shop_subcategories') }}</span>
+                                                <span class="nav-sub-title">{{ $navCategory->localizedName() }}</span>
+                                            </span>
+                                        </a>
+                                        <ul class="nav-sub {{ $visibleChildren->count() > 8 ? 'nav-sub--wide' : ($visibleChildren->count() > 4 ? 'nav-sub--columns' : '') }}">
+                                            @foreach ($visibleChildren as $child)
+                                                <li>
+                                                    <a
+                                                        href="{{ localized_route('categories.show', ['category' => $child->slug]) }}"
+                                                        class="{{ $currentCategory?->is($child) ? 'is-active' : '' }}"
+                                                    >
+                                                        <span class="nav-sub-name">{{ $child->localizedName() }}</span>
+                                                        <span class="nav-sub-count">{{ $child->products_count }}</span>
+                                                    </a>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                        <a
+                                            href="{{ localized_route('categories.show', ['category' => $navCategory->slug]) }}"
+                                            class="nav-sub-more"
+                                        >
+                                            {{ __('store.view_category') }}
+                                        </a>
+                                    </div>
                                 @endif
                             </div>
                         @endforeach
