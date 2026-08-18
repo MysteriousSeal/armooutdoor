@@ -135,7 +135,7 @@
                 </header>
                 <div class="product-grid product-grid--five">
                     @foreach ($featured as $product)
-                        @include('partials.product-card', ['product' => $product, 'lazy' => $loop->index > 1])
+                        @include('partials.product-card', ['product' => $product, 'lazy' => $loop->index > 1, 'fiveColumn' => true])
                     @endforeach
                 </div>
             </section>
@@ -170,7 +170,7 @@
                 </header>
                 <div class="product-grid product-grid--five">
                     @foreach ($more as $product)
-                        @include('partials.product-card', ['product' => $product, 'lazy' => true])
+                        @include('partials.product-card', ['product' => $product, 'lazy' => true, 'fiveColumn' => true])
                     @endforeach
                 </div>
             </section>
