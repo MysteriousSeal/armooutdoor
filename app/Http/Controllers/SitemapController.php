@@ -43,6 +43,7 @@ class SitemapController extends Controller
         $urls = [
             ['loc' => localized_route('home', [], 'fr'), 'changefreq' => 'daily', 'priority' => '1.0'],
             ['loc' => route('categories.index'), 'changefreq' => 'weekly', 'priority' => '0.7'],
+            ['loc' => route('products.new-arrivals'), 'changefreq' => 'daily', 'priority' => '0.7'],
             ['loc' => route('faq'), 'changefreq' => 'monthly', 'priority' => '0.5'],
             ['loc' => route('help.shipping-returns'), 'changefreq' => 'monthly', 'priority' => '0.5'],
             ['loc' => route('help.secure-payment'), 'changefreq' => 'monthly', 'priority' => '0.5'],

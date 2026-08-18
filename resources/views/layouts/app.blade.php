@@ -181,7 +181,7 @@
                     <h2 id="footer-shop-heading" class="site-footer-heading">{{ __('store.footer_shop') }}</h2>
                     <ul class="site-footer-links">
                         <li><a href="{{ route('categories.index') }}">{{ __('store.footer_shop_all_categories') }}</a></li>
-                        <li><a href="#">{{ __('store.footer_shop_new') }}</a></li>
+                        <li><a href="{{ route('products.new-arrivals') }}">{{ __('store.footer_shop_new') }}</a></li>
                         <li><a href="#">{{ __('store.footer_shop_promotions') }}</a></li>
                         <li><a href="#">{{ __('store.footer_shop_best_sellers') }}</a></li>
                     </ul>

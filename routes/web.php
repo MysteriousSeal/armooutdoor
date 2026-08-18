@@ -38,6 +38,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\HelpController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\NewArrivalsController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PreferenceController;
 use App\Http\Controllers\ProductController;
@@ -170,6 +171,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 Route::get('/', HomeController::class)->name('home');
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+Route::get('/nouveautes', [NewArrivalsController::class, 'index'])->name('products.new-arrivals');
 Route::get('/categories/{category:slug}', [CategoryController::class, 'show'])->name('categories.show');
 Route::get('/products/{product:slug}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/search', [SearchController::class, 'index'])->name('search');
