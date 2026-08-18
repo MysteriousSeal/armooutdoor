@@ -27,6 +27,10 @@
                 <span class="admin-stat-label">Invoice</span>
                 <span class="admin-stat-value admin-stat-value--sm">Footer link shown on invoice PDFs</span>
             </a>
+            <a href="{{ route('admin.settings.suppliers.index') }}" class="admin-stat-card">
+                <span class="admin-stat-label">Suppliers</span>
+                <span class="admin-stat-value admin-stat-value--sm">Suppliers and their lead time</span>
+            </a>
         </div>
     </div>
 @endsection

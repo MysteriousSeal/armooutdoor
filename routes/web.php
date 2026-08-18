@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\SearchController as AdminSearchController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\ShippingSettingController as AdminShippingSettingController;
+use App\Http\Controllers\Admin\SupplierController as AdminSupplierController;
 
 // Auth (customer-facing login/register/password reset)
 use App\Http\Controllers\Auth\ForgotPasswordController;
@@ -162,6 +163,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/settings/marketplaces', [AdminMarketplaceController::class, 'store'])->name('settings.marketplaces.store');
         Route::put('/settings/marketplaces/{marketplace}', [AdminMarketplaceController::class, 'update'])->name('settings.marketplaces.update');
         Route::delete('/settings/marketplaces/{marketplace}', [AdminMarketplaceController::class, 'destroy'])->name('settings.marketplaces.destroy');
+        Route::get('/settings/suppliers', [AdminSupplierController::class, 'index'])->name('settings.suppliers.index');
+        Route::get('/settings/suppliers/create', [AdminSupplierController::class, 'create'])->name('settings.suppliers.create');
+        Route::post('/settings/suppliers', [AdminSupplierController::class, 'store'])->name('settings.suppliers.store');
+        Route::get('/settings/suppliers/{supplier}/edit', [AdminSupplierController::class, 'edit'])->name('settings.suppliers.edit');
+        Route::put('/settings/suppliers/{supplier}', [AdminSupplierController::class, 'update'])->name('settings.suppliers.update');
+        Route::delete('/settings/suppliers/{supplier}', [AdminSupplierController::class, 'destroy'])->name('settings.suppliers.destroy');
     });
 });
 

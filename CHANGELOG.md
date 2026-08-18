@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-18 — v0.1.36
+
+### Admin
+
+- **Suppliers settings page**: new page under Settings to manually track suppliers, with name, website and lead time (days to deliver once an order is placed).
+
 ## 2026-08-18 — v0.1.35
 
 ### Storefront
