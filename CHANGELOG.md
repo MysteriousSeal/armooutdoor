@@ -2,6 +2,13 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-19 — v0.2.2
+
+### Storefront
+
+- Added a custom 404 page: search box, link back to the homepage, and a list of top-level categories, styled to match the shop and kept in its own `errors.css` stylesheet.
+- Fixed a bug that crashed any 404 for an unresolved product or category route (`layouts.app` tried to read `->category` off the raw route parameter when implicit model binding failed).
+
 ## 2026-08-19 — v0.2.1
 
 ### Orders

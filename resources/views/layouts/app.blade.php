@@ -136,7 +136,11 @@
         </div>
 
         @php
-            $currentCategory = request()->route('category') ?? request()->route('product')?->category;
+            $routeCategory = request()->route('category');
+            $routeProduct = request()->route('product');
+            $currentCategory = $routeCategory instanceof \App\Models\Category
+                ? $routeCategory
+                : ($routeProduct instanceof \App\Models\Product ? $routeProduct->category : null);
         @endphp
         <div class="site-cat-menu" id="site-cat-menu" hidden>
             <div class="site-cat-menu-inner">
