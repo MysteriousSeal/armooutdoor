@@ -916,6 +916,16 @@
     letter-spacing: -0.02em;
 }
 
+.admin-list-title.is-copyable {
+    cursor: pointer;
+    border-bottom: 1px dashed transparent;
+}
+
+.admin-list-title.is-copyable:hover,
+.admin-list-title.is-copyable:focus-visible {
+    border-bottom-color: var(--text-muted);
+}
+
 .admin-list-lede {
     margin: 0.625rem 0 0;
     max-width: 36rem;
@@ -2607,6 +2617,18 @@ input[type="date"].form-control {
     grid-template-columns: minmax(0, 1fr) 20rem;
     gap: 1.5rem;
     align-items: start;
+}
+
+.order-facts-row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+@media (max-width: 700px) {
+    .order-facts-row {
+        grid-template-columns: 1fr;
+    }
 }
 
 .admin-list-kicker a {

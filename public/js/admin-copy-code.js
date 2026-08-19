@@ -51,13 +51,7 @@
         return copyWithExecCommand(text);
     }
 
-    document.addEventListener('click', function (event) {
-        var target = event.target.closest('[data-copy-code]');
-
-        if (!target) {
-            return;
-        }
-
+    function handleCopy(target) {
         var code = target.getAttribute('data-copy-code');
 
         copyText(code).then(function () {
@@ -65,5 +59,30 @@
         }).catch(function () {
             showToast('Could not copy "' + code + '".');
         });
+    }
+
+    document.addEventListener('click', function (event) {
+        var target = event.target.closest('[data-copy-code]');
+
+        if (!target) {
+            return;
+        }
+
+        handleCopy(target);
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key !== 'Enter' && event.key !== ' ') {
+            return;
+        }
+
+        var target = event.target.closest('[data-copy-code][role="button"]');
+
+        if (!target) {
+            return;
+        }
+
+        event.preventDefault();
+        handleCopy(target);
     });
 })();

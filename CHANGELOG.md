@@ -2,6 +2,13 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-19 — v0.1.82
+
+### Orders
+
+- Admin order page: moved Customer, Shipping address, Billing address and Payment into a single row above Status history.
+- Admin order page: the order number is now clickable to copy it to the clipboard, with a confirmation toast.
+
 ## 2026-08-19 — v0.1.81
 
 ### Orders

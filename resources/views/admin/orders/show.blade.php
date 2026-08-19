@@ -9,7 +9,13 @@
                 <div>
                     <p class="admin-list-kicker"><a href="{{ route('admin.orders.index') }}">Orders</a></p>
                     <div class="admin-order-heading">
-                        <h2 class="admin-list-title">{{ $order->number }}</h2>
+                        <h2
+                            class="admin-list-title is-copyable"
+                            data-copy-code="{{ $order->number }}"
+                            role="button"
+                            tabindex="0"
+                            title="Click to copy order number"
+                        >{{ $order->number }}</h2>
                         <span class="badge badge-{{ $order->status }}">
                             {{ ucfirst($order->status) }}
                         </span>
@@ -174,6 +180,73 @@
                     </div>
                 @endif
 
+                <div class="order-facts-row">
+                    <section class="order-fact">
+                        <h3 class="order-fact-title">Customer</h3>
+                        @if ($order->user)
+                            <p>
+                                {{ $order->user->name }}
+                                @if ($order->user->email)
+                                    <br>{{ $order->user->email }}
+                                @endif
+                            </p>
+                        @else
+                            <p>Deleted customer</p>
+                        @endif
+                    </section>
+
+                    <section class="order-fact">
+                        <div class="order-fact-heading">
+                            <h3 class="order-fact-title">Shipping address</h3>
+                            @if ($order->addressIsEditable())
+                                <button type="button" class="footer-text-btn" data-modal-open="edit-shipping-address-modal">Edit</button>
+                            @endif
+                        </div>
+                        <p>
+                            {{ format_person_name($order->address_snapshot['first_name'], $order->address_snapshot['last_name']) }}<br>
+                            {{ $order->address_snapshot['line1'] }}
+                            @if (! empty($order->address_snapshot['line2']))
+                                <br>{{ $order->address_snapshot['line2'] }}
+                            @endif
+                            <br>{{ $order->address_snapshot['postal_code'] }} {{ $order->address_snapshot['city'] }}
+                            <br>{{ __('store.country_'.$order->address_snapshot['country']) }}
+                            @if (! empty($order->address_snapshot['phone']))
+                                <br>{{ $order->address_snapshot['phone'] }}
+                            @endif
+                        </p>
+                    </section>
+
+                    @if ($order->billing_address_snapshot)
+                        <section class="order-fact">
+                            <div class="order-fact-heading">
+                                <h3 class="order-fact-title">Billing address</h3>
+                                @if ($order->addressIsEditable())
+                                    <button type="button" class="footer-text-btn" data-modal-open="edit-billing-address-modal">Edit</button>
+                                @endif
+                            </div>
+                            <p>
+                                {{ format_person_name($order->billing_address_snapshot['first_name'], $order->billing_address_snapshot['last_name']) }}<br>
+                                {{ $order->billing_address_snapshot['line1'] }}
+                                @if (! empty($order->billing_address_snapshot['line2']))
+                                    <br>{{ $order->billing_address_snapshot['line2'] }}
+                                @endif
+                                <br>{{ $order->billing_address_snapshot['postal_code'] }} {{ $order->billing_address_snapshot['city'] }}
+                                <br>{{ __('store.country_'.$order->billing_address_snapshot['country']) }}
+                                @if (! empty($order->billing_address_snapshot['phone']))
+                                    <br>{{ $order->billing_address_snapshot['phone'] }}
+                                @endif
+                            </p>
+                        </section>
+                    @endif
+
+                    @if ($order->payment_method)
+                        <section class="order-fact">
+                            <h3 class="order-fact-title">Payment</h3>
+                            <p>{{ $order->payment_method->label() }}</p>
+                        </section>
+                    @endif
+                </div>
+
                 <section class="order-panel">
                     <h3 class="order-panel-title">Status history</h3>
                     <ol class="order-timeline">
@@ -315,70 +388,6 @@
                     @endunless
                 </section>
 
-                <section class="order-fact">
-                    <h3 class="order-fact-title">Customer</h3>
-                    @if ($order->user)
-                        <p>
-                            {{ $order->user->name }}
-                            @if ($order->user->email)
-                                <br>{{ $order->user->email }}
-                            @endif
-                        </p>
-                    @else
-                        <p>Deleted customer</p>
-                    @endif
-                </section>
-
-                <section class="order-fact">
-                    <div class="order-fact-heading">
-                        <h3 class="order-fact-title">Shipping address</h3>
-                        @if ($order->addressIsEditable())
-                            <button type="button" class="footer-text-btn" data-modal-open="edit-shipping-address-modal">Edit</button>
-                        @endif
-                    </div>
-                    <p>
-                        {{ format_person_name($order->address_snapshot['first_name'], $order->address_snapshot['last_name']) }}<br>
-                        {{ $order->address_snapshot['line1'] }}
-                        @if (! empty($order->address_snapshot['line2']))
-                            <br>{{ $order->address_snapshot['line2'] }}
-                        @endif
-                        <br>{{ $order->address_snapshot['postal_code'] }} {{ $order->address_snapshot['city'] }}
-                        <br>{{ __('store.country_'.$order->address_snapshot['country']) }}
-                        @if (! empty($order->address_snapshot['phone']))
-                            <br>{{ $order->address_snapshot['phone'] }}
-                        @endif
-                    </p>
-                </section>
-
-                @if ($order->billing_address_snapshot)
-                    <section class="order-fact">
-                        <div class="order-fact-heading">
-                            <h3 class="order-fact-title">Billing address</h3>
-                            @if ($order->addressIsEditable())
-                                <button type="button" class="footer-text-btn" data-modal-open="edit-billing-address-modal">Edit</button>
-                            @endif
-                        </div>
-                        <p>
-                            {{ format_person_name($order->billing_address_snapshot['first_name'], $order->billing_address_snapshot['last_name']) }}<br>
-                            {{ $order->billing_address_snapshot['line1'] }}
-                            @if (! empty($order->billing_address_snapshot['line2']))
-                                <br>{{ $order->billing_address_snapshot['line2'] }}
-                            @endif
-                            <br>{{ $order->billing_address_snapshot['postal_code'] }} {{ $order->billing_address_snapshot['city'] }}
-                            <br>{{ __('store.country_'.$order->billing_address_snapshot['country']) }}
-                            @if (! empty($order->billing_address_snapshot['phone']))
-                                <br>{{ $order->billing_address_snapshot['phone'] }}
-                            @endif
-                        </p>
-                    </section>
-                @endif
-
-                @if ($order->payment_method)
-                    <section class="order-fact">
-                        <h3 class="order-fact-title">Payment</h3>
-                        <p>{{ $order->payment_method->label() }}</p>
-                    </section>
-                @endif
             </aside>
         </div>
 
@@ -526,3 +535,7 @@
         @endif
     </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('js/admin-copy-code.js') }}" defer></script>
+@endpush
