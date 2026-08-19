@@ -12,60 +12,96 @@
                     <p class="admin-list-lede">Marketplaces you also sell products on.</p>
                 </div>
             </div>
+            <p class="form-hint">Used to track which platform an order came from. The note is printed in the invoice's Notes section for orders placed on that marketplace. Removing a marketplace doesn't change orders that already used it — the name and note stay on those orders.</p>
         </header>
 
-        <div class="admin-form-card admin-form-card--solo">
-            <h3 class="admin-panel-title">Marketplaces</h3>
-            <p class="form-hint">Used to track which platform an order came from. The note is printed in the invoice's Notes section for orders placed on that marketplace. Removing a marketplace doesn't change orders that already used it — the name and note stay on those orders.</p>
-
-            @if ($marketplaces->isNotEmpty())
-                <ul class="admin-check-list admin-check-list--rows">
-                    @foreach ($marketplaces as $marketplace)
-                        <li class="admin-check-list-row">
-                            <span>{{ $marketplace->name }}</span>
-                            <form method="POST" action="{{ route('admin.settings.marketplaces.destroy', $marketplace) }}">
+        @if ($marketplaces->isNotEmpty())
+            <div class="marketplace-grid">
+                @foreach ($marketplaces as $marketplace)
+                    <section class="marketplace-card">
+                        <div class="marketplace-card-head">
+                            <span class="marketplace-media">
+                                @if ($marketplace->logo)
+                                    <img src="{{ $marketplace->logoUrl() }}" alt="">
+                                @else
+                                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                                        <path d="M3 16l5-5 4 4 4-4 5 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <circle cx="8" cy="8.5" r="1.5" fill="currentColor"/>
+                                    </svg>
+                                @endif
+                            </span>
+                            <h3 class="marketplace-name">{{ $marketplace->name }}</h3>
+                            <form method="POST" action="{{ route('admin.settings.marketplaces.destroy', $marketplace) }}" class="marketplace-remove-form">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="footer-text-btn">Remove</button>
                             </form>
-                        </li>
-                        <li class="admin-check-list-row">
-                            <form method="POST" action="{{ route('admin.settings.marketplaces.update', $marketplace) }}" class="form-row form-row--inline" style="width: 100%">
-                                @csrf
-                                @method('PUT')
-                                <div class="form-group" style="flex: 1">
-                                    <label for="marketplace_note_{{ $marketplace->id }}" class="sr-only">Invoice note</label>
-                                    <input
-                                        type="text"
-                                        id="marketplace_note_{{ $marketplace->id }}"
-                                        name="note"
-                                        class="form-control"
-                                        value="{{ old('note', $marketplace->note) }}"
-                                        maxlength="500"
-                                        placeholder="Note shown on the invoice (optional)"
-                                    >
-                                </div>
-                                <button type="submit" class="btn btn-sm btn-secondary">Save note</button>
-                            </form>
-                        </li>
-                    @endforeach
-                </ul>
-            @endif
+                        </div>
 
-            <form method="POST" action="{{ route('admin.settings.marketplaces.store') }}" class="form-row form-row--inline">
+                        <form method="POST" action="{{ route('admin.settings.marketplaces.update', $marketplace) }}" enctype="multipart/form-data" class="marketplace-card-form">
+                            @csrf
+                            @method('PUT')
+                            <div class="form-group">
+                                <label for="marketplace_note_{{ $marketplace->id }}">Invoice note</label>
+                                <textarea
+                                    id="marketplace_note_{{ $marketplace->id }}"
+                                    name="note"
+                                    class="form-control"
+                                    rows="4"
+                                    maxlength="500"
+                                    placeholder="Note shown on the invoice (optional)"
+                                >{{ old('note', $marketplace->note) }}</textarea>
+                            </div>
+
+                            <div class="marketplace-card-footer">
+                                <div class="form-group">
+                                    <label for="marketplace_logo_{{ $marketplace->id }}">Logo</label>
+                                    <input type="file" id="marketplace_logo_{{ $marketplace->id }}" name="logo" accept="image/*" class="form-control">
+                                    <p class="form-hint">Resized to 100×100px WebP.</p>
+                                </div>
+                                <div class="marketplace-card-actions">
+                                    @if ($marketplace->logo)
+                                        <label class="form-check">
+                                            <input type="checkbox" name="remove_logo" value="1">
+                                            Remove logo
+                                        </label>
+                                    @endif
+                                    <button type="submit" class="btn btn-sm btn-secondary">Save</button>
+                                </div>
+                            </div>
+                        </form>
+                    </section>
+                @endforeach
+            </div>
+        @endif
+
+        <section class="marketplace-card marketplace-card--new">
+            <h3 class="admin-panel-title">Add a marketplace</h3>
+            <form method="POST" action="{{ route('admin.settings.marketplaces.store') }}" enctype="multipart/form-data" class="marketplace-card-form">
                 @csrf
                 <div class="form-group">
-                    <label for="marketplace_name" class="sr-only">Marketplace name</label>
+                    <label for="marketplace_name">Name</label>
                     <input type="text" id="marketplace_name" name="name" class="form-control" value="{{ old('name') }}" maxlength="80" placeholder="e.g. Vinted">
                     @error('name') <p class="form-error">{{ $message }}</p> @enderror
                 </div>
                 <div class="form-group">
-                    <label for="marketplace_new_note" class="sr-only">Invoice note</label>
-                    <input type="text" id="marketplace_new_note" name="note" class="form-control" value="{{ old('note') }}" maxlength="500" placeholder="Note shown on the invoice (optional)">
+                    <label for="marketplace_new_note">Invoice note</label>
+                    <textarea id="marketplace_new_note" name="note" class="form-control" rows="4" maxlength="500" placeholder="Note shown on the invoice (optional)">{{ old('note') }}</textarea>
                     @error('note') <p class="form-error">{{ $message }}</p> @enderror
                 </div>
-                <button type="submit" class="btn btn-secondary">Add marketplace</button>
+                <div class="marketplace-card-footer">
+                    <div class="form-group">
+                        <label for="marketplace_new_logo">Logo</label>
+                        <input type="file" id="marketplace_new_logo" name="logo" accept="image/*" class="form-control">
+                        <p class="form-hint">Resized to 100×100px WebP (optional).</p>
+                        @error('logo') <p class="form-error">{{ $message }}</p> @enderror
+                    </div>
+                    <div class="marketplace-card-actions">
+                        <button type="submit" class="btn btn-primary">Add marketplace</button>
+                    </div>
+                </div>
             </form>
-        </div>
+        </section>
     </div>
 @endsection

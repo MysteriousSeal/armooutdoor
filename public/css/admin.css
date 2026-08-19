@@ -464,6 +464,116 @@
     border-bottom: none;
 }
 
+.marketplace-logo {
+    width: 1.75rem;
+    height: 1.75rem;
+    object-fit: contain;
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.marketplace-logo--sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+.marketplace-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.marketplace-card {
+    padding: 1.25rem 1.35rem 1.35rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.marketplace-card--new {
+    max-width: 34rem;
+}
+
+.marketplace-card-head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.1rem;
+}
+
+.marketplace-media {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    flex-shrink: 0;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.marketplace-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.marketplace-name {
+    flex: 1;
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.marketplace-remove-form {
+    flex-shrink: 0;
+}
+
+.marketplace-card-form .form-group {
+    margin-bottom: 0.9rem;
+}
+
+.marketplace-card-footer {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.marketplace-card-footer .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.marketplace-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    flex-shrink: 0;
+}
+
+.marketplace-card-actions .form-check {
+    white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+    .marketplace-card-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .marketplace-card-actions {
+        justify-content: space-between;
+    }
+}
+
+.order-chip--channel {
+    gap: 0.35rem;
+}
+
 .shipping-carrier-options {
     display: flex;
     flex-direction: column;

@@ -5,6 +5,7 @@ namespace App\Support;
 class ImageThumbnailer
 {
     public const SIZE = 400;
+
     public const MAIN_SIZE = 1000;
 
     /**
@@ -54,6 +55,18 @@ class ImageThumbnailer
      */
     public static function normalizeMain(string $relativePath): ?string
     {
+        return self::normalizeSquare($relativePath, self::MAIN_SIZE);
+    }
+
+    /**
+     * Normalizes a local image to an exact square WebP of the given size —
+     * scaled to fit (never cropped) and padded with transparency. Returns
+     * the new relative path (extension may have changed), or null for
+     * remote/unreadable images. Idempotent: an image that's already the
+     * right size and format is left alone.
+     */
+    public static function normalizeSquare(string $relativePath, int $size, int $quality = 90): ?string
+    {
         if ($relativePath === '' || str_starts_with($relativePath, 'http://') || str_starts_with($relativePath, 'https://')) {
             return null;
         }
@@ -69,9 +82,9 @@ class ImageThumbnailer
         $newRelativePath = $dir.$info['filename'].'.webp';
 
         if ($relativePath === $newRelativePath) {
-            $size = @getimagesize($source);
+            $imageSize = @getimagesize($source);
 
-            if ($size && $size[0] === self::MAIN_SIZE && $size[1] === self::MAIN_SIZE) {
+            if ($imageSize && $imageSize[0] === $size && $imageSize[1] === $size) {
                 return $relativePath;
             }
         }
@@ -82,8 +95,8 @@ class ImageThumbnailer
             return null;
         }
 
-        $resized = self::resizeContain($image, self::MAIN_SIZE, self::MAIN_SIZE);
-        imagewebp($resized, public_path('images/'.$newRelativePath), 90);
+        $resized = self::resizeContain($image, $size, $size);
+        imagewebp($resized, public_path('images/'.$newRelativePath), $quality);
         imagedestroy($image);
         imagedestroy($resized);
 

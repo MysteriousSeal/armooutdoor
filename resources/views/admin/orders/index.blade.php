@@ -277,7 +277,12 @@
                                 </td>
                                 <td>
                                     @if ($order->is_manual)
-                                        <span class="order-chip order-chip--channel">{{ $order->marketplace_name ?: 'Manuelle' }}</span>
+                                        <span class="order-chip order-chip--channel">
+                                            @if ($order->marketplace?->logo)
+                                                <img src="{{ $order->marketplace->logoUrl() }}" alt="" class="marketplace-logo marketplace-logo--sm">
+                                            @endif
+                                            {{ $order->marketplace_name ?: 'Manuelle' }}
+                                        </span>
                                     @else
                                         <span class="admin-table-sub">—</span>
                                     @endif
