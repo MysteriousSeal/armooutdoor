@@ -280,9 +280,37 @@
                                 <td>{{ $product->supplier?->name ?? '—' }}</td>
                                 <td>{{ $product->formattedPrice() }}</td>
                                 <td>{{ $product->quantity }}</td>
-                                <td>{{ $product->variants_count > 0 ? $product->variants_count : '—' }}</td>
+                                <td>
+                                    @if ($product->variants_count > 0)
+                                        <button
+                                            type="button"
+                                            class="variant-toggle"
+                                            data-variants-toggle
+                                            aria-expanded="false"
+                                            aria-controls="variant-panel-{{ $product->id }}"
+                                        >
+                                            {{ $product->variants_count }}
+                                            <svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true">
+                                                <path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                        </button>
+                                    @else
+                                        —
+                                    @endif
+                                </td>
                                 <td>{{ $product->weight_grams ? number_format($product->weight_grams).' g' : '—' }}</td>
-                                <td>{{ filled($product->gtin) ? $product->gtin : '—' }}</td>
+                                <td>
+                                    @if ($product->variants_count > 0)
+                                        @php
+                                            $gtinCount = $product->variants->filter(fn ($variant) => filled($variant->gtin))->count();
+                                        @endphp
+                                        <span class="variant-gtin-ratio {{ $gtinCount === $product->variants_count ? 'is-complete' : ($gtinCount === 0 ? 'is-empty' : 'is-partial') }}">
+                                            {{ $gtinCount }}/{{ $product->variants_count }}
+                                        </span>
+                                    @else
+                                        {{ filled($product->gtin) ? $product->gtin : '—' }}
+                                    @endif
+                                </td>
                                 <td>
                                     <form method="POST" action="{{ route('admin.products.status', $product) }}">
                                         @csrf
@@ -311,7 +339,7 @@
                                         ->unique()
                                         ->values();
                                 @endphp
-                                <tr class="admin-variant-row">
+                                <tr class="admin-variant-row" id="variant-panel-{{ $product->id }}" hidden>
                                     <td colspan="12">
                                         <div class="admin-variant-panel">
                                             <table class="admin-variant-table">
@@ -392,3 +420,23 @@
         @endif
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        (function () {
+            document.querySelectorAll('[data-variants-toggle]').forEach(function (trigger) {
+                var panel = document.getElementById(trigger.getAttribute('aria-controls'));
+
+                if (!panel) {
+                    return;
+                }
+
+                trigger.addEventListener('click', function () {
+                    var isOpen = trigger.getAttribute('aria-expanded') === 'true';
+                    trigger.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+                    panel.hidden = isOpen;
+                });
+            });
+        })();
+    </script>
+@endpush

@@ -1874,6 +1874,85 @@ a.admin-stat-card:hover {
     height: 2rem;
 }
 
+.variant-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent-hover);
+    background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.variant-toggle svg {
+    transition: transform 0.15s ease;
+}
+
+.variant-toggle:hover {
+    background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+    border-color: var(--accent);
+}
+
+.variant-toggle[aria-expanded="true"] {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+}
+
+.variant-toggle[aria-expanded="true"] svg {
+    transform: rotate(180deg);
+}
+
+.variant-gtin-ratio {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+}
+
+.variant-gtin-ratio.is-complete {
+    color: #3d6b4e;
+    background: #eef4ef;
+    border: 1px solid #d5e4d8;
+}
+
+.variant-gtin-ratio.is-partial {
+    color: #8a6d1f;
+    background: #fbf3dc;
+    border: 1px solid #ecd9a3;
+}
+
+.variant-gtin-ratio.is-empty {
+    color: #a44;
+    background: #f7ecec;
+    border: 1px solid #e3c6c6;
+}
+
+[data-theme='dark'] .variant-gtin-ratio.is-complete {
+    color: #8fceac;
+    background: color-mix(in srgb, #8fceac 12%, var(--surface));
+    border-color: color-mix(in srgb, #8fceac 32%, var(--border));
+}
+
+[data-theme='dark'] .variant-gtin-ratio.is-partial {
+    color: #e0b673;
+    background: color-mix(in srgb, #e0b673 12%, var(--surface));
+    border-color: color-mix(in srgb, #e0b673 32%, var(--border));
+}
+
+[data-theme='dark'] .variant-gtin-ratio.is-empty {
+    color: #e08585;
+    background: color-mix(in srgb, #e08585 12%, var(--surface));
+    border-color: color-mix(in srgb, #e08585 32%, var(--border));
+}
+
 .admin-variant-row > td,
 .admin-table tbody > tr.admin-variant-row:hover > td {
     padding: 0.15rem 1rem 0.85rem;
