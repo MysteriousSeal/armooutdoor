@@ -467,6 +467,7 @@ class OrderController extends Controller
         abort_if($order->isDraft(), 404);
 
         $order->markStatus('preparing');
+        AdminActivityLog::record('order.preparing', $order, 'Marked order '.$order->number.' as being prepared');
 
         return back()->with('status', 'Order marked as being prepared.');
     }
@@ -476,6 +477,7 @@ class OrderController extends Controller
         abort_if($order->isDraft(), 404);
 
         $order->markStatus('shipped');
+        AdminActivityLog::record('order.shipped', $order, 'Marked order '.$order->number.' as shipped');
 
         return back()->with('status', 'Order marked as shipped.');
     }
@@ -485,6 +487,7 @@ class OrderController extends Controller
         abort_if($order->isDraft() || $order->status === 'refunded', 403);
 
         $order->markStatus('refunded');
+        AdminActivityLog::record('order.refunded', $order, 'Marked order '.$order->number.' as refunded');
 
         return back()->with('status', 'Order marked as refunded.');
     }
@@ -551,6 +554,7 @@ class OrderController extends Controller
             ...$validated,
             'package_type_name' => $packageType?->name,
         ]);
+        AdminActivityLog::record('order.tracking_updated', $order, 'Updated tracking for order '.$order->number);
 
         return back()->with('status', 'Tracking details saved.');
     }
@@ -598,6 +602,7 @@ class OrderController extends Controller
         abort_unless($order->addressIsEditable(), 403);
 
         $order->update(['address_snapshot' => ['label' => null, ...$request->validated()]]);
+        AdminActivityLog::record('order.shipping_address_updated', $order, 'Updated shipping address for order '.$order->number);
 
         return back()->with('status', 'Shipping address updated for this order.');
     }
@@ -607,6 +612,7 @@ class OrderController extends Controller
         abort_unless($order->addressIsEditable(), 403);
 
         $order->update(['billing_address_snapshot' => ['label' => null, ...$request->validated()]]);
+        AdminActivityLog::record('order.billing_address_updated', $order, 'Updated billing address for order '.$order->number);
 
         return back()->with('status', 'Billing address updated for this order.');
     }

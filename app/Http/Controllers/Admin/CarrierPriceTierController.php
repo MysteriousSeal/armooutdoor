@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateCarrierPriceTierRequest;
+use App\Models\AdminActivityLog;
 use App\Models\Carrier;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -26,6 +27,8 @@ class CarrierPriceTierController extends Controller
                 ]);
             }
         });
+
+        AdminActivityLog::record('carrier.price_tiers_updated', $carrier, 'Updated price tiers for '.$carrier->localizedName());
 
         return redirect()
             ->route('admin.settings.shipping.edit')

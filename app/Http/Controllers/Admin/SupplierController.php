@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AdminActivityLog;
 use App\Models\Supplier;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,7 +21,7 @@ class SupplierController extends Controller
     public function create(): View
     {
         return view('admin.settings.supplier-form', [
-            'supplier' => new Supplier(),
+            'supplier' => new Supplier,
         ]);
     }
 
@@ -39,7 +40,8 @@ class SupplierController extends Controller
             'lead_time_days' => ['nullable', 'integer', 'min:0', 'max:365'],
         ]);
 
-        Supplier::query()->create($validated);
+        $supplier = Supplier::query()->create($validated);
+        AdminActivityLog::record('supplier.created', $supplier, 'Created supplier '.$supplier->name);
 
         return redirect()
             ->route('admin.settings.suppliers.index')
@@ -55,6 +57,7 @@ class SupplierController extends Controller
         ]);
 
         $supplier->update($validated);
+        AdminActivityLog::record('supplier.updated', $supplier, 'Updated supplier '.$supplier->name);
 
         return redirect()
             ->route('admin.settings.suppliers.index')
@@ -63,7 +66,9 @@ class SupplierController extends Controller
 
     public function destroy(Supplier $supplier): RedirectResponse
     {
+        $name = $supplier->name;
         $supplier->delete();
+        AdminActivityLog::record('supplier.deleted', null, 'Removed supplier '.$name);
 
         return redirect()
             ->route('admin.settings.suppliers.index')

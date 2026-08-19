@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AdminActivityLog;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -44,6 +45,7 @@ class AdminUserController extends Controller
         $admin = User::query()->create($validated);
         $admin->is_admin = true;
         $admin->save();
+        AdminActivityLog::record('admin.created', $admin, 'Added admin '.$admin->name.' ('.$admin->role.')');
 
         return redirect()
             ->route('admin.settings.admins.index')
@@ -77,7 +79,21 @@ class AdminUserController extends Controller
             unset($validated['password']);
         }
 
+        $roleChanged = $admin->role !== $validated['role'];
+        $passwordReset = array_key_exists('password', $validated);
+        $oldRole = $admin->role;
+
         $admin->update($validated);
+
+        AdminActivityLog::record('admin.updated', $admin, 'Updated admin '.$admin->name);
+
+        if ($roleChanged) {
+            AdminActivityLog::record('admin.role_changed', $admin, 'Changed '.$admin->name.'\'s role from '.$oldRole.' to '.$admin->role);
+        }
+
+        if ($passwordReset) {
+            AdminActivityLog::record('admin.password_reset', $admin, 'Reset password for '.$admin->name);
+        }
 
         return redirect()
             ->route('admin.settings.admins.index')
@@ -99,6 +115,7 @@ class AdminUserController extends Controller
         $admin->is_admin = false;
         $admin->admin_deactivated_at = now();
         $admin->save();
+        AdminActivityLog::record('admin.deactivated', $admin, 'Deactivated admin '.$admin->name);
 
         return redirect()
             ->route('admin.settings.admins.index')
@@ -113,6 +130,7 @@ class AdminUserController extends Controller
         $admin->is_admin = true;
         $admin->admin_deactivated_at = null;
         $admin->save();
+        AdminActivityLog::record('admin.reactivated', $admin, 'Reactivated admin '.$admin->name);
 
         return redirect()
             ->route('admin.settings.admins.index')

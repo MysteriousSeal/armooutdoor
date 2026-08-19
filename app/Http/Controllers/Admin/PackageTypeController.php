@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AdminActivityLog;
 use App\Models\PackageType;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,7 +16,8 @@ class PackageTypeController extends Controller
             'name' => ['required', 'string', 'max:80', 'unique:package_types,name'],
         ]);
 
-        PackageType::query()->create($validated);
+        $packageType = PackageType::query()->create($validated);
+        AdminActivityLog::record('package_type.created', $packageType, 'Created package type '.$packageType->name);
 
         return redirect()
             ->route('admin.settings.shipping.edit')
@@ -24,7 +26,9 @@ class PackageTypeController extends Controller
 
     public function destroy(PackageType $packageType): RedirectResponse
     {
+        $name = $packageType->name;
         $packageType->delete();
+        AdminActivityLog::record('package_type.deleted', null, 'Removed package type '.$name);
 
         return redirect()
             ->route('admin.settings.shipping.edit')

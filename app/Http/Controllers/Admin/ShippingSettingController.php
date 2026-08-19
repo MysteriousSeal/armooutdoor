@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateShippingSettingRequest;
+use App\Models\AdminActivityLog;
 use App\Models\Carrier;
 use App\Models\PackageType;
 use App\Models\ShippingSetting;
@@ -33,6 +34,7 @@ class ShippingSettingController extends Controller
                 : (int) round(((float) $threshold) * 100),
             'free_shipping_carrier_ids' => array_map('intval', $request->input('free_shipping_carrier_ids', [])),
         ]);
+        AdminActivityLog::record('shipping_setting.updated', null, 'Updated shipping settings');
 
         return redirect()
             ->route('admin.settings.shipping.edit')

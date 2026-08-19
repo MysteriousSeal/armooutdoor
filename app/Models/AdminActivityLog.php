@@ -44,6 +44,11 @@ class AdminActivityLog extends Model
             Product::class => 'Product',
             Discount::class => 'Discount',
             DiscountCode::class => 'Discount code',
+            Supplier::class => 'Supplier',
+            Marketplace::class => 'Marketplace',
+            PackageType::class => 'Package type',
+            Carrier::class => 'Carrier',
+            User::class => 'Admin',
             default => 'Item',
         };
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AdminActivityLog;
 use App\Models\Marketplace;
 use App\Support\ImageThumbnailer;
 use Illuminate\Http\RedirectResponse;
@@ -26,7 +27,8 @@ class MarketplaceController extends Controller
             $validated['logo'] = $this->storeLogo($request->file('logo'), $validated['name']);
         }
 
-        Marketplace::query()->create($validated);
+        $marketplace = Marketplace::query()->create($validated);
+        AdminActivityLog::record('marketplace.created', $marketplace, 'Created marketplace '.$marketplace->name);
 
         return redirect()
             ->route('admin.settings.orders.edit')
@@ -52,6 +54,7 @@ class MarketplaceController extends Controller
         unset($validated['remove_logo']);
 
         $marketplace->update($validated);
+        AdminActivityLog::record('marketplace.updated', $marketplace, 'Updated marketplace '.$marketplace->name);
 
         return redirect()
             ->route('admin.settings.orders.edit')
@@ -60,8 +63,10 @@ class MarketplaceController extends Controller
 
     public function destroy(Marketplace $marketplace): RedirectResponse
     {
+        $name = $marketplace->name;
         $this->deleteLogo($marketplace->logo);
         $marketplace->delete();
+        AdminActivityLog::record('marketplace.deleted', null, 'Removed marketplace '.$name);
 
         return redirect()
             ->route('admin.settings.orders.edit')
