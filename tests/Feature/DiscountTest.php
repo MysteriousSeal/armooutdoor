@@ -126,7 +126,7 @@ class DiscountTest extends TestCase
             'address_id' => $address->id,
             'same_billing_address' => true,
             'carrier_id' => $carrier->id,
-            'payment_method' => 'card',
+            'payment_method' => 'paypal',
         ]);
 
         $order = Order::query()->firstOrFail();
@@ -153,7 +153,7 @@ class DiscountTest extends TestCase
             'address_id' => $address->id,
             'same_billing_address' => true,
             'carrier_id' => $carrier->id,
-            'payment_method' => 'card',
+            'payment_method' => 'paypal',
         ]);
 
         $this->assertSame(2, $code->fresh()->quantity);
@@ -254,7 +254,7 @@ class DiscountTest extends TestCase
             'address_id' => $address->id,
             'same_billing_address' => true,
             'carrier_id' => $carrier->id,
-            'payment_method' => 'card',
+            'payment_method' => 'paypal',
         ]);
 
         $this->actingAs($user)->post('/cart', ['product_id' => $product->id, 'quantity' => 1]);

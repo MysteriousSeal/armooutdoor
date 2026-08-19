@@ -698,14 +698,14 @@ textarea.form-control {
 
 .order-item-supplier-note,
 .order-item-backorder-note {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     margin-top: 0.35rem;
-    padding: 0.15rem 0.5rem;
+    padding: 0.3rem 0.55rem;
     font-size: 0.75rem;
     color: #8a6d1a;
     background: #fdf3d8;
     border: 1px solid #f0dda0;
-    border-radius: 0.25rem;
 }
 
 .order-item-discount {
@@ -885,6 +885,140 @@ textarea.form-control {
     margin-top: 0.65rem;
 }
 
+.stripe-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    margin: 0.75rem 0 0;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+}
+
+.stripe-meta-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.stripe-meta-row dt {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.stripe-meta-row dd {
+    margin: 0;
+}
+
+.stripe-meta-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    max-width: 100%;
+    padding: 0.3rem 0.55rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.75rem;
+    color: #5147e5;
+    background: color-mix(in srgb, #635bff 8%, var(--surface));
+    border: 1px solid color-mix(in srgb, #635bff 22%, var(--border));
+    overflow-wrap: anywhere;
+}
+
+a.stripe-meta-chip {
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+a.stripe-meta-chip::after {
+    content: '↗';
+    flex-shrink: 0;
+    font-family: system-ui, sans-serif;
+    color: color-mix(in srgb, #635bff 60%, var(--text-muted));
+}
+
+a.stripe-meta-chip:hover {
+    background: color-mix(in srgb, #635bff 14%, var(--surface));
+    border-color: color-mix(in srgb, #635bff 35%, var(--border));
+}
+
+[data-theme='dark'] .stripe-meta-chip {
+    color: #b3aeff;
+    background: color-mix(in srgb, #635bff 16%, var(--surface));
+    border-color: color-mix(in srgb, #635bff 32%, var(--border));
+}
+
+[data-theme='dark'] a.stripe-meta-chip:hover {
+    background: color-mix(in srgb, #635bff 26%, var(--surface));
+}
+
+.stripe-fee-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.55rem;
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    color: #a44;
+    background: #f7ecec;
+    border: 1px solid #e3c6c6;
+}
+
+.stripe-status-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.55rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.stripe-status-chip--paid {
+    color: #3d6b4e;
+    background: #eef4ef;
+    border: 1px solid #d5e4d8;
+}
+
+.stripe-status-chip--pending {
+    color: #8a6d1f;
+    background: #fbf3dc;
+    border: 1px solid #ecd9a3;
+}
+
+.stripe-status-chip--failed {
+    color: #a44;
+    background: #f7ecec;
+    border: 1px solid #e3c6c6;
+}
+
+[data-theme='dark'] .stripe-status-chip--paid {
+    color: #8fceac;
+    background: color-mix(in srgb, #8fceac 12%, var(--surface));
+    border-color: color-mix(in srgb, #8fceac 32%, var(--border));
+}
+
+[data-theme='dark'] .stripe-status-chip--pending {
+    color: #e0b673;
+    background: color-mix(in srgb, #e0b673 12%, var(--surface));
+    border-color: color-mix(in srgb, #e0b673 32%, var(--border));
+}
+
+[data-theme='dark'] .stripe-status-chip--failed {
+    color: #e08585;
+    background: color-mix(in srgb, #e08585 12%, var(--surface));
+    border-color: color-mix(in srgb, #e08585 32%, var(--border));
+}
+
+[data-theme='dark'] .stripe-fee-chip {
+    color: #e08585;
+    background: color-mix(in srgb, #e08585 12%, var(--surface));
+    border-color: color-mix(in srgb, #e08585 32%, var(--border));
+}
+
+.stripe-fee-percentage {
+    margin-left: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
 .order-facts > .btn {
     margin-top: 0.25rem;
 }
@@ -1042,6 +1176,14 @@ button.admin-table-icon-btn:hover {
     text-transform: uppercase;
     white-space: nowrap;
     border: 1px solid var(--border);
+}
+
+.badge-inline {
+    height: 1.2rem;
+    margin-left: 0.4rem;
+    padding: 0 0.45rem;
+    font-size: 0.625rem;
+    vertical-align: middle;
 }
 
 .badge-featured {

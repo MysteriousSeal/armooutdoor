@@ -4,10 +4,12 @@ namespace App\Models;
 
 use App\Enums\DeliveryMethod;
 use App\Enums\PaymentMethod;
+use App\Support\ShippingEstimate;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Str;
 
@@ -42,6 +44,10 @@ use Illuminate\Support\Str;
     'discount_cents',
     'total_cents',
     'payment_method',
+    'stripe_checkout_session_id',
+    'stripe_payment_intent_id',
+    'stripe_customer_id',
+    'payment_fee_cents',
 ])]
 class Order extends Model
 {
@@ -68,6 +74,7 @@ class Order extends Model
             'discount_cents' => 'integer',
             'total_cents' => 'integer',
             'payment_method' => PaymentMethod::class,
+            'payment_fee_cents' => 'integer',
         ];
     }
 
@@ -94,13 +101,13 @@ class Order extends Model
      * candidate date is latest is the one shown, since that's the item
      * holding up the whole shipment.
      */
-    public function estimatedShippingDate(): \Illuminate\Support\Carbon
+    public function estimatedShippingDate(): Carbon
     {
-        $candidates = collect([\App\Support\ShippingEstimate::standard($this->created_at)]);
+        $candidates = collect([ShippingEstimate::standard($this->created_at)]);
 
         foreach ($this->items as $item) {
             if ($item->was_backordered && $item->supplier_lead_time_days !== null) {
-                $candidates->push(\App\Support\ShippingEstimate::backordered($this->created_at, $item->supplier_lead_time_days));
+                $candidates->push(ShippingEstimate::backordered($this->created_at, $item->supplier_lead_time_days));
             }
         }
 
@@ -200,6 +207,55 @@ class Order extends Model
     public function formattedTotal(): string
     {
         return format_euros($this->total_cents);
+    }
+
+    /**
+     * What actually lands in the bank after the marketplace's cut, what
+     * was paid out of pocket for shipping, and the card/PayPal processor's
+     * fee are all taken off the order total.
+     */
+    public function perceivedTotalCents(): int
+    {
+        return $this->total_cents
+            - ($this->marketplace_commission_cents ?? 0)
+            - ($this->shipping_paid_cents ?? 0)
+            - ($this->payment_fee_cents ?? 0);
+    }
+
+    public function formattedPerceivedTotal(): string
+    {
+        return format_euros($this->perceivedTotalCents());
+    }
+
+    /**
+     * The marketplace commission, out-of-pocket shipping, and payment
+     * processor fee combined — everything that's taken off the total
+     * before it actually lands in the bank.
+     */
+    public function totalCostsCents(): int
+    {
+        return ($this->marketplace_commission_cents ?? 0)
+            + ($this->shipping_paid_cents ?? 0)
+            + ($this->payment_fee_cents ?? 0);
+    }
+
+    public function formattedTotalCosts(): string
+    {
+        return format_euros($this->totalCostsCents());
+    }
+
+    /**
+     * The payment processing fee as a share of the order total, e.g. "4.7%".
+     */
+    public function formattedPaymentFeePercentage(): ?string
+    {
+        if ($this->payment_fee_cents === null || $this->total_cents === 0) {
+            return null;
+        }
+
+        $percentage = $this->payment_fee_cents / $this->total_cents * 100;
+
+        return number_format($percentage, 1, ',', ' ').' %';
     }
 
     public function hasTracking(): bool

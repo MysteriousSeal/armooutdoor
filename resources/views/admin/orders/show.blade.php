@@ -242,7 +242,56 @@
                     @if ($order->payment_method)
                         <section class="order-fact">
                             <h3 class="order-fact-title">Payment</h3>
-                            <p>{{ $order->payment_method->label() }}</p>
+                            <p>
+                                {{ $order->payment_method->label() }}
+                                @if ($order->payment_method === \App\Enums\PaymentMethod::Card)
+                                    (Stripe)
+                                @endif
+                            </p>
+
+                            @if ($order->stripe_payment_intent_id || $order->stripe_customer_id || $order->payment_fee_cents)
+                                <dl class="stripe-meta">
+                                    @if ($order->payment_fee_cents)
+                                        <div class="stripe-meta-row">
+                                            <dt>Payment processing fee</dt>
+                                            <dd>
+                                                <span class="stripe-fee-chip">− {{ format_euros($order->payment_fee_cents) }}</span>
+                                                @if ($order->formattedPaymentFeePercentage())
+                                                    <span class="stripe-fee-percentage">{{ $order->formattedPaymentFeePercentage() }} of total</span>
+                                                @endif
+                                            </dd>
+                                        </div>
+                                    @endif
+                                    @if ($order->stripe_payment_intent_id)
+                                        <div class="stripe-meta-row">
+                                            <dt>Payment intent</dt>
+                                            <dd>
+                                                @if ($stripePaymentIntentUrl)
+                                                    <a href="{{ $stripePaymentIntentUrl }}" target="_blank" rel="noopener noreferrer" class="stripe-meta-chip">
+                                                        {{ $order->stripe_payment_intent_id }}
+                                                    </a>
+                                                @else
+                                                    <span class="stripe-meta-chip">{{ $order->stripe_payment_intent_id }}</span>
+                                                @endif
+                                            </dd>
+                                        </div>
+                                    @endif
+                                    @if ($order->stripe_customer_id)
+                                        <div class="stripe-meta-row">
+                                            <dt>Stripe customer</dt>
+                                            <dd>
+                                                @if ($stripeCustomerUrl)
+                                                    <a href="{{ $stripeCustomerUrl }}" target="_blank" rel="noopener noreferrer" class="stripe-meta-chip">
+                                                        {{ $order->stripe_customer_id }}
+                                                    </a>
+                                                @else
+                                                    <span class="stripe-meta-chip">{{ $order->stripe_customer_id }}</span>
+                                                @endif
+                                            </dd>
+                                        </div>
+                                    @endif
+                                </dl>
+                            @endif
                         </section>
                     @endif
                 </div>

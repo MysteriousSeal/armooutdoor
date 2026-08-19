@@ -27,7 +27,7 @@
             : null;
     @endphp
 
-    <div class="admin-list-page">
+    <div class="admin-list-page admin-orders-page">
         <header class="admin-list-hero">
             <div class="admin-list-hero-row">
                 <div>
@@ -41,13 +41,47 @@
                 </div>
             </div>
             <div class="admin-list-meta">
-                <span class="admin-list-chip">{{ number_format($toPrepareCount) }} to prepare</span>
-                <span class="admin-list-chip">{{ number_format($missingTrackingCount) }} missing tracking</span>
+                <span class="admin-list-chip">{{ number_format($kpis['order_count']) }} total orders</span>
+                <span class="admin-list-chip">{{ number_format($kpis['to_prepare_count']) }} to prepare</span>
+                <span class="admin-list-chip">{{ number_format($kpis['missing_tracking_count']) }} missing tracking</span>
                 @if ($hasFilters)
                     <span class="admin-list-chip is-filtered">Filtered</span>
                 @endif
             </div>
         </header>
+
+        <div class="admin-stat-grid admin-stat-grid--primary">
+            <div class="admin-stat-card">
+                <span class="admin-stat-label">Total amount</span>
+                <span class="admin-stat-value">{{ format_euros($kpis['amount_cents']) }}</span>
+                <span class="admin-stat-value--sm">Order totals</span>
+            </div>
+            <div class="admin-stat-card">
+                <span class="admin-stat-label">Own shipping cost</span>
+                <span class="admin-stat-value">{{ format_euros($kpis['shipping_cost_cents']) }}</span>
+                <span class="admin-stat-value--sm">Paid out of pocket</span>
+            </div>
+            <div class="admin-stat-card">
+                <span class="admin-stat-label">Commission cost</span>
+                <span class="admin-stat-value">{{ format_euros($kpis['commission_cost_cents']) }}</span>
+                <span class="admin-stat-value--sm">Marketplace cut</span>
+            </div>
+            <div class="admin-stat-card">
+                <span class="admin-stat-label">Payment fees</span>
+                <span class="admin-stat-value">{{ format_euros($kpis['payment_fee_cents']) }}</span>
+                <span class="admin-stat-value--sm">Card / PayPal processor</span>
+            </div>
+            <div class="admin-stat-card admin-stat-card--warning">
+                <span class="admin-stat-label">Total costs</span>
+                <span class="admin-stat-value">{{ format_euros($kpis['total_costs_cents']) }}</span>
+                <span class="admin-stat-value--sm">Shipping + commission + fees</span>
+            </div>
+            <div class="admin-stat-card admin-stat-card--positive">
+                <span class="admin-stat-label">Total perceived</span>
+                <span class="admin-stat-value">{{ format_euros($kpis['perceived_total_cents']) }}</span>
+                <span class="admin-stat-value--sm">After all costs</span>
+            </div>
+        </div>
 
         <nav class="admin-tabs" aria-label="Order tabs">
             <a href="{{ route('admin.orders.index', [...$baseFilters, 'tab' => 'orders']) }}" class="{{ $tab === 'orders' ? 'active' : '' }}">
@@ -193,6 +227,8 @@
                             <th>Status</th>
                             <th>Tracking</th>
                             <th class="admin-table-num">Total</th>
+                            <th class="admin-table-num">Various costs</th>
+                            <th class="admin-table-num">Total perceived</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -222,28 +258,28 @@
                                 </td>
                                 <td>
                                     @if ($order->is_manual)
-                                        <span class="admin-list-chip">{{ $order->marketplace_name ?: 'Manuelle' }}</span>
+                                        <span class="order-chip order-chip--channel">{{ $order->marketplace_name ?: 'Manuelle' }}</span>
                                     @else
                                         <span class="admin-table-sub">—</span>
                                     @endif
                                 </td>
                                 <td>
-                                    <span class="badge badge-{{ $order->status }}">
+                                    <span class="order-chip order-chip--{{ $order->status }}">
                                         {{ ucfirst($order->status) }}
                                     </span>
                                 </td>
                                 <td>
                                     @if ($order->hasTracking())
-                                        <span class="tracking-flag is-available">Available</span>
+                                        <span class="order-chip order-chip--tracking-available">Available</span>
                                     @elseif ($order->hasBeenShipped())
-                                        <span class="tracking-flag is-missing">Missing</span>
+                                        <span class="order-chip order-chip--tracking-missing">Missing</span>
                                     @else
-                                        <span class="tracking-flag is-na">N/A</span>
+                                        <span class="order-chip order-chip--tracking-na">N/A</span>
                                     @endif
                                 </td>
                                 <td class="admin-table-num">
                                     <span class="admin-order-total">{{ $order->formattedTotal() }}</span>
-                                    @if ($order->marketplace_commission_cents || $order->shipping_paid_cents)
+                                    @if ($order->marketplace_commission_cents || $order->shipping_paid_cents || $order->payment_fee_cents)
                                         <span class="admin-order-deductions">
                                             @if ($order->marketplace_commission_cents)
                                                 <span class="admin-order-deduction" title="Commission">−{{ format_euros($order->marketplace_commission_cents) }} comm.</span>
@@ -251,8 +287,21 @@
                                             @if ($order->shipping_paid_cents)
                                                 <span class="admin-order-deduction" title="Shipping paid">−{{ format_euros($order->shipping_paid_cents) }} ship.</span>
                                             @endif
+                                            @if ($order->payment_fee_cents)
+                                                <span class="admin-order-deduction" title="{{ $order->payment_method?->label() }} fee">−{{ format_euros($order->payment_fee_cents) }} fee</span>
+                                            @endif
                                         </span>
                                     @endif
+                                </td>
+                                <td class="admin-table-num">
+                                    @if ($order->totalCostsCents() > 0)
+                                        <span class="stripe-fee-chip">− {{ $order->formattedTotalCosts() }}</span>
+                                    @else
+                                        <span class="admin-table-sub">—</span>
+                                    @endif
+                                </td>
+                                <td class="admin-table-num">
+                                    <span class="admin-order-perceived">{{ $order->formattedPerceivedTotal() }}</span>
                                 </td>
                                 <td>
                                     <div class="admin-table-actions">

@@ -267,6 +267,8 @@ return [
     'payment_paypal_lede' => 'Payez avec votre compte PayPal.',
     'order_payment' => 'Paiement',
     'order_placed' => 'Votre commande est enregistrée.',
+    'stripe_order_line_name' => 'Commande :shop',
+    'payment_not_confirmed' => 'Le paiement n\'a pas pu être confirmé. Veuillez réessayer.',
     'order_title' => 'Commande :number',
     'order_confirmed' => 'Commande confirmée',
     'order_total' => 'Total',

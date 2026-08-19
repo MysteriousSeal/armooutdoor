@@ -4,7 +4,6 @@
 use App\Http\Controllers\Account\AccountController;
 use App\Http\Controllers\Account\AddressController;
 use App\Http\Controllers\Account\ProfileController;
-
 // Admin (back office)
 use App\Http\Controllers\Admin\ActivityController as AdminActivityController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
@@ -24,14 +23,13 @@ use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\SearchController as AdminSearchController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\ShippingSettingController as AdminShippingSettingController;
+use App\Http\Controllers\Admin\StripePaymentController as AdminStripePaymentController;
 use App\Http\Controllers\Admin\SupplierController as AdminSupplierController;
-
 // Auth (customer-facing login/register/password reset)
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
-
 // Storefront (shop, cart, checkout, orders, etc.)
 use App\Http\Controllers\BestSellersController;
 use App\Http\Controllers\CartController;
@@ -48,6 +46,7 @@ use App\Http\Controllers\PromotionsController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\WishlistController;
 use Illuminate\Support\Facades\Route;
 
@@ -170,6 +169,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/settings/suppliers/{supplier}/edit', [AdminSupplierController::class, 'edit'])->name('settings.suppliers.edit');
         Route::put('/settings/suppliers/{supplier}', [AdminSupplierController::class, 'update'])->name('settings.suppliers.update');
         Route::delete('/settings/suppliers/{supplier}', [AdminSupplierController::class, 'destroy'])->name('settings.suppliers.destroy');
+
+        Route::get('/stripe/orphaned-payments', [AdminStripePaymentController::class, 'index'])->name('stripe.orphaned-payments.index');
+        Route::post('/stripe/orphaned-payments/{sessionId}/finalize', [AdminStripePaymentController::class, 'finalize'])->name('stripe.orphaned-payments.finalize');
     });
 });
 
@@ -202,6 +204,8 @@ Route::get('/paiement-securise', [HelpController::class, 'securePayment'])->name
 | Cart (guests and customers alike)
 |--------------------------------------------------------------------------
 */
+
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])->name('stripe.webhook');
 
 Route::get('/cart', [CartController::class, 'show'])->name('cart.show');
 Route::post('/cart', [CartController::class, 'add'])->name('cart.add');
@@ -264,6 +268,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/checkout/discount-code', [CheckoutController::class, 'applyDiscountCode'])->name('checkout.discount-code.store');
     Route::delete('/checkout/discount-code', [CheckoutController::class, 'removeDiscountCode'])->name('checkout.discount-code.destroy');
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+    Route::get('/checkout/stripe/success', [CheckoutController::class, 'stripeSuccess'])->name('checkout.stripe.success');
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::get('/orders/{order}/invoice', [OrderController::class, 'invoice'])->name('orders.invoice');

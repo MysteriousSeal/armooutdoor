@@ -4,5 +4,5 @@ return [
     'currency' => 'EUR',
     'countries' => ['FR', 'BE', 'CH', 'LU'],
     'customer_countries' => ['FR'],
-    'version' => '0.1.82',
+    'version' => '0.2.0',
 ];

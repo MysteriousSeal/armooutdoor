@@ -31,6 +31,10 @@
                 <span class="admin-stat-label">Suppliers</span>
                 <span class="admin-stat-value admin-stat-value--sm">Suppliers and their lead time</span>
             </a>
+            <a href="{{ route('admin.stripe.orphaned-payments.index') }}" class="admin-stat-card">
+                <span class="admin-stat-label">Stripe payments</span>
+                <span class="admin-stat-value admin-stat-value--sm">All checkout sessions and their matching orders</span>
+            </a>
         </div>
     </div>
 @endsection

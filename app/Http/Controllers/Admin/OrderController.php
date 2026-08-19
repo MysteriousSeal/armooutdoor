@@ -18,10 +18,12 @@ use App\Models\ProductVariant;
 use App\Models\ShippingSetting;
 use App\Models\User;
 use App\Support\Csv;
+use App\Support\StripeDashboard;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -42,20 +44,37 @@ class OrderController extends Controller
             ->simplePaginate(20)
             ->withQueryString();
 
+        $this->backfillMissingPaymentFees($orders->getCollection());
+
+        $nonArchivedOrders = Order::query()->whereNull('archived_at')->where('status', '!=', 'draft');
+        $amountCents = (clone $nonArchivedOrders)->sum('total_cents');
+        $shippingCostCents = (clone $nonArchivedOrders)->sum('shipping_paid_cents');
+        $commissionCostCents = (clone $nonArchivedOrders)->sum('marketplace_commission_cents');
+        $paymentFeeCents = (clone $nonArchivedOrders)->sum('payment_fee_cents');
+        $totalCostsCents = $shippingCostCents + $commissionCostCents + $paymentFeeCents;
+
         return view('admin.orders.index', [
             'orders' => $orders,
             'tab' => $filters['tab'],
+            'kpis' => [
+                'order_count' => (clone $nonArchivedOrders)->count(),
+                'amount_cents' => $amountCents,
+                'shipping_cost_cents' => $shippingCostCents,
+                'commission_cost_cents' => $commissionCostCents,
+                'payment_fee_cents' => $paymentFeeCents,
+                'total_costs_cents' => $totalCostsCents,
+                'perceived_total_cents' => $amountCents - $totalCostsCents,
+                'to_prepare_count' => (clone $nonArchivedOrders)->whereIn('status', ['placed', 'preparing'])->count(),
+                'missing_tracking_count' => (clone $nonArchivedOrders)
+                    ->where('status', 'shipped')
+                    ->where(function ($query): void {
+                        $query->whereNull('tracking_number')->orWhere('tracking_number', '');
+                    })
+                    ->count(),
+            ],
             'orderCount' => Order::query()->whereNull('archived_at')->where('status', '!=', 'draft')->count(),
             'draftCount' => Order::query()->whereNull('archived_at')->where('status', 'draft')->count(),
             'archivedCount' => Order::query()->whereNotNull('archived_at')->count(),
-            'toPrepareCount' => Order::query()->whereNull('archived_at')->whereIn('status', ['placed', 'preparing'])->count(),
-            'missingTrackingCount' => Order::query()
-                ->whereNull('archived_at')
-                ->where('status', 'shipped')
-                ->where(function ($query): void {
-                    $query->whereNull('tracking_number')->orWhere('tracking_number', '');
-                })
-                ->count(),
             'search' => $filters['search'],
             'status' => $filters['status'],
             'marketplaceId' => $filters['marketplace_id'],
@@ -90,6 +109,29 @@ class OrderController extends Controller
                 number_format($order->total_cents / 100, 2, '.', ''),
             ])
         );
+    }
+
+    /**
+     * Self-heals orders whose payment fee wasn't captured at creation time
+     * (Stripe's balance transaction can lag slightly behind payment
+     * success) — fetched once here, on view, and persisted so it's never
+     * queried again afterwards.
+     *
+     * @param  Collection<int, Order>  $orders
+     */
+    private function backfillMissingPaymentFees($orders): void
+    {
+        foreach ($orders as $order) {
+            if ($order->payment_fee_cents !== null || $order->stripe_payment_intent_id === null) {
+                continue;
+            }
+
+            $feeCents = StripeDashboard::fetchFeeCents($order->stripe_payment_intent_id);
+
+            if ($feeCents !== null) {
+                $order->update(['payment_fee_cents' => $feeCents]);
+            }
+        }
     }
 
     /**
@@ -399,10 +441,14 @@ class OrderController extends Controller
     {
         $order->load(['user', 'items.product.discount', 'items.product.supplier', 'items.variant', 'statusHistories']);
 
+        $this->backfillMissingPaymentFees(collect([$order]));
+
         return view('admin.orders.show', [
             'order' => $order,
             'carriers' => Carrier::query()->orderBy('sort_order')->get(),
             'packageTypes' => PackageType::query()->orderBy('name')->get(),
+            'stripePaymentIntentUrl' => $order->stripe_payment_intent_id ? StripeDashboard::paymentIntentUrl($order->stripe_payment_intent_id) : null,
+            'stripeCustomerUrl' => $order->stripe_customer_id ? StripeDashboard::customerUrl($order->stripe_customer_id) : null,
         ]);
     }
 

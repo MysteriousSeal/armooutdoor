@@ -105,7 +105,7 @@ class CheckoutTest extends TestCase
                 'address_id' => $address->id,
                 'same_billing_address' => true,
                 'carrier_id' => $carrier->id,
-                'payment_method' => 'card',
+                'payment_method' => 'paypal',
             ]);
 
         $order = Order::query()->firstOrFail();
@@ -113,7 +113,7 @@ class CheckoutTest extends TestCase
         $response->assertRedirect('/orders/'.$order->number);
 
         $this->assertSame('placed', $order->status);
-        $this->assertSame('card', $order->payment_method->value);
+        $this->assertSame('paypal', $order->payment_method->value);
         $this->assertSame('home', $order->carrier_method->value);
         $this->assertSame(15800, $order->subtotal_cents);
         $this->assertSame(690, $order->shipping_cents);
@@ -127,7 +127,7 @@ class CheckoutTest extends TestCase
             ->assertSee($order->number)
             ->assertSee('Poêle en fonte')
             ->assertSee('Colissimo')
-            ->assertSee('Carte bancaire');
+            ->assertSee('PayPal');
     }
 
     public function test_a_relay_order_requires_a_pickup_point(): void
@@ -218,7 +218,7 @@ class CheckoutTest extends TestCase
                 'address_id' => $address->id,
                 'same_billing_address' => true,
                 'carrier_id' => $carrier->id,
-                'payment_method' => 'card',
+                'payment_method' => 'paypal',
             ])
             ->assertRedirect();
 

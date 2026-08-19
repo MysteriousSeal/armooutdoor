@@ -15,6 +15,7 @@ use App\Models\RelayPoint;
 use App\Models\ShippingSetting;
 use App\Models\User;
 use App\Services\SendcloudRelayClient;
+use App\Services\StripeCheckoutFinalizer;
 use App\Support\Cart;
 use App\Support\CartLine;
 use Illuminate\Database\Eloquent\Collection;
@@ -23,7 +24,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\MessageBag;
+use Illuminate\Support\ViewErrorBag;
 use Illuminate\View\View;
+use Stripe\StripeClient;
 
 class CheckoutController extends Controller
 {
@@ -64,7 +68,7 @@ class CheckoutController extends Controller
         $relayProvider = $selectedCarrier ? $this->providerForCarrier($selectedCarrier) : null;
         $relayPoints = ($relayPostalCode !== '' && $relayProvider !== null)
             ? $this->relayPointsFor($relayPostalCode, $selectedAddress?->country ?? 'FR', $relayProvider)
-            : new Collection();
+            : new Collection;
 
         return view('checkout.show', [
             'lines' => $cart->lines(),
@@ -224,10 +228,10 @@ class CheckoutController extends Controller
         $subtotalCents = $cart->totalCents();
         $discountCents = $discountCode ? $subtotalCents - $discountCode->apply($subtotalCents) : 0;
 
-        $errors = new \Illuminate\Support\ViewErrorBag();
+        $errors = new ViewErrorBag;
 
         if ($errorMessage !== null) {
-            $errors->put('default', new \Illuminate\Support\MessageBag(['discount_code' => [$errorMessage]]));
+            $errors->put('default', new MessageBag(['discount_code' => [$errorMessage]]));
         }
 
         $sectionHtml = view('partials.checkout-discount-code', [
@@ -270,6 +274,10 @@ class CheckoutController extends Controller
 
         if ($carrier->isRelay()) {
             $relayPoint = RelayPoint::query()->findOrFail($request->integer('relay_point_id'));
+        }
+
+        if ($request->validated('payment_method') === 'card') {
+            return $this->startStripeCheckout($request, $cart, $address, $billingAddress, $carrier, $relayPoint);
         }
 
         try {
@@ -407,6 +415,120 @@ class CheckoutController extends Controller
             ->with('status', __('store.order_placed'));
     }
 
+    private function startStripeCheckout(
+        Request $request,
+        Cart $cart,
+        Address $address,
+        Address $billingAddress,
+        Carrier $carrier,
+        ?RelayPoint $relayPoint,
+    ): RedirectResponse {
+        $user = $request->user();
+        $subtotal = $cart->totalCents();
+        $shipping = ShippingSetting::current()->effectivePriceCents($carrier, $subtotal, $cart->totalWeightGrams());
+
+        $discountCodeId = session(self::DISCOUNT_CODE_SESSION_KEY);
+        $discountCode = $discountCodeId !== null ? DiscountCode::query()->find($discountCodeId) : null;
+        $discountCents = ($discountCode !== null && $discountCode->eligibilityError($user) === null)
+            ? $subtotal - $discountCode->apply($subtotal)
+            : 0;
+
+        $totalCents = max(0, $subtotal - $discountCents + $shipping);
+
+        $stripe = new StripeClient(config('services.stripe.secret'));
+        $existingCustomerId = $this->findStripeCustomerId($stripe, $user->email);
+
+        $session = $stripe->checkout->sessions->create([
+            'mode' => 'payment',
+            ...($existingCustomerId !== null
+                ? ['customer' => $existingCustomerId]
+                : ['customer_email' => $user->email, 'customer_creation' => 'always']),
+            'line_items' => [[
+                'price_data' => [
+                    'currency' => strtolower(config('shop.currency')),
+                    'unit_amount' => $totalCents,
+                    'product_data' => [
+                        'name' => __('store.stripe_order_line_name', ['shop' => config('app.name')]),
+                    ],
+                ],
+                'quantity' => 1,
+            ]],
+            'metadata' => [
+                'user_id' => $user->id,
+                'address_id' => $address->id,
+                'billing_address_id' => $billingAddress->id,
+                'carrier_id' => $carrier->id,
+                'relay_point_id' => $relayPoint?->id,
+                'discount_code_id' => $discountCode?->id,
+            ],
+            'success_url' => localized_route('checkout.stripe.success').'?session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url' => localized_route('checkout.show'),
+        ]);
+
+        return redirect()->away($session->url);
+    }
+
+    /**
+     * Reuses an existing Stripe Customer for this email instead of letting
+     * Checkout create a new one every time — otherwise a returning customer
+     * ends up with a fresh Customer object on every order.
+     */
+    private function findStripeCustomerId(StripeClient $stripe, string $email): ?string
+    {
+        $customers = $stripe->customers->all(['email' => $email, 'limit' => 1]);
+
+        return $customers->data[0]->id ?? null;
+    }
+
+    public function stripeSuccess(Request $request, StripeCheckoutFinalizer $finalizer): RedirectResponse
+    {
+        $sessionId = (string) $request->query('session_id', '');
+
+        if ($sessionId === '') {
+            return redirect(localized_route('checkout.show'));
+        }
+
+        $stripe = new StripeClient(config('services.stripe.secret'));
+        $session = $stripe->checkout->sessions->retrieve($sessionId);
+
+        if ($session->payment_status !== 'paid') {
+            return redirect(localized_route('checkout.show'))
+                ->with('status', __('store.payment_not_confirmed'));
+        }
+
+        $metadata = $session->metadata;
+
+        try {
+            $order = $finalizer->finalize(
+                userId: (int) $metadata->user_id,
+                addressId: (int) $metadata->address_id,
+                billingAddressId: filled($metadata->billing_address_id) ? (int) $metadata->billing_address_id : null,
+                carrierId: (int) $metadata->carrier_id,
+                relayPointId: filled($metadata->relay_point_id) ? (int) $metadata->relay_point_id : null,
+                discountCodeId: filled($metadata->discount_code_id) ? (int) $metadata->discount_code_id : null,
+                stripeCheckoutSessionId: $session->id,
+                stripePaymentIntentId: is_string($session->payment_intent) ? $session->payment_intent : null,
+                stripeCustomerId: is_string($session->customer) ? $session->customer : null,
+            );
+        } catch (\RuntimeException $exception) {
+            if ($exception->getMessage() === 'stock') {
+                return redirect(localized_route('cart.show'))
+                    ->with('status', __('store.out_of_stock'));
+            }
+
+            if ($exception->getMessage() === 'empty_cart') {
+                return redirect(localized_route('orders.index'));
+            }
+
+            throw $exception;
+        }
+
+        session()->forget(self::DISCOUNT_CODE_SESSION_KEY);
+
+        return redirect(localized_route('orders.show', ['order' => $order->number]))
+            ->with('status', __('store.order_placed'));
+    }
+
     private function resolveAppliedDiscountCode(User $user): ?DiscountCode
     {
         $id = session(self::DISCOUNT_CODE_SESSION_KEY);
@@ -438,7 +560,7 @@ class CheckoutController extends Controller
     private function relayPointsFor(?string $postalCode, string $country = 'FR', string $provider = 'mondial_relay'): Collection
     {
         if (blank($postalCode)) {
-            return new Collection();
+            return new Collection;
         }
 
         $prefix = $provider === 'chronopost' ? 'cp-' : 'mr-';

@@ -2,10 +2,21 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
-## 2026-08-19 — v0.1.82
+## 2026-08-19 — v0.2.0
+
+### Payments
+
+- **Stripe Checkout integration (sandbox/test mode)**: Carte bancaire now goes through a real Stripe Checkout session. The order is only created once payment is confirmed — via the success redirect, with a webhook (`checkout.session.completed`) as a backup — never at checkout submission, so no order exists for an unpaid cart.
+- Reuses an existing Stripe Customer for a returning email instead of creating a new one on every order.
+- New admin page — Settings → Stripe payments: lists every Stripe Checkout Session from the last 30 days (paid, pending, failed) with its matching order if any, KPIs (revenue, success rate, fees, orphaned payments), and status tabs.
+- New admin diagnostic: orphaned-payment recovery (`StripeCheckoutFinalizer`/`StripePaymentController::finalize`) can recreate an order from a paid session that never produced one — kept out of the main listing page for now, available as a guarded fallback.
+- Orders now store `stripe_checkout_session_id`, `stripe_payment_intent_id`, `stripe_customer_id`, and `payment_fee_cents` (generic column, ready for PayPal too) so the admin never needs to call Stripe just to render a page — a self-healing fallback fetches a missing fee once (a Stripe race condition can leave it briefly unset) and persists it.
+- Admin order page: Payment card now shows the payment processor fee (amount + % of order total), payment intent id and Stripe customer id as linked chips into the Stripe dashboard; "Carte bancaire" reads as "Carte bancaire (Stripe)" in the admin only.
 
 ### Orders
 
+- Admin orders list: new KPI row (total amount, own shipping cost, commission cost, payment fees, total costs, total perceived) and two new columns — "Various costs" and "Total perceived" (total minus commission, shipping paid, and payment fee).
+- Admin orders list: Channel/Status/Tracking chips redesigned into one consistent component.
 - Admin order page: moved Customer, Shipping address, Billing address and Payment into a single row above Status history.
 - Admin order page: the order number is now clickable to copy it to the clipboard, with a confirmation toast.
 
