@@ -2354,6 +2354,102 @@ input[type="date"].form-control {
     min-width: 8.25rem;
 }
 
+.admin-actions-menu {
+    position: relative;
+    display: inline-flex;
+    justify-content: flex-end;
+}
+
+.admin-actions-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0.3rem 0.55rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.6;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.admin-actions-trigger:hover {
+    color: var(--accent-hover);
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, var(--bg));
+}
+
+.admin-actions-trigger[aria-expanded="true"] {
+    color: var(--accent-hover);
+    background: var(--surface);
+    border-color: var(--accent);
+}
+
+.admin-actions-trigger svg {
+    transition: transform 0.15s ease;
+}
+
+.admin-actions-trigger[aria-expanded="true"] svg {
+    transform: rotate(180deg);
+}
+
+.admin-actions-dropdown {
+    position: absolute;
+    top: calc(100% + 0.35rem);
+    right: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    min-width: 13rem;
+    padding: 0.35rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.18);
+}
+
+.admin-actions-item {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.5rem 0.6rem;
+    font-size: 0.8125rem;
+    color: var(--text);
+    background: none;
+    border: none;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.admin-actions-item svg {
+    flex-shrink: 0;
+    color: var(--text-muted);
+}
+
+.admin-actions-item:hover {
+    color: var(--accent-hover);
+    background: color-mix(in srgb, var(--accent) 8%, var(--bg));
+}
+
+.admin-actions-item.is-disabled {
+    color: var(--text-muted);
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.admin-actions-item.is-disabled:hover {
+    background: none;
+}
+
+[data-theme='dark'] .admin-actions-dropdown {
+    box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.5);
+}
+
 .admin-discount-codes-table th,
 .admin-discount-codes-table td {
     padding-top: 0.55rem;

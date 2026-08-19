@@ -330,52 +330,75 @@
                                     <span class="admin-order-perceived">{{ $order->formattedPerceivedTotal() }}</span>
                                 </td>
                                 <td>
-                                    <div class="admin-table-actions">
-                                        @if ($order->invoiceIsAvailable())
-                                            <a
-                                                href="{{ route('admin.orders.invoice', $order) }}"
-                                                class="admin-table-icon-btn"
-                                                title="Download invoice"
-                                                aria-label="Download invoice"
-                                            >
-                                                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-                                                    <path d="M12 4v11m0 0-4-4m4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-                                                    <path d="M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            </a>
-                                        @else
-                                            <span class="admin-table-icon-btn is-disabled" title="Invoice not available yet" aria-hidden="true">
-                                                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-                                                    <path d="M12 4v11m0 0-4-4m4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-                                                    <path d="M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            </span>
-                                        @endif
-                                        <button
-                                            type="button"
-                                            class="admin-table-icon-btn"
-                                            data-archive-toggle
-                                            data-action="{{ route($order->isArchived() ? 'admin.orders.unarchive' : 'admin.orders.archive', $order) }}"
-                                            data-order="{{ $order->number }}"
-                                            data-archived="{{ $order->isArchived() ? '1' : '0' }}"
-                                            title="{{ $order->isArchived() ? 'Unarchive order' : 'Archive order' }}"
-                                            aria-label="{{ $order->isArchived() ? 'Unarchive order' : 'Archive order' }}"
-                                        >
-                                            @if ($order->isArchived())
-                                                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-                                                    <rect x="4" y="4" width="16" height="4" rx="1" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
-                                                    <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
-                                                    <path d="M14 12.5 12 10.5 10 12.5m2-2v6" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            @else
-                                                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-                                                    <rect x="4" y="4" width="16" height="4" rx="1" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
-                                                    <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
-                                                    <path d="M10 14.5 12 16.5l2-2m-2 2v-6" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            @endif
+                                    <div class="admin-actions-menu">
+                                        <button type="button" class="admin-actions-trigger" data-actions-toggle aria-haspopup="true" aria-expanded="false">
+                                            Actions
+                                            <svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true">
+                                                <path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
                                         </button>
-                                        <a href="{{ route('admin.orders.show', $order) }}" class="btn btn-sm btn-primary">View</a>
+                                        <div class="admin-actions-dropdown" data-actions-dropdown hidden>
+                                            @if (! $order->isDraft())
+                                                <a href="{{ route('admin.orders.delivery-slip', $order) }}" class="admin-actions-item">
+                                                    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                                                        <path d="M12 4v11m0 0-4-4m4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                                        <path d="M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    </svg>
+                                                    Download delivery slip
+                                                </a>
+                                            @else
+                                                <span class="admin-actions-item is-disabled" title="Not available for drafts">
+                                                    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                                                        <path d="M12 4v11m0 0-4-4m4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                                        <path d="M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    </svg>
+                                                    Download delivery slip
+                                                </span>
+                                            @endif
+
+                                            @if ($order->invoiceIsAvailable())
+                                                <a href="{{ route('admin.orders.invoice', $order) }}" class="admin-actions-item">
+                                                    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                                                        <path d="M12 4v11m0 0-4-4m4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                                        <path d="M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    </svg>
+                                                    Download invoice
+                                                </a>
+                                            @else
+                                                <span class="admin-actions-item is-disabled" title="Invoice not available yet">
+                                                    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                                                        <path d="M12 4v11m0 0-4-4m4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                                        <path d="M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    </svg>
+                                                    Download invoice
+                                                </span>
+                                            @endif
+
+                                            <button
+                                                type="button"
+                                                class="admin-actions-item"
+                                                data-archive-toggle
+                                                data-action="{{ route($order->isArchived() ? 'admin.orders.unarchive' : 'admin.orders.archive', $order) }}"
+                                                data-order="{{ $order->number }}"
+                                                data-archived="{{ $order->isArchived() ? '1' : '0' }}"
+                                            >
+                                                @if ($order->isArchived())
+                                                    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                                                        <rect x="4" y="4" width="16" height="4" rx="1" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
+                                                        <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
+                                                        <path d="M14 12.5 12 10.5 10 12.5m2-2v6" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    </svg>
+                                                    Unarchive order
+                                                @else
+                                                    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                                                        <rect x="4" y="4" width="16" height="4" rx="1" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
+                                                        <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
+                                                        <path d="M10 14.5 12 16.5l2-2m-2 2v-6" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    </svg>
+                                                    Archive order
+                                                @endif
+                                            </button>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>
@@ -403,6 +426,35 @@
 @endsection
 
 @push('scripts')
+    <script>
+        (function () {
+            document.querySelectorAll('[data-actions-toggle]').forEach(function (trigger) {
+                var dropdown = trigger.nextElementSibling;
+
+                trigger.addEventListener('click', function (event) {
+                    event.stopPropagation();
+                    var isOpen = !dropdown.hidden;
+
+                    document.querySelectorAll('[data-actions-dropdown]').forEach(function (el) {
+                        el.hidden = true;
+                        el.previousElementSibling.setAttribute('aria-expanded', 'false');
+                    });
+
+                    if (!isOpen) {
+                        dropdown.hidden = false;
+                        trigger.setAttribute('aria-expanded', 'true');
+                    }
+                });
+            });
+
+            document.addEventListener('click', function () {
+                document.querySelectorAll('[data-actions-dropdown]').forEach(function (el) {
+                    el.hidden = true;
+                    el.previousElementSibling.setAttribute('aria-expanded', 'false');
+                });
+            });
+        })();
+    </script>
     <script>
         (function () {
             var modal = document.getElementById('archive-confirm-modal');
