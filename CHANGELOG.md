@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-19 — v0.1.81
+
+### Orders
+
+- Increased font sizes ~15% on the invoice and delivery slip PDFs for better readability.
+
 ## 2026-08-19 — v0.1.80
 
 ### Catalog
