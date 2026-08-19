@@ -95,6 +95,13 @@
                         @error('image_file') <p class="form-error">{{ $message }}</p> @enderror
                         @error('gallery_images') <p class="form-error">{{ $message }}</p> @enderror
                         @error('gallery_images.*') <p class="form-error">{{ $message }}</p> @enderror
+
+                        <div class="form-group image-may-vary-field">
+                            <label class="form-check">
+                                <input type="checkbox" id="image_may_vary" name="image_may_vary" value="1" @checked(old('image_may_vary', $product->exists ? $product->image_may_vary : false))>
+                                The final product visual can change from the pictures, according to supply.
+                            </label>
+                        </div>
                     </section>
 
                     <section class="order-panel">

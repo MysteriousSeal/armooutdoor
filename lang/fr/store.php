@@ -102,6 +102,7 @@ return [
     'low_stock_short' => 'Derniers stocks',
     'age_restricted_notice' => 'Vente libre aux plus de 18 ans.',
     'age_restricted_proof_notice' => 'Une preuve de majorité sera demandée au passage de la commande.',
+    'image_may_vary_notice' => 'Visuel non contractuel, le produit livré peut varier selon l’approvisionnement.',
     'discount_ends_in' => 'L’offre se termine dans',
     'discount_countdown_days' => 'j',
     'discount_countdown_hours' => 'h',

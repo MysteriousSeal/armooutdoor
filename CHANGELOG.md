@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-19 — v0.1.80
+
+### Catalog
+
+- Added an "image may vary" flag on products (admin checkbox, off by default) shown as a boxed notice on the product page when the delivered item's visual can differ from the pictures depending on supply.
+
 ## 2026-08-19 — v0.1.79
 
 ### Storefront

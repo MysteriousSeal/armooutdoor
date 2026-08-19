@@ -34,6 +34,7 @@ class StoreProductRequest extends FormRequest
             'carrier_ids.*' => ['integer', 'exists:carriers,id'],
             'is_active' => ['sometimes', 'boolean'],
             'age_restricted' => ['sometimes', 'boolean'],
+            'image_may_vary' => ['sometimes', 'boolean'],
             'sku' => [
                 'nullable',
                 'string',

@@ -60,6 +60,9 @@
                         @endforeach
                     </div>
                 @endif
+                @if ($product->image_may_vary)
+                    <p class="image-may-vary-notice">{{ __('store.image_may_vary_notice') }}</p>
+                @endif
             </div>
 
             <div class="product-detail-buy">

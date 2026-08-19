@@ -473,6 +473,13 @@ textarea.form-control {
     accent-color: var(--accent);
 }
 
+.image-may-vary-field {
+    margin-top: 1rem;
+    padding: 0.75rem 0.9rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
 .admin-check-list-row .form-group {
     flex-shrink: 0;
     width: 8rem;
