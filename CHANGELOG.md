@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-20 — v0.2.6
+
+### Admin
+
+- Deactivated admins can now be reactivated (Settings → Admins), restoring access without recreating the account.
+- Added owner/staff roles: staff can no longer refund orders, delete discounts or discount codes, view Stripe payment data, or manage admin accounts — owner-only.
+- Activity log now also covers order status transitions (prepare/ship/refund), tracking and address edits, all settings pages, supplier/marketplace/package-type CRUD, and admin-user management — closing the gap where those actions left no trail.
+- Deleting a discount, discount code, supplier, marketplace, or package type now asks for confirmation first, matching the existing order refund/archive/ship modals.
+- Admins can edit a customer's name and email, and send them a password reset link, from the customer page — previously only a free-text notes field was editable.
+
 ## 2026-08-20 — v0.2.5
 
 ### Admin
