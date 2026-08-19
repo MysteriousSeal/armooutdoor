@@ -111,7 +111,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/discounts', [AdminDiscountController::class, 'store'])->name('discounts.store');
         Route::get('/discounts/{discount}/edit', [AdminDiscountController::class, 'edit'])->name('discounts.edit');
         Route::put('/discounts/{discount}', [AdminDiscountController::class, 'update'])->name('discounts.update');
-        Route::delete('/discounts/{discount}', [AdminDiscountController::class, 'destroy'])->name('discounts.destroy');
+        Route::delete('/discounts/{discount}', [AdminDiscountController::class, 'destroy'])->middleware('admin.owner')->name('discounts.destroy');
 
         // Discount codes (cart-wide coupon codes)
         Route::get('/discount-codes/check-code', [AdminDiscountCodeController::class, 'checkCode'])->name('discount-codes.check-code');
@@ -119,7 +119,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/discount-codes', [AdminDiscountCodeController::class, 'store'])->name('discount-codes.store');
         Route::get('/discount-codes/{discountCode}/edit', [AdminDiscountCodeController::class, 'edit'])->name('discount-codes.edit');
         Route::put('/discount-codes/{discountCode}', [AdminDiscountCodeController::class, 'update'])->name('discount-codes.update');
-        Route::delete('/discount-codes/{discountCode}', [AdminDiscountCodeController::class, 'destroy'])->name('discount-codes.destroy');
+        Route::delete('/discount-codes/{discountCode}', [AdminDiscountCodeController::class, 'destroy'])->middleware('admin.owner')->name('discount-codes.destroy');
 
         // Categories
         Route::get('/categories', [AdminCategoryController::class, 'index'])->name('categories.index');
@@ -140,7 +140,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/orders/{order}/delivery-slip', [AdminOrderController::class, 'deliverySlip'])->name('orders.delivery-slip');
         Route::patch('/orders/{order}/prepare', [AdminOrderController::class, 'prepare'])->name('orders.prepare');
         Route::patch('/orders/{order}/ship', [AdminOrderController::class, 'ship'])->name('orders.ship');
-        Route::patch('/orders/{order}/refund', [AdminOrderController::class, 'refund'])->name('orders.refund');
+        Route::patch('/orders/{order}/refund', [AdminOrderController::class, 'refund'])->middleware('admin.owner')->name('orders.refund');
         Route::patch('/orders/{order}/archive', [AdminOrderController::class, 'archive'])->name('orders.archive');
         Route::patch('/orders/{order}/unarchive', [AdminOrderController::class, 'unarchive'])->name('orders.unarchive');
         Route::patch('/orders/{order}/tracking', [AdminOrderController::class, 'updateTracking'])->name('orders.tracking.update');
@@ -170,16 +170,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/settings/suppliers/{supplier}/edit', [AdminSupplierController::class, 'edit'])->name('settings.suppliers.edit');
         Route::put('/settings/suppliers/{supplier}', [AdminSupplierController::class, 'update'])->name('settings.suppliers.update');
         Route::delete('/settings/suppliers/{supplier}', [AdminSupplierController::class, 'destroy'])->name('settings.suppliers.destroy');
-        Route::get('/settings/admins', [AdminUserController::class, 'index'])->name('settings.admins.index');
-        Route::get('/settings/admins/create', [AdminUserController::class, 'create'])->name('settings.admins.create');
-        Route::post('/settings/admins', [AdminUserController::class, 'store'])->name('settings.admins.store');
-        Route::get('/settings/admins/{admin}/edit', [AdminUserController::class, 'edit'])->name('settings.admins.edit');
-        Route::put('/settings/admins/{admin}', [AdminUserController::class, 'update'])->name('settings.admins.update');
-        Route::patch('/settings/admins/{admin}/deactivate', [AdminUserController::class, 'deactivate'])->name('settings.admins.deactivate');
-        Route::patch('/settings/admins/{admin}/reactivate', [AdminUserController::class, 'reactivate'])->name('settings.admins.reactivate');
+        Route::middleware('admin.owner')->group(function () {
+            Route::get('/settings/admins', [AdminUserController::class, 'index'])->name('settings.admins.index');
+            Route::get('/settings/admins/create', [AdminUserController::class, 'create'])->name('settings.admins.create');
+            Route::post('/settings/admins', [AdminUserController::class, 'store'])->name('settings.admins.store');
+            Route::get('/settings/admins/{admin}/edit', [AdminUserController::class, 'edit'])->name('settings.admins.edit');
+            Route::put('/settings/admins/{admin}', [AdminUserController::class, 'update'])->name('settings.admins.update');
+            Route::patch('/settings/admins/{admin}/deactivate', [AdminUserController::class, 'deactivate'])->name('settings.admins.deactivate');
+            Route::patch('/settings/admins/{admin}/reactivate', [AdminUserController::class, 'reactivate'])->name('settings.admins.reactivate');
 
-        Route::get('/stripe/orphaned-payments', [AdminStripePaymentController::class, 'index'])->name('stripe.orphaned-payments.index');
-        Route::post('/stripe/orphaned-payments/{sessionId}/finalize', [AdminStripePaymentController::class, 'finalize'])->name('stripe.orphaned-payments.finalize');
+            Route::get('/stripe/orphaned-payments', [AdminStripePaymentController::class, 'index'])->name('stripe.orphaned-payments.index');
+            Route::post('/stripe/orphaned-payments/{sessionId}/finalize', [AdminStripePaymentController::class, 'finalize'])->name('stripe.orphaned-payments.finalize');
+        });
     });
 });
 

@@ -150,11 +150,13 @@
 
                             <div class="admin-discount-actions">
                                 <a href="{{ route('admin.discounts.edit', $discount) }}" class="btn btn-sm btn-secondary">Edit</a>
-                                <form method="POST" action="{{ route('admin.discounts.destroy', $discount) }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-secondary">Remove</button>
-                                </form>
+                                @if (auth()->user()->isOwner())
+                                    <form method="POST" action="{{ route('admin.discounts.destroy', $discount) }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-secondary">Remove</button>
+                                    </form>
+                                @endif
                             </div>
                         </li>
                     @endforeach
@@ -230,11 +232,13 @@
                                     <td>
                                         <div class="admin-table-actions">
                                             <a href="{{ route('admin.discount-codes.edit', $discountCode) }}" class="btn btn-sm btn-secondary">Edit</a>
-                                            <form method="POST" action="{{ route('admin.discount-codes.destroy', $discountCode) }}">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-secondary">Remove</button>
-                                            </form>
+                                            @if (auth()->user()->isOwner())
+                                                <form method="POST" action="{{ route('admin.discount-codes.destroy', $discountCode) }}">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-secondary">Remove</button>
+                                                </form>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>

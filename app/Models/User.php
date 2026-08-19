@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['first_name', 'last_name', 'email', 'password', 'external', 'notes'])]
+#[Fillable(['first_name', 'last_name', 'email', 'password', 'role', 'external', 'notes'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -63,6 +63,20 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->is_admin === true;
+    }
+
+    /**
+     * Owners have full access; staff are blocked from refunds, deleting
+     * discounts, viewing Stripe payment data, and managing other admins.
+     */
+    public function isOwner(): bool
+    {
+        return $this->isAdmin() && $this->role === 'owner';
+    }
+
+    public function isStaff(): bool
+    {
+        return $this->isAdmin() && $this->role !== 'owner';
     }
 
     public function initials(): string

@@ -44,6 +44,7 @@
                             <span class="admin-user-info">
                                 <span class="admin-user-name">
                                     {{ $admin->name }}
+                                    <span class="role-badge role-badge--{{ $admin->role }}">{{ ucfirst($admin->role) }}</span>
                                     @if ($admin->is(auth()->user()))
                                         <span class="admin-user-you">You</span>
                                     @endif
@@ -59,7 +60,10 @@
                         <div class="admin-user-card admin-user-card--deactivated">
                             <span class="admin-user-avatar admin-user-avatar--deactivated">{{ $admin->initials() }}</span>
                             <span class="admin-user-info">
-                                <span class="admin-user-name">{{ $admin->name }}</span>
+                                <span class="admin-user-name">
+                                    {{ $admin->name }}
+                                    <span class="role-badge role-badge--{{ $admin->role }}">{{ ucfirst($admin->role) }}</span>
+                                </span>
                                 <span class="admin-user-email">{{ $admin->email }}</span>
                                 <span class="admin-user-since">Deactivated {{ $admin->admin_deactivated_at->format('d M Y') }}</span>
                             </span>

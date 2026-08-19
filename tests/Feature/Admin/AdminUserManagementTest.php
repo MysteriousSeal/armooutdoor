@@ -34,6 +34,7 @@ class AdminUserManagementTest extends TestCase
             'email' => 'newadmin@example.com',
             'password' => 'secret123',
             'password_confirmation' => 'secret123',
+            'role' => 'staff',
         ]);
 
         $response->assertRedirect('/admin/settings/admins');
@@ -96,6 +97,7 @@ class AdminUserManagementTest extends TestCase
                 'first_name' => 'Updated',
                 'last_name' => 'Name',
                 'email' => 'updated@example.com',
+                'role' => 'owner',
             ])
             ->assertRedirect('/admin/settings/admins');
 
@@ -116,6 +118,7 @@ class AdminUserManagementTest extends TestCase
             'email' => $target->email,
             'password' => 'brand-new-pass',
             'password_confirmation' => 'brand-new-pass',
+            'role' => 'owner',
         ]);
 
         $this->assertTrue(Hash::check('brand-new-pass', $target->fresh()->password));

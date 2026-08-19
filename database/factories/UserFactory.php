@@ -48,6 +48,15 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'is_admin' => true,
+            'role' => 'owner',
+        ]);
+    }
+
+    public function staffAdmin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_admin' => true,
+            'role' => 'staff',
         ]);
     }
 }

@@ -38,6 +38,7 @@ class AdminUserController extends Controller
             'last_name' => ['required', 'string', 'max:80'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', Password::min(8)],
+            'role' => ['required', Rule::in(['owner', 'staff'])],
         ]);
 
         $admin = User::query()->create($validated);
@@ -65,7 +66,12 @@ class AdminUserController extends Controller
             'last_name' => ['required', 'string', 'max:80'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($admin->id)],
             'password' => ['nullable', 'confirmed', Password::min(8)],
+            'role' => ['required', Rule::in(['owner', 'staff'])],
         ]);
+
+        if ($admin->role === 'owner' && $validated['role'] !== 'owner' && $this->ownerCount() <= 1) {
+            return back()->with('status', 'Can\'t demote the last remaining owner.')->withInput();
+        }
 
         if (blank($validated['password'] ?? null)) {
             unset($validated['password']);
@@ -86,8 +92,8 @@ class AdminUserController extends Controller
             return back()->with('status', 'You can\'t deactivate your own account.');
         }
 
-        if (User::query()->where('is_admin', true)->count() <= 1) {
-            return back()->with('status', 'Can\'t deactivate the last remaining admin.');
+        if ($admin->role === 'owner' && $this->ownerCount() <= 1) {
+            return back()->with('status', 'Can\'t deactivate the last remaining owner.');
         }
 
         $admin->is_admin = false;
@@ -111,5 +117,10 @@ class AdminUserController extends Controller
         return redirect()
             ->route('admin.settings.admins.index')
             ->with('status', 'Admin reactivated.');
+    }
+
+    private function ownerCount(): int
+    {
+        return User::query()->where('is_admin', true)->where('role', 'owner')->count();
     }
 }

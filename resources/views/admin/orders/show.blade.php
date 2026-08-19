@@ -33,7 +33,7 @@
                         @elseif ($order->status === 'preparing')
                             <button type="button" class="btn btn-primary" data-modal-open="ship-confirm-modal">Mark as shipped</button>
                         @endif
-                        @if ($order->status !== 'refunded')
+                        @if ($order->status !== 'refunded' && auth()->user()->isOwner())
                             <button type="button" class="btn btn-secondary" data-modal-open="refund-confirm-modal">Mark as refunded</button>
                         @endif
                     @endif

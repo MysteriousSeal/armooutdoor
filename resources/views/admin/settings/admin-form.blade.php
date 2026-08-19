@@ -47,6 +47,24 @@
                 @error('email') <p class="form-error">{{ $message }}</p> @enderror
             </div>
 
+            @php $selectedRole = old('role', $admin->role ?? 'staff'); @endphp
+            <div class="form-group">
+                <label>Role</label>
+                <div class="role-picker">
+                    <label class="role-option {{ $selectedRole === 'owner' ? 'is-selected' : '' }}">
+                        <input type="radio" name="role" value="owner" @checked($selectedRole === 'owner')>
+                        <span class="role-option-title">Owner</span>
+                        <span class="role-option-desc">Full access, including refunds, deleting discounts, Stripe payment data, and managing admins.</span>
+                    </label>
+                    <label class="role-option {{ $selectedRole === 'staff' ? 'is-selected' : '' }}">
+                        <input type="radio" name="role" value="staff" @checked($selectedRole === 'staff')>
+                        <span class="role-option-title">Staff</span>
+                        <span class="role-option-desc">Everything except refunds, deleting discounts, Stripe payment data, and managing admins.</span>
+                    </label>
+                </div>
+                @error('role') <p class="form-error">{{ $message }}</p> @enderror
+            </div>
+
             <div class="form-row form-row--inline">
                 <div class="form-group">
                     <label for="password">{{ $admin->exists ? 'New password' : 'Password' }}</label>
