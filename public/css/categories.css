@@ -54,8 +54,8 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
-    max-width: 28rem;
-    padding: 1.65rem 1.7rem 1.75rem;
+    max-width: 34rem;
+    padding: 1.65rem 2rem 1.75rem;
     background: color-mix(in srgb, var(--surface) 92%, transparent);
     backdrop-filter: blur(6px);
 }
@@ -89,7 +89,7 @@
 .cat-hero-title-accent {
     position: relative;
     display: inline-block;
-    width: fit-content;
+    max-width: 100%;
     color: #5b5c3b;
 }
 

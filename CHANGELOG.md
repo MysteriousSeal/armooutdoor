@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-19 — v0.1.79
+
+### Storefront
+
+- Widened the category-hero copy panel (`.cat-hero-copy`) so longer titles and accented text have more room before wrapping or clipping.
+
 ## 2026-08-19 — v0.1.78
 
 ### Testing
