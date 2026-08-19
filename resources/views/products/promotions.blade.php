@@ -62,6 +62,7 @@
             'title' => 'Promotions',
             'description' => 'Les produits actuellement en promotion.',
             'tags' => [trans_choice('store.products_count', $products->count(), ['count' => $products->count()])],
+            'imageUrl' => asset('images/pages/promotions-hero.webp'),
         ])
 
         @if ($products->isEmpty())

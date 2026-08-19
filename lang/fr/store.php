@@ -4,7 +4,7 @@ return [
     'tagline' => 'Du matériel discret pour le stand et le terrain',
     'meta_home' => 'Armo Outdoor, boutique en ligne de cibles, matériel de stand, vêtements et kit terrain. Livraison en France, à domicile ou en point relais.',
     'nav_home' => 'Accueil',
-    'nav_categories' => 'Catégories',
+    'nav_categories' => 'Menu',
     'nav_see_more' => 'Voir plus',
     'search_placeholder' => 'Rechercher dans la boutique…',
     'search_label' => 'Rechercher',

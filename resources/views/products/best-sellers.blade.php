@@ -62,6 +62,8 @@
             'title' => 'Meilleures ventes',
             'description' => 'Les produits les plus vendus de la boutique.',
             'tags' => [trans_choice('store.products_count', $products->count(), ['count' => $products->count()])],
+            'imageUrl' => asset('images/pages/meilleures-ventes-hero.webp'),
+            'titleNoWrap' => true,
         ])
 
         @if ($products->isEmpty())

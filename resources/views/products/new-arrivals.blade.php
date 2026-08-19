@@ -61,6 +61,7 @@
             'title' => 'Nouveautés',
             'description' => 'Les derniers produits ajoutés à la boutique.',
             'tags' => [trans_choice('store.products_count', $products->count(), ['count' => $products->count()])],
+            'imageUrl' => asset('images/pages/nouveautes-hero.webp'),
         ])
 
         @if ($products->isEmpty())

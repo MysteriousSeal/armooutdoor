@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-19 — v0.1.77
+
+### Storefront
+
+- **Hero images for catalog listing pages**: added flat-icon hero banners to Meilleures ventes, Promotions and Nouveautés, matching the category page hero treatment.
+- **Single-line title on Meilleures ventes hero**: added an opt-in `titleNoWrap` option to the shared page-hero partial, used only on that page; other heroes keep their existing wrapping.
+- **Renamed hamburger menu label**: "Catégories" is now "Menu".
+
 ## 2026-08-19 — v0.1.76
 
 ### Storefront

@@ -78,6 +78,14 @@
     text-transform: uppercase;
 }
 
+.cat-hero-copy--wide {
+    max-width: none;
+}
+
+.cat-hero-title--nowrap {
+    white-space: nowrap;
+}
+
 .cat-hero-title-accent {
     position: relative;
     display: inline-block;
@@ -171,6 +179,10 @@
 
     .cat-hero-title {
         font-size: 2rem;
+    }
+
+    .cat-hero-title--nowrap {
+        white-space: normal;
     }
 }
 
