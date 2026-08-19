@@ -2,6 +2,13 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-19 — v0.2.1
+
+### Orders
+
+- Admin orders list: the cost KPI cards (own shipping cost, commission cost, payment fees) now show their share of both the total order amount and the total costs. Total costs and Total perceived show their share of the total amount too.
+- Admin orders list: the Total amount KPI card is narrower, giving more room to the others.
+
 ## 2026-08-19 — v0.2.0
 
 ### Payments

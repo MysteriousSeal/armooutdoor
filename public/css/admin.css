@@ -1039,7 +1039,7 @@
 }
 
 .admin-orders-page .admin-stat-grid--primary {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: 0.7fr repeat(5, minmax(0, 1fr));
     margin-bottom: 1.75rem;
 }
 
@@ -1053,6 +1053,12 @@
     color: #a44;
 }
 
+.admin-stat-card--warning .admin-stat-pct {
+    color: #a44;
+    background: color-mix(in srgb, #a44 8%, transparent);
+    border-color: color-mix(in srgb, #a44 28%, transparent);
+}
+
 [data-theme='dark'] .admin-stat-card--warning {
     background: color-mix(in srgb, #e08585 12%, var(--surface));
     border-color: color-mix(in srgb, #e08585 35%, var(--border));
@@ -1061,6 +1067,12 @@
 [data-theme='dark'] .admin-stat-card--warning .admin-stat-label,
 [data-theme='dark'] .admin-stat-card--warning .admin-stat-value {
     color: #e08585;
+}
+
+[data-theme='dark'] .admin-stat-card--warning .admin-stat-pct {
+    color: #e08585;
+    background: color-mix(in srgb, #e08585 14%, transparent);
+    border-color: color-mix(in srgb, #e08585 32%, transparent);
 }
 
 .admin-stat-card--positive {
@@ -1073,6 +1085,12 @@
     color: #3d6b4e;
 }
 
+.admin-stat-card--positive .admin-stat-pct {
+    color: #3d6b4e;
+    background: color-mix(in srgb, #3d6b4e 8%, transparent);
+    border-color: color-mix(in srgb, #3d6b4e 28%, transparent);
+}
+
 [data-theme='dark'] .admin-stat-card--positive {
     background: color-mix(in srgb, #8fceac 12%, var(--surface));
     border-color: color-mix(in srgb, #8fceac 35%, var(--border));
@@ -1081,6 +1099,12 @@
 [data-theme='dark'] .admin-stat-card--positive .admin-stat-label,
 [data-theme='dark'] .admin-stat-card--positive .admin-stat-value {
     color: #8fceac;
+}
+
+[data-theme='dark'] .admin-stat-card--positive .admin-stat-pct {
+    color: #8fceac;
+    background: color-mix(in srgb, #8fceac 16%, transparent);
+    border-color: color-mix(in srgb, #8fceac 32%, transparent);
 }
 
 .admin-stat-card--compact {
@@ -1323,6 +1347,25 @@ a.admin-stat-card:hover {
     font-weight: 400;
     letter-spacing: normal;
     color: var(--text-muted);
+}
+
+.admin-stat-pct-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.5rem;
+}
+
+.admin-stat-pct {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
 }
 
 .admin-toolbar {

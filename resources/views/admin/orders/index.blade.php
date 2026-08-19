@@ -60,26 +60,44 @@
                 <span class="admin-stat-label">Own shipping cost</span>
                 <span class="admin-stat-value">{{ format_euros($kpis['shipping_cost_cents']) }}</span>
                 <span class="admin-stat-value--sm">Paid out of pocket</span>
+                <span class="admin-stat-pct-row">
+                    <span class="admin-stat-pct" title="Share of Total amount">{{ number_format($kpis['shipping_cost_pct_amount'] ?? 0, 2) }}% of amount</span>
+                    <span class="admin-stat-pct" title="Share of Total costs">{{ number_format($kpis['shipping_cost_pct_costs'] ?? 0, 2) }}% of costs</span>
+                </span>
             </div>
             <div class="admin-stat-card">
                 <span class="admin-stat-label">Commission cost</span>
                 <span class="admin-stat-value">{{ format_euros($kpis['commission_cost_cents']) }}</span>
                 <span class="admin-stat-value--sm">Marketplace cut</span>
+                <span class="admin-stat-pct-row">
+                    <span class="admin-stat-pct" title="Share of Total amount">{{ number_format($kpis['commission_cost_pct_amount'] ?? 0, 2) }}% of amount</span>
+                    <span class="admin-stat-pct" title="Share of Total costs">{{ number_format($kpis['commission_cost_pct_costs'] ?? 0, 2) }}% of costs</span>
+                </span>
             </div>
             <div class="admin-stat-card">
                 <span class="admin-stat-label">Payment fees</span>
                 <span class="admin-stat-value">{{ format_euros($kpis['payment_fee_cents']) }}</span>
                 <span class="admin-stat-value--sm">Card / PayPal processor</span>
+                <span class="admin-stat-pct-row">
+                    <span class="admin-stat-pct" title="Share of Total amount">{{ number_format($kpis['payment_fee_pct_amount'] ?? 0, 2) }}% of amount</span>
+                    <span class="admin-stat-pct" title="Share of Total costs">{{ number_format($kpis['payment_fee_pct_costs'] ?? 0, 2) }}% of costs</span>
+                </span>
             </div>
             <div class="admin-stat-card admin-stat-card--warning">
                 <span class="admin-stat-label">Total costs</span>
                 <span class="admin-stat-value">{{ format_euros($kpis['total_costs_cents']) }}</span>
                 <span class="admin-stat-value--sm">Shipping + commission + fees</span>
+                <span class="admin-stat-pct-row">
+                    <span class="admin-stat-pct">{{ number_format($kpis['total_costs_pct_amount'] ?? 0, 2) }}% of amount</span>
+                </span>
             </div>
             <div class="admin-stat-card admin-stat-card--positive">
                 <span class="admin-stat-label">Total perceived</span>
                 <span class="admin-stat-value">{{ format_euros($kpis['perceived_total_cents']) }}</span>
                 <span class="admin-stat-value--sm">After all costs</span>
+                <span class="admin-stat-pct-row">
+                    <span class="admin-stat-pct">{{ number_format($kpis['perceived_total_pct_amount'] ?? 0, 2) }}% of amount</span>
+                </span>
             </div>
         </div>
 

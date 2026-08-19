@@ -53,6 +53,8 @@ class OrderController extends Controller
         $paymentFeeCents = (clone $nonArchivedOrders)->sum('payment_fee_cents');
         $totalCostsCents = $shippingCostCents + $commissionCostCents + $paymentFeeCents;
 
+        $percentOf = fn (int $part, int $whole): ?float => $whole > 0 ? round($part / $whole * 100, 2) : null;
+
         return view('admin.orders.index', [
             'orders' => $orders,
             'tab' => $filters['tab'],
@@ -60,10 +62,18 @@ class OrderController extends Controller
                 'order_count' => (clone $nonArchivedOrders)->count(),
                 'amount_cents' => $amountCents,
                 'shipping_cost_cents' => $shippingCostCents,
+                'shipping_cost_pct_amount' => $percentOf($shippingCostCents, $amountCents),
+                'shipping_cost_pct_costs' => $percentOf($shippingCostCents, $totalCostsCents),
                 'commission_cost_cents' => $commissionCostCents,
+                'commission_cost_pct_amount' => $percentOf($commissionCostCents, $amountCents),
+                'commission_cost_pct_costs' => $percentOf($commissionCostCents, $totalCostsCents),
                 'payment_fee_cents' => $paymentFeeCents,
+                'payment_fee_pct_amount' => $percentOf($paymentFeeCents, $amountCents),
+                'payment_fee_pct_costs' => $percentOf($paymentFeeCents, $totalCostsCents),
                 'total_costs_cents' => $totalCostsCents,
+                'total_costs_pct_amount' => $percentOf($totalCostsCents, $amountCents),
                 'perceived_total_cents' => $amountCents - $totalCostsCents,
+                'perceived_total_pct_amount' => $percentOf($amountCents - $totalCostsCents, $amountCents),
                 'to_prepare_count' => (clone $nonArchivedOrders)->whereIn('status', ['placed', 'preparing'])->count(),
                 'missing_tracking_count' => (clone $nonArchivedOrders)
                     ->where('status', 'shipped')
