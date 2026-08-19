@@ -94,6 +94,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/customers/export', [AdminCustomerController::class, 'export'])->name('customers.export');
         Route::get('/customers/{customer}', [AdminCustomerController::class, 'show'])->name('customers.show');
         Route::patch('/customers/{customer}/notes', [AdminCustomerController::class, 'updateNotes'])->name('customers.notes.update');
+        Route::patch('/customers/{customer}', [AdminCustomerController::class, 'updateAccount'])->name('customers.update');
+        Route::post('/customers/{customer}/send-reset-link', [AdminCustomerController::class, 'sendResetLink'])->name('customers.send-reset-link');
 
         // Products
         Route::get('/products', [AdminProductController::class, 'index'])->name('products.index');

@@ -131,21 +131,36 @@
             <aside class="order-facts">
                 <section class="order-fact">
                     <h3 class="order-fact-title">Account</h3>
-                    <dl class="admin-customer-facts">
-                        <div>
-                            <dt>Name</dt>
-                            <dd>{{ $customer->name !== '' ? $customer->name : '—' }}</dd>
+                    <form method="POST" action="{{ route('admin.customers.update', $customer) }}" class="admin-customer-account-form">
+                        @csrf
+                        @method('PATCH')
+                        <div class="admin-customer-account-row">
+                            <div class="form-group">
+                                <label for="first_name">First name</label>
+                                <input type="text" id="first_name" name="first_name" class="form-control" value="{{ old('first_name', $customer->first_name) }}" maxlength="80" required>
+                                @error('first_name') <p class="form-error">{{ $message }}</p> @enderror
+                            </div>
+                            <div class="form-group">
+                                <label for="last_name">Last name</label>
+                                <input type="text" id="last_name" name="last_name" class="form-control" value="{{ old('last_name', $customer->last_name) }}" maxlength="80" required>
+                                @error('last_name') <p class="form-error">{{ $message }}</p> @enderror
+                            </div>
                         </div>
-                        <div>
-                            <dt>Email</dt>
-                            <dd>
-                                @if ($customer->email)
-                                    <a href="mailto:{{ $customer->email }}">{{ $customer->email }}</a>
-                                @else
-                                    —
-                                @endif
-                            </dd>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" class="form-control" value="{{ old('email', $customer->email) }}" maxlength="255" required>
+                            @error('email') <p class="form-error">{{ $message }}</p> @enderror
                         </div>
+                        <button type="submit" class="btn btn-secondary">Save account details</button>
+                    </form>
+
+                    <form method="POST" action="{{ route('admin.customers.send-reset-link', $customer) }}" class="admin-customer-reset-form">
+                        @csrf
+                        <p class="admin-customer-reset-hint">Emails a password reset link. Nobody at Armo Outdoor sees or sets the password directly.</p>
+                        <button type="submit" class="btn btn-secondary">Send password reset link</button>
+                    </form>
+
+                    <dl class="admin-customer-facts admin-customer-facts--readonly">
                         <div>
                             <dt>Joined</dt>
                             <dd>{{ $customer->created_at->format('d M Y · H:i') }}</dd>

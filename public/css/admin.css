@@ -184,6 +184,49 @@
     background: var(--bg);
 }
 
+.admin-customer-account-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    padding-bottom: 1.1rem;
+    margin-bottom: 1.1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.admin-customer-account-form .form-group {
+    margin-bottom: 0;
+}
+
+.admin-customer-account-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.9rem;
+}
+
+.admin-customer-account-form .btn,
+.admin-customer-reset-form .btn {
+    align-self: flex-start;
+}
+
+.admin-customer-reset-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding-bottom: 1.1rem;
+    margin-bottom: 1.1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.admin-customer-reset-hint {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.admin-customer-facts--readonly {
+    margin: 0;
+}
+
 .admin-customer-cell,
 .admin-customer-hero {
     display: flex;

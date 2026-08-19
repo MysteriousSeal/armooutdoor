@@ -39,6 +39,10 @@ class AdminActivityLog extends Model
 
     public function subjectLabel(): string
     {
+        if ($this->subject_type === User::class) {
+            return $this->subject?->is_admin ? 'Admin' : 'Customer';
+        }
+
         return match ($this->subject_type) {
             Order::class => 'Order',
             Product::class => 'Product',
@@ -48,7 +52,6 @@ class AdminActivityLog extends Model
             Marketplace::class => 'Marketplace',
             PackageType::class => 'Package type',
             Carrier::class => 'Carrier',
-            User::class => 'Admin',
             default => 'Item',
         };
     }

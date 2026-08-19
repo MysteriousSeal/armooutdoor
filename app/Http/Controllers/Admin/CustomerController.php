@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AdminActivityLog;
 use App\Models\User;
 use App\Support\Csv;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -153,5 +156,37 @@ class CustomerController extends Controller
         $customer->update(['notes' => $validated['notes'] ?? null]);
 
         return back()->with('status', 'Notes saved.');
+    }
+
+    public function updateAccount(Request $request, User $customer): RedirectResponse
+    {
+        abort_if($customer->is_admin, 404);
+
+        $validated = $request->validate([
+            'first_name' => ['required', 'string', 'max:80'],
+            'last_name' => ['required', 'string', 'max:80'],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($customer->id)],
+        ]);
+
+        $customer->update($validated);
+
+        AdminActivityLog::record('customer.updated', $customer, 'Updated account details for '.$customer->name);
+
+        return back()->with('status', 'Account details saved.');
+    }
+
+    public function sendResetLink(User $customer): RedirectResponse
+    {
+        abort_if($customer->is_admin, 404);
+
+        $status = Password::sendResetLink(['email' => $customer->email]);
+
+        if ($status !== Password::RESET_LINK_SENT) {
+            return back()->with('status', 'Could not send the reset link.');
+        }
+
+        AdminActivityLog::record('customer.password_reset_sent', $customer, 'Sent a password reset link to '.$customer->name);
+
+        return back()->with('status', 'Password reset link sent.');
     }
 }
