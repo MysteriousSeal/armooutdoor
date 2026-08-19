@@ -148,7 +148,62 @@ class AdminUserManagementTest extends TestCase
             ->patch('/admin/settings/admins/'.$target->id.'/deactivate')
             ->assertRedirect('/admin/settings/admins');
 
-        $this->assertFalse($target->fresh()->is_admin);
+        $target->refresh();
+        $this->assertFalse($target->is_admin);
+        $this->assertNotNull($target->admin_deactivated_at);
+    }
+
+    public function test_deactivated_admins_appear_in_the_deactivated_tab(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $target = User::factory()->admin()->create();
+
+        $this->actingAs($admin)->patch('/admin/settings/admins/'.$target->id.'/deactivate');
+
+        $this->actingAs($admin)
+            ->get('/admin/settings/admins?tab=deactivated')
+            ->assertOk()
+            ->assertSee($target->email);
+
+        $this->actingAs($admin)
+            ->get('/admin/settings/admins')
+            ->assertOk()
+            ->assertDontSee($target->email);
+    }
+
+    public function test_admin_can_reactivate_a_deactivated_admin(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $target = User::factory()->admin()->create();
+        $this->actingAs($admin)->patch('/admin/settings/admins/'.$target->id.'/deactivate');
+
+        $this->actingAs($admin)
+            ->patch('/admin/settings/admins/'.$target->id.'/reactivate')
+            ->assertRedirect('/admin/settings/admins');
+
+        $target->refresh();
+        $this->assertTrue($target->is_admin);
+        $this->assertNull($target->admin_deactivated_at);
+    }
+
+    public function test_reactivating_a_currently_active_admin_404s(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $target = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->patch('/admin/settings/admins/'.$target->id.'/reactivate')
+            ->assertNotFound();
+    }
+
+    public function test_reactivating_a_user_who_was_never_an_admin_404s(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $customer = User::factory()->create();
+
+        $this->actingAs($admin)
+            ->patch('/admin/settings/admins/'.$customer->id.'/reactivate')
+            ->assertNotFound();
     }
 
     public function test_an_admin_cannot_deactivate_themselves(): void

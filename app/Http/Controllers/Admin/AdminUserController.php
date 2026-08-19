@@ -12,10 +12,17 @@ use Illuminate\View\View;
 
 class AdminUserController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $tab = $request->query('tab') === 'deactivated' ? 'deactivated' : 'active';
+
         return view('admin.settings.admins', [
-            'admins' => User::query()->where('is_admin', true)->orderBy('first_name')->get(),
+            'tab' => $tab,
+            'admins' => $tab === 'active'
+                ? User::query()->where('is_admin', true)->orderBy('first_name')->get()
+                : User::query()->whereNotNull('admin_deactivated_at')->orderByDesc('admin_deactivated_at')->get(),
+            'activeCount' => User::query()->where('is_admin', true)->count(),
+            'deactivatedCount' => User::query()->whereNotNull('admin_deactivated_at')->count(),
         ]);
     }
 
@@ -84,10 +91,25 @@ class AdminUserController extends Controller
         }
 
         $admin->is_admin = false;
+        $admin->admin_deactivated_at = now();
         $admin->save();
 
         return redirect()
             ->route('admin.settings.admins.index')
             ->with('status', 'Admin deactivated.');
+    }
+
+    public function reactivate(User $admin): RedirectResponse
+    {
+        abort_if($admin->is_admin, 404);
+        abort_if($admin->admin_deactivated_at === null, 404);
+
+        $admin->is_admin = true;
+        $admin->admin_deactivated_at = null;
+        $admin->save();
+
+        return redirect()
+            ->route('admin.settings.admins.index')
+            ->with('status', 'Admin reactivated.');
     }
 }

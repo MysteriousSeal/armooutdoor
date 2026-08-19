@@ -576,7 +576,7 @@
 
 .admin-user-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 26rem));
     gap: 1rem;
 }
 
@@ -595,6 +595,22 @@
 .admin-user-card:hover {
     border-color: var(--accent);
     box-shadow: var(--shadow);
+}
+
+.admin-user-card--deactivated:hover {
+    border-color: var(--border);
+    box-shadow: none;
+}
+
+.admin-user-avatar--deactivated {
+    color: var(--text-muted);
+    background: var(--surface);
+    border-color: var(--border);
+}
+
+.admin-user-card--deactivated .admin-user-name,
+.admin-user-card--deactivated .admin-user-email {
+    color: var(--text-muted);
 }
 
 .admin-user-avatar {

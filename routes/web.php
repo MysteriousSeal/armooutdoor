@@ -176,6 +176,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/settings/admins/{admin}/edit', [AdminUserController::class, 'edit'])->name('settings.admins.edit');
         Route::put('/settings/admins/{admin}', [AdminUserController::class, 'update'])->name('settings.admins.update');
         Route::patch('/settings/admins/{admin}/deactivate', [AdminUserController::class, 'deactivate'])->name('settings.admins.deactivate');
+        Route::patch('/settings/admins/{admin}/reactivate', [AdminUserController::class, 'reactivate'])->name('settings.admins.reactivate');
 
         Route::get('/stripe/orphaned-payments', [AdminStripePaymentController::class, 'index'])->name('stripe.orphaned-payments.index');
         Route::post('/stripe/orphaned-payments/{sessionId}/finalize', [AdminStripePaymentController::class, 'finalize'])->name('stripe.orphaned-payments.finalize');
