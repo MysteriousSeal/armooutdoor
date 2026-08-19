@@ -243,6 +243,7 @@
                             <th>Shipping</th>
                             <th>Channel</th>
                             <th>Status</th>
+                            <th>Free delivery</th>
                             <th>Tracking</th>
                             <th class="admin-table-num">Total</th>
                             <th class="admin-table-num">Various costs</th>
@@ -285,6 +286,13 @@
                                     <span class="order-chip order-chip--{{ $order->status }}">
                                         {{ ucfirst($order->status) }}
                                     </span>
+                                </td>
+                                <td>
+                                    @if ($order->shipping_cents === 0)
+                                        <span class="order-chip order-chip--shipped">Yes</span>
+                                    @else
+                                        <span class="order-chip order-chip--draft">No</span>
+                                    @endif
                                 </td>
                                 <td>
                                     @if ($order->hasTracking())
