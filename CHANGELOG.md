@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-19 — v0.2.4
+
+### Orders
+
+- Admin orders list: added a "Free delivery" column (Yes/No, based on charged shipping being zero).
+- Admin orders list: row actions (delivery slip, invoice, archive) replaced with a single "Actions" dropdown, sized to match the other chips; removed the redundant "View" button since the order number already links to it.
+- Admin marketplaces: added logo upload, auto-resized to 100×100px WebP; shown in the settings page and in the order list's Channel chip.
+- Redesigned the Orders settings page as a card grid, matching the rest of the admin.
+
 ## 2026-08-19 — v0.2.3
 
 ### Storefront
