@@ -74,15 +74,15 @@ class CartTest extends TestCase
         ]);
 
         $this->post('/register', [
-            'first_name' => 'Colas',
+            'first_name' => 'Jean',
             'last_name' => 'Client',
-            'email' => 'colas@example.com',
+            'email' => 'jean@example.com',
             'password' => 'secret-pass',
             'password_confirmation' => 'secret-pass',
         ])->assertRedirect('/');
 
         $this->assertDatabaseHas('cart_items', [
-            'user_id' => User::query()->where('email', 'colas@example.com')->value('id'),
+            'user_id' => User::query()->where('email', 'jean@example.com')->value('id'),
             'product_id' => $product->id,
             'quantity' => 2,
         ]);

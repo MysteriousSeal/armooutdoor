@@ -27,13 +27,13 @@ class AdminManualOrderVariantTest extends TestCase
     private function shippingFields(): array
     {
         return [
-            'first_name' => 'Colas',
+            'first_name' => 'Jean',
             'last_name' => 'Client',
             'line1' => '1 rue du Test',
             'postal_code' => '75000',
             'city' => 'Paris',
             'country' => 'FR',
-            'billing_first_name' => 'Colas',
+            'billing_first_name' => 'Jean',
             'billing_last_name' => 'Client',
             'billing_line1' => '1 rue du Test',
             'billing_postal_code' => '75000',

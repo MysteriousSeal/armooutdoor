@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-19 — v0.1.78
+
+### Testing
+
+- **Expanded the automated test suite from 53 to 206 tests**, covering password reset, wishlist, reviews, product/cart discounts and discount codes, storefront discovery (search, sitemaps, FAQ/help/legal, theme preference, 404s), a full admin-route authorization audit (every `admin.*` route rejects guests/non-admins), the admin JSON API, admin catalogue/order management, and unit tests for `Cart`, `ShippingEstimate`, `Csv`, `HtmlSanitizer`, and `SendcloudRelayClient`.
+- Fixed 3 stale test assertions that no longer matched current app behaviour (uppercase-last-name formatting, products-list default sort).
+- Fixed a pre-existing test (`AdminTest`) that was writing real image files to `public/images/products` on every run without cleaning up after itself; added the same safeguard to new tests that upload images.
+
 ## 2026-08-19 — v0.1.77
 
 ### Storefront

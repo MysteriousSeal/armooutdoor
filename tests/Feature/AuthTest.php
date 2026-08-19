@@ -36,9 +36,9 @@ class AuthTest extends TestCase
     {
         $this->from('/register')
             ->post('/register', [
-                'first_name' => 'Colas',
+                'first_name' => 'Jean',
                 'last_name' => 'Test',
-                'email' => 'colas@example.com',
+                'email' => 'jean@example.com',
                 'password' => 'secret-pass',
                 'password_confirmation' => 'secret-pass',
             ])
@@ -47,9 +47,9 @@ class AuthTest extends TestCase
 
         $this->assertAuthenticated();
         $this->assertDatabaseHas('users', [
-            'first_name' => 'Colas',
+            'first_name' => 'Jean',
             'last_name' => 'Test',
-            'email' => 'colas@example.com',
+            'email' => 'jean@example.com',
         ]);
     }
 
@@ -57,9 +57,9 @@ class AuthTest extends TestCase
     {
         $this->from('/register')
             ->post('/register', [
-                'first_name' => 'Colas',
+                'first_name' => 'Jean',
                 'last_name' => 'Test',
-                'email' => 'colas@example.com',
+                'email' => 'jean@example.com',
                 'password' => 'secret-pass',
                 'password_confirmation' => 'different',
             ])
@@ -72,13 +72,13 @@ class AuthTest extends TestCase
     public function test_a_user_can_log_in_and_out(): void
     {
         $user = User::factory()->create([
-            'email' => 'colas@example.com',
+            'email' => 'jean@example.com',
             'password' => 'secret-pass',
         ]);
 
         $this->from('/login')
             ->post('/login', [
-                'email' => 'colas@example.com',
+                'email' => 'jean@example.com',
                 'password' => 'secret-pass',
             ])
             ->assertRedirect('/');
@@ -95,13 +95,13 @@ class AuthTest extends TestCase
     public function test_login_rejects_invalid_credentials(): void
     {
         User::factory()->create([
-            'email' => 'colas@example.com',
+            'email' => 'jean@example.com',
             'password' => 'secret-pass',
         ]);
 
         $this->from('/login')
             ->post('/login', [
-                'email' => 'colas@example.com',
+                'email' => 'jean@example.com',
                 'password' => 'wrong-password',
             ])
             ->assertRedirect('/login')

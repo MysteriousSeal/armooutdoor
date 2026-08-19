@@ -10,7 +10,6 @@ use Database\Seeders\AdminSeeder;
 use Database\Seeders\CatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class AdminTest extends TestCase
@@ -62,14 +61,14 @@ class AdminTest extends TestCase
 
         $this->get('/admin/customers')
             ->assertOk()
-            ->assertSee('Jane Shopper')
+            ->assertSee('Jane SHOPPER')
             ->assertSee('jane@example.com')
             ->assertSee('With orders')
             ->assertSee('No orders')
             ->assertSee('Joined between')
             ->assertDontSee('admin@armooutdoor.test');
 
-        $this->get('/admin/products')
+        $this->get('/admin/products?sort=id-asc')
             ->assertOk()
             ->assertSee('Tente crête deux places')
             ->assertSee('Abris');
@@ -154,8 +153,10 @@ class AdminTest extends TestCase
             ->assertOk()
             ->assertSee('Add product');
 
-        Storage::fake('public');
-
+        // Product image uploads are written straight to public/images (not
+        // through the Storage facade, so Storage::fake() can't intercept
+        // them) — the real file is deleted at the end of this test so the
+        // repo's public folder isn't left polluted with test fixtures.
         $response = $this->actingAs($admin)
             ->from('/admin/products/create')
             ->post('/admin/products', [
@@ -192,6 +193,10 @@ class AdminTest extends TestCase
         $this->assertSame('Bivy forêt II', $product->fresh()->name['fr']);
         $this->assertSame(9900, $product->fresh()->price_cents);
         $this->assertSame(4, $product->fresh()->quantity);
+
+        $image = $product->fresh()->image;
+        @unlink(public_path('images/'.$image));
+        @unlink(public_path('images/'.dirname($image).'/thumbs/'.basename($image)));
     }
 
     public function test_an_admin_can_search_customers_and_products(): void
@@ -212,7 +217,7 @@ class AdminTest extends TestCase
         $this->actingAs($admin)
             ->get('/admin/search?q=jane')
             ->assertOk()
-            ->assertSee('Jane Shopper')
+            ->assertSee('Jane SHOPPER')
             ->assertSee('jane@example.com')
             ->assertSee('View in customers');
 

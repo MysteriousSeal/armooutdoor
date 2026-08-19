@@ -70,7 +70,7 @@ class CheckoutTest extends TestCase
             ->from('/checkout')
             ->post('/checkout/addresses', [
                 'label' => 'Home',
-                'first_name' => 'Colas',
+                'first_name' => 'Jean',
                 'last_name' => 'Martin',
                 'line1' => '12 rue des Archives',
                 'postal_code' => '75004',
@@ -84,7 +84,7 @@ class CheckoutTest extends TestCase
 
         $this->assertDatabaseHas('addresses', [
             'user_id' => $user->id,
-            'first_name' => 'Colas',
+            'first_name' => 'Jean',
             'city' => 'Paris',
             'is_default' => 1,
         ]);

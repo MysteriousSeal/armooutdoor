@@ -28,12 +28,12 @@ class AccountTest extends TestCase
 
     public function test_account_hub_links_to_profile_and_addresses(): void
     {
-        $user = User::factory()->create(['first_name' => 'Colas', 'last_name' => 'Martin']);
+        $user = User::factory()->create(['first_name' => 'Jean', 'last_name' => 'Martin']);
 
         $this->actingAs($user)
             ->get('/account')
             ->assertOk()
-            ->assertSee('Bonjour, Colas Martin')
+            ->assertSee('Bonjour, Jean MARTIN')
             ->assertSee('Informations du compte')
             ->assertSee('Adresses');
     }
@@ -90,7 +90,7 @@ class AccountTest extends TestCase
             ->from('/account/addresses')
             ->post('/account/addresses', [
                 'label' => 'Home',
-                'first_name' => 'Colas',
+                'first_name' => 'Jean',
                 'last_name' => 'Martin',
                 'line1' => '12 rue des Archives',
                 'postal_code' => '75004',
@@ -111,7 +111,7 @@ class AccountTest extends TestCase
         $this->actingAs($user)
             ->put('/account/addresses/'.$address->id, [
                 'label' => 'Studio',
-                'first_name' => 'Colas',
+                'first_name' => 'Jean',
                 'last_name' => 'Martin',
                 'line1' => '8 place Bellecour',
                 'postal_code' => '69002',
