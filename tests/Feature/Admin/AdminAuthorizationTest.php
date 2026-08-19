@@ -42,6 +42,7 @@ class AdminAuthorizationTest extends TestCase
         $discount = Discount::query()->create(['product_id' => $product->id, 'type' => 'percentage', 'value' => 10]);
         $discountCode = DiscountCode::query()->create(['code' => 'AUDIT', 'type' => 'percentage', 'value' => 10]);
         $customer = User::factory()->create();
+        $targetAdmin = User::factory()->admin()->create();
         $order = Order::query()->create([
             'number' => Order::generateNumber(),
             'user_id' => $customer->id,
@@ -81,6 +82,7 @@ class AdminAuthorizationTest extends TestCase
             'marketplace' => $marketplace->id,
             'packageType' => $packageType->id,
             'carrier' => $carrier->id,
+            'admin' => $targetAdmin->id,
         ];
 
         $nonAdmin = User::factory()->create();

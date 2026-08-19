@@ -6,6 +6,7 @@ use App\Http\Controllers\Account\AddressController;
 use App\Http\Controllers\Account\ProfileController;
 // Admin (back office)
 use App\Http\Controllers\Admin\ActivityController as AdminActivityController;
+use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\CarrierPriceTierController as AdminCarrierPriceTierController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
@@ -169,6 +170,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/settings/suppliers/{supplier}/edit', [AdminSupplierController::class, 'edit'])->name('settings.suppliers.edit');
         Route::put('/settings/suppliers/{supplier}', [AdminSupplierController::class, 'update'])->name('settings.suppliers.update');
         Route::delete('/settings/suppliers/{supplier}', [AdminSupplierController::class, 'destroy'])->name('settings.suppliers.destroy');
+        Route::get('/settings/admins', [AdminUserController::class, 'index'])->name('settings.admins.index');
+        Route::get('/settings/admins/create', [AdminUserController::class, 'create'])->name('settings.admins.create');
+        Route::post('/settings/admins', [AdminUserController::class, 'store'])->name('settings.admins.store');
+        Route::get('/settings/admins/{admin}/edit', [AdminUserController::class, 'edit'])->name('settings.admins.edit');
+        Route::put('/settings/admins/{admin}', [AdminUserController::class, 'update'])->name('settings.admins.update');
+        Route::patch('/settings/admins/{admin}/deactivate', [AdminUserController::class, 'deactivate'])->name('settings.admins.deactivate');
 
         Route::get('/stripe/orphaned-payments', [AdminStripePaymentController::class, 'index'])->name('stripe.orphaned-payments.index');
         Route::post('/stripe/orphaned-payments/{sessionId}/finalize', [AdminStripePaymentController::class, 'finalize'])->name('stripe.orphaned-payments.finalize');

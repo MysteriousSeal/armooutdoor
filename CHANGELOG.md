@@ -2,6 +2,13 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-20 — v0.2.5
+
+### Admin
+
+- Added admin-user management (Settings → Admins): create new admins, edit name/email/reset password, deactivate — no more direct DB access needed to onboard staff. Guards against deactivating yourself or the last remaining admin.
+- Added 10 tests covering creation, validation, password reset, and deactivation guards; extended the route-authorization sweep to cover the new routes.
+
 ## 2026-08-19 — v0.2.4
 
 ### Orders
