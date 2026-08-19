@@ -51,20 +51,27 @@
         </form>
 
         @if ($supplier->exists)
-            <form
-                method="POST"
-                action="{{ route('admin.settings.suppliers.destroy', $supplier) }}"
-                class="admin-form-card admin-form-card--solo"
-                style="margin-top: 1rem"
-            >
-                @csrf
-                @method('DELETE')
+            <div class="admin-form-card admin-form-card--solo" style="margin-top: 1rem">
                 <h3 class="admin-panel-title">Remove</h3>
                 <p class="form-hint">This only removes the supplier from this list.</p>
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-secondary">Remove supplier</button>
+                    <button type="button" class="btn btn-secondary" data-modal-open="supplier-delete-modal">Remove supplier</button>
                 </div>
-            </form>
+            </div>
+
+            <dialog id="supplier-delete-modal" class="modal" aria-labelledby="supplier-delete-title">
+                <form method="POST" action="{{ route('admin.settings.suppliers.destroy', $supplier) }}">
+                    @csrf
+                    @method('DELETE')
+                    <p class="modal-kicker">{{ $supplier->name }}</p>
+                    <h3 class="modal-title" id="supplier-delete-title">Remove this supplier?</h3>
+                    <p class="modal-body">This only removes the supplier from this list.</p>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                        <button type="submit" class="btn btn-primary">Remove supplier</button>
+                    </div>
+                </form>
+            </dialog>
         @endif
     </div>
 @endsection

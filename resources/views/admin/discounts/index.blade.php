@@ -151,11 +151,20 @@
                             <div class="admin-discount-actions">
                                 <a href="{{ route('admin.discounts.edit', $discount) }}" class="btn btn-sm btn-secondary">Edit</a>
                                 @if (auth()->user()->isOwner())
-                                    <form method="POST" action="{{ route('admin.discounts.destroy', $discount) }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-secondary">Remove</button>
-                                    </form>
+                                    <button type="button" class="btn btn-sm btn-secondary" data-modal-open="discount-delete-{{ $discount->id }}">Remove</button>
+                                    <dialog id="discount-delete-{{ $discount->id }}" class="modal" aria-labelledby="discount-delete-{{ $discount->id }}-title">
+                                        <form method="POST" action="{{ route('admin.discounts.destroy', $discount) }}">
+                                            @csrf
+                                            @method('DELETE')
+                                            <p class="modal-kicker">{{ $discount->name }}</p>
+                                            <h3 class="modal-title" id="discount-delete-{{ $discount->id }}-title">Remove this discount?</h3>
+                                            <p class="modal-body">This can't be undone. Orders that already used it keep their applied discount.</p>
+                                            <div class="modal-actions">
+                                                <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                                                <button type="submit" class="btn btn-primary">Remove discount</button>
+                                            </div>
+                                        </form>
+                                    </dialog>
                                 @endif
                             </div>
                         </li>
@@ -233,11 +242,20 @@
                                         <div class="admin-table-actions">
                                             <a href="{{ route('admin.discount-codes.edit', $discountCode) }}" class="btn btn-sm btn-secondary">Edit</a>
                                             @if (auth()->user()->isOwner())
-                                                <form method="POST" action="{{ route('admin.discount-codes.destroy', $discountCode) }}">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-secondary">Remove</button>
-                                                </form>
+                                                <button type="button" class="btn btn-sm btn-secondary" data-modal-open="discount-code-delete-{{ $discountCode->id }}">Remove</button>
+                                                <dialog id="discount-code-delete-{{ $discountCode->id }}" class="modal" aria-labelledby="discount-code-delete-{{ $discountCode->id }}-title">
+                                                    <form method="POST" action="{{ route('admin.discount-codes.destroy', $discountCode) }}">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <p class="modal-kicker">{{ $discountCode->code }}</p>
+                                                        <h3 class="modal-title" id="discount-code-delete-{{ $discountCode->id }}-title">Remove this discount code?</h3>
+                                                        <p class="modal-body">This can't be undone. Customers who already used it keep their applied discount.</p>
+                                                        <div class="modal-actions">
+                                                            <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                                                            <button type="submit" class="btn btn-primary">Remove code</button>
+                                                        </div>
+                                                    </form>
+                                                </dialog>
                                             @endif
                                         </div>
                                     </td>

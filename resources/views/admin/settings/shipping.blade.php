@@ -195,11 +195,20 @@
                     @foreach ($packageTypes as $packageType)
                         <li>
                             <span class="admin-table-primary">{{ $packageType->name }}</span>
-                            <form method="POST" action="{{ route('admin.settings.package-types.destroy', $packageType) }}">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="footer-text-btn">Remove</button>
-                            </form>
+                            <button type="button" class="footer-text-btn" data-modal-open="package-type-delete-{{ $packageType->id }}">Remove</button>
+                            <dialog id="package-type-delete-{{ $packageType->id }}" class="modal" aria-labelledby="package-type-delete-{{ $packageType->id }}-title">
+                                <form method="POST" action="{{ route('admin.settings.package-types.destroy', $packageType) }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <p class="modal-kicker">{{ $packageType->name }}</p>
+                                    <h3 class="modal-title" id="package-type-delete-{{ $packageType->id }}-title">Remove this package type?</h3>
+                                    <p class="modal-body">Orders that already used it keep it on their tracking.</p>
+                                    <div class="modal-actions">
+                                        <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                                        <button type="submit" class="btn btn-primary">Remove package type</button>
+                                    </div>
+                                </form>
+                            </dialog>
                         </li>
                     @endforeach
                 </ul>

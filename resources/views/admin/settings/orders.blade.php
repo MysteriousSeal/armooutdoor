@@ -32,11 +32,20 @@
                                 @endif
                             </span>
                             <h3 class="marketplace-name">{{ $marketplace->name }}</h3>
-                            <form method="POST" action="{{ route('admin.settings.marketplaces.destroy', $marketplace) }}" class="marketplace-remove-form">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="footer-text-btn">Remove</button>
-                            </form>
+                            <button type="button" class="footer-text-btn" data-modal-open="marketplace-delete-{{ $marketplace->id }}">Remove</button>
+                            <dialog id="marketplace-delete-{{ $marketplace->id }}" class="modal" aria-labelledby="marketplace-delete-{{ $marketplace->id }}-title">
+                                <form method="POST" action="{{ route('admin.settings.marketplaces.destroy', $marketplace) }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <p class="modal-kicker">{{ $marketplace->name }}</p>
+                                    <h3 class="modal-title" id="marketplace-delete-{{ $marketplace->id }}-title">Remove this marketplace?</h3>
+                                    <p class="modal-body">Orders that already used it keep their name and note.</p>
+                                    <div class="modal-actions">
+                                        <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                                        <button type="submit" class="btn btn-primary">Remove marketplace</button>
+                                    </div>
+                                </form>
+                            </dialog>
                         </div>
 
                         <form method="POST" action="{{ route('admin.settings.marketplaces.update', $marketplace) }}" enctype="multipart/form-data" class="marketplace-card-form">
