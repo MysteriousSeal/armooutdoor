@@ -201,6 +201,18 @@ Route::get('/paiement-securise', [HelpController::class, 'securePayment'])->name
 
 /*
 |--------------------------------------------------------------------------
+| Debug (local environment only — lets you preview error pages)
+|--------------------------------------------------------------------------
+*/
+
+if (app()->environment('local')) {
+    Route::get('/debug/throw-500', function () {
+        abort(500, 'Fake error for testing the 500 page.');
+    })->name('debug.throw-500');
+}
+
+/*
+|--------------------------------------------------------------------------
 | Cart (guests and customers alike)
 |--------------------------------------------------------------------------
 */

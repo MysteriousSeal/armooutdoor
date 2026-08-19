@@ -14,10 +14,10 @@
             ->get();
     @endphp
     <div class="container">
-        <section class="error-404">
-            <p class="error-404-code" aria-hidden="true">404</p>
-            <h1 class="error-404-title">Cette page s’est égarée</h1>
-            <p class="error-404-lede">
+        <section class="error-page">
+            <p class="error-page-code" aria-hidden="true">404</p>
+            <h1 class="error-page-title">Cette page s’est égarée</h1>
+            <p class="error-page-lede">
                 La page que vous cherchez n’existe pas, ou plus. Essayez une recherche, ou repartez de l’accueil.
             </p>
 
@@ -38,7 +38,7 @@
                 <button type="submit" class="btn btn-primary">Rechercher</button>
             </form>
 
-            <a href="{{ localized_route('home') }}" class="error-404-home-link">
+            <a href="{{ localized_route('home') }}" class="error-page-home-link">
                 <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
                     <path d="M19 12H5M11 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>

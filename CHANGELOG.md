@@ -2,6 +2,13 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-19 — v0.2.3
+
+### Storefront
+
+- Added a custom 500 page, matching the 404 page's design (shared `.error-page*` styles in `errors.css`), with "Réessayer" and "Retour à l'accueil" actions.
+- Added a local-only debug route (`/debug/throw-500`) to preview the 500 page without needing a real server error.
+
 ## 2026-08-19 — v0.2.2
 
 ### Storefront

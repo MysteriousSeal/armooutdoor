@@ -1,11 +1,11 @@
-.error-404 {
+.error-page {
     max-width: 34rem;
     margin: 0 auto;
     padding: 4.5rem 1rem 3rem;
     text-align: center;
 }
 
-.error-404-code {
+.error-page-code {
     margin: 0 0 0.35rem;
     font-size: clamp(4rem, 13vw, 7rem);
     font-weight: 800;
@@ -14,19 +14,41 @@
     color: color-mix(in srgb, var(--accent) 65%, var(--text-muted));
 }
 
-.error-404-title {
+.error-page-title {
     margin: 0 0 0.75rem;
     font-size: 1.6rem;
     font-weight: 700;
     letter-spacing: -0.02em;
 }
 
-.error-404-lede {
+.error-page-lede {
     margin: 0 auto 2.25rem;
     max-width: 28rem;
     font-size: 1rem;
     line-height: 1.6;
     color: var(--text-muted);
+}
+
+.error-page-home-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--accent-hover);
+    text-decoration: none;
+}
+
+.error-page-home-link:hover {
+    text-decoration: underline;
+}
+
+.error-page-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1.25rem;
 }
 
 .error-404-search {
@@ -58,20 +80,6 @@
 
 .error-404-search .btn {
     flex-shrink: 0;
-}
-
-.error-404-home-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--accent-hover);
-    text-decoration: none;
-}
-
-.error-404-home-link:hover {
-    text-decoration: underline;
 }
 
 .error-404-categories {
@@ -117,8 +125,13 @@
 }
 
 @media (max-width: 480px) {
-    .error-404 {
+    .error-page {
         padding: 3rem 1rem 2rem;
+    }
+
+    .error-page-actions {
+        flex-direction: column;
+        gap: 0.9rem;
     }
 
     .error-404-search {
