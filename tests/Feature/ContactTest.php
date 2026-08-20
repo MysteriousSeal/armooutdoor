@@ -61,6 +61,43 @@ class ContactTest extends TestCase
             ->assertSee('Nous contacter');
     }
 
+    public function test_the_contact_page_leads_with_a_hero(): void
+    {
+        $response = $this->get('/contact');
+
+        $response->assertOk()
+            ->assertSee('cat-hero', false)
+            ->assertSee(__('store.contact_hero_kicker'))
+            ->assertSee(__('store.contact_hero_tag_reply'))
+            ->assertSee(__('store.contact_hero_tag_team'))
+            // The hero's styles live in categories.css, like every other
+            // page that uses the partial.
+            ->assertSee('css/categories.css', false);
+    }
+
+    public function test_the_hero_carries_the_page_heading(): void
+    {
+        $content = $this->get('/contact')->assertOk()->getContent();
+
+        // The page used to head itself with an <h2>, unlike every other page
+        // on the site. The hero supplies a real <h1> instead.
+        $this->assertMatchesRegularExpression(
+            '/<h1 class="cat-hero-title[^"]*">\s*<span class="cat-hero-title-accent">'.preg_quote(__('store.contact_title'), '/').'/',
+            $content,
+        );
+        $this->assertStringNotContainsString('class="page-title"', $content);
+    }
+
+    public function test_the_hero_renders_without_an_image_until_one_exists(): void
+    {
+        $content = $this->get('/contact')->assertOk()->getContent();
+
+        // No contact-hero.webp yet, so it must not claim to have an image —
+        // has-image would leave the overlay darkening a bare surface.
+        $this->assertStringNotContainsString('cat-hero has-image', $content);
+        $this->assertStringNotContainsString('cat-hero-overlay', $content);
+    }
+
     public function test_contact_form_is_wired_for_dynamic_submission(): void
     {
         $this->get('/contact')

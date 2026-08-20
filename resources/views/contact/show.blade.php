@@ -5,6 +5,9 @@
 @section('canonical', localized_route('contact.show'))
 
 @push('head')
+    {{-- The hero's styles live in categories.css, same as every other page
+         that uses partials.page-hero. --}}
+    <link rel="stylesheet" href="{{ versioned_asset('css/categories.css') }}">
     <link rel="stylesheet" href="{{ versioned_asset('css/contact.css') }}">
 @endpush
 
@@ -20,10 +23,16 @@
             <span>{{ __('store.contact_title') }}</span>
         </nav>
 
-        <header class="page-header">
-            <h2 class="page-title">{{ __('store.contact_title') }}</h2>
-            <p class="page-lede">{{ __('store.contact_intro') }}</p>
-        </header>
+        @include('partials.page-hero', [
+            'kicker' => __('store.contact_hero_kicker'),
+            'title' => __('store.contact_title'),
+            'description' => __('store.contact_intro'),
+            'tags' => [
+                __('store.contact_hero_tag_reply'),
+                __('store.contact_hero_tag_team'),
+            ],
+            'titleNoWrap' => true,
+        ])
 
         <div class="contact-layout">
             <form id="contact-form" method="POST" action="{{ localized_route('contact.store') }}" class="contact-form" novalidate>
