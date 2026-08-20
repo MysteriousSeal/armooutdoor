@@ -23,6 +23,13 @@ class AdminTest extends TestCase
         $this->seed([CatalogSeeder::class, AdminSeeder::class]);
     }
 
+    public function test_admin_seeder_grants_owner_role(): void
+    {
+        $admin = User::query()->where('email', 'admin@armooutdoor.test')->firstOrFail();
+
+        $this->assertTrue($admin->isOwner());
+    }
+
     public function test_admin_login_page_is_public(): void
     {
         $this->get('/admin')

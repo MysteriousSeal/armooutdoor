@@ -94,6 +94,42 @@ class AdminRoleTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_staff_cannot_see_stripe_metadata_on_an_order(): void
+    {
+        $staff = User::factory()->staffAdmin()->create();
+        $order = $this->placedOrder();
+        $order->update([
+            'stripe_payment_intent_id' => 'pi_test123',
+            'stripe_customer_id' => 'cus_test123',
+            'payment_fee_cents' => 150,
+        ]);
+
+        $this->actingAs($staff)
+            ->get('/admin/orders/'.$order->number)
+            ->assertOk()
+            ->assertDontSee('pi_test123')
+            ->assertDontSee('cus_test123')
+            ->assertDontSee('Payment processing fee');
+    }
+
+    public function test_owner_can_see_stripe_metadata_on_an_order(): void
+    {
+        $owner = User::factory()->admin()->create();
+        $order = $this->placedOrder();
+        $order->update([
+            'stripe_payment_intent_id' => 'pi_test123',
+            'stripe_customer_id' => 'cus_test123',
+            'payment_fee_cents' => 150,
+        ]);
+
+        $this->actingAs($owner)
+            ->get('/admin/orders/'.$order->number)
+            ->assertOk()
+            ->assertSee('pi_test123')
+            ->assertSee('cus_test123')
+            ->assertSee('Payment processing fee');
+    }
+
     public function test_staff_cannot_manage_admins(): void
     {
         $staff = User::factory()->staffAdmin()->create();

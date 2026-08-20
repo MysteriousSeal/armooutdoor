@@ -17,6 +17,7 @@ class AdminSeeder extends Seeder
         $admin->last_name = 'Armo Outdoor';
         $admin->password = 'password';
         $admin->is_admin = true;
+        $admin->role = 'owner';
         $admin->save();
     }
 }

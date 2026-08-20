@@ -18,6 +18,7 @@
         </header>
 
         <form
+            id="admin-form"
             method="POST"
             action="{{ $admin->exists ? route('admin.settings.admins.update', $admin) : route('admin.settings.admins.store') }}"
             class="admin-form-card admin-form-card--solo"
@@ -86,19 +87,46 @@
         </form>
 
         @if ($admin->exists && ! $admin->is(auth()->user()))
-            <form
-                method="POST"
-                action="{{ route('admin.settings.admins.deactivate', $admin) }}"
-                class="admin-form-card admin-form-card--solo admin-form-card--danger"
-            >
-                @csrf
-                @method('PATCH')
+            <div class="admin-form-card admin-form-card--solo admin-form-card--danger">
                 <h3 class="admin-panel-title">Deactivate</h3>
                 <p class="form-hint">Revokes back-office access. They stay a regular account otherwise.</p>
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-secondary">Deactivate admin</button>
+                    <button type="button" class="btn btn-secondary" data-modal-open="deactivate-confirm-modal">Deactivate admin</button>
                 </div>
-            </form>
+            </div>
+
+            <dialog id="deactivate-confirm-modal" class="modal" aria-labelledby="deactivate-confirm-title">
+                <form method="POST" action="{{ route('admin.settings.admins.deactivate', $admin) }}">
+                    @csrf
+                    @method('PATCH')
+                    <p class="modal-kicker">{{ $admin->name }}</p>
+                    <h3 class="modal-title" id="deactivate-confirm-title">Deactivate this admin?</h3>
+                    <p class="modal-body">Revokes back-office access immediately. They stay a regular account otherwise, and can be reactivated later.</p>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                        <button type="submit" class="btn btn-primary">Deactivate admin</button>
+                    </div>
+                </form>
+            </dialog>
+        @endif
+
+        @if ($admin->exists && $admin->is(auth()->user()) && $admin->role === 'owner')
+            <dialog id="self-demote-confirm-modal" class="modal" aria-labelledby="self-demote-confirm-title">
+                <p class="modal-kicker">{{ $admin->name }}</p>
+                <h3 class="modal-title" id="self-demote-confirm-title">Switch yourself to staff?</h3>
+                <p class="modal-body">
+                    You'll immediately lose owner-only access — refunds, deleting discounts, Stripe payment data, and admin management —
+                    for the rest of this session.
+                </p>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                    <button type="button" class="btn btn-primary" id="self-demote-confirm-submit">Switch to staff</button>
+                </div>
+            </dialog>
         @endif
     </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('js/admin-self-demote.js') }}" defer></script>
+@endpush

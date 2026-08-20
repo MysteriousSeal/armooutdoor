@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-20 — v0.2.7
+
+### Admin
+
+- Fixed a bootstrap lockout: `AdminSeeder` never set `role`, so a freshly seeded admin had `isOwner() === false` with no self-service fix (existing production admins were unaffected). The seeder now grants `owner`.
+- The per-order Stripe metadata block (payment fee, payment intent ID, Stripe customer ID/links) is now owner-only, closing a gap where staff could still see it despite the RBAC rollout.
+- "Deactivate admin" now asks for confirmation first, matching the rest of the admin's destructive actions.
+- An owner demoting themselves to staff now gets a warning that they'll lose owner access immediately, and can still confirm.
+
 ## 2026-08-20 — v0.2.6
 
 ### Admin

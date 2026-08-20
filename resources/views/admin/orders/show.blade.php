@@ -249,7 +249,7 @@
                                 @endif
                             </p>
 
-                            @if ($order->stripe_payment_intent_id || $order->stripe_customer_id || $order->payment_fee_cents)
+                            @if (($order->stripe_payment_intent_id || $order->stripe_customer_id || $order->payment_fee_cents) && auth()->user()->isOwner())
                                 <dl class="stripe-meta">
                                     @if ($order->payment_fee_cents)
                                         <div class="stripe-meta-row">
