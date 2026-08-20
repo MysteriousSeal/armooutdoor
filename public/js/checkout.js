@@ -140,14 +140,32 @@
         var carrier = selectedCarrier();
         var shippingCents = carrier ? (config.carriers[carrier.value] || 0) : 0;
 
+        // A free-relay-delivery code only bites once a covered carrier is
+        // picked, so this is recomputed on every carrier change.
+        var waived = config.freeShippingCarrierIds || [];
+        var shippingDiscount = (carrier && waived.indexOf(parseInt(carrier.value, 10)) !== -1)
+            ? shippingCents
+            : 0;
+
         if (shippingPrice) {
             shippingPrice.textContent = carrier
                 ? (shippingCents === 0 ? 'Gratuite' : formatEuros(shippingCents))
                 : '—';
         }
 
+        var discountRow = document.getElementById('checkout-shipping-discount-row');
+        var discountValue = document.getElementById('checkout-shipping-discount-value');
+        if (discountRow) {
+            discountRow.hidden = shippingDiscount === 0;
+        }
+        if (discountValue) {
+            discountValue.textContent = '-' + formatEuros(shippingDiscount);
+        }
+
         if (grandTotal) {
-            grandTotal.textContent = formatEuros(config.subtotalCents - (config.discountCents || 0) + shippingCents);
+            grandTotal.textContent = formatEuros(
+                config.subtotalCents - (config.discountCents || 0) + shippingCents - shippingDiscount
+            );
         }
     }
 

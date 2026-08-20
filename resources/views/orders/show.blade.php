@@ -85,6 +85,12 @@
                                 <dd>-{{ $order->formattedDiscountCents() }}</dd>
                             </div>
                         @endif
+                        @if ($order->shipping_discount_cents > 0)
+                            <div>
+                                <dt>{{ __('store.checkout_shipping_discount') }}</dt>
+                                <dd>-{{ format_euros($order->shipping_discount_cents) }}</dd>
+                            </div>
+                        @endif
                     </dl>
                     @if ($discountedItems->isNotEmpty())
                         <div class="order-reductions">

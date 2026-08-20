@@ -18,6 +18,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class DiscountCode extends Model
 {
+    public const TYPE_PERCENTAGE = 'percentage';
+
+    public const TYPE_FIXED = 'fixed';
+
+    /**
+     * Waives the delivery charge when the order goes to a relay point.
+     * Deliberately narrow: free home delivery, or free delivery on one named
+     * carrier, are different features rather than variations of this one.
+     */
+    public const TYPE_FREE_RELAY_SHIPPING = 'free_relay_shipping';
+
     protected function casts(): array
     {
         return [
@@ -38,6 +49,11 @@ class DiscountCode extends Model
         return $this->hasMany(Order::class);
     }
 
+    public function isFreeRelayShipping(): bool
+    {
+        return $this->type === self::TYPE_FREE_RELAY_SHIPPING;
+    }
+
     public function isForCustomer(): bool
     {
         return $this->user_id !== null;
@@ -54,6 +70,11 @@ class DiscountCode extends Model
      */
     public function apply(int $totalCents): int
     {
+        // A shipping code never touches the goods total.
+        if ($this->isFreeRelayShipping()) {
+            return $totalCents;
+        }
+
         $discounted = $this->type === 'percentage'
             ? $totalCents - (int) round($totalCents * $this->value / 100)
             : $totalCents - $this->value;
@@ -63,14 +84,20 @@ class DiscountCode extends Model
 
     public function label(): string
     {
-        return $this->type === 'percentage'
-            ? '-'.$this->value.'%'
-            : '-'.format_euros($this->value);
+        return match ($this->type) {
+            self::TYPE_PERCENTAGE => '-'.$this->value.'%',
+            self::TYPE_FREE_RELAY_SHIPPING => __('store.discount_code_free_relay_label'),
+            default => '-'.format_euros($this->value),
+        };
     }
 
     public function typeLabel(): string
     {
-        return $this->type === 'percentage' ? 'Percentage off' : 'Fixed amount off';
+        return match ($this->type) {
+            self::TYPE_PERCENTAGE => 'Percentage off',
+            self::TYPE_FREE_RELAY_SHIPPING => 'Free relay delivery',
+            default => 'Fixed amount off',
+        };
     }
 
     public function quantityLabel(): string
@@ -182,5 +209,64 @@ class DiscountCode extends Model
         }
 
         return null;
+    }
+
+    /**
+     * Refusals that depend on the cart rather than the customer. Kept apart
+     * from eligibilityError() so that method's callers don't all have to
+     * acquire a cart they have no use for.
+     *
+     * A missing or home-delivery carrier is not an error: the code is
+     * accepted and simply does not bite unless they pick a relay point.
+     */
+    public function cartEligibilityError(int $subtotalCents): ?string
+    {
+        if (! $this->isFreeRelayShipping()) {
+            return null;
+        }
+
+        if ($this->relayDeliveryIsAlreadyFree($subtotalCents)) {
+            return __('store.discount_code_error_relay_already_free');
+        }
+
+        return null;
+    }
+
+    /**
+     * True only when every active relay carrier is already free at this
+     * subtotal. Free shipping is configured per carrier, so if even one relay
+     * option still charges, the code still has something to do.
+     */
+    public function relayDeliveryIsAlreadyFree(int $subtotalCents): bool
+    {
+        $relayCarriers = Carrier::query()->active()->get()->filter(
+            fn (Carrier $carrier): bool => $carrier->isRelay(),
+        );
+
+        if ($relayCarriers->isEmpty()) {
+            return false;
+        }
+
+        $shipping = ShippingSetting::current();
+
+        return $relayCarriers->every(
+            fn (Carrier $carrier): bool => $shipping->isFreeFor($carrier, $subtotalCents),
+        );
+    }
+
+    /**
+     * What this code takes off the shipping line for the chosen carrier.
+     */
+    public function shippingDiscountCents(?Carrier $carrier, int $shippingCents, int $subtotalCents): int
+    {
+        if (! $this->isFreeRelayShipping() || $carrier === null || ! $carrier->isRelay()) {
+            return 0;
+        }
+
+        if ($this->relayDeliveryIsAlreadyFree($subtotalCents)) {
+            return 0;
+        }
+
+        return $shippingCents;
     }
 }

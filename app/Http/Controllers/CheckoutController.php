@@ -60,6 +60,14 @@ class CheckoutController extends Controller
         $discountCode = $this->resolveAppliedDiscountCode($user);
         $discountCents = $discountCode ? $subtotalCents - $discountCode->apply($subtotalCents) : 0;
 
+        // Which carriers the applied code waives delivery on, so the
+        // client-side total can stay in step with the server's.
+        $freeShippingCarrierIds = $carriers
+            ->filter(fn (Carrier $carrier): bool => $discountCode !== null
+                && $discountCode->shippingDiscountCents($carrier, $carrierPricesCents[$carrier->id], $subtotalCents) > 0)
+            ->pluck('id')
+            ->values();
+
         // No-JS fallback: the relay list is normally only ever populated by
         // the AJAX endpoint (fetching live on every page load would slow it
         // down for everyone), but a <noscript> form on the page can submit
@@ -77,6 +85,7 @@ class CheckoutController extends Controller
             'carrierPricesCents' => $carrierPricesCents,
             'discountCode' => $discountCode,
             'discountCents' => $discountCents,
+            'freeShippingCarrierIds' => $freeShippingCarrierIds,
             'addresses' => $addresses,
             'homeCarriers' => $carriers->filter(fn (Carrier $carrier): bool => $carrier->method === DeliveryMethod::Home)->values(),
             'relayCarriers' => $carriers->filter(fn (Carrier $carrier): bool => $carrier->method === DeliveryMethod::Relay)->values(),
@@ -194,7 +203,8 @@ class CheckoutController extends Controller
                 : back()->withErrors(['discount_code' => $error]);
         }
 
-        $error = $discountCode->eligibilityError($request->user());
+        $error = $discountCode->eligibilityError($request->user())
+            ?? $discountCode->cartEligibilityError($cart->totalCents());
 
         if ($error !== null) {
             return $request->wantsJson()
@@ -288,6 +298,7 @@ class CheckoutController extends Controller
 
                 $discountCode = null;
                 $discountCents = 0;
+                $shippingDiscount = 0;
                 $discountCodeId = session(self::DISCOUNT_CODE_SESSION_KEY);
 
                 if ($discountCodeId !== null) {
@@ -295,8 +306,15 @@ class CheckoutController extends Controller
 
                     if ($discountCode !== null && $discountCode->eligibilityError($request->user()) === null) {
                         $discountCents = $subtotal - $discountCode->apply($subtotal);
+                        $shippingDiscount = $discountCode->shippingDiscountCents($carrier, $shipping, $subtotal);
 
-                        if ($discountCode->hasLimitedQuantity()) {
+                        // Re-checked here, not just when the code was entered:
+                        // the cart may have crossed the free-shipping
+                        // threshold since. A code that ends up worth nothing
+                        // is dropped rather than consumed, so it stays usable.
+                        if ($discountCents === 0 && $shippingDiscount === 0 && $discountCode->isFreeRelayShipping()) {
+                            $discountCode = null;
+                        } elseif ($discountCode->hasLimitedQuantity()) {
                             $discountCode->decrement('quantity');
                         }
                     } else {
@@ -326,7 +344,8 @@ class CheckoutController extends Controller
                         'value' => $discountCode->value,
                     ] : null,
                     'discount_cents' => $discountCents,
-                    'total_cents' => $subtotal - $discountCents + $shipping,
+                    'shipping_discount_cents' => $shippingDiscount,
+                    'total_cents' => max(0, $subtotal - $discountCents + $shipping - $shippingDiscount),
                     'payment_method' => $request->validated('payment_method'),
                 ]);
 
@@ -430,11 +449,11 @@ class CheckoutController extends Controller
 
         $discountCodeId = session(self::DISCOUNT_CODE_SESSION_KEY);
         $discountCode = $discountCodeId !== null ? DiscountCode::query()->find($discountCodeId) : null;
-        $discountCents = ($discountCode !== null && $discountCode->eligibilityError($user) === null)
-            ? $subtotal - $discountCode->apply($subtotal)
-            : 0;
+        $usable = $discountCode !== null && $discountCode->eligibilityError($user) === null;
+        $discountCents = $usable ? $subtotal - $discountCode->apply($subtotal) : 0;
+        $shippingDiscount = $usable ? $discountCode->shippingDiscountCents($carrier, $shipping, $subtotal) : 0;
 
-        $totalCents = max(0, $subtotal - $discountCents + $shipping);
+        $totalCents = max(0, $subtotal - $discountCents + $shipping - $shippingDiscount);
 
         $stripe = new StripeClient(config('services.stripe.secret'));
         $existingCustomerId = $this->findStripeCustomerId($stripe, $user->email);

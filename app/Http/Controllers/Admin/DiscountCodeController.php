@@ -25,7 +25,7 @@ class DiscountCodeController extends Controller
 
     public function create(Request $request): View
     {
-        $discountCode = new DiscountCode();
+        $discountCode = new DiscountCode;
 
         if ($request->filled('user_id')) {
             $discountCode->user_id = $request->integer('user_id');
@@ -87,7 +87,11 @@ class DiscountCodeController extends Controller
         return [
             'code' => $request->string('code')->toString(),
             'type' => $type,
-            'value' => $type === 'percentage' ? (int) round($value) : (int) round($value * 100),
+            'value' => match ($type) {
+                DiscountCode::TYPE_FREE_RELAY_SHIPPING => null,
+                DiscountCode::TYPE_PERCENTAGE => (int) round($value),
+                default => (int) round($value * 100),
+            },
             'user_id' => $request->filled('user_id') ? $request->integer('user_id') : null,
             'quantity' => $request->filled('quantity') ? $request->integer('quantity') : null,
             'max_uses_per_customer' => $request->filled('max_uses_per_customer') ? $request->integer('max_uses_per_customer') : null,

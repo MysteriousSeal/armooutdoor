@@ -2,7 +2,14 @@
     <div class="discount-code-applied">
         <div class="discount-code-applied-copy">
             <span class="order-discount-badge">{{ $discountCode->code }}</span>
-            <span class="discount-code-applied-amount">-{{ format_euros($discountCents) }}</span>
+            @if ($discountCode->isFreeRelayShipping())
+                {{-- No money amount: it is worth whatever the relay carrier
+                     costs, and only once one is chosen. --}}
+                <span class="discount-code-applied-amount">{{ __('store.discount_code_free_relay_label') }}</span>
+                <span class="discount-code-applied-hint">{{ __('store.discount_code_free_relay_hint') }}</span>
+            @else
+                <span class="discount-code-applied-amount">-{{ format_euros($discountCents) }}</span>
+            @endif
         </div>
         <form method="POST" action="{{ localized_route('checkout.discount-code.destroy') }}" class="discount-code-remove-form">
             @csrf

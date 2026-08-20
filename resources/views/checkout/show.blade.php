@@ -505,6 +505,10 @@
                         <dt>{{ __('store.shipping') }}</dt>
                         <dd id="checkout-shipping-price">—</dd>
                     </div>
+                    <div id="checkout-shipping-discount-row" hidden>
+                        <dt>{{ __('store.checkout_shipping_discount') }}</dt>
+                        <dd id="checkout-shipping-discount-value">—</dd>
+                    </div>
                     <div class="checkout-totals-grand">
                         <dt>{{ __('store.line_total') }}</dt>
                         <dd id="checkout-grand-total">{{ format_euros($subtotalCents - $discountCents) }}</dd>
@@ -537,6 +541,9 @@
                     {{ $carrier->id }}: {{ $carrierPricesCents[$carrier->id] }},
                 @endforeach
             },
+            // Carriers this cart's code waives delivery on. The total is
+            // computed here as well as in PHP, so both must know.
+            freeShippingCarrierIds: @json($freeShippingCarrierIds),
             relayPointsUrl: @json(localized_route('checkout.relay-points')),
             relayHoursLabel: @json(__('store.relay_hours')),
             postalCodesSearchUrl: @json(localized_route('checkout.postal-codes')),

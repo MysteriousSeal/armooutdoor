@@ -3158,6 +3158,13 @@
     color: #9dbea8;
 }
 
+.discount-code-applied-hint {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
 .checkout-section--discount-code .form-error {
     margin-top: 0.55rem;
 }

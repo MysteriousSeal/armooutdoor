@@ -103,11 +103,18 @@
                                         <span class="admin-table-sub">e.g. 5,00 € off the cart</span>
                                     </span>
                                 </label>
+                                <label class="admin-choice">
+                                    <input type="radio" name="type" value="free_relay_shipping" @checked($selectedType === 'free_relay_shipping')>
+                                    <span class="discount-type-copy">
+                                        <span class="admin-table-strong">Free relay delivery</span>
+                                        <span class="admin-table-sub">Waives delivery to a relay point</span>
+                                    </span>
+                                </label>
                             </div>
                             @error('type') <p class="form-error">{{ $message }}</p> @enderror
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group" id="discount-code-value-group" @if ($selectedType === 'free_relay_shipping') hidden @endif>
                             <label for="value">Value</label>
                             <div class="discount-value-field">
                                 <input
@@ -118,7 +125,7 @@
                                     value="{{ $selectedValue }}"
                                     min="0.01"
                                     step="0.01"
-                                    required
+                                    @unless ($selectedType === 'free_relay_shipping') required @endunless
                                 >
                                 <span class="discount-value-suffix" id="discount-code-value-suffix">{{ $selectedType === 'fixed' ? '€' : '%' }}</span>
                             </div>
@@ -255,6 +262,7 @@
             var quantityInput = document.getElementById('quantity');
             var maxPerCustomerInput = document.getElementById('max_uses_per_customer');
             var endsAtInput = document.getElementById('ends_at');
+            var valueGroup = document.getElementById('discount-code-value-group');
             var suffix = document.getElementById('discount-code-value-suffix');
             var hint = document.getElementById('discount-code-value-hint');
             var previewCode = document.getElementById('discount-code-preview-code');
@@ -281,7 +289,17 @@
             }
 
             function updatePreview() {
-                var isFixed = selectedType() === 'fixed';
+                var type = selectedType();
+                var isFixed = type === 'fixed';
+                var isFreeRelay = type === 'free_relay_shipping';
+
+                // The value field is meaningless for a free-delivery code, and
+                // leaving it required would block the form while hidden.
+                if (valueGroup) {
+                    valueGroup.hidden = isFreeRelay;
+                }
+                valueInput.required = ! isFreeRelay;
+
                 suffix.textContent = isFixed ? '€' : '%';
                 hint.textContent = isFixed
                     ? 'Euro amount to subtract from the cart, for example 5.00.'
@@ -291,7 +309,9 @@
                 previewCode.textContent = code !== '' ? code : 'YOURCODE';
 
                 var raw = parseFloat(valueInput.value);
-                if (! isNaN(raw) && raw > 0) {
+                if (isFreeRelay) {
+                    previewBadge.textContent = 'Point relais offert';
+                } else if (! isNaN(raw) && raw > 0) {
                     previewBadge.textContent = isFixed
                         ? '-' + formatEuros(Math.round(raw * 100))
                         : '-' + Math.round(raw) + '%';
@@ -299,9 +319,9 @@
                     previewBadge.textContent = '—';
                 }
 
-                previewType.textContent = isFixed
-                    ? 'Fixed amount off · cart total'
-                    : 'Percentage off · cart total';
+                previewType.textContent = isFreeRelay
+                    ? 'Free relay delivery · shipping'
+                    : (isFixed ? 'Fixed amount off · cart total' : 'Percentage off · cart total');
 
                 var customer = customerById(customerInput.value);
                 previewCustomer.textContent = customer ? customer.name : 'Any customer';

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Models\DiscountCode;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -34,12 +35,17 @@ class StoreDiscountCodeRequest extends FormRequest
                 'regex:/^[A-Z0-9-]+$/',
                 Rule::unique('discount_codes', 'code')->ignore($discountCode),
             ],
-            'type' => ['required', Rule::in(['percentage', 'fixed'])],
+            'type' => ['required', Rule::in([
+                DiscountCode::TYPE_PERCENTAGE,
+                DiscountCode::TYPE_FIXED,
+                DiscountCode::TYPE_FREE_RELAY_SHIPPING,
+            ])],
             'value' => [
-                'required',
+                // A free-delivery code has no amount.
+                $this->input('type') === DiscountCode::TYPE_FREE_RELAY_SHIPPING ? 'nullable' : 'required',
                 'numeric',
                 'min:0.01',
-                $this->input('type') === 'percentage' ? 'max:100' : 'max:99999.99',
+                $this->input('type') === DiscountCode::TYPE_PERCENTAGE ? 'max:100' : 'max:99999.99',
             ],
             'user_id' => ['nullable', 'exists:users,id'],
             'quantity' => ['nullable', 'integer', 'min:1'],
