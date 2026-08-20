@@ -6,6 +6,7 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -31,6 +32,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_admin' => 'boolean',
             'admin_deactivated_at' => 'datetime',
+            'admin_viewed_at' => 'datetime',
             'external' => 'boolean',
         ];
     }
@@ -58,6 +60,26 @@ class User extends Authenticatable
     public function conversations(): HasMany
     {
         return $this->hasMany(Conversation::class)->latest();
+    }
+
+    /**
+     * Shop customers no admin has opened the profile of yet. Scoped the same
+     * way the customers list is — externals come from manual orders and never
+     * appear there, so they must not appear in its badge either.
+     */
+    public function scopeUnviewedByAdmin(Builder $query): void
+    {
+        $query->where('is_admin', false)
+            ->where('external', false)
+            ->whereNull('admin_viewed_at');
+    }
+
+    public function markViewedByAdmin(): void
+    {
+        if ($this->admin_viewed_at === null) {
+            $this->admin_viewed_at = now();
+            $this->save();
+        }
     }
 
     public function wishlistItems(): HasMany

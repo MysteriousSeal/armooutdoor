@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\CompanySetting;
 use App\Models\Conversation;
 use App\Models\Order;
+use App\Models\User;
 use App\Models\WishlistItem;
 use App\Support\Cart;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -85,6 +86,9 @@ class AppServiceProvider extends ServiceProvider
                     : 0,
                 'ordersAwaitingStartCount' => $isAdmin
                     ? Order::query()->awaitingStart()->count()
+                    : 0,
+                'unviewedCustomerCount' => $isAdmin
+                    ? User::query()->unviewedByAdmin()->count()
                     : 0,
             ]);
         });

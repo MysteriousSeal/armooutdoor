@@ -128,6 +128,7 @@ class CustomerController extends Controller
     {
         abort_if($customer->is_admin, 404);
 
+        $customer->markViewedByAdmin();
         $customer->load('addresses');
         $orders = $customer->orders()->whereNull('archived_at')->withCount('items')->get();
         $paidOrders = $orders->whereNotIn('status', ['draft', 'refunded']);

@@ -275,6 +275,13 @@
     padding-bottom: 0.9rem;
 }
 
+/* Leading marker column: only ever holds the "not opened yet" dot. */
+.admin-customers-table th:first-child,
+.admin-customers-table td:first-child {
+    width: 1px;
+    padding-right: 0;
+}
+
 .order-panel .empty-state {
     padding: 1.75rem 0.5rem;
 }
@@ -1949,16 +1956,43 @@ a.admin-stat-card:hover {
     padding-bottom: 0.9rem;
 }
 
-.admin-message-row--unread > td {
+/* A table row that still needs the admin's attention — an unread message,
+   a customer nobody has opened yet. */
+.admin-message-row--unread > td,
+.admin-row--new > td {
     background: color-mix(in srgb, var(--accent) 5%, transparent);
 }
 
-.admin-message-row--unread > td:first-child {
+.admin-message-row--unread > td:first-child,
+.admin-row--new > td:first-child {
     box-shadow: inset 3px 0 0 var(--accent);
 }
 
-.admin-message-row--unread .admin-table-primary {
+.admin-message-row--unread .admin-table-primary,
+.admin-row--new .admin-table-strong {
     font-weight: 700;
+}
+
+.admin-customer-name-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    min-width: 0;
+}
+
+.admin-new-chip {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    padding: 0.1rem 0.4rem;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--accent-hover);
+    background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--accent) 32%, var(--border));
 }
 
 .admin-message-sender {
@@ -2046,7 +2080,8 @@ a.admin-stat-card:hover {
     max-width: 22rem;
 }
 
-.admin-message-dot {
+.admin-message-dot,
+.admin-row-dot {
     display: inline-block;
     width: 0.5rem;
     height: 0.5rem;

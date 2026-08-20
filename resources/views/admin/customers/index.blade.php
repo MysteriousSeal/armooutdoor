@@ -151,6 +151,7 @@
                 <table class="admin-table admin-customers-table">
                     <thead>
                         <tr>
+                            <th></th>
                             <th>Customer</th>
                             <th>Orders</th>
                             <th class="admin-table-num">Spent</th>
@@ -167,14 +168,24 @@
                                     ? \Illuminate\Support\Carbon::parse($customer->last_order_at)
                                     : null;
                             @endphp
-                            <tr>
+                            <tr class="{{ $customer->admin_viewed_at === null ? 'admin-row--new' : '' }}">
+                                <td>
+                                    @if ($customer->admin_viewed_at === null)
+                                        <span class="admin-row-dot" title="Not opened yet" aria-label="Not opened yet"></span>
+                                    @endif
+                                </td>
                                 <td>
                                     <div class="admin-customer-cell">
                                         <span class="admin-customer-avatar" aria-hidden="true">{{ $customer->initials() }}</span>
                                         <span class="admin-customer-identity">
-                                            <a href="{{ route('admin.customers.show', $customer) }}" class="admin-table-strong">
-                                                {{ $displayName }}
-                                            </a>
+                                            <span class="admin-customer-name-row">
+                                                <a href="{{ route('admin.customers.show', $customer) }}" class="admin-table-strong">
+                                                    {{ $displayName }}
+                                                </a>
+                                                @if ($customer->admin_viewed_at === null)
+                                                    <span class="admin-new-chip" title="You haven't opened this profile yet">New</span>
+                                                @endif
+                                            </span>
                                             @if ($customer->name !== '')
                                                 <span class="admin-table-sub">{{ $customer->email }}</span>
                                             @endif
