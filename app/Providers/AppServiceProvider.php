@@ -73,16 +73,17 @@ class AppServiceProvider extends ServiceProvider
             fn ($view) => $view->with('unreadConversationCount', $this->unreadConversationCount()),
         );
 
-        // Nav badge counts. Guarded on auth: layouts.admin also renders for a
-        // signed-out admin, and an unguarded count would query for nobody.
+        // Nav badge counts. Gated on being an admin, not merely signed in:
+        // these are shop-wide operational numbers, and the layout can be
+        // rendered outside the admin middleware (an error page, say).
         View::composer('layouts.admin', function ($view): void {
-            $signedIn = Auth::guard('web')->check();
+            $isAdmin = Auth::guard('web')->check() && Auth::guard('web')->user()->isAdmin();
 
             $view->with([
-                'unreadMessageCount' => $signedIn
+                'unreadMessageCount' => $isAdmin
                     ? Conversation::query()->unreadForAdmin()->count()
                     : 0,
-                'ordersAwaitingStartCount' => $signedIn
+                'ordersAwaitingStartCount' => $isAdmin
                     ? Order::query()->awaitingStart()->count()
                     : 0,
             ]);

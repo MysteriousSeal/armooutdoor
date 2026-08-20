@@ -40,10 +40,17 @@ class ConversationController extends Controller
     {
         $this->authorizeOwnership($request, $conversation);
 
-        // The composer is hidden on a closed thread, but a customer reply
-        // reopens it — that should be a deliberate action, not something a
-        // stale page can trigger by accident.
-        abort_if($conversation->isClosed(), 403);
+        // The composer is hidden on a closed thread, so getting here means a
+        // stale page rather than anything untoward. Send them back to the
+        // thread with an explanation instead of an error page.
+        if ($conversation->isClosed()) {
+            if ($request->wantsJson()) {
+                return response()->json(['message' => __('store.conversation_closed_note')], 409);
+            }
+
+            return redirect(localized_route('account.conversations.show', ['conversation' => $conversation]))
+                ->with('status', __('store.conversation_closed_note'));
+        }
 
         $message = $conversation->postMessage(
             $request->validated('body'),

@@ -153,9 +153,27 @@ class AccountConversationTest extends TestCase
         $conversation->status = Conversation::STATUS_CLOSED;
         $conversation->save();
 
+        // A stale page, not a permissions failure: send them back to the
+        // thread with an explanation rather than an error page.
         $this->actingAs($user)
             ->post('/account/messages/'.$conversation->id.'/reply', ['body' => 'Encore une chose'])
-            ->assertForbidden();
+            ->assertRedirect(route('account.conversations.show', ['conversation' => $conversation]))
+            ->assertSessionHas('status', __('store.conversation_closed_note'));
+
+        $this->assertDatabaseCount('conversation_messages', 1);
+    }
+
+    public function test_a_dynamic_reply_to_a_closed_thread_is_refused_with_a_reason(): void
+    {
+        $user = User::factory()->create();
+        $conversation = $this->conversationFor($user);
+        $conversation->status = Conversation::STATUS_CLOSED;
+        $conversation->save();
+
+        $this->actingAs($user)
+            ->postJson('/account/messages/'.$conversation->id.'/reply', ['body' => 'Encore une chose'])
+            ->assertStatus(409)
+            ->assertJsonPath('message', __('store.conversation_closed_note'));
 
         $this->assertDatabaseCount('conversation_messages', 1);
     }
