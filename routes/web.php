@@ -152,6 +152,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/orders/{order}/prepare', [AdminOrderController::class, 'prepare'])->name('orders.prepare');
         Route::patch('/orders/{order}/ship', [AdminOrderController::class, 'ship'])->name('orders.ship');
         Route::patch('/orders/{order}/refund', [AdminOrderController::class, 'refund'])->middleware('admin.owner')->name('orders.refund');
+        // Before the {order} routes: /orders/bulk/... must not be taken
+        // as an order number by the route-model binding.
+        Route::patch('/orders/bulk/archive', [AdminOrderController::class, 'bulkArchive'])->name('orders.bulk-archive');
+        Route::patch('/orders/bulk/unarchive', [AdminOrderController::class, 'bulkUnarchive'])->name('orders.bulk-unarchive');
         Route::patch('/orders/{order}/archive', [AdminOrderController::class, 'archive'])->name('orders.archive');
         Route::patch('/orders/{order}/unarchive', [AdminOrderController::class, 'unarchive'])->name('orders.unarchive');
         Route::patch('/orders/{order}/tracking', [AdminOrderController::class, 'updateTracking'])->name('orders.tracking.update');

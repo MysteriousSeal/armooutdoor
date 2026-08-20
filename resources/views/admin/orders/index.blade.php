@@ -238,6 +238,9 @@
                 <table class="admin-table admin-orders-table">
                     <thead>
                         <tr>
+                            <th class="admin-select-cell">
+                                <input type="checkbox" id="bulk-select-all" aria-label="Select every order on this page">
+                            </th>
                             <th>Order</th>
                             <th>Customer</th>
                             <th>Shipping</th>
@@ -253,7 +256,15 @@
                     </thead>
                     <tbody>
                         @foreach ($orders as $order)
-                            <tr>
+                            <tr data-bulk-row>
+                                <td class="admin-select-cell">
+                                    <input
+                                        type="checkbox"
+                                        class="bulk-select-row"
+                                        value="{{ $order->id }}"
+                                        aria-label="Select order {{ $order->number }}"
+                                    >
+                                </td>
                                 <td>
                                     <a href="{{ route('admin.orders.show', $order) }}" class="admin-table-strong">
                                         {{ $order->number }}
@@ -415,6 +426,28 @@
             </div>
 
             @include('admin.partials.pager', ['paginator' => $orders])
+
+            {{-- Deliberately holds no table: the row actions are already
+                 <form>s, and nesting them would make the browser silently
+                 drop the inner one. JS copies the ticked ids in on submit. --}}
+            <form
+                method="POST"
+                id="bulk-action-form"
+                action="{{ route($tab === 'archived' ? 'admin.orders.bulk-unarchive' : 'admin.orders.bulk-archive') }}"
+            >
+                @csrf
+                @method('PATCH')
+            </form>
+
+            <div class="bulk-bar" id="bulk-bar" hidden>
+                <span class="bulk-bar-count"><span id="bulk-bar-number">0</span> selected</span>
+                <div class="bulk-bar-actions">
+                    <button type="button" class="btn btn-sm btn-secondary" id="bulk-clear">Clear</button>
+                    <button type="button" class="btn btn-sm btn-primary" id="bulk-apply">
+                        {{ $tab === 'archived' ? 'Unarchive' : 'Archive' }}
+                    </button>
+                </div>
+            </div>
         @endif
 
         <dialog id="archive-confirm-modal" class="modal" aria-labelledby="archive-confirm-title">
@@ -485,4 +518,5 @@
             });
         })();
     </script>
+    <script src="{{ asset('js/admin-bulk-select.js') }}" defer></script>
 @endpush

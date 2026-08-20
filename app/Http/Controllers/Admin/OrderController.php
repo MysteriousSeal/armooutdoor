@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\BulkOrderActionRequest;
 use App\Http\Requests\Admin\StoreManualOrderRequest;
 use App\Http\Requests\Admin\UpdateOrderBillingAddressRequest;
 use App\Http\Requests\Admin\UpdateOrderShippingAddressRequest;
@@ -511,6 +512,52 @@ class OrderController extends Controller
         AdminActivityLog::record('order.unarchived', $order, 'Unarchived order '.$order->number);
 
         return back()->with('status', 'Order unarchived.');
+    }
+
+    public function bulkArchive(BulkOrderActionRequest $request): RedirectResponse
+    {
+        // Already-archived rows are skipped rather than refused: someone else
+        // may have archived one while this page sat open, and that is no
+        // reason to fail the whole batch.
+        $orders = Order::query()
+            ->whereIn('id', $request->validated('order_ids'))
+            ->whereNull('archived_at')
+            ->get();
+
+        foreach ($orders as $order) {
+            $order->archive();
+            AdminActivityLog::record('order.archived', $order, 'Archived order '.$order->number);
+        }
+
+        return back()->with('status', $this->bulkStatus($orders->count(), 'archived'));
+    }
+
+    public function bulkUnarchive(BulkOrderActionRequest $request): RedirectResponse
+    {
+        $orders = Order::query()
+            ->whereIn('id', $request->validated('order_ids'))
+            ->whereNotNull('archived_at')
+            ->get();
+
+        foreach ($orders as $order) {
+            $order->unarchive();
+            AdminActivityLog::record('order.unarchived', $order, 'Unarchived order '.$order->number);
+        }
+
+        return back()->with('status', $this->bulkStatus($orders->count(), 'unarchived'));
+    }
+
+    /**
+     * Counts what actually changed, not what was submitted — otherwise the
+     * message overstates the result whenever a row was skipped.
+     */
+    private function bulkStatus(int $count, string $verb): string
+    {
+        if ($count === 0) {
+            return 'Nothing to '.($verb === 'archived' ? 'archive' : 'unarchive').'.';
+        }
+
+        return $count.' order'.($count === 1 ? '' : 's').' '.$verb.'.';
     }
 
     public function invoice(Order $order): Response
