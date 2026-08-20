@@ -4,7 +4,7 @@
 
 @section('content')
     @php
-        $valueDefault = $discountCode->exists
+        $valueDefault = ($discountCode->exists && $discountCode->value !== null)
             ? ($discountCode->type === 'percentage' ? $discountCode->value : number_format($discountCode->value / 100, 2, '.', ''))
             : '';
         $selectedType = old('type', $discountCode->type ?? 'percentage');
@@ -131,7 +131,7 @@
                                     value="{{ $selectedValue }}"
                                     min="0.01"
                                     step="0.01"
-                                    @unless ($selectedType === 'free_relay_shipping') required @endunless
+                                    @if ($selectedType === 'free_relay_shipping') disabled @else required @endif
                                 >
                                 <span class="discount-value-suffix" id="discount-code-value-suffix">{{ $selectedType === 'fixed' ? '€' : '%' }}</span>
                             </div>
@@ -304,7 +304,11 @@
                 if (valueGroup) {
                     valueGroup.hidden = isFreeRelay;
                 }
+                // Disabled, not just un-required: a hidden field that fails its
+                // own min constraint silently blocks the whole form, because
+                // the browser cannot focus it to report the error.
                 valueInput.required = ! isFreeRelay;
+                valueInput.disabled = isFreeRelay;
 
                 suffix.textContent = isFixed ? '€' : '%';
                 hint.textContent = isFixed

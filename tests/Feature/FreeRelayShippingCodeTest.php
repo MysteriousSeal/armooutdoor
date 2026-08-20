@@ -207,6 +207,81 @@ class FreeRelayShippingCodeTest extends TestCase
         $this->assertSame([], $response->json('freeShippingCarrierIds'));
     }
 
+    public function test_an_existing_code_can_be_saved_from_the_edit_form(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $code = $this->code();
+
+        $this->actingAs($admin)
+            ->put('/admin/discount-codes/'.$code->id, [
+                'code' => 'RELAIS2',
+                'type' => DiscountCode::TYPE_FREE_RELAY_SHIPPING,
+                'value' => '',
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame('RELAIS2', $code->fresh()->code);
+    }
+
+    public function test_a_stale_value_cannot_block_the_save(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $code = $this->code();
+
+        // "0.00" is what the form used to render from a null value, and it
+        // fails min:0.01 — which killed the Save button with no visible error.
+        $this->actingAs($admin)
+            ->put('/admin/discount-codes/'.$code->id, [
+                'code' => 'RELAIS3',
+                'type' => DiscountCode::TYPE_FREE_RELAY_SHIPPING,
+                'value' => '0.00',
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame('RELAIS3', $code->fresh()->code);
+        $this->assertNull($code->fresh()->value);
+    }
+
+    public function test_the_edit_form_leaves_the_value_field_empty_and_disabled(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $code = $this->code();
+
+        $content = $this->actingAs($admin)
+            ->get('/admin/discount-codes/'.$code->id.'/edit')
+            ->assertOk()
+            ->getContent();
+
+        preg_match('/<input[^>]*id="value".*?>/s', $content, $match);
+        $input = $match[0] ?? '';
+
+        $this->assertStringContainsString('value=""', $input);
+        $this->assertStringContainsString('disabled', $input);
+        $this->assertStringNotContainsString('required', $input);
+    }
+
+    public function test_an_amount_code_keeps_its_value_field_usable(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $code = DiscountCode::query()->create([
+            'code' => 'DIX',
+            'type' => DiscountCode::TYPE_PERCENTAGE,
+            'value' => 10,
+        ]);
+
+        $content = $this->actingAs($admin)
+            ->get('/admin/discount-codes/'.$code->id.'/edit')
+            ->assertOk()
+            ->getContent();
+
+        preg_match('/<input[^>]*id="value".*?>/s', $content, $match);
+        $input = $match[0] ?? '';
+
+        $this->assertStringContainsString('value="10"', $input);
+        $this->assertStringContainsString('required', $input);
+        $this->assertStringNotContainsString('disabled', $input);
+    }
+
     public function test_the_edit_form_preview_shows_the_english_badge(): void
     {
         $admin = User::factory()->admin()->create();

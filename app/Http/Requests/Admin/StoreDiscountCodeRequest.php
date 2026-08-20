@@ -40,13 +40,17 @@ class StoreDiscountCodeRequest extends FormRequest
                 DiscountCode::TYPE_FIXED,
                 DiscountCode::TYPE_FREE_RELAY_SHIPPING,
             ])],
-            'value' => [
-                // A free-delivery code has no amount.
-                $this->input('type') === DiscountCode::TYPE_FREE_RELAY_SHIPPING ? 'nullable' : 'required',
-                'numeric',
-                'min:0.01',
-                $this->input('type') === DiscountCode::TYPE_PERCENTAGE ? 'max:100' : 'max:99999.99',
-            ],
+            // A free-delivery code has no amount, so whatever the form posts
+            // is ignored rather than validated — a stale value left in the
+            // hidden field must never be able to block the save.
+            'value' => $this->input('type') === DiscountCode::TYPE_FREE_RELAY_SHIPPING
+                ? ['nullable']
+                : [
+                    'required',
+                    'numeric',
+                    'min:0.01',
+                    $this->input('type') === DiscountCode::TYPE_PERCENTAGE ? 'max:100' : 'max:99999.99',
+                ],
             'user_id' => ['nullable', 'exists:users,id'],
             'quantity' => ['nullable', 'integer', 'min:1'],
             'max_uses_per_customer' => [
