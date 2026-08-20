@@ -4,6 +4,7 @@
 use App\Http\Controllers\Account\AccountController;
 use App\Http\Controllers\Account\AddressController;
 use App\Http\Controllers\Account\ConversationController as AccountConversationController;
+use App\Http\Controllers\Account\DiscountCodeController as AccountDiscountCodeController;
 use App\Http\Controllers\Account\ProfileController;
 // Admin (back office)
 use App\Http\Controllers\Admin\ActivityController as AdminActivityController;
@@ -293,6 +294,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/account/addresses/{address}', [AddressController::class, 'update'])->name('account.addresses.update');
     Route::delete('/account/addresses/{address}', [AddressController::class, 'destroy'])->name('account.addresses.destroy');
     Route::patch('/account/addresses/{address}/default', [AddressController::class, 'makeDefault'])->name('account.addresses.default');
+    Route::get('/account/reductions', [AccountDiscountCodeController::class, 'index'])->name('account.discounts.index');
     Route::get('/account/messages', [AccountConversationController::class, 'index'])->name('account.conversations.index');
     Route::get('/account/messages/{conversation}', [AccountConversationController::class, 'show'])->name('account.conversations.show');
     Route::post('/account/messages/{conversation}/reply', [AccountConversationController::class, 'reply'])

@@ -96,6 +96,47 @@ class DiscountCode extends Model
         };
     }
 
+    /**
+     * The customer-facing counterpart to label(), which is English for the
+     * back office. Same figures, the shop's language.
+     */
+    public function customerLabel(): string
+    {
+        return match ($this->type) {
+            self::TYPE_PERCENTAGE => '-'.$this->value.'%',
+            self::TYPE_FREE_RELAY_SHIPPING => __('store.discount_code_free_relay_label'),
+            default => '-'.format_euros($this->value),
+        };
+    }
+
+    /**
+     * How long the customer has left, in French, or null when there is no
+     * deadline. remainingLabel() is the admin's English version.
+     */
+    public function customerDeadlineLabel(): ?string
+    {
+        if ($this->ends_at === null) {
+            return null;
+        }
+
+        return __('store.discount_code_valid_until', [
+            'date' => $this->ends_at->translatedFormat('j F Y'),
+        ]);
+    }
+
+    /**
+     * Uses this customer still has, or null when unlimited.
+     */
+    public function remainingUsesFor(User $user): ?int
+    {
+        $limits = array_filter([
+            $this->hasMaxUsesPerCustomer() ? $this->max_uses_per_customer - $this->customerUsageCount($user->id) : null,
+            $this->hasLimitedQuantity() ? $this->quantity : null,
+        ], fn (?int $value): bool => $value !== null);
+
+        return $limits === [] ? null : max(0, min($limits));
+    }
+
     public function typeLabel(): string
     {
         return match ($this->type) {

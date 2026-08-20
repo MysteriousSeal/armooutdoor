@@ -84,6 +84,23 @@
                 </span>
             </a>
 
+            <a href="{{ localized_route('account.discounts.index') }}" class="account-hub-card">
+                <span class="account-hub-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="22" height="22">
+                        <path d="M4 9V6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5V9a2.4 2.4 0 0 0 0 6v2.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5V15a2.4 2.4 0 0 0 0-6z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                        <path d="M14 9.5 10 14.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                </span>
+                <span class="account-hub-body">
+                    <span class="home-kicker">05</span>
+                    <h3>{{ __('store.account_discounts') }}</h3>
+                    <p>{{ __('store.account_discounts_lede') }}</p>
+                    <span class="account-hub-meta">
+                        {{ trans_choice('store.discount_count', $discountCount, ['count' => $discountCount]) }}
+                    </span>
+                </span>
+            </a>
+
             <a href="{{ localized_route('account.conversations.index') }}" class="account-hub-card">
                 <span class="account-hub-icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" width="22" height="22">
@@ -91,7 +108,7 @@
                     </svg>
                 </span>
                 <span class="account-hub-body">
-                    <span class="home-kicker">05</span>
+                    <span class="home-kicker">06</span>
                     <h3>{{ __('store.account_conversations') }}</h3>
                     <p>{{ __('store.account_conversations_lede') }}</p>
                     <span class="account-hub-meta">

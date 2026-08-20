@@ -14,6 +14,9 @@
     <a href="{{ localized_route('orders.index') }}" class="{{ request()->routeIs('orders.*') ? 'is-active' : '' }}">
         {{ __('store.account_orders') }}
     </a>
+    <a href="{{ localized_route('account.discounts.index') }}" class="{{ request()->routeIs('account.discounts.*') ? 'is-active' : '' }}">
+        {{ __('store.account_discounts') }}
+    </a>
     <a href="{{ localized_route('account.conversations.index') }}" class="{{ request()->routeIs('account.conversations.*') ? 'is-active' : '' }}">
         {{ __('store.account_conversations') }}
         @if ($unreadConversationCount > 0)

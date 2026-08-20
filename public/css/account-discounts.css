@@ -1,0 +1,123 @@
+/*
+ * Vouchers on the customer's account. Square-cornered like everything else;
+ * the ticket feel comes from the split panel and the perforation, not from
+ * rounding.
+ */
+
+.voucher-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.voucher {
+    display: flex;
+    align-items: stretch;
+    gap: 1.25rem;
+    padding: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    transition: border-color 0.15s, box-shadow 0.2s ease;
+}
+
+.voucher:hover {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-hover);
+}
+
+/* The stub: tinted, with a dashed edge standing in for the perforation. */
+.voucher-value {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    min-width: 9rem;
+    padding: 1.35rem 1.15rem;
+    background: color-mix(in srgb, var(--accent) 9%, var(--surface));
+    border-right: 1px dashed color-mix(in srgb, var(--accent) 40%, var(--border));
+}
+
+.voucher-amount {
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    text-align: center;
+    color: var(--accent-hover);
+    overflow-wrap: anywhere;
+}
+
+.voucher-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.2rem;
+    flex: 1;
+    min-width: 0;
+    padding: 1.1rem 0;
+}
+
+.voucher-code {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0;
+    min-width: 0;
+}
+
+.voucher-code-text {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    overflow-wrap: anywhere;
+}
+
+.voucher-meta {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+
+/*
+ * Scoped to .voucher on purpose: base.css resets `button.btn { margin: 0 }`,
+ * which outweighs a lone class and would flatten the gap to the card edge.
+ */
+.voucher .voucher-cta {
+    align-self: center;
+    flex-shrink: 0;
+    margin-right: 1.25rem;
+}
+
+.voucher-cta svg {
+    flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+    .voucher {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    /* Perforation runs across the ticket once it stacks. */
+    .voucher-value {
+        min-width: 0;
+        padding: 0.9rem 1.15rem;
+        border-right: 0;
+        border-bottom: 1px dashed color-mix(in srgb, var(--accent) 40%, var(--border));
+    }
+
+    .voucher-body {
+        padding: 1rem 1.15rem 0.6rem;
+    }
+
+    .voucher .voucher-cta {
+        align-self: stretch;
+        margin: 0 1.15rem 1.15rem;
+        text-align: center;
+    }
+}
