@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-20 — v0.6.2 — build NFYJQY
+
+### Orders
+
+- Marking an order as being prepared, shipped or refunded no longer reloads the page. The badge, the action buttons, the invoice and delivery-slip links, the status history and the confirmation dialogs all update in place, and a toast confirms the change.
+- Anything unexpected falls back to the ordinary page submit, so a refusal — a staff member attempting a refund, say — is still shown in full. Without JavaScript the page behaves exactly as before.
+
+**Known:** the count on the Orders nav item still reflects the old status until the next page load.
+
 ## 2026-08-20 — v0.6.1 — build Y0S29P
 
 ### Storefront
