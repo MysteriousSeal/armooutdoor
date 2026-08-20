@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 /**
@@ -168,13 +169,66 @@ class AccountDiscountsTest extends TestCase
     public function test_a_deadline_is_shown_in_french(): void
     {
         $user = User::factory()->create();
-        $endsAt = Carbon::parse('2026-12-24 12:00');
+        $endsAt = Carbon::parse('2026-12-24 23:59');
         $this->code(['user_id' => $user->id, 'ends_at' => $endsAt]);
 
+        // Ends with the day, so the date alone says everything.
         $this->actingAs($user)
             ->get('/account/reductions')
             ->assertOk()
-            ->assertSee(__('store.discount_code_valid_until', ['date' => $endsAt->translatedFormat('j F Y')]));
+            ->assertSee(__('store.discount_code_valid_until', ['date' => $endsAt->translatedFormat('j F Y')]))
+            ->assertDontSee('23:59');
+    }
+
+    public function test_a_deadline_in_the_middle_of_the_day_shows_the_time(): void
+    {
+        $user = User::factory()->create();
+        $endsAt = Carbon::parse('2026-12-24 09:00');
+        $this->code(['user_id' => $user->id, 'ends_at' => $endsAt]);
+
+        // Without the time the customer reads this as valid all day, then
+        // meets a refusal at 09:01 with nothing to explain it.
+        $this->actingAs($user)
+            ->get('/account/reductions')
+            ->assertOk()
+            ->assertSee(__('store.discount_code_valid_until_time', [
+                'date' => $endsAt->translatedFormat('j F Y'),
+                'time' => '09:00',
+            ]));
+    }
+
+    public function test_codes_are_ordered_by_how_soon_they_lapse(): void
+    {
+        $user = User::factory()->create();
+
+        // Created newest-first in the opposite order to their deadlines, so
+        // creation order cannot accidentally produce the right answer.
+        $undated = $this->code(['user_id' => $user->id, 'ends_at' => null]);
+        $soon = $this->code(['user_id' => $user->id, 'ends_at' => now()->addDay()]);
+        $later = $this->code(['user_id' => $user->id, 'ends_at' => now()->addYears(3)]);
+
+        $this->assertSame(
+            [$soon->code, $later->code, $undated->code],
+            $this->actingAs($user)->get('/account/reductions')->viewData('codes')->pluck('code')->all(),
+        );
+    }
+
+    public function test_listing_the_codes_does_not_cost_a_query_per_code(): void
+    {
+        $user = User::factory()->create();
+
+        for ($i = 0; $i < 12; $i++) {
+            $this->code(['user_id' => $user->id, 'max_uses_per_customer' => 3, 'quantity' => 5]);
+        }
+
+        DB::enableQueryLog();
+        $this->actingAs($user)->get('/account/reductions')->assertOk();
+        $queries = count(DB::getQueryLog());
+        DB::disableQueryLog();
+
+        // Eligibility and the remaining-uses line each want this customer's
+        // usage; counting it per code once cost 3 queries apiece.
+        $this->assertLessThan(12, $queries);
     }
 
     public function test_a_code_without_a_deadline_says_so(): void

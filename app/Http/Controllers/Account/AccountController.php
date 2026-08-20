@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Account;
 
 use App\Http\Controllers\Controller;
-use App\Models\DiscountCode;
 use Illuminate\View\View;
 
 class AccountController extends Controller
@@ -18,10 +17,8 @@ class AccountController extends Controller
             'wishlistCount' => $user->wishlistItems()->count(),
             'orderCount' => $user->orders()->whereNull('archived_at')->count(),
             'conversationCount' => $user->conversations()->count(),
-            // Same rule as the discounts page: only what they can use now.
-            'discountCount' => $user->discountCodes()->get()
-                ->filter(fn (DiscountCode $code): bool => $code->eligibilityError($user) === null)
-                ->count(),
+            // Same rule as the discounts page, from the same method.
+            'discountCount' => $user->usableDiscountCodes()->count(),
         ]);
     }
 }

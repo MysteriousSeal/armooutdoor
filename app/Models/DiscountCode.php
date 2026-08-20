@@ -29,6 +29,13 @@ class DiscountCode extends Model
      */
     public const TYPE_FREE_RELAY_SHIPPING = 'free_relay_shipping';
 
+    /**
+     * Per-customer order counts already resolved for this instance.
+     *
+     * @var array<int, int>
+     */
+    protected array $customerUsageCounts = [];
+
     protected function casts(): array
     {
         return [
@@ -119,8 +126,13 @@ class DiscountCode extends Model
             return null;
         }
 
-        return __('store.discount_code_valid_until', [
+        // A cutoff in the middle of the day would otherwise read as "all day",
+        // and the customer would meet a refusal they had no way to expect.
+        $runsToEndOfDay = $this->ends_at->format('H:i') === '23:59';
+
+        return __($runsToEndOfDay ? 'store.discount_code_valid_until' : 'store.discount_code_valid_until_time', [
             'date' => $this->ends_at->translatedFormat('j F Y'),
+            'time' => $this->ends_at->format('H:i'),
         ]);
     }
 
@@ -229,7 +241,19 @@ class DiscountCode extends Model
 
     public function customerUsageCount(int $userId): int
     {
-        return $this->orders()->where('user_id', $userId)->count();
+        // Rendering one voucher asks for this up to three times — twice while
+        // deciding eligibility, once more for the remaining-uses line — so the
+        // answer is kept on the instance instead of being re-queried.
+        return $this->customerUsageCounts[$userId] ??= $this->orders()->where('user_id', $userId)->count();
+    }
+
+    /**
+     * Seed the count from a query that already aggregated it, so listing a
+     * customer's codes costs one query rather than one per code.
+     */
+    public function rememberCustomerUsage(int $userId, int $count): void
+    {
+        $this->customerUsageCounts[$userId] = $count;
     }
 
     /**

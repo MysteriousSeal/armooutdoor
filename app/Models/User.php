@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -55,6 +56,35 @@ class User extends Authenticatable
     public function discountCodes(): HasMany
     {
         return $this->hasMany(DiscountCode::class)->latest();
+    }
+
+    /**
+     * The codes reserved for this customer that they can redeem right now.
+     *
+     * Usability is decided by DiscountCode::eligibilityError(), the same
+     * method checkout uses, so the account can never advertise a code the
+     * checkout would then refuse for a reason it already knows about. The one
+     * exception is a free-relay code on a cart where relay delivery is already
+     * free: that depends on the cart, so it can only be judged at checkout.
+     *
+     * Ordered by how soon they lapse, since a code expiring tomorrow matters
+     * more than one created yesterday.
+     *
+     * @return Collection<int, DiscountCode>
+     */
+    public function usableDiscountCodes(): Collection
+    {
+        return $this->discountCodes()
+            ->withCount([
+                'orders as customer_usage_count' => fn (Builder $query) => $query->where('user_id', $this->id),
+            ])
+            ->reorder()
+            ->orderByRaw('ends_at IS NULL, ends_at')
+            ->orderByDesc('created_at')
+            ->get()
+            ->each(fn (DiscountCode $code) => $code->rememberCustomerUsage($this->id, (int) $code->customer_usage_count))
+            ->filter(fn (DiscountCode $code): bool => $code->eligibilityError($this) === null)
+            ->values();
     }
 
     public function conversations(): HasMany
