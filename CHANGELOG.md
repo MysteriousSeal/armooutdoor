@@ -2,6 +2,21 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-21 — v0.8.2 — build RT4R3N
+
+### Storefront
+
+- **The product reference is now on the product page.** Every product carried a SKU that no customer could read. It sits under the title as a quiet "Réf." line — small muted label, monospace value, selectable in one click so it can be pasted into an email or an order without retyping. It follows the selected variant, the way the price and the lead time already do, since that is the reference actually going in the cart. A product without a reference shows no line rather than an empty label.
+
+**Fixed:** every multi-paragraph product had a broken meta description. Plain-text extraction ran the end of one paragraph straight into the start of the next — "…et chargeur.Le DLV36 reprend…" — because tags were stripped without leaving a space behind. Block boundaries now become spaces; inline tags still close up, so a bold word gains nothing.
+
+### Catalog
+
+- Seven airsoft replicas added: the Classic Army Nemesis LS-12, the ASG DLV36 pack, the Walther PPQ and Ruger P345 pistols, the ASG Urban Sniper and the Black Ops Kar 98K, each with full characteristics, supplier reference and package weight. Placeholder images stand in until the real ones arrive.
+- The airsoft section was reorganised into **Répliques de poing**, **Répliques longues** and **Répliques sniper**. The Browning 1911 had been filed under Revolvers.
+- Characteristics across the airsoft range now follow one schema and one order, so two fiches can be read side by side. Manufacturer references and EAN codes were dropped from the public specs.
+- Six target listings rewritten against their own photographs. Several were wrong: one described colours it does not have, one was sold as reactive when it is a plain scoring target, and one had "test" as its entire description — which was also its Google snippet. Specifications that had been dumped into the description as paragraphs are now proper characteristics, with filters and package weights.
+
 ## 2026-08-21 — v0.8.1 — build TKBHYX
 
 ### Storefront
