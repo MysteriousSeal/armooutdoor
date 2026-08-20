@@ -48,13 +48,20 @@ class OrderController extends Controller
 
         $this->backfillMissingPaymentFees($orders->getCollection());
 
-        // excludingTest() on every figure below: an order kept only as a
-        // record of testing must not move any of them.
-        $nonArchivedOrders = Order::query()->whereNull('archived_at')->excludingTest()->where('status', '!=', 'draft');
-        $amountCents = (clone $nonArchivedOrders)->sum('total_cents');
-        $shippingCostCents = (clone $nonArchivedOrders)->sum('shipping_paid_cents');
-        $commissionCostCents = (clone $nonArchivedOrders)->sum('marketplace_commission_cents');
-        $paymentFeeCents = (clone $nonArchivedOrders)->sum('payment_fee_cents');
+        // Money and the order count behind it cover archived orders too: the
+        // sale happened, and hiding a row from the working list is no reason
+        // to unmake it. Test orders are the only ones left out, since those
+        // sales never happened at all.
+        $salesOrders = Order::query()->excludingTest()->where('status', '!=', 'draft');
+
+        // The operational counts stay on the working list, where archiving is
+        // exactly the way to say "done with this one".
+        $openOrders = Order::query()->whereNull('archived_at')->excludingTest()->where('status', '!=', 'draft');
+
+        $amountCents = (clone $salesOrders)->sum('total_cents');
+        $shippingCostCents = (clone $salesOrders)->sum('shipping_paid_cents');
+        $commissionCostCents = (clone $salesOrders)->sum('marketplace_commission_cents');
+        $paymentFeeCents = (clone $salesOrders)->sum('payment_fee_cents');
         $totalCostsCents = $shippingCostCents + $commissionCostCents + $paymentFeeCents;
 
         $percentOf = fn (int $part, int $whole): ?float => $whole > 0 ? round($part / $whole * 100, 2) : null;
@@ -63,7 +70,7 @@ class OrderController extends Controller
             'orders' => $orders,
             'tab' => $filters['tab'],
             'kpis' => [
-                'order_count' => (clone $nonArchivedOrders)->count(),
+                'order_count' => (clone $salesOrders)->count(),
                 'amount_cents' => $amountCents,
                 'shipping_cost_cents' => $shippingCostCents,
                 'shipping_cost_pct_amount' => $percentOf($shippingCostCents, $amountCents),
@@ -78,8 +85,8 @@ class OrderController extends Controller
                 'total_costs_pct_amount' => $percentOf($totalCostsCents, $amountCents),
                 'perceived_total_cents' => $amountCents - $totalCostsCents,
                 'perceived_total_pct_amount' => $percentOf($amountCents - $totalCostsCents, $amountCents),
-                'to_prepare_count' => (clone $nonArchivedOrders)->whereIn('status', ['placed', 'preparing'])->count(),
-                'missing_tracking_count' => (clone $nonArchivedOrders)
+                'to_prepare_count' => (clone $openOrders)->whereIn('status', ['placed', 'preparing'])->count(),
+                'missing_tracking_count' => (clone $openOrders)
                     ->where('status', 'shipped')
                     ->where(function ($query): void {
                         $query->whereNull('tracking_number')->orWhere('tracking_number', '');
@@ -87,8 +94,8 @@ class OrderController extends Controller
                     ->count(),
             ],
             'orderCount' => Order::query()->whereNull('archived_at')->excludingTest()->where('status', '!=', 'draft')->count(),
-            'draftCount' => Order::query()->whereNull('archived_at')->excludingTest()->where('status', 'draft')->count(),
-            'archivedCount' => Order::query()->whereNotNull('archived_at')->excludingTest()->count(),
+            'draftCount' => Order::query()->excludingTest()->where('status', 'draft')->count(),
+            'archivedCount' => Order::query()->whereNotNull('archived_at')->excludingTest()->where('status', '!=', 'draft')->count(),
             'testCount' => Order::query()->onlyTest()->count(),
             'search' => $filters['search'],
             'status' => $filters['status'],
@@ -176,15 +183,19 @@ class OrderController extends Controller
      */
     private function filteredOrdersQuery(array $filters): Builder
     {
+        // Drafts and orders are separated the same way in every tab, so the
+        // tab counts and the KPI above them describe the same set. Archived
+        // once swept up archived drafts too, which is why 4 + 62 never added
+        // up to the 64 orders the KPI reported.
+        //
         // The test tab holds every test order, archived or not, and the other
         // three hold none. So a test order is never in two tabs at once.
         return Order::query()
             ->when($filters['tab'] === 'test', fn ($query) => $query->onlyTest())
             ->when($filters['tab'] !== 'test', fn ($query) => $query->excludingTest())
-            ->when($filters['tab'] === 'archived', fn ($query) => $query->whereNotNull('archived_at'))
-            ->when(! in_array($filters['tab'], ['archived', 'test'], true), fn ($query) => $query->whereNull('archived_at'))
+            ->when($filters['tab'] === 'orders', fn ($query) => $query->whereNull('archived_at')->where('status', '!=', 'draft'))
             ->when($filters['tab'] === 'draft', fn ($query) => $query->where('status', 'draft'))
-            ->when($filters['tab'] === 'orders', fn ($query) => $query->where('status', '!=', 'draft'))
+            ->when($filters['tab'] === 'archived', fn ($query) => $query->whereNotNull('archived_at')->where('status', '!=', 'draft'))
             ->when($filters['status'] !== '', fn ($query) => $query->where('status', $filters['status']))
             ->when($filters['marketplace_id'] !== null, fn ($query) => $query->where('marketplace_id', $filters['marketplace_id']))
             ->when($filters['date_from'] !== '', fn ($query) => $query->whereDate('created_at', '>=', $filters['date_from']))
@@ -535,6 +546,8 @@ class OrderController extends Controller
 
     public function archive(Order $order): RedirectResponse
     {
+        abort_unless($order->canBeArchived(), 403);
+
         $order->archive();
         AdminActivityLog::record('order.archived', $order, 'Archived order '.$order->number);
 
@@ -543,10 +556,42 @@ class OrderController extends Controller
 
     public function unarchive(Order $order): RedirectResponse
     {
+        abort_unless($order->canBeArchived(), 403);
+
         $order->unarchive();
         AdminActivityLog::record('order.unarchived', $order, 'Unarchived order '.$order->number);
 
         return back()->with('status', 'Order unarchived.');
+    }
+
+    public function destroy(Order $order): RedirectResponse
+    {
+        // Only drafts. Anything further along is a record of something that
+        // happened, and those are archived rather than destroyed.
+        abort_unless($order->canBeDeleted(), 403);
+
+        // Logged before the delete, so the entry still carries the number.
+        AdminActivityLog::record('order.deleted', $order, 'Deleted draft order '.$order->number);
+        $order->delete();
+
+        return redirect()
+            ->route('admin.orders.index', ['tab' => 'draft'])
+            ->with('status', 'Draft deleted.');
+    }
+
+    public function bulkDestroy(BulkOrderActionRequest $request): RedirectResponse
+    {
+        $orders = Order::query()
+            ->whereIn('id', $request->validated('order_ids'))
+            ->where('status', 'draft')
+            ->get();
+
+        foreach ($orders as $order) {
+            AdminActivityLog::record('order.deleted', $order, 'Deleted draft order '.$order->number);
+            $order->delete();
+        }
+
+        return back()->with('status', $this->bulkStatus($orders->count(), 'deleted', 'delete'));
     }
 
     public function markTest(Order $order): RedirectResponse
@@ -603,6 +648,7 @@ class OrderController extends Controller
         $orders = Order::query()
             ->whereIn('id', $request->validated('order_ids'))
             ->whereNull('archived_at')
+            ->where('status', '!=', 'draft')
             ->get();
 
         foreach ($orders as $order) {
@@ -618,6 +664,7 @@ class OrderController extends Controller
         $orders = Order::query()
             ->whereIn('id', $request->validated('order_ids'))
             ->whereNotNull('archived_at')
+            ->where('status', '!=', 'draft')
             ->get();
 
         foreach ($orders as $order) {

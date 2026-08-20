@@ -105,8 +105,10 @@
             });
 
             // Set here rather than on the form, since a cancelled confirmation
-            // must not leave the previous button's endpoint behind.
+            // must not leave the previous button's endpoint or method behind.
             form.action = applyBtn.getAttribute('data-bulk-action');
+            form.querySelector('[name="_method"]').value = applyBtn.getAttribute('data-bulk-method') || 'PATCH';
+            modalSubmit.classList.toggle('btn-danger', applyBtn.getAttribute('data-bulk-method') === 'DELETE');
 
             modalBody.textContent = 'Are you sure you want to '
                 + applyBtn.getAttribute('data-bulk-verb') + ' ' + chosen.length + ' ' + noun + '?';

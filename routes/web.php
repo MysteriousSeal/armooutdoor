@@ -165,6 +165,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/orders/bulk/untest', [AdminOrderController::class, 'bulkUnmarkTest'])->middleware('admin.owner')->name('orders.bulk-untest');
         Route::patch('/orders/{order}/test', [AdminOrderController::class, 'markTest'])->middleware('admin.owner')->name('orders.test');
         Route::patch('/orders/{order}/untest', [AdminOrderController::class, 'unmarkTest'])->middleware('admin.owner')->name('orders.untest');
+        // Drafts are deleted rather than archived, and deleting cannot be
+        // taken back, so it sits with the other owner-only actions.
+        Route::delete('/orders/bulk/delete', [AdminOrderController::class, 'bulkDestroy'])->middleware('admin.owner')->name('orders.bulk-destroy');
+        Route::delete('/orders/{order}', [AdminOrderController::class, 'destroy'])->middleware('admin.owner')->name('orders.destroy');
         Route::patch('/orders/{order}/tracking', [AdminOrderController::class, 'updateTracking'])->name('orders.tracking.update');
         Route::patch('/orders/{order}/marketplace-commission', [AdminOrderController::class, 'updateMarketplaceCommission'])->name('orders.marketplace-commission.update');
         Route::patch('/orders/{order}/shipping-paid', [AdminOrderController::class, 'updateShippingPaid'])->name('orders.shipping-paid.update');

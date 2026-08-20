@@ -129,14 +129,21 @@ class AdminBulkArchiveTest extends TestCase
             ->assertSessionHas('status', 'Nothing to archive.');
     }
 
-    public function test_drafts_can_be_archived_like_any_other_order(): void
+    public function test_drafts_are_passed_over_by_bulk_archiving(): void
     {
         $admin = User::factory()->admin()->create();
         $draft = $this->order('draft');
+        $real = $this->order();
 
-        $this->actingAs($admin)->patch(route('admin.orders.bulk-archive'), ['order_ids' => [$draft->id]]);
+        // A draft records nothing that happened, so there is nothing to file
+        // away. Drafts are deleted instead, and a batch containing one still
+        // archives the rest.
+        $this->actingAs($admin)
+            ->patch(route('admin.orders.bulk-archive'), ['order_ids' => [$draft->id, $real->id]])
+            ->assertSessionHas('status', '1 order archived.');
 
-        $this->assertNotNull($draft->fresh()->archived_at);
+        $this->assertNull($draft->fresh()->archived_at);
+        $this->assertNotNull($real->fresh()->archived_at);
     }
 
     public function test_an_empty_selection_is_refused(): void

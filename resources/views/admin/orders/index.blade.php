@@ -417,6 +417,24 @@
                                             </button>
                                             @endif
 
+                                            @if ($order->canBeDeleted())
+                                                @if (auth()->user()->isOwner())
+                                                    <button
+                                                        type="button"
+                                                        class="admin-actions-item is-danger"
+                                                        data-confirm-toggle
+                                                        data-action="{{ route('admin.orders.destroy', $order) }}"
+                                                        data-method="DELETE"
+                                                        data-body="Draft {{ $order->number }} will be deleted for good, along with its lines. This cannot be undone."
+                                                        data-label="Delete draft"
+                                                    >
+                                                        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                                                            <path d="M5 7h14M10 7V5h4v2m-7 0 .8 12a2 2 0 0 0 2 1.9h4.4a2 2 0 0 0 2-1.9L17 7" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                                        </svg>
+                                                        Delete draft
+                                                    </button>
+                                                @endif
+                                            @else
                                             <button
                                                 type="button"
                                                 class="admin-actions-item"
@@ -441,6 +459,7 @@
                                                     Archive order
                                                 @endif
                                             </button>
+                                            @endif
                                         </div>
                                     </div>
                                 </td>
@@ -456,7 +475,19 @@
                 <span class="bulk-bar-count"><span id="bulk-bar-number">0</span> selected</span>
                 <div class="bulk-bar-actions">
                     <button type="button" class="btn btn-sm btn-secondary" id="bulk-clear">Clear</button>
-                    @if ($tab === 'test' && auth()->user()->isOwner())
+                    @if ($tab === 'draft')
+                        @if (auth()->user()->isOwner())
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-danger"
+                                data-bulk-apply
+                                data-bulk-action="{{ route('admin.orders.bulk-destroy') }}"
+                                data-bulk-method="DELETE"
+                                data-bulk-verb="permanently delete"
+                                data-bulk-label="Delete"
+                            >Delete</button>
+                        @endif
+                    @elseif ($tab === 'test' && auth()->user()->isOwner())
                         <button
                             type="button"
                             class="btn btn-sm btn-primary"
@@ -565,8 +596,11 @@
             document.querySelectorAll('[data-confirm-toggle]').forEach(function (btn) {
                 btn.addEventListener('click', function () {
                     form.action = btn.getAttribute('data-action');
+                    // Archiving patches, deleting deletes.
+                    form.querySelector('[name="_method"]').value = btn.getAttribute('data-method') || 'PATCH';
                     body.textContent = btn.getAttribute('data-body');
                     submitBtn.textContent = btn.getAttribute('data-label');
+                    submitBtn.classList.toggle('btn-danger', btn.getAttribute('data-method') === 'DELETE');
 
                     modal.showModal();
                 });

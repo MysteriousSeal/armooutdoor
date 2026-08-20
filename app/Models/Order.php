@@ -348,6 +348,20 @@ class Order extends Model
         $query->whereNotNull('test_marked_at');
     }
 
+    /**
+     * A draft is not a record of anything that happened, so there is nothing
+     * to file away. Drafts are deleted instead.
+     */
+    public function canBeArchived(): bool
+    {
+        return ! $this->isDraft();
+    }
+
+    public function canBeDeleted(): bool
+    {
+        return $this->isDraft();
+    }
+
     public function isArchived(): bool
     {
         return $this->archived_at !== null;

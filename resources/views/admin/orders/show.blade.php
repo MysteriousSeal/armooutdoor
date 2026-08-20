@@ -40,7 +40,11 @@
                             <button type="button" class="btn btn-secondary" data-modal-open="refund-confirm-modal">Mark as refunded</button>
                         @endif
                     @endif
-                    @if ($order->isArchived())
+                    @if ($order->canBeDeleted())
+                        @if (auth()->user()->isOwner())
+                            <button type="button" class="btn btn-danger" data-modal-open="delete-confirm-modal">Delete draft</button>
+                        @endif
+                    @elseif ($order->isArchived())
                         <button type="button" class="btn btn-secondary" data-modal-open="unarchive-confirm-modal">Unarchive</button>
                     @else
                         <button type="button" class="btn btn-secondary" data-modal-open="archive-confirm-modal">Archive</button>
@@ -559,6 +563,26 @@
                 </form>
             </dialog>
         @endif
+        @endif
+
+        @if ($order->canBeDeleted() && auth()->user()->isOwner())
+            <dialog id="delete-confirm-modal" class="modal" aria-labelledby="delete-confirm-title">
+                <form method="POST" action="{{ route('admin.orders.destroy', $order) }}">
+                    @csrf
+                    @method('DELETE')
+                    <p class="modal-kicker">{{ $order->number }}</p>
+                    <h3 class="modal-title" id="delete-confirm-title">Delete this draft?</h3>
+                    <p class="modal-body">
+                        The draft and its lines go for good. Nothing here was ever charged
+                        or shipped, so there is no record to keep — but this cannot be
+                        undone.
+                    </p>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                        <button type="submit" class="btn btn-danger">Delete draft</button>
+                    </div>
+                </form>
+            </dialog>
         @endif
 
         @if ($order->isArchived())

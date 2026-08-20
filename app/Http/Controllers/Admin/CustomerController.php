@@ -83,12 +83,12 @@ class CustomerController extends Controller
         // date, the with/without-orders tabs and the CSV export at once —
         // without it the list credits a customer with orders their own
         // profile page says they never placed.
-        return fn ($query) => $query->whereNull('archived_at')->excludingTest()->where('status', '!=', 'draft');
+        return fn ($query) => $query->excludingTest()->where('status', '!=', 'draft');
     }
 
     private function spentOrdersScope(): \Closure
     {
-        return fn ($query) => $query->whereNull('archived_at')->excludingTest()->whereNotIn('status', ['draft', 'refunded']);
+        return fn ($query) => $query->excludingTest()->whereNotIn('status', ['draft', 'refunded']);
     }
 
     /**
@@ -134,9 +134,10 @@ class CustomerController extends Controller
 
         $customer->markViewedByAdmin();
         $customer->load('addresses');
-        $orders = $customer->orders()->whereNull('archived_at')->withCount('items')->get();
-        // Test orders stay in the list above — this profile is a record of
-        // what the customer did — but never in what they spent.
+        // Archived orders are listed and counted here, so the rows and the
+        // total describe the same set. Test orders are listed but not counted,
+        // which is why the page says so next to the figure.
+        $orders = $customer->orders()->withCount('items')->get();
         $paidOrders = $orders->whereNotIn('status', ['draft', 'refunded'])->where('test_marked_at', null);
         $spentCents = (int) $paidOrders->sum('total_cents');
 

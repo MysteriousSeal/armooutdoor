@@ -17,15 +17,16 @@ class DashboardController extends Controller
         $last7Start = $now->copy()->subDays(6)->startOfDay();
         $last30Start = $now->copy()->subDays(29)->startOfDay();
 
-        // excludingTest() on every figure here: an order kept only as a record
-        // of testing must not move revenue, counts or the charts.
-        $nonRefunded = fn () => Order::query()->whereNull('archived_at')->excludingTest()->whereNotIn('status', ['refunded', 'draft']);
+        // Sales figures span archived orders as well: archiving tidies the
+        // working list, it does not undo the sale. Test orders are the only
+        // ones excluded, because those sales never happened.
+        $nonRefunded = fn () => Order::query()->excludingTest()->whereNotIn('status', ['refunded', 'draft']);
 
-        $orderCount = Order::query()->whereNull('archived_at')->excludingTest()->where('status', '!=', 'draft')->count();
+        $orderCount = Order::query()->excludingTest()->where('status', '!=', 'draft')->count();
         $draftCount = Order::query()->whereNull('archived_at')->excludingTest()->where('status', 'draft')->count();
         $nonRefundedCount = $nonRefunded()->count();
         $netRevenueCents = (int) $nonRefunded()->sum('total_cents');
-        $refundedCents = (int) Order::query()->whereNull('archived_at')->excludingTest()->where('status', 'refunded')->sum('total_cents');
+        $refundedCents = (int) Order::query()->excludingTest()->where('status', 'refunded')->sum('total_cents');
         $averageOrderCents = $nonRefundedCount > 0 ? (int) round($netRevenueCents / $nonRefundedCount) : 0;
 
         $statusCounts = Order::query()
@@ -36,7 +37,6 @@ class DashboardController extends Controller
             ->pluck('count', 'status');
 
         $dailyRows = Order::query()
-            ->whereNull('archived_at')
             ->excludingTest()
             ->where('created_at', '>=', $last7Start)
             ->where('status', '!=', 'draft')
@@ -45,7 +45,6 @@ class DashboardController extends Controller
             ->pluck('revenue_cents', 'day')
             ->all();
         $dailyOrderRows = Order::query()
-            ->whereNull('archived_at')
             ->excludingTest()
             ->where('created_at', '>=', $last7Start)
             ->where('status', '!=', 'draft')
@@ -73,7 +72,6 @@ class DashboardController extends Controller
 
         $topProducts = OrderItem::query()
             ->join('orders', 'orders.id', '=', 'order_items.order_id')
-            ->whereNull('orders.archived_at')
             ->whereNull('orders.test_marked_at')
             ->whereNotIn('orders.status', ['refunded', 'draft'])
             ->select('order_items.*')

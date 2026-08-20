@@ -76,6 +76,9 @@
                                             @endif
                                         </span>
                                     </div>
+                                    @if ($order->isArchived())
+                                        <span class="badge badge-disabled" title="Archived, and still counted in the total spent">Archived</span>
+                                    @endif
                                     @if ($order->isTest())
                                         <span class="badge badge-test" title="Left out of the total spent">Test</span>
                                     @endif

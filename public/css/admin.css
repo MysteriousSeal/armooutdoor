@@ -1256,6 +1256,40 @@
 }
 
 /* A footnote to the chip before it, not a figure of its own. */
+/*
+ * Deleting a draft is the one action here that cannot be taken back, so it
+ * does not look like the rest. Red only on the control that destroys, never
+ * on the row it belongs to.
+ */
+.btn-danger {
+    color: #fff;
+    background: #a44;
+    border-color: #a44;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: #8e3a3a;
+    border-color: #8e3a3a;
+}
+
+.admin-actions-item.is-danger {
+    color: #a44;
+}
+
+.admin-actions-item.is-danger:hover {
+    color: #fff;
+    background: #a44;
+}
+
+[data-theme='dark'] .admin-actions-item.is-danger {
+    color: #e08585;
+}
+
+[data-theme='dark'] .admin-actions-item.is-danger:hover {
+    color: #fff;
+    background: #a44;
+}
+
 .admin-list-chip--muted {
     color: var(--text-muted);
     background: transparent;
