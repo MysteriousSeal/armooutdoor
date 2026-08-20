@@ -34,13 +34,17 @@
                                     @endunless
                                 </td>
                                 <td>
-                                    <span class="admin-table-primary">{{ $message->name }}</span>
+                                    @if ($message->user)
+                                        <a href="{{ route('admin.customers.show', $message->user) }}" class="admin-table-link">{{ $message->name }}</a>
+                                    @else
+                                        <span class="admin-table-primary">{{ $message->name }}</span>
+                                    @endif
                                     <span class="admin-table-sub">{{ $message->email }}</span>
                                 </td>
                                 <td>{{ $message->subject }}</td>
                                 <td>
                                     @if ($message->order)
-                                        <a href="{{ route('admin.orders.show', $message->order) }}">{{ $message->order->number }}</a>
+                                        <a href="{{ route('admin.orders.show', $message->order) }}" class="admin-table-link">{{ $message->order->number }}</a>
                                     @else
                                         —
                                     @endif

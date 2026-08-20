@@ -258,6 +258,33 @@ class ContactTest extends TestCase
             ->assertSee($order->number);
     }
 
+    public function test_admin_message_list_links_the_known_customer_and_order(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $customer = User::factory()->create();
+        $order = $this->orderFor($customer);
+        ContactMessage::query()->create([
+            'user_id' => $customer->id,
+            'order_id' => $order->id,
+            'name' => $customer->name,
+            'email' => $customer->email,
+            'subject' => 'Question',
+            'message' => 'Test',
+        ]);
+
+        $response = $this->actingAs($admin)->get('/admin/messages');
+
+        $response->assertOk();
+        $response->assertSee(
+            'href="'.route('admin.customers.show', $customer).'" class="admin-table-link"',
+            false,
+        );
+        $response->assertSee(
+            'href="'.route('admin.orders.show', $order).'" class="admin-table-link"',
+            false,
+        );
+    }
+
     public function test_non_admins_cannot_view_the_admin_message_inbox(): void
     {
         $customer = User::factory()->create();

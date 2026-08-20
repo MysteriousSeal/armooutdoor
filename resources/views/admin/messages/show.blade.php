@@ -10,13 +10,27 @@
             <p class="admin-list-lede">
                 From {{ $message->name }} ({{ $message->email }})
                 · {{ $message->created_at->format('d M Y · H:i') }}
-                @if ($message->user)
-                    · <a href="{{ route('admin.customers.show', $message->user) }}">Customer account</a>
-                @endif
-                @if ($message->order)
-                    · <a href="{{ route('admin.orders.show', $message->order) }}">Order {{ $message->order->number }}</a>
-                @endif
             </p>
+            @if ($message->user || $message->order)
+                <div class="admin-message-links">
+                    @if ($message->user)
+                        <a href="{{ route('admin.customers.show', $message->user) }}" class="admin-message-link-chip">
+                            <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                                <path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Zm-7 9a7 7 0 0 1 14 0" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Customer account
+                        </a>
+                    @endif
+                    @if ($message->order)
+                        <a href="{{ route('admin.orders.show', $message->order) }}" class="admin-message-link-chip">
+                            <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                                <path d="M4 7h16v13H4V7Zm4-3.5v3.5m8-3.5v3.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Order {{ $message->order->number }}
+                        </a>
+                    @endif
+                </div>
+            @endif
         </header>
 
         <section class="order-panel admin-message-body">

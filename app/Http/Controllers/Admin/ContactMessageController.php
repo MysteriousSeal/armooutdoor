@@ -11,7 +11,7 @@ class ContactMessageController extends Controller
     public function index(): View
     {
         return view('admin.messages.index', [
-            'messages' => ContactMessage::query()->with('order')->latest()->simplePaginate(20),
+            'messages' => ContactMessage::query()->with(['user', 'order'])->latest()->simplePaginate(20),
             'unreadCount' => ContactMessage::query()->whereNull('read_at')->count(),
         ]);
     }
