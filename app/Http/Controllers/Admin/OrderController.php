@@ -22,6 +22,7 @@ use App\Support\Csv;
 use App\Support\StripeDashboard;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -455,47 +456,74 @@ class OrderController extends Controller
 
     public function show(Order $order): View
     {
+        return view('admin.orders.show', $this->showData($order));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function showData(Order $order): array
+    {
         $order->load(['user', 'items.product.discount', 'items.product.supplier', 'items.variant', 'statusHistories']);
 
         $this->backfillMissingPaymentFees(collect([$order]));
 
-        return view('admin.orders.show', [
+        return [
             'order' => $order,
             'carriers' => Carrier::query()->orderBy('sort_order')->get(),
             'packageTypes' => PackageType::query()->orderBy('name')->get(),
             'stripePaymentIntentUrl' => $order->stripe_payment_intent_id ? StripeDashboard::paymentIntentUrl($order->stripe_payment_intent_id) : null,
             'stripeCustomerUrl' => $order->stripe_customer_id ? StripeDashboard::customerUrl($order->stripe_customer_id) : null,
-        ]);
+        ];
     }
 
-    public function prepare(Order $order): RedirectResponse
+    /**
+     * A status change rewrites the badge, the action buttons, the downloads,
+     * the timeline and the confirm modals. Rather than rebuilding any of that
+     * in JavaScript — where it would drift from the Blade — the server
+     * re-renders the page and the client swaps those regions out of it.
+     */
+    private function statusChangeResponse(Request $request, Order $order, string $message): RedirectResponse|JsonResponse
+    {
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => $message,
+                'status' => $order->status,
+                'html' => view('admin.orders.show', $this->showData($order->fresh()))->render(),
+            ]);
+        }
+
+        return back()->with('status', $message);
+    }
+
+    public function prepare(Request $request, Order $order): RedirectResponse|JsonResponse
     {
         abort_if($order->isDraft(), 404);
 
         $order->markStatus('preparing');
         AdminActivityLog::record('order.preparing', $order, 'Marked order '.$order->number.' as being prepared');
 
-        return back()->with('status', 'Order marked as being prepared.');
+        return $this->statusChangeResponse($request, $order, 'Order marked as being prepared.');
     }
 
-    public function ship(Order $order): RedirectResponse
+    public function ship(Request $request, Order $order): RedirectResponse|JsonResponse
     {
         abort_if($order->isDraft(), 404);
 
         $order->markStatus('shipped');
         AdminActivityLog::record('order.shipped', $order, 'Marked order '.$order->number.' as shipped');
 
-        return back()->with('status', 'Order marked as shipped.');
+        return $this->statusChangeResponse($request, $order, 'Order marked as shipped.');
     }
 
-    public function refund(Order $order): RedirectResponse
+    public function refund(Request $request, Order $order): RedirectResponse|JsonResponse
     {
         abort_if($order->isDraft() || $order->status === 'refunded', 403);
 
         $order->markStatus('refunded');
         AdminActivityLog::record('order.refunded', $order, 'Marked order '.$order->number.' as refunded');
 
-        return back()->with('status', 'Order marked as refunded.');
+        return $this->statusChangeResponse($request, $order, 'Order marked as refunded.');
     }
 
     public function archive(Order $order): RedirectResponse

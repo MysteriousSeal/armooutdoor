@@ -8,7 +8,7 @@
             <div class="admin-list-hero-row">
                 <div>
                     <p class="admin-list-kicker"><a href="{{ route('admin.orders.index') }}">Orders</a></p>
-                    <div class="admin-order-heading">
+                    <div class="admin-order-heading" id="order-heading">
                         <h2
                             class="admin-list-title is-copyable"
                             data-copy-code="{{ $order->number }}"
@@ -24,7 +24,7 @@
                         @endif
                     </div>
                 </div>
-                <div class="admin-order-actions">
+                <div class="admin-order-actions" id="order-actions">
                     @if ($order->isDraft())
                         <a href="{{ route('admin.orders.edit', $order) }}" class="btn btn-primary">Edit draft</a>
                     @else
@@ -181,6 +181,7 @@
                     <p class="order-total-amount">{{ $order->formattedTotal() }}</p>
                 </section>
 
+                <div id="order-downloads">
                 @if (! $order->isDraft() || $order->invoiceIsAvailable())
                     <div class="order-panel-actions">
                         @if (! $order->isDraft())
@@ -191,6 +192,7 @@
                         @endif
                     </div>
                 @endif
+                </div>
 
                 <div class="order-facts-row">
                     <section class="order-fact">
@@ -308,7 +310,7 @@
                     @endif
                 </div>
 
-                <section class="order-panel">
+                <section class="order-panel" id="order-timeline">
                     <h3 class="order-panel-title">Status history</h3>
                     <ol class="order-timeline">
                         @foreach ($order->statusHistories as $entry)
@@ -452,6 +454,7 @@
             </aside>
         </div>
 
+        <div id="order-modals">
         @if ($order->status === 'placed')
             <dialog id="prepare-confirm-modal" class="modal" aria-labelledby="prepare-confirm-title">
                 <form method="POST" action="{{ route('admin.orders.prepare', $order) }}">
@@ -540,6 +543,7 @@
                 </form>
             </dialog>
         @endif
+        </div>
 
         @if ($order->addressIsEditable())
             <dialog
@@ -599,4 +603,5 @@
 
 @push('scripts')
     <script src="{{ asset('js/admin-copy-code.js') }}" defer></script>
+    <script src="{{ asset('js/admin-order-status.js') }}" defer></script>
 @endpush

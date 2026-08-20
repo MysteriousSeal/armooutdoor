@@ -1,23 +1,6 @@
 (function () {
-    var toastTimeout = null;
-
     function showToast(text) {
-        var toast = document.getElementById('admin-copy-toast');
-
-        if (!toast) {
-            toast = document.createElement('div');
-            toast.id = 'admin-copy-toast';
-            toast.className = 'admin-toast';
-            document.body.appendChild(toast);
-        }
-
-        toast.textContent = text;
-        toast.classList.add('is-visible');
-
-        clearTimeout(toastTimeout);
-        toastTimeout = setTimeout(function () {
-            toast.classList.remove('is-visible');
-        }, 2000);
+        window.armoToast.show(text, 2000);
     }
 
     function copyWithExecCommand(text) {
