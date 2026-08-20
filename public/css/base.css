@@ -339,6 +339,32 @@ button.btn {
     color: #8a6417;
 }
 
+.flash-error {
+    background: #f7ecec;
+    border-color: #e3c6c6;
+    color: #a44;
+}
+
+[data-theme='dark'] .flash-error {
+    background: color-mix(in srgb, #e08585 12%, var(--surface));
+    border-color: color-mix(in srgb, #e08585 35%, var(--border));
+    color: #e08585;
+}
+
+.flash-error-title {
+    margin: 0 0 0.35rem;
+    font-weight: 600;
+}
+
+.flash-error-list {
+    margin: 0;
+    padding-left: 1.1rem;
+}
+
+.flash-error-list li + li {
+    margin-top: 0.2rem;
+}
+
 [data-theme='dark'] .flash-warning {
     background: color-mix(in srgb, #e0b258 12%, var(--surface));
     border-color: color-mix(in srgb, #e0b258 35%, var(--border));

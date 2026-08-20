@@ -206,6 +206,38 @@ class AdminBulkArchiveTest extends TestCase
             ->assertSee('js/admin-bulk-select.js', false);
     }
 
+    public function test_a_failed_bulk_action_tells_the_admin_why(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        // A bulk action has no field to hang an @error on, so without the
+        // layout's banner this redirected back showing nothing at all.
+        $this->actingAs($admin)
+            ->from('/admin/orders')
+            ->patch(route('admin.orders.bulk-archive'), ['order_ids' => [999999]])
+            ->assertRedirect('/admin/orders');
+
+        $this->actingAs($admin)
+            ->get('/admin/orders')
+            ->assertOk()
+            ->assertSee('flash-error', false);
+    }
+
+    public function test_a_successful_bulk_action_shows_no_error_banner(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->from('/admin/orders')
+            ->patch(route('admin.orders.bulk-archive'), ['order_ids' => [$this->order()->id]]);
+
+        $this->actingAs($admin)
+            ->get('/admin/orders')
+            ->assertOk()
+            ->assertSee('flash-success', false)
+            ->assertDontSee('flash-error', false);
+    }
+
     public function test_the_bulk_action_has_its_own_modal_separate_from_the_per_row_one(): void
     {
         $admin = User::factory()->admin()->create();

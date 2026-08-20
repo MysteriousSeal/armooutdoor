@@ -98,6 +98,29 @@
         @if (session('status'))
             <div class="flash flash-success" role="status">{{ session('status') }}</div>
         @endif
+        {{-- Catches validation failures from forms with no field to hang an
+             @error on — a bulk action, say — which would otherwise redirect
+             back looking as though nothing had happened. --}}
+        {{-- isset(): $errors is shared by the web middleware group, so it is
+             absent when this layout renders outside a normal request — an
+             error page, for instance. --}}
+        @if (isset($errors) && $errors->any())
+            {{-- Deduplicated first: a bulk action can raise the same message
+                 once per item, and the count decides the layout. --}}
+            @php($flashErrors = collect($errors->all())->unique()->values())
+            <div class="flash flash-error" role="alert">
+                @if ($flashErrors->count() === 1)
+                    {{ $flashErrors->first() }}
+                @else
+                    <p class="flash-error-title">Some changes could not be saved:</p>
+                    <ul class="flash-error-list">
+                        @foreach ($flashErrors as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                @endif
+            </div>
+        @endif
         @yield('content')
     </main>
 
