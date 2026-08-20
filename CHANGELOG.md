@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-20 — v0.6.0 — build BSEIPM
+
+### Orders
+
+- **Select several orders and archive them in one go.** A checkbox per row with a select-all for the page, a bar that appears once something is ticked, and a confirmation naming the count. Shift-click selects a range. The Archived tab offers Unarchive instead.
+- Selection covers the current page only, so the request carries the orders you actually ticked — the server never re-runs the list's filters, and cannot act on an order that arrived after the page was loaded.
+- Orders archived by someone else in the meantime are skipped rather than failing the batch, and the message counts what actually changed. Each order still gets its own activity-log entry, so "who archived this order" keeps working.
+
+### Admin
+
+- Validation errors now appear as a banner at the top of admin pages. Previously only success messages were shown, so a form with no field to attach an error to — a bulk action — redirected back looking as though nothing had happened. Forms with inline field errors now show both, which is the usual error-summary pattern.
+
 ## 2026-08-20 — v0.5.2 — build 5KRG63
 
 ### Fixed
