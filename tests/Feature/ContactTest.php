@@ -415,6 +415,218 @@ class ContactTest extends TestCase
         );
     }
 
+    public function test_index_shows_possibly_customer_for_a_guest_message_matching_an_email(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $customer = User::factory()->create(['email' => 'jean@example.com']);
+        ContactMessage::query()->create([
+            'name' => 'Jean M.',
+            'email' => 'jean@example.com',
+            'subject' => 'Question',
+            'message' => 'Test',
+        ]);
+
+        $response = $this->actingAs($admin)->get('/admin/messages');
+
+        $response->assertOk();
+        $response->assertSee('possibly '.$customer->name);
+        $response->assertSee(
+            'href="'.route('admin.customers.show', $customer).'" class="admin-message-guess"',
+            false,
+        );
+    }
+
+    public function test_index_matches_guest_email_case_insensitively(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $customer = User::factory()->create(['email' => 'jean@example.com']);
+        ContactMessage::query()->create([
+            'name' => 'Jean M.',
+            'email' => 'JEAN@EXAMPLE.COM',
+            'subject' => 'Question',
+            'message' => 'Test',
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/admin/messages')
+            ->assertSee('possibly '.$customer->name);
+    }
+
+    public function test_index_shows_no_guess_when_no_email_matches(): void
+    {
+        $admin = User::factory()->admin()->create();
+        ContactMessage::query()->create([
+            'name' => 'Jean M.',
+            'email' => 'nobody@example.com',
+            'subject' => 'Question',
+            'message' => 'Test',
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/admin/messages')
+            ->assertDontSee('possibly');
+    }
+
+    public function test_index_never_guesses_for_a_message_already_linked_to_a_customer(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $customer = User::factory()->create(['email' => 'jean@example.com']);
+        ContactMessage::query()->create([
+            'user_id' => $customer->id,
+            'name' => 'Jean M.',
+            'email' => 'jean@example.com',
+            'subject' => 'Question',
+            'message' => 'Test',
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/admin/messages')
+            ->assertDontSee('possibly');
+    }
+
+    public function test_show_page_links_the_possible_customer_for_a_guest_message(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $customer = User::factory()->create(['email' => 'jean@example.com']);
+        $message = ContactMessage::query()->create([
+            'name' => 'Jean M.',
+            'email' => 'jean@example.com',
+            'subject' => 'Question',
+            'message' => 'Test',
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/admin/messages/'.$message->id)
+            ->assertOk()
+            ->assertSee('Possibly '.$customer->name)
+            ->assertSee(route('admin.customers.show', $customer));
+    }
+
+    public function test_possible_customer_model_helper_ignores_admin_accounts(): void
+    {
+        User::factory()->admin()->create(['email' => 'jean@example.com']);
+        $message = ContactMessage::query()->create([
+            'name' => 'Jean M.',
+            'email' => 'jean@example.com',
+            'subject' => 'Question',
+            'message' => 'Test',
+        ]);
+
+        $this->assertNull($message->possibleCustomer());
+    }
+
+    public function test_index_shows_message_stats(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $read = ContactMessage::query()->create([
+            'name' => 'Jean M.',
+            'email' => 'jean@example.com',
+            'subject' => 'Question',
+            'message' => 'Test',
+        ]);
+        $read->markAsRead();
+        ContactMessage::query()->create([
+            'name' => 'Marie D.',
+            'email' => 'marie@example.com',
+            'subject' => 'Autre question',
+            'message' => 'Test',
+        ]);
+
+        $response = $this->actingAs($admin)->get('/admin/messages');
+
+        $response->assertOk()
+            ->assertSee('Total messages')
+            ->assertSee('Unread')
+            ->assertSee('Last 7 days')
+            ->assertSee('admin-stat-card--warning', false);
+    }
+
+    public function test_index_shows_sender_initials_and_a_message_snippet(): void
+    {
+        $admin = User::factory()->admin()->create();
+        ContactMessage::query()->create([
+            'name' => 'Jean Martin',
+            'email' => 'jean@example.com',
+            'subject' => 'Question',
+            'message' => 'Bonjour, je voudrais savoir si vous livrez en Corse.',
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/admin/messages')
+            ->assertOk()
+            ->assertSee('JM')
+            ->assertSee('Bonjour, je voudrais savoir si vous livrez en Corse.');
+    }
+
+    public function test_index_marks_an_admin_sender_with_a_chip_and_no_link(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $sender = User::factory()->admin()->create(['first_name' => 'Sender', 'last_name' => 'Admin']);
+        ContactMessage::query()->create([
+            'user_id' => $sender->id,
+            'name' => $sender->name,
+            'email' => $sender->email,
+            'subject' => 'Question',
+            'message' => 'Test',
+        ]);
+
+        $response = $this->actingAs($admin)->get('/admin/messages');
+
+        $response->assertOk()
+            ->assertSee('admin-role-chip', false)
+            ->assertSee($sender->name)
+            ->assertDontSee('href="'.route('admin.customers.show', $sender).'"', false);
+    }
+
+    public function test_index_still_links_a_regular_customer_sender(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $customer = User::factory()->create();
+        ContactMessage::query()->create([
+            'user_id' => $customer->id,
+            'name' => $customer->name,
+            'email' => $customer->email,
+            'subject' => 'Question',
+            'message' => 'Test',
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/admin/messages')
+            ->assertOk()
+            ->assertDontSee('admin-role-chip', false)
+            ->assertSee('href="'.route('admin.customers.show', $customer).'"', false);
+    }
+
+    public function test_show_page_marks_an_admin_sender_without_a_broken_customer_link(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $sender = User::factory()->admin()->create();
+        $message = ContactMessage::query()->create([
+            'user_id' => $sender->id,
+            'name' => $sender->name,
+            'email' => $sender->email,
+            'subject' => 'Question',
+            'message' => 'Test',
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/admin/messages/'.$message->id)
+            ->assertOk()
+            ->assertSee('admin-message-link-chip--admin', false)
+            ->assertDontSee('Customer account')
+            ->assertDontSee(route('admin.customers.show', $sender), false);
+    }
+
+    public function test_the_customer_page_really_would_404_for_an_admin(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $sender = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->get(route('admin.customers.show', $sender))
+            ->assertNotFound();
+    }
+
     public function test_non_admins_cannot_view_the_admin_message_inbox(): void
     {
         $customer = User::factory()->create();

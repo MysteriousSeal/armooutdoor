@@ -10,6 +10,21 @@
             <p class="admin-list-lede">Contact form submissions from the storefront.</p>
         </header>
 
+        <div class="admin-stat-grid">
+            <div class="admin-stat-card">
+                <span class="admin-stat-label">Total messages</span>
+                <span class="admin-stat-value">{{ number_format($totalCount) }}</span>
+            </div>
+            <div class="admin-stat-card {{ $unreadCount > 0 ? 'admin-stat-card--warning' : '' }}">
+                <span class="admin-stat-label">Unread</span>
+                <span class="admin-stat-value">{{ number_format($unreadCount) }}</span>
+            </div>
+            <div class="admin-stat-card">
+                <span class="admin-stat-label">Last 7 days</span>
+                <span class="admin-stat-value">{{ number_format($thisWeekCount) }}</span>
+            </div>
+        </div>
+
         @if ($messages->isEmpty())
             <p class="empty-state">No messages yet.</p>
         @else
@@ -34,14 +49,31 @@
                                     @endunless
                                 </td>
                                 <td>
-                                    @if ($message->user)
-                                        <a href="{{ route('admin.customers.show', $message->user) }}" class="admin-table-link">{{ $message->name }}</a>
-                                    @else
-                                        <span class="admin-table-primary">{{ $message->name }}</span>
-                                    @endif
-                                    <span class="admin-table-sub">{{ $message->email }}</span>
+                                    <div class="admin-customer-cell">
+                                        <span class="admin-customer-avatar" aria-hidden="true">{{ $message->initials() }}</span>
+                                        <span class="admin-customer-identity">
+                                            @if ($message->user?->isAdmin())
+                                                <span class="admin-message-sender">
+                                                    <span class="admin-table-primary">{{ $message->name }}</span>
+                                                    <span class="admin-role-chip">Admin</span>
+                                                </span>
+                                            @elseif ($message->user)
+                                                <a href="{{ route('admin.customers.show', $message->user) }}" class="admin-table-link">{{ $message->name }}</a>
+                                            @else
+                                                <span class="admin-table-primary">{{ $message->name }}</span>
+                                                @php $possibleCustomer = $possibleCustomersByEmail->get(mb_strtolower($message->email)); @endphp
+                                                @if ($possibleCustomer)
+                                                    <a href="{{ route('admin.customers.show', $possibleCustomer) }}" class="admin-message-guess">possibly {{ $possibleCustomer->name }}</a>
+                                                @endif
+                                            @endif
+                                            <span class="admin-table-sub">{{ $message->email }}</span>
+                                        </span>
+                                    </div>
                                 </td>
-                                <td>{{ $message->subject }}</td>
+                                <td>
+                                    <span class="admin-table-primary">{{ $message->subject }}</span>
+                                    <span class="admin-message-snippet">{{ \Illuminate\Support\Str::limit($message->message, 60) }}</span>
+                                </td>
                                 <td>
                                     @if ($message->order)
                                         <a href="{{ route('admin.orders.show', $message->order) }}" class="admin-table-link">{{ $message->order->number }}</a>

@@ -11,14 +11,28 @@
                 From {{ $message->name }} ({{ $message->email }})
                 · {{ $message->created_at->format('d M Y · H:i') }}
             </p>
-            @if ($message->user || $message->order)
+            @if ($message->user || $message->order || $possibleCustomer)
                 <div class="admin-message-links">
-                    @if ($message->user)
+                    @if ($message->user?->isAdmin())
+                        <span class="admin-message-link-chip admin-message-link-chip--admin">
+                            <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                                <path d="M12 3 4.5 6v5.5c0 4.3 3.1 8 7.5 9 4.4-1 7.5-4.7 7.5-9V6L12 3Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Admin
+                        </span>
+                    @elseif ($message->user)
                         <a href="{{ route('admin.customers.show', $message->user) }}" class="admin-message-link-chip">
                             <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
                                 <path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Zm-7 9a7 7 0 0 1 14 0" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                             Customer account
+                        </a>
+                    @elseif ($possibleCustomer)
+                        <a href="{{ route('admin.customers.show', $possibleCustomer) }}" class="admin-message-link-chip admin-message-link-chip--guess">
+                            <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                                <path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Zm-7 9a7 7 0 0 1 14 0" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Possibly {{ $possibleCustomer->name }}
                         </a>
                     @endif
                     @if ($message->order)
