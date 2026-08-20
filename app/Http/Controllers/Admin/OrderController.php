@@ -103,7 +103,11 @@ class OrderController extends Controller
 
         return Csv::download(
             'orders-'.now()->format('Y-m-d').'.csv',
-            ['Number', 'Date', 'Customer', 'Email', 'Status', 'Archived', 'Marketplace', 'Carrier', 'Subtotal', 'Shipping', 'Discount', 'Total'],
+            // Shipping is the carrier's price; a discount code can waive it
+            // without changing that, so the waiver needs its own column for
+            // the row to reconcile: subtotal - discount + shipping
+            // - free delivery = total.
+            ['Number', 'Date', 'Customer', 'Email', 'Status', 'Archived', 'Marketplace', 'Carrier', 'Subtotal', 'Shipping', 'Discount', 'Free delivery', 'Total'],
             $orders->map(fn (Order $order): array => [
                 $order->number,
                 $order->created_at->format('Y-m-d H:i'),
@@ -116,6 +120,7 @@ class OrderController extends Controller
                 number_format($order->subtotal_cents / 100, 2, '.', ''),
                 number_format($order->shipping_cents / 100, 2, '.', ''),
                 number_format($order->discount_cents / 100, 2, '.', ''),
+                number_format(($order->shipping_discount_cents ?? 0) / 100, 2, '.', ''),
                 number_format($order->total_cents / 100, 2, '.', ''),
             ])
         );

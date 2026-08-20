@@ -293,7 +293,9 @@
                                     </span>
                                 </td>
                                 <td>
-                                    @if ($order->shipping_cents === 0)
+                                    @if ($order->deliveryWasFree() && $order->deliveryWasFreedByCode())
+                                        <span class="order-chip order-chip--shipped" title="Waived by discount code {{ $order->discountCodeCode() }}">Yes (code)</span>
+                                    @elseif ($order->deliveryWasFree())
                                         <span class="order-chip order-chip--shipped">Yes</span>
                                     @else
                                         <span class="order-chip order-chip--draft">No</span>

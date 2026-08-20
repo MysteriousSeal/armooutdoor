@@ -192,6 +192,31 @@ class Order extends Model
         return format_euros($this->shipping_cents);
     }
 
+    /**
+     * What the customer actually paid for delivery. A discount code waives
+     * the charge without touching shipping_cents, which keeps the real
+     * carrier price so the invoice can still show what delivery would have
+     * cost — so the two must be subtracted to get the charged amount.
+     */
+    public function chargedShippingCents(): int
+    {
+        return max(0, $this->shipping_cents - ($this->shipping_discount_cents ?? 0));
+    }
+
+    public function deliveryWasFree(): bool
+    {
+        return $this->chargedShippingCents() === 0;
+    }
+
+    /**
+     * Free because a code waived it, rather than because the cart reached the
+     * free-shipping threshold.
+     */
+    public function deliveryWasFreedByCode(): bool
+    {
+        return ($this->shipping_discount_cents ?? 0) > 0;
+    }
+
     public function hasDiscountCode(): bool
     {
         return $this->discount_code_snapshot !== null;

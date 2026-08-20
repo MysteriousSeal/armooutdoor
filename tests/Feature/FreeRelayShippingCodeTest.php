@@ -207,6 +207,129 @@ class FreeRelayShippingCodeTest extends TestCase
         $this->assertSame([], $response->json('freeShippingCarrierIds'));
     }
 
+    private function orderWith(int $shippingCents, int $shippingDiscountCents): Order
+    {
+        return Order::query()->create([
+            'number' => Order::generateNumber(),
+            'user_id' => User::factory()->create()->id,
+            'status' => 'placed',
+            'address_snapshot' => ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'x', 'postal_code' => '75000', 'city' => 'Paris', 'country' => 'FR'],
+            'billing_address_snapshot' => ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'x', 'postal_code' => '75000', 'city' => 'Paris', 'country' => 'FR'],
+            'carrier_method' => 'relay',
+            'carrier_snapshot' => ['name' => ['fr' => 'Mondial Relay']],
+            'subtotal_cents' => 5000,
+            'shipping_cents' => $shippingCents,
+            'shipping_discount_cents' => $shippingDiscountCents,
+            'discount_cents' => 0,
+            'total_cents' => 5000 + $shippingCents - $shippingDiscountCents,
+            'payment_method' => 'card',
+        ]);
+    }
+
+    public function test_delivery_waived_by_a_code_counts_as_free(): void
+    {
+        $order = $this->orderWith(490, 490);
+
+        $this->assertSame(0, $order->chargedShippingCents());
+        $this->assertTrue($order->deliveryWasFree());
+        $this->assertTrue($order->deliveryWasFreedByCode());
+    }
+
+    public function test_delivery_free_from_the_threshold_is_not_credited_to_a_code(): void
+    {
+        $order = $this->orderWith(0, 0);
+
+        $this->assertTrue($order->deliveryWasFree());
+        $this->assertFalse($order->deliveryWasFreedByCode());
+    }
+
+    public function test_paid_delivery_is_not_free(): void
+    {
+        $order = $this->orderWith(490, 0);
+
+        $this->assertSame(490, $order->chargedShippingCents());
+        $this->assertFalse($order->deliveryWasFree());
+    }
+
+    public function test_the_orders_list_marks_a_code_waived_delivery(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $this->orderWith(490, 490);
+
+        // shipping_cents stays at the real carrier price, so the old
+        // "shipping_cents === 0" test showed "No" on these orders.
+        $this->actingAs($admin)
+            ->get('/admin/orders')
+            ->assertOk()
+            ->assertSee('Yes (code)');
+    }
+
+    public function test_the_orders_list_marks_threshold_free_delivery_plainly(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $this->orderWith(0, 0);
+
+        $this->actingAs($admin)
+            ->get('/admin/orders')
+            ->assertOk()
+            ->assertSee('>Yes<', false)
+            ->assertDontSee('Yes (code)');
+    }
+
+    public function test_the_orders_list_marks_paid_delivery_as_not_free(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $this->orderWith(490, 0);
+
+        $this->actingAs($admin)
+            ->get('/admin/orders')
+            ->assertOk()
+            ->assertSee('>No<', false)
+            ->assertDontSee('Yes (code)');
+    }
+
+    public function test_the_csv_export_reconciles_on_a_code_waived_order(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $order = $this->orderWith(490, 490);
+
+        $csv = $this->actingAs($admin)->get('/admin/orders/export')->streamedContent();
+
+        [$header, $row] = array_map('str_getcsv', array_slice(explode("\n", trim($csv)), 0, 2));
+        $line = array_combine($header, $row);
+
+        $this->assertSame('4.90', $line['Shipping']);
+        $this->assertSame('4.90', $line['Free delivery']);
+
+        // Without the waiver column the row could not be balanced from its
+        // own figures.
+        $this->assertEqualsWithDelta(
+            (float) $line['Total'],
+            (float) $line['Subtotal'] - (float) $line['Discount'] + (float) $line['Shipping'] - (float) $line['Free delivery'],
+            0.001,
+        );
+
+        $this->assertSame((float) $order->total_cents / 100, (float) $line['Total']);
+    }
+
+    public function test_the_csv_export_still_reconciles_without_a_waiver(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $this->orderWith(490, 0);
+
+        $csv = $this->actingAs($admin)->get('/admin/orders/export')->streamedContent();
+
+        [$header, $row] = array_map('str_getcsv', array_slice(explode("\n", trim($csv)), 0, 2));
+        $line = array_combine($header, $row);
+
+        $this->assertSame('0.00', $line['Free delivery']);
+        $this->assertEqualsWithDelta(
+            (float) $line['Total'],
+            (float) $line['Subtotal'] - (float) $line['Discount'] + (float) $line['Shipping'] - (float) $line['Free delivery'],
+            0.001,
+        );
+    }
+
     public function test_an_existing_code_can_be_saved_from_the_edit_form(): void
     {
         $admin = User::factory()->admin()->create();
