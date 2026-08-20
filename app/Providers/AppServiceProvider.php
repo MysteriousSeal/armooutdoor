@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Category;
 use App\Models\CompanySetting;
 use App\Models\Conversation;
+use App\Models\Order;
 use App\Models\WishlistItem;
 use App\Support\Cart;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -72,12 +73,20 @@ class AppServiceProvider extends ServiceProvider
             fn ($view) => $view->with('unreadConversationCount', $this->unreadConversationCount()),
         );
 
-        View::composer(
-            'layouts.admin',
-            fn ($view) => $view->with('unreadMessageCount', Auth::guard('web')->check()
-                ? Conversation::query()->unreadForAdmin()->count()
-                : 0),
-        );
+        // Nav badge counts. Guarded on auth: layouts.admin also renders for a
+        // signed-out admin, and an unguarded count would query for nobody.
+        View::composer('layouts.admin', function ($view): void {
+            $signedIn = Auth::guard('web')->check();
+
+            $view->with([
+                'unreadMessageCount' => $signedIn
+                    ? Conversation::query()->unreadForAdmin()->count()
+                    : 0,
+                'ordersAwaitingStartCount' => $signedIn
+                    ? Order::query()->awaitingStart()->count()
+                    : 0,
+            ]);
+        });
     }
 
     /**

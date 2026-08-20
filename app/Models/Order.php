@@ -6,6 +6,7 @@ use App\Enums\DeliveryMethod;
 use App\Enums\PaymentMethod;
 use App\Support\ShippingEstimate;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -281,6 +282,16 @@ class Order extends Model
     public function isDraft(): bool
     {
         return $this->status === 'draft';
+    }
+
+    /**
+     * Orders nobody has begun preparing yet. Narrower than the "to prepare"
+     * KPI on the orders list, which also counts orders already in progress.
+     * Drafts fall out for free — a draft is never 'placed'.
+     */
+    public function scopeAwaitingStart(Builder $query): void
+    {
+        $query->whereNull('archived_at')->where('status', 'placed');
     }
 
     public function isArchived(): bool
