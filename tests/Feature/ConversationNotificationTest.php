@@ -114,20 +114,23 @@ class ConversationNotificationTest extends TestCase
 
     public function test_the_email_does_not_name_the_admin_who_replied(): void
     {
+        // Distinctive names: the email greets the customer by name, so a
+        // faker-generated one could contain the admin's as a substring and
+        // fail at random.
         $admin = User::factory()->admin()->create([
-            'first_name' => 'Julie',
-            'last_name' => 'Simmons',
-            'email' => 'julie@armooutdoor.test',
+            'first_name' => 'Zorbulon',
+            'last_name' => 'Quibblesworth',
+            'email' => 'zorbulon@armooutdoor.test',
         ]);
-        $customer = User::factory()->create();
+        $customer = User::factory()->create(['first_name' => 'Jean', 'last_name' => 'Martin']);
         $conversation = $this->conversationFor($customer);
         $conversation->postMessage('Bonjour', ConversationMessage::AUTHOR_ADMIN, $admin);
 
         $rendered = (string) (new ConversationReplied($conversation))->toMail($customer)->render();
 
-        $this->assertStringNotContainsString('Julie', $rendered);
-        $this->assertStringNotContainsString('Simmons', $rendered);
-        $this->assertStringNotContainsString('julie@armooutdoor.test', $rendered);
+        $this->assertStringNotContainsString('Zorbulon', $rendered);
+        $this->assertStringNotContainsString('Quibblesworth', $rendered);
+        $this->assertStringNotContainsString('zorbulon@armooutdoor.test', $rendered);
         $this->assertStringContainsString(config('app.name'), $rendered);
     }
 

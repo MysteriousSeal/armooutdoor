@@ -390,12 +390,14 @@ class AccountConversationTest extends TestCase
 
     public function test_an_admin_reply_is_shown_as_the_shop_never_the_staff_member(): void
     {
+        // Distinctive names: a faker-generated customer could otherwise happen
+        // to contain the admin's name as a substring and fail at random.
         $admin = User::factory()->admin()->create([
-            'first_name' => 'Julie',
-            'last_name' => 'Simmons',
-            'email' => 'julie@armooutdoor.test',
+            'first_name' => 'Zorbulon',
+            'last_name' => 'Quibblesworth',
+            'email' => 'zorbulon@armooutdoor.test',
         ]);
-        $user = User::factory()->create();
+        $user = User::factory()->create(['first_name' => 'Jean', 'last_name' => 'Martin']);
         $conversation = $this->conversationFor($user);
         $conversation->postMessage('Votre commande part demain.', ConversationMessage::AUTHOR_ADMIN, $admin);
 
@@ -404,9 +406,9 @@ class AccountConversationTest extends TestCase
         $response->assertOk()
             ->assertSee('Votre commande part demain.')
             ->assertSee(config('app.name'))
-            ->assertDontSee('Julie')
-            ->assertDontSee('Simmons')
-            ->assertDontSee('julie@armooutdoor.test');
+            ->assertDontSee('Zorbulon')
+            ->assertDontSee('Quibblesworth')
+            ->assertDontSee('zorbulon@armooutdoor.test');
     }
 
     public function test_the_thread_links_a_referenced_order(): void
