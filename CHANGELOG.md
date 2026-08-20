@@ -2,6 +2,23 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-20 — v0.4.0 — build DUZR9H
+
+### Messages
+
+- **Contact messages are now two-way conversations.** They were flat rows an admin answered out of band with a `mailto:` link; they are now threads, answerable in the admin and readable and answerable by the customer in their account.
+- Customer account gains "Mes messages": a thread list and thread view with a reply box, an unread badge in the account nav and on the account hub, and a count on the user's name in the site header.
+- Admin gains a thread timeline with a reply box, Open/Closed tabs, and close/reopen — all recorded in the activity log.
+- The customer is emailed when an admin replies. The email links to the thread and deliberately does not quote the reply, keeping thread content out of inboxes.
+- An admin can correct their own reply for 30 minutes after sending it, inline and without a page reload. Both sides then see when it was edited.
+- Admin replies are shown as coming from the shop, never from the staff member who wrote them; the authoring admin is still recorded for the audit trail.
+- Guest messages stay one-way: there is no account behind them, so there is nowhere for a reply to be read. The admin gets the email fallback instead of a reply box.
+
+### Under the hood
+
+- `contact_messages` split into `conversations` + `conversation_messages`, with existing messages folded into a thread plus its opening message. **The migration drops `contact_messages` — take a database copy before deploying.**
+- The reply notification needs real SMTP; `MAIL_MAILER` is still `log`. Everything else works without it.
+
 ## 2026-08-20 — v0.3.0 — build HGU8K1
 
 ### Storefront
