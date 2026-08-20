@@ -18,8 +18,8 @@ class StoreContactMessageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:120'],
-            'email' => ['required', 'string', 'email', 'max:255'],
+            'name' => [$this->user() ? 'nullable' : 'required', 'string', 'max:120'],
+            'email' => [$this->user() ? 'nullable' : 'required', 'string', 'email', 'max:255'],
             'subject' => ['required', 'string', 'max:150'],
             'message' => ['required', 'string', 'max:5000'],
             'order_id' => [

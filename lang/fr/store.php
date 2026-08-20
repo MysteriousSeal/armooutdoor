@@ -376,6 +376,8 @@ return [
     'contact_title' => 'Nous contacter',
     'contact_intro' => 'Une question sur une commande, un produit ou la boutique ? Écrivez-nous, on vous répond au plus vite.',
     'contact_name' => 'Nom',
+    'contact_name_locked' => 'Le nom de votre compte est utilisé automatiquement.',
+    'contact_email_locked' => 'L\'e-mail de votre compte est utilisé automatiquement.',
     'contact_email' => 'E-mail',
     'contact_subject' => 'Sujet',
     'contact_order' => 'Commande concernée (facultatif)',

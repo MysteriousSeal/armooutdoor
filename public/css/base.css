@@ -374,6 +374,12 @@ button.btn {
     border-color: var(--accent);
 }
 
+.form-control:disabled {
+    color: var(--text-muted);
+    background: var(--bg-muted);
+    cursor: not-allowed;
+}
+
 select.form-control {
     appearance: none;
     -webkit-appearance: none;

@@ -37,13 +37,35 @@
                 <div class="form-row form-row--inline">
                     <div class="form-group">
                         <label for="name">{{ __('store.contact_name') }}</label>
-                        <input type="text" id="name" name="name" class="form-control" value="{{ old('name', $prefillName) }}" maxlength="120" required data-validate>
+                        <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            class="form-control"
+                            value="{{ old('name', $prefillName) }}"
+                            maxlength="120"
+                            @if ($identityLocked) disabled @else required data-validate @endif
+                        >
+                        @if ($identityLocked)
+                            <p class="form-hint">{{ __('store.contact_name_locked') }}</p>
+                        @endif
                         @error('name') <p class="form-error">{{ $message }}</p> @enderror
                     </div>
 
                     <div class="form-group">
                         <label for="email">{{ __('store.contact_email') }}</label>
-                        <input type="email" id="email" name="email" class="form-control" value="{{ old('email', $prefillEmail) }}" maxlength="255" required data-validate>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            class="form-control"
+                            value="{{ old('email', $prefillEmail) }}"
+                            maxlength="255"
+                            @if ($identityLocked) disabled @else required data-validate @endif
+                        >
+                        @if ($identityLocked)
+                            <p class="form-hint">{{ __('store.contact_email_locked') }}</p>
+                        @endif
                         @error('email') <p class="form-error">{{ $message }}</p> @enderror
                     </div>
                 </div>

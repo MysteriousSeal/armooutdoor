@@ -19,6 +19,7 @@ class ContactController extends Controller
             'company' => CompanySetting::current(),
             'prefillName' => $user?->name ?? old('name', ''),
             'prefillEmail' => $user?->email ?? old('email', ''),
+            'identityLocked' => $user !== null,
             'orders' => $user
                 ? $user->orders()->whereNull('archived_at')->where('status', '!=', 'draft')->latest()->get()
                 : collect(),
@@ -31,6 +32,8 @@ class ContactController extends Controller
 
         ContactMessage::query()->create([
             ...$validated,
+            'name' => $request->user()?->name ?? $validated['name'],
+            'email' => $request->user()?->email ?? $validated['email'],
             'user_id' => $request->user()?->id,
         ]);
 

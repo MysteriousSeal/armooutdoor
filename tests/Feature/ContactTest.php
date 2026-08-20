@@ -109,6 +109,136 @@ class ContactTest extends TestCase
         ]);
     }
 
+    public function test_name_field_is_disabled_for_a_logged_in_customer(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get('/contact')
+            ->assertOk()
+            ->assertSee('disabled', false)
+            ->assertSee(__('store.contact_name_locked'));
+    }
+
+    public function test_name_field_is_enabled_for_a_guest(): void
+    {
+        $this->get('/contact')
+            ->assertOk()
+            ->assertDontSee(__('store.contact_name_locked'));
+    }
+
+    public function test_a_logged_in_customer_cannot_override_their_name(): void
+    {
+        $user = User::factory()->create(['first_name' => 'Jean', 'last_name' => 'Martin']);
+
+        $this->actingAs($user)->post('/contact', [
+            'name' => 'Fake Name',
+            'email' => $user->email,
+            'subject' => 'Question',
+            'message' => 'Test',
+        ]);
+
+        $this->assertDatabaseHas('contact_messages', [
+            'user_id' => $user->id,
+            'name' => $user->name,
+        ]);
+        $this->assertDatabaseMissing('contact_messages', ['name' => 'Fake Name']);
+    }
+
+    public function test_a_logged_in_customer_can_submit_without_a_name_field(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->post('/contact', [
+            'email' => $user->email,
+            'subject' => 'Question',
+            'message' => 'Test',
+        ]);
+
+        $response->assertSessionDoesntHaveErrors('name');
+        $this->assertDatabaseHas('contact_messages', [
+            'user_id' => $user->id,
+            'name' => $user->name,
+        ]);
+    }
+
+    public function test_name_is_required_for_a_guest(): void
+    {
+        $response = $this->post('/contact', [
+            'email' => 'jean@example.com',
+            'subject' => 'Question',
+            'message' => 'Test',
+        ]);
+
+        $response->assertSessionHasErrors('name');
+        $this->assertDatabaseCount('contact_messages', 0);
+    }
+
+    public function test_email_field_is_disabled_for_a_logged_in_customer(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get('/contact')
+            ->assertOk()
+            ->assertSee('disabled', false)
+            ->assertSee(__('store.contact_email_locked'));
+    }
+
+    public function test_email_field_is_enabled_for_a_guest(): void
+    {
+        $this->get('/contact')
+            ->assertOk()
+            ->assertDontSee(__('store.contact_email_locked'));
+    }
+
+    public function test_a_logged_in_customer_cannot_override_their_email(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->post('/contact', [
+            'name' => $user->name,
+            'email' => 'fake@example.com',
+            'subject' => 'Question',
+            'message' => 'Test',
+        ]);
+
+        $this->assertDatabaseHas('contact_messages', [
+            'user_id' => $user->id,
+            'email' => $user->email,
+        ]);
+        $this->assertDatabaseMissing('contact_messages', ['email' => 'fake@example.com']);
+    }
+
+    public function test_a_logged_in_customer_can_submit_without_an_email_field(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->post('/contact', [
+            'name' => $user->name,
+            'subject' => 'Question',
+            'message' => 'Test',
+        ]);
+
+        $response->assertSessionDoesntHaveErrors('email');
+        $this->assertDatabaseHas('contact_messages', [
+            'user_id' => $user->id,
+            'email' => $user->email,
+        ]);
+    }
+
+    public function test_email_is_required_for_a_guest(): void
+    {
+        $response = $this->post('/contact', [
+            'name' => 'Jean Martin',
+            'subject' => 'Question',
+            'message' => 'Test',
+        ]);
+
+        $response->assertSessionHasErrors('email');
+        $this->assertDatabaseCount('contact_messages', 0);
+    }
+
     public function test_message_is_required(): void
     {
         $response = $this->post('/contact', [
