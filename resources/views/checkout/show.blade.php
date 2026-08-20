@@ -18,6 +18,10 @@
             <p class="page-lede">{{ __('store.checkout_intro') }}</p>
         </header>
 
+        @if ($paymentCanceled)
+            <div class="flash flash-warning" role="status">{{ __('store.payment_canceled') }}</div>
+        @endif
+
         <form method="POST" action="{{ localized_route('checkout.store') }}" id="checkout-form">@csrf</form>
 
         <div class="checkout-layout">

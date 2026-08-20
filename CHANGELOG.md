@@ -2,6 +2,17 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-20 — v0.2.8
+
+### Storefront
+
+- Added a real Contact page: the nav/footer "Nous contacter" link was previously dead (`href="#"`). Open to guests and customers, with a honeypot and rate limiting; messages are stored for admins only, no emails sent.
+- Checkout now shows a warning banner ("Le paiement a été annulé…") after a canceled or declined Stripe payment — previously the customer landed back on checkout with no explanation.
+
+### Admin
+
+- New "Messages" section (top-level nav, with an unread-count badge): lists and shows contact-form submissions.
+
 ## 2026-08-20 — v0.2.7
 
 ### Admin

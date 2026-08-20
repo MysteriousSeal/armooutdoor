@@ -4,6 +4,7 @@ namespace Tests\Feature\Admin;
 
 use App\Models\Carrier;
 use App\Models\Category;
+use App\Models\ContactMessage;
 use App\Models\Discount;
 use App\Models\DiscountCode;
 use App\Models\Marketplace;
@@ -60,6 +61,12 @@ class AdminAuthorizationTest extends TestCase
         $supplier = Supplier::query()->create(['name' => 'Audit Supplier']);
         $marketplace = Marketplace::query()->create(['name' => 'Audit Marketplace']);
         $packageType = PackageType::query()->create(['name' => 'Audit Box']);
+        $contactMessage = ContactMessage::query()->create([
+            'name' => 'Audit Sender',
+            'email' => 'audit@example.com',
+            'subject' => 'Audit',
+            'message' => 'Audit message',
+        ]);
         $carrier = Carrier::query()->first() ?? Carrier::query()->create([
             'slug' => 'audit-carrier',
             'name' => ['en' => 'Audit', 'fr' => 'Audit'],
@@ -83,6 +90,7 @@ class AdminAuthorizationTest extends TestCase
             'packageType' => $packageType->id,
             'carrier' => $carrier->id,
             'admin' => $targetAdmin->id,
+            'message' => $contactMessage->id,
         ];
 
         $nonAdmin = User::factory()->create();

@@ -89,6 +89,7 @@ class CheckoutController extends Controller
             'selectedCarrierIsRelay' => $selectedCarrier?->isRelay() ?? false,
             'selectedRelayPointId' => old('relay_point_id'),
             'selectedPaymentMethod' => old('payment_method'),
+            'paymentCanceled' => request()->boolean('payment_canceled'),
         ]);
     }
 
@@ -462,7 +463,7 @@ class CheckoutController extends Controller
                 'discount_code_id' => $discountCode?->id,
             ],
             'success_url' => localized_route('checkout.stripe.success').'?session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url' => localized_route('checkout.show'),
+            'cancel_url' => localized_route('checkout.show', ['payment_canceled' => 1]),
         ]);
 
         return redirect()->away($session->url);

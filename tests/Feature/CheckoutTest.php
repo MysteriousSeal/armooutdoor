@@ -58,6 +58,34 @@ class CheckoutTest extends TestCase
             ->assertSee('Nouvelle adresse');
     }
 
+    public function test_checkout_shows_a_notice_after_a_canceled_stripe_payment(): void
+    {
+        $user = User::factory()->create();
+        $product = Product::query()->where('slug', 'ridge-tent')->firstOrFail();
+
+        $this->actingAs($user)
+            ->post('/cart', ['product_id' => $product->id, 'quantity' => 1]);
+
+        $this->actingAs($user)
+            ->get('/checkout?payment_canceled=1')
+            ->assertOk()
+            ->assertSee('paiement a été annulé');
+    }
+
+    public function test_checkout_shows_no_cancellation_notice_normally(): void
+    {
+        $user = User::factory()->create();
+        $product = Product::query()->where('slug', 'ridge-tent')->firstOrFail();
+
+        $this->actingAs($user)
+            ->post('/cart', ['product_id' => $product->id, 'quantity' => 1]);
+
+        $this->actingAs($user)
+            ->get('/checkout')
+            ->assertOk()
+            ->assertDontSee('paiement a été annulé');
+    }
+
     public function test_a_user_can_create_an_address(): void
     {
         $user = User::factory()->create();

@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Category;
 use App\Models\CompanySetting;
+use App\Models\ContactMessage;
 use App\Models\WishlistItem;
 use App\Support\Cart;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -63,6 +64,13 @@ class AppServiceProvider extends ServiceProvider
         View::composer(
             ['legal.terms', 'legal.notice', 'legal.privacy', 'legal.withdrawal'],
             fn ($view) => $view->with('company', CompanySetting::current()),
+        );
+
+        View::composer(
+            'layouts.admin',
+            fn ($view) => $view->with('unreadMessageCount', Auth::guard('web')->check()
+                ? ContactMessage::query()->whereNull('read_at')->count()
+                : 0),
         );
     }
 }

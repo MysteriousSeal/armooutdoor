@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\CarrierPriceTierController as AdminCarrierPriceTi
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\ChangelogController as AdminChangelogController;
 use App\Http\Controllers\Admin\CompanySettingController as AdminCompanySettingController;
+use App\Http\Controllers\Admin\ContactMessageController as AdminContactMessageController;
 use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\DiscountCodeController as AdminDiscountCodeController;
@@ -36,6 +37,7 @@ use App\Http\Controllers\BestSellersController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\HelpController;
 use App\Http\Controllers\HomeController;
@@ -96,6 +98,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/customers/{customer}/notes', [AdminCustomerController::class, 'updateNotes'])->name('customers.notes.update');
         Route::patch('/customers/{customer}', [AdminCustomerController::class, 'updateAccount'])->name('customers.update');
         Route::post('/customers/{customer}/send-reset-link', [AdminCustomerController::class, 'sendResetLink'])->name('customers.send-reset-link');
+        Route::get('/messages', [AdminContactMessageController::class, 'index'])->name('messages.index');
+        Route::get('/messages/{message}', [AdminContactMessageController::class, 'show'])->name('messages.show');
 
         // Products
         Route::get('/products', [AdminProductController::class, 'index'])->name('products.index');
@@ -208,6 +212,8 @@ Route::view('/mentions-legales', 'legal.notice')->name('legal.notice');
 Route::view('/confidentialite', 'legal.privacy')->name('legal.privacy');
 Route::view('/droit-de-retractation', 'legal.withdrawal')->name('legal.withdrawal');
 Route::get('/faq', [FaqController::class, 'index'])->name('faq');
+Route::get('/contact', [ContactController::class, 'create'])->name('contact.show');
+Route::post('/contact', [ContactController::class, 'store'])->middleware('throttle:5,1')->name('contact.store');
 Route::get('/livraison-et-retours', [HelpController::class, 'shippingReturns'])->name('help.shipping-returns');
 Route::get('/paiement-securise', [HelpController::class, 'securePayment'])->name('help.secure-payment');
 

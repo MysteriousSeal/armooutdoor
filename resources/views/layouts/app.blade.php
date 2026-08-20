@@ -94,7 +94,7 @@
                         <a href="{{ route('products.best-sellers') }}" class="sort-tab {{ request()->routeIs('products.best-sellers') ? 'active' : '' }}">
                             {{ __('store.footer_shop_best_sellers') }}
                         </a>
-                        <a href="#" class="sort-tab">
+                        <a href="{{ localized_route('contact.show') }}" class="sort-tab {{ request()->routeIs('contact.show') ? 'active' : '' }}">
                             {{ __('store.footer_help_contact') }}
                         </a>
                     </nav>
@@ -240,7 +240,7 @@
                         <li><a href="{{ route('faq') }}">{{ __('store.footer_help_faq') }}</a></li>
                         <li><a href="{{ route('help.shipping-returns') }}">{{ __('store.footer_help_shipping_returns') }}</a></li>
                         <li><a href="{{ route('help.secure-payment') }}">{{ __('store.footer_help_secure_payment') }}</a></li>
-                        <li><a href="#">{{ __('store.footer_help_contact') }}</a></li>
+                        <li><a href="{{ localized_route('contact.show') }}">{{ __('store.footer_help_contact') }}</a></li>
                     </ul>
                 </nav>
             </div>
