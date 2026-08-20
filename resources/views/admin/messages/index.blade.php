@@ -20,6 +20,7 @@
                             <th></th>
                             <th>From</th>
                             <th>Subject</th>
+                            <th>Order</th>
                             <th>Received</th>
                             <th></th>
                         </tr>
@@ -37,6 +38,13 @@
                                     <span class="admin-table-sub">{{ $message->email }}</span>
                                 </td>
                                 <td>{{ $message->subject }}</td>
+                                <td>
+                                    @if ($message->order)
+                                        <a href="{{ route('admin.orders.show', $message->order) }}">{{ $message->order->number }}</a>
+                                    @else
+                                        —
+                                    @endif
+                                </td>
                                 <td>
                                     <span class="admin-table-primary">{{ $message->created_at->format('d M Y') }}</span>
                                     <span class="admin-table-sub">{{ $message->created_at->format('H:i') }}</span>

@@ -13,6 +13,9 @@
                 @if ($message->user)
                     · <a href="{{ route('admin.customers.show', $message->user) }}">Customer account</a>
                 @endif
+                @if ($message->order)
+                    · <a href="{{ route('admin.orders.show', $message->order) }}">Order {{ $message->order->number }}</a>
+                @endif
             </p>
         </header>
 

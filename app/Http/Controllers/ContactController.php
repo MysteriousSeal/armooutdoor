@@ -19,6 +19,9 @@ class ContactController extends Controller
             'company' => CompanySetting::current(),
             'prefillName' => $user?->name ?? old('name', ''),
             'prefillEmail' => $user?->email ?? old('email', ''),
+            'orders' => $user
+                ? $user->orders()->whereNull('archived_at')->where('status', '!=', 'draft')->latest()->get()
+                : collect(),
         ]);
     }
 

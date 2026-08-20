@@ -378,6 +378,8 @@ return [
     'contact_name' => 'Nom',
     'contact_email' => 'E-mail',
     'contact_subject' => 'Sujet',
+    'contact_order' => 'Commande concernée (facultatif)',
+    'contact_order_none' => 'Aucune commande en particulier',
     'contact_message' => 'Message',
     'contact_submit' => 'Envoyer le message',
     'contact_sent' => 'Votre message a bien été envoyé. On vous répond au plus vite.',

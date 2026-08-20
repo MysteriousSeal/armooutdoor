@@ -3,13 +3,34 @@
 namespace Tests\Feature;
 
 use App\Models\ContactMessage;
+use App\Models\Order;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
 class ContactTest extends TestCase
 {
     use RefreshDatabase;
+
+    private function orderFor(User $user, string $status = 'placed', ?Carbon $archivedAt = null): Order
+    {
+        return Order::query()->create([
+            'number' => Order::generateNumber(),
+            'user_id' => $user->id,
+            'status' => $status,
+            'archived_at' => $archivedAt,
+            'address_snapshot' => ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'x', 'postal_code' => '75000', 'city' => 'Paris', 'country' => 'FR'],
+            'billing_address_snapshot' => ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'x', 'postal_code' => '75000', 'city' => 'Paris', 'country' => 'FR'],
+            'carrier_method' => 'home',
+            'carrier_snapshot' => ['name' => ['fr' => 'Colissimo']],
+            'subtotal_cents' => 1000,
+            'shipping_cents' => 500,
+            'discount_cents' => 0,
+            'total_cents' => 1500,
+            'payment_method' => 'card',
+        ]);
+    }
 
     public function test_contact_page_is_public(): void
     {
@@ -113,6 +134,128 @@ class ContactTest extends TestCase
 
         $response->assertSessionHasErrors('website');
         $this->assertDatabaseCount('contact_messages', 0);
+    }
+
+    public function test_a_logged_in_customer_with_orders_sees_the_order_dropdown(): void
+    {
+        $user = User::factory()->create();
+        $order = $this->orderFor($user);
+
+        $this->actingAs($user)
+            ->get('/contact')
+            ->assertOk()
+            ->assertSee($order->number);
+    }
+
+    public function test_a_guest_does_not_see_the_order_dropdown(): void
+    {
+        $this->get('/contact')
+            ->assertOk()
+            ->assertDontSee('name="order_id"', false);
+    }
+
+    public function test_a_customer_without_orders_does_not_see_the_order_dropdown(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get('/contact')
+            ->assertDontSee('name="order_id"', false);
+    }
+
+    public function test_a_customer_can_reference_their_own_order(): void
+    {
+        $user = User::factory()->create();
+        $order = $this->orderFor($user);
+
+        $this->actingAs($user)->post('/contact', [
+            'name' => $user->name,
+            'email' => $user->email,
+            'subject' => 'Question',
+            'message' => 'Où en est ma commande ?',
+            'order_id' => $order->id,
+        ]);
+
+        $this->assertDatabaseHas('contact_messages', [
+            'email' => $user->email,
+            'order_id' => $order->id,
+        ]);
+    }
+
+    public function test_a_customer_cannot_reference_someone_elses_order(): void
+    {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+        $otherOrder = $this->orderFor($otherUser);
+
+        $response = $this->actingAs($user)->post('/contact', [
+            'name' => $user->name,
+            'email' => $user->email,
+            'subject' => 'Question',
+            'message' => 'Test',
+            'order_id' => $otherOrder->id,
+        ]);
+
+        $response->assertSessionHasErrors('order_id');
+        $this->assertDatabaseCount('contact_messages', 0);
+    }
+
+    public function test_a_customer_cannot_reference_a_draft_or_archived_order(): void
+    {
+        $user = User::factory()->create();
+        $draftOrder = $this->orderFor($user, 'draft');
+        $archivedOrder = $this->orderFor($user, 'placed', now());
+
+        foreach ([$draftOrder, $archivedOrder] as $order) {
+            $response = $this->actingAs($user)->post('/contact', [
+                'name' => $user->name,
+                'email' => $user->email,
+                'subject' => 'Question',
+                'message' => 'Test',
+                'order_id' => $order->id,
+            ]);
+
+            $response->assertSessionHasErrors('order_id');
+        }
+
+        $this->assertDatabaseCount('contact_messages', 0);
+    }
+
+    public function test_a_guest_cannot_reference_an_order(): void
+    {
+        $user = User::factory()->create();
+        $order = $this->orderFor($user);
+
+        $response = $this->post('/contact', [
+            'name' => 'Jean Martin',
+            'email' => 'jean@example.com',
+            'subject' => 'Question',
+            'message' => 'Test',
+            'order_id' => $order->id,
+        ]);
+
+        $response->assertSessionHasErrors('order_id');
+        $this->assertDatabaseCount('contact_messages', 0);
+    }
+
+    public function test_admin_message_view_links_the_referenced_order(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $customer = User::factory()->create();
+        $order = $this->orderFor($customer);
+        $message = ContactMessage::query()->create([
+            'user_id' => $customer->id,
+            'order_id' => $order->id,
+            'name' => $customer->name,
+            'email' => $customer->email,
+            'subject' => 'Question',
+            'message' => 'Test',
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/admin/messages/'.$message->id)
+            ->assertOk()
+            ->assertSee($order->number);
     }
 
     public function test_non_admins_cannot_view_the_admin_message_inbox(): void

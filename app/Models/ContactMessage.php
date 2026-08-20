@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['user_id', 'name', 'email', 'subject', 'message'])]
+#[Fillable(['user_id', 'order_id', 'name', 'email', 'subject', 'message'])]
 class ContactMessage extends Model
 {
     protected function casts(): array
@@ -19,6 +19,11 @@ class ContactMessage extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
     }
 
     public function isRead(): bool

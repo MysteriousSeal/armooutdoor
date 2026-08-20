@@ -54,6 +54,21 @@
                     @error('subject') <p class="form-error">{{ $message }}</p> @enderror
                 </div>
 
+                @if ($orders->isNotEmpty())
+                    <div class="form-group">
+                        <label for="order_id">{{ __('store.contact_order') }}</label>
+                        <select id="order_id" name="order_id" class="form-control">
+                            <option value="">{{ __('store.contact_order_none') }}</option>
+                            @foreach ($orders as $order)
+                                <option value="{{ $order->id }}" @selected(old('order_id') == $order->id)>
+                                    {{ $order->number }} · {{ $order->created_at->format('d/m/Y') }} · {{ $order->formattedTotal() }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('order_id') <p class="form-error">{{ $message }}</p> @enderror
+                    </div>
+                @endif
+
                 <div class="form-group">
                     <label for="message">{{ __('store.contact_message') }}</label>
                     <textarea id="message" name="message" class="form-control" rows="7" maxlength="5000" required data-validate>{{ old('message') }}</textarea>
