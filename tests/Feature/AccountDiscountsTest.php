@@ -19,10 +19,14 @@ class AccountDiscountsTest extends TestCase
 {
     use RefreshDatabase;
 
+    private int $codeSequence = 0;
+
     private function code(array $attributes = []): DiscountCode
     {
+        // Counted, not random: a random suffix collided once the tests began
+        // creating a dozen codes at a time, failing on the unique index.
         return DiscountCode::query()->create([
-            'code' => 'CODE'.random_int(1000, 9999),
+            'code' => 'CODE'.str_pad((string) ++$this->codeSequence, 4, '0', STR_PAD_LEFT),
             'type' => 'percentage',
             'value' => 10,
             ...$attributes,

@@ -63,6 +63,47 @@ class DraftOrderDeletionTest extends TestCase
         $this->assertNotNull($draft->fresh()->archived_at);
     }
 
+    public function test_a_draft_cannot_be_marked_as_a_test_order(): void
+    {
+        $owner = User::factory()->admin()->create();
+        $draft = $this->order('draft');
+        $markedDraft = $this->order('draft', ['test_marked_at' => now()]);
+
+        // Otherwise marking becomes the one way to move a draft out of the
+        // Drafts tab — the side door archiving was just closed for. It also
+        // achieves nothing: drafts are outside every figure already.
+        $this->actingAs($owner)->patch(route('admin.orders.test', $draft))->assertForbidden();
+        $this->actingAs($owner)->patch(route('admin.orders.untest', $markedDraft))->assertForbidden();
+
+        $this->assertNull($draft->fresh()->test_marked_at);
+    }
+
+    public function test_bulk_test_marking_passes_over_drafts(): void
+    {
+        $owner = User::factory()->admin()->create();
+        $draft = $this->order('draft');
+        $real = $this->order();
+
+        $this->actingAs($owner)
+            ->patch(route('admin.orders.bulk-test'), ['order_ids' => [$draft->id, $real->id]])
+            ->assertSessionHas('status', '1 order marked as test.');
+
+        $this->assertNull($draft->fresh()->test_marked_at);
+        $this->assertNotNull($real->fresh()->test_marked_at);
+    }
+
+    public function test_a_draft_offers_neither_archiving_nor_test_marking(): void
+    {
+        $owner = User::factory()->admin()->create();
+        $draft = $this->order('draft');
+
+        // Delete is the only way out of Drafts, so it is the only one offered.
+        $this->actingAs($owner)->get('/admin/orders/'.$draft->number)->assertOk()
+            ->assertSee('Delete draft')
+            ->assertDontSee('Mark as test')
+            ->assertDontSee('data-modal-open="archive-confirm-modal"', false);
+    }
+
     public function test_an_owner_deletes_a_draft_and_its_lines_go_with_it(): void
     {
         $owner = User::factory()->admin()->create();

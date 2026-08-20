@@ -399,7 +399,7 @@
                                                 </span>
                                             @endif
 
-                                            @if (auth()->user()->isOwner())
+                                            @if (auth()->user()->isOwner() && $order->canBeMarkedAsTest())
                                             <button
                                                 type="button"
                                                 class="admin-actions-item"

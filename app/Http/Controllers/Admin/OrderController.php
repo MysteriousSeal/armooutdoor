@@ -596,6 +596,8 @@ class OrderController extends Controller
 
     public function markTest(Order $order): RedirectResponse
     {
+        abort_unless($order->canBeMarkedAsTest(), 403);
+
         $order->markAsTest();
         AdminActivityLog::record('order.marked_test', $order, 'Marked order '.$order->number.' as a test order');
 
@@ -604,6 +606,8 @@ class OrderController extends Controller
 
     public function unmarkTest(Order $order): RedirectResponse
     {
+        abort_unless($order->canBeMarkedAsTest(), 403);
+
         $order->unmarkAsTest();
         AdminActivityLog::record('order.unmarked_test', $order, 'Unmarked order '.$order->number.' as a test order');
 
@@ -615,6 +619,7 @@ class OrderController extends Controller
         $orders = Order::query()
             ->whereIn('id', $request->validated('order_ids'))
             ->excludingTest()
+            ->where('status', '!=', 'draft')
             ->get();
 
         foreach ($orders as $order) {
@@ -630,6 +635,7 @@ class OrderController extends Controller
         $orders = Order::query()
             ->whereIn('id', $request->validated('order_ids'))
             ->onlyTest()
+            ->where('status', '!=', 'draft')
             ->get();
 
         foreach ($orders as $order) {

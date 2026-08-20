@@ -49,7 +49,7 @@
                     @else
                         <button type="button" class="btn btn-secondary" data-modal-open="archive-confirm-modal">Archive</button>
                     @endif
-                    @if (auth()->user()->isOwner())
+                    @if (auth()->user()->isOwner() && $order->canBeMarkedAsTest())
                         @if ($order->isTest())
                             <button type="button" class="btn btn-secondary" data-modal-open="untest-confirm-modal">Unmark as test</button>
                         @else
@@ -526,7 +526,7 @@
 
         {{-- Gated like the buttons above: a form staff cannot submit has no
              business being in the page. --}}
-        @if (auth()->user()->isOwner())
+        @if (auth()->user()->isOwner() && $order->canBeMarkedAsTest())
         @if ($order->isTest())
             <dialog id="untest-confirm-modal" class="modal" aria-labelledby="untest-confirm-title">
                 <form method="POST" action="{{ route('admin.orders.untest', $order) }}">

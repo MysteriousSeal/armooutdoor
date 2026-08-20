@@ -362,6 +362,16 @@ class Order extends Model
         return $this->isDraft();
     }
 
+    /**
+     * Drafts are already outside every figure, so marking one changes nothing
+     * — and it would be the one way to move a draft out of the Drafts tab,
+     * which is exactly what archiving is no longer allowed to do.
+     */
+    public function canBeMarkedAsTest(): bool
+    {
+        return ! $this->isDraft();
+    }
+
     public function isArchived(): bool
     {
         return $this->archived_at !== null;
