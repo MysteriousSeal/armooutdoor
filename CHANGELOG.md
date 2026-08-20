@@ -2,6 +2,17 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-20 — v0.4.2 — build L18919
+
+### Admin
+
+- New customers whose profile nobody has opened yet are now flagged: a badge on the Customers nav item, and a dot, "New" chip and tinted row on the list itself. Opening the profile clears it. Manual-order accounts stay out of it, since they never appear on that list.
+- Right-aligned the View button on the conversations and activity tables, which were missing the wrapper every other admin table uses.
+
+### Fixed
+
+- **A customer replying to a closed conversation was shown the admin 403 page** — the back-office nav along with its shop-wide badge counts, including unread conversations across every customer. Replying to a closed thread no longer errors at all; it redirects back with an explanation. The 403 page now picks its chrome from who is asking, and the admin nav counts require an admin rather than merely a login.
+
 ## 2026-08-20 — v0.4.1 — build EUXF6Z
 
 ### Admin
