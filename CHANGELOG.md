@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-20 — v0.4.1 — build EUXF6Z
+
+### Admin
+
+- The Orders nav item now carries a badge counting orders nobody has started on yet — non-archived orders still at "placed". Narrower than the "to prepare" chip on the orders list, which also counts orders already being prepared.
+
 ## 2026-08-20 — v0.4.0 — build DUZR9H
 
 ### Messages
