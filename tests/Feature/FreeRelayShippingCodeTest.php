@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Address;
 use App\Models\Carrier;
+use App\Models\CompanySetting;
 use App\Models\DiscountCode;
 use App\Models\Order;
 use App\Models\Product;
@@ -354,6 +355,55 @@ class FreeRelayShippingCodeTest extends TestCase
             // string with it rather than typing one by hand.
             ->assertSee('-'.format_euros(500))
             ->assertDontSee('Free relay delivery');
+    }
+
+    /**
+     * The invoice is a legal document, so its figures have to add up. Renders
+     * the Blade rather than the PDF: the numbers are what matter here, and
+     * dompdf output is not readable.
+     */
+    private function renderInvoice(Order $order): string
+    {
+        return view('admin.orders.invoice-pdf', [
+            'order' => $order->load('items'),
+            'company' => CompanySetting::current(),
+        ])->render();
+    }
+
+    public function test_the_invoice_shows_the_waiver_so_the_figures_add_up(): void
+    {
+        $order = $this->waivedOrderFor(User::factory()->create());
+        $html = $this->renderInvoice($order);
+
+        $this->assertStringContainsString(__('store.checkout_shipping_discount'), $html);
+        $this->assertStringContainsString('-'.format_euros(490), $html);
+
+        // Sous-total - réduction + livraison - livraison offerte = total.
+        $this->assertSame(
+            $order->total_cents,
+            $order->subtotal_cents - $order->discount_cents + $order->shipping_cents - $order->shipping_discount_cents,
+        );
+    }
+
+    public function test_the_invoice_omits_the_reduction_line_when_nothing_came_off_the_goods(): void
+    {
+        $order = $this->waivedOrderFor(User::factory()->create());
+
+        $this->assertStringNotContainsString('Réduction', $this->renderInvoice($order));
+    }
+
+    public function test_the_invoice_still_shows_a_real_goods_discount(): void
+    {
+        $order = $this->orderWith(490, 0);
+        $order->discount_cents = 500;
+        $order->discount_code_snapshot = ['code' => 'DIX', 'type' => DiscountCode::TYPE_PERCENTAGE, 'value' => 10];
+        $order->save();
+
+        $html = $this->renderInvoice($order);
+
+        $this->assertStringContainsString('Réduction', $html);
+        $this->assertStringContainsString('-'.format_euros(500), $html);
+        $this->assertStringNotContainsString(__('store.checkout_shipping_discount'), $html);
     }
 
     public function test_the_csv_export_reconciles_on_a_code_waived_order(): void

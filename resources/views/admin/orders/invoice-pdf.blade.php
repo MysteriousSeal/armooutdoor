@@ -276,7 +276,10 @@
                         <td class="t-label">Sous-total</td>
                         <td class="t-value">{{ $order->formattedSubtotal() }}</td>
                     </tr>
-                    @if ($order->hasDiscountCode())
+                    {{-- Only when something actually came off the goods: a
+                         shipping code takes nothing off them, and would
+                         otherwise print "Réduction -0,00 €". --}}
+                    @if ($order->discount_cents > 0)
                         <tr>
                             <td class="t-label">Réduction</td>
                             <td class="t-value">-{{ $order->formattedDiscountCents() }}</td>
@@ -286,6 +289,15 @@
                         <td class="t-label">Livraison</td>
                         <td class="t-value">{{ $order->formattedShipping() }}</td>
                     </tr>
+                    {{-- Without this the invoice does not add up: Livraison
+                         shows the carrier's real price, but the customer was
+                         never charged it. --}}
+                    @if ($order->shipping_discount_cents > 0)
+                        <tr>
+                            <td class="t-label">{{ __('store.checkout_shipping_discount') }}</td>
+                            <td class="t-value">-{{ format_euros($order->shipping_discount_cents) }}</td>
+                        </tr>
+                    @endif
                     @if ($order->status === 'refunded')
                         <tr>
                             <td class="t-label">Remboursement</td>
