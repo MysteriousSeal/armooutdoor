@@ -499,7 +499,14 @@
                     </div>
                     <div id="checkout-discount-row" @unless ($discountCode) hidden @endunless>
                         <dt id="checkout-discount-label">{{ $discountCode ? __('store.order_discount_code', ['code' => $discountCode->code]) : '' }}</dt>
-                        <dd id="checkout-discount-value">-{{ format_euros($discountCents) }}</dd>
+                        {{-- A shipping code has no goods amount; it is worth
+                             whatever the relay carrier costs, shown on its own
+                             line below once one is chosen. --}}
+                        <dd id="checkout-discount-value">
+                            {{ $discountCode?->isFreeRelayShipping()
+                                ? __('store.discount_code_free_relay_label')
+                                : '-'.format_euros($discountCents) }}
+                        </dd>
                     </div>
                     <div>
                         <dt>{{ __('store.shipping') }}</dt>

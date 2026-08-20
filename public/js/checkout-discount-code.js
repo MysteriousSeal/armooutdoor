@@ -47,6 +47,7 @@
 
         if (window.armoCheckout) {
             window.armoCheckout.discountCents = data.discountCents || 0;
+            window.armoCheckout.freeShippingCarrierIds = data.freeShippingCarrierIds || [];
             if (typeof window.armoCheckout.syncTotals === 'function') {
                 window.armoCheckout.syncTotals();
             }

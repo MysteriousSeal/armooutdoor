@@ -62,11 +62,7 @@ class CheckoutController extends Controller
 
         // Which carriers the applied code waives delivery on, so the
         // client-side total can stay in step with the server's.
-        $freeShippingCarrierIds = $carriers
-            ->filter(fn (Carrier $carrier): bool => $discountCode !== null
-                && $discountCode->shippingDiscountCents($carrier, $carrierPricesCents[$carrier->id], $subtotalCents) > 0)
-            ->pluck('id')
-            ->values();
+        $freeShippingCarrierIds = $this->freeShippingCarrierIds($cart, $discountCode);
 
         // No-JS fallback: the relay list is normally only ever populated by
         // the AJAX endpoint (fetching live on every page load would slow it
@@ -234,6 +230,33 @@ class CheckoutController extends Controller
         return redirect(localized_route('checkout.show'))->with('status', $message);
     }
 
+    /**
+     * Carriers whose delivery charge the applied code waives.
+     *
+     * @return array<int, int>
+     */
+    private function freeShippingCarrierIds(Cart $cart, ?DiscountCode $discountCode): array
+    {
+        if ($discountCode === null) {
+            return [];
+        }
+
+        $subtotalCents = $cart->totalCents();
+        $weightGrams = $cart->totalWeightGrams();
+        $shippingSetting = ShippingSetting::current();
+
+        return Carrier::query()->active()->get()
+            ->filter(fn (Carrier $carrier): bool => $cart->allowsCarrier($carrier))
+            ->filter(fn (Carrier $carrier): bool => $discountCode->shippingDiscountCents(
+                $carrier,
+                $shippingSetting->effectivePriceCents($carrier, $subtotalCents, $weightGrams),
+                $subtotalCents,
+            ) > 0)
+            ->pluck('id')
+            ->values()
+            ->all();
+    }
+
     private function discountCodeSectionResponse(Cart $cart, ?DiscountCode $discountCode, string $message, ?string $errorMessage = null): JsonResponse
     {
         $subtotalCents = $cart->totalCents();
@@ -253,8 +276,14 @@ class CheckoutController extends Controller
         return response()->json([
             'applied' => $discountCode !== null,
             'discountCents' => $discountCents,
+            // The client recomputes the total too, so it needs to learn which
+            // carriers this code waives — otherwise the shipping line would
+            // only zero out after a reload.
+            'freeShippingCarrierIds' => $this->freeShippingCarrierIds($cart, $discountCode),
             'discountLabel' => $discountCode ? __('store.order_discount_code', ['code' => $discountCode->code]) : null,
-            'discountValueText' => '-'.format_euros($discountCents),
+            'discountValueText' => $discountCode?->isFreeRelayShipping()
+                ? __('store.discount_code_free_relay_label')
+                : '-'.format_euros($discountCents),
             'sectionHtml' => $sectionHtml,
             'message' => $message,
         ], $errorMessage !== null ? 422 : 200);

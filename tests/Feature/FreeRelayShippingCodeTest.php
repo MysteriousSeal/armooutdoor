@@ -151,6 +151,62 @@ class FreeRelayShippingCodeTest extends TestCase
         $this->assertSame('Point relais offert', __('store.discount_code_free_relay_label'));
     }
 
+    public function test_the_summary_shows_text_not_a_zero_amount(): void
+    {
+        $this->code();
+        $user = User::factory()->create();
+        $product = Product::query()->where('slug', 'ridge-tent')->firstOrFail();
+        $this->actingAs($user)->post('/cart', ['product_id' => $product->id, 'quantity' => 1]);
+        $this->actingAs($user)->post('/checkout/discount-code', ['code' => 'RELAIS']);
+
+        $content = $this->actingAs($user)->get('/checkout')->assertOk()->getContent();
+
+        // The code takes nothing off the goods, so the old markup rendered a
+        // meaningless "-0,00 €" against the code's name.
+        $this->assertMatchesRegularExpression(
+            '/id="checkout-discount-value">\s*Point relais offert/',
+            $content,
+        );
+    }
+
+    public function test_the_dynamic_apply_returns_text_and_the_waived_carriers(): void
+    {
+        $this->code();
+        $user = User::factory()->create();
+        $product = Product::query()->where('slug', 'ridge-tent')->firstOrFail();
+        $this->actingAs($user)->post('/cart', ['product_id' => $product->id, 'quantity' => 1]);
+
+        $response = $this->actingAs($user)
+            ->postJson('/checkout/discount-code', ['code' => 'RELAIS'])
+            ->assertOk();
+
+        $response->assertJsonPath('discountValueText', __('store.discount_code_free_relay_label'));
+
+        // Without this the client could not zero the shipping line until a
+        // reload, and would show a total the server disagrees with.
+        $this->assertNotEmpty($response->json('freeShippingCarrierIds'));
+    }
+
+    public function test_an_amount_code_still_shows_its_amount(): void
+    {
+        DiscountCode::query()->create([
+            'code' => 'DIX',
+            'type' => DiscountCode::TYPE_PERCENTAGE,
+            'value' => 10,
+        ]);
+
+        $user = User::factory()->create();
+        $product = Product::query()->where('slug', 'ridge-tent')->firstOrFail();
+        $this->actingAs($user)->post('/cart', ['product_id' => $product->id, 'quantity' => 1]);
+
+        $response = $this->actingAs($user)
+            ->postJson('/checkout/discount-code', ['code' => 'DIX'])
+            ->assertOk();
+
+        $this->assertStringStartsWith('-', $response->json('discountValueText'));
+        $this->assertSame([], $response->json('freeShippingCarrierIds'));
+    }
+
     public function test_the_edit_form_preview_shows_the_english_badge(): void
     {
         $admin = User::factory()->admin()->create();
