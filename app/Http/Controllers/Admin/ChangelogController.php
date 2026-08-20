@@ -15,11 +15,12 @@ class ChangelogController extends Controller
     }
 
     /**
-     * Parses this project's CHANGELOG.md ("## date — vX.Y.Z" releases, "### Category"
-     * sections, "- " items with optional "  - " nested notes) into a plain structure
-     * for the admin changelog page. Item text is pre-rendered to safe HTML (bold/code).
+     * Parses this project's CHANGELOG.md ("## date — vX.Y.Z — build XXXXXX" releases,
+     * "### Category" sections, "- " items with optional "  - " nested notes) into a
+     * plain structure for the admin changelog page. Item text is pre-rendered to safe
+     * HTML (bold/code).
      *
-     * @return array<int, array{date: string, version: ?string, categories: array<int, array{name: ?string, items: array<int, array{text: string, children: array<int, string>}>}>}>
+     * @return array<int, array{date: string, version: ?string, build: ?string, categories: array<int, array{name: ?string, items: array<int, array{text: string, children: array<int, string>}>}>}>
      */
     private function parse(string $markdown): array
     {
@@ -37,13 +38,19 @@ class ChangelogController extends Controller
 
                 $date = $m[1];
                 $version = null;
+                $build = null;
 
-                if (preg_match('/^(.*) — v(.+)$/u', $m[1], $hm)) {
+                if (preg_match('/^(.*) — build (\S+)$/u', $date, $bm)) {
+                    $date = trim($bm[1]);
+                    $build = trim($bm[2]);
+                }
+
+                if (preg_match('/^(.*) — v(\S+)$/u', $date, $hm)) {
                     $date = trim($hm[1]);
                     $version = trim($hm[2]);
                 }
 
-                $release = ['date' => $date, 'version' => $version, 'categories' => []];
+                $release = ['date' => $date, 'version' => $version, 'build' => $build, 'categories' => []];
                 $categoryIndex = null;
                 $itemIndex = null;
 

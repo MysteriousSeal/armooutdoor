@@ -2,7 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
-## 2026-08-20 — v0.2.8
+## 2026-08-20 — v0.2.9 — build D12L9R
+
+### Admin
+
+- Changelog entries now show a build number (random 6-character code) alongside the version, generated once and stored in `CHANGELOG.md` rather than recomputed on each page view.
+- Backfilled build numbers onto all 79 existing changelog entries, and version numbers (v0.1.12–v0.1.14) onto the 3 oldest entries that predated versioning.
+
+## 2026-08-20 — v0.2.8 — build BP0TL4
 
 ### Storefront
 
@@ -13,7 +20,7 @@ All notable changes to this project since the initial commit are documented here
 
 - New "Messages" section (top-level nav, with an unread-count badge): lists and shows contact-form submissions.
 
-## 2026-08-20 — v0.2.7
+## 2026-08-20 — v0.2.7 — build VPFYXH
 
 ### Admin
 
@@ -22,7 +29,7 @@ All notable changes to this project since the initial commit are documented here
 - "Deactivate admin" now asks for confirmation first, matching the rest of the admin's destructive actions.
 - An owner demoting themselves to staff now gets a warning that they'll lose owner access immediately, and can still confirm.
 
-## 2026-08-20 — v0.2.6
+## 2026-08-20 — v0.2.6 — build M713S7
 
 ### Admin
 
@@ -32,14 +39,14 @@ All notable changes to this project since the initial commit are documented here
 - Deleting a discount, discount code, supplier, marketplace, or package type now asks for confirmation first, matching the existing order refund/archive/ship modals.
 - Admins can edit a customer's name and email, and send them a password reset link, from the customer page — previously only a free-text notes field was editable.
 
-## 2026-08-20 — v0.2.5
+## 2026-08-20 — v0.2.5 — build UYXMR7
 
 ### Admin
 
 - Added admin-user management (Settings → Admins): create new admins, edit name/email/reset password, deactivate — no more direct DB access needed to onboard staff. Guards against deactivating yourself or the last remaining admin.
 - Added 10 tests covering creation, validation, password reset, and deactivation guards; extended the route-authorization sweep to cover the new routes.
 
-## 2026-08-19 — v0.2.4
+## 2026-08-19 — v0.2.4 — build SESHJG
 
 ### Orders
 
@@ -48,28 +55,28 @@ All notable changes to this project since the initial commit are documented here
 - Admin marketplaces: added logo upload, auto-resized to 100×100px WebP; shown in the settings page and in the order list's Channel chip.
 - Redesigned the Orders settings page as a card grid, matching the rest of the admin.
 
-## 2026-08-19 — v0.2.3
+## 2026-08-19 — v0.2.3 — build VI990E
 
 ### Storefront
 
 - Added a custom 500 page, matching the 404 page's design (shared `.error-page*` styles in `errors.css`), with "Réessayer" and "Retour à l'accueil" actions.
 - Added a local-only debug route (`/debug/throw-500`) to preview the 500 page without needing a real server error.
 
-## 2026-08-19 — v0.2.2
+## 2026-08-19 — v0.2.2 — build BIQ5LR
 
 ### Storefront
 
 - Added a custom 404 page: search box, link back to the homepage, and a list of top-level categories, styled to match the shop and kept in its own `errors.css` stylesheet.
 - Fixed a bug that crashed any 404 for an unresolved product or category route (`layouts.app` tried to read `->category` off the raw route parameter when implicit model binding failed).
 
-## 2026-08-19 — v0.2.1
+## 2026-08-19 — v0.2.1 — build YVUJYG
 
 ### Orders
 
 - Admin orders list: the cost KPI cards (own shipping cost, commission cost, payment fees) now show their share of both the total order amount and the total costs. Total costs and Total perceived show their share of the total amount too.
 - Admin orders list: the Total amount KPI card is narrower, giving more room to the others.
 
-## 2026-08-19 — v0.2.0
+## 2026-08-19 — v0.2.0 — build CVCH5V
 
 ### Payments
 
@@ -87,25 +94,25 @@ All notable changes to this project since the initial commit are documented here
 - Admin order page: moved Customer, Shipping address, Billing address and Payment into a single row above Status history.
 - Admin order page: the order number is now clickable to copy it to the clipboard, with a confirmation toast.
 
-## 2026-08-19 — v0.1.81
+## 2026-08-19 — v0.1.81 — build DTCE7N
 
 ### Orders
 
 - Increased font sizes ~15% on the invoice and delivery slip PDFs for better readability.
 
-## 2026-08-19 — v0.1.80
+## 2026-08-19 — v0.1.80 — build QBDU21
 
 ### Catalog
 
 - Added an "image may vary" flag on products (admin checkbox, off by default) shown as a boxed notice on the product page when the delivered item's visual can differ from the pictures depending on supply.
 
-## 2026-08-19 — v0.1.79
+## 2026-08-19 — v0.1.79 — build UHCIAK
 
 ### Storefront
 
 - Widened the category-hero copy panel (`.cat-hero-copy`) so longer titles and accented text have more room before wrapping or clipping.
 
-## 2026-08-19 — v0.1.78
+## 2026-08-19 — v0.1.78 — build Q54BK6
 
 ### Testing
 
@@ -113,7 +120,7 @@ All notable changes to this project since the initial commit are documented here
 - Fixed 3 stale test assertions that no longer matched current app behaviour (uppercase-last-name formatting, products-list default sort).
 - Fixed a pre-existing test (`AdminTest`) that was writing real image files to `public/images/products` on every run without cleaning up after itself; added the same safeguard to new tests that upload images.
 
-## 2026-08-19 — v0.1.77
+## 2026-08-19 — v0.1.77 — build BW5OMX
 
 ### Storefront
 
@@ -121,86 +128,86 @@ All notable changes to this project since the initial commit are documented here
 - **Single-line title on Meilleures ventes hero**: added an opt-in `titleNoWrap` option to the shared page-hero partial, used only on that page; other heroes keep their existing wrapping.
 - **Renamed hamburger menu label**: "Catégories" is now "Menu".
 
-## 2026-08-19 — v0.1.76
+## 2026-08-19 — v0.1.76 — build TRPDDK
 
 ### Storefront
 
 - **Shared page hero partial**: extracted a `partials.page-hero` component (kicker, title, description, tag chips) and adopted it on the all-categories, best-sellers, new-arrivals and promotions pages for a consistent header.
 
-## 2026-08-19 — v0.1.75
+## 2026-08-19 — v0.1.75 — build RN106E
 
 ### Storefront
 
 - **"Nous contacter" in the main nav**: added as the last item in the top nav bar, alongside Accueil, Nouveautés, Promotions and Meilleures ventes.
 
-## 2026-08-19 — v0.1.74
+## 2026-08-19 — v0.1.74 — build 3E3VXX
 
 ### Storefront
 
 - **Fixed account page order count**: it included archived orders; now only counts non-archived ones.
 
-## 2026-08-19 — v0.1.73
+## 2026-08-19 — v0.1.73 — build 6NT0CR
 
 ### Admin
 
 - **Tracking status "N/A"**: the orders list's tracking column now shows "N/A" for orders that have never been shipped, instead of "Missing" — "Missing" is reserved for orders that were shipped but have no tracking number. Orders with a tracking number always show "Available", regardless of status.
 
-## 2026-08-19 — v0.1.72
+## 2026-08-19 — v0.1.72 — build 65W5DN
 
 ### Admin
 
 - **Shipping paid field for manual orders**: marketplace-linked manual orders now have a "Shipping paid" field, next to Commission, to record what you actually paid for shipping. Shown as a deduction chip on the orders list too.
 
-## 2026-08-19 — v0.1.71
+## 2026-08-19 — v0.1.71 — build L94I6T
 
 ### Storefront
 
 - **Order history explanations**: each status in "Historique de la commande" now shows a short note explaining what it means.
 
-## 2026-08-19 — v0.1.70
+## 2026-08-19 — v0.1.70 — build ZDFAI6
 
 ### Storefront
 
 - **Category hero redesign**: photo now bleeds from the right edge and fades into the page background on the left, with the title/description in a blurred glass card over the fade — replaces the flat dark-scrim overlay. Added hero photos for Stand de tir, Vêtements, Terrain, Quotidien, Munitions and Répliques airsoft.
 
-## 2026-08-19 — v0.1.69
+## 2026-08-19 — v0.1.69 — build ZY17P7
 
 ### Admin
 
 - **Invoice footer toggle**: the invoice settings page now has a "Show footer on invoices" switch, so the footer line can be hidden on PDFs without losing the saved text and URL.
 
-## 2026-08-19 — v0.1.68
+## 2026-08-19 — v0.1.68 — build ZNP5P0
 
 ### Admin
 
 - **Category hero images**: category edit pages now have an optional hero image field. Uploads are center-cropped to 21:9 and converted to WebP automatically. Shown as a full-bleed banner behind the category page header on the storefront.
 
-## 2026-08-19 — v0.1.67
+## 2026-08-19 — v0.1.67 — build 3URQCM
 
 ### Storefront
 
 - **French category URLs**: renamed 21 category slugs from English to French for SEO (e.g. `targets` → `cibles`, `apparel` → `vetements`, `ammo-boxes` → `boites-munitions`). Old URLs 301-redirect to the new ones, mapped in `config/category_slug_redirects.php`.
 
-## 2026-08-19 — v0.1.66
+## 2026-08-19 — v0.1.66 — build 22FBGS
 
 ### Admin
 
 - **De-duplicated category icon mapping**: the root-category-to-icon lookup was copy-pasted in 4 different views; it's now a single `Category::iconName()` method.
 
-## 2026-08-19 — v0.1.65
+## 2026-08-19 — v0.1.65 — build ACJXUI
 
 ### Storefront
 
 - **Unified category page header**: subcategory pages now use the same hero layout as root categories (icon, kicker, title, description, product count), with the kicker showing the parent category name instead of the generic tagline.
 
-## 2026-08-19 — v0.1.64
+## 2026-08-19 — v0.1.64 — build 5WUJ1Z
 
 ### Storefront
 
 - **Category icon in nav dropdowns**: each header submenu now shows the parent category's icon next to its subcategory list.
 - **Multi-column nav dropdowns**: submenus with more than 6 subcategories now flow into 3 columns instead of one long list.
 
-## 2026-08-19 — v0.1.63
+## 2026-08-19 — v0.1.63 — build RT36PR
 
 ### Admin
 
@@ -210,25 +217,25 @@ All notable changes to this project since the initial commit are documented here
 
 - **Added Mechanix M-Pact gloves (Noir)**: 1 product with 5 size variants (S–XXL) from DM Diffusion, filed under the existing Gants category.
 
-## 2026-08-19 — v0.1.62
+## 2026-08-19 — v0.1.62 — build Y41OEZ
 
 ### Admin
 
 - **Locked main product fields once variants exist**: SKU, GTIN, quantity and all Supplier fields on the product edit form are now disabled (and cleared) once a product has variants, since that data lives per-variant instead. Enforced server-side too, and cleaned up 15 existing variant products that still had stale values on the main product.
 
-## 2026-08-19 — v0.1.61
+## 2026-08-19 — v0.1.61 — build 2VZWCR
 
 ### Admin
 
 - **Prettier variant sub-table**: the products list now nests variants in a framed panel with one column per attribute present (e.g. Taille, Couleur), then separate SKU, GTIN, supplier and supplier-ref columns, plus stock chips for low/out and slightly faded inherited images.
 
-## 2026-08-19 — v0.1.60
+## 2026-08-19 — v0.1.60 — build QGM3XG
 
 ### Admin
 
 - **Variant details in the products table**: products with variants now show a sub-row with a compact table listing each variant's image, attribute (e.g. "Taille: S"), SKU, GTIN, supplier, supplier reference, price and stock.
 
-## 2026-08-19 — v0.1.59
+## 2026-08-19 — v0.1.59 — build IKF81Q
 
 ### Store
 
@@ -236,74 +243,74 @@ All notable changes to this project since the initial commit are documented here
 - **Variant-aware product card badge**: category, home, search, wishlist and other product-card listings now show "Dispo fournisseur" when every variant is out of stock but at least one can still be backordered, instead of always showing "Épuisé".
 - Renamed the product page's per-variant backorder chip label from "Sur commande" to "Dispo fournisseur".
 
-## 2026-08-19 — v0.1.58
+## 2026-08-19 — v0.1.58 — build 62AFWM
 
 ### Store
 
 - **Supplier badge for out-of-stock variant products**: on a product page, when every variant is out of stock but at least one can still be backordered from a supplier, the price-area badge now shows "Disponible chez notre fournisseur" instead of "Épuisé".
 
-## 2026-08-19 — v0.1.57
+## 2026-08-19 — v0.1.57 — build AMCCY9
 
 ### Admin
 
 - **Per-variant supplier fields**: each product variant now has its own supplier, availability, reference and product URL, independent from the parent product's supplier. Out-of-stock variants with a supplier can be backordered the same way non-variant products already could.
 
-## 2026-08-19 — v0.1.56
+## 2026-08-19 — v0.1.56 — build AIC983
 
 ### Catalog
 
 - **Added Mechanix M-Pact gloves (Coyote)**: 1 product with 5 size variants (S–XXL) from DM Diffusion, new "Gants" subcategory under Vêtements.
 
-## 2026-08-19 — v0.1.55
+## 2026-08-19 — v0.1.55 — build FK1DO1
 
 ### Admin
 
 - **Fixed squeezed product thumbnails**: long category and product names were forcing the products table wider, squeezing the thumbnail column off-square. Category names now hard-truncate to 20 characters and product names to 30, both with a full-text tooltip on hover.
 
-## 2026-08-19 — v0.1.54
+## 2026-08-19 — v0.1.54 — build 8Z8Y38
 
 ### Admin
 
 - **Products list defaults to newest first**: default sort changed from ID ascending to ID descending, so newly added products show up immediately without changing the sort.
 
-## 2026-08-19 — v0.1.53
+## 2026-08-19 — v0.1.53 — build UQOQ4W
 
 ### Storefront
 
 - **Shorter stock chip text on the homepage's 5-per-row grids**: "Disponibilité fournisseur" and "Derniers stock disponibles" now show as "Dispo fournisseur" and "Derniers stocks" there, so the badge doesn't overflow the card.
 
-## 2026-08-19 — v0.1.52
+## 2026-08-19 — v0.1.52 — build WPBAYY
 
 ### Storefront
 
 - **Product cards show supplier availability**: cards for out-of-stock, backorderable products now show a "Disponibilité fournisseur" chip, stay undimmed, and keep a working "Add to cart" button, everywhere the shared product card appears (homepage, search, category, wishlist).
 
-## 2026-08-19 — v0.1.51
+## 2026-08-19 — v0.1.51 — build Q2HODH
 
 ### Storefront
 
 - **Live cart shipping estimate**: removing a line from the cart now updates the estimated shipping date in place instead of requiring a full reload.
 - **Backordered cart lines**: the quantity field and "Update quantity" button are hidden for lines available at supplier (always capped at 1 anyway) — Remove stays available.
 
-## 2026-08-19 — v0.1.50
+## 2026-08-19 — v0.1.50 — build JQ44SZ
 
 ### Storefront
 
 - **Cart shipping estimate**: the cart page now shows an estimated shipping date at the top, computed live as "if you ordered right now" — same 10am/weekend rules as the order page, factoring in any backordered line's supplier lead time.
 
-## 2026-08-19 — v0.1.49
+## 2026-08-19 — v0.1.49 — build NT41KD
 
 ### Storefront
 
 - **Estimated shipping date**: the customer order page now shows an estimated shipping date (before 10am ships same day, otherwise next day; weekends push to Monday), accounting for backordered items' supplier lead time — whichever is latest wins. Backordered line items also show a note under the SKU. Not shown on the admin order page.
 
-## 2026-08-18 — v0.1.48
+## 2026-08-18 — v0.1.48 — build RT57KY
 
 ### Admin
 
 - **Fixed products list "ID" sort**: sort links used to omit `?sort=id-asc` from the URL as a cleanup, since it was always the default. That broke once the last-used sort started being remembered via cookie — omitting it meant "keep the remembered sort" instead of "sort by ID". Every sort link now always includes `sort` explicitly.
 
-## 2026-08-19 — v0.1.47
+## 2026-08-19 — v0.1.47 — build E70YX1
 
 ### Admin
 
@@ -311,13 +318,13 @@ All notable changes to this project since the initial commit are documented here
 - **Order detail supplier note**: when an order item is out of stock but available at its supplier, the order page now shows a note with the supplier name and lead time.
 - **New catalog product**: added Specna Arms BIO Core 0,20 g airsoft BBs (3000-count bottle), filed under the existing Billes airsoft subcategory.
 
-## 2026-08-18 — v0.1.46
+## 2026-08-18 — v0.1.46 — build DW9XMZ
 
 ### Storefront
 
 - **Cart line supplier availability**: a backordered cart line now shows "Disponible chez notre fournisseur" with the supplier's estimated lead time, next to the SKU.
 
-## 2026-08-18 — v0.1.45
+## 2026-08-18 — v0.1.45 — build 84H1I4
 
 ### Storefront
 
@@ -327,116 +334,116 @@ All notable changes to this project since the initial commit are documented here
 
 - **Fixed a 500 error** when sorting the products list by Supplier while also searching: the search filter's unqualified `name` column collided with the joined suppliers table's own `name` column. Now qualified as `products.name`.
 
-## 2026-08-18 — v0.1.44
+## 2026-08-18 — v0.1.44 — build AQ5L4Q
 
 ### Admin
 
 - **Products list sorting**: Price and Supplier columns are now sortable (base price, supplier name with unassigned products always last), matching ID/Name/Stock. The last-used sort is remembered in a cookie and reapplied on your next visit, unless the URL explicitly specifies one.
 
-## 2026-08-18 — v0.1.43
+## 2026-08-18 — v0.1.43 — build P5GY3K
 
 ### Admin
 
 - **Changelog page**: releases now sit on a vertical timeline rail instead of a plain stacked list.
 
-## 2026-08-18 — v0.1.42
+## 2026-08-18 — v0.1.42 — build 6O7XJO
 
 ### Storefront
 
 - **Category page redesign**: filters moved into a dedicated sidebar (radio buttons instead of dropdowns) on subcategory pages, with a reworked toolbar for subcategory navigation and sorting.
 
-## 2026-08-18 — v0.1.41
+## 2026-08-18 — v0.1.41 — build 9IL488
 
 ### Storefront
 
 - **Category filters restricted to subcategories**: the filter dropdowns no longer show on main category pages (those with subcategories), only on leaf subcategory pages. Filtering via URL still works either way.
 
-## 2026-08-18 — v0.1.40
+## 2026-08-18 — v0.1.40 — build HVC5CM
 
 ### Storefront
 
 - **Fixed category filters with numeric-only values**: PHP silently casts array keys that look like integers (e.g. "3300"), which broke selecting any such filter option — it always reset to "Tous". Fixed in `CategoryController::availableFilterValues()`.
 - **New Billes airsoft filters**: added Quantité, Contenant, Poids and Bio facets across all 4 products in that subcategory, via the Admin API.
 
-## 2026-08-18 — v0.1.39
+## 2026-08-18 — v0.1.39 — build PM48CE
 
 ### Storefront
 
 - **Category sort options**: added "Pertinence" (now the default, first in the list) and "Nouveautés" to every category page's sort dropdown. Pertinence currently orders the same as Nouveautés (newest first) until real relevance scoring is added.
 - **New catalog product**: added Specna Arms BIO Core 0,20 g airsoft BBs (5000-count, 1 kg sachet), filed under the existing Billes airsoft subcategory.
 
-## 2026-08-18 — v0.1.38
+## 2026-08-18 — v0.1.38 — build 6RWZDE
 
 ### Admin
 
 - **Available at supplier**: new switch in the product edit page's Supplier section, tracking whether the supplier currently has the item in stock for reordering. Defaults to on.
 
-## 2026-08-18 — v0.1.37
+## 2026-08-18 — v0.1.37 — build 9CIM2K
 
 ### Admin
 
 - **Product supplier**: products can now be linked to a supplier (optional, one per product) via a dropdown on the product edit page, below Carriers.
 - **Products list**: shows the supplier per product, with a filter dropdown and a Supplier column in the CSV export.
 
-## 2026-08-18 — v0.1.36
+## 2026-08-18 — v0.1.36 — build 5FC3AM
 
 ### Admin
 
 - **Suppliers settings page**: new page under Settings to manually track suppliers, with name, website and lead time (days to deliver once an order is placed).
 
-## 2026-08-18 — v0.1.35
+## 2026-08-18 — v0.1.35 — build 8OC9TB
 
 ### Storefront
 
 - **New "Promotions" and "Meilleures ventes" pages**: Promotions lists every product with an active discount; Meilleures ventes ranks products by units sold across placed/preparing/shipped orders. Both linked from the footer, listed in both sitemaps, with full SEO (title, meta description, canonical, breadcrumb and CollectionPage/ItemList structured data).
 - **New catalog product**: added Specna Arms BIO Core 0,20 g airsoft BBs (1000-count sachet), filed under the existing Billes airsoft subcategory.
 
-## 2026-08-18 — v0.1.34
+## 2026-08-18 — v0.1.34 — build 89X0PD
 
 ### Storefront
 
 - **Répliques airsoft icon**: the category now shows a Font Awesome gun icon on the homepage and the "Toutes les catégories" page, instead of the generic default icon.
 - **Product card redesign**: the "add to cart" button now floats over the card corner instead of sitting in a fixed-width footer bar, with tighter card spacing.
 
-## 2026-08-18 — v0.1.33
+## 2026-08-18 — v0.1.33 — build 1JEW70
 
 ### Storefront
 
 - **New "Nouveautés" page**: lists the latest products added to the catalog, linked from the footer, with full SEO (title, meta description, canonical, breadcrumb and CollectionPage/ItemList structured data) and listed in both sitemaps.
 
-## 2026-08-18 — v0.1.32
+## 2026-08-18 — v0.1.32 — build PQUUOP
 
 ### Storefront
 
 - **New catalog products**: added a Browning 1911 Spring 6 mm BB airsoft pistol (with its full image gallery), in a new "Pistolets" subcategory under Répliques airsoft.
 - **Subheader nav layout**: left-aligned instead of right-aligned, with bigger tap targets on category links and the dropdown menu.
 
-## 2026-08-18 — v0.1.31
+## 2026-08-18 — v0.1.31 — build KDHJWW
 
 ### Storefront
 
 - **New catalog products**: added two ASG Blaster 6 mm airsoft BB bottles (0,12 g and 0,20 g), in a new "Billes airsoft" subcategory under Munitions et Consommables.
 - **CSS cache busting**: every stylesheet link now carries `?v=<site version>`, so a version bump forces browsers to fetch the latest CSS instead of a stale cached copy.
 
-## 2026-08-18 — v0.1.30
+## 2026-08-18 — v0.1.30 — build 67OFZV
 
 ### Storefront
 
 - **New "Toutes les catégories" page**: lists every category and subcategory with product counts, linked from the footer and the homepage's category section, with full SEO (title, meta description, canonical, breadcrumb and CollectionPage/ItemList structured data) and listed in both sitemaps.
 
-## 2026-08-18 — v0.1.29
+## 2026-08-18 — v0.1.29 — build 9TPXT2
 
 ### Storefront
 
 - **Paiement sécurisé page**: clarified that the invoice becomes available once the order ships or is refunded.
 
-## 2026-08-18 — v0.1.28
+## 2026-08-18 — v0.1.28 — build PTB1WQ
 
 ### Storefront
 
 - **New help pages**: added an FAQ page (with FAQPage structured data for SEO), a "Livraison & Retours" page and a "Paiement sécurisé" page, all reachable from the footer's "Aide & Infos" column and listed in both sitemaps.
 
-## 2026-08-18 — v0.1.27
+## 2026-08-18 — v0.1.27 — build DQFDTI
 
 ### Admin
 
@@ -446,7 +453,7 @@ All notable changes to this project since the initial commit are documented here
 
 - **Consistent name formatting**: customer and address names now always display with the last name in uppercase and the first name capitalized, everywhere a name is shown (orders, invoices, delivery slips, accounts, admin lists).
 
-## 2026-08-18 — v0.1.26
+## 2026-08-18 — v0.1.26 — build VLFZLH
 
 ### Storefront
 
@@ -457,26 +464,26 @@ All notable changes to this project since the initial commit are documented here
 
 - **Products list tabs**: "Out of stock", "Missing SKU", "Missing GTIN" and "Missing weight" no longer count or list disabled products; the "Disabled" tab moved to the end of the row.
 
-## 2026-08-17 — v0.1.25
+## 2026-08-17 — v0.1.25 — build J4JW87
 
 ### Storefront
 
 - **Homepage icons**: every hand-drawn icon (category tiles, reassurance strip, shipping banner, "Pourquoi choisir" and "Une boutique française" sections) is now a real Font Awesome Free icon, and the "Sélectionné pour vous" grid shows 10 products (5 per row) instead of 4.
 - **Single icon partial**: all icons now render through one `partials.icon` component (a small registry of just the SVG paths actually used, not the full Font Awesome library); the old per-category `partials.category-icon` view is gone.
 
-## 2026-08-17 — v0.1.24
+## 2026-08-17 — v0.1.24 — build CHMFE6
 
 ### Housekeeping
 
 - **Rewrote README.md**: full description of the shop (catalog, storefront features, admin back office, brand/design notes), not just the old dev-setup summary.
 
-## 2026-08-17 — v0.1.23
+## 2026-08-17 — v0.1.23 — build G0DCAL
 
 ### Housekeeping
 
 - **Fixed the feature test suite**: `AuthTest`, `AccountTest`, `StorefrontTest`, and `ExampleTest` were still requesting `/fr`-prefixed URLs from before the app dropped locale-prefixed routing, and `AdminManualOrderVariantTest` still sent the removed `billing_same_as_shipping` flag instead of explicit billing fields. All 50 tests pass again.
 
-## 2026-08-17 — v0.1.22
+## 2026-08-17 — v0.1.22 — build D8PXP9
 
 ### Admin
 
@@ -485,7 +492,7 @@ All notable changes to this project since the initial commit are documented here
 - **Customer notes**: each customer profile has a free-text notes field for internal use ("called about a return", etc.), and the email is now a clickable mailto link.
 - **Activity log**: a new Activity page records admin actions on orders (archive/unarchive), products (create/update/enable/disable/restock), and discounts/discount codes (create/update/delete), each linking back to the affected record.
 
-## 2026-08-17 — v0.1.21
+## 2026-08-17 — v0.1.21 — build MI1GT4
 
 ### Admin
 
@@ -495,25 +502,25 @@ All notable changes to this project since the initial commit are documented here
 - **Inline restock**: the dashboard's stock alerts list now has a quantity field and Save button per product instead of a read-only count.
 - **Dashboard "External" stat**: now counts non-archived manual orders instead of external customer records, so archiving a manual order removes it from this count.
 
-## 2026-08-17 — v0.1.20
+## 2026-08-17 — v0.1.20 — build BFATZP
 
 ### Orders
 
 - **Manual order form's pickup point search**: a postal code field now sits above the relay/pickup point list, defaulting to the billing address postal code — editing it re-searches that postal code independently, without touching the billing address.
 
-## 2026-08-17 — v0.1.19
+## 2026-08-17 — v0.1.19 — build 1U14DN
 
 ### Orders
 
 - **Archive orders**: new "Archived" tab on the admin orders list, with an archive/unarchive icon button per row (confirm popup before either action). Archived orders drop out of the Orders/Drafts tabs, the admin dashboard's counts, charts, and top-products/marketplace stats, and the customer's own order list — direct links to an archived order now 404 for the customer, same as a draft.
 
-## 2026-08-17 — v0.1.18
+## 2026-08-17 — v0.1.18 — build CSO6PS
 
 ### Admin
 
 - **Changelog page**: this file is now browsable at Admin → Changelog, parsed into cards (version, date, category, bullets) newest first, with the latest release flagged and the version number in the admin header linking straight to it.
 
-## 2026-08-17 — v0.1.17
+## 2026-08-17 — v0.1.17 — build VEK7H8
 
 ### Orders
 
@@ -524,14 +531,14 @@ All notable changes to this project since the initial commit are documented here
   - "Save as draft" and "Create order"/"Finalize order" stay disabled until the customer, products, carrier, and both addresses are filled in.
   - Submitting with no marketplace selected now asks for confirmation ("Are you sure you don't want to select a marketplace?") before continuing.
 
-## 2026-08-17 — v0.1.16
+## 2026-08-17 — v0.1.16 — build GGD6QV
 
 ### Shipping & carriers
 
 - **Checkout works fully without JavaScript**: relay-carrier selection now has a `<noscript>` fallback — a postal code field and "Rechercher" button trigger a real server-rendered relay point list (the picker still appears instantly on carrier selection too, via a CSS-only rule). The search reuses the main checkout form's fields so it always reflects whichever carrier is actually selected, rather than resubmitting a stale one.
 - **Payment method locked until a relay point is picked**: for relay carriers, the payment cards stay visible but grayed out (and any prior selection is cleared) until a point is chosen, with a hint above them explaining why. "Valider la commande" is disabled until the whole form — address, carrier, relay point if needed, billing address, and payment method — is filled in.
 
-## 2026-08-17 — v0.1.15
+## 2026-08-17 — v0.1.15 — build 1TTC1W
 
 ### Storefront
 
@@ -547,7 +554,7 @@ All notable changes to this project since the initial commit are documented here
 - **Postcode/city autocomplete**: a new "Rechercher par ville ou code postal" search on the relay picker suggests matches as you type, backed by a new `GET /checkout/postal-codes` endpoint over a downloaded official French postcode dataset kept server-side (never shipped to the client).
 - **Relay point opening hours**: now shown, condensed so consecutive days with the same hours collapse into one line ("Lun-Ven 09:00-19:00") instead of repeating per day.
 
-## 2026-08-16
+## 2026-08-16 — v0.1.14 — build 47YJLZ
 
 ### Discounts
 
@@ -596,7 +603,7 @@ All notable changes to this project since the initial commit are documented here
 
 - **routes/web.php**: reorganized into commented sections (Sitemap, Admin — with sub-comments per resource, Storefront, Cart, Customer auth, Customer account) and grouped/alphabetized the `use` imports. No route path, method, name, or middleware changed — verified byte-identical route definitions before and after.
 
-## 2026-08-15
+## 2026-08-15 — v0.1.13 — build QZA3NF
 
 ### Shipping & carriers
 
@@ -629,7 +636,7 @@ All notable changes to this project since the initial commit are documented here
 
 - **Invoice footer link**: new Settings → Invoice page for an optional footer text + URL, shown on every invoice PDF under the VAT mention.
 
-## 2026-08-14
+## 2026-08-14 — v0.1.12 — build Z6VTMW
 
 ### Variants
 

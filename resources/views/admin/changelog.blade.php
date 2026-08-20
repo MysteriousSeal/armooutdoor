@@ -36,6 +36,9 @@
                             @if ($release['version'])
                                 <span class="changelog-version">v{{ $release['version'] }}</span>
                             @endif
+                            @if ($release['build'])
+                                <span class="changelog-build" title="Build number">{{ $release['build'] }}</span>
+                            @endif
                             @if ($loop->first)
                                 <span class="changelog-latest">Latest</span>
                             @endif
