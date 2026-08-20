@@ -204,7 +204,7 @@ return [
     'checkout_title' => 'Commande',
     'checkout_intro' => 'Une adresse, puis une façon de l’envoyer — chez vous, ou dans un point relais tout près.',
     'checkout_sign_in' => 'Connectez-vous pour commander',
-    'payment_canceled' => 'Le paiement a été annulé. Votre panier est intact — vous pouvez réessayer.',
+    'payment_canceled' => 'Le paiement a été annulé. Votre panier est intact, vous pouvez réessayer.',
     'discount_code_section' => 'Code de réduction',
     'discount_code_placeholder' => 'Entrez un code',
     'discount_code_apply' => 'Appliquer',
