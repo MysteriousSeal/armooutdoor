@@ -96,7 +96,7 @@
                     <h3>{{ __('store.account_discounts') }}</h3>
                     <p>{{ __('store.account_discounts_lede') }}</p>
                     <span class="account-hub-meta">
-                        {{ trans_choice('store.discount_count', $discountCount, ['count' => $discountCount]) }}
+                        {{ trans_choice('store.discount_count', $usableDiscountCount, ['count' => $usableDiscountCount]) }}
                     </span>
                 </span>
             </a>

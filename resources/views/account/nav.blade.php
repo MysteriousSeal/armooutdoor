@@ -16,6 +16,9 @@
     </a>
     <a href="{{ localized_route('account.discounts.index') }}" class="{{ request()->routeIs('account.discounts.*') ? 'is-active' : '' }}">
         {{ __('store.account_discounts') }}
+        @if ($usableDiscountCount > 0)
+            <span class="account-nav-badge is-quiet">{{ $usableDiscountCount }}</span>
+        @endif
     </a>
     <a href="{{ localized_route('account.conversations.index') }}" class="{{ request()->routeIs('account.conversations.*') ? 'is-active' : '' }}">
         {{ __('store.account_conversations') }}

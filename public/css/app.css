@@ -2322,6 +2322,21 @@
     border-radius: 999px;
 }
 
+/*
+ * A standing count rather than an alert: same pill, but tinted instead of
+ * filled, so it sits beside the unread badge without competing with it.
+ */
+.account-nav-badge.is-quiet {
+    color: var(--accent-hover);
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+[data-theme='dark'] .account-nav-badge.is-quiet {
+    color: color-mix(in srgb, var(--accent) 55%, #fff);
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
 /* Account → Mes messages */
 
 .conversation-list {

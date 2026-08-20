@@ -387,6 +387,79 @@ class AccountDiscountsTest extends TestCase
         $this->assertNull($this->code(['user_id' => $user->id, 'ends_at' => null])->countdownLabel());
     }
 
+    public function test_the_nav_badge_counts_the_usable_codes(): void
+    {
+        $user = User::factory()->create();
+        $this->code(['user_id' => $user->id]);
+        $this->code(['user_id' => $user->id]);
+        $this->code(['user_id' => $user->id, 'ends_at' => now()->subDay()]);
+
+        // Two usable, one expired. The badge counts what the page will list.
+        $this->actingAs($user)
+            ->get('/account')
+            ->assertOk()
+            ->assertSee('<span class="account-nav-badge is-quiet">2</span>', false);
+    }
+
+    public function test_the_nav_badge_is_absent_with_no_usable_codes(): void
+    {
+        $user = User::factory()->create();
+        $this->code(['user_id' => $user->id, 'ends_at' => now()->subDay()]);
+
+        // A zero badge is worse than none: it draws the eye to nothing.
+        $this->actingAs($user)
+            ->get('/account')
+            ->assertOk()
+            ->assertDontSee('account-nav-badge is-quiet', false);
+    }
+
+    public function test_the_badge_shows_on_every_account_page_not_just_the_discounts_one(): void
+    {
+        $user = User::factory()->create();
+        $this->code(['user_id' => $user->id]);
+
+        // The nav is shared, so a badge that only appeared on its own page
+        // would read as a bug rather than a count.
+        foreach (['/account', '/account/reductions', '/account/addresses', '/account/wishlist'] as $path) {
+            $this->actingAs($user)
+                ->get($path)
+                ->assertOk()
+                ->assertSee('<span class="account-nav-badge is-quiet">1</span>', false);
+        }
+    }
+
+    public function test_the_badge_and_the_hub_card_agree(): void
+    {
+        $user = User::factory()->create();
+        $this->code(['user_id' => $user->id]);
+        $this->code(['user_id' => $user->id]);
+
+        // Both now read the same composer value rather than counting twice.
+        $this->actingAs($user)
+            ->get('/account')
+            ->assertOk()
+            ->assertSee('<span class="account-nav-badge is-quiet">2</span>', false)
+            ->assertSee(trans_choice('store.discount_count', 2, ['count' => 2]));
+    }
+
+    public function test_the_badge_costs_one_query_however_many_codes(): void
+    {
+        $user = User::factory()->create();
+
+        for ($i = 0; $i < 10; $i++) {
+            $this->code(['user_id' => $user->id, 'max_uses_per_customer' => 3]);
+        }
+
+        DB::enableQueryLog();
+        $this->actingAs($user)->get('/account/addresses')->assertOk();
+        $queries = count(DB::getQueryLog());
+        DB::disableQueryLog();
+
+        // The nav renders on every account page, so this must not become a
+        // per-code cost on pages that have nothing to do with discounts.
+        $this->assertLessThan(12, $queries);
+    }
+
     public function test_the_nav_and_hub_link_to_the_page(): void
     {
         $this->actingAs(User::factory()->create())

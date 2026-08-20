@@ -71,7 +71,10 @@ class AppServiceProvider extends ServiceProvider
 
         View::composer(
             ['account.nav', 'account.index'],
-            fn ($view) => $view->with('unreadConversationCount', $this->unreadConversationCount()),
+            fn ($view) => $view->with([
+                'unreadConversationCount' => $this->unreadConversationCount(),
+                'usableDiscountCount' => $this->usableDiscountCount(),
+            ]),
         );
 
         // Nav badge counts. Gated on being an admin, not merely signed in:
@@ -109,5 +112,19 @@ class AppServiceProvider extends ServiceProvider
             ->where('user_id', Auth::id())
             ->unreadForCustomer()
             ->count());
+    }
+
+    /**
+     * Codes this customer can redeem right now. The account nav renders on
+     * every account page, so the answer is resolved once per request and
+     * shared with the hub card that shows the same figure.
+     */
+    private function usableDiscountCount(): int
+    {
+        if (! Auth::check()) {
+            return 0;
+        }
+
+        return once(fn (): int => Auth::user()->usableDiscountCodes()->count());
     }
 }

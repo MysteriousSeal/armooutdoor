@@ -17,8 +17,6 @@ class AccountController extends Controller
             'wishlistCount' => $user->wishlistItems()->count(),
             'orderCount' => $user->orders()->whereNull('archived_at')->count(),
             'conversationCount' => $user->conversations()->count(),
-            // Same rule as the discounts page, from the same method.
-            'discountCount' => $user->usableDiscountCodes()->count(),
         ]);
     }
 }
