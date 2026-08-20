@@ -2,6 +2,13 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-20 — v0.6.1 — build Y0S29P
+
+### Storefront
+
+- The contact page now leads with a hero, matching the nouveautés, meilleures ventes and catégories pages. No background image yet — drop a `contact-hero.webp` into `public/images/pages/` and it picks one up.
+- It also headed itself with an `<h2>` rather than an `<h1>`, unlike every other page; the hero corrects that.
+
 ## 2026-08-20 — v0.6.0 — build BSEIPM
 
 ### Orders
