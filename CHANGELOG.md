@@ -2,6 +2,21 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-20 — v0.3.0 — build HGU8K1
+
+### Storefront
+
+- Contact form now validates and submits without reloading the page: fields are checked as you leave them, errors appear inline, and a toast confirms the send. Falls back to a normal form post if JavaScript is unavailable.
+- Logged-in customers can attach one of their own orders to a message, so a question about an order arrives with the order already linked.
+- Name and email are locked to the account's own values for logged-in customers — the fields are disabled, and the server ignores any submitted value regardless.
+- Removed the phone number from the contact sidebar, dropped an em dash from the payment-canceled notice, and gave that notice room to breathe above the discount-code block.
+
+### Admin
+
+- Messages list redesigned: sender avatars, a message snippet under each subject, clearer unread rows, and stat cards for total/unread/last-7-days.
+- Customer and order references on a message are now obviously clickable, and a guest message whose email matches a customer account shows a "possibly &lt;name&gt;" hint linking to that customer.
+- Messages from an admin account show an "Admin" chip instead of a name link — those links pointed at the customer page, which 404s for an admin.
+
 ## 2026-08-20 — v0.2.9 — build D12L9R
 
 ### Admin
