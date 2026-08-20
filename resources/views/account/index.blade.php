@@ -96,7 +96,9 @@
                     <p>{{ __('store.account_conversations_lede') }}</p>
                     <span class="account-hub-meta">
                         @if ($unreadConversationCount > 0)
-                            {{ trans_choice('store.conversation_unread_count', $unreadConversationCount, ['count' => $unreadConversationCount]) }}
+                            <span class="conversation-chip conversation-chip--unread">
+                                {{ trans_choice('store.conversation_unread_count', $unreadConversationCount, ['count' => $unreadConversationCount]) }}
+                            </span>
                         @else
                             {{ trans_choice('store.conversation_count', $conversationCount, ['count' => $conversationCount]) }}
                         @endif

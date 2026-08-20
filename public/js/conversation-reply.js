@@ -37,6 +37,11 @@
         // the admin view and the account view set this differently.
         item.className = 'thread-item ' + (form.dataset.threadItemClass || 'thread-item--admin');
 
+        var avatar = document.createElement('span');
+        avatar.className = 'thread-avatar';
+        avatar.setAttribute('aria-hidden', 'true');
+        avatar.textContent = data.authorInitials || '';
+
         var bubble = document.createElement('div');
         bubble.className = 'thread-bubble';
 
@@ -60,6 +65,7 @@
         meta.appendChild(time);
         bubble.appendChild(meta);
         bubble.appendChild(body);
+        item.appendChild(avatar);
         item.appendChild(bubble);
         thread.appendChild(item);
 

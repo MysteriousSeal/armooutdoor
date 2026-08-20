@@ -76,21 +76,7 @@
             @endif
         </header>
 
-        <ol class="thread thread--as-admin" id="conversation-thread">
-            @foreach ($conversation->messages as $message)
-                <li class="thread-item {{ $message->isFromAdmin() ? 'thread-item--admin' : 'thread-item--customer' }}">
-                    <div class="thread-bubble">
-                        <div class="thread-meta">
-                            <span class="thread-author">{{ $message->authorLabel() }}</span>
-                            <time class="thread-time" datetime="{{ $message->created_at->toIso8601String() }}">
-                                {{ $message->created_at->format('d M Y · H:i') }}
-                            </time>
-                        </div>
-                        <p class="thread-body">{!! nl2br(e($message->body)) !!}</p>
-                    </div>
-                </li>
-            @endforeach
-        </ol>
+        @include('partials.conversation-thread', ['conversation' => $conversation, 'viewer' => 'admin'])
 
         @if ($conversation->isGuest())
             {{-- No account behind this thread, so a reply here would have no reader. --}}

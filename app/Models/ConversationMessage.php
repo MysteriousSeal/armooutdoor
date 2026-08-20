@@ -40,4 +40,34 @@ class ConversationMessage extends Model
             ? config('app.name')
             : $this->conversation->name;
     }
+
+    /**
+     * Initials for the timeline avatar. Admin replies carry the shop's mark,
+     * matching authorLabel() — never the staff member's initials.
+     */
+    public function avatarInitials(): string
+    {
+        if (! $this->isFromAdmin()) {
+            return $this->conversation->initials();
+        }
+
+        $words = array_values(array_filter(explode(' ', trim((string) config('app.name')))));
+
+        return strtoupper(implode('', array_map(
+            fn (string $word): string => mb_substr($word, 0, 1),
+            array_slice($words, 0, 2),
+        )));
+    }
+
+    /**
+     * True when this message continues a run from the same side, so the
+     * timeline can group it under the previous one instead of repeating
+     * the author and avatar.
+     */
+    public function continues(?self $previous): bool
+    {
+        return $previous !== null
+            && $previous->author_type === $this->author_type
+            && $previous->created_at->isSameDay($this->created_at);
+    }
 }

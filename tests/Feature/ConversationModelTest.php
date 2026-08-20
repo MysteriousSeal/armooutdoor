@@ -176,6 +176,57 @@ class ConversationModelTest extends TestCase
         $this->assertSame($conversation->name, $message->authorLabel());
     }
 
+    public function test_an_admin_avatar_carries_the_shop_mark_not_the_staff_initials(): void
+    {
+        $admin = User::factory()->admin()->create(['first_name' => 'Julie', 'last_name' => 'Simmons']);
+        $conversation = $this->conversation(User::factory()->create());
+
+        $message = $conversation->postMessage('Bonjour', ConversationMessage::AUTHOR_ADMIN, $admin);
+
+        $this->assertSame('AO', $message->avatarInitials());
+        $this->assertNotSame('JS', $message->avatarInitials());
+    }
+
+    public function test_a_customer_avatar_uses_the_thread_initials(): void
+    {
+        $conversation = $this->conversation();
+
+        $message = $conversation->postMessage('Bonjour', ConversationMessage::AUTHOR_CUSTOMER);
+
+        $this->assertSame($conversation->initials(), $message->avatarInitials());
+    }
+
+    public function test_consecutive_messages_from_the_same_side_group_together(): void
+    {
+        $conversation = $this->conversation();
+        $first = $conversation->postMessage('Un', ConversationMessage::AUTHOR_CUSTOMER);
+        $second = $conversation->postMessage('Deux', ConversationMessage::AUTHOR_CUSTOMER);
+
+        $this->assertFalse($first->continues(null));
+        $this->assertTrue($second->continues($first));
+    }
+
+    public function test_a_message_from_the_other_side_starts_a_new_group(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $conversation = $this->conversation(User::factory()->create());
+        $customerMessage = $conversation->postMessage('Un', ConversationMessage::AUTHOR_CUSTOMER);
+        $adminMessage = $conversation->postMessage('Deux', ConversationMessage::AUTHOR_ADMIN, $admin);
+
+        $this->assertFalse($adminMessage->continues($customerMessage));
+    }
+
+    public function test_a_message_on_a_new_day_starts_a_new_group(): void
+    {
+        $conversation = $this->conversation();
+        $first = $conversation->postMessage('Un', ConversationMessage::AUTHOR_CUSTOMER);
+
+        $this->travel(1)->days();
+        $second = $conversation->postMessage('Deux', ConversationMessage::AUTHOR_CUSTOMER);
+
+        $this->assertFalse($second->continues($first));
+    }
+
     public function test_messages_come_back_oldest_first(): void
     {
         $admin = User::factory()->admin()->create();

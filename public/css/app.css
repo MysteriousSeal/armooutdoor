@@ -2437,12 +2437,6 @@
     gap: 1.25rem;
 }
 
-/* An odd number of cards would leave a lone half-width card on the last
-   row; let it span the full width instead. */
-.account-hub-card:last-child:nth-child(odd) {
-    grid-column: 1 / -1;
-}
-
 .account-hub-card {
     display: flex;
     align-items: flex-start;
@@ -2496,6 +2490,14 @@
     color: var(--text-muted);
 }
 
+/* The hub card's type scale is much larger than the messages list's, so the
+   chip needs a little more presence here to sit right against it. */
+.account-hub-meta .conversation-chip {
+    padding: 0.22rem 0.6rem;
+    font-size: 0.6875rem;
+    letter-spacing: 0.05em;
+}
+
 .account-card {
     max-width: 36rem;
 }
@@ -2535,12 +2537,35 @@
 }
 
 .site-auth-name {
-    max-width: 8rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    max-width: 10rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+/* The name truncates; the badge never does. */
+.site-auth-name-text {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 0.8125rem;
-    font-weight: 500;
+}
+
+.site-auth-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    min-width: 1.15rem;
+    height: 1.15rem;
+    padding: 0 0.3rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+    background: var(--accent);
+    border-radius: 999px;
 }
 
 .site-auth-logout,

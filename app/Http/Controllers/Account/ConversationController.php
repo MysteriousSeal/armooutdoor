@@ -58,6 +58,7 @@ class ConversationController extends Controller
                 'message' => __('store.conversation_reply_sent'),
                 'sentAt' => $message->created_at->format('d/m/Y · H:i'),
                 'authorLabel' => $message->authorLabel(),
+                'authorInitials' => $message->avatarInitials(),
                 'body' => $message->body,
             ]);
         }

@@ -121,7 +121,12 @@
 
                     @auth
                         <a href="{{ localized_route('account.index') }}" class="site-auth-name {{ request()->routeIs('account.*') ? 'is-active' : '' }}">
-                            {{ auth()->user()->name }}
+                            <span class="site-auth-name-text">{{ auth()->user()->name }}</span>
+                            @if ($unreadConversationCount > 0)
+                                <span class="site-auth-badge" aria-label="{{ trans_choice('store.conversation_unread_count', $unreadConversationCount, ['count' => $unreadConversationCount]) }}">
+                                    {{ $unreadConversationCount }}
+                                </span>
+                            @endif
                         </a>
                         <form action="{{ localized_route('logout') }}" method="POST" class="site-auth-logout">
                             @csrf

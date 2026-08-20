@@ -51,6 +51,7 @@ class AppServiceProvider extends ServiceProvider
                     ->get(),
                 'cartCount' => app(Cart::class)->quantity(),
                 'wishlistProductIds' => app('wishlist.product-ids'),
+                'unreadConversationCount' => $this->unreadConversationCount(),
             ]);
         });
 
@@ -68,9 +69,7 @@ class AppServiceProvider extends ServiceProvider
 
         View::composer(
             ['account.nav', 'account.index'],
-            fn ($view) => $view->with('unreadConversationCount', Auth::check()
-                ? Conversation::query()->where('user_id', Auth::id())->unreadForCustomer()->count()
-                : 0),
+            fn ($view) => $view->with('unreadConversationCount', $this->unreadConversationCount()),
         );
 
         View::composer(
@@ -79,5 +78,22 @@ class AppServiceProvider extends ServiceProvider
                 ? Conversation::query()->unreadForAdmin()->count()
                 : 0),
         );
+    }
+
+    /**
+     * Threads where the shop has replied since the customer last looked.
+     * Resolved once per request and reused: the site header renders it on
+     * every storefront page, and the account views ask for it again.
+     */
+    private function unreadConversationCount(): int
+    {
+        if (! Auth::check()) {
+            return 0;
+        }
+
+        return once(fn (): int => Conversation::query()
+            ->where('user_id', Auth::id())
+            ->unreadForCustomer()
+            ->count());
     }
 }

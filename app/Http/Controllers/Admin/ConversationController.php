@@ -96,6 +96,7 @@ class ConversationController extends Controller
                 'message' => 'Reply sent.',
                 'sentAt' => $message->created_at->format('d M Y · H:i'),
                 'authorLabel' => $message->authorLabel(),
+                'authorInitials' => $message->avatarInitials(),
                 'body' => $message->body,
             ]);
         }

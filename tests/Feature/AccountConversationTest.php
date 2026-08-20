@@ -239,6 +239,85 @@ class AccountConversationTest extends TestCase
             ->assertSee(trans_choice('store.conversation_unread_count', 1, ['count' => 1]));
     }
 
+    public function test_the_site_header_badges_the_name_when_a_reply_is_waiting(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $user = User::factory()->create();
+        $conversation = $this->conversationFor($user);
+        $conversation->postMessage('Notre réponse', ConversationMessage::AUTHOR_ADMIN, $admin);
+
+        // Any storefront page, not just the account section.
+        $this->actingAs($user)
+            ->get('/')
+            ->assertOk()
+            ->assertSee('site-auth-badge', false);
+    }
+
+    public function test_the_site_header_has_no_badge_without_a_reply(): void
+    {
+        $user = User::factory()->create();
+        $this->conversationFor($user);
+
+        $this->actingAs($user)
+            ->get('/')
+            ->assertOk()
+            ->assertDontSee('site-auth-badge', false);
+    }
+
+    public function test_the_site_header_badge_clears_once_the_thread_is_opened(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $user = User::factory()->create();
+        $conversation = $this->conversationFor($user);
+        $conversation->postMessage('Notre réponse', ConversationMessage::AUTHOR_ADMIN, $admin);
+
+        $this->actingAs($user)->get('/account/messages/'.$conversation->id)->assertOk();
+
+        $this->actingAs($user)
+            ->get('/')
+            ->assertOk()
+            ->assertDontSee('site-auth-badge', false);
+    }
+
+    public function test_guests_get_no_header_badge(): void
+    {
+        $this->get('/')->assertOk()->assertDontSee('site-auth-badge', false);
+    }
+
+    public function test_the_timeline_renders_avatars_a_day_separator_and_relative_times(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $user = User::factory()->create();
+        $conversation = $this->conversationFor($user);
+        $conversation->postMessage('Notre réponse', ConversationMessage::AUTHOR_ADMIN, $admin);
+
+        $response = $this->actingAs($user)->get('/account/messages/'.$conversation->id);
+
+        $response->assertOk()
+            ->assertSee('thread-avatar', false)
+            ->assertSee('thread-day', false)
+            ->assertSee($conversation->created_at->translatedFormat('j F Y'))
+            ->assertSee('il y a');
+    }
+
+    public function test_a_grouped_message_renders_a_blank_spacer_not_a_second_avatar(): void
+    {
+        $user = User::factory()->create();
+        $conversation = $this->conversationFor($user, 'Premier');
+        $conversation->postMessage('Test', ConversationMessage::AUTHOR_CUSTOMER, $user);
+
+        $response = $this->actingAs($user)->get('/account/messages/'.$conversation->id);
+
+        $response->assertOk()->assertSee('thread-avatar--placeholder', false);
+
+        // The initials appear once, on the first message of the run — the
+        // follow-up gets an empty spacer rather than a repeated avatar.
+        $this->assertSame(
+            1,
+            substr_count($response->getContent(), '>'.$conversation->initials().'</span>'),
+        );
+    }
+
     public function test_the_thread_page_keeps_the_account_nav(): void
     {
         $user = User::factory()->create();

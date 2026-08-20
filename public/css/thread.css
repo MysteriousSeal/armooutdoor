@@ -19,17 +19,82 @@
 
 .thread-item {
     display: flex;
+    align-items: flex-end;
+    gap: 0.6rem;
     max-width: 100%;
     justify-content: flex-start;
 }
 
+/* "Mine" sits on the right, with the avatar on the outside edge.
+   row-reverse flips the main axis, so flex-start is the right-hand edge here. */
 .thread--as-admin .thread-item--admin,
 .thread--as-customer .thread-item--customer {
-    justify-content: flex-end;
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+}
+
+/* A run of messages from the same side hugs the one above it. */
+.thread-item--continues {
+    margin-top: -0.6rem;
+}
+
+.thread-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.thread--as-admin .thread-item--admin .thread-avatar:not(.thread-avatar--placeholder),
+.thread--as-customer .thread-item--customer .thread-avatar:not(.thread-avatar--placeholder) {
+    color: var(--accent-hover);
+    background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+    border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+}
+
+/* Holds the space so grouped bubbles stay aligned with the first one in the
+   run, without drawing anything. Needs to outrank the tinted "mine" rule
+   above, hence the doubled class. */
+.thread-avatar--placeholder.thread-avatar--placeholder {
+    background: none;
+    border: 0;
+}
+
+.thread-day {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0.5rem 0;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.thread-day::before,
+.thread-day::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+
+.thread-day:first-child {
+    margin-top: 0;
 }
 
 .thread-bubble {
-    max-width: min(42rem, 82%);
+    max-width: min(42rem, calc(100% - 3rem));
     padding: 0.85rem 1rem 0.9rem;
     background: var(--surface);
     border: 1px solid var(--border);
@@ -66,6 +131,19 @@
     font-size: 0.6875rem;
     color: var(--text-muted);
     white-space: nowrap;
+    cursor: help;
+}
+
+/* Grouped messages drop the meta row, so the time tucks under the body. */
+.thread-time--inline {
+    display: block;
+    margin-top: 0.3rem;
+    font-size: 0.625rem;
+}
+
+.thread--as-admin .thread-item--admin .thread-time--inline,
+.thread--as-customer .thread-item--customer .thread-time--inline {
+    text-align: right;
 }
 
 .thread-body {
