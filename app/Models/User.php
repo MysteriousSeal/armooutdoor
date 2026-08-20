@@ -55,6 +55,11 @@ class User extends Authenticatable
         return $this->hasMany(DiscountCode::class)->latest();
     }
 
+    public function conversations(): HasMany
+    {
+        return $this->hasMany(Conversation::class)->latest();
+    }
+
     public function wishlistItems(): HasMany
     {
         return $this->hasMany(WishlistItem::class)->latest();

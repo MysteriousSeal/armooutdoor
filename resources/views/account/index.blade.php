@@ -83,6 +83,26 @@
                     </span>
                 </span>
             </a>
+
+            <a href="{{ localized_route('account.conversations.index') }}" class="account-hub-card">
+                <span class="account-hub-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="22" height="22">
+                        <path d="M20 12.5c0 3.4-3.6 6.2-8 6.2-.9 0-1.8-.1-2.6-.3L4 20l1.4-3.4A5.9 5.9 0 0 1 4 12.5c0-3.4 3.6-6.2 8-6.2s8 2.8 8 6.2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                    </svg>
+                </span>
+                <span class="account-hub-body">
+                    <span class="home-kicker">05</span>
+                    <h3>{{ __('store.account_conversations') }}</h3>
+                    <p>{{ __('store.account_conversations_lede') }}</p>
+                    <span class="account-hub-meta">
+                        @if ($unreadConversationCount > 0)
+                            {{ trans_choice('store.conversation_unread_count', $unreadConversationCount, ['count' => $unreadConversationCount]) }}
+                        @else
+                            {{ trans_choice('store.conversation_count', $conversationCount, ['count' => $conversationCount]) }}
+                        @endif
+                    </span>
+                </span>
+            </a>
         </div>
     </div>
 @endsection

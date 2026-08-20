@@ -1993,6 +1993,48 @@ a.admin-stat-card:hover {
     background: var(--bg);
 }
 
+.admin-nowrap {
+    white-space: nowrap;
+}
+
+.admin-thread-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    min-width: 1.15rem;
+    height: 1.15rem;
+    padding: 0 0.3rem;
+    font-size: 0.625rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+}
+
+.admin-status-chip {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    padding: 0.1rem 0.4rem;
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.admin-status-chip--closed {
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.admin-message-snippet-tag {
+    font-weight: 600;
+    color: var(--accent-hover);
+}
+
 .admin-message-snippet {
     display: block;
     margin-top: 0.15rem;

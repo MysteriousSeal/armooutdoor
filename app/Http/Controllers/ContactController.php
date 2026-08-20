@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreContactMessageRequest;
 use App\Models\CompanySetting;
-use App\Models\ContactMessage;
+use App\Models\Conversation;
+use App\Models\ConversationMessage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -28,14 +29,21 @@ class ContactController extends Controller
 
     public function store(StoreContactMessageRequest $request): RedirectResponse|JsonResponse
     {
-        $validated = $request->safe()->except('website');
+        $validated = $request->safe()->except(['website', 'message']);
+        $user = $request->user();
 
-        ContactMessage::query()->create([
+        $conversation = Conversation::query()->create([
             ...$validated,
-            'name' => $request->user()?->name ?? $validated['name'],
-            'email' => $request->user()?->email ?? $validated['email'],
-            'user_id' => $request->user()?->id,
+            'name' => $user?->name ?? $validated['name'],
+            'email' => $user?->email ?? $validated['email'],
+            'user_id' => $user?->id,
         ]);
+
+        $conversation->postMessage(
+            $request->safe()->string('message')->toString(),
+            ConversationMessage::AUTHOR_CUSTOMER,
+            $user,
+        );
 
         if ($request->wantsJson()) {
             return response()->json(['message' => __('store.contact_sent')]);

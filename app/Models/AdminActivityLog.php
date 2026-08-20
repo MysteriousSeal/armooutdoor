@@ -52,6 +52,7 @@ class AdminActivityLog extends Model
             Marketplace::class => 'Marketplace',
             PackageType::class => 'Package type',
             Carrier::class => 'Carrier',
+            Conversation::class => 'Conversation',
             default => 'Item',
         };
     }

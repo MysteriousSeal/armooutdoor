@@ -16,6 +16,7 @@ class AccountController extends Controller
             'addressCount' => $user->addresses()->count(),
             'wishlistCount' => $user->wishlistItems()->count(),
             'orderCount' => $user->orders()->whereNull('archived_at')->count(),
+            'conversationCount' => $user->conversations()->count(),
         ]);
     }
 }

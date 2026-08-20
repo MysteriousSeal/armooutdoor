@@ -3,6 +3,7 @@
 // Account (customer profile, addresses)
 use App\Http\Controllers\Account\AccountController;
 use App\Http\Controllers\Account\AddressController;
+use App\Http\Controllers\Account\ConversationController as AccountConversationController;
 use App\Http\Controllers\Account\ProfileController;
 // Admin (back office)
 use App\Http\Controllers\Admin\ActivityController as AdminActivityController;
@@ -12,7 +13,7 @@ use App\Http\Controllers\Admin\CarrierPriceTierController as AdminCarrierPriceTi
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\ChangelogController as AdminChangelogController;
 use App\Http\Controllers\Admin\CompanySettingController as AdminCompanySettingController;
-use App\Http\Controllers\Admin\ContactMessageController as AdminContactMessageController;
+use App\Http\Controllers\Admin\ConversationController as AdminConversationController;
 use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\DiscountCodeController as AdminDiscountCodeController;
@@ -98,8 +99,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/customers/{customer}/notes', [AdminCustomerController::class, 'updateNotes'])->name('customers.notes.update');
         Route::patch('/customers/{customer}', [AdminCustomerController::class, 'updateAccount'])->name('customers.update');
         Route::post('/customers/{customer}/send-reset-link', [AdminCustomerController::class, 'sendResetLink'])->name('customers.send-reset-link');
-        Route::get('/messages', [AdminContactMessageController::class, 'index'])->name('messages.index');
-        Route::get('/messages/{message}', [AdminContactMessageController::class, 'show'])->name('messages.show');
+        Route::get('/conversations', [AdminConversationController::class, 'index'])->name('conversations.index');
+        Route::get('/conversations/{conversation}', [AdminConversationController::class, 'show'])->name('conversations.show');
+        Route::post('/conversations/{conversation}/reply', [AdminConversationController::class, 'reply'])->name('conversations.reply');
+        Route::patch('/conversations/{conversation}/close', [AdminConversationController::class, 'close'])->name('conversations.close');
+        Route::patch('/conversations/{conversation}/reopen', [AdminConversationController::class, 'reopen'])->name('conversations.reopen');
 
         // Products
         Route::get('/products', [AdminProductController::class, 'index'])->name('products.index');
@@ -284,6 +288,11 @@ Route::middleware('auth')->group(function () {
     Route::put('/account/addresses/{address}', [AddressController::class, 'update'])->name('account.addresses.update');
     Route::delete('/account/addresses/{address}', [AddressController::class, 'destroy'])->name('account.addresses.destroy');
     Route::patch('/account/addresses/{address}/default', [AddressController::class, 'makeDefault'])->name('account.addresses.default');
+    Route::get('/account/messages', [AccountConversationController::class, 'index'])->name('account.conversations.index');
+    Route::get('/account/messages/{conversation}', [AccountConversationController::class, 'show'])->name('account.conversations.show');
+    Route::post('/account/messages/{conversation}/reply', [AccountConversationController::class, 'reply'])
+        ->middleware('throttle:10,1')
+        ->name('account.conversations.reply');
     Route::get('/account/wishlist', [WishlistController::class, 'index'])->name('account.wishlist.index');
 
     Route::post('/wishlist', [WishlistController::class, 'store'])->name('wishlist.store');

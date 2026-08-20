@@ -4,7 +4,7 @@ namespace App\Providers;
 
 use App\Models\Category;
 use App\Models\CompanySetting;
-use App\Models\ContactMessage;
+use App\Models\Conversation;
 use App\Models\WishlistItem;
 use App\Support\Cart;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -67,9 +67,16 @@ class AppServiceProvider extends ServiceProvider
         );
 
         View::composer(
+            ['account.nav', 'account.index'],
+            fn ($view) => $view->with('unreadConversationCount', Auth::check()
+                ? Conversation::query()->where('user_id', Auth::id())->unreadForCustomer()->count()
+                : 0),
+        );
+
+        View::composer(
             'layouts.admin',
             fn ($view) => $view->with('unreadMessageCount', Auth::guard('web')->check()
-                ? ContactMessage::query()->whereNull('read_at')->count()
+                ? Conversation::query()->unreadForAdmin()->count()
                 : 0),
         );
     }

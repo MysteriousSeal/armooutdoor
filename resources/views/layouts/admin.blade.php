@@ -68,7 +68,7 @@
         <nav class="admin-nav-links" aria-label="Admin sections">
             <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard</a>
             <a href="{{ route('admin.customers.index') }}" class="{{ request()->routeIs('admin.customers.*') ? 'active' : '' }}">Customers</a>
-            <a href="{{ route('admin.messages.index') }}" class="{{ request()->routeIs('admin.messages.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.conversations.index') }}" class="{{ request()->routeIs('admin.conversations.*') ? 'active' : '' }}">
                 Messages
                 @if ($unreadMessageCount > 0)
                     <span class="admin-nav-badge">{{ $unreadMessageCount }}</span>

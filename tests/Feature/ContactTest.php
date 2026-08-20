@@ -2,7 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Models\ContactMessage;
+use App\Models\Conversation;
+use App\Models\ConversationMessage;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -32,6 +33,27 @@ class ContactTest extends TestCase
         ]);
     }
 
+    /**
+     * A conversation plus its opening customer message, which is what a
+     * contact-form submission produces.
+     */
+    private function conversation(array $attributes = []): Conversation
+    {
+        $body = $attributes['message'] ?? 'Test';
+        unset($attributes['message']);
+
+        $conversation = Conversation::query()->create([
+            'name' => 'Jean Martin',
+            'email' => 'jean@example.com',
+            'subject' => 'Question',
+            ...$attributes,
+        ]);
+
+        $conversation->postMessage($body, ConversationMessage::AUTHOR_CUSTOMER, $conversation->user);
+
+        return $conversation;
+    }
+
     public function test_contact_page_is_public(): void
     {
         $this->get('/contact')
@@ -58,12 +80,48 @@ class ContactTest extends TestCase
         ]);
 
         $response->assertRedirect('/contact');
-        $this->assertDatabaseHas('contact_messages', [
+        $this->assertDatabaseHas('conversations', [
             'name' => 'Jean Martin',
             'email' => 'jean@example.com',
             'subject' => 'Question sur une commande',
             'user_id' => null,
         ]);
+    }
+
+    public function test_a_submission_opens_a_thread_holding_the_message_body(): void
+    {
+        $this->post('/contact', [
+            'name' => 'Jean Martin',
+            'email' => 'jean@example.com',
+            'subject' => 'Question sur une commande',
+            'message' => 'Bonjour, où en est ma commande ?',
+        ]);
+
+        $conversation = Conversation::query()->firstOrFail();
+
+        $this->assertTrue($conversation->isOpen());
+        $this->assertTrue($conversation->isGuest());
+        $this->assertNotNull($conversation->last_customer_message_at);
+        $this->assertTrue($conversation->hasUnreadForAdmin());
+
+        $this->assertCount(1, $conversation->messages);
+        $this->assertSame('Bonjour, où en est ma commande ?', $conversation->messages->first()->body);
+        $this->assertSame(ConversationMessage::AUTHOR_CUSTOMER, $conversation->messages->first()->author_type);
+    }
+
+    public function test_a_logged_in_submission_records_the_author_on_the_message(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->post('/contact', [
+            'subject' => 'Question',
+            'message' => 'Bonjour',
+        ]);
+
+        $conversation = Conversation::query()->firstOrFail();
+
+        $this->assertFalse($conversation->isGuest());
+        $this->assertSame($user->id, $conversation->messages->first()->user_id);
     }
 
     public function test_a_dynamic_submission_receives_a_json_success_response(): void
@@ -76,7 +134,7 @@ class ContactTest extends TestCase
         ]);
 
         $response->assertOk()->assertJsonStructure(['message']);
-        $this->assertDatabaseHas('contact_messages', ['email' => 'jean@example.com']);
+        $this->assertDatabaseHas('conversations', ['email' => 'jean@example.com']);
     }
 
     public function test_a_dynamic_submission_receives_json_validation_errors(): void
@@ -89,7 +147,7 @@ class ContactTest extends TestCase
         ]);
 
         $response->assertStatus(422)->assertJsonValidationErrors(['email', 'message']);
-        $this->assertDatabaseCount('contact_messages', 0);
+        $this->assertDatabaseCount('conversations', 0);
     }
 
     public function test_a_logged_in_customer_message_is_linked_to_their_account(): void
@@ -103,7 +161,7 @@ class ContactTest extends TestCase
             'message' => 'Comment retourner un article ?',
         ]);
 
-        $this->assertDatabaseHas('contact_messages', [
+        $this->assertDatabaseHas('conversations', [
             'email' => $user->email,
             'user_id' => $user->id,
         ]);
@@ -138,11 +196,11 @@ class ContactTest extends TestCase
             'message' => 'Test',
         ]);
 
-        $this->assertDatabaseHas('contact_messages', [
+        $this->assertDatabaseHas('conversations', [
             'user_id' => $user->id,
             'name' => $user->name,
         ]);
-        $this->assertDatabaseMissing('contact_messages', ['name' => 'Fake Name']);
+        $this->assertDatabaseMissing('conversations', ['name' => 'Fake Name']);
     }
 
     public function test_a_logged_in_customer_can_submit_without_a_name_field(): void
@@ -156,7 +214,7 @@ class ContactTest extends TestCase
         ]);
 
         $response->assertSessionDoesntHaveErrors('name');
-        $this->assertDatabaseHas('contact_messages', [
+        $this->assertDatabaseHas('conversations', [
             'user_id' => $user->id,
             'name' => $user->name,
         ]);
@@ -171,7 +229,7 @@ class ContactTest extends TestCase
         ]);
 
         $response->assertSessionHasErrors('name');
-        $this->assertDatabaseCount('contact_messages', 0);
+        $this->assertDatabaseCount('conversations', 0);
     }
 
     public function test_email_field_is_disabled_for_a_logged_in_customer(): void
@@ -203,11 +261,11 @@ class ContactTest extends TestCase
             'message' => 'Test',
         ]);
 
-        $this->assertDatabaseHas('contact_messages', [
+        $this->assertDatabaseHas('conversations', [
             'user_id' => $user->id,
             'email' => $user->email,
         ]);
-        $this->assertDatabaseMissing('contact_messages', ['email' => 'fake@example.com']);
+        $this->assertDatabaseMissing('conversations', ['email' => 'fake@example.com']);
     }
 
     public function test_a_logged_in_customer_can_submit_without_an_email_field(): void
@@ -221,7 +279,7 @@ class ContactTest extends TestCase
         ]);
 
         $response->assertSessionDoesntHaveErrors('email');
-        $this->assertDatabaseHas('contact_messages', [
+        $this->assertDatabaseHas('conversations', [
             'user_id' => $user->id,
             'email' => $user->email,
         ]);
@@ -236,7 +294,7 @@ class ContactTest extends TestCase
         ]);
 
         $response->assertSessionHasErrors('email');
-        $this->assertDatabaseCount('contact_messages', 0);
+        $this->assertDatabaseCount('conversations', 0);
     }
 
     public function test_message_is_required(): void
@@ -249,7 +307,7 @@ class ContactTest extends TestCase
         ]);
 
         $response->assertSessionHasErrors('message');
-        $this->assertDatabaseCount('contact_messages', 0);
+        $this->assertDatabaseCount('conversations', 0);
     }
 
     public function test_a_filled_honeypot_field_rejects_the_submission(): void
@@ -263,7 +321,7 @@ class ContactTest extends TestCase
         ]);
 
         $response->assertSessionHasErrors('website');
-        $this->assertDatabaseCount('contact_messages', 0);
+        $this->assertDatabaseCount('conversations', 0);
     }
 
     public function test_a_logged_in_customer_with_orders_sees_the_order_dropdown(): void
@@ -306,7 +364,7 @@ class ContactTest extends TestCase
             'order_id' => $order->id,
         ]);
 
-        $this->assertDatabaseHas('contact_messages', [
+        $this->assertDatabaseHas('conversations', [
             'email' => $user->email,
             'order_id' => $order->id,
         ]);
@@ -327,7 +385,7 @@ class ContactTest extends TestCase
         ]);
 
         $response->assertSessionHasErrors('order_id');
-        $this->assertDatabaseCount('contact_messages', 0);
+        $this->assertDatabaseCount('conversations', 0);
     }
 
     public function test_a_customer_cannot_reference_a_draft_or_archived_order(): void
@@ -348,7 +406,7 @@ class ContactTest extends TestCase
             $response->assertSessionHasErrors('order_id');
         }
 
-        $this->assertDatabaseCount('contact_messages', 0);
+        $this->assertDatabaseCount('conversations', 0);
     }
 
     public function test_a_guest_cannot_reference_an_order(): void
@@ -365,7 +423,7 @@ class ContactTest extends TestCase
         ]);
 
         $response->assertSessionHasErrors('order_id');
-        $this->assertDatabaseCount('contact_messages', 0);
+        $this->assertDatabaseCount('conversations', 0);
     }
 
     public function test_admin_message_view_links_the_referenced_order(): void
@@ -373,7 +431,7 @@ class ContactTest extends TestCase
         $admin = User::factory()->admin()->create();
         $customer = User::factory()->create();
         $order = $this->orderFor($customer);
-        $message = ContactMessage::query()->create([
+        $message = $this->conversation([
             'user_id' => $customer->id,
             'order_id' => $order->id,
             'name' => $customer->name,
@@ -383,7 +441,7 @@ class ContactTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->get('/admin/messages/'.$message->id)
+            ->get('/admin/conversations/'.$message->id)
             ->assertOk()
             ->assertSee($order->number);
     }
@@ -393,7 +451,7 @@ class ContactTest extends TestCase
         $admin = User::factory()->admin()->create();
         $customer = User::factory()->create();
         $order = $this->orderFor($customer);
-        ContactMessage::query()->create([
+        $this->conversation([
             'user_id' => $customer->id,
             'order_id' => $order->id,
             'name' => $customer->name,
@@ -402,7 +460,7 @@ class ContactTest extends TestCase
             'message' => 'Test',
         ]);
 
-        $response = $this->actingAs($admin)->get('/admin/messages');
+        $response = $this->actingAs($admin)->get('/admin/conversations');
 
         $response->assertOk();
         $response->assertSee(
@@ -419,14 +477,14 @@ class ContactTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
         $customer = User::factory()->create(['email' => 'jean@example.com']);
-        ContactMessage::query()->create([
+        $this->conversation([
             'name' => 'Jean M.',
             'email' => 'jean@example.com',
             'subject' => 'Question',
             'message' => 'Test',
         ]);
 
-        $response = $this->actingAs($admin)->get('/admin/messages');
+        $response = $this->actingAs($admin)->get('/admin/conversations');
 
         $response->assertOk();
         $response->assertSee('possibly '.$customer->name);
@@ -440,7 +498,7 @@ class ContactTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
         $customer = User::factory()->create(['email' => 'jean@example.com']);
-        ContactMessage::query()->create([
+        $this->conversation([
             'name' => 'Jean M.',
             'email' => 'JEAN@EXAMPLE.COM',
             'subject' => 'Question',
@@ -448,14 +506,14 @@ class ContactTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->get('/admin/messages')
+            ->get('/admin/conversations')
             ->assertSee('possibly '.$customer->name);
     }
 
     public function test_index_shows_no_guess_when_no_email_matches(): void
     {
         $admin = User::factory()->admin()->create();
-        ContactMessage::query()->create([
+        $this->conversation([
             'name' => 'Jean M.',
             'email' => 'nobody@example.com',
             'subject' => 'Question',
@@ -463,7 +521,7 @@ class ContactTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->get('/admin/messages')
+            ->get('/admin/conversations')
             ->assertDontSee('possibly');
     }
 
@@ -471,7 +529,7 @@ class ContactTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
         $customer = User::factory()->create(['email' => 'jean@example.com']);
-        ContactMessage::query()->create([
+        $this->conversation([
             'user_id' => $customer->id,
             'name' => 'Jean M.',
             'email' => 'jean@example.com',
@@ -480,7 +538,7 @@ class ContactTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->get('/admin/messages')
+            ->get('/admin/conversations')
             ->assertDontSee('possibly');
     }
 
@@ -488,7 +546,7 @@ class ContactTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
         $customer = User::factory()->create(['email' => 'jean@example.com']);
-        $message = ContactMessage::query()->create([
+        $message = $this->conversation([
             'name' => 'Jean M.',
             'email' => 'jean@example.com',
             'subject' => 'Question',
@@ -496,7 +554,7 @@ class ContactTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->get('/admin/messages/'.$message->id)
+            ->get('/admin/conversations/'.$message->id)
             ->assertOk()
             ->assertSee('Possibly '.$customer->name)
             ->assertSee(route('admin.customers.show', $customer));
@@ -505,7 +563,7 @@ class ContactTest extends TestCase
     public function test_possible_customer_model_helper_ignores_admin_accounts(): void
     {
         User::factory()->admin()->create(['email' => 'jean@example.com']);
-        $message = ContactMessage::query()->create([
+        $message = $this->conversation([
             'name' => 'Jean M.',
             'email' => 'jean@example.com',
             'subject' => 'Question',
@@ -518,21 +576,21 @@ class ContactTest extends TestCase
     public function test_index_shows_message_stats(): void
     {
         $admin = User::factory()->admin()->create();
-        $read = ContactMessage::query()->create([
+        $read = $this->conversation([
             'name' => 'Jean M.',
             'email' => 'jean@example.com',
             'subject' => 'Question',
             'message' => 'Test',
         ]);
-        $read->markAsRead();
-        ContactMessage::query()->create([
+        $read->markReadForAdmin();
+        $this->conversation([
             'name' => 'Marie D.',
             'email' => 'marie@example.com',
             'subject' => 'Autre question',
             'message' => 'Test',
         ]);
 
-        $response = $this->actingAs($admin)->get('/admin/messages');
+        $response = $this->actingAs($admin)->get('/admin/conversations');
 
         $response->assertOk()
             ->assertSee('Total messages')
@@ -544,7 +602,7 @@ class ContactTest extends TestCase
     public function test_index_shows_sender_initials_and_a_message_snippet(): void
     {
         $admin = User::factory()->admin()->create();
-        ContactMessage::query()->create([
+        $this->conversation([
             'name' => 'Jean Martin',
             'email' => 'jean@example.com',
             'subject' => 'Question',
@@ -552,7 +610,7 @@ class ContactTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->get('/admin/messages')
+            ->get('/admin/conversations')
             ->assertOk()
             ->assertSee('JM')
             ->assertSee('Bonjour, je voudrais savoir si vous livrez en Corse.');
@@ -562,7 +620,7 @@ class ContactTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
         $sender = User::factory()->admin()->create(['first_name' => 'Sender', 'last_name' => 'Admin']);
-        ContactMessage::query()->create([
+        $this->conversation([
             'user_id' => $sender->id,
             'name' => $sender->name,
             'email' => $sender->email,
@@ -570,7 +628,7 @@ class ContactTest extends TestCase
             'message' => 'Test',
         ]);
 
-        $response = $this->actingAs($admin)->get('/admin/messages');
+        $response = $this->actingAs($admin)->get('/admin/conversations');
 
         $response->assertOk()
             ->assertSee('admin-role-chip', false)
@@ -582,7 +640,7 @@ class ContactTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
         $customer = User::factory()->create();
-        ContactMessage::query()->create([
+        $this->conversation([
             'user_id' => $customer->id,
             'name' => $customer->name,
             'email' => $customer->email,
@@ -591,7 +649,7 @@ class ContactTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->get('/admin/messages')
+            ->get('/admin/conversations')
             ->assertOk()
             ->assertDontSee('admin-role-chip', false)
             ->assertSee('href="'.route('admin.customers.show', $customer).'"', false);
@@ -601,7 +659,7 @@ class ContactTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
         $sender = User::factory()->admin()->create();
-        $message = ContactMessage::query()->create([
+        $message = $this->conversation([
             'user_id' => $sender->id,
             'name' => $sender->name,
             'email' => $sender->email,
@@ -610,7 +668,7 @@ class ContactTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->get('/admin/messages/'.$message->id)
+            ->get('/admin/conversations/'.$message->id)
             ->assertOk()
             ->assertSee('admin-message-link-chip--admin', false)
             ->assertDontSee('Customer account')
@@ -632,14 +690,14 @@ class ContactTest extends TestCase
         $customer = User::factory()->create();
 
         $this->actingAs($customer)
-            ->get('/admin/messages')
+            ->get('/admin/conversations')
             ->assertRedirect('/admin');
     }
 
     public function test_admin_can_view_and_read_a_message(): void
     {
         $admin = User::factory()->admin()->create();
-        $message = ContactMessage::query()->create([
+        $message = $this->conversation([
             'name' => 'Jean Martin',
             'email' => 'jean@example.com',
             'subject' => 'Question',
@@ -647,24 +705,24 @@ class ContactTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->get('/admin/messages')
+            ->get('/admin/conversations')
             ->assertOk()
             ->assertSee('Jean Martin');
 
-        $this->assertNull($message->fresh()->read_at);
+        $this->assertTrue($message->fresh()->hasUnreadForAdmin());
 
         $this->actingAs($admin)
-            ->get('/admin/messages/'.$message->id)
+            ->get('/admin/conversations/'.$message->id)
             ->assertOk()
             ->assertSee('Bonjour !');
 
-        $this->assertNotNull($message->fresh()->read_at);
+        $this->assertFalse($message->fresh()->hasUnreadForAdmin());
     }
 
     public function test_admin_nav_shows_unread_message_count(): void
     {
         $admin = User::factory()->admin()->create();
-        ContactMessage::query()->create([
+        $this->conversation([
             'name' => 'Jean Martin',
             'email' => 'jean@example.com',
             'subject' => 'Question',

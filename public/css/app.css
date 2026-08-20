@@ -2307,10 +2307,140 @@
     background: var(--surface);
 }
 
+.account-nav-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.2rem;
+    height: 1.2rem;
+    margin-left: 0.4rem;
+    padding: 0 0.32rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: #fff;
+    background: var(--accent);
+    border-radius: 999px;
+}
+
+/* Account → Mes messages */
+
+.conversation-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.conversation-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.15rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: border-color 0.15s;
+}
+
+.conversation-card:hover {
+    border-color: var(--accent);
+}
+
+.conversation-card.is-unread {
+    border-left: 3px solid var(--accent);
+}
+
+.conversation-card-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+    flex: 1;
+}
+
+.conversation-card-head {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.conversation-card-subject {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.conversation-card.is-unread .conversation-card-subject {
+    font-weight: 700;
+}
+
+.conversation-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.1rem 0.4rem;
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.conversation-chip--unread {
+    color: var(--accent-hover);
+    background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+    border-color: color-mix(in srgb, var(--accent) 32%, var(--border));
+}
+
+.conversation-card-snippet {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.conversation-card-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.conversation-card-chevron {
+    flex-shrink: 0;
+    color: var(--text-muted);
+}
+
+.conversation-list-actions {
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 1.5rem;
+}
+
+.conversation-order-link {
+    margin-top: 0.4rem;
+    font-size: 0.875rem;
+}
+
+.conversation-order-link a {
+    color: var(--accent-hover);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--accent-hover) 40%, transparent);
+    text-underline-offset: 0.15em;
+}
+
 .account-hub {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.25rem;
+}
+
+/* An odd number of cards would leave a lone half-width card on the last
+   row; let it span the full width instead. */
+.account-hub-card:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
 }
 
 .account-hub-card {

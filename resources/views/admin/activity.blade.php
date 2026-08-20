@@ -35,6 +35,7 @@
                                     $log->subject instanceof \App\Models\Supplier => route('admin.settings.suppliers.edit', $log->subject),
                                     $log->subject instanceof \App\Models\Marketplace => route('admin.settings.orders.edit'),
                                     $log->subject instanceof \App\Models\PackageType, $log->subject instanceof \App\Models\Carrier => route('admin.settings.shipping.edit'),
+                                    $log->subject instanceof \App\Models\Conversation => route('admin.conversations.show', $log->subject),
                                     $log->subject instanceof \App\Models\User => $log->subject->is_admin
                                         ? (auth()->user()->isOwner() ? route('admin.settings.admins.edit', $log->subject) : null)
                                         : route('admin.customers.show', $log->subject),
