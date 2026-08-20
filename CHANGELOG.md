@@ -2,6 +2,20 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-20 — v0.5.0 — build IW7DUG
+
+### Discounts
+
+- **New discount code type: free relay-point delivery.** Waives the delivery charge when the customer checks out to a relay point. Unlike the percentage and fixed-amount codes it reduces the shipping line rather than the goods, so it has no amount to set.
+- Refused when relay delivery is already free for that cart. Free shipping is configured per carrier, so this means free on *every* active relay carrier — if one still charges, the code still has something to do.
+- Applying it before a carrier is chosen is fine: it shows "s'applique si vous choisissez un point relais" and only bites once a relay is selected. With home delivery it simply has no effect.
+- Re-checked when the order is placed, in case the cart crossed the free-shipping threshold in the meantime. A code that would be worth nothing is dropped rather than consumed, so it stays usable for a later order.
+- Recorded on the order as its own figure rather than folded into the goods discount, so the orders cost KPIs stay truthful.
+
+### Under the hood
+
+- `orders` gains `shipping_discount_cents`, and `discount_codes.value` becomes nullable — a free-delivery code has no amount, and a `0` would have read as "0% off". **Needs `php artisan migrate` on deploy.**
+
 ## 2026-08-20 — v0.4.2 — build L18919
 
 ### Admin
