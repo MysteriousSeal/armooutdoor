@@ -2,6 +2,25 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-20 — v0.7.0 — build 9S4EA5
+
+### Storefront
+
+- **Customers can now see the discount codes reserved for them.** A new "Mes réductions" page in the account, listed as vouchers with the amount, the code and how many uses are left. Only codes tied to that customer appear; public codes stay as they are distributed rather than becoming a coupon directory for anyone who logs in.
+- Whether a code is usable is decided by the same method checkout uses, so an expired, sold-out or already-used code drops off the page on its own. The one thing the account cannot judge is a free-relay code on a cart where relay delivery is already free, since that depends on the cart.
+- Each voucher carries a **Copier le code** button rather than a link to the cart, with a toast confirming the copy and a fallback that selects the code where the clipboard is unavailable.
+- Codes with a deadline show a **live countdown** that ticks down to the second, switching to the warning palette inside the last 48 hours. It renders server-side first, so it is right before any script runs and still shows a value without JavaScript. Seconds drop away past a week out.
+- When a countdown reaches zero the voucher withdraws itself — struck through, dimmed, copy button disabled — so the page stops offering a code the checkout has already started refusing.
+- The list is ordered by how soon each code lapses, with undated codes last. It was newest-first, which buried a code expiring tomorrow under one valid for three years.
+- Deadlines falling in the middle of the day now show the time. The admin form defaults to 23:59, so existing codes read exactly as before, but a code ending at 09:00 no longer reads as valid all day.
+
+### Under the hood
+
+- Listing a customer's codes cost roughly three queries per code, and the account hub repeated the whole thing for its count. Twelve codes ran 41 queries; the listing query now aggregates each code's usage in one pass and the page stays under a dozen regardless of how many codes there are.
+- Both surfaces share `User::usableDiscountCodes()` instead of repeating the eligibility filter, so the page and the hub's count cannot drift apart.
+
+**Fixed:** the countdown showed "3j 03h" for a code with exactly three days and four hours left — `ends_at` is stored to the second while `now()` carries microseconds, so truncating the difference dropped a whole unit. Both the server and the browser now round up, which also keeps them agreeing at the handover to the first tick.
+
 ## 2026-08-20 — v0.6.2 — build NFYJQY
 
 ### Orders
