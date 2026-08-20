@@ -2,6 +2,25 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-20 — v0.8.0 — build LSPEJ6
+
+### Orders
+
+- **Orders placed while testing can be marked as such instead of deleted.** The record is kept in full, but the order leaves every figure in the admin: revenue, order counts, the charts, the marketplace breakdown, top products and the customer's lifetime spend. Marked orders move to a fourth tab of their own and carry a Test chip wherever they surface, including admin search — which stays the way to find one and unmark it.
+- Marking is owner-only, like refunding rather than like archiving: archiving hides an order, this moves money out of the figures. It is reversible, singly or in a batch, and the activity log records both directions.
+- **Nothing is undone by marking.** The stock the order took and the invoice number it used are not given back, and the confirmation says so plainly, so nobody marks a batch expecting their stock to return. Nothing about it reaches the customer.
+
+### Changed
+
+- **Archived orders now count towards the money.** Archiving tidies the working list; it does not unmake a sale. The euro KPIs, the order counts behind them, net revenue, the seven-day chart, the marketplace breakdown, top products and customer lifetime spend all cover archived orders again. What is left to prepare and what is missing tracking still exclude them, because archiving is exactly how you say you are done with an order.
+- A customer's admin profile now lists their archived orders, with a badge. Their spend counts those orders, and a total covering rows the page does not show cannot be checked by anyone.
+- **Drafts are deleted rather than archived.** A draft records nothing that happened — nothing charged, nothing shipped, no invoice number taken — so there is nothing to file away. Owners delete them from the row menu, the draft's own page or the Drafts tab in a batch; everything past draft refuses deletion just as firmly. Deleting is the one irreversible action here, so it is the only one wearing red.
+- Drafts also refuse being archived or marked as test, so deletion is the only way one leaves the Drafts tab.
+
+**Fixed:** the Orders tab count plus the Archived tab count came to more than the total the KPI above them reported, with nothing on the page to explain the gap. Archived was the only tab sweeping up archived drafts as well. Drafts now sit apart wherever they are, and the tab counts add up to the KPI.
+
+**Migration:** two, run with `php artisan migrate`. One adds the column, one clears the archived flag from drafts that were archived while that was still allowed. Neither deletes anything.
+
 ## 2026-08-20 — v0.7.1 — build GQODHO
 
 ### Storefront
