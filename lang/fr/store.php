@@ -48,6 +48,8 @@ return [
     'featured' => 'Sélectionné pour vous',
     'featured_lede' => 'Une pièce de chaque rayon, choisie pour vous.',
     'see_all_products' => 'Voir tous les produits',
+    'home_ship_strip' => 'Livraison offerte dès :amount d’achat',
+    'home_ship_strip_note' => 'France métropolitaine',
     'home_ship_banner_title' => 'Livraison offerte dès :amount d’achat',
     'home_ship_banner_title_plain' => 'Livraison offerte',
     'home_ship_banner_text' => 'À domicile ou en point relais en France métropolitaine.',

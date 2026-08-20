@@ -4,6 +4,22 @@
 @section('meta_description', __('store.meta_home'))
 @section('canonical', localized_route('home'))
 
+@if ($freeShippingAmount)
+    @push('topbar')
+        {{-- Only rendered when there is a real figure to name: a promise of
+             free shipping with no threshold behind it is worse than silence. --}}
+        <aside class="ship-strip" aria-label="{{ __('store.home_ship_banner_title', ['amount' => $freeShippingAmount]) }}">
+            <p class="ship-strip-inner">
+                <span class="ship-strip-icon" aria-hidden="true">
+                    @include('partials.icon', ['name' => 'truck-fast', 'size' => 15])
+                </span>
+                <span>{!! __('store.home_ship_strip', ['amount' => '<b class="ship-strip-amount">'.e($freeShippingAmount).'</b>']) !!}</span>
+                <span class="ship-strip-note">{{ __('store.home_ship_strip_note') }}</span>
+            </p>
+        </aside>
+    @endpush
+@endif
+
 @section('content')
     @php
         $shopUrl = $firstCategory

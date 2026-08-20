@@ -1,3 +1,77 @@
+/*
+ * The free-shipping strip. It sits above the site header on the homepage
+ * only, so it has to earn its place in one line: quiet ground, one figure
+ * carrying the weight, and no button pretending there is more to do.
+ */
+.ship-strip {
+    background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+    border-bottom: 1px solid color-mix(in srgb, var(--accent) 22%, var(--border));
+}
+
+.ship-strip-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0.55rem 1.5rem;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    text-align: center;
+    color: var(--accent-hover);
+}
+
+.ship-strip-icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    color: var(--accent);
+}
+
+.ship-strip-amount {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+    color: var(--text);
+}
+
+/* A qualifier, not a second message. */
+.ship-strip-note {
+    position: relative;
+    padding-left: 0.85rem;
+    color: var(--text-muted);
+}
+
+.ship-strip-note::before {
+    content: '';
+    position: absolute;
+    left: 0.35rem;
+    top: 50%;
+    width: 3px;
+    height: 3px;
+    margin-top: -1.5px;
+    background: currentColor;
+    border-radius: 50%;
+    opacity: 0.6;
+}
+
+/* Stacked, the divider dot reads as a bullet on a list of one. */
+@media (max-width: 480px) {
+    .ship-strip-note {
+        padding-left: 0;
+    }
+
+    .ship-strip-note::before {
+        display: none;
+    }
+}
+
+[data-theme='dark'] .ship-strip {
+    background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+    border-bottom-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+}
+
 .home .home-hero {
     position: relative;
     isolation: isolate;

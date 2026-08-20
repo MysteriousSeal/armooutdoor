@@ -11,7 +11,14 @@ class HomeController extends Controller
 {
     public function __invoke(): View
     {
-        $thresholdCents = ShippingSetting::current()->free_shipping_threshold_cents;
+        $shipping = ShippingSetting::current();
+
+        // A threshold with no carrier flagged grants free shipping on nothing,
+        // so there is no figure to advertise. Both surfaces read this, so
+        // neither can promise what checkout would not honour.
+        $thresholdCents = ($shipping->free_shipping_carrier_ids ?? []) === []
+            ? null
+            : $shipping->free_shipping_threshold_cents;
         $categories = Category::query()
             ->whereNull('parent_id')
             ->with([

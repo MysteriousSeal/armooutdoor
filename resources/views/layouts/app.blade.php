@@ -29,6 +29,8 @@
     @stack('head')
 </head>
 <body>
+    @stack('topbar')
+
     <header class="site-header">
         <div class="site-header-inner">
             <div class="site-header-main">
