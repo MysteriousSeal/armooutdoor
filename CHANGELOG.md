@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-21 — v0.8.1 — build TKBHYX
+
+### Storefront
+
+- **The free-shipping threshold now leads the homepage.** A quiet strip above the logo, with the amount carrying the weight. It was buried halfway down the page, below the categories, where someone deciding whether to add one more item never saw it. Homepage only, and it appears only when there is a real figure behind it.
+
+**Fixed:** the homepage worked its free-shipping figure out from the threshold alone, but free shipping is granted per carrier. A threshold set with no carrier flagged had the homepage advertising a discount checkout would never apply. Both the new strip and the existing mid-page banner now require a carrier behind the number.
+
+### Under the hood
+
+- Nothing asserted that saving a draft order leaves stock alone, which is the whole reason deleting a draft is safe. Reserving stock at draft time would have made deletion quietly lose inventory with the suite still green. Three tests now cover it: a saved draft moves no stock, finalizing moves it exactly once, and deleting the draft takes nothing with it.
+
 ## 2026-08-20 — v0.8.0 — build LSPEJ6
 
 ### Orders
