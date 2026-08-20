@@ -82,11 +82,16 @@ class DiscountCode extends Model
         return max(0, $discounted);
     }
 
+    /**
+     * The short badge shown in the admin, so it stays English like the rest
+     * of the back office. The storefront renders its own French copy from
+     * store.discount_code_free_relay_label rather than calling this.
+     */
     public function label(): string
     {
         return match ($this->type) {
             self::TYPE_PERCENTAGE => '-'.$this->value.'%',
-            self::TYPE_FREE_RELAY_SHIPPING => __('store.discount_code_free_relay_label'),
+            self::TYPE_FREE_RELAY_SHIPPING => 'Free relay delivery',
             default => '-'.format_euros($this->value),
         };
     }

@@ -26,8 +26,14 @@
         $selectedCustomerId = old('user_id', $discountCode->user_id);
         $selectedCustomer = $customerOptions->firstWhere('id', (int) $selectedCustomerId);
         $selectedCustomerLabel = $selectedCustomer['label'] ?? '';
+        // Taken from the model so the form preview and the discounts list
+        // can never show a different badge for the same code.
+        $freeRelayLabel = (new \App\Models\DiscountCode(['type' => \App\Models\DiscountCode::TYPE_FREE_RELAY_SHIPPING]))->label();
+
         $previewBadge = '';
-        if ($selectedValue !== '' && is_numeric($selectedValue)) {
+        if ($selectedType === \App\Models\DiscountCode::TYPE_FREE_RELAY_SHIPPING) {
+            $previewBadge = $freeRelayLabel;
+        } elseif ($selectedValue !== '' && is_numeric($selectedValue)) {
             $previewBadge = $selectedType === 'percentage'
                 ? '-'.(int) round((float) $selectedValue).'%'
                 : '-'.format_euros((int) round(((float) $selectedValue) * 100));
@@ -310,7 +316,7 @@
 
                 var raw = parseFloat(valueInput.value);
                 if (isFreeRelay) {
-                    previewBadge.textContent = 'Point relais offert';
+                    previewBadge.textContent = @json($freeRelayLabel);
                 } else if (! isNaN(raw) && raw > 0) {
                     previewBadge.textContent = isFixed
                         ? '-' + formatEuros(Math.round(raw * 100))

@@ -137,9 +137,59 @@ class FreeRelayShippingCodeTest extends TestCase
     {
         $label = $this->code()->label();
 
-        $this->assertSame(__('store.discount_code_free_relay_label'), $label);
         $this->assertStringNotContainsString('€', $label);
         $this->assertStringNotContainsString('%', $label);
+    }
+
+    public function test_the_admin_badge_is_english_and_the_storefront_is_french(): void
+    {
+        $code = $this->code();
+
+        // The back office is English throughout; only the storefront is
+        // translated. label() is the admin badge.
+        $this->assertSame('Free relay delivery', $code->label());
+        $this->assertSame('Point relais offert', __('store.discount_code_free_relay_label'));
+    }
+
+    public function test_the_edit_form_preview_shows_the_english_badge(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $code = $this->code();
+
+        $content = $this->actingAs($admin)
+            ->get('/admin/discount-codes/'.$code->id.'/edit')
+            ->assertOk()
+            ->assertDontSee('Point relais offert')
+            ->getContent();
+
+        // The radio's own label also reads "Free relay delivery", so assert on
+        // the preview badge itself rather than anywhere on the page.
+        $this->assertMatchesRegularExpression(
+            '/id="discount-code-preview-badge">\s*Free relay delivery/',
+            $content,
+        );
+    }
+
+    public function test_the_create_form_preview_has_no_french_string(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->get('/admin/discount-codes/create')
+            ->assertOk()
+            ->assertDontSee('Point relais offert');
+    }
+
+    public function test_the_admin_list_shows_the_english_badge(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $this->code();
+
+        $this->actingAs($admin)
+            ->get('/admin/discounts?tab=codes')
+            ->assertOk()
+            ->assertSee('Free relay delivery')
+            ->assertDontSee('Point relais offert');
     }
 
     public function test_the_checkout_refuses_it_when_relay_is_already_free(): void
