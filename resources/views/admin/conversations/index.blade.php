@@ -119,7 +119,9 @@
                                     <span class="admin-table-sub">{{ $conversation->created_at->format('H:i') }}</span>
                                 </td>
                                 <td>
-                                    <a href="{{ route('admin.conversations.show', $conversation) }}" class="btn btn-sm btn-primary">View</a>
+                                    <div class="admin-table-actions">
+                                        <a href="{{ route('admin.conversations.show', $conversation) }}" class="btn btn-sm btn-primary">View</a>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach

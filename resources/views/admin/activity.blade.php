@@ -51,9 +51,11 @@
                                 <td><span class="admin-list-chip">{{ $log->subjectLabel() }}</span></td>
                                 <td>{{ $log->description }}</td>
                                 <td>
-                                    @if ($subjectRoute)
-                                        <a href="{{ $subjectRoute }}" class="btn btn-sm btn-primary">View</a>
-                                    @endif
+                                    <div class="admin-table-actions">
+                                        @if ($subjectRoute)
+                                            <a href="{{ $subjectRoute }}" class="btn btn-sm btn-primary">View</a>
+                                        @endif
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
