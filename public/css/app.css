@@ -2490,6 +2490,15 @@
     min-width: 0;
 }
 
+/*
+ * .home-kicker carries a bottom margin for the homepage, which lands on top
+ * of this card's own gap and leaves the number floating away from the title
+ * it labels. They belong together.
+ */
+.account-hub-card .home-kicker {
+    margin-bottom: -0.15rem;
+}
+
 .account-hub-card h3 {
     font-size: 1.35rem;
     font-weight: 500;
