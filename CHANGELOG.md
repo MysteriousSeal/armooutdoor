@@ -2,6 +2,20 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-20 — v0.5.1 — build D1SSUL
+
+Follow-ups to the free relay-delivery code added in v0.5.0.
+
+### Fixed
+
+- **The invoice didn't add up when a code waived delivery.** The waived amount appeared nowhere, so sous-total − réduction + livraison came to more than the Total TTC printed below it, by exactly the waived shipping. There is now a "Livraison offerte" line under Livraison, and "Réduction" only prints when something actually came off the goods. **Invoices already downloaded for such orders have the wrong figures baked in — regenerate them from the admin.**
+- The orders list showed "No" under Free delivery for code-waived orders. A code waives the charge without changing the shipping figure, which keeps the carrier's real price for the invoice. The column now reads "Yes (code)" for a waiver, plain "Yes" when the cart reached the free-shipping threshold.
+- Order pages, in the admin and the customer's account, showed "-0,00 €" beside the code instead of naming it.
+
+### Changed
+
+- The orders CSV export gains a "Free delivery" column, so a code-waived row reconciles from its own figures. **Total moves from column 12 to 13** — check anything reading that file by position rather than by header.
+
 ## 2026-08-20 — v0.5.0 — build IW7DUG
 
 ### Discounts
