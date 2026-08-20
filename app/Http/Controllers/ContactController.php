@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreContactMessageRequest;
 use App\Models\CompanySetting;
 use App\Models\ContactMessage;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -21,7 +22,7 @@ class ContactController extends Controller
         ]);
     }
 
-    public function store(StoreContactMessageRequest $request): RedirectResponse
+    public function store(StoreContactMessageRequest $request): RedirectResponse|JsonResponse
     {
         $validated = $request->safe()->except('website');
 
@@ -29,6 +30,10 @@ class ContactController extends Controller
             ...$validated,
             'user_id' => $request->user()?->id,
         ]);
+
+        if ($request->wantsJson()) {
+            return response()->json(['message' => __('store.contact_sent')]);
+        }
 
         return redirect(localized_route('contact.show'))
             ->with('status', __('store.contact_sent'));

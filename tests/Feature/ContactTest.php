@@ -18,6 +18,15 @@ class ContactTest extends TestCase
             ->assertSee('Nous contacter');
     }
 
+    public function test_contact_form_is_wired_for_dynamic_submission(): void
+    {
+        $this->get('/contact')
+            ->assertOk()
+            ->assertSee('id="contact-form"', false)
+            ->assertSee('novalidate', false)
+            ->assertSee('js/contact-form.js', false);
+    }
+
     public function test_a_guest_can_send_a_message(): void
     {
         $response = $this->post('/contact', [
@@ -34,6 +43,32 @@ class ContactTest extends TestCase
             'subject' => 'Question sur une commande',
             'user_id' => null,
         ]);
+    }
+
+    public function test_a_dynamic_submission_receives_a_json_success_response(): void
+    {
+        $response = $this->postJson('/contact', [
+            'name' => 'Jean Martin',
+            'email' => 'jean@example.com',
+            'subject' => 'Question sur une commande',
+            'message' => 'Bonjour, où en est ma commande ?',
+        ]);
+
+        $response->assertOk()->assertJsonStructure(['message']);
+        $this->assertDatabaseHas('contact_messages', ['email' => 'jean@example.com']);
+    }
+
+    public function test_a_dynamic_submission_receives_json_validation_errors(): void
+    {
+        $response = $this->postJson('/contact', [
+            'name' => 'Jean Martin',
+            'email' => 'not-an-email',
+            'subject' => 'Question',
+            'message' => '',
+        ]);
+
+        $response->assertStatus(422)->assertJsonValidationErrors(['email', 'message']);
+        $this->assertDatabaseCount('contact_messages', 0);
     }
 
     public function test_a_logged_in_customer_message_is_linked_to_their_account(): void

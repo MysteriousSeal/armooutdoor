@@ -8,6 +8,10 @@
     <link rel="stylesheet" href="{{ versioned_asset('css/contact.css') }}">
 @endpush
 
+@push('scripts')
+    <script src="{{ asset('js/contact-form.js') }}" defer></script>
+@endpush
+
 @section('content')
     <div class="container">
         <nav class="breadcrumbs" aria-label="breadcrumb">
@@ -22,7 +26,7 @@
         </header>
 
         <div class="contact-layout">
-            <form method="POST" action="{{ localized_route('contact.store') }}" class="contact-form" novalidate>
+            <form id="contact-form" method="POST" action="{{ localized_route('contact.store') }}" class="contact-form" novalidate>
                 @csrf
 
                 <div class="contact-form-honeypot" aria-hidden="true">
@@ -33,26 +37,26 @@
                 <div class="form-row form-row--inline">
                     <div class="form-group">
                         <label for="name">{{ __('store.contact_name') }}</label>
-                        <input type="text" id="name" name="name" class="form-control" value="{{ old('name', $prefillName) }}" maxlength="120" required>
+                        <input type="text" id="name" name="name" class="form-control" value="{{ old('name', $prefillName) }}" maxlength="120" required data-validate>
                         @error('name') <p class="form-error">{{ $message }}</p> @enderror
                     </div>
 
                     <div class="form-group">
                         <label for="email">{{ __('store.contact_email') }}</label>
-                        <input type="email" id="email" name="email" class="form-control" value="{{ old('email', $prefillEmail) }}" maxlength="255" required>
+                        <input type="email" id="email" name="email" class="form-control" value="{{ old('email', $prefillEmail) }}" maxlength="255" required data-validate>
                         @error('email') <p class="form-error">{{ $message }}</p> @enderror
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label for="subject">{{ __('store.contact_subject') }}</label>
-                    <input type="text" id="subject" name="subject" class="form-control" value="{{ old('subject') }}" maxlength="150" required>
+                    <input type="text" id="subject" name="subject" class="form-control" value="{{ old('subject') }}" maxlength="150" required data-validate>
                     @error('subject') <p class="form-error">{{ $message }}</p> @enderror
                 </div>
 
                 <div class="form-group">
                     <label for="message">{{ __('store.contact_message') }}</label>
-                    <textarea id="message" name="message" class="form-control" rows="7" maxlength="5000" required>{{ old('message') }}</textarea>
+                    <textarea id="message" name="message" class="form-control" rows="7" maxlength="5000" required data-validate>{{ old('message') }}</textarea>
                     @error('message') <p class="form-error">{{ $message }}</p> @enderror
                 </div>
 
