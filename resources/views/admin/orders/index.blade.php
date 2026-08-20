@@ -427,18 +427,6 @@
 
             @include('admin.partials.pager', ['paginator' => $orders])
 
-            {{-- Deliberately holds no table: the row actions are already
-                 <form>s, and nesting them would make the browser silently
-                 drop the inner one. JS copies the ticked ids in on submit. --}}
-            <form
-                method="POST"
-                id="bulk-action-form"
-                action="{{ route($tab === 'archived' ? 'admin.orders.bulk-unarchive' : 'admin.orders.bulk-archive') }}"
-            >
-                @csrf
-                @method('PATCH')
-            </form>
-
             <div class="bulk-bar" id="bulk-bar" hidden>
                 <span class="bulk-bar-count"><span id="bulk-bar-number">0</span> selected</span>
                 <div class="bulk-bar-actions">
@@ -459,6 +447,27 @@
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
                     <button type="submit" class="btn btn-primary" id="archive-confirm-submit"></button>
+                </div>
+            </form>
+        </dialog>
+
+        {{-- The bulk action has its own modal rather than borrowing the
+             per-row one: sharing meant reassigning that modal's submit
+             handler, and any close path that failed to clear it would have
+             let a later per-row click submit a stale bulk selection. --}}
+        <dialog id="bulk-confirm-modal" class="modal" aria-labelledby="bulk-confirm-title">
+            <form
+                method="POST"
+                id="bulk-confirm-form"
+                action="{{ route($tab === 'archived' ? 'admin.orders.bulk-unarchive' : 'admin.orders.bulk-archive') }}"
+            >
+                @csrf
+                @method('PATCH')
+                <h3 class="modal-title" id="bulk-confirm-title">Are you sure?</h3>
+                <p class="modal-body" id="bulk-confirm-body"></p>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="bulk-confirm-submit"></button>
                 </div>
             </form>
         </dialog>

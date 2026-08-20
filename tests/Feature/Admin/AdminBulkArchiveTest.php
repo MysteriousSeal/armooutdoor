@@ -206,6 +206,42 @@ class AdminBulkArchiveTest extends TestCase
             ->assertSee('js/admin-bulk-select.js', false);
     }
 
+    public function test_the_bulk_action_has_its_own_modal_separate_from_the_per_row_one(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $this->order();
+
+        $content = $this->actingAs($admin)->get('/admin/orders')->assertOk()->getContent();
+
+        // Sharing the per-row modal meant reassigning its submit handler; a
+        // close path that failed to clear it would have let a later per-row
+        // click submit a stale bulk selection.
+        $this->assertStringContainsString('id="bulk-confirm-modal"', $content);
+        $this->assertStringContainsString('id="archive-confirm-modal"', $content);
+        $this->assertStringContainsString('id="bulk-confirm-form"', $content);
+        $this->assertStringContainsString('id="archive-confirm-form"', $content);
+    }
+
+    public function test_the_bulk_form_is_not_nested_inside_the_orders_table(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $this->order();
+
+        $content = $this->actingAs($admin)->get('/admin/orders')->assertOk()->getContent();
+
+        // The row actions are already forms. If the bulk form wrapped the
+        // table, the browser would silently drop them.
+        $tableStart = strpos($content, '<table');
+        $tableEnd = strpos($content, '</table>');
+        $bulkForm = strpos($content, 'id="bulk-confirm-form"');
+
+        $this->assertNotFalse($bulkForm);
+        $this->assertTrue(
+            $bulkForm > $tableEnd || $bulkForm < $tableStart,
+            'The bulk form must sit outside the table.',
+        );
+    }
+
     public function test_the_archived_tab_offers_unarchive_instead(): void
     {
         $admin = User::factory()->admin()->create();

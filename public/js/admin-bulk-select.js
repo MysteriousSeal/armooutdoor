@@ -1,8 +1,9 @@
 (function () {
-    var form = document.getElementById('bulk-action-form');
+    var modal = document.getElementById('bulk-confirm-modal');
+    var form = document.getElementById('bulk-confirm-form');
     var bar = document.getElementById('bulk-bar');
 
-    if (!form || !bar) {
+    if (!modal || !form || !bar) {
         return;
     }
 
@@ -11,13 +12,8 @@
     var number = document.getElementById('bulk-bar-number');
     var applyBtn = document.getElementById('bulk-apply');
     var clearBtn = document.getElementById('bulk-clear');
-
-    // Reuses the per-row archive modal: its action, body and submit label are
-    // already set from JS, so there is no need for a second one.
-    var modal = document.getElementById('archive-confirm-modal');
-    var modalForm = document.getElementById('archive-confirm-form');
-    var modalBody = document.getElementById('archive-confirm-body');
-    var modalSubmit = document.getElementById('archive-confirm-submit');
+    var modalBody = document.getElementById('bulk-confirm-body');
+    var modalSubmit = document.getElementById('bulk-confirm-submit');
 
     var isUnarchive = applyBtn.textContent.trim() === 'Unarchive';
     var lastToggled = null;
@@ -50,6 +46,9 @@
             rows.forEach(function (row) {
                 row.checked = selectAll.checked;
             });
+            // Anchor the next shift-click somewhere meaningful rather than on
+            // whichever row happened to be clicked before.
+            lastToggled = null;
             sync();
         });
     }
@@ -90,39 +89,24 @@
         var verb = isUnarchive ? 'unarchive' : 'archive';
         var noun = chosen.length === 1 ? 'order' : 'orders';
 
-        // Point the shared modal at the bulk form for this one submission.
+        // Rebuilt every time, so a selection changed after a cancelled
+        // confirmation cannot leave stale ids behind.
+        form.querySelectorAll('input[name="order_ids[]"]').forEach(function (input) {
+            input.remove();
+        });
+
+        chosen.forEach(function (row) {
+            var hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = 'order_ids[]';
+            hidden.value = row.value;
+            form.appendChild(hidden);
+        });
+
         modalBody.textContent = 'Are you sure you want to ' + verb + ' ' + chosen.length + ' ' + noun + '?';
         modalSubmit.textContent = (isUnarchive ? 'Unarchive ' : 'Archive ') + chosen.length + ' ' + noun;
 
-        modalSubmit.onclick = function (event) {
-            event.preventDefault();
-
-            form.querySelectorAll('input[name="order_ids[]"]').forEach(function (input) {
-                input.remove();
-            });
-
-            chosen.forEach(function (row) {
-                var hidden = document.createElement('input');
-                hidden.type = 'hidden';
-                hidden.name = 'order_ids[]';
-                hidden.value = row.value;
-                form.appendChild(hidden);
-            });
-
-            form.submit();
-        };
-
         modal.showModal();
-    });
-
-    // The per-row buttons share this modal, so its submit handler has to go
-    // back to normal once a bulk confirmation is dismissed.
-    modal.addEventListener('close', function () {
-        modalSubmit.onclick = null;
-    });
-
-    modalForm.addEventListener('submit', function () {
-        modalSubmit.onclick = null;
     });
 
     sync();
