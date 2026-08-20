@@ -3,8 +3,10 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\AdminActivityLog;
+use App\Models\Carrier;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -36,6 +38,87 @@ class DraftOrderDeletionTest extends TestCase
             'payment_method' => 'card',
             ...$attributes,
         ]);
+    }
+
+    private function carrier(): Carrier
+    {
+        return Carrier::query()->first() ?? Carrier::query()->create([
+            'slug' => 'draft-test-carrier',
+            'name' => ['en' => 'Carrier', 'fr' => 'Transporteur'],
+            'description' => ['en' => '', 'fr' => ''],
+            'eta' => ['en' => '', 'fr' => ''],
+            'method' => 'home',
+            'price_cents' => 500,
+            'active' => true,
+            'sort_order' => 1,
+        ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function manualOrderPayload(Product $product, string $action): array
+    {
+        $customer = User::factory()->create();
+
+        return [
+            'action' => $action,
+            'customer_mode' => 'existing',
+            'customer_id' => $customer->id,
+            'items' => [['product_id' => $product->id, 'variant_id' => null, 'quantity' => 3, 'price' => 10]],
+            'carrier_id' => $this->carrier()->id,
+            'first_name' => 'A', 'last_name' => 'B', 'line1' => 'x',
+            'postal_code' => '75000', 'city' => 'Paris', 'country' => 'FR',
+            'billing_first_name' => 'A', 'billing_last_name' => 'B', 'billing_line1' => 'x',
+            'billing_postal_code' => '75000', 'billing_city' => 'Paris', 'billing_country' => 'FR',
+        ];
+    }
+
+    /**
+     * Deleting a draft is only safe because a draft has taken nothing. If
+     * stock were ever reserved at draft time, deleting one would quietly lose
+     * that stock, and nothing else in the suite would notice.
+     */
+    public function test_saving_a_draft_does_not_move_stock(): void
+    {
+        $owner = User::factory()->admin()->create();
+        $product = Product::factory()->create(['quantity' => 20]);
+
+        $this->actingAs($owner)
+            ->post(route('admin.orders.store'), $this->manualOrderPayload($product, 'draft'))
+            ->assertRedirect();
+
+        $this->assertSame(20, $product->fresh()->quantity, 'A draft reserves nothing.');
+        $this->assertDatabaseHas('orders', ['status' => 'draft']);
+    }
+
+    public function test_stock_moves_when_the_draft_is_finalised_and_not_before(): void
+    {
+        $owner = User::factory()->admin()->create();
+        $product = Product::factory()->create(['quantity' => 20]);
+
+        // The same flag decides the status and the decrement, so this is the
+        // other half of the pair: nothing at draft, exactly once at placed.
+        $this->actingAs($owner)
+            ->post(route('admin.orders.store'), $this->manualOrderPayload($product, 'placed'))
+            ->assertRedirect();
+
+        $this->assertSame(17, $product->fresh()->quantity);
+    }
+
+    public function test_deleting_a_draft_leaves_stock_alone(): void
+    {
+        $owner = User::factory()->admin()->create();
+        $product = Product::factory()->create(['quantity' => 20]);
+
+        $this->actingAs($owner)->post(route('admin.orders.store'), $this->manualOrderPayload($product, 'draft'));
+        $draft = Order::query()->where('status', 'draft')->firstOrFail();
+
+        $this->actingAs($owner)->delete(route('admin.orders.destroy', $draft))->assertRedirect();
+
+        // Nothing was taken, so nothing is given back — and nothing is lost.
+        $this->assertSame(20, $product->fresh()->quantity);
+        $this->assertDatabaseMissing('orders', ['id' => $draft->id]);
     }
 
     public function test_a_draft_cannot_be_archived_or_unarchived(): void
