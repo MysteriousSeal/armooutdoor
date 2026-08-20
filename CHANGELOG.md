@@ -2,6 +2,19 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-20 — v0.7.1 — build GQODHO
+
+### Storefront
+
+- The account section for discount codes is now called **Mes codes de réduction** rather than "Mes réductions", which read as money off — what a discount does, not what the page holds. Singular "réduction" to match the wording already used at the cart and checkout.
+- The account nav tab now carries a **count of the codes the customer can use**, so a code reserved for someone is visible from any account page rather than only once they think to look. Tinted rather than filled, unlike the unread-messages badge beside it: an unread reply is something to act on, a standing count of codes is a fact.
+- The hub card now reads that same count instead of working it out again. Both showed the same figure by running the same filter twice, which is a disagreement waiting to happen.
+
+### Changed
+
+- The figure on each account hub card — the email, the address count, the order count — sat in the same muted grey as the description right above it and read as a third line of blurb. Each card now closes on its figure: pushed to the foot on a hairline, in the body colour, with tabular figures so "0 commande" and "12 commandes" do not shift the line. The rules land at the same height across a row, which the ragged spacing had been hiding.
+- The numbering on those cards sat over a centimetre from the title it labels, because the kicker carries a bottom margin sized for the homepage that landed on top of the card's own gap. Number and title now read as one heading.
+
 ## 2026-08-20 — v0.7.0 — build 9S4EA5
 
 ### Storefront
