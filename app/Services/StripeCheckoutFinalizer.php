@@ -69,14 +69,22 @@ class StripeCheckoutFinalizer
 
             $discountCode = null;
             $discountCents = 0;
+            $shippingDiscount = 0;
 
             if ($discountCodeId !== null) {
                 $discountCode = DiscountCode::query()->lockForUpdate()->find($discountCodeId);
 
                 if ($discountCode !== null && $discountCode->eligibilityError(Auth::user()) === null) {
                     $discountCents = $subtotal - $discountCode->apply($subtotal);
+                    $shippingDiscount = $discountCode->shippingDiscountCents($carrier, $shipping, $subtotal);
 
-                    if ($discountCode->hasLimitedQuantity()) {
+                    // Re-checked here, not just when the code was entered:
+                    // the cart may have crossed the free-shipping threshold
+                    // since. A code that ends up worth nothing is dropped
+                    // rather than consumed, so it stays usable.
+                    if ($discountCents === 0 && $shippingDiscount === 0 && $discountCode->isFreeRelayShipping()) {
+                        $discountCode = null;
+                    } elseif ($discountCode->hasLimitedQuantity()) {
                         $discountCode->decrement('quantity');
                     }
                 } else {
@@ -105,8 +113,11 @@ class StripeCheckoutFinalizer
                     'type' => $discountCode->type,
                     'value' => $discountCode->value,
                 ] : null,
+                'shipping_discount_cents' => $shippingDiscount,
                 'discount_cents' => $discountCents,
-                'total_cents' => $subtotal - $discountCents + $shipping,
+                // Must match what startStripeCheckout() charged, which also
+                // subtracts the shipping waiver.
+                'total_cents' => max(0, $subtotal - $discountCents + $shipping - $shippingDiscount),
                 'payment_method' => 'card',
                 'stripe_checkout_session_id' => $stripeCheckoutSessionId,
                 'stripe_payment_intent_id' => $stripePaymentIntentId,
