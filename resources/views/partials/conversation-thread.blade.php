@@ -5,6 +5,7 @@
     // the storefront in French.
     $isAdminView = ($viewer ?? 'customer') === 'admin';
     $messages = $conversation->messages;
+    $editor = $isAdminView ? auth()->user() : null;
 @endphp
 
 <ol class="thread thread--as-{{ $isAdminView ? 'admin' : 'customer' }}" id="conversation-thread">
@@ -31,7 +32,12 @@
             </li>
         @endif
 
-        <li class="thread-item {{ $message->isFromAdmin() ? 'thread-item--admin' : 'thread-item--customer' }} {{ $continues ? 'thread-item--continues' : '' }}">
+        @php $editable = $message->isEditableBy($editor); @endphp
+
+        <li
+            class="thread-item {{ $message->isFromAdmin() ? 'thread-item--admin' : 'thread-item--customer' }} {{ $continues ? 'thread-item--continues' : '' }}"
+            @if ($editable) data-message-id="{{ $message->id }}" data-edit-url="{{ route('admin.conversations.messages.update', [$conversation, $message]) }}" @endif
+        >
             @if ($continues)
                 <span class="thread-avatar thread-avatar--placeholder" aria-hidden="true"></span>
             @else
@@ -48,11 +54,26 @@
                     </div>
                 @endunless
                 <p class="thread-body">{!! nl2br(e($message->body)) !!}</p>
-                @if ($continues)
-                    <time class="thread-time thread-time--inline" datetime="{{ $message->created_at->toIso8601String() }}" title="{{ $exact }}">
-                        {{ $relative }}
-                    </time>
-                @endif
+
+                <div class="thread-foot">
+                    @if ($continues)
+                        <time class="thread-time" datetime="{{ $message->created_at->toIso8601String() }}" title="{{ $exact }}">
+                            {{ $relative }}
+                        </time>
+                    @endif
+
+                    <span class="thread-edited" @unless ($message->wasEdited()) hidden @endunless>
+                        @if ($message->wasEdited())
+                            {{ $isAdminView
+                                ? 'edited at '.$message->edited_at->format('H:i')
+                                : __('store.conversation_edited_at', ['time' => $message->edited_at->format('H\hi')]) }}
+                        @endif
+                    </span>
+
+                    @if ($editable)
+                        <button type="button" class="thread-edit-btn" data-thread-edit>Edit</button>
+                    @endif
+                </div>
             </div>
         </li>
     @endforeach

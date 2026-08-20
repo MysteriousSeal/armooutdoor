@@ -126,4 +126,5 @@
 
 @push('scripts')
     <script src="{{ asset('js/conversation-reply.js') }}" defer></script>
+    <script src="{{ asset('js/conversation-edit.js') }}" defer></script>
 @endpush

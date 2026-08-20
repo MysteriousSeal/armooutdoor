@@ -102,6 +102,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/conversations', [AdminConversationController::class, 'index'])->name('conversations.index');
         Route::get('/conversations/{conversation}', [AdminConversationController::class, 'show'])->name('conversations.show');
         Route::post('/conversations/{conversation}/reply', [AdminConversationController::class, 'reply'])->name('conversations.reply');
+        Route::patch('/conversations/{conversation}/messages/{message}', [AdminConversationController::class, 'updateMessage'])->name('conversations.messages.update');
         Route::patch('/conversations/{conversation}/close', [AdminConversationController::class, 'close'])->name('conversations.close');
         Route::patch('/conversations/{conversation}/reopen', [AdminConversationController::class, 'reopen'])->name('conversations.reopen');
 

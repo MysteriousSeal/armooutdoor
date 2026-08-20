@@ -98,10 +98,47 @@ class ConversationController extends Controller
                 'authorLabel' => $message->authorLabel(),
                 'authorInitials' => $message->avatarInitials(),
                 'body' => $message->body,
+                // So the freshly appended bubble is editable straight away,
+                // rather than only after a reload.
+                'editUrl' => route('admin.conversations.messages.update', [$conversation, $message]),
             ]);
         }
 
         return back()->with('status', 'Reply sent.');
+    }
+
+    /**
+     * Correcting a reply shortly after sending it. Deliberately does not
+     * re-notify the customer: the email only says an answer is waiting, and
+     * a typo fix is not news.
+     */
+    public function updateMessage(
+        StoreConversationReplyRequest $request,
+        Conversation $conversation,
+        ConversationMessage $message,
+    ): RedirectResponse|JsonResponse {
+        abort_unless($message->conversation_id === $conversation->id, 404);
+        abort_unless($message->isEditableBy($request->user()), 403);
+
+        $message->body = $request->validated('body');
+        $message->edited_at = now();
+        $message->save();
+
+        AdminActivityLog::record(
+            'conversation.message_edited',
+            $conversation,
+            'Edited a reply to '.$conversation->name.' about "'.$conversation->subject.'"',
+        );
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Reply updated.',
+                'body' => $message->body,
+                'editedLabel' => 'edited at '.$message->edited_at->format('H:i'),
+            ]);
+        }
+
+        return back()->with('status', 'Reply updated.');
     }
 
     /**

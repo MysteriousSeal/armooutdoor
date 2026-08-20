@@ -5,6 +5,7 @@ namespace Tests\Feature\Admin;
 use App\Models\Carrier;
 use App\Models\Category;
 use App\Models\Conversation;
+use App\Models\ConversationMessage;
 use App\Models\Discount;
 use App\Models\DiscountCode;
 use App\Models\Marketplace;
@@ -66,6 +67,7 @@ class AdminAuthorizationTest extends TestCase
             'email' => 'audit@example.com',
             'subject' => 'Audit',
         ]);
+        $conversationMessage = $conversation->postMessage('Audit message', ConversationMessage::AUTHOR_ADMIN, $targetAdmin);
         $carrier = Carrier::query()->first() ?? Carrier::query()->create([
             'slug' => 'audit-carrier',
             'name' => ['en' => 'Audit', 'fr' => 'Audit'],
@@ -90,6 +92,7 @@ class AdminAuthorizationTest extends TestCase
             'carrier' => $carrier->id,
             'admin' => $targetAdmin->id,
             'conversation' => $conversation->id,
+            'message' => $conversationMessage->id,
         ];
 
         $nonAdmin = User::factory()->create();

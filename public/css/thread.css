@@ -134,16 +134,74 @@
     cursor: help;
 }
 
-/* Grouped messages drop the meta row, so the time tucks under the body. */
-.thread-time--inline {
-    display: block;
-    margin-top: 0.3rem;
+/* Timestamp on a grouped message, the edited marker, and the edit control
+   all share a row tucked under the body. */
+.thread-foot {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.35rem;
     font-size: 0.625rem;
 }
 
-.thread--as-admin .thread-item--admin .thread-time--inline,
-.thread--as-customer .thread-item--customer .thread-time--inline {
-    text-align: right;
+.thread-foot:empty {
+    display: none;
+}
+
+.thread--as-admin .thread-item--admin .thread-foot,
+.thread--as-customer .thread-item--customer .thread-foot {
+    justify-content: flex-end;
+}
+
+.thread-foot .thread-time {
+    font-size: 0.625rem;
+}
+
+.thread-edited {
+    font-size: 0.625rem;
+    font-style: italic;
+    color: var(--text-muted);
+}
+
+.thread-edited[hidden] {
+    display: none;
+}
+
+.thread-edit-btn {
+    padding: 0;
+    font-size: 0.625rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: none;
+    border: 0;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--text-muted) 40%, transparent);
+    text-underline-offset: 0.15em;
+}
+
+.thread-edit-btn:hover {
+    color: var(--accent-hover);
+    text-decoration-color: currentColor;
+}
+
+.thread-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: min(28rem, 60vw);
+}
+
+.thread-editor textarea.form-control {
+    margin-bottom: 0;
+    font-size: 0.875rem;
+    background: var(--surface);
+}
+
+.thread-editor-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.4rem;
 }
 
 .thread-body {

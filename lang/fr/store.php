@@ -412,6 +412,7 @@ return [
     'conversation_reply_required' => 'Écrivez une réponse avant de l’envoyer.',
     'conversation_closed_note' => 'Cet échange est clôturé. Écrivez-nous un nouveau message si vous avez une autre question.',
     'conversation_back' => 'Retour à mes messages',
+    'conversation_edited_at' => 'modifié à :time',
     'conversation_notification_subject' => 'Réponse à votre message : :subject',
     'conversation_notification_greeting' => 'Bonjour :name,',
     'conversation_notification_line' => 'Nous venons de répondre à votre message. Vous pouvez lire notre réponse depuis votre compte.',

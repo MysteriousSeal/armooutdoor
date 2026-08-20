@@ -65,6 +65,29 @@
         meta.appendChild(time);
         bubble.appendChild(meta);
         bubble.appendChild(body);
+
+        // Only the admin view sends an edit URL; a customer cannot edit.
+        if (data.editUrl) {
+            item.dataset.editUrl = data.editUrl;
+
+            var foot = document.createElement('div');
+            foot.className = 'thread-foot';
+
+            var edited = document.createElement('span');
+            edited.className = 'thread-edited';
+            edited.hidden = true;
+
+            var editBtn = document.createElement('button');
+            editBtn.type = 'button';
+            editBtn.className = 'thread-edit-btn';
+            editBtn.setAttribute('data-thread-edit', '');
+            editBtn.textContent = 'Edit';
+
+            foot.appendChild(edited);
+            foot.appendChild(editBtn);
+            bubble.appendChild(foot);
+        }
+
         item.appendChild(avatar);
         item.appendChild(bubble);
         thread.appendChild(item);

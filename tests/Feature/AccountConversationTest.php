@@ -318,6 +318,46 @@ class AccountConversationTest extends TestCase
         );
     }
 
+    public function test_the_customer_sees_that_a_reply_was_edited(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $user = User::factory()->create();
+        $conversation = $this->conversationFor($user);
+        $message = $conversation->postMessage('Corrigé', ConversationMessage::AUTHOR_ADMIN, $admin);
+        $message->edited_at = now();
+        $message->save();
+
+        $this->actingAs($user)
+            ->get('/account/messages/'.$conversation->id)
+            ->assertOk()
+            ->assertSee(__('store.conversation_edited_at', ['time' => $message->edited_at->format('H\hi')]));
+    }
+
+    public function test_the_customer_never_gets_an_edit_control(): void
+    {
+        $user = User::factory()->create();
+        $conversation = $this->conversationFor($user);
+
+        $this->actingAs($user)
+            ->get('/account/messages/'.$conversation->id)
+            ->assertOk()
+            ->assertDontSee('data-thread-edit', false)
+            ->assertDontSee('conversation-edit.js', false);
+    }
+
+    public function test_a_customer_cannot_edit_a_message_through_the_admin_route(): void
+    {
+        $user = User::factory()->create();
+        $conversation = $this->conversationFor($user);
+        $message = $conversation->messages()->firstOrFail();
+
+        $this->actingAs($user)
+            ->patch('/admin/conversations/'.$conversation->id.'/messages/'.$message->id, ['body' => 'Réécrit'])
+            ->assertRedirect('/admin');
+
+        $this->assertNull($message->fresh()->edited_at);
+    }
+
     public function test_the_thread_page_keeps_the_account_nav(): void
     {
         $user = User::factory()->create();

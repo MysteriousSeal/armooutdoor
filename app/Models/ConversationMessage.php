@@ -13,6 +13,16 @@ class ConversationMessage extends Model
 
     public const AUTHOR_ADMIN = 'admin';
 
+    /** How long after sending an admin may still correct their own reply. */
+    public const EDIT_WINDOW_MINUTES = 30;
+
+    protected function casts(): array
+    {
+        return [
+            'edited_at' => 'datetime',
+        ];
+    }
+
     public function conversation(): BelongsTo
     {
         return $this->belongsTo(Conversation::class);
@@ -64,6 +74,30 @@ class ConversationMessage extends Model
      * timeline can group it under the previous one instead of repeating
      * the author and avatar.
      */
+    public function wasEdited(): bool
+    {
+        return $this->edited_at !== null;
+    }
+
+    /**
+     * An admin may correct their own reply for a short while after sending
+     * it. Only their own: another admin's wording stays theirs to fix. The
+     * single source of truth for both the controller and the view, so the
+     * button can never appear on something the server would refuse.
+     */
+    public function isEditableBy(?User $user): bool
+    {
+        if ($user === null || ! $user->isAdmin() || ! $this->isFromAdmin()) {
+            return false;
+        }
+
+        if ($this->user_id !== $user->id) {
+            return false;
+        }
+
+        return $this->created_at->greaterThan(now()->subMinutes(self::EDIT_WINDOW_MINUTES));
+    }
+
     public function continues(?self $previous): bool
     {
         return $previous !== null

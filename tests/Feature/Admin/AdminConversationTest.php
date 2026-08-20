@@ -263,6 +263,166 @@ class AdminConversationTest extends TestCase
             ->assertSee(route('admin.conversations.show', $conversation), false);
     }
 
+    public function test_an_admin_can_edit_their_own_recent_reply(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $conversation = $this->conversation(User::factory()->create());
+        $message = $conversation->postMessage('Typo ici', ConversationMessage::AUTHOR_ADMIN, $admin);
+
+        $response = $this->actingAs($admin)->patch(
+            route('admin.conversations.messages.update', [$conversation, $message]),
+            ['body' => 'Corrigé'],
+        );
+
+        $response->assertRedirect();
+        $message->refresh();
+        $this->assertSame('Corrigé', $message->body);
+        $this->assertNotNull($message->edited_at);
+        $this->assertTrue($message->wasEdited());
+    }
+
+    public function test_editing_is_logged_to_the_activity_log(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $conversation = $this->conversation(User::factory()->create());
+        $message = $conversation->postMessage('Typo', ConversationMessage::AUTHOR_ADMIN, $admin);
+
+        $this->actingAs($admin)->patch(
+            route('admin.conversations.messages.update', [$conversation, $message]),
+            ['body' => 'Corrigé'],
+        );
+
+        $this->assertDatabaseHas('admin_activity_logs', [
+            'action' => 'conversation.message_edited',
+            'user_id' => $admin->id,
+            'subject_id' => $conversation->id,
+        ]);
+    }
+
+    public function test_an_admin_cannot_edit_a_reply_written_by_another_admin(): void
+    {
+        $author = User::factory()->admin()->create();
+        $other = User::factory()->admin()->create();
+        $conversation = $this->conversation(User::factory()->create());
+        $message = $conversation->postMessage('Leur texte', ConversationMessage::AUTHOR_ADMIN, $author);
+
+        $this->actingAs($other)
+            ->patch(route('admin.conversations.messages.update', [$conversation, $message]), ['body' => 'Détourné'])
+            ->assertForbidden();
+
+        $this->assertSame('Leur texte', $message->fresh()->body);
+    }
+
+    public function test_an_admin_cannot_edit_a_customers_message(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $customer = User::factory()->create();
+        $conversation = $this->conversation($customer);
+        $message = $conversation->messages()->firstOrFail();
+
+        $this->actingAs($admin)
+            ->patch(route('admin.conversations.messages.update', [$conversation, $message]), ['body' => 'Réécrit'])
+            ->assertForbidden();
+
+        $this->assertNull($message->fresh()->edited_at);
+    }
+
+    public function test_a_reply_can_no_longer_be_edited_after_the_window_closes(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $conversation = $this->conversation(User::factory()->create());
+        $message = $conversation->postMessage('Trop tard', ConversationMessage::AUTHOR_ADMIN, $admin);
+
+        $this->travel(ConversationMessage::EDIT_WINDOW_MINUTES + 1)->minutes();
+
+        $this->actingAs($admin)
+            ->patch(route('admin.conversations.messages.update', [$conversation, $message]), ['body' => 'Corrigé'])
+            ->assertForbidden();
+
+        $this->assertSame('Trop tard', $message->fresh()->body);
+    }
+
+    public function test_a_message_from_another_conversation_is_not_found(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $conversation = $this->conversation(User::factory()->create());
+        $other = $this->conversation(User::factory()->create());
+        $message = $other->postMessage('Ailleurs', ConversationMessage::AUTHOR_ADMIN, $admin);
+
+        $this->actingAs($admin)
+            ->patch(route('admin.conversations.messages.update', [$conversation, $message]), ['body' => 'Corrigé'])
+            ->assertNotFound();
+    }
+
+    public function test_an_edited_reply_body_is_required(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $conversation = $this->conversation(User::factory()->create());
+        $message = $conversation->postMessage('Original', ConversationMessage::AUTHOR_ADMIN, $admin);
+
+        $this->actingAs($admin)
+            ->patch(route('admin.conversations.messages.update', [$conversation, $message]), ['body' => ''])
+            ->assertSessionHasErrors('body');
+
+        $this->assertSame('Original', $message->fresh()->body);
+    }
+
+    public function test_the_edit_button_only_appears_on_the_admins_own_recent_reply(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $other = User::factory()->admin()->create();
+        $conversation = $this->conversation(User::factory()->create());
+        $mine = $conversation->postMessage('La mienne', ConversationMessage::AUTHOR_ADMIN, $admin);
+        $theirs = $conversation->postMessage('La leur', ConversationMessage::AUTHOR_ADMIN, $other);
+
+        $response = $this->actingAs($admin)->get(route('admin.conversations.show', $conversation));
+
+        $response->assertOk()
+            ->assertSee(route('admin.conversations.messages.update', [$conversation, $mine]), false)
+            ->assertDontSee(route('admin.conversations.messages.update', [$conversation, $theirs]), false);
+    }
+
+    public function test_a_stale_reply_shows_no_edit_button(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $conversation = $this->conversation(User::factory()->create());
+        $message = $conversation->postMessage('Ancienne', ConversationMessage::AUTHOR_ADMIN, $admin);
+
+        $this->travel(ConversationMessage::EDIT_WINDOW_MINUTES + 1)->minutes();
+
+        $this->actingAs($admin)
+            ->get(route('admin.conversations.show', $conversation))
+            ->assertOk()
+            ->assertDontSee('data-thread-edit', false);
+    }
+
+    public function test_a_dynamic_edit_returns_the_new_body_and_edited_label(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $conversation = $this->conversation(User::factory()->create());
+        $message = $conversation->postMessage('Avant', ConversationMessage::AUTHOR_ADMIN, $admin);
+
+        $response = $this->actingAs($admin)->patchJson(
+            route('admin.conversations.messages.update', [$conversation, $message]),
+            ['body' => 'Après'],
+        );
+
+        $response->assertOk()
+            ->assertJsonStructure(['message', 'body', 'editedLabel'])
+            ->assertJsonPath('body', 'Après');
+    }
+
+    public function test_a_fresh_reply_comes_back_with_its_edit_url(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $conversation = $this->conversation(User::factory()->create());
+
+        $this->actingAs($admin)
+            ->postJson(route('admin.conversations.reply', $conversation), ['body' => 'Bonjour'])
+            ->assertOk()
+            ->assertJsonStructure(['editUrl']);
+    }
+
     public function test_staff_can_answer_customers(): void
     {
         $staff = User::factory()->staffAdmin()->create();
