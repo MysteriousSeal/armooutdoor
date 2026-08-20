@@ -19,6 +19,8 @@
     var mainImage = document.getElementById('product-detail-main-image');
     var qtyInput = form.querySelector('.qty-stepper-input');
     var buyRow = form.querySelector('.product-buy-row');
+    var skuEl = document.getElementById('product-detail-sku');
+    var skuValueEl = document.getElementById('product-detail-sku-value');
     var leadTimeEl = document.getElementById('product-lead-time');
     var leadTimeValueEl = document.getElementById('product-lead-time-value');
     var leadTimeTemplate = document.getElementById('variant-lead-times');
@@ -66,6 +68,15 @@
             } else {
                 discountBadgeEl.hidden = true;
             }
+        }
+
+        // La référence suit la variante : c'est celle-là que le client
+        // commande, pas celle du produit parent.
+        if (skuEl && skuValueEl) {
+            var sku = radio.getAttribute('data-variant-sku');
+
+            skuValueEl.textContent = sku || '';
+            skuEl.hidden = !sku;
         }
 
         if (countdownEl) {

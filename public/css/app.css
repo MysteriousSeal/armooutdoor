@@ -1534,6 +1534,39 @@
     line-height: 1.25;
 }
 
+/*
+ * La référence. C'est une donnée d'identification, pas un argument de vente :
+ * elle se lit quand on la cherche et disparaît le reste du temps. D'où le
+ * corps petit, la casse haute sur le libellé seul, et des chiffres à chasse
+ * fixe pour que la valeur reste sélectionnable proprement.
+ */
+.product-detail-sku {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    /* Le titre n'a pas de marge basse : la référence pose la sienne, pour ne
+       pas se lire comme un sous-titre collé au nom du produit. */
+    margin: 0.7rem 0 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: var(--text-muted);
+}
+
+.product-detail-sku-label {
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.product-detail-sku-value {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+    color: var(--text);
+    overflow-wrap: anywhere;
+    user-select: all;
+}
+
 .product-detail-rating {
     display: flex;
     align-items: center;

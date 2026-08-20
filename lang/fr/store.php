@@ -132,6 +132,7 @@ return [
     'quantity' => 'Quantité',
     'related' => 'Aussi dans cette catégorie',
     'product_description' => 'Description',
+    'product_sku' => 'Réf.',
     'product_characteristics' => 'Caractéristiques',
     'product_variants' => 'Variantes disponibles',
     'cart_variant' => 'Variante',

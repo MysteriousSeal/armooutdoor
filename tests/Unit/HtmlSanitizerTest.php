@@ -85,6 +85,25 @@ class HtmlSanitizerTest extends TestCase
         $this->assertSame('Hello world', HtmlSanitizer::toPlainText("Hello\u{A0}\u{A0}world"));
     }
 
+    public function test_to_plain_text_keeps_blocks_apart(): void
+    {
+        // strip_tags alone welds the end of one block to the start of the
+        // next, and a product's meta description is built from this — it read
+        // "...et chargeur.Le DLV36 reprend..." on every multi-paragraph page.
+        $this->assertSame(
+            'Un. Deux.',
+            HtmlSanitizer::toPlainText('<p>Un.</p><p>Deux.</p>'),
+        );
+
+        $this->assertSame(
+            'Un Deux Trois Quatre',
+            HtmlSanitizer::toPlainText('<ul><li>Un</li><li>Deux</li></ul>Trois<br>Quatre'),
+        );
+
+        // Inline tags still close up, or every bold word would gain a space.
+        $this->assertSame('Hello world', HtmlSanitizer::toPlainText('<p>Hello <strong>world</strong></p>'));
+    }
+
     public function test_is_empty_detects_html_with_no_visible_text(): void
     {
         $this->assertTrue(HtmlSanitizer::isEmpty('<p><br></p>'));

@@ -87,7 +87,12 @@ class HtmlSanitizer
             return '';
         }
 
-        $text = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        // Block boundaries become spaces first: strip_tags alone runs the end
+        // of one paragraph into the start of the next, which is how meta
+        // descriptions ended up reading "…et chargeur.Le DLV36 reprend…".
+        $spaced = preg_replace('/<br\s*\/?>|<\/(?:p|div|li|ul|ol|h[1-6]|tr|td|th|blockquote|section|article)\s*>/i', ' ', $html) ?? $html;
+
+        $text = html_entity_decode(strip_tags($spaced), ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $text = str_replace("\xc2\xa0", ' ', $text);
         $text = preg_replace('/\s+/u', ' ', $text) ?? $text;
 

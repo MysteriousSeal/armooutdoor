@@ -73,6 +73,9 @@
                     $selectedVariantId = old('variant_id', optional($activeVariants->first(fn ($variant) => $variant->inStock()) ?? $activeVariants->first())->id);
                     $displayVariant = $product->hasVariants() ? $activeVariants->firstWhere('id', (int) $selectedVariantId) : null;
                     $variantHasOwnPrice = $displayVariant?->price_cents !== null;
+                    // La référence affichée est celle de ce qui partira au
+                    // panier : celle de la variante si elle en a une.
+                    $displaySku = $displayVariant?->sku ?: $product->sku;
                 @endphp
 
                 @if ($product->category)
@@ -84,6 +87,11 @@
                 @endif
 
                 <h2 class="product-detail-title">{{ $product->localizedName() }}</h2>
+                <p class="product-detail-sku" id="product-detail-sku" @if (! $displaySku) hidden @endif>
+                    <span class="product-detail-sku-label">{{ __('store.product_sku') }}</span>
+                    <span class="product-detail-sku-value" id="product-detail-sku-value">{{ $displaySku }}</span>
+                </p>
+
                 <div class="product-detail-rating">
                     <span class="star-rating" aria-hidden="true">{{ str_repeat('★', (int) round($product->averageRating() ?? 0)) }}{{ str_repeat('☆', 5 - (int) round($product->averageRating() ?? 0)) }}</span>
                     <span class="card-rating-count">({{ $product->reviewsCount() }})</span>
@@ -205,6 +213,7 @@
                                                 data-variant-discount-label="{{ ($variant->price_cents === null && $product->hasDiscount()) ? $product->discount->label() : '' }}"
                                                 data-variant-discount-ends-at="{{ ($variant->price_cents === null && $product->hasDiscount() && $product->discount->ends_at) ? $product->discount->ends_at->toIso8601String() : '' }}"
                                                 data-variant-max="{{ $variant->maxPurchasable() }}"
+                                                data-variant-sku="{{ $variant->sku ?: $product->sku }}"
                                                 @if ($variant->image)
                                                     data-variant-image="{{ $variant->imageUrl() }}"
                                                 @endif
