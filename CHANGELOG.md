@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-20 — v0.5.2 — build 5KRG63
+
+### Fixed
+
+- **Card orders using a free relay-delivery code recorded the wrong total.** The customer was charged correctly, but the order was saved with the full delivery charge added back — on a 79,00 € basket, Stripe took 79,00 € while the order said 82,90 €. Card payments only; PayPal was unaffected. Because the waiver was not recorded, those orders also showed "No" under Free delivery, printed "Réduction −0,00 €" on the invoice, and exported a row that did not add up.
+- On the same path, a code could be consumed without being worth anything.
+
+**Existing card orders placed with such a code carry the wrong total and need correcting by hand — the fix only applies to new orders.** The affected ones are card orders whose discount code was a free relay-delivery one; their total is overstated by exactly the delivery charge.
+
 ## 2026-08-20 — v0.5.1 — build D1SSUL
 
 Follow-ups to the free relay-delivery code added in v0.5.0.
