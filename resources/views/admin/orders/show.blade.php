@@ -22,6 +22,9 @@
                         @if ($order->isArchived())
                             <span class="badge badge-disabled">Archived</span>
                         @endif
+                        @if ($order->isTest())
+                            <span class="badge badge-test" title="Kept as a record of testing; left out of every figure">Test</span>
+                        @endif
                     </div>
                 </div>
                 <div class="admin-order-actions" id="order-actions">
@@ -41,6 +44,13 @@
                         <button type="button" class="btn btn-secondary" data-modal-open="unarchive-confirm-modal">Unarchive</button>
                     @else
                         <button type="button" class="btn btn-secondary" data-modal-open="archive-confirm-modal">Archive</button>
+                    @endif
+                    @if (auth()->user()->isOwner())
+                        @if ($order->isTest())
+                            <button type="button" class="btn btn-secondary" data-modal-open="untest-confirm-modal">Unmark as test</button>
+                        @else
+                            <button type="button" class="btn btn-secondary" data-modal-open="test-confirm-modal">Mark as test</button>
+                        @endif
                     @endif
                 </div>
             </div>
@@ -508,6 +518,47 @@
                     </div>
                 </form>
             </dialog>
+        @endif
+
+        {{-- Gated like the buttons above: a form staff cannot submit has no
+             business being in the page. --}}
+        @if (auth()->user()->isOwner())
+        @if ($order->isTest())
+            <dialog id="untest-confirm-modal" class="modal" aria-labelledby="untest-confirm-title">
+                <form method="POST" action="{{ route('admin.orders.untest', $order) }}">
+                    @csrf
+                    @method('PATCH')
+                    <p class="modal-kicker">{{ $order->number }}</p>
+                    <h3 class="modal-title" id="untest-confirm-title">No longer a test order?</h3>
+                    <p class="modal-body">
+                        It will count towards revenue, the order counts and this customer's
+                        lifetime spend again.
+                    </p>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                        <button type="submit" class="btn btn-primary">Unmark as test</button>
+                    </div>
+                </form>
+            </dialog>
+        @else
+            <dialog id="test-confirm-modal" class="modal" aria-labelledby="test-confirm-title">
+                <form method="POST" action="{{ route('admin.orders.test', $order) }}">
+                    @csrf
+                    @method('PATCH')
+                    <p class="modal-kicker">{{ $order->number }}</p>
+                    <h3 class="modal-title" id="test-confirm-title">Mark this as a test order?</h3>
+                    <p class="modal-body">
+                        It is kept in full but leaves every figure: revenue, order counts and
+                        this customer's lifetime spend. Nothing is undone — the stock it took
+                        and the invoice number it used are not given back.
+                    </p>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                        <button type="submit" class="btn btn-primary">Mark as test</button>
+                    </div>
+                </form>
+            </dialog>
+        @endif
         @endif
 
         @if ($order->isArchived())

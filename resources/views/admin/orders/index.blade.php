@@ -111,6 +111,9 @@
             <a href="{{ route('admin.orders.index', [...$baseFilters, 'tab' => 'archived']) }}" class="{{ $tab === 'archived' ? 'active' : '' }}">
                 Archived <span class="admin-tab-count">{{ number_format($archivedCount) }}</span>
             </a>
+            <a href="{{ route('admin.orders.index', [...$baseFilters, 'tab' => 'test']) }}" class="{{ $tab === 'test' ? 'active' : '' }}">
+                Test <span class="admin-tab-count">{{ number_format($testCount) }}</span>
+            </a>
         </nav>
 
         <form method="GET" action="{{ route('admin.orders.index') }}" class="admin-filter-bar">
@@ -217,6 +220,7 @@
             $tabLabel = match ($tab) {
                 'draft' => 'drafts',
                 'archived' => 'archived orders',
+                'test' => 'test orders',
                 default => 'orders',
             };
         @endphp
@@ -269,6 +273,9 @@
                                     <a href="{{ route('admin.orders.show', $order) }}" class="admin-table-strong">
                                         {{ $order->number }}
                                     </a>
+                                    @if ($order->isTest())
+                                        <span class="order-chip order-chip--test" title="Kept as a record of testing; left out of every figure">Test</span>
+                                    @endif
                                     <span class="admin-table-sub">{{ $order->created_at->format('d M Y · H:i') }}</span>
                                 </td>
                                 <td>
@@ -392,13 +399,31 @@
                                                 </span>
                                             @endif
 
+                                            @if (auth()->user()->isOwner())
                                             <button
                                                 type="button"
                                                 class="admin-actions-item"
-                                                data-archive-toggle
+                                                data-confirm-toggle
+                                                data-action="{{ route($order->isTest() ? 'admin.orders.untest' : 'admin.orders.test', $order) }}"
+                                                data-body="{{ $order->isTest()
+                                                    ? 'Order '.$order->number.' will count towards the figures again.'
+                                                    : 'Order '.$order->number.' will be kept but left out of every figure. Stock and invoice numbers it used are not given back.' }}"
+                                                data-label="{{ $order->isTest() ? 'Unmark as test' : 'Mark as test' }}"
+                                            >
+                                                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                                                    <path d="M9 3h6M10 3v6.2L5.5 18a2 2 0 0 0 1.8 3h9.4a2 2 0 0 0 1.8-3L14 9.2V3" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
+                                                {{ $order->isTest() ? 'Unmark as test' : 'Mark as test' }}
+                                            </button>
+                                            @endif
+
+                                            <button
+                                                type="button"
+                                                class="admin-actions-item"
+                                                data-confirm-toggle
                                                 data-action="{{ route($order->isArchived() ? 'admin.orders.unarchive' : 'admin.orders.archive', $order) }}"
-                                                data-order="{{ $order->number }}"
-                                                data-archived="{{ $order->isArchived() ? '1' : '0' }}"
+                                                data-body="Are you sure you want to {{ $order->isArchived() ? 'unarchive' : 'archive' }} order {{ $order->number }}?"
+                                                data-label="{{ $order->isArchived() ? 'Unarchive order' : 'Archive order' }}"
                                             >
                                                 @if ($order->isArchived())
                                                     <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
@@ -431,22 +456,48 @@
                 <span class="bulk-bar-count"><span id="bulk-bar-number">0</span> selected</span>
                 <div class="bulk-bar-actions">
                     <button type="button" class="btn btn-sm btn-secondary" id="bulk-clear">Clear</button>
-                    <button type="button" class="btn btn-sm btn-primary" id="bulk-apply">
-                        {{ $tab === 'archived' ? 'Unarchive' : 'Archive' }}
-                    </button>
+                    @if ($tab === 'test' && auth()->user()->isOwner())
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-primary"
+                            data-bulk-apply
+                            data-bulk-action="{{ route('admin.orders.bulk-untest') }}"
+                            data-bulk-verb="unmark as test"
+                            data-bulk-label="Unmark as test"
+                        >Unmark as test</button>
+                    @else
+                        @if (auth()->user()->isOwner())
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-secondary"
+                            data-bulk-apply
+                            data-bulk-action="{{ route('admin.orders.bulk-test') }}"
+                            data-bulk-verb="mark as test"
+                            data-bulk-label="Mark as test"
+                        >Mark as test</button>
+                        @endif
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-primary"
+                            data-bulk-apply
+                            data-bulk-action="{{ route($tab === 'archived' ? 'admin.orders.bulk-unarchive' : 'admin.orders.bulk-archive') }}"
+                            data-bulk-verb="{{ $tab === 'archived' ? 'unarchive' : 'archive' }}"
+                            data-bulk-label="{{ $tab === 'archived' ? 'Unarchive' : 'Archive' }}"
+                        >{{ $tab === 'archived' ? 'Unarchive' : 'Archive' }}</button>
+                    @endif
                 </div>
             </div>
         @endif
 
-        <dialog id="archive-confirm-modal" class="modal" aria-labelledby="archive-confirm-title">
-            <form method="POST" id="archive-confirm-form">
+        <dialog id="row-confirm-modal" class="modal" aria-labelledby="row-confirm-title">
+            <form method="POST" id="row-confirm-form">
                 @csrf
                 @method('PATCH')
-                <h3 class="modal-title" id="archive-confirm-title">Are you sure?</h3>
-                <p class="modal-body" id="archive-confirm-body"></p>
+                <h3 class="modal-title" id="row-confirm-title">Are you sure?</h3>
+                <p class="modal-body" id="row-confirm-body"></p>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="archive-confirm-submit"></button>
+                    <button type="submit" class="btn btn-primary" id="row-confirm-submit"></button>
                 </div>
             </form>
         </dialog>
@@ -456,11 +507,9 @@
              handler, and any close path that failed to clear it would have
              let a later per-row click submit a stale bulk selection. --}}
         <dialog id="bulk-confirm-modal" class="modal" aria-labelledby="bulk-confirm-title">
-            <form
-                method="POST"
-                id="bulk-confirm-form"
-                action="{{ route($tab === 'archived' ? 'admin.orders.bulk-unarchive' : 'admin.orders.bulk-archive') }}"
-            >
+            {{-- The action is set by whichever bulk button was pressed, since
+                 this bar now offers more than one. --}}
+            <form method="POST" id="bulk-confirm-form">
                 @csrf
                 @method('PATCH')
                 <h3 class="modal-title" id="bulk-confirm-title">Are you sure?</h3>
@@ -506,21 +555,18 @@
     </script>
     <script>
         (function () {
-            var modal = document.getElementById('archive-confirm-modal');
-            var form = document.getElementById('archive-confirm-form');
-            var body = document.getElementById('archive-confirm-body');
-            var submitBtn = document.getElementById('archive-confirm-submit');
+            var modal = document.getElementById('row-confirm-modal');
+            var form = document.getElementById('row-confirm-form');
+            var body = document.getElementById('row-confirm-body');
+            var submitBtn = document.getElementById('row-confirm-submit');
 
-            document.querySelectorAll('[data-archive-toggle]').forEach(function (btn) {
+            // Copy comes from the button rather than being computed here, so
+            // one modal serves archiving and test-marking alike.
+            document.querySelectorAll('[data-confirm-toggle]').forEach(function (btn) {
                 btn.addEventListener('click', function () {
-                    var archived = btn.getAttribute('data-archived') === '1';
-                    var number = btn.getAttribute('data-order');
-
                     form.action = btn.getAttribute('data-action');
-                    body.textContent = archived
-                        ? 'Are you sure you want to unarchive order ' + number + '?'
-                        : 'Are you sure you want to archive order ' + number + '?';
-                    submitBtn.textContent = archived ? 'Unarchive order' : 'Archive order';
+                    body.textContent = btn.getAttribute('data-body');
+                    submitBtn.textContent = btn.getAttribute('data-label');
 
                     modal.showModal();
                 });

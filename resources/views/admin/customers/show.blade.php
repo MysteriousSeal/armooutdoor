@@ -39,6 +39,11 @@
             <div class="admin-list-meta">
                 <span class="admin-list-chip">{{ number_format($orders->count()) }} {{ \Illuminate\Support\Str::plural('order', $orders->count()) }}</span>
                 <span class="admin-list-chip">{{ format_euros($spentCents) }} spent</span>
+                @if ($testOrderCount > 0)
+                    <span class="admin-list-chip admin-list-chip--muted">
+                        excluding {{ $testOrderCount }} test {{ \Illuminate\Support\Str::plural('order', $testOrderCount) }}
+                    </span>
+                @endif
                 @if ($averageOrderCents > 0)
                     <span class="admin-list-chip">Avg. {{ format_euros($averageOrderCents) }}</span>
                 @endif
@@ -71,6 +76,9 @@
                                             @endif
                                         </span>
                                     </div>
+                                    @if ($order->isTest())
+                                        <span class="badge badge-test" title="Left out of the total spent">Test</span>
+                                    @endif
                                     <span class="badge badge-{{ $order->status }}">{{ ucfirst($order->status) }}</span>
                                     <span class="admin-dash-list-value">{{ $order->formattedTotal() }}</span>
                                     <a href="{{ route('admin.orders.show', $order) }}" class="btn btn-sm btn-primary">View</a>

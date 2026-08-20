@@ -249,9 +249,9 @@ class AdminBulkArchiveTest extends TestCase
         // close path that failed to clear it would have let a later per-row
         // click submit a stale bulk selection.
         $this->assertStringContainsString('id="bulk-confirm-modal"', $content);
-        $this->assertStringContainsString('id="archive-confirm-modal"', $content);
+        $this->assertStringContainsString('id="row-confirm-modal"', $content);
         $this->assertStringContainsString('id="bulk-confirm-form"', $content);
-        $this->assertStringContainsString('id="archive-confirm-form"', $content);
+        $this->assertStringContainsString('id="row-confirm-form"', $content);
     }
 
     public function test_the_bulk_form_is_not_nested_inside_the_orders_table(): void

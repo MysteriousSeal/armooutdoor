@@ -159,6 +159,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/orders/bulk/unarchive', [AdminOrderController::class, 'bulkUnarchive'])->name('orders.bulk-unarchive');
         Route::patch('/orders/{order}/archive', [AdminOrderController::class, 'archive'])->name('orders.archive');
         Route::patch('/orders/{order}/unarchive', [AdminOrderController::class, 'unarchive'])->name('orders.unarchive');
+        // Owner-only, like refund rather than like archive: archiving hides an
+        // order, but marking one as test moves revenue out of the figures.
+        Route::patch('/orders/bulk/test', [AdminOrderController::class, 'bulkMarkTest'])->middleware('admin.owner')->name('orders.bulk-test');
+        Route::patch('/orders/bulk/untest', [AdminOrderController::class, 'bulkUnmarkTest'])->middleware('admin.owner')->name('orders.bulk-untest');
+        Route::patch('/orders/{order}/test', [AdminOrderController::class, 'markTest'])->middleware('admin.owner')->name('orders.test');
+        Route::patch('/orders/{order}/untest', [AdminOrderController::class, 'unmarkTest'])->middleware('admin.owner')->name('orders.untest');
         Route::patch('/orders/{order}/tracking', [AdminOrderController::class, 'updateTracking'])->name('orders.tracking.update');
         Route::patch('/orders/{order}/marketplace-commission', [AdminOrderController::class, 'updateMarketplaceCommission'])->name('orders.marketplace-commission.update');
         Route::patch('/orders/{order}/shipping-paid', [AdminOrderController::class, 'updateShippingPaid'])->name('orders.shipping-paid.update');

@@ -48,7 +48,9 @@ class OrderController extends Controller
 
         $this->backfillMissingPaymentFees($orders->getCollection());
 
-        $nonArchivedOrders = Order::query()->whereNull('archived_at')->where('status', '!=', 'draft');
+        // excludingTest() on every figure below: an order kept only as a
+        // record of testing must not move any of them.
+        $nonArchivedOrders = Order::query()->whereNull('archived_at')->excludingTest()->where('status', '!=', 'draft');
         $amountCents = (clone $nonArchivedOrders)->sum('total_cents');
         $shippingCostCents = (clone $nonArchivedOrders)->sum('shipping_paid_cents');
         $commissionCostCents = (clone $nonArchivedOrders)->sum('marketplace_commission_cents');
@@ -84,9 +86,10 @@ class OrderController extends Controller
                     })
                     ->count(),
             ],
-            'orderCount' => Order::query()->whereNull('archived_at')->where('status', '!=', 'draft')->count(),
-            'draftCount' => Order::query()->whereNull('archived_at')->where('status', 'draft')->count(),
-            'archivedCount' => Order::query()->whereNotNull('archived_at')->count(),
+            'orderCount' => Order::query()->whereNull('archived_at')->excludingTest()->where('status', '!=', 'draft')->count(),
+            'draftCount' => Order::query()->whereNull('archived_at')->excludingTest()->where('status', 'draft')->count(),
+            'archivedCount' => Order::query()->whereNotNull('archived_at')->excludingTest()->count(),
+            'testCount' => Order::query()->onlyTest()->count(),
             'search' => $filters['search'],
             'status' => $filters['status'],
             'marketplaceId' => $filters['marketplace_id'],
@@ -157,7 +160,7 @@ class OrderController extends Controller
     private function orderFilters(Request $request): array
     {
         return [
-            'tab' => in_array($request->query('tab'), ['draft', 'archived'], true) ? $request->query('tab') : 'orders',
+            'tab' => in_array($request->query('tab'), ['draft', 'archived', 'test'], true) ? $request->query('tab') : 'orders',
             'search' => trim((string) $request->query('search', '')),
             'status' => in_array($request->query('status'), ['placed', 'preparing', 'shipped', 'refunded'], true)
                 ? $request->query('status')
@@ -173,9 +176,13 @@ class OrderController extends Controller
      */
     private function filteredOrdersQuery(array $filters): Builder
     {
+        // The test tab holds every test order, archived or not, and the other
+        // three hold none. So a test order is never in two tabs at once.
         return Order::query()
+            ->when($filters['tab'] === 'test', fn ($query) => $query->onlyTest())
+            ->when($filters['tab'] !== 'test', fn ($query) => $query->excludingTest())
             ->when($filters['tab'] === 'archived', fn ($query) => $query->whereNotNull('archived_at'))
-            ->when($filters['tab'] !== 'archived', fn ($query) => $query->whereNull('archived_at'))
+            ->when(! in_array($filters['tab'], ['archived', 'test'], true), fn ($query) => $query->whereNull('archived_at'))
             ->when($filters['tab'] === 'draft', fn ($query) => $query->where('status', 'draft'))
             ->when($filters['tab'] === 'orders', fn ($query) => $query->where('status', '!=', 'draft'))
             ->when($filters['status'] !== '', fn ($query) => $query->where('status', $filters['status']))
@@ -542,6 +549,52 @@ class OrderController extends Controller
         return back()->with('status', 'Order unarchived.');
     }
 
+    public function markTest(Order $order): RedirectResponse
+    {
+        $order->markAsTest();
+        AdminActivityLog::record('order.marked_test', $order, 'Marked order '.$order->number.' as a test order');
+
+        return back()->with('status', 'Order marked as a test order.');
+    }
+
+    public function unmarkTest(Order $order): RedirectResponse
+    {
+        $order->unmarkAsTest();
+        AdminActivityLog::record('order.unmarked_test', $order, 'Unmarked order '.$order->number.' as a test order');
+
+        return back()->with('status', 'Order is no longer a test order.');
+    }
+
+    public function bulkMarkTest(BulkOrderActionRequest $request): RedirectResponse
+    {
+        $orders = Order::query()
+            ->whereIn('id', $request->validated('order_ids'))
+            ->excludingTest()
+            ->get();
+
+        foreach ($orders as $order) {
+            $order->markAsTest();
+            AdminActivityLog::record('order.marked_test', $order, 'Marked order '.$order->number.' as a test order');
+        }
+
+        return back()->with('status', $this->bulkStatus($orders->count(), 'marked as test', 'mark as test'));
+    }
+
+    public function bulkUnmarkTest(BulkOrderActionRequest $request): RedirectResponse
+    {
+        $orders = Order::query()
+            ->whereIn('id', $request->validated('order_ids'))
+            ->onlyTest()
+            ->get();
+
+        foreach ($orders as $order) {
+            $order->unmarkAsTest();
+            AdminActivityLog::record('order.unmarked_test', $order, 'Unmarked order '.$order->number.' as a test order');
+        }
+
+        return back()->with('status', $this->bulkStatus($orders->count(), 'unmarked as test', 'unmark as test'));
+    }
+
     public function bulkArchive(BulkOrderActionRequest $request): RedirectResponse
     {
         // Already-archived rows are skipped rather than refused: someone else
@@ -557,7 +610,7 @@ class OrderController extends Controller
             AdminActivityLog::record('order.archived', $order, 'Archived order '.$order->number);
         }
 
-        return back()->with('status', $this->bulkStatus($orders->count(), 'archived'));
+        return back()->with('status', $this->bulkStatus($orders->count(), 'archived', 'archive'));
     }
 
     public function bulkUnarchive(BulkOrderActionRequest $request): RedirectResponse
@@ -572,20 +625,20 @@ class OrderController extends Controller
             AdminActivityLog::record('order.unarchived', $order, 'Unarchived order '.$order->number);
         }
 
-        return back()->with('status', $this->bulkStatus($orders->count(), 'unarchived'));
+        return back()->with('status', $this->bulkStatus($orders->count(), 'unarchived', 'unarchive'));
     }
 
     /**
      * Counts what actually changed, not what was submitted — otherwise the
      * message overstates the result whenever a row was skipped.
      */
-    private function bulkStatus(int $count, string $verb): string
+    private function bulkStatus(int $count, string $past, string $infinitive): string
     {
         if ($count === 0) {
-            return 'Nothing to '.($verb === 'archived' ? 'archive' : 'unarchive').'.';
+            return 'Nothing to '.$infinitive.'.';
         }
 
-        return $count.' order'.($count === 1 ? '' : 's').' '.$verb.'.';
+        return $count.' order'.($count === 1 ? '' : 's').' '.$past.'.';
     }
 
     public function invoice(Order $order): Response

@@ -108,6 +108,9 @@
                                                 <a href="{{ route('admin.orders.show', $order) }}" class="admin-table-strong">
                                                     {{ $order->number }}
                                                 </a>
+                                                @if ($order->isTest())
+                                                    <span class="order-chip order-chip--test" title="Kept as a record of testing; left out of every figure">Test</span>
+                                                @endif
                                                 <span class="admin-table-sub">{{ $order->created_at->format('d M Y · H:i') }}</span>
                                             </td>
                                             <td>

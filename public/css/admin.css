@@ -1255,6 +1255,13 @@
     border: 1px solid var(--border);
 }
 
+/* A footnote to the chip before it, not a figure of its own. */
+.admin-list-chip--muted {
+    color: var(--text-muted);
+    background: transparent;
+    border-style: dashed;
+}
+
 .admin-nav-search-input:focus {
     outline: none;
     border-color: var(--accent);
@@ -2448,6 +2455,30 @@ a.admin-stat-card:hover {
     color: var(--text-muted);
     background: var(--bg);
     border-color: var(--border);
+}
+
+/*
+ * A label on the order, not a status. The status chips beside it say where an
+ * order is in its life; this one says the order is not real. Dashed, hollow
+ * and unfilled so the two can never be misread for one another.
+ */
+.order-chip--test,
+.badge-test {
+    color: var(--text-muted);
+    background: repeating-linear-gradient(
+        135deg,
+        transparent,
+        transparent 4px,
+        color-mix(in srgb, var(--text-muted) 8%, transparent) 4px,
+        color-mix(in srgb, var(--text-muted) 8%, transparent) 8px
+    );
+    border: 1px dashed color-mix(in srgb, var(--text-muted) 45%, var(--border));
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.order-chip--test {
+    margin-left: 0.4rem;
 }
 
 [data-theme='dark'] .order-chip--preparing {

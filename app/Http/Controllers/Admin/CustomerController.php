@@ -79,12 +79,16 @@ class CustomerController extends Controller
 
     private function countedOrdersScope(): \Closure
     {
-        return fn ($query) => $query->whereNull('archived_at')->where('status', '!=', 'draft');
+        // excludingTest() here reaches the list's order count, its last-order
+        // date, the with/without-orders tabs and the CSV export at once —
+        // without it the list credits a customer with orders their own
+        // profile page says they never placed.
+        return fn ($query) => $query->whereNull('archived_at')->excludingTest()->where('status', '!=', 'draft');
     }
 
     private function spentOrdersScope(): \Closure
     {
-        return fn ($query) => $query->whereNull('archived_at')->whereNotIn('status', ['draft', 'refunded']);
+        return fn ($query) => $query->whereNull('archived_at')->excludingTest()->whereNotIn('status', ['draft', 'refunded']);
     }
 
     /**
@@ -131,13 +135,18 @@ class CustomerController extends Controller
         $customer->markViewedByAdmin();
         $customer->load('addresses');
         $orders = $customer->orders()->whereNull('archived_at')->withCount('items')->get();
-        $paidOrders = $orders->whereNotIn('status', ['draft', 'refunded']);
+        // Test orders stay in the list above — this profile is a record of
+        // what the customer did — but never in what they spent.
+        $paidOrders = $orders->whereNotIn('status', ['draft', 'refunded'])->where('test_marked_at', null);
         $spentCents = (int) $paidOrders->sum('total_cents');
 
         return view('admin.customers.show', [
             'customer' => $customer,
             'orders' => $orders,
             'spentCents' => $spentCents,
+            // The list below shows test orders and the total does not, so the
+            // page has to say why rather than leave the gap to be worked out.
+            'testOrderCount' => $orders->where('test_marked_at', '!=', null)->count(),
             'averageOrderCents' => $paidOrders->isNotEmpty()
                 ? (int) round($spentCents / $paidOrders->count())
                 : 0,

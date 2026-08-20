@@ -20,6 +20,7 @@ use Illuminate\Support\Str;
     'user_id',
     'status',
     'archived_at',
+    'test_marked_at',
     'address_id',
     'address_snapshot',
     'billing_address_id',
@@ -65,6 +66,7 @@ class Order extends Model
         return [
             'is_manual' => 'boolean',
             'archived_at' => 'datetime',
+            'test_marked_at' => 'datetime',
             'address_snapshot' => 'array',
             'billing_address_snapshot' => 'array',
             'carrier_snapshot' => 'array',
@@ -328,7 +330,22 @@ class Order extends Model
      */
     public function scopeAwaitingStart(Builder $query): void
     {
-        $query->whereNull('archived_at')->where('status', 'placed');
+        $query->whereNull('archived_at')->excludingTest()->where('status', 'placed');
+    }
+
+    /**
+     * Orders placed for real. Every figure in the admin filters through this:
+     * an order kept only as a record of testing must not move revenue, counts
+     * or a customer's lifetime spend.
+     */
+    public function scopeExcludingTest(Builder $query): void
+    {
+        $query->whereNull('test_marked_at');
+    }
+
+    public function scopeOnlyTest(Builder $query): void
+    {
+        $query->whereNotNull('test_marked_at');
     }
 
     public function isArchived(): bool
@@ -344,6 +361,25 @@ class Order extends Model
     public function unarchive(): void
     {
         $this->update(['archived_at' => null]);
+    }
+
+    public function isTest(): bool
+    {
+        return $this->test_marked_at !== null;
+    }
+
+    /**
+     * Bookkeeping, not a rollback. Stock, discount-code quantities and the
+     * invoice number this order consumed all stay as they are.
+     */
+    public function markAsTest(): void
+    {
+        $this->update(['test_marked_at' => now()]);
+    }
+
+    public function unmarkAsTest(): void
+    {
+        $this->update(['test_marked_at' => null]);
     }
 
     public function statusMessage(): string
