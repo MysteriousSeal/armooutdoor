@@ -232,6 +232,16 @@ class Order extends Model
         return format_euros($this->discount_cents);
     }
 
+    /**
+     * Read from the snapshot rather than the live code: the code may since
+     * have been edited or deleted, and the order should keep showing what it
+     * was actually placed with.
+     */
+    public function discountCodeWasFreeRelayShipping(): bool
+    {
+        return ($this->discount_code_snapshot['type'] ?? null) === DiscountCode::TYPE_FREE_RELAY_SHIPPING;
+    }
+
     public function formattedTotal(): string
     {
         return format_euros($this->total_cents);

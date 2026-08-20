@@ -288,6 +288,74 @@ class FreeRelayShippingCodeTest extends TestCase
             ->assertDontSee('Yes (code)');
     }
 
+    private function waivedOrderFor(User $user): Order
+    {
+        $order = $this->orderWith(490, 490);
+        $order->user_id = $user->id;
+        $order->discount_code_snapshot = [
+            'code' => 'RELAIS',
+            'type' => DiscountCode::TYPE_FREE_RELAY_SHIPPING,
+            'value' => null,
+        ];
+        $order->save();
+
+        return $order;
+    }
+
+    public function test_the_snapshot_identifies_a_free_delivery_code(): void
+    {
+        $order = $this->waivedOrderFor(User::factory()->create());
+
+        $this->assertTrue($order->discountCodeWasFreeRelayShipping());
+        $this->assertFalse($this->orderWith(490, 0)->discountCodeWasFreeRelayShipping());
+    }
+
+    public function test_the_admin_order_page_names_the_code_instead_of_a_zero(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $order = $this->waivedOrderFor(User::factory()->create());
+
+        $content = $this->actingAs($admin)
+            ->get('/admin/orders/'.$order->number)
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('Free relay delivery', $content);
+        $this->assertStringNotContainsString('-0,00', $content);
+    }
+
+    public function test_the_customer_order_page_names_the_code_in_french(): void
+    {
+        $user = User::factory()->create();
+        $order = $this->waivedOrderFor($user);
+
+        $content = $this->actingAs($user)
+            ->get('/orders/'.$order->number)
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString(__('store.discount_code_free_relay_label'), $content);
+        $this->assertStringNotContainsString('-0,00', $content);
+        $this->assertStringNotContainsString('Free relay delivery', $content);
+    }
+
+    public function test_an_amount_code_still_shows_its_amount_on_the_order_page(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $order = $this->orderWith(490, 0);
+        $order->discount_cents = 500;
+        $order->discount_code_snapshot = ['code' => 'DIX', 'type' => DiscountCode::TYPE_PERCENTAGE, 'value' => 10];
+        $order->save();
+
+        $this->actingAs($admin)
+            ->get('/admin/orders/'.$order->number)
+            ->assertOk()
+            // format_euros() uses a non-breaking space, so build the expected
+            // string with it rather than typing one by hand.
+            ->assertSee('-'.format_euros(500))
+            ->assertDontSee('Free relay delivery');
+    }
+
     public function test_the_csv_export_reconciles_on_a_code_waived_order(): void
     {
         $admin = User::factory()->admin()->create();

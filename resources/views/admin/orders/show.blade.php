@@ -136,12 +136,18 @@
                         @if ($order->hasDiscountCode())
                             <div>
                                 <dt>{{ $order->discountCodeCode() ? 'Code '.$order->discountCodeCode() : 'Discount' }}</dt>
-                                <dd>-{{ $order->formattedDiscountCents() }}</dd>
+                                {{-- A shipping code takes nothing off the goods; its value is
+                                     on the "Free delivery" line below. --}}
+                                <dd>
+                                    {{ $order->discountCodeWasFreeRelayShipping()
+                                        ? 'Free relay delivery'
+                                        : '-'.$order->formattedDiscountCents() }}
+                                </dd>
                             </div>
                         @endif
                         @if ($order->shipping_discount_cents > 0)
                             <div>
-                                <dt>Free relay delivery</dt>
+                                <dt>Free delivery</dt>
                                 <dd>-{{ format_euros($order->shipping_discount_cents) }}</dd>
                             </div>
                         @endif

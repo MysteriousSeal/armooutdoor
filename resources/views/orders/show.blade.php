@@ -82,7 +82,11 @@
                                         ? __('store.order_discount_code', ['code' => $order->discountCodeCode()])
                                         : __('store.order_discount') }}
                                 </dt>
-                                <dd>-{{ $order->formattedDiscountCents() }}</dd>
+                                <dd>
+                                    {{ $order->discountCodeWasFreeRelayShipping()
+                                        ? __('store.discount_code_free_relay_label')
+                                        : '-'.$order->formattedDiscountCents() }}
+                                </dd>
                             </div>
                         @endif
                         @if ($order->shipping_discount_cents > 0)
