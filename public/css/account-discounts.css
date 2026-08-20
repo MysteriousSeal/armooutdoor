@@ -77,6 +77,98 @@
     overflow-wrap: anywhere;
 }
 
+/*
+ * The countdown ran out while the page sat open. The ticket is struck
+ * through and its copy button withdrawn, so nothing here can still be
+ * carried to a checkout that would refuse it.
+ */
+.voucher.is-spent {
+    opacity: 0.65;
+}
+
+.voucher.is-spent:hover {
+    border-color: var(--border);
+    box-shadow: var(--shadow);
+}
+
+.voucher.is-spent .voucher-value {
+    background: var(--bg);
+    border-right-color: var(--border);
+}
+
+.voucher.is-spent .voucher-amount,
+.voucher.is-spent .voucher-code-text {
+    color: var(--text-muted);
+    text-decoration: line-through;
+}
+
+.voucher.is-spent .voucher-cta {
+    pointer-events: none;
+    opacity: 0.55;
+}
+
+@media (max-width: 640px) {
+    .voucher.is-spent .voucher-value {
+        border-bottom-color: var(--border);
+    }
+}
+
+.voucher-countdown-row {
+    margin: 0.45rem 0 0;
+}
+
+/*
+ * A small ticking chip. Kept quiet by default so it reads as one more fact
+ * about the code, and only raises its voice once the deadline is close.
+ */
+.voucher-countdown {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.5rem 0.2rem 0.45rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+    line-height: 1.35;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.voucher-countdown svg {
+    flex-shrink: 0;
+    opacity: 0.75;
+}
+
+.voucher-countdown.is-urgent {
+    color: #8a6417;
+    background: #f7f1e6;
+    border-color: #e3cfa1;
+}
+
+.voucher-countdown.is-urgent svg {
+    opacity: 1;
+    animation: voucher-tick 2s ease-in-out infinite;
+}
+
+@keyframes voucher-tick {
+    0%, 70%, 100% { opacity: 1; }
+    85% { opacity: 0.35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .voucher-countdown.is-urgent svg {
+        animation: none;
+    }
+}
+
+[data-theme='dark'] .voucher-countdown.is-urgent {
+    color: #e0b258;
+    background: color-mix(in srgb, #e0b258 12%, var(--surface));
+    border-color: color-mix(in srgb, #e0b258 35%, var(--border));
+}
+
 .voucher-meta {
     margin: 0;
     font-size: 0.8125rem;

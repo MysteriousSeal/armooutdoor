@@ -30,6 +30,12 @@ class DiscountCode extends Model
     public const TYPE_FREE_RELAY_SHIPPING = 'free_relay_shipping';
 
     /**
+     * Past this many days the countdown stops showing seconds: a chip ticking
+     * them off five years ahead is motion without information.
+     */
+    public const COUNTDOWN_SECONDS_WITHIN_DAYS = 7;
+
+    /**
      * Per-customer order counts already resolved for this instance.
      *
      * @var array<int, int>
@@ -171,6 +177,63 @@ class DiscountCode extends Model
     public function maxUsesPerCustomerLabel(): string
     {
         return $this->hasMaxUsesPerCustomer() ? (string) $this->max_uses_per_customer : 'Unlimited';
+    }
+
+    /**
+     * How long the customer has left, as the compact "2j 4h" the voucher
+     * chip shows. Rendered server-side so the chip is right before any
+     * script runs; account-discount-countdown.js then keeps it ticking.
+     */
+    public function countdownLabel(): ?string
+    {
+        if ($this->ends_at === null) {
+            return null;
+        }
+
+        // Rounded up, not truncated: ends_at is stored to the second while
+        // now() carries microseconds, so truncating would drop a whole unit
+        // and show "3j 3h" for a code with exactly three days and four hours.
+        $seconds = (int) ceil(max(0, now()->diffInSeconds($this->ends_at, false)));
+
+        if ($seconds === 0) {
+            return __('store.discount_code_expired');
+        }
+
+        $days = intdiv($seconds, 86400);
+        $hours = intdiv($seconds % 86400, 3600);
+        $minutes = intdiv($seconds % 3600, 60);
+        $pad = fn (int $value): string => str_pad((string) $value, 2, '0', STR_PAD_LEFT);
+
+        // Minutes always show, so the chip reads as a countdown whatever the
+        // deadline. Larger units appear only once there are any, and seconds
+        // are dropped past a week out where they say nothing useful.
+        $parts = [];
+
+        if ($days > 0) {
+            $parts[] = $days.'j';
+        }
+
+        if ($days > 0 || $hours > 0) {
+            $parts[] = $pad($hours).'h';
+        }
+
+        $parts[] = $pad($minutes).'m';
+
+        if ($days < self::COUNTDOWN_SECONDS_WITHIN_DAYS) {
+            $parts[] = $pad($seconds % 60).'s';
+        }
+
+        return __('store.discount_code_expires_in', ['time' => implode(' ', $parts)]);
+    }
+
+    /**
+     * Close enough to the deadline that the chip should say so loudly.
+     */
+    public function isEndingSoon(int $withinHours = 48): bool
+    {
+        return $this->ends_at !== null
+            && ! $this->isExpired()
+            && now()->diffInSeconds($this->ends_at, false) <= $withinHours * 3600;
     }
 
     public function isExpired(): bool

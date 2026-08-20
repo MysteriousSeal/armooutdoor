@@ -407,6 +407,8 @@ return [
     'discounts_empty_cta' => 'Découvrir la boutique',
     'discount_code_valid_until' => 'Valable jusqu’au :date',
     'discount_code_valid_until_time' => 'Valable jusqu’au :date à :time',
+    'discount_code_expires_in' => 'Expire dans :time',
+    'discount_code_expired' => 'Expiré',
     'discount_code_no_deadline' => 'Sans date limite',
     'discount_code_uses_left' => ':count utilisation restante|:count utilisations restantes',
     'discount_code_uses_unlimited' => 'Usage illimité',

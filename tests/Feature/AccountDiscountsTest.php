@@ -177,7 +177,10 @@ class AccountDiscountsTest extends TestCase
             ->get('/account/reductions')
             ->assertOk()
             ->assertSee(__('store.discount_code_valid_until', ['date' => $endsAt->translatedFormat('j F Y')]))
-            ->assertDontSee('23:59');
+            ->assertDontSee(__('store.discount_code_valid_until_time', [
+                'date' => $endsAt->translatedFormat('j F Y'),
+                'time' => '23:59',
+            ]));
     }
 
     public function test_a_deadline_in_the_middle_of_the_day_shows_the_time(): void
@@ -299,6 +302,89 @@ class AccountDiscountsTest extends TestCase
             ->assertSee(__('store.discount_code_copy'))
             ->assertSee('data-copy-code="'.$code->code.'"', false)
             ->assertDontSee('Utiliser ce code');
+    }
+
+    public function test_a_code_with_a_deadline_shows_a_countdown(): void
+    {
+        $this->freezeTime();
+        $user = User::factory()->create();
+        $this->code(['user_id' => $user->id, 'ends_at' => now()->addDays(3)->addHours(4)->addMinutes(5)->addSeconds(9)]);
+
+        // Rendered server-side so the chip is right before any script runs.
+        $this->actingAs($user)
+            ->get('/account/reductions')
+            ->assertOk()
+            ->assertSee(__('store.discount_code_expires_in', ['time' => '3j 04h 05m 09s']))
+            ->assertSee('data-countdown-to=', false);
+    }
+
+    public function test_a_code_without_a_deadline_has_no_countdown(): void
+    {
+        $user = User::factory()->create();
+        $this->code(['user_id' => $user->id, 'ends_at' => null]);
+
+        $this->actingAs($user)
+            ->get('/account/reductions')
+            ->assertOk()
+            ->assertDontSee('data-countdown-to=', false);
+    }
+
+    public function test_the_countdown_is_marked_urgent_close_to_the_deadline(): void
+    {
+        $user = User::factory()->create();
+        $soon = $this->code(['user_id' => $user->id, 'ends_at' => now()->addHours(5)]);
+        $later = $this->code(['user_id' => $user->id, 'ends_at' => now()->addDays(30)]);
+
+        $this->assertTrue($soon->isEndingSoon());
+        $this->assertFalse($later->isEndingSoon());
+
+        $this->actingAs($user)
+            ->get('/account/reductions')
+            ->assertOk()
+            ->assertSee('is-urgent', false);
+    }
+
+    public function test_the_countdown_drops_to_smaller_units_as_it_runs_down(): void
+    {
+        $this->freezeTime();
+        $user = User::factory()->create();
+
+        $this->assertSame(
+            __('store.discount_code_expires_in', ['time' => '02h 30m 00s']),
+            $this->code(['user_id' => $user->id, 'ends_at' => now()->addHours(2)->addMinutes(30)])->countdownLabel(),
+        );
+
+        // Single digits are padded, and the day and hour parts drop away
+        // once there are none left.
+        $this->assertSame(
+            __('store.discount_code_expires_in', ['time' => '04m 20s']),
+            $this->code(['user_id' => $user->id, 'ends_at' => now()->addMinutes(4)->addSeconds(20)])->countdownLabel(),
+        );
+
+        $this->assertSame(
+            __('store.discount_code_expires_in', ['time' => '00m 08s']),
+            $this->code(['user_id' => $user->id, 'ends_at' => now()->addSeconds(8)])->countdownLabel(),
+        );
+    }
+
+    public function test_a_distant_deadline_stops_counting_seconds(): void
+    {
+        $this->freezeTime();
+        $user = User::factory()->create();
+
+        // Seconds ticking five years out is motion without information, so
+        // they drop away past a week.
+        $this->assertSame(
+            __('store.discount_code_expires_in', ['time' => '6j 00h 00m 00s']),
+            $this->code(['user_id' => $user->id, 'ends_at' => now()->addDays(6)])->countdownLabel(),
+        );
+
+        $this->assertSame(
+            __('store.discount_code_expires_in', ['time' => '8j 00h 00m']),
+            $this->code(['user_id' => $user->id, 'ends_at' => now()->addDays(8)])->countdownLabel(),
+        );
+
+        $this->assertNull($this->code(['user_id' => $user->id, 'ends_at' => null])->countdownLabel());
     }
 
     public function test_the_nav_and_hub_link_to_the_page(): void

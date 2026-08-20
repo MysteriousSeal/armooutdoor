@@ -49,6 +49,24 @@
                                     ? __('store.discount_code_uses_unlimited')
                                     : trans_choice('store.discount_code_uses_left', $usesLeft, ['count' => $usesLeft]) }}
                             </p>
+
+                            @if ($code->ends_at)
+                                <p class="voucher-countdown-row">
+                                    <span
+                                        class="voucher-countdown @if ($code->isEndingSoon()) is-urgent @endif"
+                                        data-countdown-to="{{ $code->ends_at->toIso8601String() }}"
+                                        data-countdown-urgent-hours="48"
+                                        data-countdown-expired="{{ __('store.discount_code_expired') }}"
+                                        data-countdown-template="{{ __('store.discount_code_expires_in', ['time' => ':time']) }}"
+                                    >
+                                        <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                                            <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.75"/>
+                                            <path d="M12 7v5.25l3.25 1.9" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                        <span class="voucher-countdown-text">{{ $code->countdownLabel() }}</span>
+                                    </span>
+                                </p>
+                            @endif
                         </div>
 
                         <button
@@ -72,4 +90,5 @@
 
 @push('scripts')
     <script src="{{ asset('js/account-discount-copy.js') }}" defer></script>
+    <script src="{{ asset('js/account-discount-countdown.js') }}" defer></script>
 @endpush
