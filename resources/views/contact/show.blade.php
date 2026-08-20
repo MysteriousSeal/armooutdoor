@@ -22,7 +22,7 @@
         </header>
 
         <div class="contact-layout">
-            <form method="POST" action="{{ localized_route('contact.store') }}" class="contact-form">
+            <form method="POST" action="{{ localized_route('contact.store') }}" class="contact-form" novalidate>
                 @csrf
 
                 <div class="contact-form-honeypot" aria-hidden="true">
@@ -69,12 +69,6 @@
                                 <dd><a href="mailto:{{ $company->contact_email }}">{{ $company->contact_email }}</a></dd>
                             </div>
                         @endif
-                        @if (trim($company->phone) !== '')
-                            <div>
-                                <dt>{{ __('store.contact_info_phone') }}</dt>
-                                <dd><a href="tel:{{ $company->phone }}">{{ $company->formattedPhone() }}</a></dd>
-                            </div>
-                        @endif
                         @if ($company->addressLines() !== [])
                             <div>
                                 <dt>{{ __('store.contact_info_address') }}</dt>
@@ -88,7 +82,7 @@
                     </dl>
                 </div>
 
-                <div class="contact-info-card contact-info-card--faq">
+                <div class="contact-info-card">
                     <p class="contact-info-faq-title">{{ __('store.contact_info_faq_title') }}</p>
                     <p class="contact-info-faq-text">{{ __('store.contact_info_faq_text') }}</p>
                     <a href="{{ route('faq') }}" class="btn btn-secondary">{{ __('store.contact_info_faq_cta') }}</a>

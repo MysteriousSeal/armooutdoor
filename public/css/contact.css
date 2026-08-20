@@ -66,11 +66,6 @@
     line-height: 1.5;
 }
 
-.contact-info-card--faq {
-    background: color-mix(in srgb, var(--accent) 6%, var(--surface));
-    border-color: color-mix(in srgb, var(--accent) 25%, var(--border));
-}
-
 .contact-info-faq-title {
     margin: 0 0 0.3rem;
     font-size: 0.9375rem;

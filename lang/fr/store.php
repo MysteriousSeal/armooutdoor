@@ -383,7 +383,6 @@ return [
     'contact_sent' => 'Votre message a bien été envoyé. On vous répond au plus vite.',
     'contact_info_title' => 'Nos coordonnées',
     'contact_info_email' => 'E-mail',
-    'contact_info_phone' => 'Téléphone',
     'contact_info_address' => 'Adresse',
     'contact_info_faq_title' => 'Une réponse plus rapide ?',
     'contact_info_faq_text' => 'Les questions les plus fréquentes sont déjà dans la FAQ.',
