@@ -263,8 +263,8 @@
                     @if ($order->marketplace_name)
                         <div class="notes-line">Paiement sur {{ $order->marketplace_name }}</div>
                     @endif
-                    @if ($order->marketplace_note)
-                        <div class="notes-line">{{ $order->marketplace_note }}</div>
+                    @if ($order->invoiceNote())
+                        <div class="notes-line">{{ $order->invoiceNote() }}</div>
                     @endif
                 </div>
                 <div class="section-label">Nombre d'articles</div>

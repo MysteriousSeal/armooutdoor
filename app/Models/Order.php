@@ -348,6 +348,22 @@ class Order extends Model
         return $this->trackingCarrier?->localizedName() ?: $this->carrierName();
     }
 
+    /**
+     * La mention à imprimer au bas de la facture.
+     *
+     * Elle est figée sur la commande à sa création, pour qu'une reformulation
+     * ultérieure ne réécrive pas des factures déjà émises. Mais une commande
+     * créée avant que la place de marché ait sa mention n'en a aucune : on
+     * retombe alors sur celle de la plateforme, sans quoi sa facture partirait
+     * sans la mention légale sur les frais encaissés par la plateforme.
+     */
+    public function invoiceNote(): ?string
+    {
+        return filled($this->marketplace_note)
+            ? $this->marketplace_note
+            : $this->marketplace?->note;
+    }
+
     public function invoiceIsAvailable(): bool
     {
         return ! in_array($this->status, ['placed', 'preparing', 'draft'], true);
