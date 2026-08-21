@@ -2,6 +2,13 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-21 — v0.9.4 — build 8XG4PS
+
+### Admin
+
+- **Top products now shows a thumbnail**, matching the Stock alerts panel beside it — the two sat side by side and only one showed what the product looks like. The tile links to the product, and shows the product's current image, so swapping a photo shows through straight away.
+- A product with no image, or one since deleted, keeps a tile of the same size rather than losing it, so the text column stays lined up with the rows above.
+
 ## 2026-08-21 — v0.9.3 — build A7UMDY
 
 ### Orders
