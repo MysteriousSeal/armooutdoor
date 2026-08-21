@@ -43,7 +43,9 @@ class OrderController extends Controller
             ->with('user', 'statusHistories')
             ->withCount('items')
             ->latest()
-            ->simplePaginate(20)
+            // paginate() plutôt que simplePaginate() : il faut le nombre de
+            // pages pour les numéroter, et le total pour l'annoncer.
+            ->paginate(20)
             ->withQueryString();
 
         $this->backfillMissingPaymentFees($orders->getCollection());
@@ -85,6 +87,11 @@ class OrderController extends Controller
                 'total_costs_pct_amount' => $percentOf($totalCostsCents, $amountCents),
                 'perceived_total_cents' => $amountCents - $totalCostsCents,
                 'perceived_total_pct_amount' => $percentOf($amountCents - $totalCostsCents, $amountCents),
+                // Ventilation par statut sur le même périmètre que le total :
+                // les trois chiffres doivent pouvoir se recouper avec lui.
+                'shipped_count' => (clone $salesOrders)->where('status', 'shipped')->count(),
+                'delivered_count' => (clone $salesOrders)->where('status', 'delivered')->count(),
+                'refunded_count' => (clone $salesOrders)->where('status', 'refunded')->count(),
                 'to_prepare_count' => (clone $openOrders)->whereIn('status', ['placed', 'preparing'])->count(),
                 'missing_tracking_count' => (clone $openOrders)
                     ->where('status', 'shipped')

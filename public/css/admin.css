@@ -1375,12 +1375,6 @@
     background: #a44;
 }
 
-.admin-list-chip--muted {
-    color: var(--text-muted);
-    background: transparent;
-    border-style: dashed;
-}
-
 .admin-nav-search-input:focus {
     outline: none;
     border-color: var(--accent);
@@ -1579,6 +1573,67 @@
     color: var(--text);
     background: var(--surface);
     border: 1px solid var(--border);
+}
+
+/* Ventilation par statut : une pastille reprend la couleur du statut, pour
+   qu'un coup d'œil suffise à relier le chiffre à la colonne de la table. */
+.admin-list-chip--shipped,
+.admin-list-chip--delivered,
+.admin-list-chip--refunded {
+    gap: 0.4rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.admin-list-chip--shipped::before,
+.admin-list-chip--delivered::before,
+.admin-list-chip--refunded::before {
+    content: '';
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.admin-list-chip--shipped {
+    color: #3d6b4e;
+    background: #eef4ef;
+    border-color: #d5e4d8;
+}
+
+.admin-list-chip--delivered {
+    color: #2f5d8a;
+    background: #eef3f8;
+    border-color: #c6d8e8;
+}
+
+.admin-list-chip--refunded {
+    color: #a44;
+    background: #f7ecec;
+    border-color: #e3c6c6;
+}
+
+[data-theme='dark'] .admin-list-chip--shipped {
+    color: #8fceac;
+    background: color-mix(in srgb, #8fceac 12%, var(--surface));
+    border-color: color-mix(in srgb, #8fceac 32%, var(--border));
+}
+
+[data-theme='dark'] .admin-list-chip--delivered {
+    color: #8ab4dd;
+    background: color-mix(in srgb, #8ab4dd 12%, var(--surface));
+    border-color: color-mix(in srgb, #8ab4dd 35%, var(--border));
+}
+
+[data-theme='dark'] .admin-list-chip--refunded {
+    color: #e08585;
+    background: color-mix(in srgb, #e08585 12%, var(--surface));
+    border-color: color-mix(in srgb, #e08585 32%, var(--border));
+}
+
+.admin-list-chip--muted {
+    color: var(--text-muted);
+    background: transparent;
+    border-style: dashed;
 }
 
 .admin-stat-grid {
@@ -3176,9 +3231,26 @@ a.admin-pagination-page:hover {
     border-color: var(--border);
 }
 
+/* Les points de suspension tiennent la ligne de base des numéros. */
+.admin-pagination-gap {
+    display: inline-flex;
+    align-items: flex-end;
+    height: 1.75rem;
+    padding: 0 0.15rem;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+
+/* Chiffres à chasse fixe : sans ça la rangée bouge d'une page à l'autre. */
+.admin-pagination-page,
+.admin-pagination-gap {
+    font-variant-numeric: tabular-nums;
+}
+
 .admin-pagination-page.is-current {
     font-weight: 600;
-    color: var(--accent);
+    color: #fff;
+    background: var(--accent);
     border-color: var(--accent);
 }
 

@@ -42,6 +42,9 @@
             </div>
             <div class="admin-list-meta">
                 <span class="admin-list-chip">{{ number_format($kpis['order_count']) }} total orders</span>
+                <span class="admin-list-chip admin-list-chip--shipped">{{ number_format($kpis['shipped_count']) }} shipped</span>
+                <span class="admin-list-chip admin-list-chip--delivered">{{ number_format($kpis['delivered_count']) }} delivered</span>
+                <span class="admin-list-chip admin-list-chip--refunded">{{ number_format($kpis['refunded_count']) }} refunded</span>
                 <span class="admin-list-chip">{{ number_format($kpis['to_prepare_count']) }} to prepare</span>
                 <span class="admin-list-chip">{{ number_format($kpis['missing_tracking_count']) }} missing tracking</span>
                 @if ($hasFilters)
@@ -235,7 +238,7 @@
             </p>
         @else
             <p class="admin-result-count">
-                Showing {{ $orders->firstItem() }}–{{ $orders->lastItem() }}
+                Showing {{ $orders->firstItem() }}–{{ $orders->lastItem() }} of {{ number_format($orders->total()) }}
             </p>
 
             <div class="admin-table-wrap">
