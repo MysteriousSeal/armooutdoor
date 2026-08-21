@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-21 — v0.9.8 — build M4XPZW
+
+### Admin
+
+- **An order address can now name ten countries instead of four.** Marketplace sales travel further than the shop's own checkout does, and a country missing from the list could not be saved at all — a Portuguese order already on file could not have its address corrected. Germany, Spain, Ireland, Italy, the Netherlands and Portugal join France, Belgium, Switzerland and Luxembourg. The dropdown reads France first, then alphabetically by name.
+
+  The shop's own checkout is unchanged and still ships to France only: opening it further is a question of shipping rates, not of a list.
+
 ## 2026-08-21 — v0.9.7 — build K7VQD3
 
 ### Storefront
