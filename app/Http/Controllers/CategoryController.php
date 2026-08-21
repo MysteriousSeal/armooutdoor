@@ -4,13 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Product;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 class CategoryController extends Controller
 {
+    /** Produits par page sur une fiche catégorie. */
+    private const PER_PAGE = 20;
+
     public const SORTS = ['relevance', 'name', 'price-asc', 'price-desc', 'newest'];
 
     public function index(): View
@@ -70,14 +74,47 @@ class CategoryController extends Controller
         $availableFilterValues = $this->availableFilterValues($listingProducts);
         $selectedFilters = $this->selectedFilters($request, $availableFilterValues);
 
-        $products = $this->sortedProducts(
-            $this->filteredProducts($listingProducts, $selectedFilters),
-            $sort
+        $products = $this->paginate(
+            $this->sortedProducts(
+                $this->filteredProducts($listingProducts, $selectedFilters),
+                $sort
+            ),
+            $request
         );
 
         $filterGroups = $this->facetedFilterGroups($listingProducts, $availableFilterValues, $selectedFilters);
 
         return view('categories.show', compact('category', 'products', 'sort', 'filterGroups', 'selectedFilters'));
+    }
+
+    /**
+     * Les filtres et le tri s'appliquent en PHP sur la collection entière, pas
+     * en base : la pagination se découpe donc après coup, sur le résultat.
+     *
+     * La page demandée est ramenée dans les bornes existantes. Les formulaires
+     * de tri et de filtres ne transportent pas de page, donc les changer
+     * revient déjà à la première — mais une URL collée à la main, elle, peut
+     * pointer n'importe où.
+     *
+     * @param  Collection<int, Product>  $products
+     * @return LengthAwarePaginator<int, Product>
+     */
+    private function paginate(Collection $products, Request $request): LengthAwarePaginator
+    {
+        $total = $products->count();
+        $lastPage = max(1, (int) ceil($total / self::PER_PAGE));
+        $page = max(1, min((int) $request->query('page', 1), $lastPage));
+
+        return new LengthAwarePaginator(
+            $products->forPage($page, self::PER_PAGE)->values(),
+            $total,
+            self::PER_PAGE,
+            $page,
+            [
+                'path' => $request->url(),
+                'query' => $request->except('page'),
+            ]
+        );
     }
 
     /**

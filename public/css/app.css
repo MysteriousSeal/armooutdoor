@@ -4361,3 +4361,100 @@
         gap: 0.2rem;
     }
 }
+
+
+/*
+ * Pagination boutique. Les numéros sont des cibles carrées : sur mobile on
+ * les vise au pouce, et un rectangle étroit se rate. Le total sous la barre
+ * dit où l'on en est sans compter les pages.
+ */
+.store-pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 2.5rem;
+    padding-top: 1.75rem;
+    border-top: 1px solid var(--border);
+}
+
+.store-pager-pages {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.store-pager-page,
+.store-pager-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.5rem;
+    height: 2.5rem;
+    padding: 0 0.7rem;
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+    text-decoration: none;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.store-pager-page:hover,
+.store-pager-arrow:not(.is-disabled):hover {
+    border-color: var(--accent);
+    color: var(--accent-hover);
+}
+
+/* La page courante est un état, pas un bouton : elle ne se clique pas. */
+.store-pager-page.is-current {
+    font-weight: 600;
+    color: #fff;
+    background: var(--accent);
+    border-color: var(--accent);
+    cursor: default;
+}
+
+.store-pager-arrow.is-disabled {
+    color: var(--text-muted);
+    background: var(--bg);
+    opacity: 0.6;
+    cursor: default;
+}
+
+.store-pager-gap {
+    display: inline-flex;
+    align-items: flex-end;
+    height: 2.5rem;
+    padding: 0 0.15rem;
+    color: var(--text-muted);
+}
+
+.store-pager-status {
+    flex-basis: 100%;
+    margin: 0.35rem 0 0;
+    font-size: 0.8125rem;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+@media (max-width: 480px) {
+    /* Les numéros lointains sautent ; Précédent et Suivant suffisent. */
+    .store-pager-pages {
+        order: -1;
+        flex-basis: 100%;
+        justify-content: center;
+    }
+
+    .store-pager-page,
+    .store-pager-arrow {
+        min-width: 2.25rem;
+        height: 2.25rem;
+        padding: 0 0.55rem;
+    }
+}

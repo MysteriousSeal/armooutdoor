@@ -26,7 +26,7 @@
             'kicker' => $category->isRoot() ? __('store.hero_kicker') : $category->parent->localizedName(),
             'title' => $category->localizedName(),
             'description' => $category->localizedDescription(),
-            'tags' => [trans_choice('store.products_count', $products->count(), ['count' => $products->count()])],
+            'tags' => [trans_choice('store.products_count', $products->total(), ['count' => $products->total()])],
             'imageUrl' => $category->imageUrl(),
         ])
 
@@ -164,6 +164,8 @@
                                 @include('partials.product-card', ['product' => $product, 'lazy' => $index > 1])
                             @endforeach
                         </div>
+
+                        @include('partials.pager', ['paginator' => $products])
                     @endif
                 </div>
             </div>
