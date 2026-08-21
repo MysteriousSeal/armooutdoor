@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-21 — v0.9.5 — build TR0RAN
+
+### Orders
+
+- **A cost of zero no longer looks like a cost never entered.** Commission and shipping paid both showed an em dash whether they had been checked and found to be nil or simply left blank, so an order already dealt with looked identical to one nobody had touched. A recorded zero now prints as 0,00 €; the dash is kept for the case it actually means.
+
+**Fixed:** a marketplace order created before its platform had an invoice note printed without the legal mention about platform-collected fees — and would have kept doing so forever, since the note is copied onto the order at creation. The invoice now falls back to the platform's current note when the order carries none, while an order that already has one keeps its own wording, so invoices already issued cannot change retroactively.
+
+### Admin
+
+- Logos added for the Vinted and eBay marketplaces.
+
 ## 2026-08-21 — v0.9.4 — build 8XG4PS
 
 ### Admin
