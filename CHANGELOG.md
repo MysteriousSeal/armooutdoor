@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-21 — v0.9.3 — build A7UMDY
+
+### Orders
+
+- **Orders can now be marked as delivered.** A shipped order stopped there and stayed until it was refunded or forgotten; delivered closes the useful part of its life. Set from the order page, one order at a time, behind the same confirmation as the other status changes.
+- The status wears blue — the one colour the row had left, and far enough from the green of "shipped" that the two do not blur together in a long list. The customer sees "Livrée" on their own order.
+- A delivered order can still be refunded. Returns and complaints arrive after delivery, so that is precisely when refunds happen.
+
+**Fixed:** two things the new status would have broken quietly. The right to review a product required the order to be exactly "shipped", so marking it delivered would have removed that right at the moment the customer finally had the product in hand. Best-sellers ranked on placed, preparing and shipped, so delivered orders would have dropped out of the sales counts and demoted the products that sell best.
+
 ## 2026-08-21 — v0.9.2 — build K9VCB1
 
 ### Orders
