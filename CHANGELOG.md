@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-21 — v0.9.7 — build K7VQD3
+
+### Storefront
+
+- **The homepage hero became a carousel of four panels.** One image and one message held the top of the page, and nothing else could be said beside it. The original hero is now the first of four: new arrivals, promotions and best sellers follow, each linking to the aisle it names. Panels alternate sides — text left, then text right — so a slide reads as a new one rather than the same block redrawn, and the mirroring is dropped on narrow screens where there is no image left for the text to sit against.
+
+  It rotates every six seconds and stops the moment anyone shows interest: a pointer on the panel, a focused link inside it, or a tab moved to the background. Arrows, dots and the left and right arrow keys all move it by hand. Nothing rotates at all for a visitor whose system asks for reduced motion.
+
+  All four panels are in the page as served, so a reader without JavaScript still gets the whole message; the arrows and dots are the reverse, shipped hidden and revealed by the script, since a control that does nothing is worse than no control. Panels waiting off-screen cannot be reached by keyboard.
+
+  The three new panels borrow the existing hero image for now.
+
 ## 2026-08-21 — v0.9.6 — build H3KQ7M
 
 ### Admin
