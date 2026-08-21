@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-21 — v0.9.1 — build TBSXWI
+
+### Storefront
+
+- **Category pages are paginated, twenty products a page.** Vêtements listed 119 products in one go, and every image on it loaded before a visitor could reach the second row. The pager shows a sliding window of five page numbers with first, last and ellipses, so a large category does not print thirty numbers in a row, and a line underneath says where you are — "Produits 21 à 40 sur 119".
+- Filters and the sort still apply to the whole category, not just the page on screen, and changing either returns to the first page. A page number typed beyond the last falls back to the last rather than showing an empty grid.
+
+**Fixed:** the product count in the category header counted what was on screen. Once paginated it would have announced twenty pieces for a category of 119.
+
 ## 2026-08-21 — v0.9.0 — build 1TX1B2
 
 ### Admin
