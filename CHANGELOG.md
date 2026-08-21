@@ -2,6 +2,23 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-21 — v0.9.0 — build 1TX1B2
+
+### Admin
+
+- **A product now records what it costs and what it should sell for.** Two fields in the supplier panel: the purchase price excluding VAT, and the markup wanted on it. Neither is ever shown to a customer.
+- Below them, the resulting **recommended price** — purchase plus 20% VAT plus markup, rounded up to the next ,49 or ,99. Never down: rounding down would eat the margin just asked for. It recalculates as either field is typed, and the rule is written out under the figure so the number can be checked rather than taken on trust.
+- An **Apply** button fills the Price field, confirming first when a different price is already there. Nothing is saved until Save changes, and the modal says so. The Price field flashes so it is clear where the value landed.
+- The supplier panel can now be **saved on its own**, behind a confirmation and a toast. Noting a purchase price should not republish the description, the photos and every variant row.
+
+**Fixed:** creating an empty category took the homepage down with a 500 — and so did deactivating the last product in a category, which is the same fault arriving by an unrelated route. The homepage's featured-product logic returned a collection its own callers could not use as soon as one root category had nothing to show.
+
+### Under the hood
+
+- Three tests fetched the homepage and all three stayed green through the outage above. Every fixture in the suite builds categories with products already in them, so a category with none was unreachable from test data. The homepage is now exercised against thirteen catalogue shapes an admin can actually create; five of them fail against the old code.
+- Purchase price and markup are stored as integers — cents and basis points — because this schema has no decimal columns and a float has no business holding money. Basis points also keep a 32,5 % markup exact.
+- The recommended price is capped at the maximum the Price field accepts. Above it, applying would have written an out-of-range value and the browser would have refused to submit without saying why, leaving the Save button apparently dead.
+
 ## 2026-08-21 — v0.8.2 — build RT4R3N
 
 ### Storefront
