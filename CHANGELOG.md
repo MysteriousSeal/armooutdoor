@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-21 — v0.9.6 — build H3KQ7M
+
+### Admin
+
+- **The orders list can be navigated again.** Past the first page there was only Previous and Next, no page numbers, no total, and no way to jump: reaching an order from three months ago meant clicking Next until it appeared. The list now numbers its pages, shows a sliding window of them around the current one with the first and last always reachable, and announces where you are — "Showing 21–40 of 83". Filters survive the jump. The other admin lists share the same pager and gain the numbers too.
+
+- **The order total is broken down by status.** Next to the total count, three chips now give the shipped, delivered and refunded counts, each in the colour that status already wears in the table below. They cover the same orders as the total — archived ones included, test orders and drafts left out — so the figures can be read against one another.
+
+**Fixed:** the coloured chips in list headers had no colour in light mode, and the muted chip on a customer's page was never dashed or greyed as intended. The variant rules were written before the rule they were meant to override, which at equal weight means they lost; only the dark theme, being more specific, came through.
+
 ## 2026-08-21 — v0.9.5 — build TR0RAN
 
 ### Orders
