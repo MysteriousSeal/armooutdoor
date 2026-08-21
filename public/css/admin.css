@@ -1752,6 +1752,27 @@
     object-fit: cover;
 }
 
+/*
+ * Une tuile vide garde la largeur d'une vignette : sans elle, une ligne sans
+ * visuel décalerait son texte et casserait l'alignement de la colonne.
+ */
+.admin-stock-media.is-empty {
+    flex-shrink: 0;
+    background: repeating-linear-gradient(
+        135deg,
+        var(--bg),
+        var(--bg) 5px,
+        color-mix(in srgb, var(--border) 45%, var(--bg)) 5px,
+        color-mix(in srgb, var(--border) 45%, var(--bg)) 10px
+    );
+}
+
+/* Dans la liste des meilleures ventes, la vignette ne doit pas se comprimer
+   quand un nom de produit est long. */
+.admin-dash-list .admin-stock-media {
+    flex-shrink: 0;
+}
+
 .admin-stock-chip {
     display: inline-flex;
     align-items: center;

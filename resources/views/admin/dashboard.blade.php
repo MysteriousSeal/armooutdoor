@@ -186,6 +186,21 @@
                         <ul class="admin-dash-list">
                             @foreach ($topProducts as $row)
                                 <li>
+                                    @if ($row['product'] && filled($row['product']->image))
+                                        <a href="{{ route('admin.products.edit', $row['product']) }}" class="admin-stock-media">
+                                            <img
+                                                src="{{ $row['product']->imageUrl() }}"
+                                                alt=""
+                                                width="44"
+                                                height="44"
+                                                loading="lazy"
+                                            >
+                                        </a>
+                                    @else
+                                        {{-- Produit supprimé ou sans visuel : la tuile garde sa
+                                             place pour que la colonne reste alignée. --}}
+                                        <span class="admin-stock-media is-empty" aria-hidden="true"></span>
+                                    @endif
                                     <div class="admin-dash-list-main">
                                         @if ($row['product'])
                                             <a href="{{ route('admin.products.edit', $row['product']) }}" class="admin-table-strong">{{ $row['name'] }}</a>
