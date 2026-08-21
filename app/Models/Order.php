@@ -124,6 +124,16 @@ class Order extends Model
         return $this->hasMany(ProductReview::class);
     }
 
+    /**
+     * Le transporteur choisi à la commande. Le nom affiché vient du snapshot
+     * (carrierName()), qui survit à un renommage ; cette relation sert quand
+     * on a besoin du transporteur lui-même, comme pour son suivi.
+     */
+    public function carrier(): BelongsTo
+    {
+        return $this->belongsTo(Carrier::class);
+    }
+
     public function trackingCarrier(): BelongsTo
     {
         return $this->belongsTo(Carrier::class, 'tracking_carrier_id');
@@ -306,6 +316,31 @@ class Order extends Model
     public function hasBeenShipped(): bool
     {
         return $this->statusHistories->contains('status', 'shipped');
+    }
+
+    /**
+     * Le lien de suivi du colis, ou null si le transporteur retenu n'a pas de
+     * page connue. On suit le transporteur de suivi s'il est renseigné, sinon
+     * celui de la livraison : c'est le même choix que trackingCarrierName().
+     */
+    public function trackingUrl(): ?string
+    {
+        return ($this->trackingCarrier ?? $this->carrier)
+            ?->trackingUrlFor($this->tracking_number, $this->trackingPostcode());
+    }
+
+    /**
+     * Le code postal du destinataire, que Mondial Relay demande en plus du
+     * numéro. Celui de l'adresse de livraison d'abord — il est renseigné sur
+     * toutes les commandes — et à défaut celui du point relais.
+     */
+    private function trackingPostcode(): ?string
+    {
+        $address = $this->address_snapshot['postal_code'] ?? null;
+
+        return filled($address)
+            ? (string) $address
+            : ($this->relay_snapshot['postal_code'] ?? null);
     }
 
     public function trackingCarrierName(): string

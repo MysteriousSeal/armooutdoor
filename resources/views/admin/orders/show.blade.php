@@ -408,6 +408,32 @@
                         </p>
                     @endif
 
+                    @if ($order->hasTracking())
+                        <div class="order-tracking-link">
+                            <span class="order-tracking-link-label">Tracking number</span>
+                            @if ($order->trackingUrl())
+                                <a
+                                    href="{{ $order->trackingUrl() }}"
+                                    class="order-tracking-link-value"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    title="Follow this parcel on {{ $order->trackingCarrierName() }}"
+                                >
+                                    <span>{{ $order->tracking_number }}</span>
+                                    <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                                        <path d="M14 4h6v6" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M20 4 11 13" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+                                        <path d="M18 14.5V19a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 19V8a1.5 1.5 0 0 1 1.5-1.5H10" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </a>
+                            @else
+                                {{-- Transporteur sans page de suivi connue : le
+                                     numéro reste lisible et copiable. --}}
+                                <span class="order-tracking-link-value is-plain">{{ $order->tracking_number }}</span>
+                            @endif
+                        </div>
+                    @endif
+
                     @unless ($order->isDraft())
                         <form method="POST" action="{{ route('admin.orders.tracking.update', $order) }}" class="order-shipping-form">
                             @csrf

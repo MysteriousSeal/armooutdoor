@@ -83,6 +83,49 @@ class Carrier extends Model
         return format_euros($this->effectivePriceCentsForWeight(0));
     }
 
+    /**
+     * Page de suivi de chaque transporteur, indexée par slug. Les deux offres
+     * Chronopost partagent le même suivi, et Colissimo comme Lettre suivie
+     * passent par l'outil de La Poste.
+     *
+     * :number est remplacé par le numéro de suivi, :postcode par le code
+     * postal du destinataire — Mondial Relay le demande en plus du numéro.
+     */
+    private const TRACKING_URLS = [
+        'colissimo-home' => 'https://www.laposte.fr/outils/suivre-vos-envois?code=:number',
+        'lettre-suivie' => 'https://www.laposte.fr/outils/suivre-vos-envois?code=:number',
+        'chronopost-home' => 'https://www.chronopost.fr/tracking-no-cms/suivi-page?listeNumerosLT=:number',
+        'relais-pickup' => 'https://www.chronopost.fr/tracking-no-cms/suivi-page?listeNumerosLT=:number',
+        'mondial-relay' => 'https://www.mondialrelay.fr/suivi-de-colis?numeroExpedition=:number&codePostal=:postcode',
+    ];
+
+    /**
+     * Null quand ce transporteur n'a pas de page de suivi connue : le numéro
+     * reste alors affiché en clair plutôt que de renvoyer nulle part.
+     *
+     * Null aussi quand le modèle réclame un code postal qu'on n'a pas : le
+     * lien mènerait à un formulaire vide, ce qui est pire qu'un numéro à
+     * recopier.
+     */
+    public function trackingUrlFor(?string $trackingNumber, ?string $postcode = null): ?string
+    {
+        if (! filled($trackingNumber) || ! isset(self::TRACKING_URLS[$this->slug])) {
+            return null;
+        }
+
+        $template = self::TRACKING_URLS[$this->slug];
+
+        if (str_contains($template, ':postcode') && ! filled($postcode)) {
+            return null;
+        }
+
+        return str_replace(
+            [':number', ':postcode'],
+            [rawurlencode($trackingNumber), rawurlencode((string) $postcode)],
+            $template,
+        );
+    }
+
     public function isRelay(): bool
     {
         return $this->method === DeliveryMethod::Relay;

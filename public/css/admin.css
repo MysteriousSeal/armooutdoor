@@ -4370,3 +4370,57 @@ input[type="date"].form-control {
     font-size: 0.875rem;
     color: var(--text-muted);
 }
+
+/*
+ * Le lien de suivi, au-dessus du formulaire qui l'a produit. Le numéro reste
+ * en chasse fixe pour être relu chiffre à chiffre au téléphone, et la flèche
+ * dit qu'on part sur le site du transporteur.
+ */
+.order-tracking-link {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.3rem 0.6rem;
+    margin: 0.9rem 0 0;
+    padding: 0.7rem 0.85rem;
+    background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--border));
+}
+
+.order-tracking-link-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.order-tracking-link-value {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 0.875rem;
+    letter-spacing: 0.03em;
+    color: var(--accent-hover);
+    text-decoration: none;
+    overflow-wrap: anywhere;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.15s, color 0.15s;
+}
+
+.order-tracking-link-value:hover {
+    color: var(--accent);
+    border-bottom-color: currentColor;
+}
+
+.order-tracking-link-value svg {
+    flex-shrink: 0;
+    opacity: 0.75;
+}
+
+/* Sans page de suivi connue, ce n'est plus un lien : rien ne le suggère. */
+.order-tracking-link-value.is-plain {
+    color: var(--text);
+    user-select: all;
+}
