@@ -4,14 +4,21 @@ namespace App\Support;
 
 use App\Models\Category;
 use App\Models\Product;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 
 class HomepageCatalog
 {
     /**
-     * @return Collection<int, Product>
+     * Renvoie toujours une collection Eloquent : les appelants y chargent des
+     * relations et en tirent des clés. Une catégorie racine sans produit fait
+     * renvoyer null au map() ci-dessous, ce qui suffirait à dégrader le
+     * résultat en collection de base — et la page d'accueil tombait alors en
+     * 500 dès qu'une catégorie vide existait.
+     *
+     * @return EloquentCollection<int, Product>
      */
-    public static function featured(int $limit = 4): Collection
+    public static function featured(int $limit = 4): EloquentCollection
     {
         $roots = Category::query()
             ->whereNull('parent_id')
@@ -24,7 +31,7 @@ class HomepageCatalog
             ->orderBy('sort_order')
             ->get();
 
-        return $roots
+        $best = $roots
             ->map(function (Category $root): ?Product {
                 $pool = $root->products
                     ->concat($root->children->flatMap(fn (Category $child) => $child->products))
@@ -46,6 +53,8 @@ class HomepageCatalog
             ->filter()
             ->take($limit)
             ->values();
+
+        return Product::query()->getModel()->newCollection($best->all());
     }
 
     /**
@@ -57,7 +66,12 @@ class HomepageCatalog
         return Product::query()
             ->active()
             ->with('category', 'variants.supplier')
-            ->whereNotIn('id', $featured->modelKeys())
+            // pluck() plutôt que modelKeys() : une catégorie racine sans
+            // produit fait renvoyer null au map() de featured(), ce qui
+            // dégrade la collection Eloquent en collection de base — et
+            // modelKeys() n'existe que sur la première. La page d'accueil
+            // tombait alors en 500 dès qu'une catégorie vide existait.
+            ->whereNotIn('id', $featured->pluck('id')->all())
             ->orderBy('sort_order')
             ->orderBy('id')
             ->limit($limit)
