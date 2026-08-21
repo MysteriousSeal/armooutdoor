@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-21 — v0.9.2 — build K9VCB1
+
+### Orders
+
+- **A tracking number is now a link.** The shipping block on an order opens the carrier's own tracking page in a new tab, instead of leaving a number to copy into a carrier site by hand. Colissimo and Lettre suivie go to La Poste, both Chronopost offerings to Chronopost, and the rest to Mondial Relay — who want the recipient's postcode alongside the number, taken from the delivery address and falling back to the relay point.
+- A carrier with no known tracking page keeps a plain, selectable number. So does a Mondial Relay parcel with no postcode on file: a link to an empty search form is worse than a number to copy.
+
+**Known:** the link is admin-only for now. A customer looking at their own order still sees the number as plain text.
+
 ## 2026-08-21 — v0.9.1 — build TBSXWI
 
 ### Storefront
