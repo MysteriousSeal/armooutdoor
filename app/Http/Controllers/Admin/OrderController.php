@@ -103,7 +103,7 @@ class OrderController extends Controller
             'dateFrom' => $filters['date_from'],
             'dateTo' => $filters['date_to'],
             'marketplaces' => Marketplace::query()->orderBy('name')->get(),
-            'statuses' => ['placed', 'preparing', 'shipped', 'refunded'],
+            'statuses' => ['placed', 'preparing', 'shipped', 'delivered', 'refunded'],
         ]);
     }
 
@@ -169,7 +169,7 @@ class OrderController extends Controller
         return [
             'tab' => in_array($request->query('tab'), ['draft', 'archived', 'test'], true) ? $request->query('tab') : 'orders',
             'search' => trim((string) $request->query('search', '')),
-            'status' => in_array($request->query('status'), ['placed', 'preparing', 'shipped', 'refunded'], true)
+            'status' => in_array($request->query('status'), ['placed', 'preparing', 'shipped', 'delivered', 'refunded'], true)
                 ? $request->query('status')
                 : '',
             'marketplace_id' => $request->filled('marketplace_id') ? (int) $request->query('marketplace_id') : null,
@@ -522,6 +522,16 @@ class OrderController extends Controller
         AdminActivityLog::record('order.preparing', $order, 'Marked order '.$order->number.' as being prepared');
 
         return $this->statusChangeResponse($request, $order, 'Order marked as being prepared.');
+    }
+
+    public function deliver(Request $request, Order $order): RedirectResponse|JsonResponse
+    {
+        abort_if($order->isDraft(), 404);
+
+        $order->markStatus('delivered');
+        AdminActivityLog::record('order.delivered', $order, 'Marked order '.$order->number.' as delivered');
+
+        return $this->statusChangeResponse($request, $order, 'Order marked as delivered.');
     }
 
     public function ship(Request $request, Order $order): RedirectResponse|JsonResponse

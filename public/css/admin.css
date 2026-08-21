@@ -2569,6 +2569,20 @@ a.admin-stat-card:hover {
     border-color: #e3c6c6;
 }
 
+/* Bleu : arrivé. Le vert d'à côté dit "parti", ce n'est pas la même chose. */
+.order-chip--delivered {
+    color: #2f5d8a;
+    background: #eef3f8;
+    border-color: #c6d8e8;
+}
+
+[data-theme='dark'] .order-chip--delivered,
+[data-theme='dark'] .badge-delivered {
+    color: #8ab4dd;
+    background: color-mix(in srgb, #8ab4dd 12%, var(--surface));
+    border-color: color-mix(in srgb, #8ab4dd 35%, var(--border));
+}
+
 .order-chip--draft,
 .order-chip--tracking-na {
     color: var(--text-muted);

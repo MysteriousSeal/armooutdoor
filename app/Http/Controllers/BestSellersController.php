@@ -14,7 +14,7 @@ class BestSellersController extends Controller
     {
         $soldQuantities = OrderItem::query()
             ->join('orders', 'orders.id', '=', 'order_items.order_id')
-            ->whereIn('orders.status', ['placed', 'preparing', 'shipped'])
+            ->whereIn('orders.status', ['placed', 'preparing', 'shipped', 'delivered'])
             ->selectRaw('order_items.product_id, SUM(order_items.quantity) as total_quantity')
             ->groupBy('order_items.product_id')
             ->orderByDesc('total_quantity')

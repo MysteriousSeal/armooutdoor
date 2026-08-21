@@ -153,6 +153,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/orders/{order}/delivery-slip', [AdminOrderController::class, 'deliverySlip'])->name('orders.delivery-slip');
         Route::patch('/orders/{order}/prepare', [AdminOrderController::class, 'prepare'])->name('orders.prepare');
         Route::patch('/orders/{order}/ship', [AdminOrderController::class, 'ship'])->name('orders.ship');
+        Route::patch('/orders/{order}/deliver', [AdminOrderController::class, 'deliver'])->name('orders.deliver');
         Route::patch('/orders/{order}/refund', [AdminOrderController::class, 'refund'])->middleware('admin.owner')->name('orders.refund');
         // Before the {order} routes: /orders/bulk/... must not be taken
         // as an order number by the route-model binding.

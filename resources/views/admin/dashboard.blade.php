@@ -206,7 +206,7 @@
                 <section class="order-fact">
                     <h3 class="order-fact-title">Orders by status</h3>
                     <ul class="admin-dash-list">
-                        @foreach (['draft', 'placed', 'preparing', 'shipped', 'refunded'] as $status)
+                        @foreach (['draft', 'placed', 'preparing', 'shipped', 'delivered', 'refunded'] as $status)
                             <li>
                                 <span class="badge badge-{{ $status }}">{{ ucfirst($status) }}</span>
                                 <span class="admin-dash-list-value">{{ number_format($statusCounts[$status] ?? 0) }}</span>

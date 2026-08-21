@@ -1243,6 +1243,16 @@ button.admin-table-icon-btn:hover {
     background: #eef4ef;
 }
 
+/*
+ * Bleu : le colis n'est plus en mouvement. Distinct du vert d'"expédiée"
+ * juste à côté, qui dit l'inverse — parti, pas encore arrivé.
+ */
+.badge-delivered {
+    color: #2f5d8a;
+    border-color: #c6d8e8;
+    background: #eef3f8;
+}
+
 .badge-draft {
     color: var(--text-muted);
     border-color: var(--border);

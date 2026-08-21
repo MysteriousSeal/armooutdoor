@@ -35,6 +35,8 @@
                             <button type="button" class="btn btn-primary" data-modal-open="prepare-confirm-modal">Mark as being prepared</button>
                         @elseif ($order->status === 'preparing')
                             <button type="button" class="btn btn-primary" data-modal-open="ship-confirm-modal">Mark as shipped</button>
+                        @elseif ($order->status === 'shipped')
+                            <button type="button" class="btn btn-primary" data-modal-open="deliver-confirm-modal">Mark as delivered</button>
                         @endif
                         @if ($order->status !== 'refunded' && auth()->user()->isOwner())
                             <button type="button" class="btn btn-secondary" data-modal-open="refund-confirm-modal">Mark as refunded</button>
@@ -526,6 +528,26 @@
                     <div class="modal-actions">
                         <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
                         <button type="submit" class="btn btn-primary">Mark as shipped</button>
+                    </div>
+                </form>
+            </dialog>
+        @endif
+
+        @if ($order->status === 'shipped')
+            <dialog id="deliver-confirm-modal" class="modal" aria-labelledby="deliver-confirm-title">
+                <form method="POST" action="{{ route('admin.orders.deliver', $order) }}">
+                    @csrf
+                    @method('PATCH')
+                    <p class="modal-kicker">{{ $order->number }}</p>
+                    <h3 class="modal-title" id="deliver-confirm-title">Mark as delivered?</h3>
+                    <p class="modal-body">
+                        This will set the order status to <strong>Delivered</strong>.
+                        The customer will see the update on their order, and can still be
+                        refunded afterwards.
+                    </p>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                        <button type="submit" class="btn btn-primary">Mark as delivered</button>
                     </div>
                 </form>
             </dialog>
