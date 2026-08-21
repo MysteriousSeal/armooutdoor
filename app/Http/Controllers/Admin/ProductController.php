@@ -13,7 +13,9 @@ use App\Models\ProductVariant;
 use App\Models\Supplier;
 use App\Support\Csv;
 use App\Support\HtmlSanitizer;
+use App\Support\ImageThumbnailer;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -215,6 +217,47 @@ class ProductController extends Controller
         return back()->with('status', 'Stock updated for '.$product->localizedName().'.');
     }
 
+    /**
+     * Saves only the supplier block, so an admin comparing suppliers can note
+     * a price without pushing the whole product form — which would also
+     * revalidate the description, the photos and every variant row.
+     *
+     * A product with variants keeps its supplier data on the variants, so the
+     * block is refused here rather than silently written and later cleared.
+     */
+    public function updateSupplier(Request $request, Product $product): RedirectResponse|JsonResponse
+    {
+        abort_if($product->hasVariants(), 403);
+
+        $validated = $request->validate([
+            'supplier_id' => ['nullable', 'exists:suppliers,id'],
+            'available_at_supplier' => ['sometimes', 'boolean'],
+            'supplier_reference' => ['nullable', 'string', 'max:120'],
+            'supplier_product_url' => ['nullable', 'url', 'max:2048'],
+            'supplier_price' => ['nullable', 'numeric', 'min:0', 'max:99999.99'],
+            'markup_percent' => ['nullable', 'numeric', 'min:0', 'max:1000'],
+        ]);
+
+        $product->update([
+            'supplier_id' => $validated['supplier_id'] ?? null,
+            'available_at_supplier' => $request->boolean('available_at_supplier'),
+            'supplier_reference' => filled($validated['supplier_reference'] ?? null) ? trim((string) $validated['supplier_reference']) : null,
+            'supplier_product_url' => filled($validated['supplier_product_url'] ?? null) ? trim((string) $validated['supplier_product_url']) : null,
+            'supplier_price_cents' => filled($validated['supplier_price'] ?? null) ? (int) round((float) $validated['supplier_price'] * 100) : null,
+            'markup_basis_points' => filled($validated['markup_percent'] ?? null) ? (int) round((float) $validated['markup_percent'] * 100) : null,
+        ]);
+
+        AdminActivityLog::record('product.supplier_updated', $product, 'Updated supplier details for '.$product->localizedName());
+
+        $message = 'Supplier details saved for '.$product->localizedName().'.';
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => $message]);
+        }
+
+        return back()->with('status', $message);
+    }
+
     private function applyProductSort(Builder $query, string $sort): void
     {
         [$column, $direction] = match ($sort) {
@@ -312,6 +355,8 @@ class ProductController extends Controller
             'available_at_supplier' => $request->boolean('available_at_supplier'),
             'supplier_product_url' => $request->filled('supplier_product_url') ? $request->string('supplier_product_url')->trim()->toString() : null,
             'supplier_reference' => $request->filled('supplier_reference') ? $request->string('supplier_reference')->trim()->toString() : null,
+            'supplier_price_cents' => $request->filled('supplier_price') ? (int) round((float) $request->input('supplier_price') * 100) : null,
+            'markup_basis_points' => $request->filled('markup_percent') ? (int) round((float) $request->input('markup_percent') * 100) : null,
             'slug' => $slug,
             'is_active' => $request->boolean('is_active'),
             'age_restricted' => $request->boolean('age_restricted'),
@@ -400,6 +445,8 @@ class ProductController extends Controller
             'supplier_id' => null,
             'supplier_reference' => null,
             'supplier_product_url' => null,
+            'supplier_price_cents' => null,
+            'markup_basis_points' => null,
         ]);
     }
 
@@ -532,9 +579,9 @@ class ProductController extends Controller
         $name = Str::slug($slug).'-'.Str::lower(Str::random(6)).'.'.$file->getClientOriginalExtension();
         $file->move($directory, $name);
 
-        $relativePath = \App\Support\ImageThumbnailer::normalizeMain('products/'.$name) ?? 'products/'.$name;
+        $relativePath = ImageThumbnailer::normalizeMain('products/'.$name) ?? 'products/'.$name;
 
-        \App\Support\ImageThumbnailer::generate($relativePath);
+        ImageThumbnailer::generate($relativePath);
 
         return $relativePath;
     }

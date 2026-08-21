@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Models\Product;
+use App\Models\ProductVariant;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -27,6 +29,8 @@ class StoreProductRequest extends FormRequest
             'available_at_supplier' => ['sometimes', 'boolean'],
             'supplier_product_url' => ['nullable', 'url', 'max:2048'],
             'supplier_reference' => ['nullable', 'string', 'max:120'],
+            'supplier_price' => ['nullable', 'numeric', 'min:0', 'max:99999.99'],
+            'markup_percent' => ['nullable', 'numeric', 'min:0', 'max:1000'],
             'price' => ['required', 'numeric', 'min:0', 'max:99999.99'],
             'quantity' => ['sometimes', 'integer', 'min:0', 'max:99999'],
             'weight_grams' => ['nullable', 'integer', 'min:0', 'max:99999'],
@@ -97,7 +101,7 @@ class StoreProductRequest extends FormRequest
         });
     }
 
-    private function validateVariantUniqueness($validator, ?\App\Models\Product $product): void
+    private function validateVariantUniqueness($validator, ?Product $product): void
     {
         $rows = (array) $this->input('variants', []);
 
@@ -125,7 +129,7 @@ class StoreProductRequest extends FormRequest
 
                 $seen[$value] = true;
 
-                $exists = \App\Models\ProductVariant::query()
+                $exists = ProductVariant::query()
                     ->where($field, $value)
                     ->when($variantId, fn ($query) => $query->where('id', '!=', $variantId))
                     ->exists();

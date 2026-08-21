@@ -116,6 +116,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/products/{product}', [AdminProductController::class, 'update'])->name('products.update');
         Route::patch('/products/{product}/status', [AdminProductController::class, 'toggleStatus'])->name('products.status');
         Route::patch('/products/{product}/quantity', [AdminProductController::class, 'updateQuantity'])->name('products.quantity');
+        Route::patch('/products/{product}/supplier', [AdminProductController::class, 'updateSupplier'])->name('products.supplier');
 
         // Product discounts (sale price on a single product, no code needed)
         Route::get('/discounts', [AdminDiscountController::class, 'index'])->name('discounts.index');

@@ -5,6 +5,9 @@
 @section('content')
     @php
         $priceValue = old('price', $product->exists ? number_format($product->price_cents / 100, 2, '.', '') : '');
+        $supplierPriceValue = old('supplier_price', $product->supplier_price_cents !== null ? number_format($product->supplier_price_cents / 100, 2, '.', '') : '');
+        // Stockée en points de base, saisie en pourcent : 3000 -> 30 (et 3250 -> 32.5).
+        $markupValue = old('markup_percent', $product->markup_basis_points !== null ? rtrim(rtrim(number_format($product->markup_basis_points / 100, 2, '.', ''), '0'), '.') : '');
         $hasMainImage = $product->exists && $product->image !== '';
     @endphp
 
@@ -363,6 +366,44 @@
                             @error('supplier_reference') <p class="form-error">{{ $message }}</p> @enderror
                         </div>
 
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="supplier_price">Supplier price, excl. tax (EUR)</label>
+                                <input
+                                    type="number"
+                                    id="supplier_price"
+                                    name="supplier_price"
+                                    class="form-control"
+                                    value="{{ $disableSupplierFields ? '' : $supplierPriceValue }}"
+                                    min="0"
+                                    max="99999.99"
+                                    step="0.01"
+                                    placeholder="e.g. 49.90"
+                                    @if ($disableSupplierFields) disabled @endif
+                                >
+                                <p class="form-hint">What this costs you before VAT. Never shown to customers.</p>
+                                @error('supplier_price') <p class="form-error">{{ $message }}</p> @enderror
+                            </div>
+
+                            <div class="form-group">
+                                <label for="markup_percent">Markup (%)</label>
+                                <input
+                                    type="number"
+                                    id="markup_percent"
+                                    name="markup_percent"
+                                    class="form-control"
+                                    value="{{ $disableSupplierFields ? '' : $markupValue }}"
+                                    min="0"
+                                    max="1000"
+                                    step="0.01"
+                                    placeholder="e.g. 30"
+                                    @if ($disableSupplierFields) disabled @endif
+                                >
+                                <p class="form-hint">The margin you want on this product, on top of the supplier price.</p>
+                                @error('markup_percent') <p class="form-error">{{ $message }}</p> @enderror
+                            </div>
+                        </div>
+
                         <div class="form-group">
                             <label for="supplier_product_url">Link to product on supplier website</label>
                             <input
@@ -382,6 +423,47 @@
                             @endif
                             @error('supplier_product_url') <p class="form-error">{{ $message }}</p> @enderror
                         </div>
+
+                        {{-- Recalculé en direct par le script ; la valeur rendue
+                             ici sert d'état de départ et de repli sans JS. --}}
+                        <p
+                            class="supplier-recommended"
+                            id="supplier-recommended"
+                            data-vat-basis-points="{{ App\Models\Product::VAT_RATE_BASIS_POINTS }}"
+                            data-max-price-cents="{{ App\Models\Product::MAX_PRICE_CENTS }}"
+                            @if ($disableSupplierFields || $product->recommendedPriceCents() === null) hidden @endif
+                        >
+                            <span class="supplier-recommended-label">Recommended price</span>
+                            <span class="supplier-recommended-value" id="supplier-recommended-value">
+                                {{ $product->recommendedPriceCents() !== null ? format_euros($product->recommendedPriceCents()) : '' }}
+                            </span>
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-secondary supplier-recommended-apply"
+                                id="supplier-recommended-apply"
+                                hidden
+                            >Apply to price</button>
+                            <span class="supplier-recommended-note" id="supplier-recommended-note">Purchase price + 20% VAT + markup, rounded up to the next ,49 or ,99</span>
+                        </p>
+
+                        @if ($product->exists && ! $disableSupplierFields)
+                            {{-- Sans JS, le bouton reste caché : le formulaire
+                                 complet en bas de page enregistre déjà tout. --}}
+                            <div
+                                class="supplier-save-row"
+                                id="supplier-save-row"
+                                data-endpoint="{{ route('admin.products.supplier', $product) }}"
+                                hidden
+                            >
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-secondary"
+                                    data-modal-open="supplier-save-modal"
+                                    id="supplier-save-btn"
+                                >Save supplier details</button>
+                                <p class="form-hint">Saves this panel on its own, without submitting the rest of the form.</p>
+                            </div>
+                        @endif
                     </section>
                 </div>
             </div>
@@ -609,6 +691,35 @@
                 <button type="submit" class="btn btn-primary">{{ $product->exists ? 'Save changes' : 'Create product' }}</button>
             </div>
         </form>
+
+        {{-- Hors du <form> : un dialog imbriqué se soumettrait avec lui. --}}
+        @unless ($product->exists && $product->hasVariants())
+            <dialog id="apply-price-modal" class="modal" aria-labelledby="apply-price-title">
+                <h3 class="modal-title" id="apply-price-title">Replace the current price?</h3>
+                <p class="modal-body" id="apply-price-body"></p>
+                <p class="modal-body">Only the Price field is filled in. Nothing is saved until you press Save changes.</p>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                    <button type="button" class="btn btn-primary" id="apply-price-confirm">Replace the price</button>
+                </div>
+            </dialog>
+        @endunless
+
+        @if ($product->exists && ! $product->hasVariants())
+            <dialog id="supplier-save-modal" class="modal" aria-labelledby="supplier-save-title">
+                <p class="modal-kicker">{{ $product->localizedName() }}</p>
+                <h3 class="modal-title" id="supplier-save-title">Save supplier details?</h3>
+                <p class="modal-body">
+                    Only the supplier panel is written: the supplier, its reference and link,
+                    the purchase price and the markup. Nothing else on this page is touched,
+                    and unsaved changes elsewhere stay unsaved.
+                </p>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                    <button type="button" class="btn btn-primary" id="supplier-save-confirm">Save supplier details</button>
+                </div>
+            </dialog>
+        @endif
     </div>
 @endsection
 
@@ -616,10 +727,13 @@
     <link rel="stylesheet" href="{{ asset('css/vendor/quill.snow.css') }}">
 @endpush
 
+
 @push('scripts')
     <script src="{{ asset('js/vendor/quill.js') }}"></script>
     <script src="{{ asset('js/admin-description-editor.js') }}" defer></script>
     <script src="{{ asset('js/admin-gallery-upload.js') }}" defer></script>
+    <script src="{{ asset('js/admin-product-supplier-save.js') }}" defer></script>
+    <script src="{{ asset('js/admin-product-recommended-price.js') }}" defer></script>
     <script>
         (function () {
             var list = document.getElementById('characteristics-list');

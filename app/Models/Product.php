@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Support\HtmlSanitizer;
+use App\Support\ImageThumbnailer;
 use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -18,6 +19,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'available_at_supplier',
     'supplier_product_url',
     'supplier_reference',
+    'supplier_price_cents',
+    'markup_basis_points',
     'slug',
     'is_active',
     'sku',
@@ -38,6 +41,16 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 ])]
 class Product extends Model
 {
+    /** TVA française applicable à l'achat fournisseur, en points de base. */
+    public const VAT_RATE_BASIS_POINTS = 2000;
+
+    /**
+     * Plafond du champ Prix du formulaire. Une recommandation au-dessus
+     * remplirait le champ d'une valeur hors bornes : le navigateur refuse
+     * alors l'envoi sans rien afficher, et le bouton Enregistrer paraît mort.
+     */
+    public const MAX_PRICE_CENTS = 9999999;
+
     /** @use HasFactory<ProductFactory> */
     use HasFactory;
 
@@ -58,6 +71,8 @@ class Product extends Model
             'characteristics' => 'array',
             'filter_attributes' => 'array',
             'price_cents' => 'integer',
+            'supplier_price_cents' => 'integer',
+            'markup_basis_points' => 'integer',
             'quantity' => 'integer',
             'weight_grams' => 'integer',
             'carrier_ids' => 'array',
@@ -263,6 +278,46 @@ class Product extends Model
         return max(0, min(10, $this->quantity));
     }
 
+    /**
+     * Le prix de vente conseillé : prix d'achat HT, plus 20 % de TVA, plus la
+     * marge voulue, puis arrondi au palier psychologique supérieur.
+     *
+     * Null sans prix d'achat : sans lui il n'y a rien à recommander. Une marge
+     * absente vaut 0 %, ce qui donne au moins le prix de revient TTC.
+     */
+    public function recommendedPriceCents(): ?int
+    {
+        // Zéro se traite comme une absence : sans coût, il n'y a pas de marge
+        // à calculer, et 0,49 € recommandé sur un article gratuit ressemble à
+        // un bug plutôt qu'à un conseil.
+        if ($this->supplier_price_cents === null || $this->supplier_price_cents === 0) {
+            return null;
+        }
+
+        $withVat = $this->supplier_price_cents * (1 + self::VAT_RATE_BASIS_POINTS / 10000);
+        $withMarkup = $withVat * (1 + ($this->markup_basis_points ?? 0) / 10000);
+
+        return min(
+            self::roundUpToPsychologicalPrice((int) ceil(round($withMarkup, 4))),
+            self::MAX_PRICE_CENTS,
+        );
+    }
+
+    /**
+     * Remonte au prochain montant finissant par ,49 ou ,99 — jamais en
+     * dessous, pour ne pas rogner la marge demandée. 12,39 donne 12,49 ;
+     * 12,51 donne 12,99 ; un montant déjà sur un palier n'est pas touché.
+     */
+    public static function roundUpToPsychologicalPrice(int $cents): int
+    {
+        $euros = intdiv($cents, 100);
+        $remainder = $cents % 100;
+
+        return $remainder <= 49
+            ? $euros * 100 + 49
+            : $euros * 100 + 99;
+    }
+
     public function imageUrl(): string
     {
         if (str_starts_with($this->image, 'https://') || str_starts_with($this->image, 'http://')) {
@@ -274,7 +329,7 @@ class Product extends Model
 
     public function thumbnailUrl(): string
     {
-        return \App\Support\ImageThumbnailer::urlFor($this->image);
+        return ImageThumbnailer::urlFor($this->image);
     }
 
     private function localized(string $attribute): string

@@ -1255,6 +1255,91 @@
     border: 1px solid var(--border);
 }
 
+/*
+ * L'enregistrement partiel du bloc fournisseur. Séparé du reste du panneau
+ * par un filet, pour qu'on voie qu'il agit sur ce bloc et pas sur la page.
+ */
+/*
+ * Le prix conseillé. C'est un calcul, pas une saisie : il se distingue des
+ * champs au-dessus par le fond et par la valeur en chiffres tabulaires, pour
+ * qu'on la compare d'un produit à l'autre sans que les décimales dansent.
+ */
+.supplier-recommended {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.6rem;
+    margin: 0 0 1.25rem;
+    padding: 0.7rem 0.85rem;
+    background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--border));
+}
+
+.supplier-recommended-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.supplier-recommended-value {
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+    color: var(--accent-hover);
+}
+
+.supplier-recommended-apply {
+    margin-left: auto;
+}
+
+/*
+ * Le champ Prix est dans un autre panneau : ce flash dit où la valeur a
+ * atterri quand on remonte. Assez bref pour ne pas gêner la frappe.
+ */
+.form-control.is-just-applied {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+    animation: field-applied 1.6s ease-out;
+}
+
+@keyframes field-applied {
+    0% { background: color-mix(in srgb, var(--accent) 20%, var(--surface)); }
+    100% { background: var(--surface); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .form-control.is-just-applied {
+        animation: none;
+    }
+}
+
+/* La règle de calcul, en clair : sinon le chiffre est à croire sur parole. */
+.supplier-recommended-note {
+    flex-basis: 100%;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: var(--text-muted);
+}
+
+.supplier-save-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6rem 0.85rem;
+    margin-top: 1.15rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.supplier-save-row .form-hint {
+    margin: 0;
+    flex: 1;
+    min-width: 12rem;
+}
+
 /* A footnote to the chip before it, not a figure of its own. */
 /*
  * Deleting a draft is the one action here that cannot be taken back, so it
