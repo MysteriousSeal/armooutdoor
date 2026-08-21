@@ -28,27 +28,121 @@
     @endphp
 
     <div class="container home">
-        <section class="home-hero" aria-labelledby="home-hero-title" style="--hero-image: url('{{ asset('images/hero.jpg') }}')">
-            <div class="home-hero-overlay" aria-hidden="true"></div>
-            <div class="home-hero-copy">
-                <p class="home-hero-kicker">{{ __('store.home_hero_kicker') }}</p>
-                <h2 class="home-hero-title" id="home-hero-title">
-                    <span class="home-hero-title-line">Équipez-vous</span>
-                    <span class="home-hero-title-line home-hero-title-accent">pour le stand</span>
-                    <span class="home-hero-title-line">et le terrain</span>
-                </h2>
-                <p class="home-hero-text">
-                    Équipement sélectionné pour le tir sportif, la chasse, l’airgun et l’aventure en plein air.
-                </p>
-                <ul class="home-hero-tags" aria-label="{{ __('store.home_hero_tags_label') }}">
-                    <li>{{ __('store.home_hero_tag_range') }}</li>
-                    <li>{{ __('store.home_hero_tag_hunt') }}</li>
-                    <li>{{ __('store.home_hero_tag_outdoor') }}</li>
-                </ul>
-                <div class="home-hero-actions">
-                    <a href="{{ $shopUrl }}" class="btn btn-primary">{{ __('store.hero_cta') }}</a>
-                    <a href="{{ $shopUrl }}" class="btn home-hero-ghost">{{ __('store.home_browse') }}</a>
+        @php
+            // Trois panneaux figés : le premier reprend le hero d'origine, les
+            // deux autres pointent vers les rayons qui bougent le plus.
+            $slides = [
+                [
+                    'image' => asset('images/hero.jpg'),
+                    'kicker' => __('store.home_hero_kicker'),
+                    'lines' => ['Équipez-vous', 'pour le stand', 'et le terrain'],
+                    'accent' => 1,
+                    'text' => 'Équipement sélectionné pour le tir sportif, la chasse, l’airgun et l’aventure en plein air.',
+                    'tags' => [__('store.home_hero_tag_range'), __('store.home_hero_tag_hunt'), __('store.home_hero_tag_outdoor')],
+                    'cta' => ['label' => __('store.hero_cta'), 'url' => $shopUrl],
+                    'ghost' => ['label' => __('store.home_browse'), 'url' => localized_route('products.new-arrivals')],
+                ],
+                [
+                    'image' => asset('images/hero.jpg'),
+                    'kicker' => __('store.home_slide_new_kicker'),
+                    'lines' => ['Les dernières', 'nouveautés', 'en rayon'],
+                    'accent' => 1,
+                    'text' => __('store.home_slide_new_text'),
+                    'tags' => [],
+                    'cta' => ['label' => __('store.home_slide_new_cta'), 'url' => localized_route('products.new-arrivals')],
+                    'ghost' => null,
+                ],
+                [
+                    'image' => asset('images/hero.jpg'),
+                    'kicker' => __('store.home_slide_sale_kicker'),
+                    'lines' => ['Des prix', 'en baisse', 'cette semaine'],
+                    'accent' => 1,
+                    'text' => __('store.home_slide_sale_text'),
+                    'tags' => [],
+                    'cta' => ['label' => __('store.home_slide_sale_cta'), 'url' => localized_route('products.promotions')],
+                    'ghost' => null,
+                ],
+                [
+                    'image' => asset('images/hero.jpg'),
+                    'kicker' => __('store.home_slide_best_kicker'),
+                    'lines' => ['Ce que les', 'tireurs', 'achètent le plus'],
+                    'accent' => 1,
+                    'text' => __('store.home_slide_best_text'),
+                    'tags' => [],
+                    'cta' => ['label' => __('store.home_slide_best_cta'), 'url' => localized_route('products.best-sellers')],
+                    'ghost' => null,
+                ],
+            ];
+        @endphp
+
+        {{-- data-carousel est le point d'accroche du script. Sans JavaScript
+             la piste reste une liste de panneaux que l'on fait défiler au
+             doigt : rien ne disparaît. --}}
+        <section
+            class="home-carousel"
+            aria-roledescription="carousel"
+            aria-label="{{ __('store.home_carousel_label') }}"
+            data-carousel
+            data-carousel-interval="6000"
+        >
+            <div class="home-carousel-viewport">
+                <div class="home-carousel-track" data-carousel-track>
+                    @foreach ($slides as $index => $slide)
+                        <article
+                            class="home-hero home-carousel-panel {{ $index % 2 === 1 ? 'home-hero--mirrored' : '' }}"
+                            style="--hero-image: url('{{ $slide['image'] }}')"
+                            role="group"
+                            aria-roledescription="{{ __('store.home_carousel_slide') }}"
+                            aria-label="{{ $index + 1 }} / {{ count($slides) }}"
+                            @if ($index > 0) aria-hidden="true" @endif
+                            data-carousel-panel
+                        >
+                            <div class="home-hero-overlay" aria-hidden="true"></div>
+                            <div class="home-hero-copy">
+                                <p class="home-hero-kicker">{{ $slide['kicker'] }}</p>
+                                <h2 class="home-hero-title" @if ($index === 0) id="home-hero-title" @endif>
+                                    @foreach ($slide['lines'] as $line => $text)
+                                        <span class="home-hero-title-line {{ $line === $slide['accent'] ? 'home-hero-title-accent' : '' }}">{{ $text }}</span>
+                                    @endforeach
+                                </h2>
+                                <p class="home-hero-text">{{ $slide['text'] }}</p>
+                                @if ($slide['tags'])
+                                    <ul class="home-hero-tags" aria-label="{{ __('store.home_hero_tags_label') }}">
+                                        @foreach ($slide['tags'] as $tag)
+                                            <li>{{ $tag }}</li>
+                                        @endforeach
+                                    </ul>
+                                @endif
+                                <div class="home-hero-actions">
+                                    <a href="{{ $slide['cta']['url'] }}" class="btn btn-primary">{{ $slide['cta']['label'] }}</a>
+                                    @if ($slide['ghost'])
+                                        <a href="{{ $slide['ghost']['url'] }}" class="btn home-hero-ghost">{{ $slide['ghost']['label'] }}</a>
+                                    @endif
+                                </div>
+                            </div>
+                        </article>
+                    @endforeach
                 </div>
+            </div>
+
+            <button type="button" class="home-carousel-arrow home-carousel-arrow--prev" data-carousel-prev aria-label="{{ __('store.home_carousel_prev') }}" hidden>
+                <span aria-hidden="true">‹</span>
+            </button>
+            <button type="button" class="home-carousel-arrow home-carousel-arrow--next" data-carousel-next aria-label="{{ __('store.home_carousel_next') }}" hidden>
+                <span aria-hidden="true">›</span>
+            </button>
+
+            <div class="home-carousel-dots" role="tablist" aria-label="{{ __('store.home_carousel_label') }}" data-carousel-dots hidden>
+                @foreach ($slides as $index => $slide)
+                    <button
+                        type="button"
+                        class="home-carousel-dot {{ $index === 0 ? 'is-current' : '' }}"
+                        role="tab"
+                        aria-selected="{{ $index === 0 ? 'true' : 'false' }}"
+                        aria-label="{{ __('store.home_carousel_goto', ['number' => $index + 1]) }}"
+                        data-carousel-dot="{{ $index }}"
+                    ></button>
+                @endforeach
             </div>
         </section>
 
@@ -269,6 +363,7 @@
 
 @push('head')
     <link rel="stylesheet" href="{{ versioned_asset('css/home.css') }}">
+    <script src="{{ versioned_asset('js/home-carousel.js') }}" defer></script>
     <script type="application/ld+json">
         {{-- The key is written @@context so Blade emits a literal "@context":
              left bare, Blade compiles it as its own @context directive and the
