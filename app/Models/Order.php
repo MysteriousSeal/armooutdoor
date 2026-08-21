@@ -278,6 +278,20 @@ class Order extends Model
     }
 
     /**
+     * Vrai dès qu'un des trois coûts a été saisi, même à zéro.
+     *
+     * Zéro saisi et champ vide ne veulent pas dire la même chose : le premier
+     * dit « vérifié, rien à déduire », le second « pas encore renseigné ». Les
+     * confondre derrière un tiret cache le travail déjà fait.
+     */
+    public function hasRecordedCosts(): bool
+    {
+        return $this->marketplace_commission_cents !== null
+            || $this->shipping_paid_cents !== null
+            || $this->payment_fee_cents !== null;
+    }
+
+    /**
      * The marketplace commission, out-of-pocket shipping, and payment
      * processor fee combined — everything that's taken off the total
      * before it actually lands in the bank.

@@ -330,22 +330,25 @@
                                 </td>
                                 <td class="admin-table-num">
                                     <span class="admin-order-total">{{ $order->formattedTotal() }}</span>
-                                    @if ($order->marketplace_commission_cents || $order->shipping_paid_cents || $order->payment_fee_cents)
+                                    @if ($order->hasRecordedCosts())
                                         <span class="admin-order-deductions">
-                                            @if ($order->marketplace_commission_cents)
+                                            {{-- !== null et non pas « non vide » : un coût saisi à
+                                                 zéro doit s'afficher, sinon il ressemble à un champ
+                                                 qu'on aurait oublié de remplir. --}}
+                                            @if ($order->marketplace_commission_cents !== null)
                                                 <span class="admin-order-deduction" title="Commission">−{{ format_euros($order->marketplace_commission_cents) }} comm.</span>
                                             @endif
-                                            @if ($order->shipping_paid_cents)
+                                            @if ($order->shipping_paid_cents !== null)
                                                 <span class="admin-order-deduction" title="Shipping paid">−{{ format_euros($order->shipping_paid_cents) }} ship.</span>
                                             @endif
-                                            @if ($order->payment_fee_cents)
+                                            @if ($order->payment_fee_cents !== null)
                                                 <span class="admin-order-deduction" title="{{ $order->payment_method?->label() }} fee">−{{ format_euros($order->payment_fee_cents) }} fee</span>
                                             @endif
                                         </span>
                                     @endif
                                 </td>
                                 <td class="admin-table-num">
-                                    @if ($order->totalCostsCents() > 0)
+                                    @if ($order->hasRecordedCosts())
                                         <span class="stripe-fee-chip">− {{ $order->formattedTotalCosts() }}</span>
                                     @else
                                         <span class="admin-table-sub">—</span>
