@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-22 — v0.10.0 — build R2VKD7
+
+### Admin
+
+- **The changelog page was showing less than the changelog file.** It understood a release, a section and a bullet with its sub-bullets, and quietly discarded everything else — nineteen paragraphs in all. Every "Fixed" note closing a section had never been readable here, nor had the second paragraph of any longer entry. Both now appear: a continuation sits under the bullet it belongs to, and a closing note is set off by a rule against the section it ends.
+
+  A test now walks every line of the file and checks it reaches the page, so the next piece of formatting the page cannot read will fail rather than disappear.
+
 ## 2026-08-22 — v0.9.9 — build N8QWJ2
 
 ### Admin
