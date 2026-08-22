@@ -29,7 +29,11 @@
                 </div>
                 <div class="admin-order-actions" id="order-actions">
                     @if ($order->isDraft())
-                        <a href="{{ route('admin.orders.edit', $order) }}" class="btn btn-primary">Edit draft</a>
+                        {{-- Le bouton n'apparaît qu'avec JavaScript : sans lui la
+                             modale ne s'ouvre pas, et valider une commande sans
+                             confirmation ne se rattrape pas. --}}
+                        <button type="button" class="btn btn-primary" data-modal-open="validate-draft-modal" data-draft-validate hidden>Validate draft</button>
+                        <a href="{{ route('admin.orders.edit', $order) }}" class="btn btn-secondary">Edit draft</a>
                     @else
                         @if ($order->status === 'placed')
                             <button type="button" class="btn btn-primary" data-modal-open="prepare-confirm-modal">Mark as being prepared</button>
@@ -613,6 +617,26 @@
         @endif
         @endif
 
+        @if ($order->isDraft())
+            <dialog id="validate-draft-modal" class="modal" aria-labelledby="validate-draft-title">
+                <form method="POST" action="{{ route('admin.orders.validate-draft', $order) }}">
+                    @csrf
+                    @method('PATCH')
+                    <p class="modal-kicker">{{ $order->number }}</p>
+                    <h3 class="modal-title" id="validate-draft-title">Validate this draft?</h3>
+                    <p class="modal-body">
+                        It becomes a real order, waiting to be prepared, and takes its
+                        stock — {{ $order->items->sum('quantity') }} {{ Str::plural('unit', $order->items->sum('quantity')) }} off the shelf. There is no button to turn it
+                        back into a draft.
+                    </p>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                        <button type="submit" class="btn btn-primary">Validate draft</button>
+                    </div>
+                </form>
+            </dialog>
+        @endif
+
         @if ($order->canBeDeleted() && auth()->user()->isOwner())
             <dialog id="delete-confirm-modal" class="modal" aria-labelledby="delete-confirm-title">
                 <form method="POST" action="{{ route('admin.orders.destroy', $order) }}">
@@ -727,4 +751,5 @@
 @push('scripts')
     <script src="{{ asset('js/admin-copy-code.js') }}" defer></script>
     <script src="{{ asset('js/admin-order-status.js') }}" defer></script>
+    <script src="{{ asset('js/admin-draft-validate.js') }}" defer></script>
 @endpush

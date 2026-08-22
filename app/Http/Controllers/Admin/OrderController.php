@@ -800,6 +800,38 @@ class OrderController extends Controller
         return back()->with('status', 'Shipping paid saved.');
     }
 
+    /**
+     * Turn a draft into a real order without passing through the edit form.
+     *
+     * The draft already holds everything the order needs; the only thing left
+     * to do is what the edit form's "finalize" does — take the stock and start
+     * the status history. Stock is allowed to go negative: the sale happened on
+     * the marketplace whatever the shelf says, and refusing here would only
+     * stop the shop from recording it.
+     */
+    public function validateDraft(Order $order): RedirectResponse
+    {
+        abort_unless($order->isDraft(), 404);
+
+        DB::transaction(function () use ($order): void {
+            foreach ($order->items as $item) {
+                if ($item->product_variant_id !== null) {
+                    ProductVariant::query()->whereKey($item->product_variant_id)->first()?->decrement('quantity', $item->quantity);
+                    $item->product?->reconcileQuantity();
+                } else {
+                    $item->product?->decrement('quantity', $item->quantity);
+                }
+            }
+
+            $order->update(['status' => 'placed']);
+            $order->statusHistories()->create(['status' => 'placed']);
+        });
+
+        AdminActivityLog::record('order.draft_validated', $order, 'Validated draft order '.$order->number);
+
+        return back()->with('status', 'Draft validated into an order.');
+    }
+
     public function updateShippingAddress(UpdateOrderShippingAddressRequest $request, Order $order): RedirectResponse
     {
         abort_unless($order->addressIsEditable(), 403);

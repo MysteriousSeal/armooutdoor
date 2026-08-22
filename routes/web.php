@@ -151,6 +151,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/orders/{order}', [AdminOrderController::class, 'update'])->name('orders.update');
         Route::get('/orders/{order}/invoice', [AdminOrderController::class, 'invoice'])->name('orders.invoice');
         Route::get('/orders/{order}/delivery-slip', [AdminOrderController::class, 'deliverySlip'])->name('orders.delivery-slip');
+        Route::patch('/orders/{order}/validate-draft', [AdminOrderController::class, 'validateDraft'])->name('orders.validate-draft');
         Route::patch('/orders/{order}/prepare', [AdminOrderController::class, 'prepare'])->name('orders.prepare');
         Route::patch('/orders/{order}/ship', [AdminOrderController::class, 'ship'])->name('orders.ship');
         Route::patch('/orders/{order}/deliver', [AdminOrderController::class, 'deliver'])->name('orders.deliver');
