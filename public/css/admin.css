@@ -487,6 +487,38 @@
     background: var(--border);
 }
 
+/* La suite d'un point : même colonne que lui, sans puce, et un ton en
+   dessous pour qu'on voie d'un coup d'œil que c'est le même sujet. */
+.changelog-item-paragraph {
+    margin: 0.5rem 0 0;
+    color: var(--text-muted);
+}
+
+/* Le paragraphe qui ferme une section — les mentions « Fixed » — n'appartient
+   à aucun point : il se détache par un filet plutôt que par une puce. */
+.changelog-note {
+    margin: 0.85rem 0 0;
+    padding-left: 0.85rem;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+    border-left: 2px solid color-mix(in srgb, var(--accent) 40%, var(--border));
+}
+
+.changelog-item-paragraph code,
+.changelog-note code {
+    padding: 0.08rem 0.35rem;
+    font-size: 0.8125rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.changelog-item-paragraph strong,
+.changelog-note strong {
+    font-weight: 600;
+    color: var(--text);
+}
+
 .changelog-items code {
     padding: 0.08rem 0.35rem;
     font-size: 0.8125rem;

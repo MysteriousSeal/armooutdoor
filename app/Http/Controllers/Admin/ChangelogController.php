@@ -20,7 +20,12 @@ class ChangelogController extends Controller
      * plain structure for the admin changelog page. Item text is pre-rendered to safe
      * HTML (bold/code).
      *
-     * @return array<int, array{date: string, version: ?string, build: ?string, categories: array<int, array{name: ?string, items: array<int, array{text: string, children: array<int, string>}>}>}>
+     * An entry is not only bullets. A long item often carries a second paragraph
+     * indented beneath it, and a section often ends on a "**Fixed:**" paragraph of
+     * its own. Both were read and dropped, so the page quietly showed less than
+     * the file said.
+     *
+     * @return array<int, array{date: string, version: ?string, build: ?string, categories: array<int, array{name: ?string, items: array<int, array{text: string, paragraphs: array<int, string>, children: array<int, string>}>, notes: array<int, string>}>}>
      */
     private function parse(string $markdown): array
     {
@@ -62,7 +67,7 @@ class ChangelogController extends Controller
             }
 
             if (preg_match('/^### (.+)$/', $line, $m)) {
-                $release['categories'][] = ['name' => $m[1], 'items' => []];
+                $release['categories'][] = ['name' => $m[1], 'items' => [], 'notes' => []];
                 $categoryIndex = array_key_last($release['categories']);
                 $itemIndex = null;
 
@@ -71,11 +76,11 @@ class ChangelogController extends Controller
 
             if (preg_match('/^- (.+)$/', $line, $m)) {
                 if ($categoryIndex === null) {
-                    $release['categories'][] = ['name' => null, 'items' => []];
+                    $release['categories'][] = ['name' => null, 'items' => [], 'notes' => []];
                     $categoryIndex = array_key_last($release['categories']);
                 }
 
-                $release['categories'][$categoryIndex]['items'][] = ['text' => $this->formatInline($m[1]), 'children' => []];
+                $release['categories'][$categoryIndex]['items'][] = ['text' => $this->formatInline($m[1]), 'paragraphs' => [], 'children' => []];
                 $itemIndex = array_key_last($release['categories'][$categoryIndex]['items']);
 
                 continue;
@@ -83,6 +88,27 @@ class ChangelogController extends Controller
 
             if ($itemIndex !== null && preg_match('/^ {2}- (.+)$/', $line, $m)) {
                 $release['categories'][$categoryIndex]['items'][$itemIndex]['children'][] = $this->formatInline($m[1]);
+
+                continue;
+            }
+
+            // A paragraph indented under the last bullet continues it.
+            if ($itemIndex !== null && preg_match('/^ {2}(\S.*)$/', $line, $m)) {
+                $release['categories'][$categoryIndex]['items'][$itemIndex]['paragraphs'][] = $this->formatInline($m[1]);
+
+                continue;
+            }
+
+            // A paragraph of its own, flush left: the "**Fixed:**" notes that
+            // close a section. It belongs to the section, not to the last bullet.
+            if (trim($line) !== '' && preg_match('/^\S.*$/', $line)) {
+                if ($categoryIndex === null) {
+                    $release['categories'][] = ['name' => null, 'items' => [], 'notes' => []];
+                    $categoryIndex = array_key_last($release['categories']);
+                }
+
+                $release['categories'][$categoryIndex]['notes'][] = $this->formatInline($line);
+                $itemIndex = null;
             }
         }
 

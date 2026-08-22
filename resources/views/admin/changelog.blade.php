@@ -55,6 +55,9 @@
                                 @foreach ($category['items'] as $item)
                                     <li>
                                         {!! $item['text'] !!}
+                                        @foreach ($item['paragraphs'] as $paragraph)
+                                            <p class="changelog-item-paragraph">{!! $paragraph !!}</p>
+                                        @endforeach
                                         @if (! empty($item['children']))
                                             <ul class="changelog-items changelog-items--nested">
                                                 @foreach ($item['children'] as $child)
@@ -65,6 +68,9 @@
                                     </li>
                                 @endforeach
                             </ul>
+                            @foreach ($category['notes'] as $note)
+                                <p class="changelog-note">{!! $note !!}</p>
+                            @endforeach
                         </div>
                     @endforeach
                 </section>
