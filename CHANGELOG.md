@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-22 — v0.9.9 — build N8QWJ2
+
+### Admin
+
+- **A draft order can be validated from its own page.** Turning a draft into a real order meant reopening the whole edit form just to press save-and-finalize, re-reading every line on the way. A Validate draft button now sits beside Edit draft and does the same work in one click: it takes the stock, sets the order to placed and opens its status history. A confirmation names what is about to happen, down to how many units leave the shelf.
+
+  Stock is allowed to go negative rather than blocking the validation — a marketplace sale happened whatever the shelf says, and refusing would only stop the shop from recording it. Clicking twice cannot take the stock twice.
+
 ## 2026-08-21 — v0.9.8 — build M4XPZW
 
 ### Admin
