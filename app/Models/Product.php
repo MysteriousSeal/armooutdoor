@@ -255,6 +255,37 @@ class Product extends Model
         return ! $this->hasVariants() && $this->supplier_id !== null && $this->available_at_supplier;
     }
 
+    /**
+     * How the shop can serve this product right now, in one word.
+     *
+     * A product sold in several sizes is read through its sizes: what matters
+     * on a listing is whether a customer can buy something on that page, not
+     * what the quantities add up to. The best state any active size can offer
+     * is the one shown.
+     *
+     * @return 'in_stock'|'low_stock'|'at_supplier'|'out_of_stock'
+     */
+    public function availabilityState(): string
+    {
+        if ($this->hasVariants()) {
+            $active = $this->variants->filter(fn (ProductVariant $variant): bool => $variant->is_active);
+
+            return match (true) {
+                $active->contains(fn (ProductVariant $variant): bool => $variant->quantity > 2) => 'in_stock',
+                $active->contains(fn (ProductVariant $variant): bool => $variant->inStock()) => 'low_stock',
+                $active->contains(fn (ProductVariant $variant): bool => $variant->isBackorderable()) => 'at_supplier',
+                default => 'out_of_stock',
+            };
+        }
+
+        return match (true) {
+            $this->lowStock() => 'low_stock',
+            $this->inStock() => 'in_stock',
+            $this->isBackorderable() => 'at_supplier',
+            default => 'out_of_stock',
+        };
+    }
+
     public function lowStock(): bool
     {
         return $this->quantity > 0 && $this->quantity <= 2;

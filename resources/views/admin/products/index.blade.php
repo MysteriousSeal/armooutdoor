@@ -59,10 +59,16 @@
             <a href="{{ route('admin.products.index', $tabQuery('active')) }}" class="{{ $tab === 'active' ? 'active' : '' }}">
                 Products <span class="admin-tab-count">{{ number_format($activeCount) }}</span>
             </a>
+            <a href="{{ route('admin.products.index', $tabQuery('in-stock')) }}" class="starts-group {{ $tab === 'in-stock' ? 'active' : '' }}">
+                In stock <span class="admin-tab-count">{{ number_format($inStockCount) }}</span>
+            </a>
+            <a href="{{ route('admin.products.index', $tabQuery('at-supplier')) }}" class="{{ $tab === 'at-supplier' ? 'active' : '' }}">
+                At supplier <span class="admin-tab-count">{{ number_format($atSupplierCount) }}</span>
+            </a>
             <a href="{{ route('admin.products.index', $tabQuery('out-of-stock')) }}" class="{{ $tab === 'out-of-stock' ? 'active' : '' }}">
                 Out of stock <span class="admin-tab-count">{{ number_format($outOfStockCount) }}</span>
             </a>
-            <a href="{{ route('admin.products.index', $tabQuery('no-sku')) }}" class="{{ $tab === 'no-sku' ? 'active' : '' }}">
+            <a href="{{ route('admin.products.index', $tabQuery('no-sku')) }}" class="starts-group {{ $tab === 'no-sku' ? 'active' : '' }}">
                 Missing SKU <span class="admin-tab-count">{{ number_format($noSkuCount) }}</span>
             </a>
             <a href="{{ route('admin.products.index', $tabQuery('no-gtin')) }}" class="{{ $tab === 'no-gtin' ? 'active' : '' }}">
@@ -71,7 +77,7 @@
             <a href="{{ route('admin.products.index', $tabQuery('no-weight')) }}" class="{{ $tab === 'no-weight' ? 'active' : '' }}">
                 Missing weight <span class="admin-tab-count">{{ number_format($noWeightCount) }}</span>
             </a>
-            <a href="{{ route('admin.products.index', $tabQuery('disabled')) }}" class="{{ $tab === 'disabled' ? 'active' : '' }}">
+            <a href="{{ route('admin.products.index', $tabQuery('disabled')) }}" class="sits-apart {{ $tab === 'disabled' ? 'active' : '' }}">
                 Disabled <span class="admin-tab-count">{{ number_format($disabledCount) }}</span>
             </a>
         </nav>
@@ -162,6 +168,12 @@
                             @case('disabled')
                                 No disabled products.
                                 @break
+                            @case('in-stock')
+                                No products in stock.
+                                @break
+                            @case('at-supplier')
+                                No products waiting on the supplier.
+                                @break
                             @case('out-of-stock')
                                 No out of stock products.
                                 @break
@@ -239,6 +251,7 @@
                                     @endif
                                 </a>
                             </th>
+                            <th>Availability</th>
                             <th>Variants</th>
                             <th>Weight</th>
                             <th>GTIN</th>
@@ -280,6 +293,18 @@
                                 <td>{{ $product->supplier?->name ?? '—' }}</td>
                                 <td>{{ $product->formattedPrice() }}</td>
                                 <td>{{ $product->quantity }}</td>
+                                <td>
+                                    @php
+                                        $availability = $product->availabilityState();
+                                        $availabilityLabel = [
+                                            'in_stock' => 'In stock',
+                                            'low_stock' => 'Last pieces',
+                                            'at_supplier' => 'At supplier',
+                                            'out_of_stock' => 'Out of stock',
+                                        ][$availability];
+                                    @endphp
+                                    <span class="admin-availability-chip is-{{ str_replace('_', '-', $availability) }}">{{ $availabilityLabel }}</span>
+                                </td>
                                 <td>
                                     @if ($product->variants_count > 0)
                                         <button
@@ -340,7 +365,7 @@
                                         ->values();
                                 @endphp
                                 <tr class="admin-variant-row" id="variant-panel-{{ $product->id }}" hidden>
-                                    <td colspan="12">
+                                    <td colspan="14">
                                         <div class="admin-variant-panel">
                                             <table class="admin-variant-table">
                                                 <thead>

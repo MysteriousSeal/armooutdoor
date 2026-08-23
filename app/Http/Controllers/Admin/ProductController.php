@@ -37,7 +37,7 @@ class ProductController extends Controller
         $search = trim((string) $request->query('search', ''));
         $categorySlug = (string) $request->query('category', '');
         $supplierId = $request->filled('supplier') ? (int) $request->query('supplier') : null;
-        $tab = in_array($request->query('tab'), ['active', 'disabled', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight'], true)
+        $tab = in_array($request->query('tab'), ['active', 'disabled', 'in-stock', 'at-supplier', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight'], true)
             ? (string) $request->query('tab')
             : 'active';
 
@@ -61,7 +61,9 @@ class ProductController extends Controller
             'productCount' => Product::query()->count(),
             'activeCount' => Product::query()->where('is_active', true)->count(),
             'disabledCount' => Product::query()->where('is_active', false)->count(),
-            'outOfStockCount' => Product::query()->where('is_active', true)->where('quantity', '<=', 0)->count(),
+            'inStockCount' => Product::query()->tap(fn ($query) => $this->inStock($query))->count(),
+            'atSupplierCount' => Product::query()->tap(fn ($query) => $this->atSupplier($query))->count(),
+            'outOfStockCount' => Product::query()->tap(fn ($query) => $this->outOfStock($query))->count(),
             'noSkuCount' => Product::query()->tap(fn ($query) => $this->missingSku($query))->count(),
             'noGtinCount' => Product::query()->where('is_active', true)->where(fn ($query) => $query->whereNull('gtin')->orWhere('gtin', ''))->count(),
             'noWeightCount' => Product::query()->where('is_active', true)->where(fn ($query) => $query->whereNull('weight_grams')->orWhere('weight_grams', 0))->count(),
@@ -78,7 +80,7 @@ class ProductController extends Controller
         $search = trim((string) $request->query('search', ''));
         $categorySlug = (string) $request->query('category', '');
         $supplierId = $request->filled('supplier') ? (int) $request->query('supplier') : null;
-        $tab = in_array($request->query('tab'), ['active', 'disabled', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight'], true)
+        $tab = in_array($request->query('tab'), ['active', 'disabled', 'in-stock', 'at-supplier', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight'], true)
             ? (string) $request->query('tab')
             : 'active';
 
@@ -309,6 +311,72 @@ class ProductController extends Controller
     }
 
     /**
+     * Products with something on the shelf, whatever the quantity.
+     *
+     * A product sold in several sizes is read through its sizes: its own
+     * quantity is a total, and a total of zero can still hide a size that is
+     * available.
+     */
+    private function inStock(Builder $query): void
+    {
+        $query->where('is_active', true)
+            ->where(function (Builder $query): void {
+                $query->where(fn (Builder $query) => $query->doesntHave('variants')->where('quantity', '>', 0))
+                    ->orWhereHas('variants', fn (Builder $query) => $query->where('is_active', true)->where('quantity', '>', 0));
+            });
+    }
+
+    /**
+     * Nothing on the shelf, but the supplier can still fetch it.
+     *
+     * The exact opposite of outOfStock() among the products at zero, so the
+     * two tabs split that group cleanly instead of overlapping.
+     */
+    private function atSupplier(Builder $query): void
+    {
+        $query->where('is_active', true)
+            ->where(function (Builder $query): void {
+                // « Aucune déclinaison disponible » est vrai pour un produit
+                // qui n'en a aucune : il faut donc exiger qu'il en ait.
+                $query->where(fn (Builder $query) => $query->doesntHave('variants')->where('quantity', '<=', 0))
+                    ->orWhere(fn (Builder $query) => $query->has('variants')
+                        ->whereDoesntHave('variants', fn (Builder $query) => $query->where('is_active', true)->where('quantity', '>', 0)));
+            })
+            ->where(function (Builder $query): void {
+                $query->where(fn (Builder $query) => $query->doesntHave('variants')
+                    ->whereNotNull('supplier_id')
+                    ->where('available_at_supplier', true))
+                    ->orWhereHas('variants', fn (Builder $query) => $query->where('is_active', true)
+                        ->whereNotNull('supplier_id')
+                        ->where('available_at_supplier', true));
+            });
+    }
+
+    /**
+     * Products genuinely out of stock — nothing on the shelf, and nothing the
+     * supplier can fetch.
+     *
+     * A quantity of zero alone is not the same thing: thirty of the fifty-one
+     * rows this tab listed could still be ordered in, so the list of what
+     * actually needs restocking was drowned in items that did not.
+     */
+    private function outOfStock(Builder $query): void
+    {
+        $query->where('is_active', true)
+            ->where('quantity', '<=', 0)
+            ->whereNot(function (Builder $query): void {
+                // Sans déclinaison, c'est le produit qui porte le fournisseur.
+                $query->where(fn (Builder $query) => $query->doesntHave('variants')
+                    ->whereNotNull('supplier_id')
+                    ->where('available_at_supplier', true))
+                    // Avec déclinaisons, il suffit qu'une seule soit commandable.
+                    ->orWhereHas('variants', fn (Builder $query) => $query->where('is_active', true)
+                        ->whereNotNull('supplier_id')
+                        ->where('available_at_supplier', true));
+            });
+    }
+
+    /**
      * Products still owing a reference.
      *
      * A product sold in several sizes carries its reference on each of them,
@@ -331,7 +399,9 @@ class ProductController extends Controller
     {
         match ($tab) {
             'disabled' => $query->where('is_active', false),
-            'out-of-stock' => $query->where('is_active', true)->where('quantity', '<=', 0),
+            'in-stock' => $this->inStock($query),
+            'at-supplier' => $this->atSupplier($query),
+            'out-of-stock' => $this->outOfStock($query),
             'no-sku' => $this->missingSku($query),
             'no-gtin' => $query->where('is_active', true)->where(fn (Builder $query) => $query->whereNull('gtin')->orWhere('gtin', '')),
             'no-weight' => $query->where('is_active', true)->where(fn (Builder $query) => $query->whereNull('weight_grams')->orWhere('weight_grams', 0)),
