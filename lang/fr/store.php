@@ -133,6 +133,7 @@ return [
     'card_available_at_supplier' => 'Disponibilité fournisseur',
     'card_available_at_supplier_short' => 'Dispo fournisseur',
     'supplier_lead_time' => 'Délai d’expédition estimé : :days jour|Délai d’expédition estimé : :days jours',
+    'supplier_notice' => 'Nous n’avons pas cet article en stock, mais notre fournisseur en dispose : nous pouvons le commander pour vous.',
     'supplier_lead_time_label' => 'Délai d’expédition estimé',
     'supplier_lead_time_value' => ':days jour|:days jours',
     'supplier_lead_time_unknown' => 'Délai à confirmer',

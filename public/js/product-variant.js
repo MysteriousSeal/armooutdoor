@@ -21,6 +21,7 @@
     var buyRow = form.querySelector('.product-buy-row');
     var skuEl = document.getElementById('product-detail-sku');
     var skuValueEl = document.getElementById('product-detail-sku-value');
+    var supplierNoticeEl = document.getElementById('product-supplier-notice');
     var leadTimeEl = document.getElementById('product-lead-time');
     var leadTimeValueEl = document.getElementById('product-lead-time-value');
     var leadTimeTemplate = document.getElementById('variant-lead-times');
@@ -90,10 +91,17 @@
             }
         }
 
-        if (leadTimeEl && leadTimeValueEl) {
-            var leadTime = leadTimesByVariant[radio.value];
+        var leadTime = leadTimesByVariant[radio.value];
+        var atSupplier = Boolean(leadTime && leadTime.visible);
 
-            if (leadTime && leadTime.visible) {
+        // La mention et le délai disent la même chose de la même déclinaison :
+        // ils apparaissent et disparaissent ensemble.
+        if (supplierNoticeEl) {
+            supplierNoticeEl.hidden = ! atSupplier;
+        }
+
+        if (leadTimeEl && leadTimeValueEl) {
+            if (atSupplier) {
                 leadTimeValueEl.textContent = leadTime.text;
                 leadTimeEl.hidden = false;
             } else {

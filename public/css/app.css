@@ -1750,6 +1750,43 @@
 }
 
 .product-detail-supplier-delay,
+/* Explique le délai qui la suit : d'abord pourquoi l'article n'est pas là,
+   ensuite combien de temps il met à venir. Le bleu ardoise est celui de la
+   pastille « Dispo fournisseur », pour qu'on lie les deux d'un coup d'œil. */
+.product-supplier-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    width: 100%;
+    margin: 0.85rem 0 0;
+    padding: 0.7rem 0.85rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: #2f5d8a;
+    background: #eef3f8;
+    border-left: 3px solid #2f5d8a;
+}
+
+.product-supplier-notice-icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    /* Aligne l'icône sur la première ligne, pas sur le bloc entier. */
+    margin-top: 0.1rem;
+    color: currentColor;
+    opacity: 0.75;
+}
+
+/* Collée à la mention qu'elle prolonge. */
+.product-supplier-notice:not([hidden]) + .product-lead-time {
+    margin-top: 0.4rem;
+}
+
+[data-theme='dark'] .product-supplier-notice {
+    color: #8ab4dd;
+    background: color-mix(in srgb, #8ab4dd 12%, var(--surface));
+    border-left-color: #8ab4dd;
+}
+
 .product-lead-time {
     display: flex;
     align-items: center;

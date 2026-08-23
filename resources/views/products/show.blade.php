@@ -130,6 +130,13 @@
                         : $availableAtSupplier;
                     $displayLeadTimeSupplier = $product->hasVariants() ? $displayLeadTimeSource?->supplier : $supplierForLeadTime;
                 @endphp
+                {{-- Placée avant le délai : on dit d'abord pourquoi il y en a un. --}}
+                <p class="product-supplier-notice" id="product-supplier-notice" @if (! $displayLeadTimeVisible) hidden @endif>
+                    <span class="product-supplier-notice-icon" aria-hidden="true">
+                        @include('partials.icon', ['name' => 'circle-info', 'size' => 16])
+                    </span>
+                    <span>{{ __('store.supplier_notice') }}</span>
+                </p>
                 <p class="product-lead-time" id="product-lead-time" @if (! $displayLeadTimeVisible) hidden @endif>
                     <span class="product-lead-time-icon" aria-hidden="true">
                         @include('partials.icon', ['name' => 'hourglass-half', 'size' => 16])
