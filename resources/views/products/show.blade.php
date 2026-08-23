@@ -119,7 +119,7 @@
                             : (! $product->inStock() && $product->supplier_id !== null && $product->available_at_supplier);
                         $supplierForLeadTime = $backorderableVariant?->supplier ?? $product->supplier;
                     @endphp
-                    <span class="stock-badge {{ $product->lowStock() ? 'is-low-stock' : ($product->inStock() ? 'is-in-stock' : ($availableAtSupplier ? 'is-low-stock' : 'is-out-of-stock')) }}" id="product-stock-badge">
+                    <span class="stock-badge {{ $product->lowStock() ? 'is-low-stock' : ($product->inStock() ? 'is-in-stock' : ($availableAtSupplier ? 'is-at-supplier' : 'is-out-of-stock')) }}" id="product-stock-badge">
                         {{ $product->lowStock() ? __('store.low_stock') : ($product->inStock() ? __('store.in_stock') : ($availableAtSupplier ? __('store.available_at_supplier') : __('store.out_of_stock'))) }}
                     </span>
                 </div>
@@ -231,7 +231,7 @@
                                                         <span class="product-variant-chip-price">{{ $variant->formattedPrice() }}</span>
                                                     @endif
                                                     @php($variantBackorderable = ! $variant->inStock() && $variant->isBackorderable())
-                                                    <span class="product-variant-chip-stock {{ $variant->lowStock() ? 'is-low-stock' : ($variant->inStock() ? 'is-in-stock' : ($variantBackorderable ? 'is-low-stock' : 'is-out-of-stock')) }}">
+                                                    <span class="product-variant-chip-stock {{ $variant->lowStock() ? 'is-low-stock' : ($variant->inStock() ? 'is-in-stock' : ($variantBackorderable ? 'is-at-supplier' : 'is-out-of-stock')) }}">
                                                         {{ $variant->lowStock() ? __('store.variant_stock_low') : ($variant->inStock() ? __('store.variant_stock_ok') : ($variantBackorderable ? __('store.variant_stock_backorder') : __('store.variant_stock_out'))) }}
                                                     </span>
                                                 </span>

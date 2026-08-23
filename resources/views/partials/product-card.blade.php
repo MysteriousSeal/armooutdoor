@@ -36,7 +36,7 @@
                     @endif
                     {{ $product->formattedPrice() }}
                 </p>
-                <span class="card-stock-chip {{ $product->lowStock() ? 'is-low-stock' : ($product->inStock() ? 'is-in-stock' : ($availableAtSupplier ? 'is-low-stock' : 'is-out-of-stock')) }}">
+                <span class="card-stock-chip {{ $product->lowStock() ? 'is-low-stock' : ($product->inStock() ? 'is-in-stock' : ($availableAtSupplier ? 'is-at-supplier' : 'is-out-of-stock')) }}">
                     {{ $product->lowStock() ? __($fiveColumn ? 'store.low_stock_short' : 'store.low_stock') : ($product->inStock() ? __('store.in_stock') : ($availableAtSupplier ? __($fiveColumn ? 'store.card_available_at_supplier_short' : 'store.card_available_at_supplier') : __('store.out_of_stock'))) }}
                 </span>
             </div>
