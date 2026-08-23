@@ -354,6 +354,10 @@ class OrderController extends Controller
             'phone' => $request->input('billing_phone'),
         ];
 
+        // Un point relais ne se déduit pas de l'adresse d'expédition : celle-ci
+        // porte le nom du commerce, pas son identité de point de retrait.
+        $relaySnapshot = $carrier->isRelay() ? $request->relaySnapshot() : null;
+
         $shippingPrice = $request->input('shipping_price');
         $marketplace = $request->input('marketplace_id')
             ? Marketplace::query()->find($request->input('marketplace_id'))
@@ -361,7 +365,7 @@ class OrderController extends Controller
         $discountType = $request->input('discount_type');
         $discountValue = $request->input('discount_value');
 
-        return DB::transaction(function () use ($order, $customer, $carrier, $shippingSnapshot, $billingSnapshot, $items, $shippingPrice, $marketplace, $discountType, $discountValue, $finalize): Order {
+        return DB::transaction(function () use ($order, $customer, $carrier, $shippingSnapshot, $billingSnapshot, $relaySnapshot, $items, $shippingPrice, $marketplace, $discountType, $discountValue, $finalize): Order {
             $productsQuery = Product::query()->whereIn('id', $items->pluck('product_id'));
             $products = $finalize
                 ? $productsQuery->lockForUpdate()->get()->keyBy('id')
@@ -421,6 +425,7 @@ class OrderController extends Controller
                 'carrier_id' => $carrier->id,
                 'carrier_method' => $carrier->method,
                 'carrier_snapshot' => $carrier->toSnapshot(),
+                'relay_snapshot' => $relaySnapshot,
                 'subtotal_cents' => $subtotal,
                 'shipping_cents' => $shipping,
                 'discount_code_id' => null,

@@ -333,6 +333,36 @@
                             >
                             <div class="admin-relay-list" id="admin-relay-list"></div>
                             <p class="form-hint" id="admin-relay-empty" hidden>No pickup points found for this postal code.</p>
+
+                            {{-- Le point relais d'une place de marché ne figure pas
+                                 forcément dans la liste du transporteur : les champs
+                                 restent saisissables à la main. --}}
+                            @php($relay = old('relay', $isEdit ? ($order->relay_snapshot ?? []) : []))
+                            <div class="admin-relay-fields">
+                                <div class="form-group">
+                                    <label for="relay_name">Pickup point name</label>
+                                    <input type="text" id="relay_name" name="relay[name]" class="form-control" value="{{ $relay['name'] ?? '' }}" maxlength="120">
+                                    @error('relay.name') <p class="form-error">{{ $message }}</p> @enderror
+                                </div>
+                                <div class="form-group">
+                                    <label for="relay_line1">Pickup point address</label>
+                                    <input type="text" id="relay_line1" name="relay[line1]" class="form-control" value="{{ $relay['line1'] ?? '' }}" maxlength="120">
+                                    @error('relay.line1') <p class="form-error">{{ $message }}</p> @enderror
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="relay_postal_code">Postal code</label>
+                                        <input type="text" id="relay_postal_code" name="relay[postal_code]" class="form-control" value="{{ $relay['postal_code'] ?? '' }}" maxlength="12">
+                                        @error('relay.postal_code') <p class="form-error">{{ $message }}</p> @enderror
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="relay_city">City</label>
+                                        <input type="text" id="relay_city" name="relay[city]" class="form-control" value="{{ $relay['city'] ?? '' }}" maxlength="80">
+                                        @error('relay.city') <p class="form-error">{{ $message }}</p> @enderror
+                                    </div>
+                                </div>
+                                <input type="hidden" id="relay_slug" name="relay[slug]" value="{{ $relay['slug'] ?? '' }}">
+                            </div>
                         </div>
                     </section>
 
@@ -662,6 +692,14 @@
                 document.getElementById('shipping_line2').value = point.line1;
                 document.getElementById('shipping_postal_code').value = point.postal_code;
                 document.getElementById('shipping_city').value = point.city;
+
+                // Le point choisi renseigne aussi son identité, que l'adresse
+                // d'expédition seule ne conserve pas.
+                document.getElementById('relay_name').value = point.name;
+                document.getElementById('relay_line1').value = point.line1;
+                document.getElementById('relay_postal_code').value = point.postal_code;
+                document.getElementById('relay_city').value = point.city;
+                document.getElementById('relay_slug').value = point.slug || '';
                 updateOrderPreview();
                 syncSubmitButtons();
             }

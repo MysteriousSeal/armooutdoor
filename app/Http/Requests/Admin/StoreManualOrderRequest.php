@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Models\Carrier;
 use App\Models\Product;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Collection;
@@ -43,6 +44,11 @@ class StoreManualOrderRequest extends FormRequest
             'items.*.price' => ['nullable', 'numeric', 'min:0'],
 
             'carrier_id' => ['required', Rule::exists('carriers', 'id')->where('active', true)],
+            'relay.slug' => ['nullable', 'string', 'max:120'],
+            'relay.name' => ['nullable', 'string', 'max:120'],
+            'relay.line1' => ['nullable', 'string', 'max:120'],
+            'relay.postal_code' => ['nullable', 'string', 'max:12'],
+            'relay.city' => ['nullable', 'string', 'max:80'],
             'shipping_price' => ['nullable', 'numeric', 'min:0'],
             'marketplace_id' => ['nullable', 'exists:marketplaces,id'],
 
@@ -78,6 +84,25 @@ class StoreManualOrderRequest extends FormRequest
     public function after(): array
     {
         return [
+            // Un colis en point relais part sans savoir où il est retiré : le
+            // brouillon peut rester incomplet, la commande finalisée non.
+            function (Validator $validator): void {
+                if ($this->input('action') !== 'placed') {
+                    return;
+                }
+
+                $carrier = Carrier::query()->find($this->input('carrier_id'));
+
+                if ($carrier?->isRelay() !== true) {
+                    return;
+                }
+
+                foreach (['name', 'line1', 'postal_code', 'city'] as $field) {
+                    if (blank($this->input('relay.'.$field))) {
+                        $validator->errors()->add('relay.'.$field, 'Required for a pickup point delivery.');
+                    }
+                }
+            },
             function (Validator $validator): void {
                 $rows = collect($this->input('items', []))
                     ->filter(fn (array $row): bool => filled($row['product_id'] ?? null) && filled($row['quantity'] ?? null));
@@ -122,6 +147,30 @@ class StoreManualOrderRequest extends FormRequest
                     }
                 }
             },
+        ];
+    }
+
+    /**
+     * The pickup point as it will be frozen on the order, or null when nothing
+     * was given. Kept as a snapshot rather than a link: a marketplace relay is
+     * not in the carrier's own list, so there is no row to point at.
+     *
+     * @return array{slug: ?string, name: string, line1: string, postal_code: string, city: string, country: string, hours: null}|null
+     */
+    public function relaySnapshot(): ?array
+    {
+        if (blank($this->input('relay.name'))) {
+            return null;
+        }
+
+        return [
+            'slug' => $this->input('relay.slug') ?: null,
+            'name' => (string) $this->input('relay.name'),
+            'line1' => (string) $this->input('relay.line1'),
+            'postal_code' => (string) $this->input('relay.postal_code'),
+            'city' => (string) $this->input('relay.city'),
+            'country' => (string) $this->input('country'),
+            'hours' => null,
         ];
     }
 
