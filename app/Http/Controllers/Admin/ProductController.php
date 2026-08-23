@@ -62,7 +62,7 @@ class ProductController extends Controller
             'activeCount' => Product::query()->where('is_active', true)->count(),
             'disabledCount' => Product::query()->where('is_active', false)->count(),
             'outOfStockCount' => Product::query()->where('is_active', true)->where('quantity', '<=', 0)->count(),
-            'noSkuCount' => Product::query()->where('is_active', true)->where(fn ($query) => $query->whereNull('sku')->orWhere('sku', ''))->count(),
+            'noSkuCount' => Product::query()->tap(fn ($query) => $this->missingSku($query))->count(),
             'noGtinCount' => Product::query()->where('is_active', true)->where(fn ($query) => $query->whereNull('gtin')->orWhere('gtin', ''))->count(),
             'noWeightCount' => Product::query()->where('is_active', true)->where(fn ($query) => $query->whereNull('weight_grams')->orWhere('weight_grams', 0))->count(),
             'categories' => $this->categoryOptions(),
@@ -308,12 +308,31 @@ class ProductController extends Controller
         }
     }
 
+    /**
+     * Products still owing a reference.
+     *
+     * A product sold in several sizes carries its reference on each of them,
+     * not on itself. Listing it as incomplete while every size is covered
+     * turns the tab into a to-do list that can never be emptied — so a
+     * product drops out once nothing is left to fill in, whether that is on
+     * the product or on its variants.
+     */
+    private function missingSku(Builder $query): void
+    {
+        $query->where('is_active', true)
+            ->where(fn (Builder $query) => $query->whereNull('sku')->orWhere('sku', ''))
+            ->whereNot(function (Builder $query): void {
+                $query->has('variants')
+                    ->whereDoesntHave('variants', fn (Builder $query) => $query->whereNull('sku')->orWhere('sku', ''));
+            });
+    }
+
     private function applyProductTab(Builder $query, string $tab): void
     {
         match ($tab) {
             'disabled' => $query->where('is_active', false),
             'out-of-stock' => $query->where('is_active', true)->where('quantity', '<=', 0),
-            'no-sku' => $query->where('is_active', true)->where(fn (Builder $query) => $query->whereNull('sku')->orWhere('sku', '')),
+            'no-sku' => $this->missingSku($query),
             'no-gtin' => $query->where('is_active', true)->where(fn (Builder $query) => $query->whereNull('gtin')->orWhere('gtin', '')),
             'no-weight' => $query->where('is_active', true)->where(fn (Builder $query) => $query->whereNull('weight_grams')->orWhere('weight_grams', 0)),
             default => $query->where('is_active', true),
