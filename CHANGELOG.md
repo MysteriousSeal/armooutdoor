@@ -2,6 +2,22 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-23 — v0.11.0 — build X8RTM6
+
+### Admin
+
+- **The product list now says what its stock figures mean.** A number alone left the reading to you: zero could mean nothing left, or nothing here but the supplier can fetch it, and forty units looked no different from one. A new Availability column names the four states — in stock, last pieces, at supplier, out of stock — in the same colours the shop already uses for them, so a state does not change appearance between the storefront and the back office.
+
+  A product sold in several sizes is judged on its sizes rather than on its total, since what matters is whether a customer can buy something on that page.
+
+- **Out of stock now means out of stock.** Thirty of the fifty-one products it listed could still be ordered from the supplier, which buried the ones that genuinely needed restocking. Two tabs join it — In stock and At supplier — and the three now cover the active catalogue exactly once each. With eight tabs in the bar, a rule opens each family and Disabled sits apart at the end.
+
+- **Products can be found by their reference.** The search read the name and the slug only, though the reference is what is printed on the article and what a marketplace sends back. It now covers the references carried by a product's sizes too: forty-six products hold none of their own, so the number on the item was the one way of finding them that did not work.
+
+- **Missing SKU stops listing products that are done.** A product sold in several sizes carries its reference on each size, not on itself, so fifteen of the thirty-five rows had nothing left to fill in.
+
+**Fixed:** the panel that opens under a product with sizes stopped one column short of the table it sits in.
+
 ## 2026-08-23 — v0.10.3 — build W7NKD5
 
 ### Storefront
