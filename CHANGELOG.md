@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-23 — v0.11.1 — build Y6PLK4
+
+### Admin
+
+- **The product list gives its space to what is worth reading.** The barcode column printed thirteen digits on every row to answer a single question — is it set? A tick answers it now, and the count appears only when a product sold in several sizes is missing one, so the detail takes room where it earns it.
+
+  The weight keeps its figure, since it reads at a glance and decides the price of a parcel. Its absence is what needed marking: two hundred and eleven active products carry none, and a dash there looks no different from an empty cell.
+
 ## 2026-08-23 — v0.11.0 — build X8RTM6
 
 ### Admin
