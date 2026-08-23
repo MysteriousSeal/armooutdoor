@@ -2,6 +2,22 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-23 — v0.10.2 — build V4LQC8
+
+### Storefront
+
+**Fixed:** a double click on "add to cart" could leave the same article in the basket twice, each line carrying its own quantity. The rule meant to prevent it did not cover products sold without variants, because of how databases compare an absent value. It does now, and a second click quietly updates the line already there.
+
+### Admin
+
+**Fixed:** the "view in Stripe" links always pointed at Stripe's test data. The first real payment would have opened a page showing nothing — which reads as a missing payment rather than a wrong link. The link now follows the key the shop is configured with, and falls back to the test view when that key is anything unexpected.
+
+**Fixed:** entering the same product on two lines of a manual order let stock fall below zero — each line was checked against the whole shelf, then both were taken from it. The two lines are now added together before any stock moves, so the order is either served in full or refused outright.
+
+### Behind the scenes
+
+- The rule for taking stock — sell it, put it on backorder, or refuse the line — lived in three separate copies that had already drifted apart. It now lives in one place, with the difference between a customer order and a manual one kept as a deliberate setting rather than an accident.
+
 ## 2026-08-23 — v0.10.1 — build T9YBQ4
 
 ### Admin
