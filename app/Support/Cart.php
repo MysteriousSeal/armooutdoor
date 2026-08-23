@@ -127,6 +127,10 @@ class Cart
                 return;
             }
 
+            // updateOrCreate already survives losing this race: it catches the
+            // unique violation and re-reads the winner's row. That only works
+            // once the database actually refuses the second row, which is what
+            // the index on COALESCE(product_variant_id, 0) fixed.
             CartItem::query()->updateOrCreate(
                 [
                     'user_id' => Auth::id(),
