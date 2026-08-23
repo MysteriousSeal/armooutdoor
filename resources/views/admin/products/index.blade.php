@@ -90,7 +90,7 @@
                         type="search"
                         name="search"
                         class="form-control admin-toolbar-search"
-                        placeholder="Name or slug…"
+                        placeholder="Name, slug or SKU…"
                         value="{{ $search }}"
                     >
                 </div>

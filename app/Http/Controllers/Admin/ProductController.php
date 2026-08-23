@@ -112,7 +112,12 @@ class ProductController extends Controller
             ->when($search !== '', function ($query) use ($search): void {
                 $query->where(function ($query) use ($search): void {
                     $query->where('products.slug', 'like', '%'.$search.'%')
-                        ->orWhere('products.name', 'like', '%'.$search.'%');
+                        ->orWhere('products.name', 'like', '%'.$search.'%')
+                        ->orWhere('products.sku', 'like', '%'.$search.'%')
+                        // La référence imprimée sur l'article est souvent celle
+                        // d'une déclinaison : quarante-six produits n'en portent
+                        // aucune eux-mêmes et resteraient introuvables.
+                        ->orWhereHas('variants', fn ($query) => $query->where('sku', 'like', '%'.$search.'%'));
                 });
             })
             ->when($categorySlug !== '', function ($query) use ($categorySlug): void {
