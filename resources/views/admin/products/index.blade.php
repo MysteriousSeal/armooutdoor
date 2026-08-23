@@ -323,17 +323,50 @@
                                         —
                                     @endif
                                 </td>
-                                <td>{{ $product->weight_grams ? number_format($product->weight_grams).' g' : '—' }}</td>
                                 <td>
-                                    @if ($product->variants_count > 0)
-                                        @php
-                                            $gtinCount = $product->variants->filter(fn ($variant) => filled($variant->gtin))->count();
-                                        @endphp
-                                        <span class="variant-gtin-ratio {{ $gtinCount === $product->variants_count ? 'is-complete' : ($gtinCount === 0 ? 'is-empty' : 'is-partial') }}">
-                                            {{ $gtinCount }}/{{ $product->variants_count }}
+                                    {{-- Le poids décide du prix du port : le chiffre reste quand
+                                         il existe. Absent, un tiret se confond avec une colonne
+                                         vide — une croix se voit. --}}
+                                    @if ($product->weight_grams)
+                                        {{ number_format($product->weight_grams) }} g
+                                    @else
+                                        <span class="gtin-flag is-missing" title="No weight">
+                                            <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                                                <path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                                            </svg>
+                                            <span class="sr-only">No weight</span>
+                                        </span>
+                                    @endif
+                                </td>
+                                <td>
+                                    {{-- Une coche quand il n'y a rien à signaler, le compte quand
+                                         il manque quelque chose : le détail ne prend de la place
+                                         que là où il en vaut la peine. --}}
+                                    @php
+                                        $gtinCount = $product->variants_count > 0
+                                            ? $product->variants->filter(fn ($variant) => filled($variant->gtin))->count()
+                                            : (int) filled($product->gtin);
+                                        $gtinTotal = max(1, $product->variants_count);
+                                        $gtinComplete = $gtinCount === $gtinTotal;
+                                    @endphp
+                                    @if ($gtinComplete)
+                                        <span class="gtin-flag is-set" title="{{ $product->variants_count > 0 ? 'Every variant has a GTIN' : 'GTIN set' }}">
+                                            <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                                                <path d="m5 13 4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                            <span class="sr-only">GTIN set</span>
+                                        </span>
+                                    @elseif ($product->variants_count > 0)
+                                        <span class="gtin-flag {{ $gtinCount === 0 ? 'is-missing' : 'is-partial' }}" title="{{ $gtinCount }} of {{ $gtinTotal }} variants have a GTIN">
+                                            {{ $gtinCount }}/{{ $gtinTotal }}
                                         </span>
                                     @else
-                                        {{ filled($product->gtin) ? $product->gtin : '—' }}
+                                        <span class="gtin-flag is-missing" title="No GTIN">
+                                            <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                                                <path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                                            </svg>
+                                            <span class="sr-only">No GTIN</span>
+                                        </span>
                                     @endif
                                 </td>
                                 <td>
