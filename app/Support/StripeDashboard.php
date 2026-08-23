@@ -26,18 +26,43 @@ class StripeDashboard
         });
     }
 
+    /**
+     * Stripe keeps test data behind a /test/ segment. The segment was written
+     * into every link, so the day the shop takes a real payment the admin
+     * would click through to a page showing nothing — and read that as a
+     * missing payment rather than a wrong link.
+     *
+     * The secret key decides, because it is the key that fetched the account
+     * id in the first place: the mode of the link always matches the account
+     * it points at. Anything unrecognised — no key, or a restricted rk_ key —
+     * counts as test, the harmless way to be wrong.
+     */
+    public static function isLiveMode(): bool
+    {
+        return str_starts_with((string) config('services.stripe.secret'), 'sk_live_');
+    }
+
     public static function paymentIntentUrl(string $paymentIntentId): ?string
     {
-        $accountId = self::accountId();
-
-        return $accountId ? "https://dashboard.stripe.com/{$accountId}/test/payments/{$paymentIntentId}" : null;
+        return self::url('payments', $paymentIntentId);
     }
 
     public static function customerUrl(string $customerId): ?string
     {
+        return self::url('customers', $customerId);
+    }
+
+    private static function url(string $section, string $id): ?string
+    {
         $accountId = self::accountId();
 
-        return $accountId ? "https://dashboard.stripe.com/{$accountId}/test/customers/{$customerId}" : null;
+        if ($accountId === null) {
+            return null;
+        }
+
+        $mode = self::isLiveMode() ? '' : '/test';
+
+        return "https://dashboard.stripe.com/{$accountId}{$mode}/{$section}/{$id}";
     }
 
     /**
