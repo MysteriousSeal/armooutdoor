@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-23 — v0.10.3 — build W7NKD5
+
+### Storefront
+
+- **An article available only from the supplier now says so plainly.** Its badge wore the same amber as low stock, so one colour meant two different things — almost none left, and none here but we can order it. The second state has its own slate blue now, on the listing cards, the product page and each size of a product sold in several.
+
+  The product page also carries a short note above the delay: we do not have this article in stock, our supplier does, and we can order it for you. It appears and disappears with the size you pick, in step with the delay it explains.
+
 ## 2026-08-23 — v0.10.2 — build V4LQC8
 
 ### Storefront
