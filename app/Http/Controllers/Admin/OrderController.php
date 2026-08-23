@@ -18,6 +18,7 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\ShippingSetting;
 use App\Models\User;
+use App\Services\OrderStockAllocator;
 use App\Support\Csv;
 use App\Support\StripeDashboard;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -35,6 +36,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class OrderController extends Controller
 {
+    public function __construct(private readonly OrderStockAllocator $allocator) {}
+
     public function index(Request $request): View
     {
         $filters = $this->orderFilters($request);
@@ -358,6 +361,8 @@ class OrderController extends Controller
         // porte le nom du commerce, pas son identité de point de retrait.
         $relaySnapshot = $carrier->isRelay() ? $request->relaySnapshot() : null;
 
+        $allocator = $this->allocator;
+
         $shippingPrice = $request->input('shipping_price');
         $marketplace = $request->input('marketplace_id')
             ? Marketplace::query()->find($request->input('marketplace_id'))
@@ -365,7 +370,7 @@ class OrderController extends Controller
         $discountType = $request->input('discount_type');
         $discountValue = $request->input('discount_value');
 
-        return DB::transaction(function () use ($order, $customer, $carrier, $shippingSnapshot, $billingSnapshot, $relaySnapshot, $items, $shippingPrice, $marketplace, $discountType, $discountValue, $finalize): Order {
+        return DB::transaction(function () use ($order, $customer, $carrier, $shippingSnapshot, $billingSnapshot, $relaySnapshot, $items, $shippingPrice, $marketplace, $discountType, $discountValue, $finalize, $allocator): Order {
             $productsQuery = Product::query()->whereIn('id', $items->pluck('product_id'));
             $products = $finalize
                 ? $productsQuery->lockForUpdate()->get()->keyBy('id')
@@ -387,9 +392,13 @@ class OrderController extends Controller
             foreach ($items as $item) {
                 $product = $products->get($item['product_id']);
                 $variant = $item['variant_id'] ? $variants->get($item['variant_id']) : null;
-                $availableQuantity = $variant?->quantity ?? $product?->quantity;
+                if ($product === null) {
+                    throw new \RuntimeException('stock');
+                }
 
-                if ($product === null || ($finalize && $availableQuantity < $item['quantity'])) {
+                // La même règle que celle qui prendra le stock plus bas : les
+                // deux ne doivent pas pouvoir se contredire.
+                if ($finalize && ! $allocator->canAllocate($product, $variant, $item['quantity'], allowBackorder: false)) {
                     throw new \RuntimeException('stock');
                 }
 
@@ -456,14 +465,12 @@ class OrderController extends Controller
                 $product = $products->get($item['product_id']);
                 $variant = $item['variant_id'] ? $variants->get($item['variant_id']) : null;
 
-                if ($finalize) {
-                    if ($variant !== null) {
-                        $variant->decrement('quantity', $item['quantity']);
-                        $product->reconcileQuantity();
-                    } else {
-                        $product->decrement('quantity', $item['quantity']);
-                    }
-                }
+                // Une commande saisie à la main refuse ce qu'elle ne peut pas
+                // couvrir : la validation l'a déjà dit, et rien ici ne doit
+                // mettre l'acheteur en réassort à son insu.
+                $allocation = $finalize
+                    ? $allocator->allocate($product, $variant, $item['quantity'], allowBackorder: false)
+                    : null;
 
                 OrderItem::query()->create([
                     'order_id' => $savedOrder->id,
@@ -474,6 +481,8 @@ class OrderController extends Controller
                     'variant_label' => $variant?->label(),
                     'sku' => $variant?->sku ?? $product->sku,
                     'image' => $product->image,
+                    'was_backordered' => $allocation?->backordered ?? false,
+                    'supplier_lead_time_days' => $allocation?->supplierLeadTimeDays,
                     'unit_price_cents' => $item['unit_price_cents'],
                     'quantity' => $item['quantity'],
                     'line_cents' => $item['unit_price_cents'] * $item['quantity'],

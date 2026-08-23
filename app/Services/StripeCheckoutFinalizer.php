@@ -24,6 +24,8 @@ use Illuminate\Support\Facades\DB;
  */
 class StripeCheckoutFinalizer
 {
+    public function __construct(private readonly OrderStockAllocator $allocator) {}
+
     /**
      * @throws \RuntimeException with message "stock" or "empty_cart"
      */
@@ -125,15 +127,16 @@ class StripeCheckoutFinalizer
                 'payment_fee_cents' => $paymentFeeCents,
             ]);
 
-            $cart->lines()->each(function (CartLine $line) use ($order): void {
+            $allocator = $this->allocator;
+
+            $cart->lines()->each(function (CartLine $line) use ($order, $allocator): void {
                 $product = $line->product->newQuery()->lockForUpdate()->with('supplier')->find($line->product->id);
 
                 if ($product === null) {
                     throw new \RuntimeException('stock');
                 }
 
-                $wasBackordered = false;
-                $supplierLeadTimeDays = null;
+                $variant = null;
 
                 if ($line->variant !== null) {
                     $variant = ProductVariant::query()->lockForUpdate()->find($line->variant->id);
@@ -141,37 +144,10 @@ class StripeCheckoutFinalizer
                     if ($variant === null) {
                         throw new \RuntimeException('stock');
                     }
-
-                    if ($variant->quantity < $line->quantity) {
-                        if (! $variant->isBackorderable()) {
-                            throw new \RuntimeException('stock');
-                        }
-
-                        if ($variant->quantity > 0) {
-                            $variant->decrement('quantity', $variant->quantity);
-                        }
-
-                        $wasBackordered = true;
-                        $supplierLeadTimeDays = $variant->supplier?->lead_time_days;
-                    } else {
-                        $variant->decrement('quantity', $line->quantity);
-                    }
-
-                    $product->reconcileQuantity();
-                } elseif ($product->quantity < $line->quantity) {
-                    if (! $product->isBackorderable()) {
-                        throw new \RuntimeException('stock');
-                    }
-
-                    if ($product->quantity > 0) {
-                        $product->decrement('quantity', $product->quantity);
-                    }
-
-                    $wasBackordered = true;
-                    $supplierLeadTimeDays = $product->supplier?->lead_time_days;
-                } else {
-                    $product->decrement('quantity', $line->quantity);
                 }
+
+                // A customer is put on backorder rather than turned away.
+                $allocation = $allocator->allocate($product, $variant, $line->quantity, allowBackorder: true);
 
                 OrderItem::query()->create([
                     'order_id' => $order->id,
@@ -182,8 +158,8 @@ class StripeCheckoutFinalizer
                     'variant_label' => $line->variantLabel(),
                     'sku' => $line->variant?->sku ?? $line->product->sku,
                     'image' => $line->product->image,
-                    'was_backordered' => $wasBackordered,
-                    'supplier_lead_time_days' => $supplierLeadTimeDays,
+                    'was_backordered' => $allocation->backordered,
+                    'supplier_lead_time_days' => $allocation->supplierLeadTimeDays,
                     'unit_price_cents' => $line->unitPriceCents(),
                     'original_unit_price_cents' => $line->hasDiscount() ? $line->product->price_cents : null,
                     'discount_label' => $line->hasDiscount() ? $line->product->discount->label() : null,

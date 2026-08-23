@@ -179,6 +179,23 @@ class StoreManualOrderRequest extends FormRequest
      */
     public function validItems(): Collection
     {
+        return $this->rawItems()
+            // Deux lignes du même article sont une seule ligne : les laisser
+            // séparées ferait vérifier chacune contre le stock entier, puis
+            // retrancher les deux — et le stock passerait sous zéro.
+            ->groupBy(fn (array $item): string => $item['product_id'].':'.($item['variant_id'] ?? ''))
+            ->map(fn (Collection $group): array => [
+                ...$group->first(),
+                'quantity' => $group->sum('quantity'),
+            ])
+            ->values();
+    }
+
+    /**
+     * @return Collection<int, array{product_id: int, variant_id: ?int, quantity: int, unit_price_cents: int}>
+     */
+    private function rawItems(): Collection
+    {
         return collect($this->input('items', []))
             ->filter(fn (array $row): bool => filled($row['product_id'] ?? null) && filled($row['quantity'] ?? null))
             ->map(function (array $row): array {
