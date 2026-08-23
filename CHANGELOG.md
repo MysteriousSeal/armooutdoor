@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-23 — v0.10.1 — build T9YBQ4
+
+### Admin
+
+- **A manual order now records its pickup point.** Choosing a point from the carrier's list filled the shipping address and then forgot which point it was, so a relay order was saved without knowing where its parcel gets collected — the address carries the shop's name, not its identity as a pickup point. The point has its own fields now, filled by the picker and editable afterwards, because a marketplace imposes its own relay and that one appears in no list of ours.
+
+  A relay delivery must name its pickup point before the order can be finalized. A draft may still be saved without one: a draft is work in progress, and the pickup point is often the last thing known.
+
 ## 2026-08-22 — v0.10.0 — build R2VKD7
 
 ### Admin
