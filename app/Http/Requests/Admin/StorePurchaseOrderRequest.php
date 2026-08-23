@@ -71,6 +71,11 @@ class StorePurchaseOrderRequest extends FormRequest
         return filled($price) ? $this->toExVatCents((string) $price) : 0;
     }
 
+    public function vatRateBasisPoints(): int
+    {
+        return (int) round(((float) ($this->input('vat_rate') ?: 0)) * 100);
+    }
+
     /**
      * A price typed as the supplier displays it, brought back to excl. VAT.
      * The rate is a typing aid: nothing about VAT is stored on the order.

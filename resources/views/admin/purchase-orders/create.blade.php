@@ -24,12 +24,21 @@
         ])->values(),
     ])->values();
 
+    // Le sélecteur dit dans quelle unité les champs sont écrits. À la
+    // réouverture d'un brouillon, il reprend le taux du bon et les montants
+    // repassent donc en TTC : sinon le formulaire annoncerait du TTC en
+    // affichant du HT, et l'enregistrement retirerait la TVA une deuxième fois.
+    $defaultVatRate = $isEdit ? (string) round($purchaseOrder->vatRatePercent(), 1) : '0';
+    $asTyped = fn (int $exVatCents): string => number_format(
+        ($isEdit ? $purchaseOrder->withVatCents($exVatCents) : $exVatCents) / 100, 2, '.', '',
+    );
+
     $defaultItems = $isEdit
         ? $purchaseOrder->items->map(fn ($item) => [
             'product_id' => $item->product_id,
             'variant_id' => $item->product_variant_id,
             'quantity' => $item->quantity_ordered,
-            'cost' => number_format($item->unit_cost_cents / 100, 2, '.', ''),
+            'cost' => $asTyped($item->unit_cost_cents),
         ])->values()->all()
         : [['product_id' => '', 'quantity' => 1]];
     $items = old('items', $defaultItems);
@@ -96,10 +105,10 @@
                     <div class="po-vat-mode">
                         <label for="vat_rate">Prices entered as</label>
                         <select id="vat_rate" name="vat_rate" class="form-control" data-vat-rate>
-                            <option value="0" @selected(old('vat_rate', '0') === '0')>Excl. VAT (HT)</option>
-                            <option value="5.5" @selected(old('vat_rate') === '5.5')>Incl. VAT at 5.5%</option>
-                            <option value="10" @selected(old('vat_rate') === '10')>Incl. VAT at 10%</option>
-                            <option value="20" @selected(old('vat_rate') === '20')>Incl. VAT at 20%</option>
+                            @foreach (['0' => 'Excl. VAT (HT)', '5.5' => 'Incl. VAT at 5.5%', '10' => 'Incl. VAT at 10%', '20' => 'Incl. VAT at 20%'] as $rate => $rateLabel)
+                                {{-- Une clé « 20 » revient en entier : la comparaison stricte a besoin du cast. --}}
+                                <option value="{{ $rate }}" @selected(old('vat_rate', $defaultVatRate) === (string) $rate)>{{ $rateLabel }}</option>
+                            @endforeach
                         </select>
                     </div>
                 </div>
@@ -211,7 +220,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="shipping_price">Shipping / freight € <span data-cost-mode>(excl. VAT)</span></label>
-                        <input type="number" id="shipping_price" name="shipping_price" class="form-control" value="{{ old('shipping_price', $isEdit && $purchaseOrder->shipping_cents ? number_format($purchaseOrder->shipping_cents / 100, 2, '.', '') : '') }}" min="0" step="0.01">
+                        <input type="number" id="shipping_price" name="shipping_price" class="form-control" value="{{ old('shipping_price', $isEdit && $purchaseOrder->shipping_cents ? $asTyped($purchaseOrder->shipping_cents) : '') }}" min="0" step="0.01">
                         @error('shipping_price') <p class="form-error">{{ $message }}</p> @enderror
                     </div>
                     <div class="form-group form-group--wide">

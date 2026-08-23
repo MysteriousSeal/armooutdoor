@@ -252,4 +252,73 @@ class PurchaseOrderReceivingTest extends TestCase
 
         $this->assertSame(5, $product->fresh()->quantity);
     }
+
+    public function test_the_receive_form_starts_every_line_at_zero(): void
+    {
+        $product = Product::factory()->create(['quantity' => 2]);
+        $po = $this->sentOrder([['product' => $product, 'quantity' => 5]]);
+        $item = $po->items->first();
+
+        $html = $this->actingAs(User::factory()->admin()->create())
+            ->get(route('admin.purchase-orders.show', $po))
+            ->assertOk()
+            ->getContent();
+
+        // Envoyer le formulaire sans le lire ne doit jamais faire monter le
+        // stock : la quantité restante est une indication, pas une valeur
+        // pré-saisie.
+        $document = new \DOMDocument;
+        libxml_use_internal_errors(true);
+        $document->loadHTML($html);
+        libxml_clear_errors();
+
+        $input = (new \DOMXPath($document))
+            ->query('//input[@name="lines['.$item->id.']"]')
+            ->item(0);
+
+        $this->assertNotNull($input);
+        $this->assertSame('0', $input->getAttribute('value'));
+        $this->assertSame('5', $input->getAttribute('max'));
+    }
+
+    public function test_the_receive_input_sits_in_the_line_it_belongs_to(): void
+    {
+        $product = Product::factory()->create(['quantity' => 2]);
+        $other = Product::factory()->create(['quantity' => 0]);
+        $po = $this->sentOrder([
+            ['product' => $product, 'quantity' => 5],
+            ['product' => $other, 'quantity' => 3],
+        ]);
+        $this->receive($po, [$po->items->first()->id => 5]);
+        $po->refresh();
+
+        $html = $this->actingAs(User::factory()->admin()->create())
+            ->get(route('admin.purchase-orders.show', $po))
+            ->assertOk()
+            ->getContent();
+
+        $document = new \DOMDocument;
+        libxml_use_internal_errors(true);
+        $document->loadHTML($html);
+        libxml_clear_errors();
+        $xpath = new \DOMXPath($document);
+
+        $closed = $po->items->firstWhere('quantity_received', 5);
+        $open = $po->items->firstWhere('quantity_received', 0);
+
+        // Une seule liste d'articles : la case se saisit dans la ligne du
+        // tableau, pas dans un second panneau qui répète les mêmes noms.
+        $this->assertSame(
+            1,
+            $xpath->query('//table//tbody//tr//td[contains(@class, "po-receive-cell")]/input[@name="lines['.$open->id.']"]')->length,
+            'la case de réception doit être une cellule du tableau',
+        );
+
+        // Rien à saisir sur une ligne close : une coche à la place.
+        $this->assertSame(0, $xpath->query('//input[@name="lines['.$closed->id.']"]')->length);
+        $this->assertSame(1, $xpath->query('//table//tbody//td[span[@class="po-receive-done"]]')->length);
+
+        $this->assertStringNotContainsString('Receive stock', $html);
+        $this->assertSame(1, $xpath->query('//form[contains(@class, "po-receive-form")]')->length);
+    }
 }

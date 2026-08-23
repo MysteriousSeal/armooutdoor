@@ -17,6 +17,9 @@
                         @if ($purchaseOrder->expected_at)
                             · expected {{ $purchaseOrder->expected_at->format('d M Y') }}
                         @endif
+                        @if ($purchaseOrder->hasVat())
+                            · supplier prices included {{ rtrim(rtrim(number_format($purchaseOrder->vatRatePercent(), 1), '0'), '.') }}% VAT
+                        @endif
                         @if ($purchaseOrder->createdBy)
                             · drafted by {{ $purchaseOrder->createdBy->name }}
                         @endif
@@ -39,34 +42,75 @@
 
         <div class="order-layout">
             <div class="order-main">
+                @php
+                    $canReceive = $purchaseOrder->canReceive();
+                @endphp
+
                 <section class="order-panel">
                     <h3 class="order-panel-title">Lines</h3>
+
+                    {{-- La saisie de réception vit dans le tableau : c'est en face de
+                         la ligne qu'on sait ce qui est arrivé, pas dans une seconde
+                         liste des mêmes articles. --}}
+                    @if ($canReceive)
+                        <form method="POST" action="{{ route('admin.purchase-orders.receive', $purchaseOrder) }}" class="po-receive-form">
+                            @csrf
+                            @error('lines') <p class="form-error">{{ $message }}</p> @enderror
+                    @endif
+
                     <div class="admin-table-wrap">
                         <table class="admin-table">
                             <thead>
                                 <tr>
+                                    <th class="admin-table-media"></th>
                                     <th>Product</th>
-                                    <th>SKU</th>
                                     <th>Supplier ref</th>
                                     <th>Ordered</th>
                                     <th>Received</th>
                                     <th>Remaining</th>
-                                    <th>Unit cost</th>
-                                    <th>Line total</th>
+                                    <th>Unit cost<span class="po-col-note">excl. VAT</span></th>
+                                    <th>Line total<span class="po-col-note">excl. VAT</span></th>
+                                    @if ($purchaseOrder->hasVat())
+                                        <th>Unit cost<span class="po-col-note">incl. VAT</span></th>
+                                        <th>Line total<span class="po-col-note">incl. VAT</span></th>
+                                    @endif
+                                    @if ($canReceive)
+                                        <th class="po-receive-cell">Receive<span class="po-col-note">now</span></th>
+                                    @endif
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($purchaseOrder->items as $item)
                                     <tr>
-                                        <td>
+                                        <td class="admin-table-media">
+                                            {{-- Le produit peut avoir été supprimé : la tuile garde
+                                                 sa place pour que la colonne reste alignée. Une
+                                                 déclinaison qui a sa propre photo montre la sienne :
+                                                 c'est elle qui a été commandée. --}}
                                             @if ($item->product)
-                                                <a href="{{ route('admin.products.edit', $item->product) }}" class="admin-link">{{ $item->name }}</a>
+                                                <a href="{{ route('admin.products.edit', $item->product) }}">
+                                                    <img
+                                                        class="admin-product-thumb"
+                                                        src="{{ filled($item->variant?->image) ? $item->variant->thumbnailUrl() : $item->product->thumbnailUrl() }}"
+                                                        alt="{{ $item->name }}"
+                                                        loading="lazy"
+                                                    >
+                                                </a>
                                             @else
-                                                {{ $item->name }}
-                                                <span class="po-line-note">product deleted</span>
+                                                <span class="admin-stock-media is-empty" aria-hidden="true"></span>
                                             @endif
                                         </td>
-                                        <td>{{ $item->sku ?: '—' }}</td>
+                                        <td>
+                                            @if ($item->product)
+                                                <a href="{{ route('admin.products.edit', $item->product) }}" class="admin-table-strong po-line-name" title="{{ $item->name }}">{{ $item->name }}</a>
+                                            @else
+                                                <span class="admin-table-strong po-line-name" title="{{ $item->name }}">{{ $item->name }}</span>
+                                                <span class="po-line-note">product deleted</span>
+                                            @endif
+                                            @if (filled($item->sku))
+                                                <span class="admin-table-sub">{{ $item->sku }}</span>
+                                            @endif
+                                        </td>
                                         <td>{{ $item->supplier_reference ?: '—' }}</td>
                                         <td>{{ $item->quantity_ordered }}</td>
                                         <td>
@@ -77,43 +121,46 @@
                                         <td>{{ $item->quantityRemaining() }}</td>
                                         <td>{{ format_euros($item->unit_cost_cents) }}</td>
                                         <td>{{ format_euros($item->lineTotalCents()) }}</td>
+                                        @if ($purchaseOrder->hasVat())
+                                            <td class="po-vat-cell">{{ format_euros($purchaseOrder->withVatCents($item->unit_cost_cents)) }}</td>
+                                            <td class="po-vat-cell">{{ format_euros($purchaseOrder->lineTotalInclVatCents($item)) }}</td>
+                                        @endif
+                                        @if ($canReceive)
+                                            <td class="po-receive-cell">
+                                                @if ($item->isFullyReceived())
+                                                    <span class="po-receive-done" aria-hidden="true">✓</span>
+                                                    <span class="sr-only">Fully received</span>
+                                                @else
+                                                    <input
+                                                        type="number"
+                                                        id="receive-line-{{ $item->id }}"
+                                                        name="lines[{{ $item->id }}]"
+                                                        class="form-control po-receive-input"
+                                                        aria-label="Receive now — {{ $item->name }}"
+                                                        {{-- À zéro par défaut : la réception fait monter le stock, donc
+                                                             elle se saisit ligne par ligne plutôt qu'elle ne se confirme. --}}
+                                                        value="0"
+                                                        min="0"
+                                                        max="{{ $item->quantityRemaining() }}"
+                                                    >
+                                                    @error('lines.'.$item->id) <span class="form-error">{{ $message }}</span> @enderror
+                                                @endif
+                                            </td>
+                                        @endif
                                     </tr>
                                 @endforeach
                             </tbody>
                         </table>
                     </div>
-                </section>
 
-                @if ($purchaseOrder->canReceive())
-                    <section class="order-panel">
-                        <h3 class="order-panel-title">Receive stock</h3>
-                        <p class="admin-list-lede">Stock rises as goods arrive. Leave a line at 0 to skip it.</p>
-                        <form method="POST" action="{{ route('admin.purchase-orders.receive', $purchaseOrder) }}" class="po-receive-form">
-                            @csrf
-                            @error('lines') <p class="form-error">{{ $message }}</p> @enderror
-                            @foreach ($purchaseOrder->items as $item)
-                                @continue($item->isFullyReceived())
-                                <div class="po-receive-row">
-                                    <label for="receive-line-{{ $item->id }}" class="po-receive-label">
-                                        {{ $item->name }}
-                                        <span class="po-line-note">{{ $item->quantityRemaining() }} outstanding</span>
-                                    </label>
-                                    <input
-                                        type="number"
-                                        id="receive-line-{{ $item->id }}"
-                                        name="lines[{{ $item->id }}]"
-                                        class="form-control po-receive-input"
-                                        value="{{ $item->quantityRemaining() }}"
-                                        min="0"
-                                        max="{{ $item->quantityRemaining() }}"
-                                    >
-                                    @error('lines.'.$item->id) <p class="form-error">{{ $message }}</p> @enderror
-                                </div>
-                            @endforeach
-                            <button type="submit" class="btn btn-primary">Receive</button>
+                    @if ($canReceive)
+                            <div class="po-receive-actions">
+                                <p class="po-receive-hint">Stock rises as goods arrive. Leave a line at 0 to skip it.</p>
+                                <button type="submit" class="btn btn-primary">Receive</button>
+                            </div>
                         </form>
-                    </section>
-                @endif
+                    @endif
+                </section>
 
                 <section class="order-panel" id="order-timeline">
                     <h3 class="order-panel-title">History</h3>
@@ -138,11 +185,15 @@
 
             <aside class="order-facts">
                 <section class="order-fact">
-                    <h3 class="order-fact-title">Totals (excl. VAT)</h3>
+                    <h3 class="order-fact-title">Totals</h3>
                     <dl class="order-totals">
                         <div><dt>Subtotal</dt><dd>{{ format_euros($purchaseOrder->subtotalCents()) }}</dd></div>
                         <div><dt>Shipping</dt><dd>{{ format_euros($purchaseOrder->shipping_cents) }}</dd></div>
-                        <div><dt>Total</dt><dd>{{ format_euros($purchaseOrder->totalCents()) }}</dd></div>
+                        <div><dt>Total excl. VAT</dt><dd>{{ format_euros($purchaseOrder->totalCents()) }}</dd></div>
+                        @if ($purchaseOrder->hasVat())
+                            <div><dt>VAT {{ rtrim(rtrim(number_format($purchaseOrder->vatRatePercent(), 1), '0'), '.') }}%</dt><dd>{{ format_euros($purchaseOrder->vatAmountCents()) }}</dd></div>
+                            <div class="po-total-paid"><dt>Total incl. VAT</dt><dd>{{ format_euros($purchaseOrder->totalInclVatCents()) }}</dd></div>
+                        @endif
                         <div><dt>Received value</dt><dd>{{ format_euros($purchaseOrder->receivedValueCents()) }}</dd></div>
                     </dl>
                 </section>

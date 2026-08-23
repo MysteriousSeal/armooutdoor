@@ -29,6 +29,7 @@ use Illuminate\Support\Str;
     'expected_at',
     'notes',
     'shipping_cents',
+    'vat_rate_basis_points',
     'created_by_user_id',
     'sent_at',
     'received_at',
@@ -44,6 +45,7 @@ class PurchaseOrder extends Model
         return [
             'expected_at' => 'date',
             'shipping_cents' => 'integer',
+            'vat_rate_basis_points' => 'integer',
             'sent_at' => 'datetime',
             'received_at' => 'datetime',
             'cancelled_at' => 'datetime',
@@ -126,6 +128,49 @@ class PurchaseOrder extends Model
     public function totalCents(): int
     {
         return $this->subtotalCents() + $this->shipping_cents;
+    }
+
+    /**
+     * The rate the supplier's prices included, as a percentage. Costs are
+     * stored excl. VAT; this is what turns them back into what was paid.
+     */
+    public function vatRatePercent(): float
+    {
+        return $this->vat_rate_basis_points / 100;
+    }
+
+    public function hasVat(): bool
+    {
+        return $this->vat_rate_basis_points > 0;
+    }
+
+    public function withVatCents(int $exVatCents): int
+    {
+        return (int) round($exVatCents * (1 + $this->vat_rate_basis_points / 10000));
+    }
+
+    /**
+     * What the supplier charged for the line.
+     *
+     * Derived from the unit price rather than from the line's excl. VAT
+     * total: the supplier priced each unit, so rounding once per unit
+     * reproduces their invoice, where rounding the line total again would
+     * drift a cent or two away from it.
+     */
+    public function lineTotalInclVatCents(PurchaseOrderItem $item): int
+    {
+        return $item->quantity_ordered * $this->withVatCents($item->unit_cost_cents);
+    }
+
+    public function totalInclVatCents(): int
+    {
+        return (int) $this->items->sum(fn (PurchaseOrderItem $item): int => $this->lineTotalInclVatCents($item))
+            + $this->withVatCents($this->shipping_cents);
+    }
+
+    public function vatAmountCents(): int
+    {
+        return $this->totalInclVatCents() - $this->totalCents();
     }
 
     public function receivedValueCents(): int

@@ -1905,6 +1905,30 @@
     }
 }
 
+/* Les colonnes HT et TTC se suivent : une mention sous l'intitulé dit
+   laquelle on lit, et le TTC s'efface d'un ton pour que le HT — ce que la
+   commande stocke — reste la colonne principale. */
+.po-col-note {
+    display: block;
+    margin-top: 0.1rem;
+    font-size: 0.625rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: none;
+    color: var(--text-muted);
+}
+
+.po-vat-cell {
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.po-total-paid dt,
+.po-total-paid dd {
+    font-weight: 600;
+    color: var(--text);
+}
+
 /* Les bons de commande fournisseur. Les statuts reprennent la grammaire des
    commandes clients : gris pour le brouillon, bleu pour ce qui voyage, ambre
    pour l'entre-deux, vert pour l'arrivé, rouge sourd pour l'annulé. */
@@ -2007,30 +2031,68 @@
     color: var(--text-muted);
 }
 
-/* La réception : une ligne par article encore attendu. */
-.po-receive-form {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    align-items: flex-start;
-}
-
-.po-receive-row {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    width: 100%;
-    max-width: 34rem;
-}
-
-.po-receive-label {
-    flex: 1;
-    font-size: 0.875rem;
+/* La réception se saisit dans la colonne de droite du tableau des lignes :
+   la case est en face de l'article, à côté du reste à recevoir. */
+.po-receive-cell {
+    width: 6.5rem;
+    text-align: right;
+    white-space: nowrap;
 }
 
 .po-receive-input {
-    width: 6rem;
-    flex-shrink: 0;
+    width: 4.5rem;
+    height: 2rem;
+    padding: 0 0.5rem;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
+.po-receive-input:focus {
+    border-color: var(--accent);
+}
+
+.po-receive-done {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.8125rem;
+    line-height: 1;
+    color: #3d6b4e;
+    background: color-mix(in srgb, #7ba888 18%, var(--surface));
+    border: 1px solid color-mix(in srgb, #7ba888 38%, var(--border));
+    border-radius: 50%;
+}
+
+[data-theme='dark'] .po-receive-done {
+    color: #9dccab;
+}
+
+.po-receive-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 1.1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.po-receive-hint {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+
+.po-receive-actions .btn {
+    margin-left: auto;
+}
+
+.po-receive-cell .form-error {
+    display: block;
+    margin-top: 0.3rem;
+    font-size: 0.75rem;
 }
 
 .admin-list-chip {
@@ -2971,6 +3033,36 @@ a.admin-stat-card:hover {
 
 .admin-table-primary {
     display: block;
+}
+
+/* La colonne vignette : juste assez large pour la tuile, pour que le nom du
+   produit commence au même endroit d'une ligne à l'autre. */
+.admin-table-media {
+    width: 3.25rem;
+    min-width: 3.25rem;
+}
+
+/* Un img porte max-width: 100 % pour toute la boutique : dans une cellule
+   serrée par un titre à rallonge, la tuile se laissait écraser en hauteur
+   fixe et largeur rognée — donc rectangulaire. Un plancher sur les deux
+   dimensions la garde carrée quoi qu'il arrive à la colonne. */
+.admin-table-media .admin-product-thumb,
+.admin-table-media .admin-stock-media {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    flex-shrink: 0;
+}
+
+/* Deux lignes puis les points de suspension : un nom de produit long garde
+   sa hauteur de ligne au lieu de pousser la colonne et d'aplatir la
+   vignette. Le titre complet reste au survol. */
+.po-line-name {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+    max-width: 24rem;
 }
 
 .admin-table-sub {
