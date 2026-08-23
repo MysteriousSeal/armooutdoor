@@ -45,6 +45,7 @@ class AdminActivityLog extends Model
 
         return match ($this->subject_type) {
             Order::class => 'Order',
+            PurchaseOrder::class => 'Purchase order',
             Product::class => 'Product',
             Discount::class => 'Discount',
             DiscountCode::class => 'Discount code',

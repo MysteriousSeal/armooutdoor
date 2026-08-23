@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\MarketplaceController as AdminMarketplaceControll
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PackageTypeController as AdminPackageTypeController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\PurchaseOrderController as AdminPurchaseOrderController;
 use App\Http\Controllers\Admin\SearchController as AdminSearchController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\ShippingSettingController as AdminShippingSettingController;
@@ -142,6 +143,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/categories/{category}', [AdminCategoryController::class, 'update'])->name('categories.update');
 
         // Orders
+        Route::get('/purchase-orders', [AdminPurchaseOrderController::class, 'index'])->name('purchase-orders.index');
+        Route::get('/purchase-orders/create', [AdminPurchaseOrderController::class, 'create'])->name('purchase-orders.create');
+        Route::post('/purchase-orders', [AdminPurchaseOrderController::class, 'store'])->name('purchase-orders.store');
+        Route::get('/purchase-orders/{purchaseOrder}', [AdminPurchaseOrderController::class, 'show'])->name('purchase-orders.show');
+        Route::get('/purchase-orders/{purchaseOrder}/edit', [AdminPurchaseOrderController::class, 'edit'])->name('purchase-orders.edit');
+        Route::put('/purchase-orders/{purchaseOrder}', [AdminPurchaseOrderController::class, 'update'])->name('purchase-orders.update');
+        Route::patch('/purchase-orders/{purchaseOrder}/send', [AdminPurchaseOrderController::class, 'send'])->name('purchase-orders.send');
+        Route::post('/purchase-orders/{purchaseOrder}/receive', [AdminPurchaseOrderController::class, 'receive'])->name('purchase-orders.receive');
+        // Owner-only, like order refund and delete: cancelling closes out
+        // committed stock, and deleting cannot be taken back.
+        Route::patch('/purchase-orders/{purchaseOrder}/cancel', [AdminPurchaseOrderController::class, 'cancel'])->middleware('admin.owner')->name('purchase-orders.cancel');
+        Route::delete('/purchase-orders/{purchaseOrder}', [AdminPurchaseOrderController::class, 'destroy'])->middleware('admin.owner')->name('purchase-orders.destroy');
+
         Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/export', [AdminOrderController::class, 'export'])->name('orders.export');
         Route::get('/orders/create', [AdminOrderController::class, 'create'])->name('orders.create');

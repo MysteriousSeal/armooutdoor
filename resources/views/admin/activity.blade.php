@@ -29,6 +29,7 @@
                             @php
                                 $subjectRoute = match (true) {
                                     $log->subject instanceof \App\Models\Order => route('admin.orders.show', $log->subject),
+                                    $log->subject instanceof \App\Models\PurchaseOrder => route('admin.purchase-orders.show', $log->subject),
                                     $log->subject instanceof \App\Models\Product => route('admin.products.edit', $log->subject),
                                     $log->subject instanceof \App\Models\Discount => route('admin.discounts.edit', $log->subject),
                                     $log->subject instanceof \App\Models\DiscountCode => route('admin.discount-codes.edit', $log->subject),

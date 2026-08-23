@@ -85,6 +85,12 @@
                     <span class="admin-nav-badge" title="{{ $ordersAwaitingStartCount }} not started yet">{{ $ordersAwaitingStartCount }}</span>
                 @endif
             </a>
+            <a href="{{ route('admin.purchase-orders.index') }}" class="{{ request()->routeIs('admin.purchase-orders.*') ? 'active' : '' }}">
+                Purchase orders
+                @if ($purchaseOrdersAwaitingReceiptCount > 0)
+                    <span class="admin-nav-badge" title="{{ $purchaseOrdersAwaitingReceiptCount }} awaiting receipt">{{ $purchaseOrdersAwaitingReceiptCount }}</span>
+                @endif
+            </a>
             <a href="{{ route('admin.products.index') }}" class="{{ request()->routeIs('admin.products.*') ? 'active' : '' }}">Products</a>
             <a href="{{ route('admin.categories.index') }}" class="{{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">Categories</a>
             <a href="{{ route('admin.discounts.index') }}" class="{{ request()->routeIs('admin.discounts.*', 'admin.discount-codes.*') ? 'active' : '' }}">Discounts</a>
