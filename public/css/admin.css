@@ -5256,3 +5256,55 @@ input[type="date"].form-control {
     font-size: 0.8125rem;
     color: var(--text-muted);
 }
+
+/* ------------------------------------------------------------------
+   Remise en rayon après remboursement
+   ------------------------------------------------------------------ */
+
+.order-restock-form {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.order-restock-input {
+    width: 4rem;
+    height: 2.25rem;
+    padding: 0 0.4rem;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.order-restock-input:focus {
+    border-color: var(--accent);
+}
+
+.order-restock-note {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Sur le modèle de la coche de réception d'un bon de commande : une fois
+   fait, la ligne l'affiche plutôt que de proposer à nouveau le formulaire. */
+.order-restock-done {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0.5rem 0 0;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.75rem;
+    color: #3d6b4e;
+    background: color-mix(in srgb, #7ba888 18%, var(--surface));
+    border: 1px solid color-mix(in srgb, #7ba888 38%, var(--border));
+}
+
+[data-theme='dark'] .order-restock-done {
+    color: #9dccab;
+}

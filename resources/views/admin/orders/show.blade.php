@@ -128,6 +128,39 @@
                                             <span class="order-discount-badge">{{ $item->discount_label }}</span>
                                         </div>
                                     @endif
+                                    @if ($order->status === 'refunded' && $item->product)
+                                        @if ($item->quantityRestockable() > 0)
+                                            <form method="POST" action="{{ route('admin.orders.items.restock', [$order, $item]) }}" class="order-restock-form">
+                                                @csrf
+                                                @method('PATCH')
+                                                <label class="sr-only" for="restock-qty-{{ $item->id }}">Quantity to restock for {{ $item->localizedName() }}</label>
+                                                <input
+                                                    type="number"
+                                                    id="restock-qty-{{ $item->id }}"
+                                                    name="quantity_{{ $item->id }}"
+                                                    value="{{ old('quantity_'.$item->id, $item->quantityRestockable()) }}"
+                                                    min="1"
+                                                    max="{{ $item->quantityRestockable() }}"
+                                                    class="form-control order-restock-input"
+                                                >
+                                                <button type="submit" class="btn btn-sm btn-secondary">Restock</button>
+                                                @if ($item->restocked_quantity > 0)
+                                                    <span class="order-restock-note">{{ $item->restocked_quantity }} already back on the shelf</span>
+                                                @endif
+                                            </form>
+                                            @error('quantity_'.$item->id) <p class="form-error">{{ $message }}</p> @enderror
+                                        @else
+                                            <p class="order-restock-done">
+                                                Restocked
+                                                @if ($item->restocked_at)
+                                                    {{ $item->restocked_at->format('d/m/Y') }}
+                                                @endif
+                                                @if ($item->restockedBy)
+                                                    by {{ $item->restockedBy->name }}
+                                                @endif
+                                            </p>
+                                        @endif
+                                    @endif
                                 </div>
                                 <div class="order-item-pricing">
                                     @if ($item->quantity > 1 || $item->hasDiscount())

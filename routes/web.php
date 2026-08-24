@@ -171,6 +171,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/orders/{order}/ship', [AdminOrderController::class, 'ship'])->name('orders.ship');
         Route::patch('/orders/{order}/deliver', [AdminOrderController::class, 'deliver'])->name('orders.deliver');
         Route::patch('/orders/{order}/refund', [AdminOrderController::class, 'refund'])->middleware('admin.owner')->name('orders.refund');
+        // Ouvert à tous les admins, comme la réception d'un bon de commande :
+        // remettre en rayon ce qui est physiquement revenu n'a rien d'un geste
+        // engageant comme le remboursement lui-même.
+        Route::patch('/orders/{order}/items/{item}/restock', [AdminOrderController::class, 'restockItem'])->name('orders.items.restock');
         // Before the {order} routes: /orders/bulk/... must not be taken
         // as an order number by the route-model binding.
         Route::patch('/orders/bulk/archive', [AdminOrderController::class, 'bulkArchive'])->name('orders.bulk-archive');

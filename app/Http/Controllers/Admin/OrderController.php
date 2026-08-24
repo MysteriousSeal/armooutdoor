@@ -32,6 +32,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -575,6 +576,87 @@ class OrderController extends Controller
         AdminActivityLog::record('order.refunded', $order, 'Marked order '.$order->number.' as refunded');
 
         return $this->statusChangeResponse($request, $order, 'Order marked as refunded.');
+    }
+
+    /**
+     * Puts returned units back on the shelf, one line at a time.
+     *
+     * Refunding the order only ever changes its status — see the decision
+     * recorded when the stock ledger was built. This is the deliberate,
+     * separate act: someone has physically checked the return and decided
+     * it is sellable. A line can be restocked in more than one pass, the
+     * same way a purchase order can be received in several deliveries.
+     */
+    public function restockItem(Request $request, Order $order, int $item): RedirectResponse|JsonResponse
+    {
+        abort_unless($order->status === 'refunded', 403);
+
+        // Named per line rather than a bare "quantity": several lines each
+        // carry their own restock form on the same page, and a validation
+        // error must land under the one that was actually submitted.
+        $field = 'quantity_'.$item;
+
+        $validated = $request->validate([
+            $field => ['required', 'integer', 'min:1'],
+        ]);
+        $quantity = $validated[$field];
+
+        $userId = $request->user()->id;
+
+        DB::transaction(function () use ($order, $item, $quantity, $field, $userId): void {
+            /** @var OrderItem $line */
+            $line = $order->items()->lockForUpdate()->findOrFail($item);
+
+            abort_if($line->product_id === null, 404);
+
+            if ($quantity > $line->quantityRestockable()) {
+                throw ValidationException::withMessages([
+                    $field => 'More than what is left to restock for this line.',
+                ]);
+            }
+
+            StockContext::during(
+                StockMovementReason::OrderRefundRestock,
+                fn () => $this->restockLine($line, $quantity),
+                subject: $order,
+            );
+
+            $line->update([
+                'restocked_quantity' => $line->restocked_quantity + $quantity,
+                'restocked_at' => now(),
+                'restocked_by_user_id' => $userId,
+            ]);
+        });
+
+        AdminActivityLog::record(
+            'order.item_restocked',
+            $order,
+            'Restocked '.$quantity.' unit(s) from order '.$order->number,
+        );
+
+        return $this->statusChangeResponse($request, $order, 'Stock updated.');
+    }
+
+    private function restockLine(OrderItem $line, int $quantity): void
+    {
+        if ($line->product_variant_id !== null) {
+            $variant = ProductVariant::query()->lockForUpdate()->find($line->product_variant_id);
+            $variant?->increment('quantity', $quantity);
+            // A product with variants keeps quantity as the mirror of their
+            // sum — see Product::reconcileQuantity().
+            $variant?->product?->reconcileQuantity();
+
+            return;
+        }
+
+        $product = Product::query()->lockForUpdate()->find($line->product_id);
+
+        // A product that has since gained variants no longer owns its own
+        // quantity; writing to it would be silently overwritten by the next
+        // reconcile, exactly as in PurchaseOrderReceiver.
+        if ($product !== null && ! $product->hasVariants()) {
+            $product->increment('quantity', $quantity);
+        }
     }
 
     public function archive(Order $order): RedirectResponse

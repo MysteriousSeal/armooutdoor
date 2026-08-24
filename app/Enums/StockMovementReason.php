@@ -17,6 +17,7 @@ enum StockMovementReason: string
     case BackorderPartial = 'backorder_partial';
     case DraftValidated = 'draft_validated';
     case PurchaseOrderReceived = 'purchase_order_received';
+    case OrderRefundRestock = 'order_refund_restock';
     case ManualAdjustment = 'manual_adjustment';
     case ProductEdited = 'product_edited';
     case ApiUpdate = 'api_update';
@@ -30,6 +31,7 @@ enum StockMovementReason: string
             self::BackorderPartial => 'Backorder',
             self::DraftValidated => 'Draft validated',
             self::PurchaseOrderReceived => 'Purchase order received',
+            self::OrderRefundRestock => 'Refund restock',
             self::ManualAdjustment => 'Manual adjustment',
             self::ProductEdited => 'Product edited',
             self::ApiUpdate => 'API update',
@@ -46,7 +48,7 @@ enum StockMovementReason: string
     public function direction(): string
     {
         return match ($this) {
-            self::PurchaseOrderReceived => 'in',
+            self::PurchaseOrderReceived, self::OrderRefundRestock => 'in',
             self::OrderPlaced, self::ManualOrder, self::BackorderPartial, self::DraftValidated => 'out',
             self::ManualAdjustment, self::ProductEdited, self::ApiUpdate, self::Unattributed => 'adjustment',
         };
