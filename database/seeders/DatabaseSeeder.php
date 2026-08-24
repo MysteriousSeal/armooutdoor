@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             ShippingSeeder::class,
             PackageTypeSeeder::class,
             MarketplaceSeeder::class,
+            BlogCategorySeeder::class,
             AdminSeeder::class,
         ]);
     }

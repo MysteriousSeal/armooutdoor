@@ -20,7 +20,26 @@ class HtmlSanitizer
         'href', 'title', 'target', 'rel', 'class',
     ];
 
-    public static function clean(?string $html): ?string
+    /**
+     * Ce qu'un article peut porter en plus, quand on le lui autorise.
+     *
+     * Les fiches produit passent par le même nettoyeur et n'ont aucun besoin
+     * d'images dans leur corps de texte : la permission est demandée, jamais
+     * acquise. `figcaption` accompagne `figure` — Quill entoure une image
+     * légendée des deux, et sans les deux la légende ressort en texte nu.
+     *
+     * @var list<string>
+     */
+    private const IMAGE_TAGS = ['img', 'figure', 'figcaption'];
+
+    /** @var list<string> */
+    private const IMAGE_ATTRIBUTES = ['src', 'alt', 'width', 'height', 'loading'];
+
+    /**
+     * @param  bool  $allowImages  Autorise `img`/`figure` avec une source
+     *                             servie par la boutique elle-même.
+     */
+    public static function clean(?string $html, bool $allowImages = false): ?string
     {
         if ($html === null) {
             return null;
@@ -28,7 +47,7 @@ class HtmlSanitizer
 
         $html = trim($html);
 
-        if ($html === '' || self::isEmpty($html)) {
+        if ($html === '' || self::isBlank($html, $allowImages)) {
             return null;
         }
 
@@ -51,7 +70,7 @@ class HtmlSanitizer
             return null;
         }
 
-        self::sanitizeNode($root);
+        self::sanitizeNode($root, $allowImages);
 
         $clean = '';
 
@@ -61,7 +80,7 @@ class HtmlSanitizer
 
         $clean = trim($clean);
 
-        return self::isEmpty($clean) ? null : $clean;
+        return self::isBlank($clean, $allowImages) ? null : $clean;
     }
 
     public static function forDisplay(?string $html): string
@@ -104,7 +123,24 @@ class HtmlSanitizer
         return self::toPlainText($html) === '';
     }
 
-    private static function sanitizeNode(DOMNode $node): void
+    /**
+     * Vide au sens de ce qu'on est en train de nettoyer.
+     *
+     * `isEmpty()` ne regarde que le texte : un article composé d'une seule
+     * image n'a rien à dire au sens des caractères, et se faisait jeter avant
+     * même d'être examiné. Quand les images comptent comme du contenu, leur
+     * présence suffit.
+     */
+    private static function isBlank(?string $html, bool $allowImages): bool
+    {
+        if ($allowImages && $html !== null && preg_match('/<img[\s>]/i', $html)) {
+            return false;
+        }
+
+        return self::isEmpty($html);
+    }
+
+    private static function sanitizeNode(DOMNode $node, bool $allowImages = false): void
     {
         if (! $node->hasChildNodes()) {
             return;
@@ -141,26 +177,85 @@ class HtmlSanitizer
                 continue;
             }
 
-            if (! in_array($tag, self::ALLOWED_TAGS, true)) {
-                self::sanitizeNode($child);
+            $allowed = self::ALLOWED_TAGS;
+
+            if ($allowImages) {
+                $allowed = array_merge($allowed, self::IMAGE_TAGS);
+            }
+
+            if (! in_array($tag, $allowed, true)) {
+                self::sanitizeNode($child, $allowImages);
                 self::unwrapNode($child);
 
                 continue;
             }
 
-            self::sanitizeAttributes($child, $tag);
-            self::sanitizeNode($child);
+            // Une image dont la source est refusée part entièrement. Retirer
+            // le seul attribut laisserait un `<img>` nu, c'est-à-dire une
+            // icône cassée — contrairement à un `<a>` vidé de son href, qui
+            // garde au moins son texte.
+            if ($tag === 'img' && ! self::hasSameOriginSource($child)) {
+                $child->parentNode?->removeChild($child);
+
+                continue;
+            }
+
+            self::sanitizeAttributes($child, $tag, $allowImages);
+            self::sanitizeNode($child, $allowImages);
         }
     }
 
-    private static function sanitizeAttributes(DOMElement $element, string $tag): void
+    /**
+     * Une image ne peut venir que de la boutique.
+     *
+     * Deux formes acceptées, et deux seulement : un chemin absolu depuis la
+     * racine du site, ou une URL http(s) dont l'hôte est le nôtre. Tout le
+     * reste part — `data:`, `javascript:`, et n'importe quel autre domaine.
+     *
+     * Le piège est `//exemple.com/x.jpg` : il commence bien par une barre
+     * oblique, mais c'est une URL sans protocole qui charge ailleurs. D'où le
+     * refus explicite du double slash avant tout le reste.
+     */
+    private static function hasSameOriginSource(DOMElement $image): bool
+    {
+        $src = trim($image->getAttribute('src'));
+
+        if ($src === '' || str_starts_with($src, '//')) {
+            return false;
+        }
+
+        if (str_starts_with($src, '/')) {
+            return true;
+        }
+
+        if (! preg_match('#^https?://#i', $src)) {
+            return false;
+        }
+
+        $host = parse_url($src, PHP_URL_HOST);
+        $appHost = parse_url((string) config('app.url'), PHP_URL_HOST);
+
+        return $host !== null
+            && $appHost !== null
+            && strcasecmp($host, $appHost) === 0;
+    }
+
+    private static function sanitizeAttributes(DOMElement $element, string $tag, bool $allowImages = false): void
     {
         $toRemove = [];
 
         foreach ($element->attributes ?? [] as $attribute) {
             $name = strtolower($attribute->name);
 
-            if (! in_array($name, self::ALLOWED_ATTRIBUTES, true)) {
+            $permitted = self::ALLOWED_ATTRIBUTES;
+
+            // Les attributs d'image ne valent que sur une image : les ajouter
+            // à la liste globale les laisserait traîner sur un `<span>`.
+            if ($allowImages && $tag === 'img') {
+                $permitted = array_merge($permitted, self::IMAGE_ATTRIBUTES);
+            }
+
+            if (! in_array($name, $permitted, true)) {
                 $toRemove[] = $attribute->name;
 
                 continue;
@@ -187,6 +282,10 @@ class HtmlSanitizer
 
         foreach ($toRemove as $name) {
             $element->removeAttribute($name);
+        }
+
+        if ($tag === 'img' && ! $element->hasAttribute('alt')) {
+            $element->setAttribute('alt', '');
         }
 
         if ($tag === 'a' && $element->hasAttribute('href')) {

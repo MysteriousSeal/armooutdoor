@@ -96,6 +96,9 @@
                         <a href="{{ route('products.best-sellers') }}" class="sort-tab {{ request()->routeIs('products.best-sellers') ? 'active' : '' }}">
                             {{ __('store.footer_shop_best_sellers') }}
                         </a>
+                        <a href="{{ route('blog.index') }}" class="sort-tab {{ request()->routeIs('blog.*') ? 'active' : '' }}">
+                            {{ __('store.nav_blog') }}
+                        </a>
                         <a href="{{ localized_route('contact.show') }}" class="sort-tab {{ request()->routeIs('contact.show') ? 'active' : '' }}">
                             {{ __('store.footer_help_contact') }}
                         </a>

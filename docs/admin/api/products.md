@@ -411,5 +411,6 @@ Before sending a write request:
 
 ## Related
 
+- [Blog API](blog.md) — same token, same envelope, same limiter.
 - Web admin product form — same catalogue, and the only place to upload images or read cost and margin.
 - `GET /api/admin/categories` — for valid `category_id` values.

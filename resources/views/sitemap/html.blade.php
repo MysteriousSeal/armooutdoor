@@ -62,6 +62,24 @@
             </div>
         </section>
 
+        @if ($posts->isNotEmpty())
+            <section class="sitemap-section" aria-labelledby="sitemap-blog-heading">
+                <h2 class="sitemap-heading" id="sitemap-blog-heading">{{ __('store.blog_title') }}</h2>
+                <div class="sitemap-groups">
+                    <nav class="sitemap-card" aria-labelledby="sitemap-blog-list">
+                        <h3 class="sitemap-cat-name" id="sitemap-blog-list">
+                            <a href="{{ route('blog.index') }}">{{ __('store.blog_all') }}</a>
+                        </h3>
+                        <ul class="sitemap-links">
+                            @foreach ($posts as $post)
+                                <li><a href="{{ route('blog.show', $post->slug) }}">{{ $post->localizedTitle() }}</a></li>
+                            @endforeach
+                        </ul>
+                    </nav>
+                </div>
+            </section>
+        @endif
+
         <section class="sitemap-section" aria-labelledby="sitemap-products-heading">
             <h2 class="sitemap-heading" id="sitemap-products-heading">{{ __('store.sitemap_products') }}</h2>
             <div class="sitemap-groups">

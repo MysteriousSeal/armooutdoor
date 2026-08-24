@@ -10,6 +10,7 @@ use App\Http\Controllers\Account\ProfileController;
 use App\Http\Controllers\Admin\ActivityController as AdminActivityController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
+use App\Http\Controllers\Admin\BlogPostController as AdminBlogPostController;
 use App\Http\Controllers\Admin\CarrierPriceTierController as AdminCarrierPriceTierController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\ChangelogController as AdminChangelogController;
@@ -37,6 +38,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 // Storefront (shop, cart, checkout, orders, etc.)
 use App\Http\Controllers\BestSellersController;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CheckoutController;
@@ -66,6 +68,7 @@ Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.i
 Route::get('/sitemap-pages.xml', [SitemapController::class, 'pages'])->name('sitemap.pages');
 Route::get('/sitemap-categories.xml', [SitemapController::class, 'categories'])->name('sitemap.categories');
 Route::get('/sitemap-products.xml', [SitemapController::class, 'products'])->name('sitemap.products');
+Route::get('/sitemap-blog.xml', [SitemapController::class, 'blog'])->name('sitemap.blog');
 Route::get('/plan-du-site', [SitemapController::class, 'html'])->name('sitemap.html');
 
 /*
@@ -120,6 +123,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/products/{product}/status', [AdminProductController::class, 'toggleStatus'])->name('products.status');
         Route::patch('/products/{product}/quantity', [AdminProductController::class, 'updateQuantity'])->name('products.quantity');
         Route::patch('/products/{product}/supplier', [AdminProductController::class, 'updateSupplier'])->name('products.supplier');
+
+        // Blog
+        Route::get('/blog', [AdminBlogPostController::class, 'index'])->name('blog.index');
+        Route::get('/blog/create', [AdminBlogPostController::class, 'create'])->name('blog.create');
+        Route::post('/blog', [AdminBlogPostController::class, 'store'])->name('blog.store');
+        Route::post('/blog/images', [AdminBlogPostController::class, 'uploadBodyImage'])->name('blog.images');
+        Route::get('/blog/{post}/edit', [AdminBlogPostController::class, 'edit'])->name('blog.edit');
+        Route::put('/blog/{post}', [AdminBlogPostController::class, 'update'])->name('blog.update');
+        Route::delete('/blog/{post}', [AdminBlogPostController::class, 'destroy'])->name('blog.destroy');
 
         // Product discounts (sale price on a single product, no code needed)
         Route::get('/discounts', [AdminDiscountController::class, 'index'])->name('discounts.index');
@@ -246,6 +258,9 @@ Route::get('/categories', [CategoryController::class, 'index'])->name('categorie
 Route::get('/nouveautes', [NewArrivalsController::class, 'index'])->name('products.new-arrivals');
 Route::get('/promotions', [PromotionsController::class, 'index'])->name('products.promotions');
 Route::get('/meilleures-ventes', [BestSellersController::class, 'index'])->name('products.best-sellers');
+
+Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
 Route::get('/products/{product:slug}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/search', [SearchController::class, 'index'])->name('search');

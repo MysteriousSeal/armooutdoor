@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BlogPost;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Response;
@@ -24,7 +25,13 @@ class SitemapController extends Controller
             ->get()
             ->groupBy(fn (Product $product) => $product->category?->id);
 
-        return view('sitemap.html', compact('categories', 'products'));
+        $posts = BlogPost::query()
+            ->visible()
+            ->with('category')
+            ->orderByDesc('published_at')
+            ->get();
+
+        return view('sitemap.html', compact('categories', 'products', 'posts'));
     }
 
     public function index(): Response
@@ -33,6 +40,7 @@ class SitemapController extends Controller
             ['url' => route('sitemap.pages')],
             ['url' => route('sitemap.categories')],
             ['url' => route('sitemap.products')],
+            ['url' => route('sitemap.blog')],
         ];
 
         return $this->xml('sitemap.index', compact('sitemaps'));
@@ -65,6 +73,20 @@ class SitemapController extends Controller
             'lastmod' => $category->updated_at?->toAtomString(),
             'changefreq' => 'weekly',
             'priority' => $category->parent_id ? '0.6' : '0.8',
+        ])->all();
+
+        return $this->xml('sitemap.urlset', compact('urls'));
+    }
+
+    public function blog(): Response
+    {
+        // Le même périmètre que la façade publique : un brouillon ou un
+        // article programmé n'a rien à faire dans un plan de site.
+        $urls = BlogPost::query()->visible()->get()->map(fn (BlogPost $post): array => [
+            'loc' => route('blog.show', $post->slug),
+            'lastmod' => $post->updated_at?->toAtomString(),
+            'changefreq' => 'monthly',
+            'priority' => '0.6',
         ])->all();
 
         return $this->xml('sitemap.urlset', compact('urls'));

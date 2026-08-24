@@ -1,0 +1,514 @@
+/* Le blog : des cartes paysage, une colonne de lecture, et rien d'autre.
+   Les couleurs viennent des variables du thème — la page suit clair et
+   sombre sans règle dédiée. */
+
+.page-head {
+    margin: 1.5rem 0 1.25rem;
+}
+
+.blog-tabs {
+    margin-bottom: 1.75rem;
+}
+
+.blog-tab-count {
+    margin-left: 0.35rem;
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+}
+
+.blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.blog-card {
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.blog-card-link {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    color: inherit;
+    text-decoration: none;
+}
+
+.blog-card:hover {
+    border-color: var(--accent);
+}
+
+/* Le ratio est tenu par la boîte, pas par le fichier : une image un peu hors
+   format ne déforme pas la grille. */
+.blog-card-media {
+    display: block;
+    aspect-ratio: 16 / 9;
+    background: var(--bg);
+    overflow: hidden;
+}
+
+.blog-card-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.blog-card-media-empty {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--bg), var(--surface));
+}
+
+.blog-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding: 1rem 1.1rem 1.2rem;
+}
+
+.blog-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.blog-card-category {
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent-hover);
+}
+
+.blog-card-title {
+    font-size: 1.125rem;
+    font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+}
+
+.blog-card-excerpt {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+/* ---------------------------------------------------------------- article */
+
+.blog-article-page {
+    padding-bottom: 3.5rem;
+}
+
+.blog-article {
+    margin: 0 0 1rem;
+}
+
+/* Même idée que le hero des catégories : photo à droite, texte givré à gauche.
+   Le titre d'article reste en casse phrase — ce n'est pas un nom de rayon. */
+.blog-article-banner {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: center;
+    min-height: 22rem;
+    margin: 0 0 1.65rem;
+    overflow: hidden;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.blog-article-banner.has-image {
+    background-image: var(--blog-hero-image);
+    background-repeat: no-repeat;
+    background-position: center right;
+    background-size: cover;
+}
+
+.blog-article-banner-overlay {
+    display: none;
+}
+
+.blog-article-banner.has-image .blog-article-banner-overlay {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(
+            90deg,
+            var(--surface) 0%,
+            var(--surface) 24%,
+            color-mix(in srgb, var(--surface) 90%, transparent) 38%,
+            color-mix(in srgb, var(--surface) 42%, transparent) 56%,
+            color-mix(in srgb, var(--surface) 8%, transparent) 74%,
+            transparent 86%
+        ),
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--surface) 18%, transparent) 0%,
+            transparent 28%,
+            transparent 72%,
+            color-mix(in srgb, var(--surface) 22%, transparent) 100%
+        );
+}
+
+.blog-article-banner-copy {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    max-width: 38rem;
+    margin: 1.6rem;
+    padding: 1.55rem 1.75rem 1.6rem;
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    backdrop-filter: blur(6px);
+}
+
+.blog-article-title {
+    margin: 0;
+    font-size: clamp(1.7rem, 3.2vw, 2.45rem);
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    line-height: 0.94;
+    text-transform: uppercase;
+}
+
+.blog-article-title-accent {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+    color: #5b5c3b;
+}
+
+.blog-article-title-accent::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0.06em;
+    height: 0.18em;
+    background: color-mix(in srgb, #5b5c3b 22%, transparent);
+    z-index: -1;
+}
+
+[data-theme='dark'] .blog-article-title-accent {
+    color: var(--accent);
+}
+
+[data-theme='dark'] .blog-article-title-accent::after {
+    background: color-mix(in srgb, var(--accent) 24%, transparent);
+}
+
+.blog-article-lede {
+    margin: 0.9rem 0 0;
+    max-width: 34rem;
+    font-size: 1.02rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+}
+
+[data-theme='dark'] .blog-article-banner-copy {
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+}
+
+.blog-article-byline {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+    gap: 0.75rem 1.25rem;
+    margin: 0 0 1rem;
+    padding: 0 0 1rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 80%, var(--accent));
+}
+
+.blog-article-byline-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+}
+
+.blog-article-byline-cell + .blog-article-byline-cell {
+    padding-left: 1.25rem;
+    border-left: 1px solid color-mix(in srgb, var(--border) 80%, var(--accent));
+}
+
+.blog-article-byline dt {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.blog-article-byline dd {
+    margin: 0;
+    font-size: 0.98rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text);
+}
+
+.blog-article-byline a {
+    color: inherit;
+}
+
+.blog-article-byline a:hover {
+    color: var(--accent-hover);
+}
+
+.blog-article-byline time {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Même largeur que le hero, sur le fond blanc de la boutique. */
+.blog-article-main {
+    max-width: none;
+    margin: 0 0 1.65rem;
+    padding: 2.35rem 2.6rem 2.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.blog-article-body {
+    font-size: 1.125rem;
+    line-height: 1.8;
+}
+
+.blog-article-body > * + * {
+    margin-top: 1.15rem;
+}
+
+.blog-article-body p:empty {
+    display: none;
+}
+
+.blog-article-body > p:first-child {
+    font-size: 1.2rem;
+    line-height: 1.7;
+    color: var(--text);
+}
+
+.blog-article-body h2,
+.blog-article-body h3,
+.blog-article-body h4 {
+    margin-top: 2.15rem;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+}
+
+.blog-article-body h2 {
+    font-size: 1.45rem;
+    margin-top: 2.5rem;
+    padding-top: 1.35rem;
+    border-top: 1px solid var(--border);
+}
+
+.blog-article-body h3 { font-size: 1.15rem; }
+.blog-article-body h4 { font-size: 1.05rem; }
+
+.blog-article-body a {
+    color: var(--accent-hover);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+}
+
+.blog-article-body a:hover {
+    color: var(--text);
+}
+
+.blog-article-body ul,
+.blog-article-body ol {
+    padding-left: 1.2rem;
+}
+
+.blog-article-body li + li {
+    margin-top: 0.55rem;
+}
+
+.blog-article-body li strong {
+    font-weight: 600;
+}
+
+.blog-article-body blockquote {
+    margin-left: 0;
+    padding: 0.35rem 0 0.35rem 1.05rem;
+    border-left: 3px solid var(--accent);
+    color: var(--text-muted);
+}
+
+.blog-article-body img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    border: 1px solid var(--border);
+}
+
+.blog-article-body figure {
+    margin: 1.85rem 0;
+}
+
+.blog-article-body figcaption {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.blog-article-body pre {
+    padding: 0.9rem 1rem;
+    overflow-x: auto;
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.blog-article-ask {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem 1.5rem;
+    margin: 0 0 1.65rem;
+    padding: 1.4rem 1.6rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.blog-article-ask-kicker {
+    margin: 0 0 0.3rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.blog-article-ask-title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text);
+}
+
+.blog-article-ask .btn {
+    flex-shrink: 0;
+}
+
+.blog-article-section-head {
+    margin: 0 0 1.15rem;
+}
+
+.blog-section-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+}
+
+.blog-article-products,
+.blog-article-related {
+    margin-top: 2.75rem;
+}
+
+.blog-article-back {
+    margin-top: 2.5rem;
+    padding-top: 1.35rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.9375rem;
+}
+
+.blog-article-back a {
+    color: var(--text-muted);
+}
+
+.blog-article-back a:hover {
+    color: var(--text);
+}
+
+/* Le renvoi depuis une fiche produit. */
+.product-blog-posts {
+    margin-top: 2.5rem;
+}
+
+@media (max-width: 900px) {
+    .blog-article-banner {
+        min-height: 0;
+        align-items: flex-end;
+    }
+
+    .blog-article-banner.has-image {
+        min-height: 22rem;
+        background-position: center top;
+    }
+
+    .blog-article-banner.has-image .blog-article-banner-overlay {
+        background: linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--surface) 8%, transparent) 0%,
+            color-mix(in srgb, var(--surface) 55%, transparent) 42%,
+            var(--surface) 78%
+        );
+    }
+
+    .blog-article-banner-copy {
+        max-width: none;
+        width: 100%;
+        margin: 0;
+        padding: 1.35rem 1.2rem 1.4rem;
+    }
+
+    .blog-article-title {
+        font-size: 1.7rem;
+    }
+
+    .blog-article-main {
+        padding: 1.6rem 1.25rem 1.75rem;
+    }
+}
+
+@media (min-width: 960px) {
+    .blog-article-main {
+        padding: 2.6rem 3rem 2.85rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .blog-article-title {
+        font-size: 1.7rem;
+    }
+
+    .blog-article-byline-cell + .blog-article-byline-cell {
+        padding-left: 0.9rem;
+    }
+
+    .blog-article-banner.has-image {
+        min-height: 18rem;
+    }
+
+    .blog-article-ask {
+        align-items: stretch;
+    }
+
+    .blog-article-ask .btn {
+        width: 100%;
+    }
+
+    .blog-grid {
+        gap: 1.1rem;
+    }
+}
