@@ -108,11 +108,12 @@ class OrderController extends Controller
                 // Ventilation par statut sur le même périmètre que le total :
                 // les trois chiffres doivent pouvoir se recouper avec lui.
                 'shipped_count' => (clone $salesOrders)->where('status', 'shipped')->count(),
+                'in_transit_count' => (clone $salesOrders)->where('status', 'in_transit')->count(),
                 'delivered_count' => (clone $salesOrders)->where('status', 'delivered')->count(),
                 'refunded_count' => (clone $salesOrders)->where('status', 'refunded')->count(),
                 'to_prepare_count' => (clone $openOrders)->whereIn('status', ['placed', 'preparing'])->count(),
                 'missing_tracking_count' => (clone $openOrders)
-                    ->where('status', 'shipped')
+                    ->whereIn('status', ['shipped', 'in_transit'])
                     ->where(function ($query): void {
                         $query->whereNull('tracking_number')->orWhere('tracking_number', '');
                     })
@@ -128,7 +129,7 @@ class OrderController extends Controller
             'dateFrom' => $filters['date_from'],
             'dateTo' => $filters['date_to'],
             'marketplaces' => Marketplace::query()->orderBy('name')->get(),
-            'statuses' => ['placed', 'preparing', 'shipped', 'delivered', 'refunded'],
+            'statuses' => ['placed', 'preparing', 'shipped', 'in_transit', 'delivered', 'refunded'],
         ]);
     }
 
@@ -218,7 +219,7 @@ class OrderController extends Controller
         return [
             'tab' => in_array($request->query('tab'), ['draft', 'archived', 'test'], true) ? $request->query('tab') : 'orders',
             'search' => trim((string) $request->query('search', '')),
-            'status' => in_array($request->query('status'), ['placed', 'preparing', 'shipped', 'delivered', 'refunded'], true)
+            'status' => in_array($request->query('status'), ['placed', 'preparing', 'shipped', 'in_transit', 'delivered', 'refunded'], true)
                 ? $request->query('status')
                 : '',
             'marketplace_id' => $request->filled('marketplace_id') ? (int) $request->query('marketplace_id') : null,
@@ -602,6 +603,16 @@ class OrderController extends Controller
         AdminActivityLog::record('order.shipped', $order, 'Marked order '.$order->number.' as shipped');
 
         return $this->statusChangeResponse($request, $order, 'Order marked as shipped.');
+    }
+
+    public function markInTransit(Request $request, Order $order): RedirectResponse|JsonResponse
+    {
+        abort_if($order->isDraft(), 404);
+
+        $order->markStatus('in_transit');
+        AdminActivityLog::record('order.in_transit', $order, 'Marked order '.$order->number.' as in transit');
+
+        return $this->statusChangeResponse($request, $order, 'Order marked as in transit.');
     }
 
     public function refund(Request $request, Order $order): RedirectResponse|JsonResponse

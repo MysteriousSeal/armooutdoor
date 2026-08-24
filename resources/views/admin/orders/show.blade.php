@@ -17,7 +17,7 @@
                             title="Click to copy order number"
                         >{{ $order->number }}</h2>
                         <span class="badge badge-{{ $order->status }}">
-                            {{ ucfirst($order->status) }}
+                            {{ $order->statusLabel() }}
                         </span>
                         @if ($order->isArchived())
                             <span class="badge badge-disabled">Archived</span>
@@ -40,6 +40,8 @@
                         @elseif ($order->status === 'preparing')
                             <button type="button" class="btn btn-primary" data-modal-open="ship-confirm-modal">Mark as shipped</button>
                         @elseif ($order->status === 'shipped')
+                            <button type="button" class="btn btn-primary" data-modal-open="in-transit-confirm-modal">Mark as in transit</button>
+                        @elseif ($order->status === 'in_transit')
                             <button type="button" class="btn btn-primary" data-modal-open="deliver-confirm-modal">Mark as delivered</button>
                         @endif
                         @if ($order->status !== 'refunded' && auth()->user()->isOwner())
@@ -380,7 +382,7 @@
                             <li class="order-timeline-item is-{{ $entry->status }}{{ $loop->first ? ' is-current' : '' }}">
                                 <span class="order-timeline-marker" aria-hidden="true"></span>
                                 <div class="order-timeline-body">
-                                    <span class="order-timeline-status">{{ ucfirst($entry->status) }}</span>
+                                    <span class="order-timeline-status">{{ \App\Models\Order::labelForStatus($entry->status) }}</span>
                                     <time class="order-timeline-date" datetime="{{ $entry->created_at->toIso8601String() }}">
                                         {{ $entry->created_at->format('d M Y · H:i') }}
                                     </time>
@@ -581,6 +583,25 @@
         @endif
 
         @if ($order->status === 'shipped')
+            <dialog id="in-transit-confirm-modal" class="modal" aria-labelledby="in-transit-confirm-title">
+                <form method="POST" action="{{ route('admin.orders.in-transit', $order) }}">
+                    @csrf
+                    @method('PATCH')
+                    <p class="modal-kicker">{{ $order->number }}</p>
+                    <h3 class="modal-title" id="in-transit-confirm-title">Mark as in transit?</h3>
+                    <p class="modal-body">
+                        This will set the order status to <strong>In transit</strong>.
+                        The customer will see the update on their order.
+                    </p>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                        <button type="submit" class="btn btn-primary">Mark as in transit</button>
+                    </div>
+                </form>
+            </dialog>
+        @endif
+
+        @if ($order->status === 'in_transit')
             <dialog id="deliver-confirm-modal" class="modal" aria-labelledby="deliver-confirm-title">
                 <form method="POST" action="{{ route('admin.orders.deliver', $order) }}">
                     @csrf

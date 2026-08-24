@@ -3872,6 +3872,12 @@
     background: #eef4ef;
 }
 
+.order-status.is-in_transit {
+    color: #6a4a9c;
+    border-color: #ddd2ec;
+    background: #f2eef8;
+}
+
 .order-status.is-refunded {
     color: #a44;
     border-color: #e3c6c6;
@@ -3888,6 +3894,12 @@
     color: #9dccab;
     background: #2a332c;
     border-color: #3d4d40;
+}
+
+[data-theme='dark'] .order-status.is-in_transit {
+    color: #ab93dc;
+    background: #2c2836;
+    border-color: #463f57;
 }
 
 [data-theme='dark'] .order-status.is-refunded {

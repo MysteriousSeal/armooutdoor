@@ -43,6 +43,7 @@
             <div class="admin-list-meta">
                 <span class="admin-list-chip">{{ number_format($kpis['order_count']) }} total orders</span>
                 <span class="admin-list-chip admin-list-chip--shipped">{{ number_format($kpis['shipped_count']) }} shipped</span>
+                <span class="admin-list-chip admin-list-chip--in_transit">{{ number_format($kpis['in_transit_count']) }} in transit</span>
                 <span class="admin-list-chip admin-list-chip--delivered">{{ number_format($kpis['delivered_count']) }} delivered</span>
                 <span class="admin-list-chip admin-list-chip--refunded">{{ number_format($kpis['refunded_count']) }} refunded</span>
                 <span class="admin-list-chip">{{ number_format($kpis['to_prepare_count']) }} to prepare</span>
@@ -150,7 +151,7 @@
                     <select id="order-status" name="status" class="form-control">
                         <option value="">All statuses</option>
                         @foreach ($statuses as $statusOption)
-                            <option value="{{ $statusOption }}" @selected($status === $statusOption)>{{ ucfirst($statusOption) }}</option>
+                            <option value="{{ $statusOption }}" @selected($status === $statusOption)>{{ \App\Models\Order::labelForStatus($statusOption) }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -204,7 +205,7 @@
                 @endif
                 @if ($status !== '')
                     <a href="{{ $filterUrl(['status' => null]) }}" class="admin-filter-chip">
-                        Status · {{ ucfirst($status) }}
+                        Status · {{ \App\Models\Order::labelForStatus($status) }}
                         <span aria-hidden="true">×</span>
                     </a>
                 @endif
@@ -320,7 +321,7 @@
                                 </td>
                                 <td>
                                     <span class="order-chip order-chip--{{ $order->status }}">
-                                        {{ ucfirst($order->status) }}
+                                        {{ $order->statusLabel() }}
                                     </span>
                                 </td>
                                 <td>

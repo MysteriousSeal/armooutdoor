@@ -1243,6 +1243,15 @@ button.admin-table-icon-btn:hover {
     background: #eef4ef;
 }
 
+/* Violet : une teinte que rien d'autre n'occupe. La sarcelle essayée d'abord
+   tombait trop près du vert d'« expédiée » et du bleu de « livrée », or ces
+   trois pastilles se lisent dans la même colonne. */
+.badge-in_transit {
+    color: #6a4a9c;
+    border-color: #ddd2ec;
+    background: #f2eef8;
+}
+
 /*
  * Bleu : le colis n'est plus en mouvement. Distinct du vert d'"expédiée"
  * juste à côté, qui dit l'inverse — parti, pas encore arrivé.
@@ -1470,6 +1479,10 @@ button.admin-table-icon-btn:hover {
     --history-tone: #3d6b4e;
 }
 
+.order-timeline-item.is-in_transit {
+    --history-tone: #6a4a9c;
+}
+
 .order-timeline-item.is-refunded {
     --history-tone: #a44;
 }
@@ -1526,6 +1539,10 @@ button.admin-table-icon-btn:hover {
 
 [data-theme='dark'] .order-timeline-item.is-shipped {
     --history-tone: #9dccab;
+}
+
+[data-theme='dark'] .order-timeline-item.is-in_transit {
+    --history-tone: #ab93dc;
 }
 
 [data-theme='dark'] .order-timeline-item.is-refunded {

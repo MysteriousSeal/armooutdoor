@@ -170,6 +170,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/orders/{order}/validate-draft', [AdminOrderController::class, 'validateDraft'])->name('orders.validate-draft');
         Route::patch('/orders/{order}/prepare', [AdminOrderController::class, 'prepare'])->name('orders.prepare');
         Route::patch('/orders/{order}/ship', [AdminOrderController::class, 'ship'])->name('orders.ship');
+        Route::patch('/orders/{order}/in-transit', [AdminOrderController::class, 'markInTransit'])->name('orders.in-transit');
         Route::patch('/orders/{order}/deliver', [AdminOrderController::class, 'deliver'])->name('orders.deliver');
         Route::patch('/orders/{order}/refund', [AdminOrderController::class, 'refund'])->middleware('admin.owner')->name('orders.refund');
         // Ouvert à tous les admins, comme la réception d'un bon de commande :
