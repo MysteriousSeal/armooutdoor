@@ -95,7 +95,15 @@
         var initialHtml = textarea.value.trim();
 
         if (initialHtml) {
-            quill.root.innerHTML = initialHtml;
+            // Passer par l'analyseur de Quill plutôt que d'écrire dans le DOM.
+            //
+            // Une affectation directe de `innerHTML` s'affiche correctement
+            // mais ne construit pas le modèle interne : Quill représente une
+            // puce par `<li data-list="bullet">`, et un `<li>` venu d'ailleurs
+            // ne lui dit rien. À la première synchronisation, le modèle fait
+            // foi et toutes les listes repartent avec leur contenu. Le bascule
+            // HTML/Visuel plus bas fait déjà correctement le même travail.
+            quill.clipboard.dangerouslyPasteHTML(initialHtml);
         }
 
         var mode = 'visual';
