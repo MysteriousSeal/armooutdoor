@@ -6,6 +6,7 @@ use App\Models\AdminActivityLog;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderItem;
 use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -876,5 +877,80 @@ class PurchaseOrderTest extends TestCase
 
         $this->assertStringNotContainsString('Additional costs', $html);
         $this->assertStringNotContainsString('>Discount<', $html);
+    }
+
+    public function test_charges_are_shared_across_lines_by_quantity_received(): void
+    {
+        $supplier = $this->supplier();
+        $po = PurchaseOrder::factory()->create([
+            'supplier_id' => $supplier->id,
+            'additional_costs_cents' => 1200,
+            'discount_cents' => 0,
+        ]);
+
+        // 5 unités contre 15 : la ligne de 15 doit toucher trois fois plus.
+        $small = PurchaseOrderItem::query()->create([
+            'purchase_order_id' => $po->id,
+            'product_id' => Product::factory()->create()->id,
+            'name' => 'A',
+            'quantity_ordered' => 5,
+            'quantity_received' => 5,
+            'unit_cost_cents' => 100,
+        ]);
+        $large = PurchaseOrderItem::query()->create([
+            'purchase_order_id' => $po->id,
+            'product_id' => Product::factory()->create()->id,
+            'name' => 'B',
+            'quantity_ordered' => 15,
+            'quantity_received' => 15,
+            'unit_cost_cents' => 100,
+        ]);
+        $po->load('items');
+
+        $this->assertSame(20, $po->totalReceivedQuantity());
+        $this->assertSame(300, $po->lineShareOfChargesCents($small));
+        $this->assertSame(900, $po->lineShareOfChargesCents($large));
+    }
+
+    public function test_a_discount_reduces_the_line_share_and_can_go_negative(): void
+    {
+        $supplier = $this->supplier();
+        $po = PurchaseOrder::factory()->create([
+            'supplier_id' => $supplier->id,
+            'additional_costs_cents' => 0,
+            'discount_cents' => 500,
+        ]);
+        $item = PurchaseOrderItem::query()->create([
+            'purchase_order_id' => $po->id,
+            'product_id' => Product::factory()->create()->id,
+            'name' => 'A',
+            'quantity_ordered' => 10,
+            'quantity_received' => 10,
+            'unit_cost_cents' => 100,
+        ]);
+        $po->load('items');
+
+        $this->assertSame(-500, $po->lineShareOfChargesCents($item));
+    }
+
+    public function test_an_unreceived_line_gets_no_share_of_anything(): void
+    {
+        $supplier = $this->supplier();
+        $po = PurchaseOrder::factory()->create([
+            'supplier_id' => $supplier->id,
+            'additional_costs_cents' => 1000,
+        ]);
+        $item = PurchaseOrderItem::query()->create([
+            'purchase_order_id' => $po->id,
+            'product_id' => Product::factory()->create()->id,
+            'name' => 'A',
+            'quantity_ordered' => 10,
+            'quantity_received' => 0,
+            'unit_cost_cents' => 100,
+        ]);
+        $po->load('items');
+
+        $this->assertSame(0, $po->totalReceivedQuantity());
+        $this->assertSame(0, $po->lineShareOfChargesCents($item));
     }
 }

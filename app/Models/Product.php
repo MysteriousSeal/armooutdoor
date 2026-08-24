@@ -172,9 +172,7 @@ class Product extends Model
         }
 
         $totalInclVatCents = $lines->sum(
-            fn (PurchaseOrderItem $line): int => $line->purchaseOrder->withVatCents(
-                $line->unit_cost_cents * $line->quantity_received,
-            ),
+            fn (PurchaseOrderItem $line): int => $line->purchaseOrder->receivedLineTotalInclVatWithChargesCents($line),
         );
 
         return (int) round($totalInclVatCents / $units);
@@ -191,8 +189,11 @@ class Product extends Model
      */
     private function receivedPurchaseOrderLines(): Collection
     {
+        // .items aussi : la part de remise et de frais d'une ligne se
+        // calcule sur la quantité reçue de tout le bon, pas seulement la
+        // sienne — sans quoi chaque ligne rechargerait son bon à part.
         return $this->purchaseOrderItems()
-            ->with('purchaseOrder')
+            ->with('purchaseOrder.items')
             ->where('quantity_received', '>', 0)
             ->get();
     }
@@ -218,7 +219,7 @@ class Product extends Model
         $lines = PurchaseOrderItem::query()
             ->whereIn('product_id', $ids)
             ->where('quantity_received', '>', 0)
-            ->with('purchaseOrder')
+            ->with('purchaseOrder.items')
             ->get()
             ->groupBy('product_id');
 
@@ -226,9 +227,7 @@ class Product extends Model
             $units = $productLines->sum('quantity_received');
 
             $totalInclVatCents = $productLines->sum(
-                fn (PurchaseOrderItem $line): int => $line->purchaseOrder->withVatCents(
-                    $line->unit_cost_cents * $line->quantity_received,
-                ),
+                fn (PurchaseOrderItem $line): int => $line->purchaseOrder->receivedLineTotalInclVatWithChargesCents($line),
             );
 
             return (int) round($totalInclVatCents / $units);

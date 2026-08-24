@@ -5386,8 +5386,15 @@ input[type="date"].form-control {
     gap: 0.4rem;
     margin: -0.35rem 0 1rem;
     padding: 0.5rem 0.75rem;
+    text-decoration: none;
     background: color-mix(in srgb, var(--accent) 6%, var(--surface));
     border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--border));
+    transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+
+.product-avg-cost:hover {
+    background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+    border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
 }
 
 .product-avg-cost-label {
@@ -5423,4 +5430,59 @@ input[type="date"].form-control {
     color: #8ab4dd;
     background: color-mix(in srgb, #8ab4dd 12%, var(--surface));
     border-color: color-mix(in srgb, #8ab4dd 35%, var(--border));
+}
+
+/* ------------------------------------------------------------------
+   Détail du coût d'achat moyen
+   ------------------------------------------------------------------ */
+
+.average-cost-total-row td {
+    padding-top: 0.75rem;
+    font-weight: 600;
+    color: var(--text);
+    border-top: 2px solid var(--border);
+}
+
+.average-cost-avg-row td {
+    padding-top: 0.4rem;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+
+.average-cost-avg-row .admin-table-num {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.average-cost-help {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    margin-left: 0.2rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    cursor: help;
+}
+
+.is-charge-positive {
+    color: #7a4a45;
+}
+
+.is-charge-negative {
+    color: #3d6b4e;
+}
+
+[data-theme='dark'] .is-charge-positive {
+    color: #d4a39d;
+}
+
+[data-theme='dark'] .is-charge-negative {
+    color: #9dccab;
 }

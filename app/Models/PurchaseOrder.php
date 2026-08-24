@@ -134,6 +134,48 @@ class PurchaseOrder extends Model
         return $this->subtotalCents() + $this->shipping_cents + $this->additional_costs_cents - $this->discount_cents;
     }
 
+    /** Across every line on this order, not just one product's. */
+    public function totalReceivedQuantity(): int
+    {
+        return (int) $this->items->sum('quantity_received');
+    }
+
+    /**
+     * This line's slice of the order's discount and additional costs,
+     * prorated by the quantity it received against everything else the
+     * order delivered — a nineteen-unit line absorbs nineteen times more
+     * than a one-unit line. Excl. VAT, the same basis as unit_cost_cents.
+     *
+     * Zero for a line on an order where nothing has been received yet:
+     * there is nothing to divide a share of.
+     */
+    public function lineShareOfChargesCents(PurchaseOrderItem $item): int
+    {
+        $totalQuantity = $this->totalReceivedQuantity();
+
+        if ($totalQuantity === 0) {
+            return 0;
+        }
+
+        $netChargesCents = $this->additional_costs_cents - $this->discount_cents;
+
+        return (int) round($netChargesCents * $item->quantity_received / $totalQuantity);
+    }
+
+    /**
+     * What this line actually cost once its share of the order's discount
+     * and additional costs is folded in — incl. VAT, for the quantity
+     * received. This is what a product's average purchase cost is drawn
+     * from, not lineTotalInclVatCents(), which prices what was ordered and
+     * knows nothing of charges spread across the whole order.
+     */
+    public function receivedLineTotalInclVatWithChargesCents(PurchaseOrderItem $item): int
+    {
+        $baseCents = $item->unit_cost_cents * $item->quantity_received;
+
+        return $this->withVatCents($baseCents + $this->lineShareOfChargesCents($item));
+    }
+
     /**
      * The rate the supplier's prices included, as a percentage. Costs are
      * stored excl. VAT; this is what turns them back into what was paid.

@@ -11,6 +11,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\ProductVariant;
+use App\Models\PurchaseOrderItem;
 use App\Models\Supplier;
 use App\Support\Csv;
 use App\Support\HtmlSanitizer;
@@ -248,6 +249,37 @@ class ProductController extends Controller
             'reason' => $reason,
             'variantId' => $variantId,
             'drift' => $this->stockLedgerDrift($product),
+        ]);
+    }
+
+    /**
+     * Comment le coût d'achat moyen affiché sur la fiche produit a été
+     * obtenu — une ligne par bon de commande reçu, dans le même calcul que
+     * Product::averagePurchaseCostInclVatCents(), pour que la page et le
+     * chiffre ne puissent jamais se contredire.
+     */
+    public function averageCost(Product $product): View
+    {
+        $lines = $product->purchaseOrderItems()
+            ->with('purchaseOrder.items')
+            ->where('quantity_received', '>', 0)
+            ->get()
+            ->sortBy(fn (PurchaseOrderItem $line) => $line->purchaseOrder->received_at ?? $line->purchaseOrder->created_at)
+            ->values();
+
+        // Sommée ici plutôt que reprise de moyenne × unités : la moyenne est
+        // elle-même arrondie, donc le produit des deux ne retombe pas
+        // toujours exactement sur la somme des lignes.
+        $totalInclVatCents = (int) $lines->sum(
+            fn (PurchaseOrderItem $line): int => $line->purchaseOrder->receivedLineTotalInclVatWithChargesCents($line),
+        );
+
+        return view('admin.products.average-cost', [
+            'product' => $product,
+            'lines' => $lines,
+            'units' => $product->receivedPurchaseUnits(),
+            'totalInclVatCents' => $totalInclVatCents,
+            'averageCostInclVatCents' => $product->averagePurchaseCostInclVatCents(),
         ]);
     }
 

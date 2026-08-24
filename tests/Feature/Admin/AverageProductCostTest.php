@@ -127,4 +127,126 @@ class AverageProductCostTest extends TestCase
             ->get(route('admin.products.create'))
             ->assertOk();
     }
+
+    public function test_the_breakdown_page_lists_each_line_and_matches_the_average(): void
+    {
+        $product = Product::factory()->create();
+        $first = $this->receivedLine($product, 2, 250);
+        $second = $this->receivedLine($product, 3, 286);
+
+        $html = $this->actingAs(User::factory()->admin()->create())
+            ->get(route('admin.products.average-cost', $product))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString($first->purchaseOrder->number, $html);
+        $this->assertStringContainsString($second->purchaseOrder->number, $html);
+
+        // 2*250 -> round(500*1.2)=600 ; 3*286 -> round(858*1.2)=1030.
+        // Total 1630, sur 5 unités -> 326, comme la moyenne affichée.
+        $this->assertStringContainsString('16,30', $html);
+        $this->assertSame(326, $product->averagePurchaseCostInclVatCents());
+        $this->assertStringContainsString('3,26', $html);
+    }
+
+    public function test_the_breakdown_page_is_empty_without_any_receipt(): void
+    {
+        $product = Product::factory()->create();
+
+        $html = $this->actingAs(User::factory()->admin()->create())
+            ->get(route('admin.products.average-cost', $product))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('No purchase order has been received', $html);
+    }
+
+    public function test_the_edit_page_links_to_the_breakdown(): void
+    {
+        $product = Product::factory()->create();
+        $this->receivedLine($product, 2, 250);
+
+        $html = $this->actingAs(User::factory()->admin()->create())
+            ->get(route('admin.products.edit', $product))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString(route('admin.products.average-cost', $product), $html);
+    }
+
+    public function test_the_average_folds_in_the_orders_prorated_charges(): void
+    {
+        // Un bon avec deux produits, 5 et 15 unités, 1200 de frais
+        // supplémentaires : la ligne de 5 en absorbe 300, celle de 15, 900.
+        $po = PurchaseOrder::factory()->create(['vat_rate_basis_points' => 2000, 'additional_costs_cents' => 1200]);
+
+        $product = Product::factory()->create();
+        PurchaseOrderItem::query()->create([
+            'purchase_order_id' => $po->id,
+            'product_id' => $product->id,
+            'name' => $product->localizedName(),
+            'quantity_ordered' => 5,
+            'quantity_received' => 5,
+            'unit_cost_cents' => 100,
+        ]);
+        PurchaseOrderItem::query()->create([
+            'purchase_order_id' => $po->id,
+            'product_id' => Product::factory()->create()->id,
+            'name' => 'Other',
+            'quantity_ordered' => 15,
+            'quantity_received' => 15,
+            'unit_cost_cents' => 100,
+        ]);
+
+        // (5*100 + 300) * 1.2 / 5 = 192 cents l'unité.
+        $this->assertSame(192, $product->averagePurchaseCostInclVatCents());
+    }
+
+    public function test_a_product_alone_on_its_order_absorbs_the_full_charge(): void
+    {
+        $po = PurchaseOrder::factory()->create(['vat_rate_basis_points' => 2000, 'discount_cents' => 200]);
+        $product = Product::factory()->create();
+        PurchaseOrderItem::query()->create([
+            'purchase_order_id' => $po->id,
+            'product_id' => $product->id,
+            'name' => $product->localizedName(),
+            'quantity_ordered' => 2,
+            'quantity_received' => 2,
+            'unit_cost_cents' => 100,
+        ]);
+
+        // (2*100 - 200) * 1.2 / 2 = 0.
+        $this->assertSame(0, $product->averagePurchaseCostInclVatCents());
+    }
+
+    public function test_the_breakdown_page_shows_the_charges_share_per_line(): void
+    {
+        $po = PurchaseOrder::factory()->create(['vat_rate_basis_points' => 2000, 'additional_costs_cents' => 1200]);
+        $product = Product::factory()->create();
+        $line = PurchaseOrderItem::query()->create([
+            'purchase_order_id' => $po->id,
+            'product_id' => $product->id,
+            'name' => $product->localizedName(),
+            'quantity_ordered' => 5,
+            'quantity_received' => 5,
+            'unit_cost_cents' => 100,
+        ]);
+        PurchaseOrderItem::query()->create([
+            'purchase_order_id' => $po->id,
+            'product_id' => Product::factory()->create()->id,
+            'name' => 'Other',
+            'quantity_ordered' => 15,
+            'quantity_received' => 15,
+            'unit_cost_cents' => 100,
+        ]);
+
+        $html = $this->actingAs(User::factory()->admin()->create())
+            ->get(route('admin.products.average-cost', $product))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertSame(300, $po->fresh(['items'])->lineShareOfChargesCents($line->fresh()));
+        $this->assertStringContainsString('+3,60', $html); // 300 HT -> withVat 20% = 360.
+        $this->assertStringContainsString('9,60', $html); // (500+300)*1.2/100 = 9,60 €.
+    }
 }
