@@ -52,9 +52,9 @@ class ArchivedOrderFiguresTest extends TestCase
             return [
                 'kpi_amount' => $orders->viewData('kpis')['amount_cents'],
                 'kpi_order_count' => $orders->viewData('kpis')['order_count'],
-                'net_revenue' => $dashboard->viewData('netRevenueCents'),
-                'dashboard_orders' => $dashboard->viewData('orderCount'),
-                'average_order' => $dashboard->viewData('averageOrderCents'),
+                'net_revenue' => $dashboard->viewData('headline')['revenue_cents'],
+                'dashboard_orders' => $dashboard->viewData('headline')['orders'],
+                'average_order' => $dashboard->viewData('headline')['average_order_cents'],
             ];
         };
 
@@ -77,7 +77,7 @@ class ArchivedOrderFiguresTest extends TestCase
 
             return [
                 'kpi_to_prepare' => $orders->viewData('kpis')['to_prepare_count'],
-                'dashboard_to_prepare' => $dashboard->viewData('toPrepareCount'),
+                'dashboard_to_prepare' => (int) ($dashboard->viewData('attention')->firstWhere('key', 'to-prepare')['count'] ?? 0),
                 'nav_badge' => Order::query()->awaitingStart()->count(),
                 'orders_tab' => $orders->viewData('orderCount'),
             ];
@@ -110,7 +110,7 @@ class ArchivedOrderFiguresTest extends TestCase
         $this->assertSame(1, $orders->viewData('kpis')['order_count']);
 
         $dashboard = $this->actingAs($admin)->get('/admin/dashboard')->assertOk();
-        $this->assertSame(1500, $dashboard->viewData('netRevenueCents'));
+        $this->assertSame(1500, $dashboard->viewData('headline')['revenue_cents']);
         $this->assertFalse($dashboard->viewData('recentOrders')->contains('id', $archivedTest->id));
     }
 
@@ -121,13 +121,13 @@ class ArchivedOrderFiguresTest extends TestCase
 
         $dashboard = $this->actingAs($admin)->get('/admin/dashboard')->assertOk();
 
-        $today = collect($dashboard->viewData('last7Days'))->last();
+        $today = $dashboard->viewData('revenueSeries')['current']->last();
         $this->assertSame(1500, $today['revenue_cents']);
         $this->assertSame(1, $today['orders']);
 
         $this->assertSame(
             1500,
-            (int) $dashboard->viewData('marketplaceStats')->firstWhere('label', 'Rakuten')?->revenue_cents,
+            (int) ($dashboard->viewData('channelSplit')->firstWhere('label', 'Rakuten')['revenue_cents'] ?? 0),
         );
     }
 

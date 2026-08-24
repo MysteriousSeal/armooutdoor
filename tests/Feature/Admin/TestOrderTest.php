@@ -261,13 +261,15 @@ class TestOrderTest extends TestCase
                 'kpi_amount' => $orders->viewData('kpis')['amount_cents'],
                 'kpi_count' => $orders->viewData('kpis')['order_count'],
                 'tab_count' => $orders->viewData('orderCount'),
-                'net_revenue' => $dashboard->viewData('netRevenueCents'),
-                'dashboard_orders' => $dashboard->viewData('orderCount'),
+                'net_revenue' => $dashboard->viewData('headline')['revenue_cents'],
+                'dashboard_orders' => $dashboard->viewData('headline')['orders'],
                 'spent' => $profile->viewData('spentCents'),
                 'nav_badge' => Order::query()->awaitingStart()->count(),
-                'to_prepare' => $dashboard->viewData('toPrepareCount'),
-                'missing_tracking' => $dashboard->viewData('missingTrackingCount'),
-                'external_customers' => $dashboard->viewData('externalCustomerCount'),
+                // Ces deux-là vivent désormais dans la bande « à traiter »,
+                // qui retire les compteurs à zéro : absent vaut donc zéro.
+                'to_prepare' => (int) ($dashboard->viewData('attention')->firstWhere('key', 'to-prepare')['count'] ?? 0),
+                'missing_tracking' => (int) ($dashboard->viewData('attention')->firstWhere('key', 'missing-tracking')['count'] ?? 0),
+                'external_customers' => $dashboard->viewData('reference')['external_orders'],
                 'recent_orders' => $dashboard->viewData('recentOrders')->count(),
             ];
         };

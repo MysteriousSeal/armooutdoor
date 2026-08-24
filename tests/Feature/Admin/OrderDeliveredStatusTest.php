@@ -121,7 +121,7 @@ class OrderDeliveredStatusTest extends TestCase
 
         $dashboard = $this->actingAs($admin)->get('/admin/dashboard')->assertOk();
 
-        $this->assertSame(1500, $dashboard->viewData('netRevenueCents'));
+        $this->assertSame(1500, $dashboard->viewData('headline')['revenue_cents']);
     }
 
     public function test_a_delivered_order_is_no_longer_chased_for_tracking(): void

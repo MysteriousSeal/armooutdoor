@@ -5486,3 +5486,598 @@ input[type="date"].form-control {
 [data-theme='dark'] .is-charge-negative {
     color: #9dccab;
 }
+
+/* ==================================================================
+   Tableau de bord
+   ==================================================================
+   Les couleurs de série ne viennent pas de la marque : l'accent
+   #8b7e74 est un taupe de très faible chroma (0,022, sous le plancher)
+   — il lit gris dès qu'il sert de teinte de donnée. Il reste donc à
+   l'habillage (boutons, liens, focus) et les marques prennent une
+   palette validée à part, dans les deux modes.
+
+   Catégorielle et rampe ordinale vérifiées au validateur contre les
+   surfaces réelles du projet (#ffffff / #262422). */
+
+:root {
+    --chart-surface: #ffffff;
+    --chart-grid: #e8e6e3;
+
+    /* Catégorielle — ordre fixe, jamais recyclé. */
+    --chart-series-1: #2a78d6;
+    --chart-series-2: #eb6834;
+    --chart-series-3: #1baf7a;
+    --chart-series-4: #6b6b6b;
+
+    /* Série de comparaison « période précédente » : volontairement neutre.
+       Le plancher de chroma vise les couleurs d'identité d'un jeu
+       catégoriel — ici il s'agit de la même mesure sur une fenêtre
+       antérieure, que le gris doit faire reculer derrière la courbe
+       courante. Séparation d'avec la série 1 vérifiée : ΔE 22 en vision
+       normale, 19 sous CVD. */
+    --chart-previous: #a8a29c;
+
+    /* Rampe ordinale, une seule teinte du clair au foncé. */
+    --chart-stage-1: #86b6ef;
+    --chart-stage-2: #5795e3;
+    --chart-stage-3: #2a78d6;
+    --chart-stage-4: #1b56a0;
+
+    /* Statuts : réservés à l'état, jamais réutilisés comme série. */
+    --status-good: #0ca30c;
+    --status-warning: #fab219;
+    --status-serious: #ec835a;
+    --status-critical: #d03b3b;
+}
+
+/* Les valeurs sombres sont choisies pour la surface sombre et validées
+   comme un jeu, pas éclaircies automatiquement depuis le mode clair. */
+[data-theme='dark'] {
+    --chart-surface: #262422;
+    --chart-grid: #3a3734;
+
+    --chart-series-1: #3987e5;
+    --chart-series-2: #d95926;
+    --chart-series-3: #199e70;
+    --chart-series-4: #a8a29c;
+
+    /* Plus sourd qu'en clair : sur fond sombre un gris clair prend le
+       dessus sur le bleu et inverse la hiérarchie des deux séries. */
+    --chart-previous: #7d766f;
+
+    --chart-stage-1: #a8cbf5;
+    --chart-stage-2: #6ba3e8;
+    --chart-stage-3: #3987e5;
+    --chart-stage-4: #2461ac;
+
+    --status-good: #4cc24c;
+    --status-warning: #f5c451;
+    --status-serious: #f0997a;
+    --status-critical: #e26a6a;
+}
+
+/* --- Sélecteur de période ------------------------------------------ */
+
+.dash-periods {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 1rem;
+}
+
+.dash-period {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.dash-period:hover {
+    color: var(--text);
+    border-color: var(--accent);
+}
+
+.dash-period.is-active {
+    color: var(--text);
+    font-weight: 600;
+    background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+    border-color: var(--accent);
+}
+
+/* --- Bande « à traiter » -------------------------------------------- */
+
+.dash-attention {
+    margin-bottom: 1.5rem;
+    padding: 0.9rem 1.1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--status-warning);
+}
+
+.dash-attention-title {
+    margin: 0 0 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.dash-attention-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* Chaque puce porte une icône ET un libellé : la couleur seule ne dit
+   jamais de quoi il s'agit. */
+.dash-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.8125rem;
+    color: var(--text);
+    text-decoration: none;
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.dash-chip:hover {
+    border-color: currentColor;
+}
+
+.dash-chip-icon {
+    flex-shrink: 0;
+}
+
+.dash-chip-count {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.dash-chip.is-warning {
+    color: color-mix(in srgb, var(--status-warning) 70%, var(--text));
+    background: color-mix(in srgb, var(--status-warning) 10%, var(--surface));
+    border-color: color-mix(in srgb, var(--status-warning) 35%, var(--border));
+}
+
+.dash-chip.is-serious {
+    color: color-mix(in srgb, var(--status-serious) 70%, var(--text));
+    background: color-mix(in srgb, var(--status-serious) 10%, var(--surface));
+    border-color: color-mix(in srgb, var(--status-serious) 35%, var(--border));
+}
+
+.dash-chip.is-critical {
+    color: color-mix(in srgb, var(--status-critical) 75%, var(--text));
+    background: color-mix(in srgb, var(--status-critical) 10%, var(--surface));
+    border-color: color-mix(in srgb, var(--status-critical) 38%, var(--border));
+}
+
+/* --- Chiffre héros et tuiles ---------------------------------------- */
+
+.dash-hero-row {
+    display: grid;
+    grid-template-columns: minmax(14rem, 1fr) 3fr;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.dash-hero {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 1.25rem 1.35rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.dash-hero-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+/* Le seul nombre de cette taille sur la page. Chiffres proportionnels :
+   rien à aligner verticalement ici. */
+.dash-hero-value {
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    color: var(--text);
+}
+
+.dash-hero-foot,
+.dash-tile-foot {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.dash-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: 1rem;
+}
+
+.dash-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.9rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.dash-tile-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.dash-tile-value {
+    font-size: 1.375rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.dash-tile-compare {
+    color: var(--text-muted);
+}
+
+/* Le sens du mouvement croisé avec « est-ce une bonne nouvelle » : des
+   remboursements en hausse ne sont pas verts. */
+.dash-delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.dash-delta.is-good {
+    color: var(--status-good);
+}
+
+.dash-delta.is-bad {
+    color: var(--status-critical);
+}
+
+.dash-delta.is-flat {
+    color: var(--text-muted);
+}
+
+.spark {
+    margin-left: auto;
+    color: var(--accent);
+}
+
+/* --- Graphiques ------------------------------------------------------ */
+
+.dash-panel-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.85rem;
+}
+
+.dash-panel-head .order-panel-title {
+    margin: 0;
+}
+
+.dash-panel-note {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.dash-chart-panel {
+    margin-bottom: 1.25rem;
+}
+
+/* Hauteur libre : un canvas à hauteur figée coupe la bande de l'axe et
+   fabrique une petite barre de défilement imbriquée. */
+.dash-chart {
+    position: relative;
+    /* Sans min-width: 0 une grille refuse de réduire son enfant sous sa
+       taille intrinsèque, et le panneau déborderait à son tour. */
+    min-width: 0;
+    min-height: 220px;
+}
+
+/* Chart.js écrit une largeur en style inline. Si son observateur de
+   redimensionnement rate un changement, ce canevas resté trop large
+   pousserait toute la page en défilement horizontal — max-width borne la
+   largeur inline sans avoir à la combattre. */
+.dash-chart canvas {
+    max-width: 100%;
+}
+
+.dash-legend {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.85rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.dash-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+/* Une pastille colorée porte l'identité ; le texte garde l'encre du
+   thème et ne prend jamais la couleur de la donnée. */
+.dash-swatch {
+    display: inline-block;
+    width: 0.7rem;
+    height: 0.7rem;
+    flex-shrink: 0;
+    border-radius: 2px;
+    background: var(--swatch-color, var(--chart-series-1));
+}
+
+.dash-swatch--current {
+    --swatch-color: var(--chart-series-1);
+}
+
+.dash-swatch--previous {
+    --swatch-color: var(--chart-previous);
+}
+
+.dash-series-1 { --swatch-color: var(--chart-series-1); }
+.dash-series-2 { --swatch-color: var(--chart-series-2); }
+.dash-series-3 { --swatch-color: var(--chart-series-3); }
+.dash-series-4 { --swatch-color: var(--chart-series-4); }
+
+.dash-stage-1 { --swatch-color: var(--chart-stage-1); }
+.dash-stage-2 { --swatch-color: var(--chart-stage-2); }
+.dash-stage-3 { --swatch-color: var(--chart-stage-3); }
+.dash-stage-4 { --swatch-color: var(--chart-stage-4); }
+
+.dash-table-view {
+    margin-top: 1rem;
+}
+
+.dash-table-view summary {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.dash-table-view summary:hover {
+    color: var(--text);
+}
+
+/* --- Barres empilées -------------------------------------------------- */
+
+.dash-stack {
+    display: flex;
+    height: 1.5rem;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+/* Un filet de 2px à la couleur du fond sépare les segments — jamais une
+   bordure, qui épaissirait la marque au lieu de l'aérer. */
+.dash-stack-segment {
+    width: var(--segment-width);
+    background: var(--swatch-color);
+    border-radius: 2px;
+}
+
+.dash-stack-segment + .dash-stack-segment {
+    margin-left: 2px;
+}
+
+.dash-pipeline-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.8125rem;
+}
+
+.dash-pipeline-list li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.dash-pipeline-label {
+    color: var(--text-muted);
+}
+
+.dash-pipeline-count {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+}
+
+/* --- Barres dans un tableau ------------------------------------------- */
+
+/* Une seule couleur pour toutes les barres : la longueur dit déjà la
+   magnitude, teinter par rang doublerait l'encodage pour rien. */
+.dash-bar-cell {
+    position: relative;
+    display: block;
+    padding: 0.15rem 0;
+}
+
+.dash-bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: var(--bar-width);
+    background: color-mix(in srgb, var(--chart-series-1) 18%, transparent);
+    border-radius: 0 3px 3px 0;
+    pointer-events: none;
+}
+
+.dash-bar-cell > a,
+.dash-bar-cell > span {
+    position: relative;
+}
+
+/* Le nom absorbe la place restante et se coupe, au lieu d'imposer sa
+   largeur naturelle : à 22rem le plafond de troncature partagé dépasse un
+   panneau de grille et fabriquait une barre de défilement imbriquée. */
+.dash-bar-table td:nth-child(2) {
+    width: 100%;
+    max-width: 0;
+}
+
+.dash-bar-table .admin-table-truncate {
+    max-width: 100%;
+}
+
+/* --- Panneaux et listes ----------------------------------------------- */
+
+.dash-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr));
+    gap: 1rem;
+}
+
+.dash-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.dash-list li {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    gap: 0.15rem 0.75rem;
+}
+
+.dash-list .admin-table-sub {
+    grid-column: 1;
+}
+
+.dash-list-value {
+    grid-row: 1 / span 2;
+    grid-column: 2;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+}
+
+.dash-reference {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1.25rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+
+.dash-reference a {
+    color: var(--text-muted);
+}
+
+.dash-reference a:hover {
+    color: var(--accent-hover);
+}
+
+@media (max-width: 900px) {
+    .dash-hero-row {
+        grid-template-columns: 1fr;
+    }
+
+    .dash-hero-value {
+        font-size: 2.5rem;
+    }
+}
+
+.dash-stock-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.dash-stock-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.dash-stock-list .admin-dash-list-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+    flex: 1;
+}
+
+/* Un panneau qui traverse toute la grille, quel que soit le nombre de
+   colonnes que l'espace disponible a permis. */
+.dash-panel--wide {
+    grid-column: 1 / -1;
+}
+
+/* Avec la largeur retrouvée, la ligne se règle en colonnes : la vignette et
+   le formulaire gardent leur taille, le nom absorbe le reste. */
+.dash-panel--wide .dash-stock-list li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.dash-panel--wide .dash-stock-list .admin-dash-list-main {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.65rem;
+    min-width: 0;
+}
+
+/* Le plafond partagé de 22rem laissait un grand vide au milieu d'un
+   panneau pleine largeur : ici le nom prend la place disponible. */
+.dash-panel--wide .dash-stock-list .admin-table-truncate {
+    max-width: 100%;
+}
+
+.dash-panel--wide .dash-stock-list .admin-stock-chip {
+    flex-shrink: 0;
+}
+
+.dash-panel--wide .dash-stock-list .admin-restock-form {
+    flex-wrap: nowrap;
+}
+
+@media (max-width: 720px) {
+    /* Trop étroit pour trois colonnes : le formulaire repasse sous le nom
+       plutôt que d'écraser les champs. */
+    .dash-panel--wide .dash-stock-list li {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .dash-panel--wide .dash-stock-list .admin-restock-form {
+        grid-column: 1 / -1;
+        flex-wrap: wrap;
+    }
+}
