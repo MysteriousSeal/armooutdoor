@@ -29,6 +29,8 @@ use Illuminate\Support\Str;
     'expected_at',
     'notes',
     'shipping_cents',
+    'discount_cents',
+    'additional_costs_cents',
     'vat_rate_basis_points',
     'created_by_user_id',
     'sent_at',
@@ -45,6 +47,8 @@ class PurchaseOrder extends Model
         return [
             'expected_at' => 'date',
             'shipping_cents' => 'integer',
+            'discount_cents' => 'integer',
+            'additional_costs_cents' => 'integer',
             'vat_rate_basis_points' => 'integer',
             'sent_at' => 'datetime',
             'received_at' => 'datetime',
@@ -127,7 +131,7 @@ class PurchaseOrder extends Model
 
     public function totalCents(): int
     {
-        return $this->subtotalCents() + $this->shipping_cents;
+        return $this->subtotalCents() + $this->shipping_cents + $this->additional_costs_cents - $this->discount_cents;
     }
 
     /**
@@ -165,7 +169,9 @@ class PurchaseOrder extends Model
     public function totalInclVatCents(): int
     {
         return (int) $this->items->sum(fn (PurchaseOrderItem $item): int => $this->lineTotalInclVatCents($item))
-            + $this->withVatCents($this->shipping_cents);
+            + $this->withVatCents($this->shipping_cents)
+            + $this->withVatCents($this->additional_costs_cents)
+            - $this->withVatCents($this->discount_cents);
     }
 
     public function vatAmountCents(): int

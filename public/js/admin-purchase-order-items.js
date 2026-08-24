@@ -9,6 +9,8 @@
 
     var nextIndex = list.querySelectorAll('.po-line').length;
     var shippingInput = document.getElementById('shipping_price');
+    var discountInput = document.getElementById('discount_price');
+    var additionalCostsInput = document.getElementById('additional_costs_price');
 
     function formatEuros(value) {
         return value.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' \u20ac';
@@ -38,18 +40,24 @@
         });
 
         var shipping = shippingInput ? parseFloat(shippingInput.value) || 0 : 0;
+        var additionalCosts = additionalCostsInput ? parseFloat(additionalCostsInput.value) || 0 : 0;
+        var discount = discountInput ? parseFloat(discountInput.value) || 0 : 0;
 
         var linesEl = document.querySelector('[data-total-lines]');
         var shippingEl = document.querySelector('[data-total-shipping]');
+        var additionalEl = document.querySelector('[data-total-additional]');
+        var discountEl = document.querySelector('[data-total-discount]');
         var grandEl = document.querySelector('[data-total-grand]');
 
         if (linesEl) linesEl.textContent = formatEuros(linesTotal);
         if (shippingEl) shippingEl.textContent = formatEuros(shipping);
-        if (grandEl) grandEl.textContent = formatEuros(linesTotal + shipping);
+        if (additionalEl) additionalEl.textContent = formatEuros(additionalCosts);
+        if (discountEl) discountEl.textContent = formatEuros(discount);
+        if (grandEl) grandEl.textContent = formatEuros(linesTotal + shipping + additionalCosts - discount);
     }
 
     document.addEventListener('input', function (event) {
-        if (event.target.matches('[data-item-qty], [data-item-cost], #shipping_price')) {
+        if (event.target.matches('[data-item-qty], [data-item-cost], #shipping_price, #discount_price, #additional_costs_price')) {
             updateTotals();
         }
     });
@@ -161,7 +169,7 @@
             var next = parseFloat(vatSelect.value) || 0;
             var factor = (1 + next / 100) / (1 + currentRate / 100);
 
-            document.querySelectorAll('[data-item-cost], #shipping_price').forEach(function (input) {
+            document.querySelectorAll('[data-item-cost], #shipping_price, #discount_price, #additional_costs_price').forEach(function (input) {
                 if (input.value !== '') {
                     input.value = (parseFloat(input.value) * factor).toFixed(2);
                 }

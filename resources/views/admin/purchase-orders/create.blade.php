@@ -210,6 +210,8 @@
                     <dl class="po-running-total">
                         <div><dt>Lines</dt><dd data-total-lines>—</dd></div>
                         <div><dt>Shipping</dt><dd data-total-shipping>—</dd></div>
+                        <div><dt>Additional costs</dt><dd data-total-additional>—</dd></div>
+                        <div><dt>Discount</dt><dd data-total-discount>—</dd></div>
                         <div class="po-running-total-grand"><dt>Total <span data-cost-mode>(excl. VAT)</span></dt><dd data-total-grand>—</dd></div>
                     </dl>
                 </div>
@@ -223,7 +225,21 @@
                         <input type="number" id="shipping_price" name="shipping_price" class="form-control" value="{{ old('shipping_price', $isEdit && $purchaseOrder->shipping_cents ? $asTyped($purchaseOrder->shipping_cents) : '') }}" min="0" step="0.01">
                         @error('shipping_price') <p class="form-error">{{ $message }}</p> @enderror
                     </div>
-                    <div class="form-group form-group--wide">
+                    <div class="form-group">
+                        <label for="discount_price">Discount € <span data-cost-mode>(excl. VAT)</span></label>
+                        <input type="number" id="discount_price" name="discount_price" class="form-control" value="{{ old('discount_price', $isEdit && $purchaseOrder->discount_cents ? $asTyped($purchaseOrder->discount_cents) : '') }}" min="0" step="0.01">
+                        <p class="form-hint">Taken off the total — a rebate, an early-payment discount.</p>
+                        @error('discount_price') <p class="form-error">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="additional_costs_price">Additional costs € <span data-cost-mode>(excl. VAT)</span></label>
+                        <input type="number" id="additional_costs_price" name="additional_costs_price" class="form-control" value="{{ old('additional_costs_price', $isEdit && $purchaseOrder->additional_costs_cents ? $asTyped($purchaseOrder->additional_costs_cents) : '') }}" min="0" step="0.01">
+                        <p class="form-hint">Added to the total — customs, a surcharge, anything beyond the goods and shipping.</p>
+                        @error('additional_costs_price') <p class="form-error">{{ $message }}</p> @enderror
+                    </div>
+                    <div class="form-group">
                         <label for="notes">Notes (optional)</label>
                         <textarea id="notes" name="notes" class="form-control" rows="2" maxlength="2000">{{ old('notes', $isEdit ? $purchaseOrder->notes : '') }}</textarea>
                         @error('notes') <p class="form-error">{{ $message }}</p> @enderror

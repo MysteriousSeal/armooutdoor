@@ -754,4 +754,127 @@ class PurchaseOrderTest extends TestCase
         $this->assertSame(53, $po->items->first()->unit_cost_cents);
         $this->assertSame(500, $po->shipping_cents);
     }
+
+    public function test_discount_and_additional_costs_follow_the_vat_mode_like_shipping(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $supplier = $this->supplier();
+        $product = Product::factory()->create();
+
+        $this->actingAs($admin)->post('/admin/purchase-orders', [
+            'supplier_id' => $supplier->id,
+            'vat_rate' => '20',
+            'shipping_price' => '12.00',
+            'discount_price' => '6.00',
+            'additional_costs_price' => '24.00',
+            'items' => [['product_id' => $product->id, 'quantity' => 1, 'cost' => '10.00']],
+        ])->assertSessionHasNoErrors();
+
+        $po = PurchaseOrder::query()->firstOrFail();
+
+        // Saisis TTC à 20 %, ramenés au HT comme le port :
+        // 12,00 / 1,2 = 10,00 ; 24,00 / 1,2 = 20,00 ; 6,00 / 1,2 = 5,00.
+        $this->assertSame(1000, $po->shipping_cents);
+        $this->assertSame(2000, $po->additional_costs_cents);
+        $this->assertSame(500, $po->discount_cents);
+    }
+
+    public function test_additional_costs_are_added_and_discount_is_subtracted_from_the_total(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $supplier = $this->supplier();
+        $product = Product::factory()->create();
+
+        $this->actingAs($admin)->post('/admin/purchase-orders', [
+            'supplier_id' => $supplier->id,
+            'items' => [['product_id' => $product->id, 'quantity' => 1, 'cost' => '100.00']],
+            'shipping_price' => '10.00',
+            'additional_costs_price' => '5.00',
+            'discount_price' => '3.00',
+        ])->assertSessionHasNoErrors();
+
+        $po = PurchaseOrder::query()->with('items')->firstOrFail();
+
+        // 100 + 10 + 5 - 3 = 112, en HT comme les autres postes ici (pas de
+        // taux saisi).
+        $this->assertSame(11200, $po->totalCents());
+        $this->assertSame(11200, $po->totalInclVatCents());
+    }
+
+    public function test_a_purchase_order_without_either_field_behaves_as_before(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $supplier = $this->supplier();
+        $product = Product::factory()->create();
+
+        $this->actingAs($admin)->post('/admin/purchase-orders', $this->payload($supplier, $product));
+
+        $po = PurchaseOrder::query()->firstOrFail();
+
+        $this->assertSame(0, $po->discount_cents);
+        $this->assertSame(0, $po->additional_costs_cents);
+    }
+
+    public function test_editing_a_draft_keeps_discount_and_additional_costs(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $supplier = $this->supplier();
+        $product = Product::factory()->create();
+
+        $this->actingAs($admin)->post('/admin/purchase-orders', [
+            'supplier_id' => $supplier->id,
+            'items' => [['product_id' => $product->id, 'quantity' => 1, 'cost' => '10.00']],
+            'discount_price' => '2.00',
+            'additional_costs_price' => '4.00',
+        ]);
+        $po = PurchaseOrder::query()->firstOrFail();
+
+        $this->actingAs($admin)->put(route('admin.purchase-orders.update', $po), [
+            'supplier_id' => $supplier->id,
+            'items' => [['product_id' => $product->id, 'quantity' => 1, 'cost' => '10.00']],
+            'discount_price' => '2.00',
+            'additional_costs_price' => '4.00',
+        ])->assertSessionHasNoErrors();
+
+        $po->refresh();
+        $this->assertSame(200, $po->discount_cents);
+        $this->assertSame(400, $po->additional_costs_cents);
+    }
+
+    public function test_the_show_page_lists_discount_and_additional_costs_when_set(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $supplier = $this->supplier();
+        $product = Product::factory()->create();
+
+        $this->actingAs($admin)->post('/admin/purchase-orders', [
+            'supplier_id' => $supplier->id,
+            'items' => [['product_id' => $product->id, 'quantity' => 1, 'cost' => '10.00']],
+            'discount_price' => '2.00',
+            'additional_costs_price' => '4.00',
+        ]);
+        $po = PurchaseOrder::query()->firstOrFail();
+
+        $html = $this->actingAs($admin)->get(route('admin.purchase-orders.show', $po))->assertOk()->getContent();
+
+        $this->assertStringContainsString('Additional costs', $html);
+        $this->assertStringContainsString('4,00', $html);
+        $this->assertStringContainsString('>Discount<', $html);
+        $this->assertStringContainsString('−2,00', $html);
+    }
+
+    public function test_the_show_page_stays_quiet_about_them_when_zero(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $supplier = $this->supplier();
+        $product = Product::factory()->create();
+
+        $this->actingAs($admin)->post('/admin/purchase-orders', $this->payload($supplier, $product));
+        $po = PurchaseOrder::query()->firstOrFail();
+
+        $html = $this->actingAs($admin)->get(route('admin.purchase-orders.show', $po))->assertOk()->getContent();
+
+        $this->assertStringNotContainsString('Additional costs', $html);
+        $this->assertStringNotContainsString('>Discount<', $html);
+    }
 }

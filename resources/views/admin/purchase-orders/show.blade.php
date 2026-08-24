@@ -189,6 +189,12 @@
                     <dl class="order-totals">
                         <div><dt>Subtotal</dt><dd>{{ format_euros($purchaseOrder->subtotalCents()) }}</dd></div>
                         <div><dt>Shipping</dt><dd>{{ format_euros($purchaseOrder->shipping_cents) }}</dd></div>
+                        @if ($purchaseOrder->additional_costs_cents > 0)
+                            <div><dt>Additional costs</dt><dd>{{ format_euros($purchaseOrder->additional_costs_cents) }}</dd></div>
+                        @endif
+                        @if ($purchaseOrder->discount_cents > 0)
+                            <div><dt>Discount</dt><dd>−{{ format_euros($purchaseOrder->discount_cents) }}</dd></div>
+                        @endif
                         <div><dt>Total excl. VAT</dt><dd>{{ format_euros($purchaseOrder->totalCents()) }}</dd></div>
                         @if ($purchaseOrder->hasVat())
                             <div><dt>VAT {{ rtrim(rtrim(number_format($purchaseOrder->vatRatePercent(), 1), '0'), '.') }}%</dt><dd>{{ format_euros($purchaseOrder->vatAmountCents()) }}</dd></div>

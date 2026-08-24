@@ -25,6 +25,8 @@ class StorePurchaseOrderRequest extends FormRequest
             'expected_at' => ['nullable', 'date'],
             'notes' => ['nullable', 'string', 'max:2000'],
             'shipping_price' => ['nullable', 'numeric', 'min:0', 'max:99999.99'],
+            'discount_price' => ['nullable', 'numeric', 'min:0', 'max:99999.99'],
+            'additional_costs_price' => ['nullable', 'numeric', 'min:0', 'max:99999.99'],
             // Les prix saisis sont HT par défaut ; un taux non nul signifie
             // « ce que j'ai tapé est TTC à ce taux » et tout est converti.
             'vat_rate' => ['nullable', Rule::in(['0', '5.5', '10', '20'])],
@@ -67,6 +69,20 @@ class StorePurchaseOrderRequest extends FormRequest
     public function shippingCents(): int
     {
         $price = $this->input('shipping_price');
+
+        return filled($price) ? $this->toExVatCents((string) $price) : 0;
+    }
+
+    public function discountCents(): int
+    {
+        $price = $this->input('discount_price');
+
+        return filled($price) ? $this->toExVatCents((string) $price) : 0;
+    }
+
+    public function additionalCostsCents(): int
+    {
+        $price = $this->input('additional_costs_price');
 
         return filled($price) ? $this->toExVatCents((string) $price) : 0;
     }

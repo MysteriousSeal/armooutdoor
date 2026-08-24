@@ -89,6 +89,8 @@ class PurchaseOrderController extends Controller
                 'expected_at' => $request->input('expected_at'),
                 'notes' => $request->input('notes'),
                 'shipping_cents' => $request->shippingCents(),
+                'discount_cents' => $request->discountCents(),
+                'additional_costs_cents' => $request->additionalCostsCents(),
                 'vat_rate_basis_points' => $request->vatRateBasisPoints(),
                 'created_by_user_id' => $request->user()->id,
             ]);
@@ -140,6 +142,8 @@ class PurchaseOrderController extends Controller
                 'expected_at' => $request->input('expected_at'),
                 'notes' => $request->input('notes'),
                 'shipping_cents' => $request->shippingCents(),
+                'discount_cents' => $request->discountCents(),
+                'additional_costs_cents' => $request->additionalCostsCents(),
                 'vat_rate_basis_points' => $request->vatRateBasisPoints(),
             ]);
 
