@@ -1,9 +1,9 @@
-# Admin API — Blog
+# Admin API: Blog
 
 Read and write blog posts over HTTP. Six endpoints, JSON in and JSON out.
 
 - **Base URL:** `https://<host>/api/admin`
-- **Auth:** static bearer token — the same one the [Products API](products.md) uses
+- **Auth:** static bearer token, the same one the [Products API](products.md) uses
 - **Content type:** `application/json` (send `Accept: application/json` on every request)
 
 > **For AI agents:** every rule in this document is enforced by the server. Sections marked **MUST** / **MUST NOT** describe hard 422 failures, not style advice. Read [Rules that will bite you](#rules-that-will-bite-you) before writing any request.
@@ -37,7 +37,7 @@ Single post (`GET /blog/posts/{id}`, `POST`, `PATCH`):
 { "data": { "id": 1, "slug": "…", … } }
 ```
 
-Lists add Laravel's pagination blocks — `data`, `links`, and `meta` holding `current_page`, `from`, `to`, `last_page`, `per_page`, `total`, `path`, `links`.
+Lists add Laravel's pagination blocks: `data`, `links`, and `meta` holding `current_page`, `from`, `to`, `last_page`, `per_page`, `total`, `path`, `links`.
 
 `DELETE` returns `204` with an empty body.
 
@@ -98,7 +98,7 @@ Lists add Laravel's pagination blocks — `data`, `links`, and `meta` holding `c
 
 ## `GET /blog/categories`
 
-The four categories, with a count of **visible** posts in each — drafts and scheduled posts are not counted.
+The four categories, with a count of **visible** posts in each. Drafts and scheduled posts are not counted.
 
 ```json
 { "data": [
@@ -112,7 +112,7 @@ Use this to get a valid `blog_category_id`. Categories are seeded, not creatable
 
 ## `GET /blog/posts`
 
-Returns **every** post — drafts and scheduled included. This is the admin view, not the public one.
+Returns **every** post, drafts and scheduled included. This is the admin view, not the public one.
 
 | Param | Type | Effect |
 |---|---|---|
@@ -120,16 +120,16 @@ Returns **every** post — drafts and scheduled included. This is the admin view
 | `slug` | string | Exact match |
 | `category_id` | int | Exact match |
 | `category` | string | Match by category **slug** (`conseils`, `actualites`, `essais`, `reglementation`) |
-| `status` | string | `draft` · `published` · `visible` · `scheduled` — see below |
+| `status` | string | `draft` · `published` · `visible` · `scheduled`. See below |
 | `updated_since` | date/datetime | Posts with `updated_at >=` this value |
 | `per_page` | int | Default `25`, **capped at 100** (higher values are clamped, not rejected) |
 | `page` | int | 1-based |
 
 `status` takes two values that are not stored columns:
 
-- `published` — every post whose status is `published`, **including scheduled ones**
-- `visible` — only what a reader can actually see right now
-- `scheduled` — published, but dated in the future or missing a date
+- `published`: every post whose status is `published`, **including scheduled ones**
+- `visible`: only what a reader can actually see right now
+- `scheduled`: published, but dated in the future or missing a date
 
 Ordered by `published_at` descending, then `id` descending.
 
@@ -160,7 +160,7 @@ curl -s -X POST \
 
 ## `PATCH /blog/posts/{id}`
 
-Partial update — **only the keys you send are touched**.
+Partial update. **Only the keys you send are touched.**
 
 ```bash
 curl -s -X PATCH \
@@ -196,7 +196,7 @@ Not writable: `slug`, `is_visible`, `is_scheduled`, `url`, timestamps.
 ## Rules that will bite you
 
 **1. A published post MUST have a date.**
-`status: "published"` without `published_at` is a `422`. This holds on `PATCH` too — flipping a dateless draft to published is refused:
+`status: "published"` without `published_at` is a `422`. This holds on `PATCH` too. Flipping a dateless draft to published is refused:
 
 ```json
 { "errors": { "published_at": ["A published post needs a publication date. Send published_at, or keep the status as draft."] } }
@@ -205,7 +205,7 @@ Not writable: `slug`, `is_visible`, `is_scheduled`, `url`, timestamps.
 Without the date the post could never satisfy the visibility rule: it would read as published in the admin and be permanently invisible to readers.
 
 **2. The slug is fixed at creation.**
-Sending `title` on `PATCH` renames the post but **not** its URL. That is deliberate — a shared or indexed link must keep working. There is no way to change a slug over the API; do it in the database if you truly must.
+Sending `title` on `PATCH` renames the post but **not** its URL. That is deliberate: a shared or indexed link must keep working. There is no way to change a slug over the API; do it in the database if you truly must.
 
 **3. `product_ids` replaces the whole list, but only when sent.**
 Omit the key and the attachments are left alone. Send `[]` and they are all removed. Order in the array is the order on the page.
@@ -213,25 +213,79 @@ Omit the key and the attachments are left alone. Send `[]` and they are all remo
 **4. A future date is not an error.**
 It creates a scheduled post: `is_visible: false`, `is_scheduled: true`, `url: null`. It becomes visible on its own when the clock passes. Nothing needs to run.
 
-**5. Drafts appear in this API.**
-`GET /blog/posts` is the admin list. If you are mirroring the public blog, filter with `?status=visible` — otherwise you will publish drafts somewhere else.
+**5. Send `published_at` as UTC, without an offset.**
+The column is cast to a datetime and stored in the application timezone, which is `UTC`. An ISO string carrying an offset has its **wall-clock time stored and the offset discarded**, so `2026-09-01T20:00:00+02:00` lands as `20:00` UTC rather than `18:00`, and a post you meant to publish is scheduled two hours later than intended. Send `2026-09-01 18:00:00`, or an ISO string ending in `Z`.
+
+**6. Drafts appear in this API.**
+`GET /blog/posts` is the admin list. If you are mirroring the public blog, filter with `?status=visible`, otherwise you will publish drafts somewhere else.
 
 ### Images in the body
 
 `body` is cleaned server-side. Allowed tags: `p`, `br`, `strong`, `b`, `em`, `i`, `u`, `s`, `strike`, `a`, `ul`, `ol`, `li`, `h2`, `h3`, `h4`, `blockquote`, `span`, `div`, `pre`, `code`, plus `img`, `figure` and `figcaption`.
 
-**An `img` MUST be same-origin.** Two shapes are accepted:
-
-1. A root-relative path — starts with a single `/`, and **not** `//`
-2. An absolute `http`/`https` URL whose host matches this site's
-
-Anything else — another host, `data:`, `javascript:`, or a protocol-relative `//host/x.jpg` — has the whole `<img>` **removed**, not just its `src`. A bare `<img>` would render as a broken-image icon.
-
-Since external images are dropped, the file has to be on this site first. **The API has no upload endpoint** — use the web admin's editor, which uploads and inserts the path for you, or set `image` to a path that already exists.
-
 `<script>`, `<style>` and `<iframe>` never survive, with or without images.
 
----
+#### The same-origin rule
+
+**An `img` MUST be same-origin.** Two shapes are accepted:
+
+1. A root-relative path: starts with a single `/`, and **not** `//`
+2. An absolute `http`/`https` URL whose host matches this site's
+
+Anything else (another host, `data:`, `javascript:`, or a protocol-relative `//host/x.jpg`) has the whole `<img>` **removed**, not just its `src`. A bare `<img>` would render as a broken-image icon.
+
+Since external images are dropped, the file has to be on this site first. **The API has no upload endpoint.** You have two practical sources:
+
+- **Reuse a product photo.** Every product image already lives at `/images/products/{file}.webp` at 1000x1000. Fetch the path from `GET /api/admin/products/{id}` and read `image`, or the `images` array for the gallery. This is the usual answer for a buying guide or a comparison, and it costs nothing extra.
+- **Upload through the web admin editor**, which stores the file under `/images/blog/` and inserts the path for you.
+
+#### The figure pattern to use
+
+Wrap every in-body image in a `<figure>` with a `<figcaption>`. The caption is not decoration: it carries the point the image is making, and a reader skimming only the images still follows the argument.
+
+```html
+<figure>
+  <img src="/images/products/pistolet-walther-ppks-…-dv5olv.webp"
+       alt="Pistolet airsoft Walther PPK/S Umarex à ressort, culasse métal noire, vue de profil"
+       width="440" height="440" loading="lazy">
+  <figcaption>Walther PPK/S : 159 mm et 314 g, le plus compact des trois.</figcaption>
+</figure>
+```
+
+Allowed on `img`: `src`, `alt`, `width`, `height`, `loading`. Anything else is stripped, and those five are permitted on `img` only, so they will not survive on a `<span>` or a `<p>`.
+
+- **`alt` is required in practice.** If you omit it the sanitizer adds an empty one to keep the markup valid, which is fine for a decorative image and wrong for a product photo. Describe the subject.
+- **Use `loading="lazy"`** on anything below the fold, which is nearly every in-body image.
+
+#### Layout: the columns are automatic
+
+**Do not try to set the layout from the content.** The sanitizer strips every `class` that does not start with `ql-`, so a layout class typed into an article is silently removed on save. There is no wrapper you can add, no inline style, no attribute. The layout lives entirely in `public/css/blog.css` and keys off the `<figure>` element itself.
+
+What that CSS does, from about 901px upward:
+
+- Each `figure` floats, so the section's text runs beside it in a second column.
+- Figures **alternate sides**, odd ones right and even ones left, via `:nth-of-type(even)`. Three photos on the same side would read as a column of images rather than a layout.
+- `h2` and `h3` carry `clear: both`, so a new section always starts on a clean line instead of sliding up beside the previous image.
+- Below 901px the floats switch off and images go full width.
+
+Because of this, **where you put the `<figure>` in the markup decides how much text wraps beside it**. Place it immediately after the heading of its section:
+
+```html
+<h3>Le PPK/S, le vrai compact</h3>
+<figure>…</figure>
+<p>Premier paragraphe, qui passera à côté de l'image.</p>
+<p>Deuxième paragraphe, également à côté.</p>
+```
+
+Put it after the first paragraph instead and only the paragraphs below it wrap, which pushes the image down and usually looks worse.
+
+An image taller than the text of its section leaves some blank space before the next heading. That is expected and accepted: the article body is deliberately full container width, so sections are wide and short. If you want the figures larger or smaller, change one value:
+
+```css
+.blog-article-body figure { width: min(32%, 15.5rem); }
+```
+
+At `15.5rem` a figure renders about 248px wide; at `21rem`, about 336px.
 
 ## Errors
 
@@ -241,7 +295,7 @@ Since external images are dropped, the file has to be on this site first. **The 
 | `403` | Reached a handler without passing the token middleware (should not occur) |
 | `404` | No post with that id |
 | `422` | Validation failed |
-| `429` | Rate limit exceeded — honour `Retry-After` |
+| `429` | Rate limit exceeded, honour `Retry-After` |
 
 ```json
 {
@@ -255,7 +309,7 @@ Since external images are dropped, the file has to be on this site first. **The 
 }
 ```
 
-> **Messages are French** — the application locale is `fr` — except the custom ones above, which are English. Agents **MUST** branch on the `errors` object keys and the HTTP status, never on message text.
+> **Messages are French**, the application locale being `fr`, except the custom ones above, which are English. Agents **MUST** branch on the `errors` object keys and the HTTP status, never on message text.
 
 ---
 
@@ -292,13 +346,15 @@ curl -s -X POST \
 1. `Accept: application/json` and `Authorization: Bearer …` set.
 2. `PATCH` carries **only** the fields being changed.
 3. Setting `status: "published"` always accompanies a `published_at`.
-4. Read `is_visible` — never recompute it from `status` and `published_at`.
+4. Read `is_visible`, never recompute it from `status` and `published_at`.
 5. `product_ids` omitted means "leave alone"; `[]` means "detach all".
-6. Body images are same-origin paths already hosted here.
-7. Mirroring the public blog means `?status=visible`, not the bare list.
-8. On `429`, wait for `Retry-After`. On `422`, read `errors` keys — never the message text.
+6. `published_at` is UTC with no offset.
+7. Body images are same-origin paths already hosted here, wrapped in a `<figure>` with a caption, placed right after their section heading.
+8. No layout classes in the body. The columns come from the stylesheet.
+9. Mirroring the public blog means `?status=visible`, not the bare list.
+10. On `429`, wait for `Retry-After`. On `422`, read `errors` keys, never the message text.
 
 ## Related
 
-- [Products API](products.md) — same token, same envelope, same limiter
-- Web admin → Blog — the only place to upload cover and in-body images
+- [Products API](products.md): same token, same envelope, same limiter
+- Web admin, Blog section: the only place to upload cover and in-body images
