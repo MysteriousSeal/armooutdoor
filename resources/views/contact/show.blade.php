@@ -119,16 +119,6 @@
                                 <dd><a href="mailto:{{ $company->contact_email }}">{{ $company->contact_email }}</a></dd>
                             </div>
                         @endif
-                        @if ($company->addressLines() !== [])
-                            <div>
-                                <dt>{{ __('store.contact_info_address') }}</dt>
-                                <dd>
-                                    @foreach ($company->addressLines() as $line)
-                                        {{ $line }}<br>
-                                    @endforeach
-                                </dd>
-                            </div>
-                        @endif
                     </dl>
                 </div>
 
