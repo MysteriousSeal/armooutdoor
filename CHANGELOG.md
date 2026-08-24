@@ -2,6 +2,20 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-24 — v0.12.0 — build ZZJLBX
+
+### Admin
+
+- **Stock now comes from suppliers on purpose.** Restocking was a bare quantity field with no record of what was ordered, from whom, or at what cost. Purchase orders give it a lifecycle instead — draft, sent, received, possibly across several deliveries — and every receipt is written to a timeline naming who received what. Stock moves in exactly one place, at receiving, under row locks: a deleted product's receipt is booked without moving stock, and a product that gained variants since the order was raised is never credited directly, since the next reconcile would erase it.
+
+  Prices are typed as the supplier shows them and stored excl. VAT; the rate itself is kept on the order, so reopening a draft shows the figures the way they were written rather than silently converting them a second time. VAT applies to the line total rather than to the unit price — rounding the unit first and multiplying was repeating the rounding error once per unit.
+
+- **Every stock figure now says why it changed.** A number that looked wrong had no history to check — the activity feed is a free-text log, populated inconsistently, with no before-or-after. A page per product now lists every movement: when, how much, what it went to or came from, and who did it. Nothing calls a logger for this; an observer on the product and its variants writes the row whenever a quantity changes, which is what makes the ledger impossible to bypass. A change that declares no reason is still recorded, as Unattributed, rather than silently missed.
+
+  A `stock:backfill-history` command reaches back over past orders and purchase-order receipts to fill the ledger in, without moving a single quantity — the balances are walked backwards from what's known today, so they land exactly on the current stock, though they describe a consistent past rather than a verified one.
+
+- **A refunded line can be put back on the shelf.** Refunding an order only ever changed its status, since the refund and the physical return are different events — nothing declared the second one. Each line on a refunded order now carries a quantity field, capped at what's left to restock, and its own reason in the ledger. It can be restocked in more than one pass, the same way a purchase-order line can be received in several deliveries.
+
 ## 2026-08-23 — v0.11.1 — build Y6PLK4
 
 ### Admin
