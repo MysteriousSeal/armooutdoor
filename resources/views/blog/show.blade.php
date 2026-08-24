@@ -20,45 +20,80 @@
 @endpush
 
 @section('content')
-    <div class="container">
+    <div class="container blog-article-page">
         <nav class="breadcrumbs" aria-label="breadcrumb">
             <a href="{{ localized_route('home') }}">{{ __('store.breadcrumb_home') }}</a>
             <span class="breadcrumbs-sep" aria-hidden="true">/</span>
             <a href="{{ route('blog.index') }}">{{ __('store.blog_title') }}</a>
+            @if ($post->category)
+                <span class="breadcrumbs-sep" aria-hidden="true">/</span>
+                <a href="{{ route('blog.index', ['categorie' => $post->category->slug]) }}">{{ $post->category->localizedName() }}</a>
+            @endif
             <span class="breadcrumbs-sep" aria-hidden="true">/</span>
             <span>{{ $post->localizedTitle() }}</span>
         </nav>
 
         <article class="blog-article">
-            <header class="blog-article-head">
-                <p class="blog-article-meta">
-                    <a href="{{ route('blog.index', ['categorie' => $post->category?->slug]) }}" class="blog-article-category">
-                        {{ $post->category?->localizedName() }}
-                    </a>
-                    <span class="breadcrumbs-sep" aria-hidden="true">·</span>
-                    <time datetime="{{ $post->published_at?->toDateString() }}">
-                        {{ $post->published_at?->translatedFormat('j F Y') }}
-                    </time>
-                </p>
-                <h2 class="blog-article-title">{{ $post->localizedTitle() }}</h2>
-                @if ($post->localizedExcerpt() !== '')
-                    <p class="blog-article-lede">{{ $post->localizedExcerpt() }}</p>
+            <header
+                class="blog-article-banner{{ $post->image ? ' has-image' : '' }}"
+                @if ($post->image) style="--blog-hero-image: url('{{ $post->heroUrl() }}')" @endif
+            >
+                @if ($post->image)
+                    <div class="blog-article-banner-overlay" aria-hidden="true"></div>
                 @endif
+                <div class="blog-article-banner-copy">
+                    @if ($post->category || $post->published_at)
+                        <dl class="blog-article-byline">
+                            @if ($post->category)
+                                <div class="blog-article-byline-cell">
+                                    <dt>{{ __('store.blog_category_label') }}</dt>
+                                    <dd>
+                                        <a href="{{ route('blog.index', ['categorie' => $post->category->slug]) }}">
+                                            {{ $post->category->localizedName() }}
+                                        </a>
+                                    </dd>
+                                </div>
+                            @endif
+                            @if ($post->published_at)
+                                <div class="blog-article-byline-cell">
+                                    <dt>{{ __('store.blog_published_label') }}</dt>
+                                    <dd>
+                                        <time datetime="{{ $post->published_at->toDateString() }}">
+                                            {{ $post->published_at->translatedFormat('j F Y') }}
+                                        </time>
+                                    </dd>
+                                </div>
+                            @endif
+                        </dl>
+                    @endif
+                    <h1 class="blog-article-title">
+                        <span class="blog-article-title-accent">{{ $post->localizedTitle() }}</span>
+                    </h1>
+                    @if ($post->localizedExcerpt() !== '')
+                        <p class="blog-article-lede">{{ $post->localizedExcerpt() }}</p>
+                    @endif
+                </div>
             </header>
 
-            @if ($post->image)
-                <figure class="blog-article-hero">
-                    <img src="{{ $post->heroUrl() }}" alt="" width="1600" height="900">
-                </figure>
-            @endif
-
-            <div class="blog-article-body">
-                {!! $post->localizedBody() !!}
+            <div class="blog-article-main">
+                <div class="blog-article-body">
+                    {!! $post->localizedBody() !!}
+                </div>
             </div>
+
+            <aside class="blog-article-ask">
+                <div class="blog-article-ask-copy">
+                    <p class="blog-article-ask-kicker">{{ __('store.blog_title') }}</p>
+                    <p class="blog-article-ask-title">{{ __('store.blog_question') }}</p>
+                </div>
+                <a href="{{ route('contact.show') }}" class="btn btn-primary">{{ __('store.blog_contact_us') }}</a>
+            </aside>
 
             @if ($post->products->isNotEmpty())
                 <section class="blog-article-products" aria-labelledby="blog-products-title">
-                    <h3 class="blog-section-title" id="blog-products-title">{{ __('store.blog_related_products') }}</h3>
+                    <header class="blog-article-section-head">
+                        <h2 class="blog-section-title" id="blog-products-title">{{ __('store.blog_related_products') }}</h2>
+                    </header>
                     <div class="product-grid">
                         @foreach ($post->products as $product)
                             @include('partials.product-card', ['product' => $product, 'lazy' => true])
@@ -67,14 +102,11 @@
                 </section>
             @endif
 
-            <aside class="blog-article-ask">
-                <p>{{ __('store.blog_question') }}</p>
-                <a href="{{ route('contact.show') }}" class="btn btn-secondary">{{ __('store.blog_contact_us') }}</a>
-            </aside>
-
             @if ($related->isNotEmpty())
                 <section class="blog-article-related" aria-labelledby="blog-related-title">
-                    <h3 class="blog-section-title" id="blog-related-title">{{ __('store.blog_related_posts') }}</h3>
+                    <header class="blog-article-section-head">
+                        <h2 class="blog-section-title" id="blog-related-title">{{ __('store.blog_related_posts') }}</h2>
+                    </header>
                     <div class="blog-grid">
                         @foreach ($related as $other)
                             @include('blog.partials.card', ['post' => $other, 'lazy' => true])

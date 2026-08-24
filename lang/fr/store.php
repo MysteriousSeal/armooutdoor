@@ -336,6 +336,8 @@ return [
     'blog_empty' => 'Aucun article pour le moment.',
     'blog_empty_category' => 'Aucun article dans cette rubrique pour le moment.',
     'blog_published_on' => 'Publié le :date',
+    'blog_category_label' => 'Rubrique',
+    'blog_published_label' => 'Publié',
     'blog_back_to_list' => 'Retour au blog',
     'blog_related_products' => 'Produits mentionnés',
     'blog_related_posts' => 'À lire aussi',
