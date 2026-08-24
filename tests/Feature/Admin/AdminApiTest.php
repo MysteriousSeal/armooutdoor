@@ -52,9 +52,11 @@ class AdminApiTest extends TestCase
     {
         Product::factory()->count(3)->create();
 
+        // Enveloppe unique pour toute l'API : les données sous `data`, la
+        // pagination sous `meta`, comme les ressources Laravel.
         $this->getJson('/api/admin/products', $this->headers())
             ->assertOk()
-            ->assertJsonStructure(['data', 'current_page', 'last_page', 'total']);
+            ->assertJsonStructure(['data' => [['id', 'slug', 'name']], 'meta' => ['current_page', 'last_page', 'total']]);
     }
 
     public function test_products_show_returns_a_single_product(): void

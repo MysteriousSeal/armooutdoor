@@ -11,7 +11,10 @@ use App\Models\User;
 use App\Models\WishlistItem;
 use App\Support\Cart;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -38,6 +41,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->configureRateLimiting();
+
         ResetPassword::createUrlUsing(function ($notifiable, string $token): string {
             return localized_route('password.reset', [
                 'token' => $token,
@@ -106,6 +111,22 @@ class AppServiceProvider extends ServiceProvider
      * Resolved once per request and reused: the site header renders it on
      * every storefront page, and the account views ask for it again.
      */
+    /**
+     * L'API d'administration n'avait aucune limite de débit.
+     *
+     * Le groupe `api` n'étant pas défini, le `throttle` implicite de Laravel
+     * ne s'appliquait pas : un jeton pouvait être deviné aussi vite que le
+     * réseau le permettait. Le compteur porte sur le jeton présenté, ou sur
+     * l'adresse quand il n'y en a pas — sans quoi mille jetons faux
+     * compteraient pour mille compteurs distincts.
+     */
+    private function configureRateLimiting(): void
+    {
+        RateLimiter::for('admin-api', function (Request $request): Limit {
+            return Limit::perMinute(120)->by($request->ip() ?? 'unknown');
+        });
+    }
+
     private function unreadConversationCount(): int
     {
         if (! Auth::check()) {

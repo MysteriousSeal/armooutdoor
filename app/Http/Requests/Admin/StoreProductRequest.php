@@ -3,9 +3,8 @@
 namespace App\Http\Requests\Admin;
 
 use App\Models\Product;
-use App\Models\ProductVariant;
+use App\Rules\UniqueCatalogIdentifier;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class StoreProductRequest extends FormRequest
 {
@@ -43,13 +42,13 @@ class StoreProductRequest extends FormRequest
                 'nullable',
                 'string',
                 'max:64',
-                Rule::unique('products', 'sku')->ignore($product),
+                new UniqueCatalogIdentifier('sku', $product?->id),
             ],
             'gtin' => [
                 'nullable',
                 'string',
                 'regex:/^(\d{8}|\d{12,14})$/',
-                Rule::unique('products', 'gtin')->ignore($product),
+                new UniqueCatalogIdentifier('gtin', $product?->id),
             ],
             'characteristic_label' => ['nullable', 'array'],
             'characteristic_label.*' => ['nullable', 'string', 'max:120'],
@@ -129,14 +128,14 @@ class StoreProductRequest extends FormRequest
 
                 $seen[$value] = true;
 
-                $exists = ProductVariant::query()
-                    ->where($field, $value)
-                    ->when($variantId, fn ($query) => $query->where('id', '!=', $variantId))
-                    ->exists();
-
-                if ($exists) {
-                    $validator->errors()->add("variants.{$index}.{$field}", 'This '.strtoupper($field).' is already used by another variant.');
-                }
+                (new UniqueCatalogIdentifier($field, $product?->id, $variantId))->validate(
+                    "variants.{$index}.{$field}",
+                    $value,
+                    fn (string $message) => $validator->errors()->add(
+                        "variants.{$index}.{$field}",
+                        str_replace(':attribute', strtoupper($field), $message),
+                    ),
+                );
             }
         }
     }
