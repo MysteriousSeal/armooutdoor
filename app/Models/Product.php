@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Observers\StockMovementObserver;
 use App\Support\HtmlSanitizer;
 use App\Support\ImageThumbnailer;
 use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+#[ObservedBy(StockMovementObserver::class)]
 #[Fillable([
     'category_id',
     'supplier_id',
@@ -128,6 +131,20 @@ class Product extends Model
         if ($this->hasVariants()) {
             $this->update(['quantity' => $this->variants()->sum('quantity')]);
         }
+    }
+
+    /**
+     * Le journal de stock du produit, déclinaisons comprises.
+     *
+     * L'identifiant départage les mouvements de la même seconde : sans lui,
+     * « le dernier » n'a pas de sens, et c'est sur lui que repose la
+     * détection de dérive.
+     */
+    public function stockMovements(): HasMany
+    {
+        return $this->hasMany(StockMovement::class)
+            ->orderByDesc('created_at')
+            ->orderByDesc('id');
     }
 
     public function wishlistItems(): HasMany

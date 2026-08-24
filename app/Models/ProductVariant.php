@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Observers\StockMovementObserver;
 use App\Support\Cart;
+use App\Support\ImageThumbnailer;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[ObservedBy(StockMovementObserver::class)]
 #[Fillable([
     'product_id',
     'supplier_id',
@@ -142,6 +146,6 @@ class ProductVariant extends Model
 
     public function thumbnailUrl(): string
     {
-        return \App\Support\ImageThumbnailer::urlFor($this->image ?: $this->product->image);
+        return ImageThumbnailer::urlFor($this->image ?: $this->product->image);
     }
 }

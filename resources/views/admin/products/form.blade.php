@@ -259,6 +259,12 @@
                                     <p class="form-hint">Units you can sell. 0 means out of stock.</p>
                                 @endif
                                 @error('quantity') <p class="form-error">{{ $message }}</p> @enderror
+                                @if ($product->exists)
+                                    <p class="form-hint">
+                                        <a href="{{ route('admin.products.stock-history', $product) }}">Stock history</a>
+                                        — every recorded change to this product's stock.
+                                    </p>
+                                @endif
                             </div>
                         </div>
                         <div class="form-row">

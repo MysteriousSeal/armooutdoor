@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\MarketplaceController as AdminMarketplaceControll
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PackageTypeController as AdminPackageTypeController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\PurchaseOrderController as AdminPurchaseOrderController;
 use App\Http\Controllers\Admin\SearchController as AdminSearchController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\ShippingSettingController as AdminShippingSettingController;
@@ -113,6 +114,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/products/create', [AdminProductController::class, 'create'])->name('products.create');
         Route::post('/products', [AdminProductController::class, 'store'])->name('products.store');
         Route::get('/products/{product}/edit', [AdminProductController::class, 'edit'])->name('products.edit');
+        Route::get('/products/{product}/stock-history', [AdminProductController::class, 'stockHistory'])->name('products.stock-history');
         Route::put('/products/{product}', [AdminProductController::class, 'update'])->name('products.update');
         Route::patch('/products/{product}/status', [AdminProductController::class, 'toggleStatus'])->name('products.status');
         Route::patch('/products/{product}/quantity', [AdminProductController::class, 'updateQuantity'])->name('products.quantity');
@@ -142,6 +144,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/categories/{category}', [AdminCategoryController::class, 'update'])->name('categories.update');
 
         // Orders
+        Route::get('/purchase-orders', [AdminPurchaseOrderController::class, 'index'])->name('purchase-orders.index');
+        Route::get('/purchase-orders/create', [AdminPurchaseOrderController::class, 'create'])->name('purchase-orders.create');
+        Route::post('/purchase-orders', [AdminPurchaseOrderController::class, 'store'])->name('purchase-orders.store');
+        Route::get('/purchase-orders/{purchaseOrder}', [AdminPurchaseOrderController::class, 'show'])->name('purchase-orders.show');
+        Route::get('/purchase-orders/{purchaseOrder}/edit', [AdminPurchaseOrderController::class, 'edit'])->name('purchase-orders.edit');
+        Route::put('/purchase-orders/{purchaseOrder}', [AdminPurchaseOrderController::class, 'update'])->name('purchase-orders.update');
+        Route::patch('/purchase-orders/{purchaseOrder}/send', [AdminPurchaseOrderController::class, 'send'])->name('purchase-orders.send');
+        Route::post('/purchase-orders/{purchaseOrder}/receive', [AdminPurchaseOrderController::class, 'receive'])->name('purchase-orders.receive');
+        // Owner-only, like order refund and delete: cancelling closes out
+        // committed stock, and deleting cannot be taken back.
+        Route::patch('/purchase-orders/{purchaseOrder}/cancel', [AdminPurchaseOrderController::class, 'cancel'])->middleware('admin.owner')->name('purchase-orders.cancel');
+        Route::delete('/purchase-orders/{purchaseOrder}', [AdminPurchaseOrderController::class, 'destroy'])->middleware('admin.owner')->name('purchase-orders.destroy');
+
         Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/export', [AdminOrderController::class, 'export'])->name('orders.export');
         Route::get('/orders/create', [AdminOrderController::class, 'create'])->name('orders.create');
@@ -156,6 +171,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/orders/{order}/ship', [AdminOrderController::class, 'ship'])->name('orders.ship');
         Route::patch('/orders/{order}/deliver', [AdminOrderController::class, 'deliver'])->name('orders.deliver');
         Route::patch('/orders/{order}/refund', [AdminOrderController::class, 'refund'])->middleware('admin.owner')->name('orders.refund');
+        // Ouvert à tous les admins, comme la réception d'un bon de commande :
+        // remettre en rayon ce qui est physiquement revenu n'a rien d'un geste
+        // engageant comme le remboursement lui-même.
+        Route::patch('/orders/{order}/items/{item}/restock', [AdminOrderController::class, 'restockItem'])->name('orders.items.restock');
         // Before the {order} routes: /orders/bulk/... must not be taken
         // as an order number by the route-model binding.
         Route::patch('/orders/bulk/archive', [AdminOrderController::class, 'bulkArchive'])->name('orders.bulk-archive');

@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Api\Admin;
 
+use App\Enums\StockMovementReason;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Admin\UpdateProductRequest;
 use App\Models\Product;
 use App\Support\HtmlSanitizer;
+use App\Support\StockContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -49,7 +51,10 @@ class ProductController extends Controller
             $payload['price_cents'] = (int) round($validated['price'] * 100);
         }
 
-        $product->update($payload);
+        StockContext::during(
+            StockMovementReason::ApiUpdate,
+            fn () => $product->update($payload),
+        );
 
         return response()->json(['data' => $product->fresh()]);
     }

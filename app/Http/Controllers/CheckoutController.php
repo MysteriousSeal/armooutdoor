@@ -401,7 +401,7 @@ class CheckoutController extends Controller
                     }
 
                     // A customer is put on backorder rather than turned away.
-                    $allocation = $allocator->allocate($product, $variant, $line->quantity, allowBackorder: true);
+                    $allocation = $allocator->allocate($product, $variant, $line->quantity, allowBackorder: true, order: $order);
 
                     OrderItem::query()->create([
                         'order_id' => $order->id,

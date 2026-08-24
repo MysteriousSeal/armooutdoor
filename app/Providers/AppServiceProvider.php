@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\CompanySetting;
 use App\Models\Conversation;
 use App\Models\Order;
+use App\Models\PurchaseOrder;
 use App\Models\User;
 use App\Models\WishlistItem;
 use App\Support\Cart;
@@ -92,6 +93,9 @@ class AppServiceProvider extends ServiceProvider
                     : 0,
                 'unviewedCustomerCount' => $isAdmin
                     ? User::query()->unviewedByAdmin()->count()
+                    : 0,
+                'purchaseOrdersAwaitingReceiptCount' => $isAdmin
+                    ? PurchaseOrder::query()->awaitingReceipt()->count()
                     : 0,
             ]);
         });

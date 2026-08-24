@@ -12,6 +12,7 @@ use App\Models\Marketplace;
 use App\Models\Order;
 use App\Models\PackageType;
 use App\Models\Product;
+use App\Models\PurchaseOrder;
 use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -60,6 +61,7 @@ class AdminAuthorizationTest extends TestCase
             'payment_method' => 'card',
         ]);
         $supplier = Supplier::query()->create(['name' => 'Audit Supplier']);
+        $purchaseOrder = PurchaseOrder::factory()->create();
         $marketplace = Marketplace::query()->create(['name' => 'Audit Marketplace']);
         $packageType = PackageType::query()->create(['name' => 'Audit Box']);
         $conversation = Conversation::query()->create([
@@ -86,6 +88,8 @@ class AdminAuthorizationTest extends TestCase
             'discountCode' => $discountCode->id,
             'customer' => $customer->id,
             'order' => $order->number,
+            // Lié par numéro : PurchaseOrder redéfinit getRouteKeyName().
+            'purchaseOrder' => $purchaseOrder->number,
             'supplier' => $supplier->id,
             'marketplace' => $marketplace->id,
             'packageType' => $packageType->id,

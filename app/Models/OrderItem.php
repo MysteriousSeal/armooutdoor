@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\ImageThumbnailer;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -22,6 +23,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'line_cents',
     'was_backordered',
     'supplier_lead_time_days',
+    'restocked_quantity',
+    'restocked_at',
+    'restocked_by_user_id',
 ])]
 class OrderItem extends Model
 {
@@ -35,6 +39,8 @@ class OrderItem extends Model
             'line_cents' => 'integer',
             'was_backordered' => 'boolean',
             'supplier_lead_time_days' => 'integer',
+            'restocked_quantity' => 'integer',
+            'restocked_at' => 'datetime',
         ];
     }
 
@@ -51,6 +57,11 @@ class OrderItem extends Model
     public function variant(): BelongsTo
     {
         return $this->belongsTo(ProductVariant::class, 'product_variant_id');
+    }
+
+    public function restockedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'restocked_by_user_id');
     }
 
     /**
@@ -78,6 +89,22 @@ class OrderItem extends Model
     public function formattedLineTotal(): string
     {
         return format_euros($this->line_cents);
+    }
+
+    /**
+     * Units still sellable but not yet put back on the shelf. Mirrors
+     * PurchaseOrderItem's quantity_ordered/quantity_received: a refund can
+     * be restocked in more than one pass (part of it damaged and set aside
+     * first, the rest returned to stock once inspected).
+     */
+    public function quantityRestockable(): int
+    {
+        return max(0, $this->quantity - $this->restocked_quantity);
+    }
+
+    public function isFullyRestocked(): bool
+    {
+        return $this->quantityRestockable() === 0;
     }
 
     /**
@@ -124,7 +151,7 @@ class OrderItem extends Model
 
     public function thumbnailUrl(): string
     {
-        return \App\Support\ImageThumbnailer::urlFor($this->image);
+        return ImageThumbnailer::urlFor($this->image);
     }
 
     /**

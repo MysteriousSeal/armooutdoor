@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\StockMovementReason;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\BulkOrderActionRequest;
 use App\Http\Requests\Admin\StoreManualOrderRequest;
@@ -20,6 +21,7 @@ use App\Models\ShippingSetting;
 use App\Models\User;
 use App\Services\OrderStockAllocator;
 use App\Support\Csv;
+use App\Support\StockContext;
 use App\Support\StripeDashboard;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
@@ -30,6 +32,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -469,7 +472,7 @@ class OrderController extends Controller
                 // couvrir : la validation l'a déjà dit, et rien ici ne doit
                 // mettre l'acheteur en réassort à son insu.
                 $allocation = $finalize
-                    ? $allocator->allocate($product, $variant, $item['quantity'], allowBackorder: false)
+                    ? $allocator->allocate($product, $variant, $item['quantity'], allowBackorder: false, reason: StockMovementReason::ManualOrder, order: $savedOrder)
                     : null;
 
                 OrderItem::query()->create([
@@ -573,6 +576,87 @@ class OrderController extends Controller
         AdminActivityLog::record('order.refunded', $order, 'Marked order '.$order->number.' as refunded');
 
         return $this->statusChangeResponse($request, $order, 'Order marked as refunded.');
+    }
+
+    /**
+     * Puts returned units back on the shelf, one line at a time.
+     *
+     * Refunding the order only ever changes its status — see the decision
+     * recorded when the stock ledger was built. This is the deliberate,
+     * separate act: someone has physically checked the return and decided
+     * it is sellable. A line can be restocked in more than one pass, the
+     * same way a purchase order can be received in several deliveries.
+     */
+    public function restockItem(Request $request, Order $order, int $item): RedirectResponse|JsonResponse
+    {
+        abort_unless($order->status === 'refunded', 403);
+
+        // Named per line rather than a bare "quantity": several lines each
+        // carry their own restock form on the same page, and a validation
+        // error must land under the one that was actually submitted.
+        $field = 'quantity_'.$item;
+
+        $validated = $request->validate([
+            $field => ['required', 'integer', 'min:1'],
+        ]);
+        $quantity = $validated[$field];
+
+        $userId = $request->user()->id;
+
+        DB::transaction(function () use ($order, $item, $quantity, $field, $userId): void {
+            /** @var OrderItem $line */
+            $line = $order->items()->lockForUpdate()->findOrFail($item);
+
+            abort_if($line->product_id === null, 404);
+
+            if ($quantity > $line->quantityRestockable()) {
+                throw ValidationException::withMessages([
+                    $field => 'More than what is left to restock for this line.',
+                ]);
+            }
+
+            StockContext::during(
+                StockMovementReason::OrderRefundRestock,
+                fn () => $this->restockLine($line, $quantity),
+                subject: $order,
+            );
+
+            $line->update([
+                'restocked_quantity' => $line->restocked_quantity + $quantity,
+                'restocked_at' => now(),
+                'restocked_by_user_id' => $userId,
+            ]);
+        });
+
+        AdminActivityLog::record(
+            'order.item_restocked',
+            $order,
+            'Restocked '.$quantity.' unit(s) from order '.$order->number,
+        );
+
+        return $this->statusChangeResponse($request, $order, 'Stock updated.');
+    }
+
+    private function restockLine(OrderItem $line, int $quantity): void
+    {
+        if ($line->product_variant_id !== null) {
+            $variant = ProductVariant::query()->lockForUpdate()->find($line->product_variant_id);
+            $variant?->increment('quantity', $quantity);
+            // A product with variants keeps quantity as the mirror of their
+            // sum — see Product::reconcileQuantity().
+            $variant?->product?->reconcileQuantity();
+
+            return;
+        }
+
+        $product = Product::query()->lockForUpdate()->find($line->product_id);
+
+        // A product that has since gained variants no longer owns its own
+        // quantity; writing to it would be silently overwritten by the next
+        // reconcile, exactly as in PurchaseOrderReceiver.
+        if ($product !== null && ! $product->hasVariants()) {
+            $product->increment('quantity', $quantity);
+        }
     }
 
     public function archive(Order $order): RedirectResponse
@@ -828,14 +912,16 @@ class OrderController extends Controller
         abort_unless($order->isDraft(), 404);
 
         DB::transaction(function () use ($order): void {
-            foreach ($order->items as $item) {
-                if ($item->product_variant_id !== null) {
-                    ProductVariant::query()->whereKey($item->product_variant_id)->first()?->decrement('quantity', $item->quantity);
-                    $item->product?->reconcileQuantity();
-                } else {
-                    $item->product?->decrement('quantity', $item->quantity);
+            StockContext::during(StockMovementReason::DraftValidated, function () use ($order): void {
+                foreach ($order->items as $item) {
+                    if ($item->product_variant_id !== null) {
+                        ProductVariant::query()->whereKey($item->product_variant_id)->first()?->decrement('quantity', $item->quantity);
+                        $item->product?->reconcileQuantity();
+                    } else {
+                        $item->product?->decrement('quantity', $item->quantity);
+                    }
                 }
-            }
+            }, subject: $order);
 
             $order->update(['status' => 'placed']);
             $order->statusHistories()->create(['status' => 'placed']);
