@@ -6,12 +6,14 @@
     @php
         $baseFilters = array_filter([
             'search' => $search ?: null,
-            'status' => $status ?: null,
             'marketplace_id' => $marketplaceId ?: null,
             'date_from' => $dateFrom ?: null,
             'date_to' => $dateTo ?: null,
         ]);
         $hasFilters = $baseFilters !== [];
+        // Changer d'onglet garde la recherche et les dates, jamais le statut :
+        // c'est l'onglet lui-même qui le porte.
+        $tabUrl = fn (array $overrides = []): string => route('admin.orders.index', [...$baseFilters, ...$overrides]);
         $filterUrl = function (array $overrides = []) use ($tab, $search, $status, $marketplaceId, $dateFrom, $dateTo): string {
             return route('admin.orders.index', array_filter([
                 'tab' => $tab !== 'orders' ? $tab : null,
@@ -116,22 +118,32 @@
         </div>
 
         <nav class="admin-tabs" aria-label="Order tabs">
-            <a href="{{ route('admin.orders.index', [...$baseFilters, 'tab' => 'orders']) }}" class="{{ $tab === 'orders' ? 'active' : '' }}">
+            <a href="{{ $tabUrl() }}" class="{{ $tab === 'orders' && $status === '' ? 'active' : '' }}">
                 Orders <span class="admin-tab-count">{{ number_format($orderCount) }}</span>
             </a>
-            <a href="{{ route('admin.orders.index', [...$baseFilters, 'tab' => 'draft']) }}" class="{{ $tab === 'draft' ? 'active' : '' }}">
+            <a href="{{ $tabUrl(['tab' => 'draft']) }}" class="{{ $tab === 'draft' ? 'active' : '' }}">
                 Drafts <span class="admin-tab-count">{{ number_format($draftCount) }}</span>
             </a>
-            <a href="{{ route('admin.orders.index', [...$baseFilters, 'tab' => 'archived']) }}" class="{{ $tab === 'archived' ? 'active' : '' }}">
+            @foreach ($statuses as $index => $statusOption)
+                <a
+                    href="{{ $tabUrl(['status' => $statusOption]) }}"
+                    class="{{ $index === 0 ? 'starts-group ' : '' }}{{ $tab === 'orders' && $status === $statusOption ? 'active' : '' }}"
+                >
+                    {{ \App\Models\Order::labelForStatus($statusOption) }}
+                    <span class="admin-tab-count">{{ number_format($statusCounts[$statusOption] ?? 0) }}</span>
+                </a>
+            @endforeach
+            <a href="{{ $tabUrl(['tab' => 'archived']) }}" class="sits-apart {{ $tab === 'archived' ? 'active' : '' }}">
                 Archived <span class="admin-tab-count">{{ number_format($archivedCount) }}</span>
             </a>
-            <a href="{{ route('admin.orders.index', [...$baseFilters, 'tab' => 'test']) }}" class="{{ $tab === 'test' ? 'active' : '' }}">
+            <a href="{{ $tabUrl(['tab' => 'test']) }}" class="{{ $tab === 'test' ? 'active' : '' }}">
                 Test <span class="admin-tab-count">{{ number_format($testCount) }}</span>
             </a>
         </nav>
 
         <form method="GET" action="{{ route('admin.orders.index') }}" class="admin-filter-bar">
             <input type="hidden" name="tab" value="{{ $tab }}">
+            <input type="hidden" name="status" value="{{ $status }}">
 
             <div class="admin-filter-search">
                 <label class="admin-filter-label" for="order-search">Search</label>
@@ -146,15 +158,6 @@
             </div>
 
             <div class="admin-filter-row">
-                <div class="admin-filter-field">
-                    <label class="admin-filter-label" for="order-status">Status</label>
-                    <select id="order-status" name="status" class="form-control">
-                        <option value="">All statuses</option>
-                        @foreach ($statuses as $statusOption)
-                            <option value="{{ $statusOption }}" @selected($status === $statusOption)>{{ \App\Models\Order::labelForStatus($statusOption) }}</option>
-                        @endforeach
-                    </select>
-                </div>
                 <div class="admin-filter-field">
                     <label class="admin-filter-label" for="order-marketplace">Marketplace</label>
                     <select id="order-marketplace" name="marketplace_id" class="form-control">
@@ -189,7 +192,7 @@
                 <div class="admin-filter-actions">
                     <button type="submit" class="btn btn-primary">Apply</button>
                     @if ($hasFilters)
-                        <a href="{{ route('admin.orders.index', ['tab' => $tab !== 'orders' ? $tab : null]) }}" class="btn btn-secondary">Clear</a>
+                        <a href="{{ route('admin.orders.index', array_filter(['tab' => $tab !== 'orders' ? $tab : null, 'status' => $status ?: null])) }}" class="btn btn-secondary">Clear</a>
                     @endif
                 </div>
             </div>
@@ -200,12 +203,6 @@
                 @if ($search !== '')
                     <a href="{{ $filterUrl(['search' => null]) }}" class="admin-filter-chip">
                         Search · {{ $search }}
-                        <span aria-hidden="true">×</span>
-                    </a>
-                @endif
-                @if ($status !== '')
-                    <a href="{{ $filterUrl(['status' => null]) }}" class="admin-filter-chip">
-                        Status · {{ \App\Models\Order::labelForStatus($status) }}
                         <span aria-hidden="true">×</span>
                     </a>
                 @endif
