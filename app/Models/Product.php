@@ -282,7 +282,7 @@ class Product extends Model
 
         return Order::query()
             ->where('user_id', $user->id)
-            ->whereIn('status', ['shipped', 'delivered'])
+            ->whereIn('status', ['shipped', 'in_transit', 'delivered'])
             ->whereHas('items', fn (Builder $query) => $query->where('product_id', $this->id))
             ->whereDoesntHave('reviews', fn (Builder $query) => $query->where('product_id', $this->id))
             ->oldest()

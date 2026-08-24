@@ -43,6 +43,7 @@
             <div class="admin-list-meta">
                 <span class="admin-list-chip">{{ number_format($kpis['order_count']) }} total orders</span>
                 <span class="admin-list-chip admin-list-chip--shipped">{{ number_format($kpis['shipped_count']) }} shipped</span>
+                <span class="admin-list-chip admin-list-chip--in_transit">{{ number_format($kpis['in_transit_count']) }} in transit</span>
                 <span class="admin-list-chip admin-list-chip--delivered">{{ number_format($kpis['delivered_count']) }} delivered</span>
                 <span class="admin-list-chip admin-list-chip--refunded">{{ number_format($kpis['refunded_count']) }} refunded</span>
                 <span class="admin-list-chip">{{ number_format($kpis['to_prepare_count']) }} to prepare</span>

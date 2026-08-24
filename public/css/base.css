@@ -1243,6 +1243,14 @@ button.admin-table-icon-btn:hover {
     background: #eef4ef;
 }
 
+/* Sarcelle : entre le vert d'« expédiée » et le bleu de « livrée », le colis
+   est parti sans être arrivé. */
+.badge-in_transit {
+    color: #2f6b70;
+    border-color: #cfe3e4;
+    background: #edf5f5;
+}
+
 /*
  * Bleu : le colis n'est plus en mouvement. Distinct du vert d'"expédiée"
  * juste à côté, qui dit l'inverse — parti, pas encore arrivé.
@@ -1470,6 +1478,10 @@ button.admin-table-icon-btn:hover {
     --history-tone: #3d6b4e;
 }
 
+.order-timeline-item.is-in_transit {
+    --history-tone: #2f6b70;
+}
+
 .order-timeline-item.is-refunded {
     --history-tone: #a44;
 }
@@ -1526,6 +1538,10 @@ button.admin-table-icon-btn:hover {
 
 [data-theme='dark'] .order-timeline-item.is-shipped {
     --history-tone: #9dccab;
+}
+
+[data-theme='dark'] .order-timeline-item.is-in_transit {
+    --history-tone: #8ac8cb;
 }
 
 [data-theme='dark'] .order-timeline-item.is-refunded {

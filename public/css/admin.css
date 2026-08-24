@@ -2140,6 +2140,7 @@
 /* Ventilation par statut : une pastille reprend la couleur du statut, pour
    qu'un coup d'œil suffise à relier le chiffre à la colonne de la table. */
 .admin-list-chip--shipped,
+.admin-list-chip--in_transit,
 .admin-list-chip--delivered,
 .admin-list-chip--refunded {
     gap: 0.4rem;
@@ -2147,6 +2148,7 @@
 }
 
 .admin-list-chip--shipped::before,
+.admin-list-chip--in_transit::before,
 .admin-list-chip--delivered::before,
 .admin-list-chip--refunded::before {
     content: '';
@@ -2160,6 +2162,12 @@
     color: #3d6b4e;
     background: #eef4ef;
     border-color: #d5e4d8;
+}
+
+.admin-list-chip--in_transit {
+    color: #2f6b70;
+    background: #edf5f5;
+    border-color: #cfe3e4;
 }
 
 .admin-list-chip--delivered {
@@ -2178,6 +2186,12 @@
     color: #8fceac;
     background: color-mix(in srgb, #8fceac 12%, var(--surface));
     border-color: color-mix(in srgb, #8fceac 32%, var(--border));
+}
+
+[data-theme='dark'] .admin-list-chip--in_transit {
+    color: #8ac8cb;
+    background: color-mix(in srgb, #8ac8cb 12%, var(--surface));
+    border-color: color-mix(in srgb, #8ac8cb 32%, var(--border));
 }
 
 [data-theme='dark'] .admin-list-chip--delivered {
@@ -3250,6 +3264,12 @@ a.admin-stat-card:hover {
     border-color: #d5e4d8;
 }
 
+.order-chip--in_transit {
+    color: #2f6b70;
+    background: #edf5f5;
+    border-color: #cfe3e4;
+}
+
 .order-chip--refunded,
 .order-chip--tracking-missing {
     color: #a44;
@@ -3313,6 +3333,12 @@ a.admin-stat-card:hover {
     color: #8fceac;
     background: color-mix(in srgb, #8fceac 12%, var(--surface));
     border-color: color-mix(in srgb, #8fceac 32%, var(--border));
+}
+
+[data-theme='dark'] .order-chip--in_transit {
+    color: #8ac8cb;
+    background: color-mix(in srgb, #8ac8cb 12%, var(--surface));
+    border-color: color-mix(in srgb, #8ac8cb 32%, var(--border));
 }
 
 [data-theme='dark'] .order-chip--refunded,
@@ -5519,9 +5545,10 @@ input[type="date"].form-control {
 
     /* Rampe ordinale, une seule teinte du clair au foncé. */
     --chart-stage-1: #86b6ef;
-    --chart-stage-2: #5795e3;
-    --chart-stage-3: #2a78d6;
-    --chart-stage-4: #1b56a0;
+    --chart-stage-2: #5f98e4;
+    --chart-stage-3: #3d7ccf;
+    --chart-stage-4: #2661a8;
+    --chart-stage-5: #17457f;
 
     /* Statuts : réservés à l'état, jamais réutilisés comme série. */
     --status-good: #0ca30c;
@@ -5545,10 +5572,11 @@ input[type="date"].form-control {
        dessus sur le bleu et inverse la hiérarchie des deux séries. */
     --chart-previous: #7d766f;
 
-    --chart-stage-1: #a8cbf5;
-    --chart-stage-2: #6ba3e8;
-    --chart-stage-3: #3987e5;
-    --chart-stage-4: #2461ac;
+    --chart-stage-1: #bcd8f8;
+    --chart-stage-2: #8fb9f0;
+    --chart-stage-3: #6398e8;
+    --chart-stage-4: #3f77c9;
+    --chart-stage-5: #2a5896;
 
     --status-good: #4cc24c;
     --status-warning: #f5c451;
@@ -5846,6 +5874,7 @@ input[type="date"].form-control {
 .dash-stage-2 { --swatch-color: var(--chart-stage-2); }
 .dash-stage-3 { --swatch-color: var(--chart-stage-3); }
 .dash-stage-4 { --swatch-color: var(--chart-stage-4); }
+.dash-stage-5 { --swatch-color: var(--chart-stage-5); }
 
 .dash-table-view {
     margin-top: 1rem;

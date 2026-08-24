@@ -81,16 +81,20 @@ class OrderDeliveredStatusTest extends TestCase
         $this->assertSame('draft', $order->fresh()->status);
     }
 
-    public function test_the_button_appears_only_on_a_shipped_order(): void
+    /**
+     * « Livrée » s'atteint depuis « en transit », pas depuis « expédiée » :
+     * l'étape intermédiaire est obligatoire, et le bouton l'impose.
+     */
+    public function test_the_button_appears_only_on_an_in_transit_order(): void
     {
         $admin = User::factory()->admin()->create();
 
         $this->actingAs($admin)
-            ->get('/admin/orders/'.$this->order('shipped')->number)
+            ->get('/admin/orders/'.$this->order('in_transit')->number)
             ->assertOk()
             ->assertSee('Mark as delivered');
 
-        foreach (['placed', 'preparing', 'delivered'] as $status) {
+        foreach (['placed', 'preparing', 'shipped', 'delivered'] as $status) {
             $this->actingAs($admin)
                 ->get('/admin/orders/'.$this->order($status)->number)
                 ->assertOk()

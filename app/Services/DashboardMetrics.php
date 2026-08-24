@@ -271,7 +271,7 @@ class DashboardMetrics
         $counts = Order::query()
             ->whereNull('archived_at')
             ->excludingTest()
-            ->whereIn('status', ['placed', 'preparing', 'shipped', 'delivered'])
+            ->whereIn('status', ['placed', 'preparing', 'shipped', 'in_transit', 'delivered'])
             ->selectRaw('status, count(*) as count')
             ->groupBy('status')
             ->pluck('count', 'status');
@@ -280,6 +280,7 @@ class DashboardMetrics
             'placed' => 'Placed',
             'preparing' => 'Preparing',
             'shipped' => 'Shipped',
+            'in_transit' => 'In transit',
             'delivered' => 'Delivered',
         ])->map(fn (string $label, string $status): array => [
             'status' => $status,
@@ -299,7 +300,7 @@ class DashboardMetrics
         $openOrders = fn (): Builder => Order::query()->whereNull('archived_at')->excludingTest();
 
         $toPrepare = (clone $openOrders())->whereIn('status', ['placed', 'preparing'])->count();
-        $missingTracking = (clone $openOrders())->where('status', 'shipped')
+        $missingTracking = (clone $openOrders())->whereIn('status', ['shipped', 'in_transit'])
             ->where(fn ($query) => $query->whereNull('tracking_number')->orWhere('tracking_number', ''))
             ->count();
         $unreadMessages = Conversation::query()->unreadForAdmin()->count();
@@ -322,7 +323,11 @@ class DashboardMetrics
                 'count' => $missingTracking,
                 'label' => 'missing tracking',
                 'level' => 'serious',
-                'url' => route('admin.orders.index', ['status' => 'shipped']),
+                // Sans filtre de statut : le compte couvre désormais deux
+                // statuts et le filtre de la liste n'en accepte qu'un. Y
+                // renvoyer vers « shipped » afficherait moins de lignes que
+                // la puce n'en annonce.
+                'url' => route('admin.orders.index'),
             ],
             [
                 'key' => 'unread-messages',

@@ -57,8 +57,14 @@ class AdminOrderLifecycleTest extends TestCase
         $this->actingAs($admin)->patch('/admin/orders/'.$order->number.'/ship')->assertRedirect();
         $this->assertSame('shipped', $order->fresh()->status);
 
+        $this->actingAs($admin)->patch('/admin/orders/'.$order->number.'/in-transit')->assertRedirect();
+        $this->assertSame('in_transit', $order->fresh()->status);
+
+        $this->actingAs($admin)->patch('/admin/orders/'.$order->number.'/deliver')->assertRedirect();
+        $this->assertSame('delivered', $order->fresh()->status);
+
         $this->assertSame(
-            ['placed', 'preparing', 'shipped'],
+            ['placed', 'preparing', 'shipped', 'in_transit', 'delivered'],
             $order->fresh()->statusHistories()->orderBy('id')->pluck('status')->all()
         );
     }
