@@ -19,16 +19,70 @@
             return;
         }
 
+        // Les articles de blog acceptent des images, les fiches produit non :
+        // c'est le gabarit qui le dit, en posant l'adresse d'envoi.
+        var uploadUrl = group.dataset.imageUploadUrl || '';
+        var groupToolbar = uploadUrl
+            ? toolbar.slice(0, 4).concat([['image'], ['clean']])
+            : toolbar;
+
         var quill = new Quill(host, {
             theme: 'snow',
             placeholder: textarea.getAttribute('placeholder') || '',
             modules: {
-                toolbar: toolbar,
+                toolbar: groupToolbar,
                 clipboard: {
                     matchVisual: false,
                 },
             },
         });
+
+        if (uploadUrl) {
+            quill.getModule('toolbar').addHandler('image', function () {
+                var input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+
+                input.addEventListener('change', function () {
+                    var file = input.files && input.files[0];
+
+                    if (!file) {
+                        return;
+                    }
+
+                    var body = new FormData();
+                    body.append('file', file);
+
+                    var token = document.querySelector('meta[name="csrf-token"]');
+
+                    fetch(uploadUrl, {
+                        method: 'POST',
+                        body: body,
+                        headers: {
+                            'X-CSRF-TOKEN': token ? token.getAttribute('content') : '',
+                            Accept: 'application/json',
+                        },
+                    })
+                        .then(function (response) {
+                            if (!response.ok) {
+                                throw new Error('upload failed');
+                            }
+
+                            return response.json();
+                        })
+                        .then(function (payload) {
+                            var range = quill.getSelection(true);
+                            quill.insertEmbed(range.index, 'image', payload.url, 'user');
+                            quill.setSelection(range.index + 1);
+                        })
+                        .catch(function () {
+                            window.alert('Image upload failed.');
+                        });
+                });
+
+                input.click();
+            });
+        }
 
         quill.clipboard.addMatcher(Node.ELEMENT_NODE, function (node, delta) {
             if (node.tagName === 'SCRIPT' || node.tagName === 'STYLE' || node.tagName === 'IFRAME') {

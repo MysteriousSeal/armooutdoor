@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\BlogPost;
 use App\Models\Carrier;
 use App\Models\Category;
 use App\Models\Conversation;
@@ -81,6 +82,8 @@ class AdminAuthorizationTest extends TestCase
             'sort_order' => 1,
         ]);
 
+        $blogPost = BlogPost::factory()->create();
+
         $bindings = [
             'category' => $category->id,
             'product' => $product->id,
@@ -97,6 +100,7 @@ class AdminAuthorizationTest extends TestCase
             'admin' => $targetAdmin->id,
             'conversation' => $conversation->id,
             'message' => $conversationMessage->id,
+            'post' => $blogPost->id,
         ];
 
         $nonAdmin = User::factory()->create();

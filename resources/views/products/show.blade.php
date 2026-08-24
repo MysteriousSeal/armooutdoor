@@ -4,6 +4,12 @@
 @section('meta_description', \Illuminate\Support\Str::limit($product->localizedDescriptionText(), 160))
 @section('canonical', localized_route('products.show', ['product' => $product->slug]))
 
+@push('head')
+    @if ($product->blogPosts->isNotEmpty())
+        <link rel="stylesheet" href="{{ versioned_asset('css/blog.css') }}">
+    @endif
+@endpush
+
 @section('content')
     @php
         $inWishlist = ($wishlistProductIds ?? collect())->contains($product->id);
@@ -391,6 +397,19 @@
                 </ul>
             @endif
         </section>
+
+        @if ($product->blogPosts->isNotEmpty())
+            <section class="shop-section product-blog-posts" aria-labelledby="product-blog-title">
+                <div class="section-head">
+                    <h2 class="section-title" id="product-blog-title">{{ __('store.product_blog_posts') }}</h2>
+                </div>
+                <div class="blog-grid">
+                    @foreach ($product->blogPosts as $post)
+                        @include('blog.partials.card', ['post' => $post, 'lazy' => true])
+                    @endforeach
+                </div>
+            </section>
+        @endif
 
         @if ($related->isNotEmpty())
             <section class="shop-section">

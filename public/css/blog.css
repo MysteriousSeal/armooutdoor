@@ -1,0 +1,264 @@
+/* Le blog : des cartes paysage, une colonne de lecture, et rien d'autre.
+   Les couleurs viennent des variables du thème — la page suit clair et
+   sombre sans règle dédiée. */
+
+.page-head {
+    margin: 1.5rem 0 1.25rem;
+}
+
+.blog-tabs {
+    margin-bottom: 1.75rem;
+}
+
+.blog-tab-count {
+    margin-left: 0.35rem;
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+}
+
+.blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.blog-card {
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.blog-card-link {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    color: inherit;
+    text-decoration: none;
+}
+
+.blog-card:hover {
+    border-color: var(--accent);
+}
+
+/* Le ratio est tenu par la boîte, pas par le fichier : une image un peu hors
+   format ne déforme pas la grille. */
+.blog-card-media {
+    display: block;
+    aspect-ratio: 16 / 9;
+    background: var(--bg);
+    overflow: hidden;
+}
+
+.blog-card-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.blog-card-media-empty {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--bg), var(--surface));
+}
+
+.blog-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding: 1rem 1.1rem 1.2rem;
+}
+
+.blog-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.blog-card-category {
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent-hover);
+}
+
+.blog-card-title {
+    font-size: 1.125rem;
+    font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+}
+
+.blog-card-excerpt {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+/* ---------------------------------------------------------------- article */
+
+/* Une longueur de ligne lisible plutôt que toute la largeur du conteneur. */
+.blog-article {
+    max-width: 46rem;
+    margin: 0 auto 3rem;
+}
+
+.blog-article-head {
+    margin: 1.5rem 0 1.25rem;
+}
+
+.blog-article-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+
+.blog-article-category {
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent-hover);
+}
+
+.blog-article-title {
+    margin: 0.5rem 0 0;
+    font-size: 2rem;
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+}
+
+.blog-article-lede {
+    margin: 0.75rem 0 0;
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+}
+
+.blog-article-hero {
+    margin: 0 0 1.75rem;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--bg);
+}
+
+.blog-article-hero img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.blog-article-body {
+    font-size: 1.0625rem;
+    line-height: 1.7;
+}
+
+.blog-article-body > * + * {
+    margin-top: 1.1rem;
+}
+
+.blog-article-body h2,
+.blog-article-body h3,
+.blog-article-body h4 {
+    margin-top: 2rem;
+    font-weight: 500;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+}
+
+.blog-article-body h2 { font-size: 1.5rem; }
+.blog-article-body h3 { font-size: 1.25rem; }
+.blog-article-body h4 { font-size: 1.0625rem; }
+
+.blog-article-body ul,
+.blog-article-body ol {
+    padding-left: 1.25rem;
+}
+
+.blog-article-body li + li {
+    margin-top: 0.35rem;
+}
+
+.blog-article-body blockquote {
+    margin-left: 0;
+    padding: 0.25rem 0 0.25rem 1rem;
+    border-left: 3px solid var(--accent);
+    color: var(--text-muted);
+}
+
+/* Une image insérée dans le texte déborde la colonne de lecture juste ce
+   qu'il faut pour se distinguer, sans casser la page. */
+.blog-article-body img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+.blog-article-body figure {
+    margin: 1.75rem 0;
+}
+
+.blog-article-body figcaption {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.blog-article-body pre {
+    padding: 0.9rem 1rem;
+    overflow-x: auto;
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.blog-section-title {
+    margin: 2.5rem 0 1rem;
+    font-size: 1.125rem;
+    font-weight: 500;
+}
+
+.blog-article-ask {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 2.5rem;
+    padding: 1rem 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.blog-article-ask p {
+    margin: 0;
+    color: var(--text-muted);
+}
+
+.blog-article-back {
+    margin-top: 2rem;
+}
+
+/* Le renvoi depuis une fiche produit. */
+.product-blog-posts {
+    margin-top: 2.5rem;
+}
+
+@media (max-width: 640px) {
+    .blog-article-title {
+        font-size: 1.5rem;
+    }
+
+    .blog-grid {
+        gap: 1.1rem;
+    }
+}

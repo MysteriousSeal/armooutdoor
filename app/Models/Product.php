@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Collection;
@@ -127,6 +128,19 @@ class Product extends Model
      * edit) — quantity itself must never be treated as authoritative once
      * a product has variants.
      */
+    /**
+     * Les articles du blog qui mentionnent ce produit.
+     *
+     * Filtré par le même périmètre que le blog lui-même : un brouillon citant
+     * un produit ne doit pas se trahir depuis sa fiche.
+     */
+    public function blogPosts(): BelongsToMany
+    {
+        return $this->belongsToMany(BlogPost::class)
+            ->visible()
+            ->orderByDesc('published_at');
+    }
+
     public function reconcileQuantity(): void
     {
         if ($this->hasVariants()) {
