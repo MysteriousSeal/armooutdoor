@@ -2,6 +2,28 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-24 — v0.14.0 — build UXT3NP
+
+### Admin
+
+- **The dashboard answers "how is this week going?" instead of "how has it gone since the beginning?"** Every figure on it was lifetime — lifetime revenue, lifetime orders, all-time best sellers that barely moved month to month. One period selector now frames the whole page, from today to the last ninety days, and each number carries how it compares with the previous stretch of the same length, named rather than left to guess at.
+
+  Work to do and things to look at were drawn as the same card, so "three parcels without a tracking number" sat among figures nobody acts on. What needs attention now has its own strip at the top, and that strip disappears entirely when nothing is wrong — one that is always full teaches you to skip it. Purchase orders waiting to be received, unread messages, best customers and recent stock movements are on the dashboard for the first time.
+
+  Revenue is drawn as a line against the previous period rather than seven bars, and every chart is doubled by a table underneath it: the figures stay readable when a chart cannot be, and no value is reachable only by hovering.
+
+- **A purchase order can carry a discount and additional costs.** Both are typed the way the supplier writes them and follow the order's VAT rate, exactly like the shipping line already did — a rebate comes off the total, customs or a surcharge goes on. They appear on the order only when they are actually set, since most orders carry neither.
+
+- **A product's average purchase cost now accounts for those discounts and costs**, shared across the order's lines in proportion to how much each one received: a line of nineteen pieces absorbs nineteen times what a line of one does. The "Average paid" figure on a product opens a page showing the arithmetic — one row per delivery received, and how the average was reached from them.
+
+### Under the hood
+
+- The dashboard's best-sellers query read every order line ever sold into memory and then fetched a product for each distinct reference, before keeping the top five; the database does the counting now. It groups by reference rather than by product, because a deleted product leaves its sales behind and they have to stay readable under the name recorded at the time of the sale.
+
+- The daily revenue figures used a date function only SQLite understands, which would have failed outright on any other database. Three columns the dashboard and the order list filter on constantly — status, archive date, creation date — were not indexed.
+
+- Charts are drawn with Chart.js 4.4.7, committed into the repository rather than loaded from a CDN, which would otherwise have been the only outside thing this site needs at runtime to work.
+
 ## 2026-08-24 — v0.13.0 — build JDO5AZ
 
 ### Admin
