@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Enums\StockMovementReason;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
+use App\Support\StockContext;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -53,7 +55,13 @@ class PurchaseOrderReceiver
                     ]);
                 }
 
-                $this->addStock($line, $quantity);
+                // Le journal de stock a besoin de la raison, pas d'un chemin
+                // à part : la réception elle-même ne change pas d'un iota.
+                StockContext::during(
+                    StockMovementReason::PurchaseOrderReceived,
+                    fn () => $this->addStock($line, $quantity),
+                    subject: $po,
+                );
                 $line->increment('quantity_received', $quantity);
                 $received[] = $quantity.' × '.$line->name;
             }

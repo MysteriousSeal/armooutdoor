@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\StockMovementReason;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreProductRequest;
 use App\Models\AdminActivityLog;
@@ -14,6 +15,7 @@ use App\Models\Supplier;
 use App\Support\Csv;
 use App\Support\HtmlSanitizer;
 use App\Support\ImageThumbnailer;
+use App\Support\StockContext;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -146,12 +148,20 @@ class ProductController extends Controller
 
     public function store(StoreProductRequest $request): RedirectResponse
     {
-        $product = Product::query()->create($this->payload($request));
-        $this->syncImages($request, $product, null);
-        $this->syncVariants($request, $product);
-        $product->refresh();
-        $this->clearMainProductFieldsIfHasVariants($product);
-        $product->reconcileQuantity();
+        // Le formulaire produit écrit des quantités à plusieurs endroits — le
+        // produit, chaque ligne de déclinaison, la remise à zéro quand la
+        // dernière disparaît. Une seule parenthèse les nomme toutes.
+        $product = StockContext::during(StockMovementReason::ProductEdited, function () use ($request): Product {
+            $product = Product::query()->create($this->payload($request));
+            $this->syncImages($request, $product, null);
+            $this->syncVariants($request, $product);
+            $product->refresh();
+            $this->clearMainProductFieldsIfHasVariants($product);
+            $product->reconcileQuantity();
+
+            return $product;
+        });
+
         AdminActivityLog::record('product.created', $product, 'Created product '.$product->localizedName());
 
         return redirect()
@@ -171,22 +181,24 @@ class ProductController extends Controller
 
     public function update(StoreProductRequest $request, Product $product): RedirectResponse
     {
-        $hadVariants = $product->hasVariants();
-        $oldCoverImage = $product->image;
-        $product->update($this->payload($request, $product));
-        $this->syncImages($request, $product, $oldCoverImage);
-        $this->syncVariants($request, $product);
-        $product->refresh();
-        $this->clearMainProductFieldsIfHasVariants($product);
+        StockContext::during(StockMovementReason::ProductEdited, function () use ($request, $product): void {
+            $hadVariants = $product->hasVariants();
+            $oldCoverImage = $product->image;
+            $product->update($this->payload($request, $product));
+            $this->syncImages($request, $product, $oldCoverImage);
+            $this->syncVariants($request, $product);
+            $product->refresh();
+            $this->clearMainProductFieldsIfHasVariants($product);
 
-        if ($product->hasVariants()) {
-            $product->reconcileQuantity();
-        } elseif ($hadVariants) {
-            // The last variant was just removed: its stock sum is stale
-            // and no longer tracks anything real, so reset to zero rather
-            // than leaving the product looking in stock by accident.
-            $product->update(['quantity' => 0]);
-        }
+            if ($product->hasVariants()) {
+                $product->reconcileQuantity();
+            } elseif ($hadVariants) {
+                // The last variant was just removed: its stock sum is stale
+                // and no longer tracks anything real, so reset to zero rather
+                // than leaving the product looking in stock by accident.
+                $product->update(['quantity' => 0]);
+            }
+        });
 
         AdminActivityLog::record('product.updated', $product, 'Updated product '.$product->localizedName());
 
@@ -207,14 +219,89 @@ class ProductController extends Controller
         return back()->with('status', $product->is_active ? 'Product activated.' : 'Product disabled.');
     }
 
+    /**
+     * Tout ce qui a fait bouger le stock de ce produit.
+     *
+     * Ouverte à tous les administrateurs : la page ne montre ni prix d'achat
+     * ni paiement, et celui qui réceptionne la marchandise est justement
+     * celui qui a besoin de la relire.
+     */
+    public function stockHistory(Request $request, Product $product): View
+    {
+        $product->load('variants');
+
+        $reason = StockMovementReason::tryFrom((string) $request->query('reason', ''));
+        $variantId = (int) $request->query('variant', 0);
+
+        $movements = $product->stockMovements()
+            ->with(['user', 'subject'])
+            ->when($reason !== null, fn ($query) => $query->where('reason', $reason))
+            ->when($variantId > 0, fn ($query) => $query->where('product_variant_id', $variantId))
+            ->simplePaginate(50)
+            ->withQueryString();
+
+        return view('admin.products.stock-history', [
+            'product' => $product,
+            'movements' => $movements,
+            'reason' => $reason,
+            'variantId' => $variantId,
+            'drift' => $this->stockLedgerDrift($product),
+        ]);
+    }
+
+    /**
+     * Ce que le journal croit, contre ce que la base dit vraiment.
+     *
+     * C'est tout l'intérêt de stocker le solde après coup : une écriture
+     * passée à côté de l'observateur — un UPDATE direct, une requête au
+     * query builder — se voit ici et nulle part ailleurs.
+     *
+     * @return list<array{label: string, expected: int, actual: int}>
+     */
+    private function stockLedgerDrift(Product $product): array
+    {
+        $stockables = $product->hasVariants()
+            ? $product->variants->map(fn (ProductVariant $variant) => [
+                'label' => $variant->label() ?: 'Variant #'.$variant->id,
+                'quantity' => $variant->quantity,
+                'movement' => $product->stockMovements()->where('product_variant_id', $variant->id)->first(),
+            ])
+            : collect([[
+                'label' => $product->localizedName(),
+                'quantity' => $product->quantity,
+                'movement' => $product->stockMovements()->whereNull('product_variant_id')->first(),
+            ]]);
+
+        return $stockables
+            // Sans mouvement enregistré, il n'y a rien à contredire : le
+            // journal démarre vide et ne prétend pas connaître le passé.
+            ->filter(fn (array $row) => $row['movement'] !== null && $row['movement']->quantity_after !== $row['quantity'])
+            ->map(fn (array $row) => [
+                'label' => $row['label'],
+                'expected' => $row['movement']->quantity_after,
+                'actual' => $row['quantity'],
+            ])
+            ->values()
+            ->all();
+    }
+
     public function updateQuantity(Request $request, Product $product): RedirectResponse
     {
         $validated = $request->validate([
             'quantity' => ['required', 'integer', 'min:0'],
+            'note' => ['nullable', 'string', 'max:255'],
         ]);
 
         $previousQuantity = $product->quantity;
-        $product->update(['quantity' => $validated['quantity']]);
+
+        // La raison est facultative, mais c'est elle qui rend l'historique
+        // utile : un chiffre corrigé sans explication ne se relit pas.
+        StockContext::during(
+            StockMovementReason::ManualAdjustment,
+            fn () => $product->update(['quantity' => $validated['quantity']]),
+            note: $validated['note'] ?? null,
+        );
+
         AdminActivityLog::record(
             'product.restocked',
             $product,

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\StockMovementReason;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\BulkOrderActionRequest;
 use App\Http\Requests\Admin\StoreManualOrderRequest;
@@ -20,6 +21,7 @@ use App\Models\ShippingSetting;
 use App\Models\User;
 use App\Services\OrderStockAllocator;
 use App\Support\Csv;
+use App\Support\StockContext;
 use App\Support\StripeDashboard;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
@@ -469,7 +471,7 @@ class OrderController extends Controller
                 // couvrir : la validation l'a déjà dit, et rien ici ne doit
                 // mettre l'acheteur en réassort à son insu.
                 $allocation = $finalize
-                    ? $allocator->allocate($product, $variant, $item['quantity'], allowBackorder: false)
+                    ? $allocator->allocate($product, $variant, $item['quantity'], allowBackorder: false, reason: StockMovementReason::ManualOrder, order: $savedOrder)
                     : null;
 
                 OrderItem::query()->create([
@@ -828,14 +830,16 @@ class OrderController extends Controller
         abort_unless($order->isDraft(), 404);
 
         DB::transaction(function () use ($order): void {
-            foreach ($order->items as $item) {
-                if ($item->product_variant_id !== null) {
-                    ProductVariant::query()->whereKey($item->product_variant_id)->first()?->decrement('quantity', $item->quantity);
-                    $item->product?->reconcileQuantity();
-                } else {
-                    $item->product?->decrement('quantity', $item->quantity);
+            StockContext::during(StockMovementReason::DraftValidated, function () use ($order): void {
+                foreach ($order->items as $item) {
+                    if ($item->product_variant_id !== null) {
+                        ProductVariant::query()->whereKey($item->product_variant_id)->first()?->decrement('quantity', $item->quantity);
+                        $item->product?->reconcileQuantity();
+                    } else {
+                        $item->product?->decrement('quantity', $item->quantity);
+                    }
                 }
-            }
+            }, subject: $order);
 
             $order->update(['status' => 'placed']);
             $order->statusHistories()->create(['status' => 'placed']);

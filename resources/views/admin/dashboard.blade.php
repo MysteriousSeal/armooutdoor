@@ -128,6 +128,17 @@
                                     min="0"
                                     class="admin-restock-input"
                                 >
+                                {{-- Facultatif, mais c'est ce qui rend l'historique relisible :
+                                     un chiffre corrigé sans raison ne s'explique plus après coup. --}}
+                                <label class="sr-only" for="stock-note-{{ $product->id }}">Reason for {{ $productName }}</label>
+                                <input
+                                    id="stock-note-{{ $product->id }}"
+                                    type="text"
+                                    name="note"
+                                    class="admin-restock-note"
+                                    maxlength="255"
+                                    placeholder="Reason (optional)"
+                                >
                                 <button type="submit" class="btn btn-sm btn-secondary">Save</button>
                             </form>
                         </li>
