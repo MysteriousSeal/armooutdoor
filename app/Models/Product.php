@@ -197,6 +197,44 @@ class Product extends Model
             ->get();
     }
 
+    /**
+     * The same average as averagePurchaseCostInclVatCents(), for many
+     * products in one query — a list page reading it per row would ask
+     * once per product otherwise.
+     *
+     * @param  iterable<int>  $productIds
+     * @return array<int, int> product id => average cost incl. VAT, cents.
+     *                         A product with nothing received is absent
+     *                         from the array rather than mapped to null.
+     */
+    public static function averagePurchaseCostsInclVatCents(iterable $productIds): array
+    {
+        $ids = collect($productIds)->unique()->values();
+
+        if ($ids->isEmpty()) {
+            return [];
+        }
+
+        $lines = PurchaseOrderItem::query()
+            ->whereIn('product_id', $ids)
+            ->where('quantity_received', '>', 0)
+            ->with('purchaseOrder')
+            ->get()
+            ->groupBy('product_id');
+
+        return $lines->map(function (Collection $productLines): int {
+            $units = $productLines->sum('quantity_received');
+
+            $totalInclVatCents = $productLines->sum(
+                fn (PurchaseOrderItem $line): int => $line->purchaseOrder->withVatCents(
+                    $line->unit_cost_cents * $line->quantity_received,
+                ),
+            );
+
+            return (int) round($totalInclVatCents / $units);
+        })->all();
+    }
+
     public function wishlistItems(): HasMany
     {
         return $this->hasMany(WishlistItem::class);

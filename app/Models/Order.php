@@ -309,6 +309,52 @@ class Order extends Model
     }
 
     /**
+     * The cost of the goods themselves, incl. VAT, from each line's product
+     * average purchase cost — a margin figure, distinct from the deducted
+     * costs above (commission, shipping, fees) which never touch the goods.
+     *
+     * Null the moment one line can't be priced — a deleted product, or one
+     * never yet received on a purchase order — rather than silently summing
+     * only the lines that can: a partial total reads as a complete one.
+     *
+     * @param  array<int, int>  $averageCostsByProductId  From
+     *                                                    Product::averagePurchaseCostsInclVatCents(), keyed by product id.
+     */
+    public function productCostInclVatCents(array $averageCostsByProductId): ?int
+    {
+        // Aucune ligne n'est un cas différent d'un coût nul vérifié : il n'y
+        // a simplement rien à chiffrer, pas une réponse « zéro » à afficher.
+        if ($this->items->isEmpty()) {
+            return null;
+        }
+
+        $total = 0;
+
+        foreach ($this->items as $item) {
+            if ($item->product_id === null || ! array_key_exists($item->product_id, $averageCostsByProductId)) {
+                return null;
+            }
+
+            $total += $averageCostsByProductId[$item->product_id] * $item->quantity;
+        }
+
+        return $total;
+    }
+
+    /**
+     * What actually landed, minus what the goods cost — the margin figure.
+     * Null whenever the product cost is (see productCostInclVatCents()):
+     * a profit computed over an unknown cost would be a guess dressed up
+     * as a number.
+     */
+    public function profitInclVatCents(array $averageCostsByProductId): ?int
+    {
+        $productCostCents = $this->productCostInclVatCents($averageCostsByProductId);
+
+        return $productCostCents === null ? null : $this->perceivedTotalCents() - $productCostCents;
+    }
+
+    /**
      * The payment processing fee as a share of the order total, e.g. "4.7%".
      */
     public function formattedPaymentFeePercentage(): ?string

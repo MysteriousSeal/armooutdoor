@@ -46,7 +46,7 @@ class OrderController extends Controller
         $filters = $this->orderFilters($request);
 
         $orders = $this->filteredOrdersQuery($filters)
-            ->with('user', 'statusHistories')
+            ->with('user', 'statusHistories', 'items')
             ->withCount('items')
             ->latest()
             // paginate() plutôt que simplePaginate() : il faut le nombre de
@@ -55,6 +55,12 @@ class OrderController extends Controller
             ->withQueryString();
 
         $this->backfillMissingPaymentFees($orders->getCollection());
+
+        // Une requête pour toute la page plutôt qu'une par commande : la
+        // moyenne d'achat d'un produit ne change pas d'une ligne à l'autre.
+        $productCostsByProductId = Product::averagePurchaseCostsInclVatCents(
+            $orders->getCollection()->flatMap(fn (Order $order) => $order->items->pluck('product_id'))->filter(),
+        );
 
         // Money and the order count behind it cover archived orders too: the
         // sale happened, and hiding a row from the working list is no reason
@@ -74,12 +80,18 @@ class OrderController extends Controller
 
         $percentOf = fn (int $part, int $whole): ?float => $whole > 0 ? round($part / $whole * 100, 2) : null;
 
+        [$profitCents, $pricedOrderCount, $totalOrderCount] = $this->profitSummary(clone $salesOrders);
+
         return view('admin.orders.index', [
             'orders' => $orders,
+            'productCostsByProductId' => $productCostsByProductId,
             'tab' => $filters['tab'],
             'kpis' => [
                 'order_count' => (clone $salesOrders)->count(),
                 'amount_cents' => $amountCents,
+                'profit_cents' => $profitCents,
+                'profit_priced_order_count' => $pricedOrderCount,
+                'profit_total_order_count' => $totalOrderCount,
                 'shipping_cost_cents' => $shippingCostCents,
                 'shipping_cost_pct_amount' => $percentOf($shippingCostCents, $amountCents),
                 'shipping_cost_pct_costs' => $percentOf($shippingCostCents, $totalCostsCents),
@@ -159,6 +171,30 @@ class OrderController extends Controller
      *
      * @param  Collection<int, Order>  $orders
      */
+    /**
+     * The Profit KPI card's numbers: total profit, how many orders it was
+     * drawn from, and how many exist in scope. An order whose product cost
+     * can't be priced (a deleted product, or one with no purchase history)
+     * is left out entirely rather than silently treated as zero — the card
+     * says how many orders that affects, the same honesty as the dash on
+     * each row.
+     *
+     * @return array{0: int, 1: int, 2: int}
+     */
+    private function profitSummary(Builder $salesOrders): array
+    {
+        $orders = $salesOrders->with('items')->get();
+
+        $productCostsByProductId = Product::averagePurchaseCostsInclVatCents(
+            $orders->flatMap(fn (Order $order) => $order->items->pluck('product_id'))->filter(),
+        );
+
+        $priced = $orders->map(fn (Order $order) => $order->profitInclVatCents($productCostsByProductId))
+            ->filter(fn (?int $profit) => $profit !== null);
+
+        return [(int) $priced->sum(), $priced->count(), $orders->count()];
+    }
+
     private function backfillMissingPaymentFees($orders): void
     {
         foreach ($orders as $order) {

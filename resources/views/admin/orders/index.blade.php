@@ -102,6 +102,16 @@
                     <span class="admin-stat-pct">{{ number_format($kpis['perceived_total_pct_amount'] ?? 0, 2) }}% of amount</span>
                 </span>
             </div>
+            <div class="admin-stat-card admin-stat-card--info">
+                <span class="admin-stat-label">Profit</span>
+                <span class="admin-stat-value">{{ format_euros($kpis['profit_cents']) }}</span>
+                {{-- Un coût produit inconnu exclut la commande plutôt que de
+                     compter zéro : le compteur dit combien sont concernées,
+                     comme le tiret sur chaque ligne de la liste. --}}
+                <span class="admin-stat-value--sm">
+                    Perceived − product cost, on {{ number_format($kpis['profit_priced_order_count']) }} of {{ number_format($kpis['profit_total_order_count']) }} orders
+                </span>
+            </div>
         </div>
 
         <nav class="admin-tabs" aria-label="Order tabs">
@@ -257,7 +267,9 @@
                             <th>Tracking</th>
                             <th class="admin-table-num">Total</th>
                             <th class="admin-table-num">Costs</th>
+                            <th class="admin-table-num">P. costs</th>
                             <th class="admin-table-num">Perceived</th>
+                            <th class="admin-table-num">Profit</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -356,7 +368,23 @@
                                     @endif
                                 </td>
                                 <td class="admin-table-num">
+                                    @php($productCostCents = $order->productCostInclVatCents($productCostsByProductId))
+                                    @if ($productCostCents !== null)
+                                        <span class="stripe-fee-chip" title="Average purchase cost, incl. VAT">− {{ format_euros($productCostCents) }}</span>
+                                    @else
+                                        <span class="admin-table-sub" title="Missing purchase history for at least one line">—</span>
+                                    @endif
+                                </td>
+                                <td class="admin-table-num">
                                     <span class="admin-order-perceived">{{ $order->formattedPerceivedTotal() }}</span>
+                                </td>
+                                <td class="admin-table-num">
+                                    @php($profitCents = $order->profitInclVatCents($productCostsByProductId))
+                                    @if ($profitCents !== null)
+                                        <span class="admin-order-profit">{{ format_euros($profitCents) }}</span>
+                                    @else
+                                        <span class="admin-table-sub" title="Missing purchase history for at least one line">—</span>
+                                    @endif
                                 </td>
                                 <td>
                                     <div class="admin-actions-menu">

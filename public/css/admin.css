@@ -2261,6 +2261,26 @@
     background: #eef4ef;
 }
 
+.admin-stat-card--info {
+    border-color: #c6d8e8;
+    background: #eef3f8;
+}
+
+.admin-stat-card--info .admin-stat-label,
+.admin-stat-card--info .admin-stat-value {
+    color: #2f5d8a;
+}
+
+[data-theme='dark'] .admin-stat-card--info {
+    background: color-mix(in srgb, #8ab4dd 12%, var(--surface));
+    border-color: color-mix(in srgb, #8ab4dd 35%, var(--border));
+}
+
+[data-theme='dark'] .admin-stat-card--info .admin-stat-label,
+[data-theme='dark'] .admin-stat-card--info .admin-stat-value {
+    color: #8ab4dd;
+}
+
 .admin-stat-card--positive .admin-stat-label,
 .admin-stat-card--positive .admin-stat-value {
     color: #3d6b4e;
@@ -5385,4 +5405,22 @@ input[type="date"].form-control {
 .product-avg-cost-note {
     font-size: 0.75rem;
     color: var(--text-muted);
+}
+
+.admin-order-profit {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.55rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: #2f5d8a;
+    background: #eef3f8;
+    border: 1px solid #c6d8e8;
+}
+
+[data-theme='dark'] .admin-order-profit {
+    color: #8ab4dd;
+    background: color-mix(in srgb, #8ab4dd 12%, var(--surface));
+    border-color: color-mix(in srgb, #8ab4dd 35%, var(--border));
 }
