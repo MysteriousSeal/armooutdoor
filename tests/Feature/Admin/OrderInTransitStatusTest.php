@@ -226,6 +226,33 @@ class OrderInTransitStatusTest extends TestCase
         }
     }
 
+    /**
+     * La valeur stockée porte un underscore : affichée brute, elle donnait
+     * « In_transit » dans la pastille, le filtre et l'historique.
+     */
+    public function test_the_status_label_is_written_without_the_underscore(): void
+    {
+        $this->assertSame('In transit', Order::labelForStatus('in_transit'));
+        $this->assertSame('Shipped', Order::labelForStatus('shipped'));
+        $this->assertSame('In transit', $this->order('in_transit')->statusLabel());
+    }
+
+    public function test_no_admin_screen_shows_the_raw_underscored_status(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $order = $this->order('in_transit');
+
+        foreach (['/admin/orders', '/admin/orders/'.$order->number, '/admin/orders?status=in_transit'] as $url) {
+            $response = $this->actingAs($admin)->get($url)->assertOk();
+
+            $response->assertSee('In transit');
+            // La valeur brute reste légitime dans les attributs (classes CSS,
+            // valeurs de <option>) : on ne traque que le libellé affiché.
+            $this->assertStringNotContainsString('>In_transit', $response->getContent(), $url);
+            $this->assertStringNotContainsString('· In_transit', $response->getContent(), $url);
+        }
+    }
+
     public function test_an_in_transit_order_appears_in_the_pipeline_count(): void
     {
         $this->order('in_transit');

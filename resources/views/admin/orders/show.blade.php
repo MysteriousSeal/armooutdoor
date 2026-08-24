@@ -17,7 +17,7 @@
                             title="Click to copy order number"
                         >{{ $order->number }}</h2>
                         <span class="badge badge-{{ $order->status }}">
-                            {{ ucfirst($order->status) }}
+                            {{ $order->statusLabel() }}
                         </span>
                         @if ($order->isArchived())
                             <span class="badge badge-disabled">Archived</span>
@@ -382,7 +382,7 @@
                             <li class="order-timeline-item is-{{ $entry->status }}{{ $loop->first ? ' is-current' : '' }}">
                                 <span class="order-timeline-marker" aria-hidden="true"></span>
                                 <div class="order-timeline-body">
-                                    <span class="order-timeline-status">{{ ucfirst($entry->status) }}</span>
+                                    <span class="order-timeline-status">{{ \App\Models\Order::labelForStatus($entry->status) }}</span>
                                     <time class="order-timeline-date" datetime="{{ $entry->created_at->toIso8601String() }}">
                                         {{ $entry->created_at->format('d M Y · H:i') }}
                                     </time>

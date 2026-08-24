@@ -120,7 +120,7 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                <span class="badge badge-{{ $order->status }}">{{ ucfirst($order->status) }}</span>
+                                                <span class="badge badge-{{ $order->status }}">{{ $order->statusLabel() }}</span>
                                                 <span class="admin-table-sub">
                                                     {{ $order->items_count }} {{ \Illuminate\Support\Str::plural('item', $order->items_count) }}
                                                 </span>

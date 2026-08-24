@@ -82,7 +82,7 @@
                                     @if ($order->isTest())
                                         <span class="badge badge-test" title="Left out of the total spent">Test</span>
                                     @endif
-                                    <span class="badge badge-{{ $order->status }}">{{ ucfirst($order->status) }}</span>
+                                    <span class="badge badge-{{ $order->status }}">{{ $order->statusLabel() }}</span>
                                     <span class="admin-dash-list-value">{{ $order->formattedTotal() }}</span>
                                     <a href="{{ route('admin.orders.show', $order) }}" class="btn btn-sm btn-primary">View</a>
                                 </li>

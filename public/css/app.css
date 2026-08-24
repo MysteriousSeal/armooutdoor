@@ -3873,9 +3873,9 @@
 }
 
 .order-status.is-in_transit {
-    color: #2f6b70;
-    border-color: #cfe3e4;
-    background: #edf5f5;
+    color: #6a4a9c;
+    border-color: #ddd2ec;
+    background: #f2eef8;
 }
 
 .order-status.is-refunded {
@@ -3897,9 +3897,9 @@
 }
 
 [data-theme='dark'] .order-status.is-in_transit {
-    color: #8ac8cb;
-    background: #283234;
-    border-color: #3b4b4d;
+    color: #ab93dc;
+    background: #2c2836;
+    border-color: #463f57;
 }
 
 [data-theme='dark'] .order-status.is-refunded {

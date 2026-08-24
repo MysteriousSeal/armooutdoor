@@ -151,7 +151,7 @@
                     <select id="order-status" name="status" class="form-control">
                         <option value="">All statuses</option>
                         @foreach ($statuses as $statusOption)
-                            <option value="{{ $statusOption }}" @selected($status === $statusOption)>{{ ucfirst($statusOption) }}</option>
+                            <option value="{{ $statusOption }}" @selected($status === $statusOption)>{{ \App\Models\Order::labelForStatus($statusOption) }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -205,7 +205,7 @@
                 @endif
                 @if ($status !== '')
                     <a href="{{ $filterUrl(['status' => null]) }}" class="admin-filter-chip">
-                        Status · {{ ucfirst($status) }}
+                        Status · {{ \App\Models\Order::labelForStatus($status) }}
                         <span aria-hidden="true">×</span>
                     </a>
                 @endif
@@ -321,7 +321,7 @@
                                 </td>
                                 <td>
                                     <span class="order-chip order-chip--{{ $order->status }}">
-                                        {{ ucfirst($order->status) }}
+                                        {{ $order->statusLabel() }}
                                     </span>
                                 </td>
                                 <td>

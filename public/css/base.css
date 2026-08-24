@@ -1243,12 +1243,13 @@ button.admin-table-icon-btn:hover {
     background: #eef4ef;
 }
 
-/* Sarcelle : entre le vert d'« expédiée » et le bleu de « livrée », le colis
-   est parti sans être arrivé. */
+/* Violet : une teinte que rien d'autre n'occupe. La sarcelle essayée d'abord
+   tombait trop près du vert d'« expédiée » et du bleu de « livrée », or ces
+   trois pastilles se lisent dans la même colonne. */
 .badge-in_transit {
-    color: #2f6b70;
-    border-color: #cfe3e4;
-    background: #edf5f5;
+    color: #6a4a9c;
+    border-color: #ddd2ec;
+    background: #f2eef8;
 }
 
 /*
@@ -1479,7 +1480,7 @@ button.admin-table-icon-btn:hover {
 }
 
 .order-timeline-item.is-in_transit {
-    --history-tone: #2f6b70;
+    --history-tone: #6a4a9c;
 }
 
 .order-timeline-item.is-refunded {
@@ -1541,7 +1542,7 @@ button.admin-table-icon-btn:hover {
 }
 
 [data-theme='dark'] .order-timeline-item.is-in_transit {
-    --history-tone: #8ac8cb;
+    --history-tone: #ab93dc;
 }
 
 [data-theme='dark'] .order-timeline-item.is-refunded {

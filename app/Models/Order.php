@@ -442,6 +442,23 @@ class Order extends Model
     }
 
     /**
+     * Le statut tel qu'on l'écrit dans l'interface.
+     *
+     * La valeur stockée peut porter un underscore — `in_transit` — et
+     * l'afficher brute donnait « In_transit ». Un seul endroit décide, pour
+     * que la pastille, le filtre et l'historique disent tous la même chose.
+     */
+    public static function labelForStatus(?string $status): string
+    {
+        return ucfirst(str_replace('_', ' ', (string) $status));
+    }
+
+    public function statusLabel(): string
+    {
+        return self::labelForStatus($this->status);
+    }
+
+    /**
      * Orders nobody has begun preparing yet. Narrower than the "to prepare"
      * KPI on the orders list, which also counts orders already in progress.
      * Drafts fall out for free — a draft is never 'placed'.

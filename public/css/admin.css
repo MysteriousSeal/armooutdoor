@@ -2165,9 +2165,9 @@
 }
 
 .admin-list-chip--in_transit {
-    color: #2f6b70;
-    background: #edf5f5;
-    border-color: #cfe3e4;
+    color: #6a4a9c;
+    background: #f2eef8;
+    border-color: #ddd2ec;
 }
 
 .admin-list-chip--delivered {
@@ -2189,9 +2189,9 @@
 }
 
 [data-theme='dark'] .admin-list-chip--in_transit {
-    color: #8ac8cb;
-    background: color-mix(in srgb, #8ac8cb 12%, var(--surface));
-    border-color: color-mix(in srgb, #8ac8cb 32%, var(--border));
+    color: #ab93dc;
+    background: color-mix(in srgb, #ab93dc 12%, var(--surface));
+    border-color: color-mix(in srgb, #ab93dc 32%, var(--border));
 }
 
 [data-theme='dark'] .admin-list-chip--delivered {
@@ -3265,9 +3265,9 @@ a.admin-stat-card:hover {
 }
 
 .order-chip--in_transit {
-    color: #2f6b70;
-    background: #edf5f5;
-    border-color: #cfe3e4;
+    color: #6a4a9c;
+    background: #f2eef8;
+    border-color: #ddd2ec;
 }
 
 .order-chip--refunded,
@@ -3336,9 +3336,9 @@ a.admin-stat-card:hover {
 }
 
 [data-theme='dark'] .order-chip--in_transit {
-    color: #8ac8cb;
-    background: color-mix(in srgb, #8ac8cb 12%, var(--surface));
-    border-color: color-mix(in srgb, #8ac8cb 32%, var(--border));
+    color: #ab93dc;
+    background: color-mix(in srgb, #ab93dc 12%, var(--surface));
+    border-color: color-mix(in srgb, #ab93dc 32%, var(--border));
 }
 
 [data-theme='dark'] .order-chip--refunded,
