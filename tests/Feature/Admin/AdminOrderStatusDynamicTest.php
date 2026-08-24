@@ -101,7 +101,40 @@ class AdminOrderStatusDynamicTest extends TestCase
         $this->assertStringContainsString('is-shipped', $html);
     }
 
-    public function test_shipping_makes_the_invoice_download_appear(): void
+    /**
+     * Deux règles distinctes se croisent ici : le client attend l'expédition
+     * (invoiceIsAvailable), l'admin considère la commande facturable dès
+     * qu'elle est confirmée en préparation (adminInvoiceIsAvailable).
+     */
+    public function test_a_placed_order_has_no_invoice_for_anyone(): void
+    {
+        $order = $this->order('placed');
+
+        $this->assertFalse($order->invoiceIsAvailable());
+        $this->assertFalse($order->adminInvoiceIsAvailable());
+    }
+
+    public function test_a_preparing_order_is_invoiceable_for_the_admin_only(): void
+    {
+        $order = $this->order('preparing');
+
+        $this->assertFalse($order->invoiceIsAvailable());
+        $this->assertTrue($order->adminInvoiceIsAvailable());
+    }
+
+    public function test_preparing_makes_the_admin_invoice_download_appear(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $order = $this->order('placed');
+
+        $this->assertFalse($order->adminInvoiceIsAvailable());
+
+        $html = $this->actingAs($admin)->patchJson(route('admin.orders.prepare', $order))->json('html');
+
+        $this->assertStringContainsString(route('admin.orders.invoice', $order), $html);
+    }
+
+    public function test_shipping_still_makes_the_customer_invoice_download_appear(): void
     {
         $admin = User::factory()->admin()->create();
         $order = $this->order('preparing');
@@ -111,6 +144,26 @@ class AdminOrderStatusDynamicTest extends TestCase
         $html = $this->actingAs($admin)->patchJson(route('admin.orders.ship', $order))->json('html');
 
         $this->assertStringContainsString(route('admin.orders.invoice', $order), $html);
+    }
+
+    public function test_a_customer_cannot_download_an_invoice_while_preparing(): void
+    {
+        $order = $this->order('preparing');
+        $customer = User::factory()->create();
+        $order->update(['user_id' => $customer->id]);
+
+        $this->actingAs($customer)
+            ->get(route('orders.invoice', $order))
+            ->assertNotFound();
+    }
+
+    public function test_an_admin_can_download_an_invoice_while_preparing(): void
+    {
+        $order = $this->order('preparing');
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->get(route('admin.orders.invoice', $order))
+            ->assertOk();
     }
 
     public function test_refunding_returns_the_rerendered_page(): void

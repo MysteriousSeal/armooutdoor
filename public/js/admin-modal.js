@@ -27,6 +27,22 @@
             });
         });
 
+        // A real link (not a button), so it keeps working without JS —
+        // the confirmation is a courtesy, not a lock.
+        scope.querySelectorAll('[data-confirm-modal]').forEach(function (link) {
+            if (!once(link, 'confirmModalBound')) {
+                return;
+            }
+
+            link.addEventListener('click', function (event) {
+                var modal = document.getElementById(link.getAttribute('data-confirm-modal'));
+                if (modal) {
+                    event.preventDefault();
+                    modal.showModal();
+                }
+            });
+        });
+
         scope.querySelectorAll('[data-modal-close]').forEach(function (btn) {
             if (!once(btn, 'modalCloseBound')) {
                 return;

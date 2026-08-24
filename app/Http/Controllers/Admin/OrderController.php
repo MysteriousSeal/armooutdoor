@@ -811,7 +811,7 @@ class OrderController extends Controller
 
     public function invoice(Order $order): Response
     {
-        abort_unless($order->invoiceIsAvailable(), 404);
+        abort_unless($order->adminInvoiceIsAvailable(), 404);
 
         $order->load('items.product', 'items.variant');
 

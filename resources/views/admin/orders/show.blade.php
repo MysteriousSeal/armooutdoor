@@ -234,14 +234,24 @@
                     <p class="order-total-amount">{{ $order->formattedTotal() }}</p>
                 </section>
 
+                {{-- Ce que la commande n'a pas encore : la facture peut se
+                     télécharger avant, mais l'admin doit le savoir avant de
+                     l'envoyer au client. --}}
+                @php($missingInvoiceFields = array_filter([$order->tracking_carrier_id === null ? 'Tracking carrier' : null, blank($order->tracking_number) ? 'Tracking number' : null, $order->package_type_id === null ? 'Package type' : null]))
                 <div id="order-downloads">
-                @if (! $order->isDraft() || $order->invoiceIsAvailable())
+                @if (! $order->isDraft() || $order->adminInvoiceIsAvailable())
                     <div class="order-panel-actions">
                         @if (! $order->isDraft())
                             <a href="{{ route('admin.orders.delivery-slip', $order) }}" class="btn btn-secondary">Download delivery slip</a>
                         @endif
-                        @if ($order->invoiceIsAvailable())
-                            <a href="{{ route('admin.orders.invoice', $order) }}" class="btn btn-secondary">Download invoice</a>
+                        @if ($order->adminInvoiceIsAvailable())
+                            <a
+                                href="{{ route('admin.orders.invoice', $order) }}"
+                                class="btn btn-secondary"
+                                @if ($missingInvoiceFields !== [])
+                                    data-confirm-modal="invoice-warning-modal"
+                                @endif
+                            >Download invoice</a>
                         @endif
                     </div>
                 @endif
@@ -721,6 +731,28 @@
                         <button type="submit" class="btn btn-primary">Archive order</button>
                     </div>
                 </form>
+            </dialog>
+        @endif
+
+        @if ($order->adminInvoiceIsAvailable() && $missingInvoiceFields !== [])
+            <dialog id="invoice-warning-modal" class="modal" aria-labelledby="invoice-warning-title">
+                <p class="modal-kicker">{{ $order->number }}</p>
+                <h3 class="modal-title" id="invoice-warning-title">Shipping details are incomplete</h3>
+                <div class="order-invoice-warning">
+                    <p class="order-invoice-warning-lede">Missing before this order can be shipped:</p>
+                    <ul class="order-invoice-warning-list">
+                        @foreach ($missingInvoiceFields as $field)
+                            <li>{{ $field }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                <p class="modal-body">
+                    You can still download the invoice now, but it will go out without these details.
+                </p>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                    <a href="{{ route('admin.orders.invoice', $order) }}" class="btn btn-primary">Download anyway</a>
+                </div>
             </dialog>
         @endif
         </div>

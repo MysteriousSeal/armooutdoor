@@ -378,9 +378,16 @@ class Order extends Model
             : $this->marketplace?->note;
     }
 
+    /** Customer-facing: an order isn't confirmed enough to bill until it ships. */
     public function invoiceIsAvailable(): bool
     {
         return ! in_array($this->status, ['placed', 'preparing', 'draft'], true);
+    }
+
+    /** Admin-facing: preparing already means the order is confirmed and paid. */
+    public function adminInvoiceIsAvailable(): bool
+    {
+        return ! in_array($this->status, ['placed', 'draft'], true);
     }
 
     public function isDraft(): bool

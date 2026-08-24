@@ -263,6 +263,7 @@
                     </thead>
                     <tbody>
                         @foreach ($orders as $order)
+                            @php($missingInvoiceFields = array_filter([$order->tracking_carrier_id === null ? 'Tracking carrier' : null, blank($order->tracking_number) ? 'Tracking number' : null, $order->package_type_id === null ? 'Package type' : null]))
                             <tr data-bulk-row>
                                 <td class="admin-select-cell">
                                     <input
@@ -387,8 +388,15 @@
                                                 </span>
                                             @endif
 
-                                            @if ($order->invoiceIsAvailable())
-                                                <a href="{{ route('admin.orders.invoice', $order) }}" class="admin-actions-item">
+                                            @if ($order->adminInvoiceIsAvailable())
+                                                <a
+                                                    href="{{ route('admin.orders.invoice', $order) }}"
+                                                    class="admin-actions-item"
+                                                    @if ($missingInvoiceFields !== [])
+                                                        data-invoice-confirm
+                                                        data-missing="{{ implode(',', $missingInvoiceFields) }}"
+                                                    @endif
+                                                >
                                                     <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
                                                         <path d="M12 4v11m0 0-4-4m4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
                                                         <path d="M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
@@ -526,6 +534,24 @@
             </div>
         @endif
 
+        {{-- Shared across every row, like row-confirm-modal: the link's own
+             data attributes carry the specifics, so one dialog covers every
+             order rather than one per row. --}}
+        <dialog id="invoice-warning-modal" class="modal" aria-labelledby="invoice-warning-title">
+            <h3 class="modal-title" id="invoice-warning-title">Shipping details are incomplete</h3>
+            <div class="order-invoice-warning">
+                <p class="order-invoice-warning-lede">Missing before this order can be shipped:</p>
+                <ul class="order-invoice-warning-list" id="invoice-warning-list"></ul>
+            </div>
+            <p class="modal-body">
+                You can still download the invoice now, but it will go out without these details.
+            </p>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                <a href="#" id="invoice-warning-download" class="btn btn-primary">Download anyway</a>
+            </div>
+        </dialog>
+
         <dialog id="row-confirm-modal" class="modal" aria-labelledby="row-confirm-title">
             <form method="POST" id="row-confirm-form">
                 @csrf
@@ -592,6 +618,26 @@
     </script>
     <script>
         (function () {
+            var invoiceModal = document.getElementById('invoice-warning-modal');
+            var invoiceList = document.getElementById('invoice-warning-list');
+            var invoiceDownload = document.getElementById('invoice-warning-download');
+
+            document.querySelectorAll('[data-invoice-confirm]').forEach(function (link) {
+                link.addEventListener('click', function (event) {
+                    event.preventDefault();
+
+                    invoiceList.innerHTML = '';
+                    link.getAttribute('data-missing').split(',').forEach(function (field) {
+                        var item = document.createElement('li');
+                        item.textContent = field;
+                        invoiceList.appendChild(item);
+                    });
+                    invoiceDownload.href = link.getAttribute('href');
+
+                    invoiceModal.showModal();
+                });
+            });
+
             var modal = document.getElementById('row-confirm-modal');
             var form = document.getElementById('row-confirm-form');
             var body = document.getElementById('row-confirm-body');
