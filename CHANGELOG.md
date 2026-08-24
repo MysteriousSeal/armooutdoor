@@ -2,6 +2,22 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-24 — v0.13.0 — build JDO5AZ
+
+### Admin
+
+- **An order can be invoiced as soon as it's being prepared, not only once it ships.** The order was already confirmed and paid at that point; a customer still waits for the parcel, but the back office had no reason to wait too. The two audiences now read separate rules — a customer's own invoice still waits for shipping.
+
+  Downloading that early can still be missing what the shipping label will carry — carrier, tracking number, package type — so the download now opens a warning listing exactly what's absent before it goes ahead. The download itself is never blocked: the warning is a courtesy, not a lock, and it works without JavaScript.
+
+- **An invoice names the carrier that actually shipped the order**, not the one chosen at checkout. The two can differ — the correcting field already existed for exactly this, the invoice just wasn't reading it.
+
+- **A product's edit page shows what it actually costs to buy**, averaged from its received purchase-order history and weighted by quantity — a nineteen-unit delivery counts for more than a one-unit one. A line ordered but never received doesn't enter the figure, since a promised price isn't a paid one.
+
+- **The orders list prices each order's margin.** Two new columns, P. costs and Profit, and a KPI card summing profit across every order in scope. Both go blank the moment one line can't be priced — a deleted product, or one with no purchase history — rather than quietly summing only the lines that can; the KPI card says how many orders that leaves out of the total.
+
+- **The Channel column shows the marketplace logo alone**, its name moved to a tooltip; a manual order with no marketplace reads as a dash instead of the word "Manuelle". Three column headers shortened to fit: Free del., Costs, Perceived.
+
 ## 2026-08-24 — v0.12.0 — build ZZJLBX
 
 ### Admin
