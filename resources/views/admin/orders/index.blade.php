@@ -57,63 +57,65 @@
         </header>
 
         <div class="admin-stat-grid admin-stat-grid--primary">
-            <div class="admin-stat-card">
+            <div class="admin-stat-card admin-stat-card--headline">
                 <span class="admin-stat-label">Total amount</span>
                 <span class="admin-stat-value">{{ format_euros($kpis['amount_cents']) }}</span>
                 <span class="admin-stat-value--sm">Order totals</span>
             </div>
-            <div class="admin-stat-card">
-                <span class="admin-stat-label">Own shipping cost</span>
-                <span class="admin-stat-value">{{ format_euros($kpis['shipping_cost_cents']) }}</span>
-                <span class="admin-stat-value--sm">Paid out of pocket</span>
-                <span class="admin-stat-pct-row">
-                    <span class="admin-stat-pct" title="Share of Total amount">{{ number_format($kpis['shipping_cost_pct_amount'] ?? 0, 2) }}% of amount</span>
-                    <span class="admin-stat-pct" title="Share of Total costs">{{ number_format($kpis['shipping_cost_pct_costs'] ?? 0, 2) }}% of costs</span>
-                </span>
+            {{-- Les trois postes qui composent « Total costs » : groupés, ils se
+                 lisent comme une décomposition plutôt que comme trois chiffres
+                 indépendants, et la ligne tient en une seule rangée. --}}
+            <div class="admin-stat-card admin-stat-card--breakdown">
+                <span class="admin-stat-label">Cost breakdown</span>
+                <ul class="admin-stat-parts">
+                    @foreach ([
+                        ['Own shipping', 'Paid out of pocket', 'shipping_cost'],
+                        ['Commission', 'Marketplace cut', 'commission_cost'],
+                        ['Payment fees', 'Card / PayPal processor', 'payment_fee'],
+                    ] as [$partLabel, $partHint, $partKey])
+                        <li class="admin-stat-part">
+                            <span class="admin-stat-part-name" title="{{ $partHint }}">{{ $partLabel }}</span>
+                            <span class="admin-stat-part-value">{{ format_euros($kpis[$partKey.'_cents']) }}</span>
+                            <span class="admin-stat-part-pcts">
+                                <span class="admin-stat-pct">{{ number_format($kpis[$partKey.'_pct_amount'] ?? 0, 2) }} % of amount</span>
+                                <span class="admin-stat-pct">{{ number_format($kpis[$partKey.'_pct_costs'] ?? 0, 2) }} % of costs</span>
+                            </span>
+                        </li>
+                    @endforeach
+                </ul>
             </div>
-            <div class="admin-stat-card">
-                <span class="admin-stat-label">Commission cost</span>
-                <span class="admin-stat-value">{{ format_euros($kpis['commission_cost_cents']) }}</span>
-                <span class="admin-stat-value--sm">Marketplace cut</span>
-                <span class="admin-stat-pct-row">
-                    <span class="admin-stat-pct" title="Share of Total amount">{{ number_format($kpis['commission_cost_pct_amount'] ?? 0, 2) }}% of amount</span>
-                    <span class="admin-stat-pct" title="Share of Total costs">{{ number_format($kpis['commission_cost_pct_costs'] ?? 0, 2) }}% of costs</span>
-                </span>
-            </div>
-            <div class="admin-stat-card">
-                <span class="admin-stat-label">Payment fees</span>
-                <span class="admin-stat-value">{{ format_euros($kpis['payment_fee_cents']) }}</span>
-                <span class="admin-stat-value--sm">Card / PayPal processor</span>
-                <span class="admin-stat-pct-row">
-                    <span class="admin-stat-pct" title="Share of Total amount">{{ number_format($kpis['payment_fee_pct_amount'] ?? 0, 2) }}% of amount</span>
-                    <span class="admin-stat-pct" title="Share of Total costs">{{ number_format($kpis['payment_fee_pct_costs'] ?? 0, 2) }}% of costs</span>
-                </span>
-            </div>
-            <div class="admin-stat-card admin-stat-card--warning">
-                <span class="admin-stat-label">Total costs</span>
-                <span class="admin-stat-value">{{ format_euros($kpis['total_costs_cents']) }}</span>
-                <span class="admin-stat-value--sm">Shipping + commission + fees</span>
-                <span class="admin-stat-pct-row">
-                    <span class="admin-stat-pct">{{ number_format($kpis['total_costs_pct_amount'] ?? 0, 2) }}% of amount</span>
-                </span>
-            </div>
-            <div class="admin-stat-card admin-stat-card--positive">
-                <span class="admin-stat-label">Total perceived</span>
-                <span class="admin-stat-value">{{ format_euros($kpis['perceived_total_cents']) }}</span>
-                <span class="admin-stat-value--sm">After all costs</span>
-                <span class="admin-stat-pct-row">
-                    <span class="admin-stat-pct">{{ number_format($kpis['perceived_total_pct_amount'] ?? 0, 2) }}% of amount</span>
-                </span>
-            </div>
-            <div class="admin-stat-card admin-stat-card--info">
-                <span class="admin-stat-label">Profit</span>
-                <span class="admin-stat-value">{{ format_euros($kpis['profit_cents']) }}</span>
-                {{-- Un coût produit inconnu exclut la commande plutôt que de
-                     compter zéro : le compteur dit combien sont concernées,
-                     comme le tiret sur chaque ligne de la liste. --}}
-                <span class="admin-stat-value--sm">
-                    Perceived − product cost, on {{ number_format($kpis['profit_priced_order_count']) }} of {{ number_format($kpis['profit_total_order_count']) }} orders
-                </span>
+            {{-- Ce qui reste une fois les coûts retirés : les trois chiffres se
+                 déduisent l'un de l'autre, ils se lisent donc ensemble. Seul le
+                 montant porte la couleur ; le bloc reste neutre, comme celui
+                 des coûts à côté. --}}
+            <div class="admin-stat-card admin-stat-card--breakdown">
+                <span class="admin-stat-label">Results</span>
+                <ul class="admin-stat-parts">
+                    <li class="admin-stat-part">
+                        <span class="admin-stat-part-name" title="Shipping + commission + fees">Total costs</span>
+                        <span class="admin-stat-part-value is-cost">{{ format_euros($kpis['total_costs_cents']) }}</span>
+                        <span class="admin-stat-part-pcts">
+                            <span class="admin-stat-pct">{{ number_format($kpis['total_costs_pct_amount'] ?? 0, 2) }} % of amount</span>
+                        </span>
+                    </li>
+                    <li class="admin-stat-part">
+                        <span class="admin-stat-part-name" title="Order totals after all costs">Total perceived</span>
+                        <span class="admin-stat-part-value is-kept">{{ format_euros($kpis['perceived_total_cents']) }}</span>
+                        <span class="admin-stat-part-pcts">
+                            <span class="admin-stat-pct">{{ number_format($kpis['perceived_total_pct_amount'] ?? 0, 2) }} % of amount</span>
+                        </span>
+                    </li>
+                    {{-- Un coût produit inconnu exclut la commande plutôt que de
+                         compter zéro : le compteur dit combien sont concernées,
+                         comme le tiret sur chaque ligne de la liste. --}}
+                    <li class="admin-stat-part">
+                        <span class="admin-stat-part-name" title="Perceived − product cost. Orders with an unknown product cost are left out.">Profit</span>
+                        <span class="admin-stat-part-value is-profit">{{ format_euros($kpis['profit_cents']) }}</span>
+                        <span class="admin-stat-part-pcts">
+                            <span class="admin-stat-pct">on {{ number_format($kpis['profit_priced_order_count']) }} of {{ number_format($kpis['profit_total_order_count']) }} orders</span>
+                        </span>
+                    </li>
+                </ul>
             </div>
         </div>
 

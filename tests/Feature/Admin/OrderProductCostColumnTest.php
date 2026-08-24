@@ -246,7 +246,9 @@ class OrderProductCostColumnTest extends TestCase
             ->assertOk()
             ->getContent();
 
-        $this->assertStringContainsString('admin-stat-card--info', $html);
+        // Le profit est une ligne du bloc « Results » depuis le regroupement
+        // des cartes ; seul le montant porte la couleur.
+        $this->assertStringContainsString('admin-stat-part-value is-profit', $html);
         // Seule la commande chiffrable entre dans le total : 12,60 €, sur 1
         // commande chiffrable sur 2 en tout.
         $this->assertStringContainsString('12,60', $html);

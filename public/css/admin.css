@@ -2233,9 +2233,103 @@
     margin-bottom: 1.75rem;
 }
 
+/* Cinq cartes, pas sept : les trois postes de coût sont regroupés dans une
+   seule, qui prend la largeur de deux. La colonne du groupe est la plus large
+   parce qu'elle porte trois lignes chiffrées, pas une. */
 .admin-orders-page .admin-stat-grid--primary {
-    grid-template-columns: 0.7fr repeat(5, minmax(0, 1fr));
+    grid-template-columns: 0.8fr 1.6fr 1.6fr;
+    align-items: stretch;
     margin-bottom: 1.75rem;
+}
+
+.admin-stat-card--breakdown {
+    gap: 0.55rem;
+}
+
+.admin-stat-parts {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* Une ligne par poste : nom à gauche, montant aligné à droite, parts en
+   dessous. La grille garde les montants sur une même colonne, ce qui rend les
+   trois comparables d'un coup d'œil. */
+.admin-stat-part {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 0.1rem 0.75rem;
+    padding: 0.4rem 0.55rem;
+    border-radius: 0.3rem;
+    background: var(--bg);
+}
+
+.admin-stat-part-name {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.admin-stat-part-value {
+    font-size: 1.0625rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
+/* Le rouge dit ce qui part, le vert ce qui reste, le bleu le résultat final.
+   Teinter le montant seul suffit : un fond par ligne ferait trois bandes là
+   où le bloc voisin n'en a aucune. */
+.admin-stat-part-value.is-cost {
+    color: #a44;
+}
+
+.admin-stat-part-value.is-kept {
+    color: #3d6b4e;
+}
+
+.admin-stat-part-value.is-profit {
+    color: #2f5d8a;
+}
+
+[data-theme='dark'] .admin-stat-part-value.is-cost {
+    color: #e08585;
+}
+
+[data-theme='dark'] .admin-stat-part-value.is-kept {
+    color: #8fceac;
+}
+
+[data-theme='dark'] .admin-stat-part-value.is-profit {
+    color: #8ab4dd;
+}
+
+.admin-stat-part-pcts {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+}
+
+/* Dans le groupe, les pastilles se posent sur le fond de la ligne : une
+   bordure de plus par poste ferait une grille dans une grille. */
+.admin-stat-part-pcts .admin-stat-pct {
+    padding: 0;
+    color: var(--text-muted);
+    background: none;
+    border: 0;
+}
+
+.admin-stat-part-pcts .admin-stat-pct + .admin-stat-pct::before {
+    content: '·';
+    margin-right: 0.3rem;
 }
 
 .admin-stat-card--warning {
@@ -2595,6 +2689,7 @@ a.admin-stat-card:hover {
 .admin-stat-pct {
     display: inline-flex;
     align-items: center;
+    white-space: nowrap;
     padding: 0.2rem 0.5rem;
     font-size: 0.6875rem;
     font-weight: 500;
@@ -4934,6 +5029,18 @@ input[type="date"].form-control {
     border-color: var(--accent);
 }
 
+/* Les deux blocs ne tiennent plus à côté du total : celui-ci passe en
+   bandeau, et les blocs se partagent la ligne suivante. */
+@media (max-width: 1100px) {
+    .admin-orders-page .admin-stat-grid--primary {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .admin-orders-page .admin-stat-card--headline {
+        grid-column: 1 / -1;
+    }
+}
+
 @media (max-width: 768px) {
 .admin-nav-bar {
         flex-wrap: wrap;
@@ -4950,6 +5057,10 @@ input[type="date"].form-control {
     .admin-stripe-payments .admin-stat-grid--primary,
     .admin-orders-page .admin-stat-grid--primary {
         grid-template-columns: 1fr 1fr;
+    }
+
+.admin-orders-page .admin-stat-card--breakdown {
+        grid-column: 1 / -1;
     }
 
 .admin-list-hero-row {
