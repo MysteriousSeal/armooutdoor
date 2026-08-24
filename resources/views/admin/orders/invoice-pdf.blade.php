@@ -251,8 +251,8 @@
                     @if (! ($order->is_manual && ($order->marketplace_id || $order->marketplace_name)) && $order->payment_method)
                         <div class="notes-line">Paiement : {{ $order->payment_method->label() }}</div>
                     @endif
-                    @if ($order->carrierName() !== '')
-                        <div class="notes-line">Transporteur : {{ $order->carrierName() }}</div>
+                    @if ($order->trackingCarrierName() !== '')
+                        <div class="notes-line">Transporteur : {{ $order->trackingCarrierName() }}</div>
                     @endif
                     @if ($order->hasTracking())
                         <div class="notes-line">Suivi : {{ $order->tracking_number }}</div>

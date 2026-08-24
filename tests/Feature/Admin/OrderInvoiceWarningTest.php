@@ -3,6 +3,7 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\Carrier;
+use App\Models\CompanySetting;
 use App\Models\Order;
 use App\Models\PackageType;
 use App\Models\User;
@@ -128,6 +129,40 @@ class OrderInvoiceWarningTest extends TestCase
 
         $this->assertStringNotContainsString('Download invoice', $html);
         $this->assertStringNotContainsString('invoice-warning-modal', $html);
+    }
+
+    public function test_the_invoice_shows_the_carrier_that_actually_shipped_it(): void
+    {
+        // Shop2Shop a été choisi à la commande, mais le colis est parti
+        // avec Mondial Relay : la facture doit dire ce qui s'est vraiment
+        // passé, pas ce qui a été acheté.
+        $sold = $this->carrier();
+        $actual = Carrier::query()->create([
+            'slug' => 'mondial-relay',
+            'name' => ['en' => 'Mondial Relay', 'fr' => 'Mondial Relay'],
+            'description' => ['en' => '', 'fr' => ''],
+            'eta' => ['en' => '', 'fr' => ''],
+            'method' => 'relay',
+            'price_cents' => 450,
+            'active' => true,
+            'sort_order' => 2,
+        ]);
+
+        $order = $this->order([
+            'carrier_id' => $sold->id,
+            'carrier_snapshot' => ['name' => ['fr' => 'Colissimo']],
+            'tracking_carrier_id' => $actual->id,
+        ]);
+
+        $order->load('items.product', 'items.variant');
+
+        $pdfHtml = view('admin.orders.invoice-pdf', [
+            'order' => $order,
+            'company' => CompanySetting::current(),
+        ])->render();
+
+        $this->assertStringContainsString('Mondial Relay', $pdfHtml);
+        $this->assertStringNotContainsString('Colissimo', $pdfHtml);
     }
 
     public function test_the_download_still_works_despite_missing_fields(): void
