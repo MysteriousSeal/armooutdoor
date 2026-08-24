@@ -389,6 +389,13 @@
                                 >
                                 <p class="form-hint">What this costs you before VAT. Never shown to customers.</p>
                                 @error('supplier_price') <p class="form-error">{{ $message }}</p> @enderror
+                                @if ($product->exists && $averagePurchaseCostInclVatCents !== null)
+                                    <p class="product-avg-cost">
+                                        <span class="product-avg-cost-label">Average paid, incl. VAT</span>
+                                        <span class="product-avg-cost-value">{{ format_euros($averagePurchaseCostInclVatCents) }}</span>
+                                        <span class="product-avg-cost-note">from {{ number_format($receivedPurchaseUnits) }} unit{{ $receivedPurchaseUnits === 1 ? '' : 's' }} received</span>
+                                    </p>
+                                @endif
                             </div>
 
                             <div class="form-group">

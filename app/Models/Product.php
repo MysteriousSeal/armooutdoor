@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Collection;
 
 #[ObservedBy(StockMovementObserver::class)]
 #[Fillable([
@@ -145,6 +146,55 @@ class Product extends Model
         return $this->hasMany(StockMovement::class)
             ->orderByDesc('created_at')
             ->orderByDesc('id');
+    }
+
+    public function purchaseOrderItems(): HasMany
+    {
+        return $this->hasMany(PurchaseOrderItem::class);
+    }
+
+    /**
+     * Ce que ce produit a réellement coûté, TVA comprise, sur ses bons de
+     * commande passés — pondéré par la quantité reçue, pas par le nombre de
+     * bons : un bon de dix-neuf pièces pèse plus qu'un bon d'une seule.
+     *
+     * Une ligne commandée mais jamais arrivée n'entre pas dans le calcul :
+     * un prix promis n'est pas un prix payé. Null si rien n'a encore été
+     * reçu — il n'y a alors rien à moyenner.
+     */
+    public function averagePurchaseCostInclVatCents(): ?int
+    {
+        $lines = $this->receivedPurchaseOrderLines();
+        $units = $lines->sum('quantity_received');
+
+        if ($units === 0) {
+            return null;
+        }
+
+        $totalInclVatCents = $lines->sum(
+            fn (PurchaseOrderItem $line): int => $line->purchaseOrder->withVatCents(
+                $line->unit_cost_cents * $line->quantity_received,
+            ),
+        );
+
+        return (int) round($totalInclVatCents / $units);
+    }
+
+    /** How many units the average above is drawn from. */
+    public function receivedPurchaseUnits(): int
+    {
+        return $this->receivedPurchaseOrderLines()->sum('quantity_received');
+    }
+
+    /**
+     * @return Collection<int, PurchaseOrderItem>
+     */
+    private function receivedPurchaseOrderLines(): Collection
+    {
+        return $this->purchaseOrderItems()
+            ->with('purchaseOrder')
+            ->where('quantity_received', '>', 0)
+            ->get();
     }
 
     public function wishlistItems(): HasMany

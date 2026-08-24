@@ -176,6 +176,8 @@ class ProductController extends Controller
             'categories' => $this->categoryOptions(),
             'carriers' => Carrier::query()->orderBy('sort_order')->get(),
             'suppliers' => Supplier::query()->orderBy('name')->get(),
+            'averagePurchaseCostInclVatCents' => $product->averagePurchaseCostInclVatCents(),
+            'receivedPurchaseUnits' => $product->receivedPurchaseUnits(),
         ]);
     }
 

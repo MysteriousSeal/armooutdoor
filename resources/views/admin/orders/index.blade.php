@@ -253,11 +253,11 @@
                             <th>Shipping</th>
                             <th>Channel</th>
                             <th>Status</th>
-                            <th>Free delivery</th>
+                            <th>Free del.</th>
                             <th>Tracking</th>
                             <th class="admin-table-num">Total</th>
-                            <th class="admin-table-num">Various costs</th>
-                            <th class="admin-table-num">Total perceived</th>
+                            <th class="admin-table-num">Costs</th>
+                            <th class="admin-table-num">Perceived</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -298,12 +298,9 @@
                                     </span>
                                 </td>
                                 <td>
-                                    @if ($order->is_manual)
-                                        <span class="order-chip order-chip--channel">
-                                            @if ($order->marketplace?->logo)
-                                                <img src="{{ $order->marketplace->logoUrl() }}" alt="" class="marketplace-logo marketplace-logo--sm">
-                                            @endif
-                                            {{ $order->marketplace_name ?: 'Manuelle' }}
+                                    @if ($order->is_manual && $order->marketplace?->logo)
+                                        <span class="order-chip order-chip--channel order-chip--channel-logo" title="{{ $order->marketplace_name }}">
+                                            <img src="{{ $order->marketplace->logoUrl() }}" alt="{{ $order->marketplace_name }}" class="marketplace-logo marketplace-logo--md">
                                         </span>
                                     @else
                                         <span class="admin-table-sub">—</span>
