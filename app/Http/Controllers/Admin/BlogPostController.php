@@ -192,7 +192,12 @@ class BlogPostController extends Controller
         $slug = $base;
         $suffix = 2;
 
-        while (BlogPost::query()->where('slug', $slug)->exists()) {
+        // Une rubrique occupe la même forme d'URL qu'un article : un article
+        // qui prendrait « conseils » serait masqué par la route rubrique et
+        // deviendrait inatteignable. On écarte ces slugs d'emblée.
+        $reserved = BlogCategory::query()->pluck('slug')->all() ?: BlogCategory::SEEDED_SLUGS;
+
+        while (in_array($slug, $reserved, true) || BlogPost::query()->where('slug', $slug)->exists()) {
             $slug = $base.'-'.$suffix;
             $suffix++;
         }

@@ -68,20 +68,53 @@ class BlogStorefrontTest extends TestCase
         $guide = BlogPost::factory()->create(['blog_category_id' => $conseils->id]);
         $news = BlogPost::factory()->create(['blog_category_id' => $actualites->id]);
 
-        $this->get('/blog?categorie=conseils')
+        $this->get('/blog/conseils')
             ->assertOk()
             ->assertSee($guide->localizedTitle(), false)
             ->assertDontSee($news->localizedTitle(), false);
     }
 
-    /** Une rubrique inconnue retombe sur la liste complète, sans erreur. */
-    public function test_an_unknown_category_does_not_break_the_page(): void
+    /**
+     * Une rubrique et un article partagent la forme `/blog/{slug}`.
+     *
+     * La route rubrique passe en premier mais n'est contrainte qu'aux slugs
+     * existants : un slug inconnu doit donc retomber sur la route article et
+     * donner un 404 franc, pas une liste complète déguisée en rubrique.
+     */
+    public function test_an_unknown_slug_is_a_404(): void
+    {
+        BlogPost::factory()->create();
+
+        $this->get('/blog/nexiste-pas')->assertNotFound();
+    }
+
+    public function test_every_category_has_its_own_route(): void
+    {
+        foreach (['conseils', 'actualites', 'essais', 'reglementation'] as $slug) {
+            $this->get('/blog/'.$slug)->assertOk();
+        }
+    }
+
+    /** Les deux routes cohabitent sur la même forme d'URL. */
+    public function test_a_post_still_resolves_beside_the_category_routes(): void
     {
         $post = BlogPost::factory()->create();
 
-        $this->get('/blog?categorie=nexiste-pas')
+        $this->get('/blog/'.$post->slug)
             ->assertOk()
             ->assertSee($post->localizedTitle(), false);
+    }
+
+    public function test_the_sitemap_lists_the_index_and_every_used_category(): void
+    {
+        BlogPost::factory()->create();
+
+        $response = $this->get('/sitemap-blog.xml')->assertOk();
+
+        $response->assertSee(route('blog.index'), false);
+        $response->assertSee(route('blog.category', 'conseils'), false);
+        // Une rubrique sans article visible n'a rien à indexer.
+        $response->assertDontSee(route('blog.category', 'actualites'), false);
     }
 
     public function test_mentioned_products_are_shown_on_the_post(): void

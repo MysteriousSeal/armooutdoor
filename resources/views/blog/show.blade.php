@@ -27,7 +27,7 @@
             <a href="{{ route('blog.index') }}">{{ __('store.blog_title') }}</a>
             @if ($post->category)
                 <span class="breadcrumbs-sep" aria-hidden="true">/</span>
-                <a href="{{ route('blog.index', ['categorie' => $post->category->slug]) }}">{{ $post->category->localizedName() }}</a>
+                <a href="{{ route('blog.category', $post->category->slug) }}">{{ $post->category->localizedName() }}</a>
             @endif
             <span class="breadcrumbs-sep" aria-hidden="true">/</span>
             <span>{{ $post->localizedTitle() }}</span>
@@ -48,7 +48,7 @@
                                 <div class="blog-article-byline-cell">
                                     <dt>{{ __('store.blog_category_label') }}</dt>
                                     <dd>
-                                        <a href="{{ route('blog.index', ['categorie' => $post->category->slug]) }}">
+                                        <a href="{{ route('blog.category', $post->category->slug) }}">
                                             {{ $post->category->localizedName() }}
                                         </a>
                                     </dd>

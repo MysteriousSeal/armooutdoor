@@ -56,6 +56,7 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\WishlistController;
+use App\Models\BlogCategory;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -260,6 +261,12 @@ Route::get('/promotions', [PromotionsController::class, 'index'])->name('product
 Route::get('/meilleures-ventes', [BestSellersController::class, 'index'])->name('products.best-sellers');
 
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+// La rubrique passe avant l'article : les deux occupent `/blog/{slug}`, et
+// seule celle-ci est contrainte aux slugs de rubriques. Tout le reste retombe
+// sur la route article juste en dessous.
+Route::get('/blog/{category}', [BlogController::class, 'category'])
+    ->where('category', BlogCategory::routeSlugPattern())
+    ->name('blog.category');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
 Route::get('/products/{product:slug}', [ProductController::class, 'show'])->name('products.show');

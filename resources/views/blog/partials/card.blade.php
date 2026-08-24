@@ -24,6 +24,7 @@
             @if ($post->localizedExcerpt() !== '')
                 <span class="blog-card-excerpt">{{ $post->localizedExcerpt() }}</span>
             @endif
+            <span class="blog-card-more">{{ __('store.blog_read') }}</span>
         </span>
     </a>
 </article>

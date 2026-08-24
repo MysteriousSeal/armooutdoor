@@ -4,23 +4,40 @@ namespace App\Http\Controllers;
 
 use App\Models\BlogCategory;
 use App\Models\BlogPost;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class BlogController extends Controller
 {
-    public function index(Request $request): View
+    public function index(): View
+    {
+        return $this->listing(null);
+    }
+
+    /**
+     * Une rubrique a sa propre adresse, `/blog/conseils`.
+     *
+     * La route ne répond que pour un slug de rubrique existant : un slug
+     * inconnu n'arrive jamais ici, il tombe sur la route article et donne un
+     * 404 franc plutôt qu'une liste complète déguisée en rubrique.
+     */
+    public function category(string $category): View
+    {
+        $active = BlogCategory::query()->where('slug', $category)->firstOrFail();
+
+        return $this->listing($active);
+    }
+
+    private function listing(?BlogCategory $activeCategory): View
     {
         $categories = BlogCategory::query()
             ->orderBy('sort_order')
             ->withCount(['posts as posts_count' => fn ($query) => $query->visible()])
             ->get();
 
-        // Une rubrique inconnue ne vaut pas une erreur : on retombe sur « tous
-        // les articles » plutôt que sur un 404 pour une faute de frappe.
-        $activeCategory = $request->filled('categorie')
-            ? $categories->firstWhere('slug', $request->query('categorie'))
-            : null;
+        if ($activeCategory !== null) {
+            // La version comptée, pour que le libellé du bandeau ait son total.
+            $activeCategory = $categories->firstWhere('id', $activeCategory->id) ?? $activeCategory;
+        }
 
         $posts = BlogPost::query()
             ->visible()

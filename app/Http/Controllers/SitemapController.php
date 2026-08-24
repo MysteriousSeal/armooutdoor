@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use App\Models\Category;
 use App\Models\Product;
@@ -31,7 +32,9 @@ class SitemapController extends Controller
             ->orderByDesc('published_at')
             ->get();
 
-        return view('sitemap.html', compact('categories', 'products', 'posts'));
+        $blogCategories = BlogCategory::query()->orderBy('sort_order')->get();
+
+        return view('sitemap.html', compact('categories', 'products', 'posts', 'blogCategories'));
     }
 
     public function index(): Response
@@ -82,12 +85,35 @@ class SitemapController extends Controller
     {
         // Le même périmètre que la façade publique : un brouillon ou un
         // article programmé n'a rien à faire dans un plan de site.
-        $urls = BlogPost::query()->visible()->get()->map(fn (BlogPost $post): array => [
+        // La liste du blog et chaque rubrique ont leur propre adresse depuis
+        // qu'elles ne sont plus un paramètre : elles s'indexent comme des
+        // pages à part entière. Une rubrique vide est laissée de côté, il n'y
+        // a rien à y voir.
+        $categories = BlogCategory::query()
+            ->withCount(['posts as posts_count' => fn ($query) => $query->visible()])
+            ->orderBy('sort_order')
+            ->get()
+            ->filter(fn (BlogCategory $category): bool => $category->posts_count > 0)
+            ->map(fn (BlogCategory $category): array => [
+                'loc' => route('blog.category', $category->slug),
+                'lastmod' => $category->posts()->visible()->max('updated_at'),
+                'changefreq' => 'weekly',
+                'priority' => '0.6',
+            ]);
+
+        $posts = BlogPost::query()->visible()->get()->map(fn (BlogPost $post): array => [
             'loc' => route('blog.show', $post->slug),
             'lastmod' => $post->updated_at?->toAtomString(),
             'changefreq' => 'monthly',
             'priority' => '0.6',
-        ])->all();
+        ]);
+
+        $urls = collect([[
+            'loc' => route('blog.index'),
+            'lastmod' => BlogPost::query()->visible()->max('updated_at'),
+            'changefreq' => 'weekly',
+            'priority' => '0.7',
+        ]])->concat($categories)->concat($posts)->all();
 
         return $this->xml('sitemap.urlset', compact('urls'));
     }

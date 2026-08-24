@@ -332,6 +332,8 @@ return [
     'nav_blog' => 'Blog',
     'blog_title' => 'Le blog',
     'blog_intro' => 'Conseils, essais, actualités et réglementation, écrits par la boutique.',
+    'blog_posts_count' => ':count article|:count articles',
+    'blog_read' => "Lire l'article",
     'blog_all' => 'Tous les articles',
     'blog_empty' => 'Aucun article pour le moment.',
     'blog_empty_category' => 'Aucun article dans cette rubrique pour le moment.',

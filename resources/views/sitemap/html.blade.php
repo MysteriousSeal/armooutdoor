@@ -65,17 +65,26 @@
         @if ($posts->isNotEmpty())
             <section class="sitemap-section" aria-labelledby="sitemap-blog-heading">
                 <h2 class="sitemap-heading" id="sitemap-blog-heading">{{ __('store.blog_title') }}</h2>
+                {{-- Une carte par rubrique, comme pour les catégories produit
+                     juste au-dessus : chaque rubrique a désormais son adresse. --}}
                 <div class="sitemap-groups">
-                    <nav class="sitemap-card" aria-labelledby="sitemap-blog-list">
-                        <h3 class="sitemap-cat-name" id="sitemap-blog-list">
-                            <a href="{{ route('blog.index') }}">{{ __('store.blog_all') }}</a>
-                        </h3>
-                        <ul class="sitemap-links">
-                            @foreach ($posts as $post)
-                                <li><a href="{{ route('blog.show', $post->slug) }}">{{ $post->localizedTitle() }}</a></li>
-                            @endforeach
-                        </ul>
-                    </nav>
+                    @foreach ($blogCategories as $blogCategory)
+                        @php
+                            $categoryPosts = $posts->where('blog_category_id', $blogCategory->id);
+                        @endphp
+                        @if ($categoryPosts->isNotEmpty())
+                            <nav class="sitemap-card" aria-labelledby="sitemap-blog-{{ $blogCategory->id }}">
+                                <h3 class="sitemap-cat-name" id="sitemap-blog-{{ $blogCategory->id }}">
+                                    <a href="{{ route('blog.category', $blogCategory->slug) }}">{{ $blogCategory->localizedName() }}</a>
+                                </h3>
+                                <ul class="sitemap-links">
+                                    @foreach ($categoryPosts as $post)
+                                        <li><a href="{{ route('blog.show', $post->slug) }}">{{ $post->localizedTitle() }}</a></li>
+                                    @endforeach
+                                </ul>
+                            </nav>
+                        @endif
+                    @endforeach
                 </div>
             </section>
         @endif

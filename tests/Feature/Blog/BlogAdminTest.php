@@ -125,6 +125,25 @@ class BlogAdminTest extends TestCase
         $this->assertDatabaseHas('blog_posts', ['slug' => 'meme-titre-2']);
     }
 
+    /**
+     * Un article intitulé « Conseils » prendrait le slug d'une rubrique, et la
+     * route rubrique le masquerait définitivement.
+     */
+    public function test_a_post_cannot_take_a_category_slug(): void
+    {
+        $this->actingAs($this->admin())->post('/admin/blog', [
+            'title' => 'Conseils',
+            'blog_category_id' => $this->category()->id,
+            'body' => '<p>x</p>',
+            'status' => 'draft',
+        ])->assertRedirect();
+
+        $slug = BlogPost::query()->firstOrFail()->slug;
+
+        $this->assertNotSame('conseils', $slug);
+        $this->assertSame('conseils-2', $slug);
+    }
+
     public function test_mentioned_products_are_attached_and_ordered(): void
     {
         $post = BlogPost::factory()->create();

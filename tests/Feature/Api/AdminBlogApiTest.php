@@ -105,6 +105,18 @@ class AdminBlogApiTest extends TestCase
         $this->assertDatabaseHas('blog_posts', ['slug' => 'meme-titre-2']);
     }
 
+    /** Même garde-fou côté API : le slug d'une rubrique est réservé. */
+    public function test_a_created_post_cannot_take_a_category_slug(): void
+    {
+        $this->postJson('/api/admin/blog/posts', [
+            'title' => 'Réglementation',
+            'body' => '<p>x</p>',
+            'blog_category_id' => $this->categoryId(),
+        ], $this->headers())
+            ->assertCreated()
+            ->assertJsonPath('data.slug', 'reglementation-2');
+    }
+
     // ------------------------------------------------------- publication
 
     /** Publier sans date donne un article que rien ne montrera jamais. */
