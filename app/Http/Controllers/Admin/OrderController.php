@@ -73,6 +73,10 @@ class OrderController extends Controller
         $openOrders = Order::query()->whereNull('archived_at')->excludingTest()->where('status', '!=', 'draft');
 
         $amountCents = (clone $salesOrders)->sum('total_cents');
+        $salesOrderCount = (clone $salesOrders)->count();
+        // Le panier moyen se déduit des deux chiffres ci-dessus, sur le même
+        // périmètre : pas de requête de plus.
+        $averageOrderCents = $salesOrderCount > 0 ? intdiv($amountCents, $salesOrderCount) : 0;
         $shippingCostCents = (clone $salesOrders)->sum('shipping_paid_cents');
         $commissionCostCents = (clone $salesOrders)->sum('marketplace_commission_cents');
         $paymentFeeCents = (clone $salesOrders)->sum('payment_fee_cents');
@@ -87,8 +91,9 @@ class OrderController extends Controller
             'productCostsByProductId' => $productCostsByProductId,
             'tab' => $filters['tab'],
             'kpis' => [
-                'order_count' => (clone $salesOrders)->count(),
+                'order_count' => $salesOrderCount,
                 'amount_cents' => $amountCents,
+                'average_order_cents' => $averageOrderCents,
                 'profit_cents' => $profitCents,
                 'profit_priced_order_count' => $pricedOrderCount,
                 'profit_total_order_count' => $totalOrderCount,

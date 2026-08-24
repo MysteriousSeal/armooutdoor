@@ -57,10 +57,25 @@
         </header>
 
         <div class="admin-stat-grid admin-stat-grid--primary">
+            {{-- La base à laquelle tous les pourcentages voisins se rapportent.
+                 Même structure que les deux blocs : un chiffre en tête, puis
+                 des lignes qui le détaillent. --}}
             <div class="admin-stat-card admin-stat-card--headline">
                 <span class="admin-stat-label">Total amount</span>
                 <span class="admin-stat-value">{{ format_euros($kpis['amount_cents']) }}</span>
-                <span class="admin-stat-value--sm">Order totals</span>
+                <span class="admin-stat-pct-row">
+                    <span class="admin-stat-pct" title="Every percentage on this row is a share of this total">100 % — the base</span>
+                </span>
+                <ul class="admin-stat-parts">
+                    <li class="admin-stat-part">
+                        <span class="admin-stat-part-name" title="Orders counted in this total">Orders</span>
+                        <span class="admin-stat-part-value">{{ number_format($kpis['order_count']) }}</span>
+                    </li>
+                    <li class="admin-stat-part">
+                        <span class="admin-stat-part-name" title="Total amount divided by the number of orders">Average order</span>
+                        <span class="admin-stat-part-value">{{ format_euros($kpis['average_order_cents']) }}</span>
+                    </li>
+                </ul>
             </div>
             {{-- Les trois postes qui composent « Total costs » : groupés, ils se
                  lisent comme une décomposition plutôt que comme trois chiffres

@@ -2246,6 +2246,20 @@
     gap: 0.55rem;
 }
 
+/* Le total porte le chiffre en tête puis ses lignes : les postes sont poussés
+   en bas, pour que les trois cartes se terminent sur la même ligne de base
+   quelle que soit la hauteur du bloc. */
+.admin-stat-card--headline .admin-stat-parts {
+    margin-top: auto;
+    padding-top: 0.55rem;
+}
+
+/* Deux lignes seulement, sans pourcentage : elles peuvent tenir sur une seule
+   rangée chacune, nom à gauche et valeur à droite. */
+.admin-stat-card--headline .admin-stat-part-value {
+    font-size: 1rem;
+}
+
 .admin-stat-parts {
     display: flex;
     flex-direction: column;
@@ -2320,6 +2334,13 @@
 
 /* Dans le groupe, les pastilles se posent sur le fond de la ligne : une
    bordure de plus par poste ferait une grille dans une grille. */
+.admin-stat-card--headline .admin-stat-pct {
+    padding: 0;
+    color: var(--text-muted);
+    background: none;
+    border: 0;
+}
+
 .admin-stat-part-pcts .admin-stat-pct {
     padding: 0;
     color: var(--text-muted);

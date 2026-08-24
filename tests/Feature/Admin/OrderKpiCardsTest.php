@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\Order;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -38,6 +39,21 @@ class OrderKpiCardsTest extends TestCase
         $next = strpos($rest, '<div class="admin-stat-card');
 
         return $next === false ? $rest : substr($rest, 0, $next);
+    }
+
+    private function orderWorth(int $totalCents): void
+    {
+        Order::query()->create([
+            'number' => Order::generateNumber(),
+            'user_id' => User::factory()->create()->id,
+            'status' => 'delivered',
+            'address_snapshot' => ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'x', 'postal_code' => '75000', 'city' => 'Paris', 'country' => 'FR'],
+            'billing_address_snapshot' => ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'x', 'postal_code' => '75000', 'city' => 'Paris', 'country' => 'FR'],
+            'carrier_method' => 'home',
+            'carrier_snapshot' => ['name' => ['fr' => 'Colissimo']],
+            'subtotal_cents' => $totalCents, 'shipping_cents' => 0, 'discount_cents' => 0,
+            'total_cents' => $totalCents, 'payment_method' => 'card',
+        ]);
     }
 
     private function cardCount(): int
@@ -136,6 +152,35 @@ class OrderKpiCardsTest extends TestCase
         // L'espace avant le % fait partie de ce qui est rendu, pas du CSS.
         $this->assertMatchesRegularExpression('/\d %\s*of amount/', $this->grid());
         $this->assertStringNotContainsString('amt', $this->grid());
+    }
+
+    public function test_the_total_block_shows_its_orders_and_average(): void
+    {
+        // Deux commandes de 15,00 € et 5,00 € : moyenne 10,00 €.
+        $this->orderWorth(1500);
+        $this->orderWorth(500);
+
+        $block = $this->block('Total amount');
+
+        $this->assertStringContainsString('Orders', $block);
+        $this->assertStringContainsString('>2<', $block);
+        $this->assertStringContainsString('Average order', $block);
+        $this->assertStringContainsString('10,00', $block);
+    }
+
+    /** Sans commande, la moyenne ne doit pas diviser par zéro. */
+    public function test_the_average_is_zero_when_there_is_no_order(): void
+    {
+        $block = $this->block('Total amount');
+
+        $this->assertStringContainsString('Average order', $block);
+        $this->assertStringContainsString('0,00', $block);
+    }
+
+    /** Le total est la base : c'est ce que dit sa sous-ligne. */
+    public function test_the_total_names_itself_as_the_base(): void
+    {
+        $this->assertStringContainsString('100 % — the base', $this->block('Total amount'));
     }
 
     public function test_the_total_spans_the_row_once_the_grid_narrows(): void
