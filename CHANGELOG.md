@@ -2,6 +2,20 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-25 — v0.16.0 — build K2GHJS
+
+### Admin
+
+- **A purchase order downloads as a PDF to send to the supplier.** It carries the lines ordered, the unit costs, shipping, any discount or additional costs, the VAT and the total to pay. What has already been received is deliberately absent: that figure keeps moving after the order is sent, and the supplier reads what is being ordered, not the state of our receipts. The document is dressed like the delivery slip, since both come from the same house — the designation takes the full width with the variant and supplier reference in small type underneath, rather than half-empty columns of their own.
+
+- **The navigation is five entries instead of thirteen.** Sales, Catalogue and System gather what belongs together and open on a click, like the Actions menus in the lists. A folded group still carries the sum of the counts it hides, so putting Orders away does not hide the number that is looked at all day. System sits at the right edge: what is set once a month has no business in the middle of the bar.
+
+- Two arrows next to an order number step to the order before and after it by date, whatever search or filter led there.
+
+### Under the hood
+
+- **Every PDF was embedding full-size product photographs.** A thousand-pixel-square picture was decoded whole and written into the document to print a 36-pixel square, which made one purchase order of eleven lines take six and a half seconds to build. Printed images are now shrunk once and kept aside, keyed on the source file's date so a replaced photograph regenerates its own copy. That order now takes two tenths of a second, and the file carries 66 kB of image data instead of 903 kB. The delivery slip and the invoice were doing exactly the same thing.
+
 ## 2026-08-25 — v0.15.0 — build YLJ6SS
 
 ### Storefront
