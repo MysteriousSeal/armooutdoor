@@ -7,15 +7,18 @@ use App\Http\Requests\Admin\ReceivePurchaseOrderRequest;
 use App\Http\Requests\Admin\StorePurchaseOrderRequest;
 use App\Http\Requests\Admin\UpdatePurchaseOrderRequest;
 use App\Models\AdminActivityLog;
+use App\Models\CompanySetting;
 use App\Models\Product;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
 use App\Models\Supplier;
 use App\Services\PurchaseOrderReceiver;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 class PurchaseOrderController extends Controller
 {
@@ -113,6 +116,24 @@ class PurchaseOrderController extends Controller
         $purchaseOrder->load(['supplier', 'items.product', 'items.variant', 'statusHistories.user', 'createdBy']);
 
         return view('admin.purchase-orders.show', ['purchaseOrder' => $purchaseOrder]);
+    }
+
+    /**
+     * Le bon de commande à envoyer au fournisseur.
+     *
+     * Ce qui a été reçu n'y figure pas : le document dit ce qu'on commande,
+     * et il continuerait à circuler alors que les réceptions, elles, bougent.
+     */
+    public function pdf(PurchaseOrder $purchaseOrder): Response
+    {
+        $purchaseOrder->load(['supplier', 'items.product', 'items.variant']);
+
+        $pdf = Pdf::loadView('admin.purchase-orders.pdf', [
+            'purchaseOrder' => $purchaseOrder,
+            'company' => CompanySetting::current(),
+        ])->setPaper('a4');
+
+        return $pdf->download('bc-'.$purchaseOrder->number.'.pdf');
     }
 
     public function edit(PurchaseOrder $purchaseOrder): View

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Support\ImageThumbnailer;
+use App\Support\PdfImageCache;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -164,6 +165,12 @@ class OrderItem extends Model
             return $this->image;
         }
 
-        return public_path('images/'.$this->image);
+        // Réduite pour l'impression. Le générateur de PDF décode l'image
+        // entière avant de la ramener à 36 px : une photo de produit pleine
+        // taille coûtait une demi-seconde par ligne.
+        $thumbnail = ImageThumbnailer::absoluteThumbnailPath($this->image);
+        $source = is_file($thumbnail) ? $thumbnail : public_path('images/'.$this->image);
+
+        return PdfImageCache::pathFor($source) ?? $source;
     }
 }

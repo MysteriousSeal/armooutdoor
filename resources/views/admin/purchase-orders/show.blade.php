@@ -26,6 +26,7 @@
                     </p>
                 </div>
                 <div class="admin-order-actions">
+                    <a href="{{ route('admin.purchase-orders.pdf', $purchaseOrder) }}" class="btn btn-secondary">Download PDF</a>
                     @if ($purchaseOrder->isDraft())
                         <button type="button" class="btn btn-primary" data-modal-open="po-send-modal">Mark as sent</button>
                         <a href="{{ route('admin.purchase-orders.edit', $purchaseOrder) }}" class="btn btn-secondary">Edit draft</a>
