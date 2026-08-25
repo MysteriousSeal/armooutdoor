@@ -133,6 +133,12 @@ class BlogPostController extends Controller
             }
         }
 
+        // Comme côté back-office : le champ ne garde que le nom.
+        if (array_key_exists('image_credit', $validated)) {
+            $credit = BlogPost::stripCreditPrefix((string) $validated['image_credit']);
+            $payload['image_credit'] = $credit === '' ? null : $credit;
+        }
+
         if (array_key_exists('title', $validated)) {
             $payload['title'] = ['fr' => $validated['title']];
         }

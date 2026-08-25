@@ -100,7 +100,14 @@
 .home .home-carousel-panel {
     flex: 0 0 100%;
     /* Le cadre et l'ombre appartiennent à la coque : un panneau qui les
-       reprendrait les empilerait à chaque glissement. */
+       reprendrait les empilerait à chaque glissement. Plus spécifique que
+       `.home-hero`, sinon sa marge du haut perce le cadre. */
+    margin-top: 0;
+    border: 0;
+    box-shadow: none;
+}
+
+.home .home-carousel .home-hero {
     margin-top: 0;
     border: 0;
     box-shadow: none;
@@ -1051,7 +1058,7 @@
 @media (max-width: 900px) {
     .home .home-hero {
         min-height: 0;
-        margin-top: 1rem;
+        margin-top: 0;
         padding: 1.5rem 1.15rem 1.5rem;
         background-position: center top;
         background-size: cover;

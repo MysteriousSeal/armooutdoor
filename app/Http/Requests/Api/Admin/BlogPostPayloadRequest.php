@@ -45,6 +45,7 @@ abstract class BlogPostPayloadRequest extends FormRequest
             'meta_title' => ['sometimes', 'nullable', 'string', 'max:180'],
             'meta_description' => ['sometimes', 'nullable', 'string', 'max:300'],
             'image' => ['sometimes', 'nullable', 'string', 'max:2048'],
+            'image_credit' => ['sometimes', 'nullable', 'string', 'max:180'],
 
             'product_ids' => ['sometimes', 'array'],
             'product_ids.*' => ['integer', 'exists:products,id'],

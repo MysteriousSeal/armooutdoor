@@ -169,6 +169,26 @@
                             </label>
                         @endif
                         <p class="form-hint">Resized to 1600×900, with an 800×450 card thumbnail.</p>
+
+                        <div class="form-group blog-cover-credit">
+                            <label for="image_credit">Credit <span class="form-optional">optional</span></label>
+                            {{-- Le préfixe est montré dans le champ plutôt que
+                                 décrit en dessous : on voit ce qui sortira. --}}
+                            <div class="input-with-prefix">
+                                <span class="input-prefix" aria-hidden="true">{{ __('store.blog_image_credit_prefix') }}</span>
+                                <input
+                                    type="text"
+                                    id="image_credit"
+                                    name="image_credit"
+                                    class="form-control"
+                                    maxlength="180"
+                                    placeholder="Umarex"
+                                    value="{{ old('image_credit', $post->image_credit) }}"
+                                >
+                            </div>
+                            <p class="form-hint">Just the name. « {{ __('store.blog_image_credit_prefix') }} » is added on the page. Left empty, nothing appears.</p>
+                            @error('image_credit') <p class="form-error">{{ $message }}</p> @enderror
+                        </div>
                         @error('image_file') <p class="form-error">{{ $message }}</p> @enderror
                     </section>
 

@@ -158,6 +158,9 @@ class BlogPostController extends Controller
             'published_at' => $validated['published_at'] ?? null,
             'meta_title' => $validated['meta_title'] ?? null,
             'meta_description' => $validated['meta_description'] ?? null,
+            // Le préfixe est ajouté à l'affichage : on ne range que le nom,
+            // même si l'auteur a retapé « Photo © » devant.
+            'image_credit' => $this->normalizeCredit($validated['image_credit'] ?? null),
         ];
 
         // Le slug se fige à la création : le changer casserait l'adresse d'un
@@ -172,9 +175,18 @@ class BlogPostController extends Controller
         } elseif ($request->boolean('remove_image')) {
             $this->deleteStoredImage($post?->image);
             $payload['image'] = null;
+            // Le crédit ne survit pas à l'image qu'il crédite.
+            $payload['image_credit'] = null;
         }
 
         return $payload;
+    }
+
+    private function normalizeCredit(?string $credit): ?string
+    {
+        $credit = BlogPost::stripCreditPrefix((string) $credit);
+
+        return $credit === '' ? null : $credit;
     }
 
     private function syncProducts(StoreBlogPostRequest $request, BlogPost $post): void

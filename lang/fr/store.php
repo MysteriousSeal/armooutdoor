@@ -341,6 +341,7 @@ return [
     'blog_category_label' => 'Rubrique',
     'blog_published_label' => 'Publié',
     'blog_back_to_list' => 'Retour au blog',
+    'blog_image_credit_prefix' => 'Photo ©',
     'blog_related_products' => 'Produits mentionnés',
     'blog_related_posts' => 'À lire aussi',
     'blog_question' => 'Une question sur cet article ?',

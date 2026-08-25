@@ -39,6 +39,7 @@ class BlogPostResource extends JsonResource
             'meta_title' => $this->meta_title,
             'meta_description' => $this->meta_description,
             'image' => $this->image,
+            'image_credit' => $this->image_credit,
             'url' => $this->isVisible() ? route('blog.show', $this->slug) : null,
             'products' => $this->whenLoaded('products', fn (): array => $this->products
                 ->map(fn ($product): array => [

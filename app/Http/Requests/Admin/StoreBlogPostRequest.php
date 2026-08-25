@@ -29,6 +29,7 @@ class StoreBlogPostRequest extends FormRequest
             'meta_title' => ['nullable', 'string', 'max:180'],
             'meta_description' => ['nullable', 'string', 'max:300'],
             'image_file' => ['nullable', 'image', 'max:8192'],
+            'image_credit' => ['nullable', 'string', 'max:180'],
             'remove_image' => ['sometimes', 'boolean'],
             'product_ids' => ['nullable', 'array'],
             'product_ids.*' => ['integer', 'exists:products,id'],

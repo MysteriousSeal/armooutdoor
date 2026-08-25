@@ -90,6 +90,7 @@ Lists add Laravel's pagination blocks: `data`, `links`, and `meta` holding `curr
 | `body` | Sanitised HTML. See [Images in the body](#images-in-the-body). |
 | `excerpt` | Card text, and the meta description when `meta_description` is empty. |
 | `image` | Cover path relative to `public/images/`. Writable as a path; **uploading a file is the web admin's job**. |
+| `image_credit` | Optional attribution, **the name only**. The page renders it as `Photo © {name}` in the corner of the banner. Plain text, no link, shown only when there is a cover. |
 | `url` | The public URL, or `null` when the post is not visible. |
 | `products` | The "Produits mentionnés" block, in display order. |
 | `category` | Present when loaded; `blog_category_id` is always there. |
@@ -187,6 +188,7 @@ Same set for `POST` and `PATCH`.
 | `meta_title` | string\|null | ≤ 180. Falls back to `title` |
 | `meta_description` | string\|null | ≤ 300. Falls back to `excerpt` |
 | `image` | string\|null | ≤ 2048, path relative to `public/images/` |
+| `image_credit` | string\|null | ≤ 180 chars, the name alone. A typed `Photo ©` or `©` prefix is stripped on save. Cleared with the cover when the web admin removes it |
 | `product_ids` | int[] | Each must exist. **Order is kept** as the display order |
 
 Not writable: `slug`, `is_visible`, `is_scheduled`, `url`, timestamps.

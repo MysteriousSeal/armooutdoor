@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
     'excerpt',
     'body',
     'image',
+    'image_credit',
     'status',
     'published_at',
     'meta_title',
@@ -102,6 +103,32 @@ class BlogPost extends Model
     public function metaDescription(): string
     {
         return $this->meta_description ?: $this->localizedExcerpt();
+    }
+
+    /**
+     * La mention telle qu'elle s'affiche.
+     *
+     * Le champ ne contient que le nom ; le « Photo © » est ajouté ici pour
+     * que toutes les mentions se ressemblent, quelle que soit la façon dont
+     * chacune a été saisie. La normalisation à l'écriture retire déjà un
+     * préfixe tapé à la main, mais on se garde aussi ici : d'anciennes lignes
+     * peuvent en porter un, et personne ne veut lire « Photo © Photo © ».
+     */
+    public function imageCreditLine(): string
+    {
+        $credit = trim((string) $this->image_credit);
+
+        if ($credit === '') {
+            return '';
+        }
+
+        return __('store.blog_image_credit_prefix').' '.self::stripCreditPrefix($credit);
+    }
+
+    /** Retire un « Photo © », « photo© » ou « © » de tête. */
+    public static function stripCreditPrefix(string $credit): string
+    {
+        return trim((string) preg_replace('/^\s*(photo\s*)?©\s*/iu', '', trim($credit)));
     }
 
     public function heroUrl(): string

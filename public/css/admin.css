@@ -6693,3 +6693,29 @@ input[type="date"].form-control {
         position: static;
     }
 }
+
+/* Un préfixe fixe collé au champ : l'auteur saisit « Umarex » et voit
+   « Photo © Umarex », sans avoir à retenir la convention. */
+.input-with-prefix {
+    display: flex;
+    align-items: stretch;
+}
+
+.input-prefix {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 0.6rem;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-right: 0;
+}
+
+.input-with-prefix .form-control {
+    flex: 1 1 auto;
+    min-width: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}

@@ -41,6 +41,12 @@
                 @if ($post->image)
                     <div class="blog-article-banner-overlay" aria-hidden="true"></div>
                 @endif
+
+                {{-- Le crédit accompagne l'image : sans visuel, il ne crédite
+                     rien et ne s'affiche pas. --}}
+                @if ($post->image && $post->image_credit)
+                    <p class="blog-article-credit">{{ $post->imageCreditLine() }}</p>
+                @endif
                 <div class="blog-article-banner-copy">
                     @if ($post->category || $post->published_at)
                         <dl class="blog-article-byline">
