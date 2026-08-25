@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[ObservedBy(StockMovementObserver::class)]
 #[Fillable([
@@ -114,9 +115,42 @@ class ProductVariant extends Model
      * one-unit backorder, independently from the parent product's
      * own supplier fields.
      */
+    /** Toutes les lignes de commande fournisseur, reçues ou non. */
+    public function purchaseOrderItems(): HasMany
+    {
+        return $this->hasMany(PurchaseOrderItem::class);
+    }
+
+    /**
+     * Les lignes de commande fournisseur encore en attente pour cet article.
+     *
+     * Ligne par ligne, pas commande par commande : une commande partiellement
+     * reçue contient des articles arrivés et d'autres non, et seuls les
+     * seconds sont encore en approvisionnement.
+     */
+    public function restockingPurchaseItems(): HasMany
+    {
+        return $this->hasMany(PurchaseOrderItem::class)
+            ->whereColumn('quantity_received', '<', 'quantity_ordered')
+            ->whereHas('purchaseOrder', fn ($query) => $query->open());
+    }
+
+    /** Un réassort est en route pour cet article. */
+    public function isRestocking(): bool
+    {
+        // Si la relation est déjà chargée, on ne repart pas en base : les
+        // listings affichent des dizaines de produits d'affilée.
+        if ($this->relationLoaded('restockingPurchaseItems')) {
+            return $this->restockingPurchaseItems->isNotEmpty();
+        }
+
+        return $this->restockingPurchaseItems()->exists();
+    }
+
     public function isBackorderable(): bool
     {
-        return $this->supplier_id !== null && $this->available_at_supplier;
+        return ! $this->isRestocking()
+            && $this->supplier_id !== null && $this->available_at_supplier;
     }
 
     public function maxPurchasable(): int

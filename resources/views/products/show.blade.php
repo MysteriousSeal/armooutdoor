@@ -124,9 +124,10 @@
                             ? ($activeVariants->isNotEmpty() && $activeVariants->every(fn ($variant) => ! $variant->inStock()) && $backorderableVariant !== null)
                             : (! $product->inStock() && $product->supplier_id !== null && $product->available_at_supplier);
                         $supplierForLeadTime = $backorderableVariant?->supplier ?? $product->supplier;
+                        $stockState = $product->availabilityState();
                     @endphp
-                    <span class="stock-badge {{ $product->lowStock() ? 'is-low-stock' : ($product->inStock() ? 'is-in-stock' : ($availableAtSupplier ? 'is-at-supplier' : 'is-out-of-stock')) }}" id="product-stock-badge">
-                        {{ $product->lowStock() ? __('store.low_stock') : ($product->inStock() ? __('store.in_stock') : ($availableAtSupplier ? __('store.available_at_supplier') : __('store.out_of_stock'))) }}
+                    <span class="stock-badge is-{{ str_replace('_', '-', $stockState) }}" id="product-stock-badge">
+                        {{ __('store.'.($stockState === 'at_supplier' ? 'available_at_supplier' : $stockState)) }}
                     </span>
                 </div>
                 @php
@@ -243,9 +244,10 @@
                                                     @if ($variantPricesDiffer)
                                                         <span class="product-variant-chip-price">{{ $variant->formattedPrice() }}</span>
                                                     @endif
+                                                    @php($variantRestocking = ! $variant->inStock() && $variant->isRestocking())
                                                     @php($variantBackorderable = ! $variant->inStock() && $variant->isBackorderable())
-                                                    <span class="product-variant-chip-stock {{ $variant->lowStock() ? 'is-low-stock' : ($variant->inStock() ? 'is-in-stock' : ($variantBackorderable ? 'is-at-supplier' : 'is-out-of-stock')) }}">
-                                                        {{ $variant->lowStock() ? __('store.variant_stock_low') : ($variant->inStock() ? __('store.variant_stock_ok') : ($variantBackorderable ? __('store.variant_stock_backorder') : __('store.variant_stock_out'))) }}
+                                                    <span class="product-variant-chip-stock {{ $variant->lowStock() ? 'is-low-stock' : ($variant->inStock() ? 'is-in-stock' : ($variantRestocking ? 'is-restocking' : ($variantBackorderable ? 'is-at-supplier' : 'is-out-of-stock'))) }}">
+                                                        {{ $variant->lowStock() ? __('store.variant_stock_low') : ($variant->inStock() ? __('store.variant_stock_ok') : ($variantRestocking ? __('store.variant_stock_restocking') : ($variantBackorderable ? __('store.variant_stock_backorder') : __('store.variant_stock_out')))) }}
                                                     </span>
                                                 </span>
                                             </span>

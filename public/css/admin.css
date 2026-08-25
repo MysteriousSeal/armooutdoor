@@ -1752,6 +1752,17 @@
     border-color: #c6d8e8;
 }
 
+/* Le réassort a sa propre teinte, contrairement à la boutique où il partage
+   le bleu du fournisseur. Pour un client, les deux disent « ça arrive » ; ici
+   ils appellent des gestes opposés : « à commander » d'un côté, « déjà
+   commandé » de l'autre. Deux pastilles identiques dans une liste de deux
+   cents lignes feraient recommander ce qui est en route. */
+.admin-availability-chip.is-restocking {
+    color: #54479c;
+    background: #f0edf8;
+    border-color: #d6cfee;
+}
+
 .admin-availability-chip.is-out-of-stock {
     color: #7a4a45;
     background: #f6eeec;
@@ -1774,6 +1785,12 @@
     color: #8ab4dd;
     background: color-mix(in srgb, #8ab4dd 12%, var(--surface));
     border-color: color-mix(in srgb, #8ab4dd 35%, var(--border));
+}
+
+[data-theme='dark'] .admin-availability-chip.is-restocking {
+    color: #ad9ceb;
+    background: color-mix(in srgb, #ad9ceb 12%, var(--surface));
+    border-color: color-mix(in srgb, #ad9ceb 32%, var(--border));
 }
 
 [data-theme='dark'] .admin-availability-chip.is-out-of-stock {
@@ -7176,4 +7193,44 @@ a.nb-match:hover {
     .order-item-sku-icon {
         transition: none;
     }
+}
+
+/* Ce qui est déjà commandé chez le fournisseur, sous la quantité disponible.
+   Le bleu du « dispo fournisseur » : même famille de sens, du stock qui vient. */
+.product-inbound {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.35rem;
+    margin: 0.4rem 0 0;
+    font-size: 0.8125rem;
+    color: #2f5d8a;
+}
+
+.product-inbound-arrow {
+    opacity: 0.7;
+}
+
+.product-inbound-ref {
+    padding: 0.05rem 0.35rem;
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    color: inherit;
+    text-decoration: none;
+    background: #eef3f8;
+    border: 1px solid #c6d8e8;
+    border-radius: 0.2rem;
+}
+
+.product-inbound-ref:hover {
+    border-color: #2f5d8a;
+}
+
+[data-theme='dark'] .product-inbound {
+    color: #8ab4dd;
+}
+
+[data-theme='dark'] .product-inbound-ref {
+    background: color-mix(in srgb, #8ab4dd 12%, var(--surface));
+    border-color: color-mix(in srgb, #8ab4dd 32%, var(--border));
 }

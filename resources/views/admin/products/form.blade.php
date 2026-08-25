@@ -259,6 +259,20 @@
                                     <p class="form-hint">Units you can sell. 0 means out of stock.</p>
                                 @endif
                                 @error('quantity') <p class="form-error">{{ $message }}</p> @enderror
+
+                                {{-- Ce qui est déjà commandé : sans cette ligne, on
+                                     recommande un article dont le réassort est en route. --}}
+                                @if ($inboundStock['quantity'] > 0)
+                                        <p class="product-inbound">
+                                            <span class="product-inbound-arrow" aria-hidden="true">&#8627;</span>
+                                            <strong>{{ number_format($inboundStock['quantity']) }}</strong>
+                                            on order
+                                            @foreach ($inboundStock['orders'] as $purchaseOrder)
+                                                <a href="{{ route('admin.purchase-orders.show', $purchaseOrder) }}" class="product-inbound-ref">{{ $purchaseOrder->number }}</a>
+                                            @endforeach
+                                        </p>
+                                @endif
+
                                 @if ($product->exists)
                                     <p class="form-hint">
                                         <a href="{{ route('admin.products.stock-history', $product) }}">Stock history</a>
