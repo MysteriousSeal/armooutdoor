@@ -10,6 +10,7 @@ use App\Models\Carrier;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
+use App\Models\ProductSlug;
 use App\Models\ProductVariant;
 use App\Models\PurchaseOrderItem;
 use App\Models\Supplier;
@@ -582,7 +583,8 @@ class ProductController extends Controller
             $original = $slug;
             $i = 2;
 
-            while (Product::query()->where('slug', $slug)->exists()) {
+            // Les adresses abandonnées comptent : elles redirigent encore.
+            while (ProductSlug::query()->where('slug', $slug)->exists()) {
                 $slug = $original.'-'.$i;
                 $i++;
             }

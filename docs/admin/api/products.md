@@ -92,6 +92,7 @@ Every endpoint wraps its payload in `data`.
   "sku": null,
   "gtin": null,
   "is_active": true,
+  "ai_validated": false,
   "age_restricted": false,
   "image_may_vary": false,
   "featured": false,
@@ -141,6 +142,8 @@ Every endpoint wraps its payload in `data`.
 | `filter_attributes` | Drives storefront filtering. Same shape, kept short and repeated across products. |
 | `has_variants` | Convenience flag; present only when variants are loaded. |
 | `sort_order` | Ascending. Storefront listings order by it, so **lower appears first**. |
+| `slug` | The product's public URL. Writable; every previous slug keeps redirecting here with a `301`. |
+| `ai_validated` | Whether the page has been reviewed and passed. `false` on every new product. Nothing on the storefront reads it; it is a bookkeeping flag for whoever is working through the catalogue. |
 
 ### Write-only fields
 
@@ -204,7 +207,7 @@ curl -s -X POST \
 
 The server assigns:
 
-- **`slug`** from `name`, deduplicated with `-2`, `-3`, … You cannot set it, and it never changes afterwards, so renaming a product does not break its URL.
+- **`slug`** from `name`, deduplicated with `-2`, `-3`, … Pass `slug` explicitly to choose your own.
 - **`sort_order`** to `max(sort_order) + 1`, i.e. the end of every listing. Pass it explicitly to place the product somewhere else.
 - **`image`** to an empty string. Add real images through the web admin.
 
@@ -236,6 +239,7 @@ Same set for `POST` and `PATCH`.
 | `name` | string | ≤ 120 chars |
 | `description` | string | ≤ 50 000 chars, HTML allowed and **sanitised server-side** |
 | `category_id` | int | must exist |
+| `slug` | string | ≤ 255, lowercase letters, digits and single hyphens (`^[a-z0-9]+(?:-[a-z0-9]+)*$`). Unique against current **and retired** slugs of every other product — see [rule 7](#rules-that-will-bite-you) |
 | `price` | decimal | ≥ 0, ≤ 99 999.99 → stored as `price_cents` |
 | `quantity` | int | 0–99 999. **MUST NOT** be sent for a product with variants |
 | `sku` | string\|null | ≤ 64, unique across products **and** variants |
@@ -243,6 +247,7 @@ Same set for `POST` and `PATCH`.
 | `weight_grams` | int\|null | 0–99 999 |
 | `carrier_ids` | int[] | each must exist. **Not nullable** — send `[]` to clear |
 | `is_active` | bool | |
+| `ai_validated` | bool | defaults to `false` on create |
 | `age_restricted` | bool | |
 | `image_may_vary` | bool | |
 | `featured` | bool | |
@@ -329,6 +334,14 @@ Sending `price_cents` does nothing — it is not a writable field.
 
 **6. Cost fields are write-only.** See [Write-only fields](#write-only-fields).
 
+**7. Old slugs keep working, and are never freed.**
+Every slug a product has ever carried is kept. Visiting a retired one returns a `301` to the product's current URL, so links already shared, indexed or printed on a marketplace listing survive a rename. The flip side: a retired slug **belongs to that product forever**. Sending another product's old slug is a `422`, since the redirect would start pointing at the wrong item. A product may always return to one of its own former slugs.
+
+A slug must be unique and match `^[a-z0-9]+(?:-[a-z0-9]+)*$` — no capitals, no spaces, no underscores, no leading, trailing or doubled hyphens.
+
+**8. `ai_validated` means nothing to the storefront.**
+It changes no price, no visibility, no availability. It records that someone reviewed the page. Set it to `true` when a page has been checked, `false` to send it back for another look.
+
 ---
 
 ## Errors
@@ -405,7 +418,8 @@ Before sending a write request:
 4. If the product has variants (`has_variants: true`), **no** `quantity` at product level.
 5. `variants` rows carry `id` to update, omit `id` to create, `_delete` to remove — and omitting a variant leaves it alone.
 6. SKU/GTIN checked for collisions against products *and* variants.
-7. On `429`, wait for `Retry-After`. On `422`, read `errors` keys — never parse the French message text.
+7. `slug` changes are permanent: the old one redirects forever and can never be given to another product.
+8. On `429`, wait for `Retry-After`. On `422`, read `errors` keys — never parse the French message text.
 
 ---
 

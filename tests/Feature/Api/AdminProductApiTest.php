@@ -389,4 +389,130 @@ class AdminProductApiTest extends TestCase
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.id', $fresh->id);
     }
+    // ------------------------------------------------- slug et relecture IA
+
+    public function test_a_new_product_is_not_validated_yet(): void
+    {
+        $response = $this->postJson('/api/admin/products', [
+            'name' => 'Cible ronde fluo',
+            'description' => '<p>Une cible.</p>',
+            'category_id' => $this->category()->id,
+            'price' => 4.9,
+        ], $this->headers())->assertCreated();
+
+        $response->assertJsonPath('data.ai_validated', false);
+        $this->assertDatabaseHas('products', ['slug' => 'cible-ronde-fluo', 'ai_validated' => false]);
+    }
+
+    public function test_the_validation_flag_can_be_set_and_cleared(): void
+    {
+        $product = Product::factory()->create(['ai_validated' => false]);
+
+        $this->patchJson('/api/admin/products/'.$product->id, ['ai_validated' => true], $this->headers())
+            ->assertOk()
+            ->assertJsonPath('data.ai_validated', true);
+
+        $this->patchJson('/api/admin/products/'.$product->id, ['ai_validated' => false], $this->headers())
+            ->assertOk()
+            ->assertJsonPath('data.ai_validated', false);
+    }
+
+    public function test_the_flag_refuses_anything_but_a_boolean(): void
+    {
+        $product = Product::factory()->create();
+
+        $this->patchJson('/api/admin/products/'.$product->id, ['ai_validated' => 'maybe'], $this->headers())
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['ai_validated']);
+    }
+
+    public function test_the_slug_can_be_changed(): void
+    {
+        $product = Product::factory()->create(['slug' => 'ancien-slug']);
+
+        $this->patchJson('/api/admin/products/'.$product->id, ['slug' => 'cible-ronde-10cm'], $this->headers())
+            ->assertOk()
+            ->assertJsonPath('data.slug', 'cible-ronde-10cm');
+
+        $this->assertDatabaseHas('products', ['id' => $product->id, 'slug' => 'cible-ronde-10cm']);
+    }
+
+    public function test_a_slug_stays_unique(): void
+    {
+        Product::factory()->create(['slug' => 'deja-pris']);
+        $product = Product::factory()->create(['slug' => 'le-mien']);
+
+        $this->patchJson('/api/admin/products/'.$product->id, ['slug' => 'deja-pris'], $this->headers())
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['slug']);
+    }
+
+    public function test_a_product_keeps_its_own_slug_without_complaint(): void
+    {
+        $product = Product::factory()->create(['slug' => 'le-mien']);
+
+        $this->patchJson('/api/admin/products/'.$product->id, ['slug' => 'le-mien'], $this->headers())
+            ->assertOk();
+    }
+
+    public function test_a_slug_must_look_like_one(): void
+    {
+        $product = Product::factory()->create();
+
+        foreach (['Cible Ronde', 'cible ronde', 'cible_ronde', 'cible--ronde', '-cible', 'cible-'] as $wrong) {
+            $this->patchJson('/api/admin/products/'.$product->id, ['slug' => $wrong], $this->headers())
+                ->assertStatus(422)
+                ->assertJsonValidationErrors(['slug']);
+        }
+    }
+
+    public function test_a_created_product_can_carry_its_own_slug(): void
+    {
+        $this->postJson('/api/admin/products', [
+            'name' => 'Cible ronde fluo',
+            'description' => '<p>Une cible.</p>',
+            'category_id' => $this->category()->id,
+            'price' => 4.9,
+            'slug' => 'cible-ronde-choisie',
+        ], $this->headers())->assertCreated()->assertJsonPath('data.slug', 'cible-ronde-choisie');
+    }
+
+    public function test_a_slug_retired_by_another_product_cannot_be_taken(): void
+    {
+        $other = Product::factory()->create(['slug' => 'ancien-du-voisin']);
+        $other->update(['slug' => 'nouveau-du-voisin']);
+
+        $product = Product::factory()->create(['slug' => 'le-mien']);
+
+        // L'ancienne adresse du voisin redirige encore : la reprendre
+        // enverrait ses vieux liens sur le mauvais article.
+        $this->patchJson('/api/admin/products/'.$product->id, ['slug' => 'ancien-du-voisin'], $this->headers())
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['slug']);
+    }
+
+    public function test_a_product_may_return_to_its_own_old_slug(): void
+    {
+        $product = Product::factory()->create(['slug' => 'premier']);
+
+        $this->patchJson('/api/admin/products/'.$product->id, ['slug' => 'second'], $this->headers())
+            ->assertOk();
+
+        $this->patchJson('/api/admin/products/'.$product->id, ['slug' => 'premier'], $this->headers())
+            ->assertOk()
+            ->assertJsonPath('data.slug', 'premier');
+    }
+
+    public function test_a_created_slug_avoids_retired_ones(): void
+    {
+        $other = Product::factory()->create(['slug' => 'cible-ronde-fluo']);
+        $other->update(['slug' => 'autre-chose']);
+
+        $this->postJson('/api/admin/products', [
+            'name' => 'Cible ronde fluo',
+            'description' => '<p>Une cible.</p>',
+            'category_id' => $this->category()->id,
+            'price' => 4.9,
+        ], $this->headers())->assertCreated()->assertJsonPath('data.slug', 'cible-ronde-fluo-2');
+    }
 }

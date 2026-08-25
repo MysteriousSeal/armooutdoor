@@ -3400,6 +3400,36 @@ a.admin-stat-card:hover {
     color: var(--text-muted);
 }
 
+/* Le slug sous la référence. Plus effacé qu'elle, et en chasse fixe : c'est
+   une adresse, on la lit caractère par caractère quand on la cherche, pas en
+   diagonale comme un nom.
+
+   Il reste dans sa colonne. Le glisser sous la vignette pour gagner de la
+   largeur ne marche pas : la ligne n'est pas assez haute, la troisième ligne
+   de texte arrive encore en face de l'image et lui passe dessus.
+
+   Une seule ligne, coupée aux points de suspension plutôt que repliée : le
+   slug ne doit pas faire grandir la ligne du tableau. Il est en entier au
+   survol. */
+.admin-table-slug {
+    margin-top: 0.1rem;
+    max-width: 16rem;
+    overflow: hidden;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.6875rem;
+    letter-spacing: -0.01em;
+    color: color-mix(in srgb, var(--text-muted) 78%, transparent);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* Un identifiant tient en quelques chiffres : la colonne prend ce qu'il faut
+   et rend le reste au nom, qui en manquait. */
+.admin-table-id {
+    width: 1%;
+    white-space: nowrap;
+}
+
 .admin-table-num {
     text-align: right;
     font-variant-numeric: tabular-nums;

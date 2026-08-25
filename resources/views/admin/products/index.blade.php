@@ -214,7 +214,7 @@
                                 $supplierSort = $sortLink('supplier');
                                 $priceSort = $sortLink('price');
                             @endphp
-                            <th>
+                            <th class="admin-table-id">
                                 <a href="{{ $idSort['url'] }}" class="admin-sort-link {{ $idSort['state'] ? 'is-active' : '' }}">
                                     ID
                                     <span class="admin-sort-dir" aria-hidden="true">{{ $idSort['state'] === 'desc' ? '↓' : '↑' }}</span>
@@ -258,6 +258,7 @@
                             <th>Variants</th>
                             <th>Weight</th>
                             <th>GTIN</th>
+                            <th title="Product page reviewed and passed">AI OK</th>
                             <th>Status</th>
                             <th></th>
                         </tr>
@@ -265,7 +266,7 @@
                     <tbody>
                         @foreach ($products as $product)
                             <tr>
-                                <td><strong>{{ $product->id }}</strong></td>
+                                <td class="admin-table-id"><strong>{{ $product->id }}</strong></td>
                                 <td>
                                     <a href="{{ route('admin.products.edit', $product) }}">
                                         <img
@@ -283,6 +284,7 @@
                                     @if (filled($product->sku))
                                         <span class="admin-table-sub">{{ $product->sku }}</span>
                                     @endif
+                                    <span class="admin-table-sub admin-table-slug" title="{{ $product->slug }}">{{ $product->slug }}</span>
                                 </td>
                                 <td>
                                     @if ($product->category)
@@ -374,6 +376,26 @@
                                     @endif
                                 </td>
                                 <td>
+                                    {{-- Même pastille que le GTIN à côté : c'est la même question,
+                                         renseigné ou non, et deux dessins pour la même chose se
+                                         liraient plus lentement que deux fois le même. --}}
+                                    @if ($product->ai_validated)
+                                        <span class="gtin-flag is-set" title="Page reviewed and passed">
+                                            <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                                                <path d="m5 13 4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                            <span class="sr-only">Reviewed</span>
+                                        </span>
+                                    @else
+                                        <span class="gtin-flag is-missing" title="Page not reviewed yet">
+                                            <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                                                <path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                                            </svg>
+                                            <span class="sr-only">Not reviewed</span>
+                                        </span>
+                                    @endif
+                                </td>
+                                <td>
                                     <form method="POST" action="{{ route('admin.products.status', $product) }}">
                                         @csrf
                                         @method('PATCH')
@@ -402,7 +424,7 @@
                                         ->values();
                                 @endphp
                                 <tr class="admin-variant-row" id="variant-panel-{{ $product->id }}" hidden>
-                                    <td colspan="14">
+                                    <td colspan="15">
                                         <div class="admin-variant-panel">
                                             <table class="admin-variant-table">
                                                 <thead>

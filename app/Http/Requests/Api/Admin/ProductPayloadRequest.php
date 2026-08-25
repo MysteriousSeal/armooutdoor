@@ -6,6 +6,7 @@ use App\Http\Middleware\EnsureAdminApiToken;
 use App\Models\Product;
 use App\Rules\UniqueCatalogIdentifier;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 /**
  * Les règles communes à la création et à la modification d'un produit.
@@ -50,8 +51,23 @@ abstract class ProductPayloadRequest extends FormRequest
             'category_id' => [$required, 'integer', 'exists:categories,id'],
             'price' => [$required, 'numeric', 'min:0', 'max:99999.99'],
 
+            // Le slug est l'adresse publique du produit : le changer casse
+            // les liens déjà en circulation, mais il faut pouvoir le corriger.
+            // Même forme que ce que fabrique `Str::slug`, et unique.
+            'slug' => [
+                'sometimes', 'string', 'max:255', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/',
+                Rule::unique('products', 'slug')->ignore($product?->id),
+                // Y compris les adresses abandonnées d'un autre produit : la
+                // vieille URL redirige encore, et la reprendre l'enverrait sur
+                // le mauvais article.
+                Rule::unique('product_slugs', 'slug')->where(
+                    fn ($query) => $product === null ? $query : $query->where('product_id', '!=', $product->id),
+                ),
+            ],
+
             'quantity' => ['sometimes', 'integer', 'min:0', 'max:99999'],
             'is_active' => ['sometimes', 'boolean'],
+            'ai_validated' => ['sometimes', 'boolean'],
             'age_restricted' => ['sometimes', 'boolean'],
             'image_may_vary' => ['sometimes', 'boolean'],
             'featured' => ['sometimes', 'boolean'],

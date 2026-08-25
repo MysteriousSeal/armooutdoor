@@ -9,6 +9,7 @@ use App\Http\Requests\Api\Admin\StoreProductRequest;
 use App\Http\Requests\Api\Admin\UpdateProductRequest;
 use App\Http\Resources\Api\Admin\ProductResource;
 use App\Models\Product;
+use App\Models\ProductSlug;
 use App\Support\HtmlSanitizer;
 use App\Support\StockContext;
 use Illuminate\Database\Eloquent\Builder;
@@ -123,7 +124,7 @@ class ProductController extends Controller
         $payload = [];
 
         $direct = [
-            'category_id', 'quantity', 'is_active', 'age_restricted', 'image_may_vary',
+            'slug', 'category_id', 'quantity', 'is_active', 'ai_validated', 'age_restricted', 'image_may_vary',
             'featured', 'sort_order', 'sku', 'gtin', 'weight_grams', 'carrier_ids',
             'supplier_id', 'available_at_supplier', 'supplier_reference',
             'supplier_product_url', 'characteristics', 'filter_attributes', 'image',
@@ -165,7 +166,8 @@ class ProductController extends Controller
         }
 
         if ($product === null) {
-            $payload['slug'] = $this->uniqueSlug($validated['name']);
+            // Le slug donné l'emporte ; sinon il se déduit du nom.
+            $payload['slug'] ??= $this->uniqueSlug($validated['name']);
             $payload['image'] ??= '';
             // En bout de liste plutôt qu'en tête : `sort_order` classe les
             // vitrines par ordre croissant, et un zéro par défaut placerait
@@ -187,7 +189,9 @@ class ProductController extends Controller
         $slug = $base;
         $suffix = 2;
 
-        while (Product::query()->where('slug', $slug)->exists()) {
+        // `product_slugs` porte aussi les adresses abandonnées : reprendre
+        // l'une d'elles détournerait une redirection encore vivante.
+        while (ProductSlug::query()->where('slug', $slug)->exists()) {
             $slug = $base.'-'.$suffix;
             $suffix++;
         }

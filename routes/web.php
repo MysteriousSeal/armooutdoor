@@ -58,6 +58,7 @@ use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\WishlistController;
 use App\Models\BlogCategory;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -276,7 +277,12 @@ Route::get('/blog/{category}', [BlogController::class, 'category'])
     ->name('blog.category');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
-Route::get('/products/{product:slug}', [ProductController::class, 'show'])->name('products.show');
+Route::get('/products/{product:slug}', [ProductController::class, 'show'])
+    // Un slug inconnu n'est pas forcément une erreur : c'est peut-être une
+    // ancienne adresse du produit, qui doit mener à la nouvelle.
+    ->missing(fn (Request $request, $exception) => app(ProductController::class)
+        ->movedOrMissing($request, (string) $request->route('product')))
+    ->name('products.show');
 Route::get('/search', [SearchController::class, 'index'])->name('search');
 
 // Legal pages

@@ -28,6 +28,7 @@ use Illuminate\Support\Collection;
     'markup_basis_points',
     'slug',
     'is_active',
+    'ai_validated',
     'sku',
     'gtin',
     'weight_grams',
@@ -61,11 +62,47 @@ class Product extends Model
 
     protected static function booted(): void
     {
+        static::created(function (Product $product): void {
+            $product->recordSlug();
+        });
+
         static::updated(function (Product $product): void {
             if ($product->wasChanged('is_active') && ! $product->is_active) {
                 CartItem::query()->where('product_id', $product->id)->delete();
             }
+
+            if ($product->wasChanged('slug')) {
+                $product->recordSlug();
+            }
         });
+    }
+
+    /**
+     * Range l'adresse du jour et met les précédentes à la retraite.
+     *
+     * Une adresse déjà connue du produit est reprise telle quelle plutôt que
+     * doublée : revenir à un ancien slug est un aller-retour, pas une
+     * troisième adresse.
+     */
+    public function recordSlug(): void
+    {
+        $this->slugs()->whereNot('slug', $this->slug)->update(['is_active' => false]);
+
+        $this->slugs()->updateOrCreate(
+            ['slug' => $this->slug],
+            ['is_active' => true],
+        );
+    }
+
+    public function slugs(): HasMany
+    {
+        return $this->hasMany(ProductSlug::class);
+    }
+
+    /** Les adresses abandonnées, celles qui redirigent. */
+    public function retiredSlugs(): HasMany
+    {
+        return $this->slugs()->retired();
     }
 
     protected function casts(): array
@@ -84,6 +121,7 @@ class Product extends Model
             'age_restricted' => 'boolean',
             'image_may_vary' => 'boolean',
             'is_active' => 'boolean',
+            'ai_validated' => 'boolean',
             'available_at_supplier' => 'boolean',
             'featured' => 'boolean',
             'sort_order' => 'integer',
