@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\DiscountCodeController as AdminDiscountCodeContro
 use App\Http\Controllers\Admin\DiscountController as AdminDiscountController;
 use App\Http\Controllers\Admin\InvoiceSettingController as AdminInvoiceSettingController;
 use App\Http\Controllers\Admin\MarketplaceController as AdminMarketplaceController;
+use App\Http\Controllers\Admin\MarketplaceListingController as AdminMarketplaceListingController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PackageTypeController as AdminPackageTypeController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
@@ -124,6 +125,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/products/{product}/status', [AdminProductController::class, 'toggleStatus'])->name('products.status');
         Route::patch('/products/{product}/quantity', [AdminProductController::class, 'updateQuantity'])->name('products.quantity');
         Route::patch('/products/{product}/supplier', [AdminProductController::class, 'updateSupplier'])->name('products.supplier');
+
+        // Marketplaces
+        Route::get('/marketplaces', [AdminMarketplaceListingController::class, 'index'])->name('marketplaces.index');
+        Route::get('/marketplaces/naturabuy', [AdminMarketplaceListingController::class, 'naturabuy'])->name('marketplaces.naturabuy');
+        Route::post('/marketplaces/naturabuy/sync', [AdminMarketplaceListingController::class, 'syncNaturabuy'])->name('marketplaces.naturabuy.sync');
 
         // Blog
         Route::get('/blog', [AdminBlogPostController::class, 'index'])->name('blog.index');

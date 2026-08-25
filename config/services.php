@@ -39,6 +39,16 @@ return [
         'token' => env('ADMIN_API_TOKEN'),
     ],
 
+    'naturabuy' => [
+        'token' => env('NATURABUY_TOKEN'),
+        'base_url' => env('NATURABUY_BASE_URL', 'https://api.naturabuy.fr'),
+        // Les deux ressources ne vivent pas sur la même version de l'API :
+        // les annonces en v2, les commandes en v5. D'où deux chemins séparés
+        // plutôt qu'un numéro de version dans l'URL de base.
+        'items_path' => env('NATURABUY_ITEMS_PATH', '/v2/items'),
+        'orders_path' => env('NATURABUY_ORDERS_PATH', '/v5/orders'),
+    ],
+
     'sendcloud' => [
         'public_key' => env('SENDCLOUD_PUBLIC_KEY'),
         'secret_key' => env('SENDCLOUD_SECRET_KEY'),
