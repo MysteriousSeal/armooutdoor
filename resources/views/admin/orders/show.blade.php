@@ -9,6 +9,33 @@
                 <div>
                     <p class="admin-list-kicker"><a href="{{ route('admin.orders.index') }}">Orders</a></p>
                     <div class="admin-order-heading" id="order-heading">
+                        {{-- Un voisin manquant reste en place, désactivé : la
+                             barre ne doit pas se réorganiser sur la première
+                             et la dernière commande. --}}
+                        <span class="order-stepper" role="group" aria-label="Browse orders">
+                            @if ($previousOrder)
+                                <a
+                                    href="{{ route('admin.orders.show', $previousOrder) }}"
+                                    class="order-stepper-btn"
+                                    title="Newer order · {{ $previousOrder->number }}"
+                                    aria-label="Newer order {{ $previousOrder->number }}"
+                                    rel="prev"
+                                >&#8249;</a>
+                            @else
+                                <span class="order-stepper-btn is-disabled" aria-hidden="true">&#8249;</span>
+                            @endif
+                            @if ($nextOrder)
+                                <a
+                                    href="{{ route('admin.orders.show', $nextOrder) }}"
+                                    class="order-stepper-btn"
+                                    title="Older order · {{ $nextOrder->number }}"
+                                    aria-label="Older order {{ $nextOrder->number }}"
+                                    rel="next"
+                                >&#8250;</a>
+                            @else
+                                <span class="order-stepper-btn is-disabled" aria-hidden="true">&#8250;</span>
+                            @endif
+                        </span>
                         {{-- Le titre reste un titre : le bouton est à
                              l'intérieur. Avec `role="button"` sur le h2, les
                              lecteurs d'écran annonçaient un bouton et perdaient

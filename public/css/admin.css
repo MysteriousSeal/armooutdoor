@@ -7234,3 +7234,55 @@ a.nb-match:hover {
     background: color-mix(in srgb, #8ab4dd 12%, var(--surface));
     border-color: color-mix(in srgb, #8ab4dd 32%, var(--border));
 }
+
+/* Aller d'une commande à la voisine sans repasser par la liste.
+   Coins droits, comme le reste du back-office. */
+.order-stepper {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-right: 0.35rem;
+}
+
+.order-stepper-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.15rem;
+    height: 2.15rem;
+    font-size: 1.125rem;
+    line-height: 1;
+    color: var(--text);
+    text-decoration: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 0;
+    transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+
+a.order-stepper-btn:hover,
+a.order-stepper-btn:focus-visible {
+    border-color: var(--accent);
+    background: var(--bg);
+}
+
+a.order-stepper-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* Bout de liste : la flèche reste, en creux. La retirer décalerait le titre
+   d'une commande à l'autre. */
+.order-stepper-btn.is-disabled {
+    color: var(--text-muted);
+    background: var(--bg);
+    border-style: dashed;
+    opacity: 0.65;
+    cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .order-stepper-btn {
+        transition: none;
+    }
+}

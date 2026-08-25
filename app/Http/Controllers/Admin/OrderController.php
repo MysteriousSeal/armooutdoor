@@ -555,6 +555,43 @@ class OrderController extends Controller
     }
 
     /**
+     * La commande voisine dans le temps.
+     *
+     * La liste va du plus récent au plus ancien : « précédente » est donc la
+     * commande juste au-dessus, plus récente, et « suivante » celle du dessous.
+     *
+     * On reste dans la même famille que la commande ouverte — un brouillon
+     * mène à un brouillon, une vraie commande à une vraie. Passer de l'une à
+     * l'autre d'un clic surprendrait, les deux pages n'offrant pas les mêmes
+     * gestes. Les commandes de test et les archivées restent de leur côté
+     * pour la même raison : elles ne comptent nulle part ailleurs dans
+     * l'admin, et on ne tombe pas dessus en parcourant le courant.
+     *
+     * L'identifiant départage les commandes de la même seconde, sans quoi deux
+     * voisines pourraient se renvoyer l'une à l'autre indéfiniment.
+     */
+    private function neighbourOrder(Order $order, bool $newer): ?Order
+    {
+        return Order::query()
+            ->where('status', $order->isDraft() ? '=' : '!=', 'draft')
+            ->when($order->isTest(), fn (Builder $query) => $query->onlyTest())
+            ->when(! $order->isTest(), fn (Builder $query) => $query->excludingTest())
+            ->when($order->isArchived(), fn (Builder $query) => $query->whereNotNull('archived_at'))
+            ->when(! $order->isArchived(), fn (Builder $query) => $query->whereNull('archived_at'))
+            ->where(function (Builder $query) use ($order, $newer): void {
+                $comparison = $newer ? '>' : '<';
+
+                $query->where('created_at', $comparison, $order->created_at)
+                    ->orWhere(fn (Builder $tie) => $tie
+                        ->where('created_at', $order->created_at)
+                        ->where('id', $comparison, $order->id));
+            })
+            ->orderBy('created_at', $newer ? 'asc' : 'desc')
+            ->orderBy('id', $newer ? 'asc' : 'desc')
+            ->first();
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private function showData(Order $order): array
@@ -565,6 +602,8 @@ class OrderController extends Controller
 
         return [
             'order' => $order,
+            'previousOrder' => $this->neighbourOrder($order, newer: true),
+            'nextOrder' => $this->neighbourOrder($order, newer: false),
             'carriers' => Carrier::query()->orderBy('sort_order')->get(),
             'packageTypes' => PackageType::query()->orderBy('name')->get(),
             'stripePaymentIntentUrl' => $order->stripe_payment_intent_id ? StripeDashboard::paymentIntentUrl($order->stripe_payment_intent_id) : null,
