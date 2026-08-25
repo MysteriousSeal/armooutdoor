@@ -54,18 +54,7 @@
         handleCopy(target);
     });
 
-    document.addEventListener('keydown', function (event) {
-        if (event.key !== 'Enter' && event.key !== ' ') {
-            return;
-        }
-
-        var target = event.target.closest('[data-copy-code][role="button"]');
-
-        if (!target) {
-            return;
-        }
-
-        event.preventDefault();
-        handleCopy(target);
-    });
+    // Pas de gestionnaire clavier ici : tout ce qui porte `data-copy-code` est
+    // un vrai <button>, qui déclenche déjà un clic sur Entrée et Espace. Le
+    // raccourci n'existait que pour un <h2 role="button">, qui n'existe plus.
 })();

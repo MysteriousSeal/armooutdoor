@@ -1537,14 +1537,55 @@
     letter-spacing: -0.02em;
 }
 
-.admin-list-title.is-copyable {
+/* Le numéro de commande se copie d'un clic, comme les SKU des lignes.
+   Le bouton hérite de la taille du titre : c'est le titre qu'on clique, pas
+   un contrôle posé à côté. */
+.admin-title-copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
     cursor: pointer;
-    border-bottom: 1px dashed transparent;
 }
 
-.admin-list-title.is-copyable:hover,
-.admin-list-title.is-copyable:focus-visible {
+.admin-title-copy-value {
+    border-bottom: 1px dashed var(--border);
+    transition: border-color 0.12s ease;
+}
+
+/* Plus discrète que le texte du titre : l'icône accompagne, elle ne pèse pas. */
+.admin-title-copy-icon {
+    flex-shrink: 0;
+    opacity: 0.4;
+    color: var(--text-muted);
+    transition: opacity 0.12s ease;
+}
+
+.admin-title-copy:hover .admin-title-copy-value,
+.admin-title-copy:focus-visible .admin-title-copy-value {
     border-bottom-color: var(--text-muted);
+}
+
+.admin-title-copy:hover .admin-title-copy-icon,
+.admin-title-copy:focus-visible .admin-title-copy-icon {
+    opacity: 0.85;
+}
+
+.admin-title-copy:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 0.2rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .admin-title-copy-value,
+    .admin-title-copy-icon {
+        transition: none;
+    }
 }
 
 .admin-list-lede {
@@ -7083,4 +7124,56 @@ a.nb-match:hover {
 
 .nb-ourname.is-differing a {
     color: var(--text);
+}
+
+/* Un SKU se copie d'un clic.
+   Contrairement au numéro de commande, dont le pointillé n'apparaît qu'au
+   survol, celui-ci est visible d'emblée : au milieu d'une liste d'articles,
+   rien d'autre ne dirait qu'on peut cliquer dessus. */
+.order-item-sku-copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    cursor: pointer;
+}
+
+.order-item-sku-value {
+    border-bottom: 1px dashed var(--border);
+    transition: border-color 0.12s ease, color 0.12s ease;
+}
+
+.order-item-sku-icon {
+    flex-shrink: 0;
+    opacity: 0.45;
+    transition: opacity 0.12s ease;
+}
+
+.order-item-sku-copy:hover .order-item-sku-value,
+.order-item-sku-copy:focus-visible .order-item-sku-value {
+    color: var(--text);
+    border-bottom-color: var(--text-muted);
+}
+
+.order-item-sku-copy:hover .order-item-sku-icon,
+.order-item-sku-copy:focus-visible .order-item-sku-icon {
+    opacity: 0.9;
+}
+
+/* Le focus se pose sur le bouton entier, pas seulement sur le texte. */
+.order-item-sku-copy:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 0.15rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .order-item-sku-value,
+    .order-item-sku-icon {
+        transition: none;
+    }
 }

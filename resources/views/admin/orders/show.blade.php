@@ -9,13 +9,25 @@
                 <div>
                     <p class="admin-list-kicker"><a href="{{ route('admin.orders.index') }}">Orders</a></p>
                     <div class="admin-order-heading" id="order-heading">
-                        <h2
-                            class="admin-list-title is-copyable"
-                            data-copy-code="{{ $order->number }}"
-                            role="button"
-                            tabindex="0"
-                            title="Click to copy order number"
-                        >{{ $order->number }}</h2>
+                        {{-- Le titre reste un titre : le bouton est à
+                             l'intérieur. Avec `role="button"` sur le h2, les
+                             lecteurs d'écran annonçaient un bouton et perdaient
+                             l'en-tête de la page. --}}
+                        <h2 class="admin-list-title">
+                            <button
+                                type="button"
+                                class="admin-title-copy"
+                                data-copy-code="{{ $order->number }}"
+                                title="Copy this order number"
+                                aria-label="Copy order number {{ $order->number }}"
+                            >
+                                <span class="admin-title-copy-value">{{ $order->number }}</span>
+                                <svg class="admin-title-copy-icon" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+                                    <rect x="9" y="9" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M5 15V5a2 2 0 0 1 2-2h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                            </button>
+                        </h2>
                         <span class="badge badge-{{ $order->status }}">
                             {{ $order->statusLabel() }}
                         </span>
@@ -115,7 +127,25 @@
                                         </p>
                                     @endif
                                     @if ($item->resolvedSku())
-                                        <p class="order-item-sku">SKU {{ $item->resolvedSku() }}</p>
+                                        <p class="order-item-sku">
+                                            SKU
+                                            {{-- Le même mécanisme que le numéro de commande, en
+                                                 plus visible : ici rien n'annoncerait qu'on peut
+                                                 cliquer. --}}
+                                            <button
+                                                type="button"
+                                                class="order-item-sku-copy"
+                                                data-copy-code="{{ $item->resolvedSku() }}"
+                                                title="Copy this SKU"
+                                                aria-label="Copy SKU {{ $item->resolvedSku() }}"
+                                            >
+                                                <span class="order-item-sku-value">{{ $item->resolvedSku() }}</span>
+                                                <svg class="order-item-sku-icon" viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">
+                                                    <rect x="9" y="9" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+                                                    <path d="M5 15V5a2 2 0 0 1 2-2h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                </svg>
+                                            </button>
+                                        </p>
                                     @endif
                                     @if ($item->product && ! $item->product->inStock() && $item->product->supplier_id && $item->product->available_at_supplier)
                                         <p class="order-item-supplier-note">
