@@ -194,6 +194,58 @@ class MarketplaceListingController extends Controller
     }
 
     /**
+     * Les produits du catalogue qui n'ont pas d'annonce chez eux.
+     *
+     * Le sens inverse des autres onglets : on part du catalogue, pas des
+     * annonces. Un produit est considéré présent si l'un de ses SKU — le sien
+     * ou celui d'une de ses déclinaisons — correspond à un code NaturaBuy,
+     * exactement ou par préfixe. Sans le préfixe, les articles vendus là-bas
+     * en une annonce par coloris ressortiraient tous comme absents.
+     *
+     * Les produits désactivés restent dehors : ce sont ceux qu'on a choisi de
+     * ne pas vendre.
+     */
+    private function productsMissingFromNaturabuyQuery(): Builder
+    {
+        $listed = fn (Builder $query, string $column) => $query
+            ->whereNotNull($column)
+            ->where($column, '!=', '')
+            ->whereExists(fn ($sub) => $sub->selectRaw(1)
+                ->from('naturabuy_listings')
+                ->where('naturabuy_listings.closed', false)
+                ->whereNotNull('naturabuy_listings.internalcode')
+                ->where(fn ($either) => $either
+                    ->whereColumn('naturabuy_listings.internalcode', $column)
+                    ->orWhereRaw($this->listedPrefixCondition($column))));
+
+        return Product::query()
+            ->with('variants')
+            ->where('is_active', true)
+            ->whereNot(fn (Builder $inner) => $inner
+                ->where(fn (Builder $own) => $listed($own, 'products.sku'))
+                ->orWhereHas('variants', fn (Builder $variant) => $listed($variant, 'product_variants.sku')));
+    }
+
+    private function productsMissingFromNaturabuy(string $search)
+    {
+        return $this->productsMissingFromNaturabuyQuery()
+            ->when($search !== '', fn (Builder $q) => $q->where(fn (Builder $inner) => $inner
+                ->where('name', 'like', '%'.$search.'%')
+                ->orWhere('sku', 'like', '%'.$search.'%')))
+            ->orderBy('name')
+            ->paginate(50)
+            ->withQueryString();
+    }
+
+    /** « le SKU commence par le code interne, suivi d'un tiret ». */
+    private function listedPrefixCondition(string $column): string
+    {
+        $concat = $this->prefixExpression(Product::query());
+
+        return $column.' LIKE '.$concat;
+    }
+
+    /**
      * Les annonces rapprochées d'un produit d'ici, ou l'inverse.
      *
      * Le rapprochement se fait en base plutôt qu'en PHP : filtrer un onglet
@@ -345,7 +397,7 @@ class MarketplaceListingController extends Controller
 
     public function naturabuy(Request $request): View
     {
-        $tab = in_array($request->query('tab'), ['in-stock', 'out-of-stock', 'in-catalogue', 'not-in-catalogue', 'qty-mismatch', 'name-mismatch'], true)
+        $tab = in_array($request->query('tab'), ['in-stock', 'out-of-stock', 'in-catalogue', 'not-in-catalogue', 'qty-mismatch', 'name-mismatch', 'missing'], true)
             ? $request->query('tab')
             : 'all';
 
@@ -365,7 +417,12 @@ class MarketplaceListingController extends Controller
             ->paginate(50)
             ->withQueryString();
 
+        $missing = $tab === 'missing'
+            ? $this->productsMissingFromNaturabuy($search)
+            : null;
+
         return view('admin.marketplaces.naturabuy', [
+            'missing' => $missing,
             'listings' => $listings,
             'catalogueMatches' => $this->catalogueMatches($listings->getCollection()),
             'tab' => $tab,
@@ -377,6 +434,7 @@ class MarketplaceListingController extends Controller
             'notInCatalogueCount' => $this->whereMatched($this->openListings(), false)->count(),
             'mismatchCount' => $this->whereQuantityMismatch($this->openListings())->count(),
             'nameMismatchCount' => $this->whereNameMismatch($this->openListings())->count(),
+            'missingCount' => $this->productsMissingFromNaturabuyQuery()->count(),
             'syncedAt' => NaturabuyListing::query()->max('synced_at'),
         ]);
     }

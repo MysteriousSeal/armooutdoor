@@ -44,6 +44,12 @@
                 Not in catalogue <span class="admin-tab-count">{{ number_format($notInCatalogueCount) }}</span>
             </a>
             <a
+                href="{{ route('admin.marketplaces.naturabuy', ['tab' => 'missing']) }}"
+                class="{{ $tab === 'missing' ? 'active' : '' }}"
+            >
+                Not listed <span class="admin-tab-count">{{ number_format($missingCount) }}</span>
+            </a>
+            <a
                 href="{{ route('admin.marketplaces.naturabuy', ['tab' => 'qty-mismatch']) }}"
                 class="starts-group {{ $tab === 'qty-mismatch' ? 'active' : '' }}{{ $mismatchCount > 0 ? ' nb-tab-attention' : '' }}"
             >
@@ -79,7 +85,55 @@
             </div>
         </form>
 
-        @if ($listings->isEmpty())
+        @if ($tab === 'missing')
+            {{-- Cet onglet renverse la table : ce sont des produits d'ici, pas
+                 des annonces de chez eux. Les colonnes changent donc aussi. --}}
+            @if ($missing->isEmpty())
+                <p class="empty-state">Every active product is listed on NaturaBuy.</p>
+            @else
+                <div class="admin-table-wrap">
+                    <table class="admin-table nb-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>SKU</th>
+                                <th class="nb-num">Price</th>
+                                <th class="nb-num">Stock</th>
+                                <th>Availability</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($missing as $product)
+                                <tr>
+                                    <td>
+                                        <a href="{{ route('admin.products.edit', $product) }}">{{ $product->localizedName() }}</a>
+                                    </td>
+                                    <td>
+                                        @if ($product->sku)
+                                            <code class="nb-code">{{ $product->sku }}</code>
+                                        @elseif ($product->variants->isNotEmpty())
+                                            <span class="nb-none">{{ $product->variants->count() }} variants</span>
+                                        @else
+                                            <span class="nb-none">—</span>
+                                        @endif
+                                    </td>
+                                    <td class="nb-num">{{ format_euros($product->price_cents) }}</td>
+                                    <td class="nb-num">{{ number_format($product->quantity) }}</td>
+                                    <td>
+                                        @php($state = $product->availabilityState())
+                                        <span class="admin-availability-chip is-{{ str_replace('_', '-', $state) }}">
+                                            {{ ['in_stock' => 'In stock', 'low_stock' => 'Last pieces', 'restocking' => 'Restocking', 'at_supplier' => 'At supplier', 'out_of_stock' => 'Out of stock'][$state] }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                @include('partials.pager', ['paginator' => $missing])
+            @endif
+        @elseif ($listings->isEmpty())
             <p class="empty-state">
                 No listings yet. Run <code>php artisan naturabuy:sync</code> to pull them in.
             </p>

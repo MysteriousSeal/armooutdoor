@@ -61,6 +61,16 @@ class NaturabuyListingsTest extends TestCase
         }
     }
 
+    /** Le lien de navigation s'accorde avec le titre de la page. */
+    public function test_the_nav_link_is_plural(): void
+    {
+        $this->actingAs($this->admin())
+            ->get('/admin/marketplaces')
+            ->assertOk()
+            ->assertSee('>Marketplaces</a>', false)
+            ->assertDontSee('>Marketplace</a>', false);
+    }
+
     public function test_the_marketplace_index_lists_naturabuy(): void
     {
         Marketplace::query()->create(['name' => 'NaturaBuy']);
@@ -481,6 +491,95 @@ class NaturabuyListingsTest extends TestCase
             ->get('/admin/marketplaces/naturabuy?tab=in-catalogue')
             ->assertOk()
             ->assertSee('Le parent');
+    }
+
+    // ---------------------------------------------------------- not listed
+
+    public function test_the_not_listed_tab_shows_products_without_a_listing(): void
+    {
+        $listed = Product::factory()->create(['sku' => 'ON-NB', 'is_active' => true]);
+        $missing = Product::factory()->create(['sku' => 'NOT-ON-NB', 'is_active' => true]);
+        $this->listing(['internalcode' => 'ON-NB']);
+
+        $this->actingAs($this->admin())
+            ->get('/admin/marketplaces/naturabuy?tab=missing')
+            ->assertOk()
+            ->assertSee($missing->localizedName())
+            ->assertDontSee($listed->localizedName())
+            ->assertSee(route('admin.products.edit', $missing), false);
+    }
+
+    /** Désactivé veut dire qu'on ne veut pas le vendre : hors liste. */
+    public function test_a_disabled_product_is_not_listed_as_missing(): void
+    {
+        $disabled = Product::factory()->create(['sku' => 'DISABLED-SKU', 'is_active' => false]);
+
+        $this->actingAs($this->admin())
+            ->get('/admin/marketplaces/naturabuy?tab=missing')
+            ->assertOk()
+            ->assertDontSee($disabled->localizedName());
+    }
+
+    /**
+     * Le préfixe compte ici aussi : NaturaBuy vend une annonce par coloris et
+     * nos tailles portent le code suffixé. Sans cela, ces produits
+     * ressortiraient comme absents alors qu'ils sont bien en ligne.
+     */
+    public function test_a_product_listed_by_prefix_is_not_missing(): void
+    {
+        $product = Product::factory()->create(['sku' => null, 'is_active' => true]);
+        $product->variants()->create([
+            'attribute_values' => [['label' => 'Taille', 'value' => 'M']],
+            'sku' => 'TEE-CAMO-M',
+            'quantity' => 1,
+        ]);
+        $this->listing(['internalcode' => 'TEE-CAMO']);
+
+        $this->actingAs($this->admin())
+            ->get('/admin/marketplaces/naturabuy?tab=missing')
+            ->assertOk()
+            ->assertDontSee($product->localizedName());
+    }
+
+    /** Un produit dont seule une déclinaison est en ligne compte comme présent. */
+    public function test_a_product_listed_through_a_variant_is_not_missing(): void
+    {
+        $product = Product::factory()->create(['sku' => null, 'is_active' => true]);
+        $product->variants()->create([
+            'attribute_values' => [['label' => 'Taille', 'value' => 'L']],
+            'sku' => 'EXACT-VAR-L',
+            'quantity' => 1,
+        ]);
+        $this->listing(['internalcode' => 'EXACT-VAR-L']);
+
+        $this->actingAs($this->admin())
+            ->get('/admin/marketplaces/naturabuy?tab=missing')
+            ->assertOk()
+            ->assertDontSee($product->localizedName());
+    }
+
+    /** Une annonce close ne compte pas comme une mise en ligne. */
+    public function test_a_closed_listing_does_not_count_as_listed(): void
+    {
+        $product = Product::factory()->create(['sku' => 'CLOSED-ONLY', 'is_active' => true]);
+        $this->listing(['internalcode' => 'CLOSED-ONLY', 'closed' => true]);
+
+        $this->actingAs($this->admin())
+            ->get('/admin/marketplaces/naturabuy?tab=missing')
+            ->assertOk()
+            ->assertSee($product->localizedName());
+    }
+
+    public function test_the_not_listed_tab_can_be_searched(): void
+    {
+        $wanted = Product::factory()->create(['sku' => 'FIND-THIS', 'is_active' => true]);
+        $other = Product::factory()->create(['sku' => 'OTHER-ONE', 'is_active' => true]);
+
+        $this->actingAs($this->admin())
+            ->get('/admin/marketplaces/naturabuy?tab=missing&search=FIND-THIS')
+            ->assertOk()
+            ->assertSee($wanted->localizedName())
+            ->assertDontSee($other->localizedName());
     }
 
     // ------------------------------------------------------- name mismatch
