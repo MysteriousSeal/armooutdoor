@@ -2,6 +2,44 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-25 — v0.15.0 — build YLJ6SS
+
+### Storefront
+
+- **The shop has a blog.** Articles carry a cover image, a category, a summary and their own meta title and description, and only show once they are published and their date has passed, so an article can be written today and appear on Monday. Categories have their own URLs. Bodies may contain images, but only ones served by this site: an article pulling a picture from somewhere else would break the day that somewhere else changes its mind. A cover can name its photographer, always printed as "Photo ©" so the wording never drifts from one article to the next.
+
+- **An order that is on its way but not yet delivered says so.** "Shipped" covered both the parcel handed to the carrier this morning and the one out for delivery tonight. A new "In transit" status sits between shipped and delivered, in its own colour — the first one chosen looked like delivered at a glance, which defeats the point of a status.
+
+- **A product waiting on a delivery says "Approvisionnement en cours"** instead of "Rupture de stock" or "Dispo fournisseur". Stock already ordered from a supplier is not stock you can promise: the product can no longer be bought against supplier availability while a purchase order for it is open, since a customer ordering it would be waiting on the same delivery, twice over.
+
+- The contact page no longer prints a postal address, and the email address is now contact@armooutdoor.fr.
+
+### Admin
+
+- **The order list is split by status, the way the product list already was.** Every status has its own tab with its count, and Archived and Test sit apart at the far end since they are not stages of an order's life but places it is filed away.
+
+- **The seven figures above the order list are now three cards** and hold on one line. They were laid out on a six-column grid, so the seventh dropped to a line of its own on every screen.
+
+- **NaturaBuy listings are visible from the admin**, under a new Marketplaces section. The listing is compared with the catalogue by reference, falling back to a prefix when a listing covers several sizes sold here as separate variants, and tabs single out what disagrees: what is listed but not in the catalogue, what is in the catalogue but not listed, and where quantities or names differ between the two. Closed listings are left out. Everything can be resynced from the page.
+
+- **An order number and each of its references copy on a click**, with a toast to confirm. Two arrows next to the order number step to the order before and after it by date, whatever search or filter led there — staying among orders of the same kind, since drafts, test orders and archived ones each have their own page and count differently everywhere else.
+
+- Products on an open purchase order are marked as being restocked in the product list and on the product form, in their own colour, so it is clear the shelf is empty on purpose.
+
+- The admin product API accepts everything the product form does, and both it and the new blog API are documented for whoever, or whatever, calls them.
+
+### Catalogue
+
+- The Walther PPK/S, the Beretta Px4 Storm spring replica, the Mechanix M-Pact Woodland gloves and the two M-Pact mitaine colourways are on sale. Several existing products gained real photographs.
+
+### Under the hood
+
+- The description editor destroyed every bulleted list it was asked to load. It wrote the stored HTML straight into the page instead of handing it to the editor's own parser, and the first save after that wrote back what was left. One article had lost seventeen blocks this way before it was caught.
+
+- Relative dates in the admin were printed in French on an otherwise English back office.
+
+- The shared pager was styled in a stylesheet the admin does not load, so it appeared unstyled on nine admin pages.
+
 ## 2026-08-24 — v0.14.0 — build UXT3NP
 
 ### Admin
