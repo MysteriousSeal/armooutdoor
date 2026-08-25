@@ -1256,28 +1256,117 @@
     background: color-mix(in srgb, var(--accent) 8%, var(--surface));
 }
 
+/* Cinq entrées plutôt que treize. Les menus dépassent de la barre : plus
+   d'`overflow-x`, sinon ils seraient rognés à l'ouverture. */
 .admin-nav-links {
     display: flex;
     align-items: stretch;
+    flex-wrap: wrap;
     gap: 0.15rem;
     padding: 0 1.15rem;
-    overflow-x: auto;
     font-size: 0.875rem;
 }
 
-.admin-nav-links a {
+.admin-nav-link {
     display: inline-flex;
     align-items: center;
+    gap: 0.35rem;
     height: 2.6rem;
     padding: 0 0.85rem;
+    font-family: inherit;
+    font-size: inherit;
     color: var(--text-muted);
     font-weight: 500;
     white-space: nowrap;
+    background: none;
+    border: 0;
     border-bottom: 2px solid transparent;
+    cursor: pointer;
 }
 
-.admin-nav-links a:hover {
+.admin-nav-link:hover {
     color: var(--text);
+}
+
+.admin-nav-group {
+    position: relative;
+    display: inline-flex;
+}
+
+/* Le dernier groupe se colle à droite : ce qu'on règle une fois par mois
+   n'a pas à occuper le milieu de la barre. */
+.admin-nav-group--end {
+    margin-left: auto;
+}
+
+.admin-nav-chevron {
+    flex-shrink: 0;
+    opacity: 0.6;
+    transition: transform 0.15s ease;
+}
+
+.admin-nav-trigger[aria-expanded='true'] {
+    color: var(--text);
+}
+
+.admin-nav-trigger[aria-expanded='true'] .admin-nav-chevron {
+    transform: rotate(180deg);
+    opacity: 1;
+}
+
+.admin-nav-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    min-width: 12.5rem;
+    padding: 0.3rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: 0 10px 26px -10px rgba(0, 0, 0, 0.22);
+}
+
+/* Le menu de droite s'aligne sur son bord, sinon il sort de la fenêtre. */
+.admin-nav-menu--right {
+    left: auto;
+    right: 0;
+}
+
+.admin-nav-menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    height: 2.1rem;
+    padding: 0 0.6rem;
+    color: var(--text);
+    font-weight: 500;
+    white-space: nowrap;
+    /* Une barre à gauche marque la page courante sans déplacer le libellé. */
+    border-left: 2px solid transparent;
+}
+
+.admin-nav-menu-item:hover {
+    color: var(--accent-hover);
+    background: color-mix(in srgb, var(--accent) 8%, var(--bg));
+}
+
+.admin-nav-menu-item.active {
+    color: var(--accent-hover);
+    border-left-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 6%, var(--bg));
+}
+
+[data-theme='dark'] .admin-nav-menu {
+    box-shadow: 0 10px 26px -10px rgba(0, 0, 0, 0.55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .admin-nav-chevron {
+        transition: none;
+    }
 }
 
 .admin-nav-badge {

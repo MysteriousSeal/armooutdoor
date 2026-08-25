@@ -66,39 +66,88 @@
         </div>
 
         <nav class="admin-nav-links" aria-label="Admin sections">
-            <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard</a>
-            <a href="{{ route('admin.customers.index') }}" class="{{ request()->routeIs('admin.customers.*') ? 'active' : '' }}">
-                Customers
-                @if ($unviewedCustomerCount > 0)
-                    <span class="admin-nav-badge" title="{{ $unviewedCustomerCount }} not looked at yet">{{ $unviewedCustomerCount }}</span>
-                @endif
-            </a>
-            <a href="{{ route('admin.conversations.index') }}" class="{{ request()->routeIs('admin.conversations.*') ? 'active' : '' }}">
-                Messages
-                @if ($unreadMessageCount > 0)
-                    <span class="admin-nav-badge">{{ $unreadMessageCount }}</span>
-                @endif
-            </a>
-            <a href="{{ route('admin.orders.index') }}" class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
-                Orders
-                @if ($ordersAwaitingStartCount > 0)
-                    <span class="admin-nav-badge" title="{{ $ordersAwaitingStartCount }} not started yet">{{ $ordersAwaitingStartCount }}</span>
-                @endif
-            </a>
-            <a href="{{ route('admin.purchase-orders.index') }}" class="{{ request()->routeIs('admin.purchase-orders.*') ? 'active' : '' }}">
-                Purchase orders
-                @if ($purchaseOrdersAwaitingReceiptCount > 0)
-                    <span class="admin-nav-badge" title="{{ $purchaseOrdersAwaitingReceiptCount }} awaiting receipt">{{ $purchaseOrdersAwaitingReceiptCount }}</span>
-                @endif
-            </a>
-            <a href="{{ route('admin.marketplaces.index') }}" class="{{ request()->routeIs('admin.marketplaces.*') ? 'active' : '' }}">Marketplaces</a>
-                <a href="{{ route('admin.products.index') }}" class="{{ request()->routeIs('admin.products.*') ? 'active' : '' }}">Products</a>
-            <a href="{{ route('admin.categories.index') }}" class="{{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">Categories</a>
-                <a href="{{ route('admin.blog.index') }}" class="{{ request()->routeIs('admin.blog.*') ? 'active' : '' }}">Blog</a>
-            <a href="{{ route('admin.discounts.index') }}" class="{{ request()->routeIs('admin.discounts.*', 'admin.discount-codes.*') ? 'active' : '' }}">Discounts</a>
-            <a href="{{ route('admin.settings.index') }}" class="{{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">Settings</a>
-            <a href="{{ route('admin.activity') }}" class="{{ request()->routeIs('admin.activity') ? 'active' : '' }}">Activity</a>
-            <a href="{{ route('admin.changelog') }}" class="{{ request()->routeIs('admin.changelog') ? 'active' : '' }}">Changelog</a>
+            @php
+                // Le badge d'un groupe additionne ceux de ses entrées : replié,
+                // il doit encore dire qu'il y a quelque chose à traiter dedans.
+                $salesBadge = $ordersAwaitingStartCount + $unviewedCustomerCount + $unreadMessageCount;
+                $salesActive = request()->routeIs('admin.orders.*', 'admin.customers.*', 'admin.conversations.*', 'admin.discounts.*', 'admin.discount-codes.*');
+                $catalogueActive = request()->routeIs('admin.products.*', 'admin.categories.*', 'admin.purchase-orders.*', 'admin.marketplaces.*');
+                $systemActive = request()->routeIs('admin.settings.*', 'admin.stripe.*', 'admin.activity', 'admin.changelog');
+            @endphp
+
+            <a href="{{ route('admin.dashboard') }}" class="admin-nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard</a>
+
+            <div class="admin-nav-group">
+                <button type="button" class="admin-nav-link admin-nav-trigger {{ $salesActive ? 'active' : '' }}" data-nav-toggle aria-haspopup="true" aria-expanded="false">
+                    Sales
+                    @if ($salesBadge > 0)
+                        <span class="admin-nav-badge" title="{{ $salesBadge }} waiting in this section">{{ $salesBadge }}</span>
+                    @endif
+                    <svg class="admin-nav-chevron" viewBox="0 0 24 24" width="11" height="11" aria-hidden="true">
+                        <path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <div class="admin-nav-menu" data-nav-menu hidden>
+                    <a href="{{ route('admin.orders.index') }}" class="admin-nav-menu-item {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
+                        Orders
+                        @if ($ordersAwaitingStartCount > 0)
+                            <span class="admin-nav-badge" title="{{ $ordersAwaitingStartCount }} not started yet">{{ $ordersAwaitingStartCount }}</span>
+                        @endif
+                    </a>
+                    <a href="{{ route('admin.customers.index') }}" class="admin-nav-menu-item {{ request()->routeIs('admin.customers.*') ? 'active' : '' }}">
+                        Customers
+                        @if ($unviewedCustomerCount > 0)
+                            <span class="admin-nav-badge" title="{{ $unviewedCustomerCount }} not looked at yet">{{ $unviewedCustomerCount }}</span>
+                        @endif
+                    </a>
+                    <a href="{{ route('admin.conversations.index') }}" class="admin-nav-menu-item {{ request()->routeIs('admin.conversations.*') ? 'active' : '' }}">
+                        Messages
+                        @if ($unreadMessageCount > 0)
+                            <span class="admin-nav-badge">{{ $unreadMessageCount }}</span>
+                        @endif
+                    </a>
+                    <a href="{{ route('admin.discounts.index') }}" class="admin-nav-menu-item {{ request()->routeIs('admin.discounts.*', 'admin.discount-codes.*') ? 'active' : '' }}">Discounts</a>
+                </div>
+            </div>
+
+            <div class="admin-nav-group">
+                <button type="button" class="admin-nav-link admin-nav-trigger {{ $catalogueActive ? 'active' : '' }}" data-nav-toggle aria-haspopup="true" aria-expanded="false">
+                    Catalogue
+                    @if ($purchaseOrdersAwaitingReceiptCount > 0)
+                        <span class="admin-nav-badge" title="{{ $purchaseOrdersAwaitingReceiptCount }} awaiting receipt">{{ $purchaseOrdersAwaitingReceiptCount }}</span>
+                    @endif
+                    <svg class="admin-nav-chevron" viewBox="0 0 24 24" width="11" height="11" aria-hidden="true">
+                        <path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <div class="admin-nav-menu" data-nav-menu hidden>
+                    <a href="{{ route('admin.products.index') }}" class="admin-nav-menu-item {{ request()->routeIs('admin.products.*') ? 'active' : '' }}">Products</a>
+                    <a href="{{ route('admin.categories.index') }}" class="admin-nav-menu-item {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">Categories</a>
+                    <a href="{{ route('admin.purchase-orders.index') }}" class="admin-nav-menu-item {{ request()->routeIs('admin.purchase-orders.*') ? 'active' : '' }}">
+                        Purchase orders
+                        @if ($purchaseOrdersAwaitingReceiptCount > 0)
+                            <span class="admin-nav-badge" title="{{ $purchaseOrdersAwaitingReceiptCount }} awaiting receipt">{{ $purchaseOrdersAwaitingReceiptCount }}</span>
+                        @endif
+                    </a>
+                    <a href="{{ route('admin.marketplaces.index') }}" class="admin-nav-menu-item {{ request()->routeIs('admin.marketplaces.*') ? 'active' : '' }}">Marketplaces</a>
+                </div>
+            </div>
+
+            <a href="{{ route('admin.blog.index') }}" class="admin-nav-link {{ request()->routeIs('admin.blog.*') ? 'active' : '' }}">Blog</a>
+
+            <div class="admin-nav-group admin-nav-group--end">
+                <button type="button" class="admin-nav-link admin-nav-trigger {{ $systemActive ? 'active' : '' }}" data-nav-toggle aria-haspopup="true" aria-expanded="false">
+                    System
+                    <svg class="admin-nav-chevron" viewBox="0 0 24 24" width="11" height="11" aria-hidden="true">
+                        <path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <div class="admin-nav-menu admin-nav-menu--right" data-nav-menu hidden>
+                    <a href="{{ route('admin.settings.index') }}" class="admin-nav-menu-item {{ request()->routeIs('admin.settings.*', 'admin.stripe.*') ? 'active' : '' }}">Settings</a>
+                    <a href="{{ route('admin.activity') }}" class="admin-nav-menu-item {{ request()->routeIs('admin.activity') ? 'active' : '' }}">Activity</a>
+                    <a href="{{ route('admin.changelog') }}" class="admin-nav-menu-item {{ request()->routeIs('admin.changelog') ? 'active' : '' }}">Changelog</a>
+                </div>
+            </div>
         </nav>
     </header>
 
@@ -132,6 +181,7 @@
         @yield('content')
     </main>
 
+    <script src="{{ asset('js/admin-nav-menu.js') }}" defer></script>
     <script src="{{ asset('js/admin-toast.js') }}" defer></script>
     <script src="{{ asset('js/pretty-select.js') }}" defer></script>
     <script src="{{ asset('js/theme-toggle.js') }}" defer></script>

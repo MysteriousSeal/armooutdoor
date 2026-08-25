@@ -1098,7 +1098,7 @@ a.stripe-meta-chip:hover {
     }
 }
 
-.admin-nav-links a.active {
+.admin-nav-link.active {
     color: var(--text);
     border-bottom-color: var(--accent);
 }
