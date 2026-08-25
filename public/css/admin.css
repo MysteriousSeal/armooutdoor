@@ -6719,3 +6719,368 @@ input[type="date"].form-control {
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
 }
+
+/* --------------------------------------------------------- marketplaces */
+
+.marketplace-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+    gap: 1rem;
+}
+
+/* Une place connectée est cliquable, les autres non : la différence se voit
+   au curseur, à la bordure et à l'accent, pas seulement au texte. */
+.marketplace-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 1.25rem 1.35rem;
+    color: inherit;
+    text-decoration: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.marketplace-card:not(.is-connected) {
+    opacity: 0.62;
+}
+
+a.marketplace-card:hover {
+    border-color: var(--accent);
+}
+
+.marketplace-card-head {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.7rem;
+}
+
+.marketplace-card-logo {
+    width: 1.75rem;
+    height: 1.75rem;
+    object-fit: contain;
+    border-radius: 0.25rem;
+}
+
+.marketplace-card-logo--empty {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.marketplace-card-name {
+    font-size: 0.9375rem;
+    font-weight: 500;
+}
+
+.marketplace-card-figure {
+    font-size: 1.75rem;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+}
+
+.marketplace-card-figure--muted {
+    color: var(--text-muted);
+}
+
+.marketplace-card-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.marketplace-card-foot {
+    margin-top: 0.55rem;
+    padding-top: 0.55rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+}
+
+/* La table des annonces : les chiffres alignés à droite et tabulaires, pour
+   que les prix se comparent d'une ligne à l'autre sans effort. */
+.nb-table .nb-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.nb-code {
+    font-size: 0.8125rem;
+    padding: 0.1rem 0.35rem;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 0.2rem;
+}
+
+.nb-none {
+    color: var(--text-muted);
+}
+
+.nb-oldprice {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-decoration: line-through;
+}
+
+/* ------------------------------------------------------------- pagination */
+
+/* Le composant `partials.pager` est partagé avec la boutique, mais son habillage
+   ne vivait que dans `app.css`, que l'administration ne charge pas : la
+   pagination y sortait donc sans aucun style, sur neuf écrans. Voici sa version
+   administration, dans le vocabulaire des tableaux qui l'entourent. */
+.admin-main .store-pager {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    margin: 1.5rem 0 0.5rem;
+}
+
+.admin-main .store-pager-pages {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.3rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.admin-main .store-pager-arrow,
+.admin-main .store-pager-page {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.15rem;
+    height: 2.15rem;
+    padding: 0 0.6rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+    text-decoration: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 0.3rem;
+    transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+
+.admin-main .store-pager-arrow:hover,
+.admin-main .store-pager-page:hover {
+    border-color: var(--accent);
+    background: var(--bg);
+}
+
+/* La page courante ne se survole pas et ne se clique pas : elle est pleine,
+   pour que l'endroit où l'on se trouve se voie sans compter. */
+.admin-main .store-pager-page.is-current {
+    color: #fff;
+    background: var(--accent);
+    border-color: var(--accent);
+    cursor: default;
+}
+
+.admin-main .store-pager-page.is-current:hover {
+    background: var(--accent);
+}
+
+/* Une flèche désactivée reste en place plutôt que de disparaître : la barre
+   ne doit pas se décaler d'une page à l'autre. */
+.admin-main .store-pager-arrow.is-disabled {
+    color: var(--text-muted);
+    background: var(--bg);
+    border-style: dashed;
+    opacity: 0.65;
+    cursor: default;
+}
+
+.admin-main .store-pager-gap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5rem;
+    height: 2.15rem;
+    color: var(--text-muted);
+}
+
+@media (max-width: 560px) {
+    /* Les numéros passent devant, les libellés « Précédent / Suivant » sont
+       les premiers à sacrifier quand la place manque. */
+    .admin-main .store-pager-arrow {
+        min-width: 0;
+        padding: 0 0.5rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* Le bouton de resynchronisation. */
+.nb-sync-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.nb-sync-icon {
+    display: inline-block;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.nb-sync-btn.is-syncing {
+    opacity: 0.75;
+    cursor: progress;
+}
+
+/* Pendant l'appel, la flèche tourne : quelques secondes sans signe de vie
+   donnent l'impression que le bouton n'a rien fait. */
+.nb-sync-btn.is-syncing .nb-sync-icon {
+    animation: nb-spin 0.9s linear infinite;
+}
+
+@keyframes nb-spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nb-sync-btn.is-syncing .nb-sync-icon {
+        animation: none;
+    }
+}
+
+/* La pastille de rapprochement catalogue, dans le vocabulaire de la fiche
+   produit : même forme, même pastille ronde, mêmes teintes. */
+.nb-match {
+    text-decoration: none;
+}
+
+a.nb-match:hover {
+    border-color: currentColor;
+}
+
+/* Ni vert ni rouge : une annonce sans code interne n'est pas en écart, il n'y
+   a simplement rien à comparer. */
+.admin-availability-chip.nb-nocode {
+    color: var(--text-muted);
+    background: var(--bg);
+    border-color: var(--border);
+}
+
+/* La quantité de notre côté, face à la leur.
+   Quand les deux s'accordent, la cellule reste muette : seul l'écart mérite
+   d'attirer l'œil sur une page de deux cents lignes. */
+.nb-ours {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    justify-content: flex-end;
+}
+
+.nb-ours.is-differing {
+    font-weight: 600;
+    color: #8a5a12;
+}
+
+.nb-delta {
+    padding: 0.05rem 0.3rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: #8a5a12;
+    background: #faf1e2;
+    border: 1px solid #edddb8;
+    border-radius: 0.2rem;
+}
+
+[data-theme='dark'] .nb-ours.is-differing,
+[data-theme='dark'] .nb-delta {
+    color: #e0b464;
+}
+
+[data-theme='dark'] .nb-delta {
+    background: color-mix(in srgb, #e0b464 12%, var(--surface));
+    border-color: color-mix(in srgb, #e0b464 32%, var(--border));
+}
+
+/* Un rapprochement déduit du préfixe se lit autrement qu'une correspondance
+   exacte : bordure pointillée, pour dire « probable » plutôt que « certain ». */
+.nb-match--prefix {
+    border-style: dashed;
+}
+
+/* Les onglets d'écart empruntent le rouge des autres pastilles du site.
+   Aucune forme n'est redéfinie ici : la géométrie reste celle de
+   `.admin-tab-count`, sinon ces deux compteurs seraient les seuls arrondis
+   d'une barre entière de compteurs carrés.
+
+   Et ils ne s'allument que s'il y a quelque chose à regarder : un rouge
+   permanent sur un zéro est un avertissement qu'on apprend à ignorer. */
+.admin-tabs a.nb-tab-attention .admin-tab-count {
+    color: #a44;
+    background: #f7ecec;
+    border-color: #e3c6c6;
+}
+
+[data-theme='dark'] .admin-tabs a.nb-tab-attention .admin-tab-count {
+    color: #e08585;
+    background: color-mix(in srgb, #e08585 12%, var(--surface));
+    border-color: color-mix(in srgb, #e08585 32%, var(--border));
+}
+
+/* Le nom de notre côté, sous celui de NaturaBuy.
+   Discret par défaut : sur l'onglet du catalogue, la plupart des lignes
+   s'accordent et n'ont rien à signaler. */
+.nb-ourname {
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    margin-top: 0.2rem;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+
+.nb-ourname-arrow {
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+.nb-ourname a {
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+}
+
+.nb-ourname a:hover {
+    color: var(--text);
+    border-bottom-color: var(--border);
+}
+
+/* L'écart de nom se dit par une étiquette, pas par une couleur d'alerte :
+   deux titres différents sont souvent un choix éditorial, pas une erreur. */
+.nb-ourname-tag {
+    flex-shrink: 0;
+    padding: 0.02rem 0.32rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 0.2rem;
+}
+
+.nb-ourname.is-differing a {
+    color: var(--text);
+}

@@ -107,11 +107,11 @@ class Discount extends Model
 
     /**
      * English relative time for the admin list. The shop locale is French,
-     * so Carbon's default diffForHumans() would otherwise leak FR copy.
+     * so the date goes through admin_relative_date(), which forces English.
      */
     public function remainingLabel(): string
     {
-        $relative = fn ($date): string => $date->copy()->locale('en')->diffForHumans();
+        $relative = fn ($date): string => admin_relative_date($date);
 
         if ($this->starts_at !== null && $this->starts_at->isFuture()) {
             return 'Starts '.$relative($this->starts_at);
