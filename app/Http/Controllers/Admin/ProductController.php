@@ -40,7 +40,7 @@ class ProductController extends Controller
         $search = trim((string) $request->query('search', ''));
         $categorySlug = (string) $request->query('category', '');
         $supplierId = $request->filled('supplier') ? (int) $request->query('supplier') : null;
-        $tab = in_array($request->query('tab'), ['active', 'disabled', 'in-stock', 'at-supplier', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight'], true)
+        $tab = in_array($request->query('tab'), ['active', 'disabled', 'in-stock', 'restocking', 'at-supplier', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight'], true)
             ? (string) $request->query('tab')
             : 'active';
 
@@ -65,6 +65,7 @@ class ProductController extends Controller
             'activeCount' => Product::query()->where('is_active', true)->count(),
             'disabledCount' => Product::query()->where('is_active', false)->count(),
             'inStockCount' => Product::query()->tap(fn ($query) => $this->inStock($query))->count(),
+            'restockingCount' => Product::query()->tap(fn ($query) => $this->restocking($query))->count(),
             'atSupplierCount' => Product::query()->tap(fn ($query) => $this->atSupplier($query))->count(),
             'outOfStockCount' => Product::query()->tap(fn ($query) => $this->outOfStock($query))->count(),
             'noSkuCount' => Product::query()->tap(fn ($query) => $this->missingSku($query))->count(),
@@ -144,6 +145,8 @@ class ProductController extends Controller
             'categories' => $this->categoryOptions(),
             'carriers' => Carrier::query()->orderBy('sort_order')->get(),
             'suppliers' => Supplier::query()->orderBy('name')->get(),
+            // Un produit qui n'existe pas encore n'a rien en commande.
+            'inboundStock' => ['quantity' => 0, 'orders' => collect()],
         ]);
     }
 
@@ -178,6 +181,7 @@ class ProductController extends Controller
             'carriers' => Carrier::query()->orderBy('sort_order')->get(),
             'suppliers' => Supplier::query()->orderBy('name')->get(),
             'averagePurchaseCostInclVatCents' => $product->averagePurchaseCostInclVatCents(),
+            'inboundStock' => $product->inboundStock(),
             'receivedPurchaseUnits' => $product->receivedPurchaseUnits(),
         ]);
     }
@@ -453,6 +457,25 @@ class ProductController extends Controller
      * The exact opposite of outOfStock() among the products at zero, so the
      * two tabs split that group cleanly instead of overlapping.
      */
+    /**
+     * Les produits dont un réassort est en route.
+     *
+     * Même définition qu'en boutique : une ligne de commande fournisseur
+     * encore incomplète, sur une commande envoyée ou partiellement reçue. La
+     * déclinaison compte pour son produit.
+     */
+    private function restocking(Builder $query): void
+    {
+        $open = fn (Builder $item) => $item
+            ->whereColumn('quantity_received', '<', 'quantity_ordered')
+            ->whereHas('purchaseOrder', fn (Builder $po) => $po->open());
+
+        $query->where('is_active', true)
+            ->where(fn (Builder $inner) => $inner
+                ->whereHas('purchaseOrderItems', $open)
+                ->orWhereHas('variants.purchaseOrderItems', $open));
+    }
+
     private function atSupplier(Builder $query): void
     {
         $query->where('is_active', true)
@@ -521,6 +544,7 @@ class ProductController extends Controller
         match ($tab) {
             'disabled' => $query->where('is_active', false),
             'in-stock' => $this->inStock($query),
+            'restocking' => $this->restocking($query),
             'at-supplier' => $this->atSupplier($query),
             'out-of-stock' => $this->outOfStock($query),
             'no-sku' => $this->missingSku($query),

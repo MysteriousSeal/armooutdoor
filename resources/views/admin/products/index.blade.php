@@ -62,6 +62,9 @@
             <a href="{{ route('admin.products.index', $tabQuery('in-stock')) }}" class="starts-group {{ $tab === 'in-stock' ? 'active' : '' }}">
                 In stock <span class="admin-tab-count">{{ number_format($inStockCount) }}</span>
             </a>
+            <a href="{{ route('admin.products.index', $tabQuery('restocking')) }}" class="{{ $tab === 'restocking' ? 'active' : '' }}">
+                Restocking <span class="admin-tab-count">{{ number_format($restockingCount) }}</span>
+            </a>
             <a href="{{ route('admin.products.index', $tabQuery('at-supplier')) }}" class="{{ $tab === 'at-supplier' ? 'active' : '' }}">
                 At supplier <span class="admin-tab-count">{{ number_format($atSupplierCount) }}</span>
             </a>
@@ -299,6 +302,7 @@
                                         $availabilityLabel = [
                                             'in_stock' => 'In stock',
                                             'low_stock' => 'Last pieces',
+                                            'restocking' => 'Restocking',
                                             'at_supplier' => 'At supplier',
                                             'out_of_stock' => 'Out of stock',
                                         ][$availability];

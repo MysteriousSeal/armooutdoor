@@ -8,6 +8,11 @@
     $availableAtSupplier = $product->hasVariants()
         ? ($activeCardVariants->isNotEmpty() && $activeCardVariants->every(fn ($variant) => ! $variant->inStock()) && $backorderableCardVariant !== null)
         : (! $product->inStock() && $product->isBackorderable());
+    // Un réassort en route l'emporte sur « dispo fournisseur » : l'article est
+    // déjà commandé, il ne se recommande pas.
+    $cardRestocking = ! $product->inStock() && ($product->hasVariants()
+        ? $activeCardVariants->contains(fn ($variant) => ! $variant->inStock() && $variant->isRestocking())
+        : $product->isRestocking());
     $fiveColumn = $fiveColumn ?? false;
 @endphp
 <article class="masonry-card product-card {{ $product->inStock() || $availableAtSupplier ? '' : 'is-out-of-stock' }}">
@@ -36,8 +41,10 @@
                     @endif
                     {{ $product->formattedPrice() }}
                 </p>
-                <span class="card-stock-chip {{ $product->lowStock() ? 'is-low-stock' : ($product->inStock() ? 'is-in-stock' : ($availableAtSupplier ? 'is-at-supplier' : 'is-out-of-stock')) }}">
-                    {{ $product->lowStock() ? __($fiveColumn ? 'store.low_stock_short' : 'store.low_stock') : ($product->inStock() ? __('store.in_stock') : ($availableAtSupplier ? __($fiveColumn ? 'store.card_available_at_supplier_short' : 'store.card_available_at_supplier') : __('store.out_of_stock'))) }}
+                {{-- Les cartes ont leurs propres libellés, plus courts, et une
+                     variante encore plus courte sur cinq colonnes. --}}
+                <span class="card-stock-chip {{ $product->lowStock() ? 'is-low-stock' : ($product->inStock() ? 'is-in-stock' : ($cardRestocking ? 'is-restocking' : ($availableAtSupplier ? 'is-at-supplier' : 'is-out-of-stock'))) }}">
+                    {{ $product->lowStock() ? __($fiveColumn ? 'store.low_stock_short' : 'store.low_stock') : ($product->inStock() ? __('store.in_stock') : ($cardRestocking ? __($fiveColumn ? 'store.card_restocking_short' : 'store.card_restocking') : ($availableAtSupplier ? __($fiveColumn ? 'store.card_available_at_supplier_short' : 'store.card_available_at_supplier') : __('store.out_of_stock')))) }}
                 </span>
             </div>
             <div class="card-rating">

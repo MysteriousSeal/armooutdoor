@@ -1630,9 +1630,15 @@
    qu'il faut faire venir. Il portait l'ambre du stock faible, ce qui donnait
    deux sens à une seule couleur. Le bleu ardoise le dit sans alarmer, et
    c'est celui que la boutique emploie déjà pour « livrée ». */
+/* Le réassort partage ce bleu : c'est la même promesse, « ça arrive », dite
+   d'un cran plus près. Les distinguer par la couleur laisserait croire à deux
+   situations sans rapport. */
 .stock-badge.is-at-supplier,
 .card-stock-chip.is-at-supplier,
-.product-variant-chip-stock.is-at-supplier {
+.product-variant-chip-stock.is-at-supplier,
+.stock-badge.is-restocking,
+.card-stock-chip.is-restocking,
+.product-variant-chip-stock.is-restocking {
     color: #2f5d8a;
     background: #eef3f8;
     border-color: #c6d8e8;
@@ -3938,7 +3944,10 @@
 
 [data-theme='dark'] .stock-badge.is-at-supplier,
 [data-theme='dark'] .card-stock-chip.is-at-supplier,
-[data-theme='dark'] .product-variant-chip-stock.is-at-supplier {
+[data-theme='dark'] .product-variant-chip-stock.is-at-supplier,
+[data-theme='dark'] .stock-badge.is-restocking,
+[data-theme='dark'] .card-stock-chip.is-restocking,
+[data-theme='dark'] .product-variant-chip-stock.is-restocking {
     color: #8ab4dd;
     background: color-mix(in srgb, #8ab4dd 12%, var(--surface));
     border-color: color-mix(in srgb, #8ab4dd 35%, var(--border));

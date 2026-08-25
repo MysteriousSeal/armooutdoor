@@ -368,9 +368,62 @@ class Product extends Model
      * Out of stock, but the supplier can still get it — sold as a
      * one-unit backorder. Only applies to products without variants.
      */
+    /**
+     * Les lignes de commande fournisseur encore en attente pour cet article.
+     *
+     * Ligne par ligne, pas commande par commande : une commande partiellement
+     * reçue contient des articles arrivés et d'autres non, et seuls les
+     * seconds sont encore en approvisionnement.
+     */
+    public function restockingPurchaseItems(): HasMany
+    {
+        return $this->hasMany(PurchaseOrderItem::class)
+            ->whereColumn('quantity_received', '<', 'quantity_ordered')
+            ->whereHas('purchaseOrder', fn ($query) => $query->open());
+    }
+
+    /**
+     * Ce qui est encore attendu, déclinaisons comprises.
+     *
+     * Renvoie la quantité manquante et les commandes fournisseur concernées,
+     * pour que la fiche puisse dire « 12 en commande » plutôt que le seul
+     * fait qu'un réassort existe.
+     *
+     * @return array{quantity: int, orders: Collection<int, PurchaseOrder>}
+     */
+    public function inboundStock(): array
+    {
+        $items = PurchaseOrderItem::query()
+            ->with('purchaseOrder')
+            ->whereColumn('quantity_received', '<', 'quantity_ordered')
+            ->whereHas('purchaseOrder', fn ($query) => $query->open())
+            ->where(fn ($query) => $query
+                ->where('product_id', $this->id)
+                ->orWhereIn('product_variant_id', $this->variants()->pluck('id')))
+            ->get();
+
+        return [
+            'quantity' => (int) $items->sum(fn (PurchaseOrderItem $item): int => max(0, $item->quantity_ordered - $item->quantity_received)),
+            'orders' => $items->pluck('purchaseOrder')->filter()->unique('id')->values(),
+        ];
+    }
+
+    /** Un réassort est en route pour cet article. */
+    public function isRestocking(): bool
+    {
+        // Si la relation est déjà chargée, on ne repart pas en base : les
+        // listings affichent des dizaines de produits d'affilée.
+        if ($this->relationLoaded('restockingPurchaseItems')) {
+            return $this->restockingPurchaseItems->isNotEmpty();
+        }
+
+        return $this->restockingPurchaseItems()->exists();
+    }
+
     public function isBackorderable(): bool
     {
-        return ! $this->hasVariants() && $this->supplier_id !== null && $this->available_at_supplier;
+        return ! $this->isRestocking()
+            && ! $this->hasVariants() && $this->supplier_id !== null && $this->available_at_supplier;
     }
 
     /**
@@ -381,7 +434,7 @@ class Product extends Model
      * what the quantities add up to. The best state any active size can offer
      * is the one shown.
      *
-     * @return 'in_stock'|'low_stock'|'at_supplier'|'out_of_stock'
+     * @return 'in_stock'|'low_stock'|'restocking'|'at_supplier'|'out_of_stock'
      */
     public function availabilityState(): string
     {
@@ -391,6 +444,9 @@ class Product extends Model
             return match (true) {
                 $active->contains(fn (ProductVariant $variant): bool => $variant->quantity > 2) => 'in_stock',
                 $active->contains(fn (ProductVariant $variant): bool => $variant->inStock()) => 'low_stock',
+                // Le réassort passe devant « dispo fournisseur » : une taille
+                // déjà commandée ne se recommande pas chez le fournisseur.
+                $active->contains(fn (ProductVariant $variant): bool => $variant->isRestocking()) => 'restocking',
                 $active->contains(fn (ProductVariant $variant): bool => $variant->isBackorderable()) => 'at_supplier',
                 default => 'out_of_stock',
             };
@@ -399,6 +455,7 @@ class Product extends Model
         return match (true) {
             $this->lowStock() => 'low_stock',
             $this->inStock() => 'in_stock',
+            $this->isRestocking() => 'restocking',
             $this->isBackorderable() => 'at_supplier',
             default => 'out_of_stock',
         };
