@@ -44,6 +44,23 @@ class NaturabuyListingsTest extends TestCase
 
     // ------------------------------------------------------------- admin
 
+    /** L'administration est en anglais : la date de synchro aussi. */
+    public function test_the_sync_date_reads_in_english(): void
+    {
+        app()->setLocale('fr');
+        $this->listing(['synced_at' => now()->subMinutes(10)]);
+        Marketplace::query()->create(['name' => 'NaturaBuy']);
+
+        $admin = $this->admin();
+
+        foreach (['/admin/marketplaces', '/admin/marketplaces/naturabuy'] as $url) {
+            $this->actingAs($admin)->get($url)
+                ->assertOk()
+                ->assertSee('10 minutes ago')
+                ->assertDontSee('il y a');
+        }
+    }
+
     public function test_the_marketplace_index_lists_naturabuy(): void
     {
         Marketplace::query()->create(['name' => 'NaturaBuy']);

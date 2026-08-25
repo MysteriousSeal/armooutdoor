@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
 
@@ -47,5 +48,25 @@ if (! function_exists('format_euros')) {
     function format_euros(int $cents): string
     {
         return Number::currency($cents / 100, in: 'EUR', locale: app()->getLocale());
+    }
+}
+
+if (! function_exists('admin_relative_date')) {
+    /**
+     * Une date relative pour l'administration, toujours en anglais.
+     *
+     * La boutique tourne en `fr`, l'administration est écrite en anglais, et
+     * `diffForHumans()` suit la locale de l'application : sans forcer la
+     * langue, « il y a 10 minutes » se glisse au milieu d'une page anglaise.
+     * C'est arrivé trois fois — les remises, les codes promo, puis les places
+     * de marché — d'où ce point de passage unique.
+     */
+    function admin_relative_date(mixed $date): string
+    {
+        if ($date === null || $date === '') {
+            return '';
+        }
+
+        return Carbon::parse($date)->locale('en')->diffForHumans();
     }
 }

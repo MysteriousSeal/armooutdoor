@@ -37,7 +37,7 @@
                         <span class="marketplace-card-label">listings</span>
                         <span class="marketplace-card-foot">
                             @if ($naturabuySyncedAt)
-                                Synced {{ \Illuminate\Support\Carbon::parse($naturabuySyncedAt)->diffForHumans() }}
+                                Synced {{ admin_relative_date($naturabuySyncedAt) }}
                             @else
                                 Never synced
                             @endif

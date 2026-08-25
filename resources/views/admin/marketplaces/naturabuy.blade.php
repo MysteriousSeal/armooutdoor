@@ -12,7 +12,7 @@
                     <p class="admin-list-lede">
                         Everything currently on sale on NaturaBuy, as their API reports it.
                         @if ($syncedAt)
-                            Last synced {{ \Illuminate\Support\Carbon::parse($syncedAt)->diffForHumans() }}.
+                            Last synced {{ admin_relative_date($syncedAt) }}.
                         @endif
                     </p>
                 </div>

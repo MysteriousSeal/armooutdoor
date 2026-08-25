@@ -248,7 +248,7 @@ class DiscountCode extends Model
 
     /**
      * English relative time for the admin list. The shop locale is French,
-     * so Carbon's default diffForHumans() would otherwise leak FR copy.
+     * so the date goes through admin_relative_date(), which forces English.
      */
     public function remainingLabel(): string
     {
@@ -256,7 +256,7 @@ class DiscountCode extends Model
             return 'No deadline';
         }
 
-        $relative = $this->ends_at->copy()->locale('en')->diffForHumans();
+        $relative = admin_relative_date($this->ends_at);
 
         return $this->isExpired() ? 'Expired '.$relative : 'Expires '.$relative;
     }
