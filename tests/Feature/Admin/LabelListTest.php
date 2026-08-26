@@ -238,4 +238,70 @@ class LabelListTest extends TestCase
         // would say the same thing twice.
         $this->page()->assertDontSee('>Label title</th>', false);
     }
+
+    public function test_the_counts_speak_for_the_whole_catalogue(): void
+    {
+        // More products than fit on a page: a count that stopped at the page
+        // size would only ever report the page size.
+        Product::factory()->count(45)->create(['sku' => null, 'gtin' => null, 'label_title' => null]);
+        $this->ready(['sku' => 'ARM-OK-1']);
+        $this->ready(['sku' => 'ARM-OK-2', 'gtin' => '5901234123457']);
+
+        $html = $this->page()->getContent();
+
+        $ready = substr($html, strpos($html, 'Ready'));
+        $incomplete = substr($html, strpos($html, 'Incomplete'));
+
+        $this->assertMatchesRegularExpression('#Ready.*?admin-tab-count">2<#s', $ready);
+        $this->assertMatchesRegularExpression('#Incomplete.*?admin-tab-count">45<#s', $incomplete);
+    }
+
+    public function test_a_tab_pages_through_its_own_articles(): void
+    {
+        Product::factory()->count(45)->create(['sku' => null, 'gtin' => null, 'label_title' => null]);
+        $this->ready(['sku' => 'ARM-OK-1']);
+
+        // The one ready article is on the first page of its tab, not buried
+        // behind forty-five unfinished ones.
+        $this->page(['tab' => 'ready'])->assertSee('ARM-OK-1');
+    }
+
+    public function test_a_product_ready_in_one_size_appears_on_both_tabs(): void
+    {
+        $product = $this->ready(['sku' => null, 'gtin' => null]);
+        $this->variant($product, 'M', 'ARM-TS-M', '4006381333931');
+        $this->variant($product, 'L', 'ARM-TS-L', null);
+
+        // The tab lists articles, so each side shows only its own rows.
+        $this->page(['tab' => 'ready'])->assertSee('ARM-TS-M')->assertDontSee('ARM-TS-L');
+        $this->page(['tab' => 'incomplete'])->assertSee('ARM-TS-L')->assertDontSee('ARM-TS-M');
+    }
+
+    public function test_a_product_short_of_its_wording_is_incomplete_whatever_its_codes(): void
+    {
+        $this->ready(['sku' => 'ARM-CODED', 'label_subtitle' => null]);
+
+        $this->page(['tab' => 'incomplete'])->assertSee('ARM-CODED');
+        $this->page(['tab' => 'ready'])->assertDontSee('ARM-CODED');
+    }
+
+    public function test_the_reference_copies_on_a_click(): void
+    {
+        $this->ready(['sku' => 'ARM-GLOVE-M']);
+
+        // The same mechanism as an order's lines: a real button, the value on
+        // a data attribute, and the script that puts it on the clipboard.
+        $this->page()
+            ->assertSee('data-copy-code="ARM-GLOVE-M"', false)
+            ->assertSee('order-item-sku-copy', false)
+            ->assertSee('aria-label="Copy SKU ARM-GLOVE-M"', false)
+            ->assertSee('js/admin-copy-code.js', false);
+    }
+
+    public function test_an_article_without_a_reference_has_nothing_to_copy(): void
+    {
+        $this->ready(['sku' => null]);
+
+        $this->page()->assertDontSee('data-copy-code', false);
+    }
 }

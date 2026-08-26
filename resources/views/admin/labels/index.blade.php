@@ -104,7 +104,23 @@
                                 </td>
                                 <td>
                                     @if (filled($article['sku']))
-                                        <span class="admin-table-code">{{ $article['sku'] }}</span>
+                                        {{-- The reference is what gets typed into a
+                                             supplier's form or a marketplace, so it
+                                             copies on a click, as it does on an
+                                             order's lines. --}}
+                                        <button
+                                            type="button"
+                                            class="order-item-sku-copy admin-table-code"
+                                            data-copy-code="{{ $article['sku'] }}"
+                                            title="Copy this SKU"
+                                            aria-label="Copy SKU {{ $article['sku'] }}"
+                                        >
+                                            <span class="order-item-sku-value">{{ $article['sku'] }}</span>
+                                            <svg class="order-item-sku-icon" viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">
+                                                <rect x="9" y="9" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+                                                <path d="M5 15V5a2 2 0 0 1 2-2h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                            </svg>
+                                        </button>
                                     @else
                                         <span class="label-missing">—</span>
                                     @endif
@@ -171,3 +187,7 @@
         @endif
     </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('js/admin-copy-code.js') }}" defer></script>
+@endpush

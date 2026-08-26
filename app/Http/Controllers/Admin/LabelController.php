@@ -36,7 +36,9 @@ class LabelController extends Controller
 
         // Products are paginated, not articles: a page of forty products may
         // print a hundred sheets, but the search and the paging have to hold
-        // on to something the database can count.
+        // on to something the database can count. The tab narrows the query
+        // too, so a page of the Ready tab is forty products that have
+        // something ready rather than forty products of which three do.
         $products = Product::query()
             ->with('variants')
             ->when($search !== '', fn (Builder $query) => $query->where(function (Builder $inner) use ($search): void {
@@ -45,6 +47,7 @@ class LabelController extends Controller
                     ->orWhere('label_title', 'like', '%'.$search.'%')
                     ->orWhereHas('variants', fn (Builder $variants) => $variants->where('sku', 'like', '%'.$search.'%'));
             }))
+            ->when($tab !== 'all', fn (Builder $query) => $this->holdingAn($query, $tab))
             ->orderBy('name')
             ->orderBy('id')
             ->paginate(self::PER_PAGE)
@@ -57,9 +60,99 @@ class LabelController extends Controller
             'articles' => $this->onTab($articles, $tab),
             'tab' => $tab,
             'search' => $search,
-            'readyCount' => $articles->where('missing', [])->count(),
-            'incompleteCount' => $articles->where('missing', '!=', [])->count(),
+            // Counted across the catalogue, not across the page: a count that
+            // stopped at forty would only ever report the page size.
+            'readyCount' => $this->countArticles(true),
+            'incompleteCount' => $this->countArticles(false),
         ]);
+    }
+
+    /**
+     * Narrows to products holding at least one article of the tab's kind.
+     *
+     * A product can be ready in one size and short in another, so it belongs
+     * on both tabs; the view then shows only the rows that match.
+     *
+     * @param  Builder<Product>  $query
+     */
+    private function holdingAn(Builder $query, string $tab): Builder
+    {
+        if ($tab === 'ready') {
+            return $query
+                ->tap(fn (Builder $inner) => $this->hasWording($inner))
+                ->where(fn (Builder $article) => $article
+                    ->where(fn (Builder $plain) => $plain
+                        ->whereDoesntHave('variants')
+                        ->tap(fn (Builder $codes) => $this->hasCodes($codes)))
+                    ->orWhereHas('variants', fn (Builder $variant) => $this->hasCodes($variant)));
+        }
+
+        // Short of its wording, every article of the product is unfinished;
+        // otherwise it is the articles missing a code that put it here.
+        return $query->where(fn (Builder $incomplete) => $incomplete
+            ->whereNot(fn (Builder $wording) => $this->hasWording($wording))
+            ->orWhere(fn (Builder $plain) => $plain
+                ->whereDoesntHave('variants')
+                ->whereNot(fn (Builder $codes) => $this->hasCodes($codes)))
+            ->orWhereHas('variants', fn (Builder $variant) => $variant
+                ->whereNot(fn (Builder $codes) => $this->hasCodes($codes))));
+    }
+
+    /**
+     * How many articles of the catalogue are ready, or are not.
+     *
+     * Counted with two queries rather than by walking every product: the page
+     * shows forty at a time and the tabs speak for all of them.
+     */
+    private function countArticles(bool $ready): int
+    {
+        $readyPlain = Product::query()
+            ->whereDoesntHave('variants')
+            ->tap(fn (Builder $query) => $this->hasWording($query))
+            ->tap(fn (Builder $query) => $this->hasCodes($query))
+            ->count();
+
+        $readyVariants = ProductVariant::query()
+            ->tap(fn (Builder $query) => $this->hasCodes($query))
+            ->whereHas('product', fn (Builder $product) => $this->hasWording($product))
+            ->count();
+
+        if ($ready) {
+            return $readyPlain + $readyVariants;
+        }
+
+        // Everything that is not ready: one article per plain product, one per
+        // variant, less the ones already counted.
+        return Product::query()->whereDoesntHave('variants')->count()
+            + ProductVariant::query()->count()
+            - $readyPlain
+            - $readyVariants;
+    }
+
+    /**
+     * A product whose label wording is filled in.
+     *
+     * Empty strings count as missing, the way `filled()` reads them.
+     *
+     * @param  Builder<Product>  $query
+     */
+    private function hasWording(Builder $query): Builder
+    {
+        return $query
+            ->whereNotNull('label_title')->where('label_title', '!=', '')
+            ->whereNotNull('label_subtitle')->where('label_subtitle', '!=', '');
+    }
+
+    /**
+     * An article carrying both of its codes.
+     *
+     * @param  Builder<Product>|Builder<ProductVariant>  $query
+     */
+    private function hasCodes(Builder $query): Builder
+    {
+        return $query
+            ->whereNotNull('sku')->where('sku', '!=', '')
+            ->whereNotNull('gtin')->where('gtin', '!=', '');
     }
 
     /**
