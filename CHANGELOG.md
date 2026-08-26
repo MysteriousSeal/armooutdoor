@@ -2,6 +2,26 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-26 — v0.18.0 — build XI4OWN
+
+### Storefront
+
+- **The product page finally tells search engines what it is selling.** The home page, the categories, the blog and the FAQ all emitted structured data; the product page, the one that matters most, emitted none. It now carries its price, its availability, its average rating and its reviews, plus a breadcrumb trail.
+
+- **The four figures that decide a purchase sit next to the price**: quantity, size, material, colour. The full specification table still says everything, in two columns rather than one long fall — sixteen rows in a single column asked for a page of scrolling where every row looked equally important.
+
+- **The stars were drawn and never said.** Every rating now carries its value in words for anyone using a screen reader, the rating at the top of the page leads to the reviews at the bottom, and the average shows the shape of its sample: three and a half out of two opinions is not a verdict, and a distribution says so better than an average alone.
+
+- **The page says what the shop already enforced**, that only a customer whose order has shipped may leave a review, and marks each review as a verified purchase. It is a guarantee few shops can give and the page was keeping it to itself.
+
+- "Accueil" leaves the main menu. The logo already led home, and the row of tabs is for the places that are not one click away anyway.
+
+### Admin
+
+- **A purchase order prints a receipt sheet to tick while unpacking.** It lists the lines with the quantity ordered, a box to write the count actually found, and two boxes to tick: Received and Handled. No prices — that is not what is checked with a crate open. The boxes print empty even on an order the system already counts as received, since a box ticked in advance invites trust in the paper rather than a look in the carton.
+
+- Both the purchase order and the receipt sheet end with a signature block for ArmoOutdoor: name, date, and room for a real signature, all left blank.
+
 ## 2026-08-26 — v0.17.0 — build 8DISR4
 
 ### Storefront
