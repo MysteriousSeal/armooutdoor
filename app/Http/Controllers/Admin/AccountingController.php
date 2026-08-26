@@ -17,34 +17,47 @@ use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * The accounts: what came in, what went out.
+ * The accounting section: what came in, what went out.
  *
- * The pages hold the place in the navigation and fix the address; the
- * figures come next.
+ * Two halves, sales and purchases, each showing a list of months and then one
+ * page per month. Sales is built out; purchases holds its place in the
+ * navigation and its address, and the figures come next.
+ *
+ * A month's page mixes two sources — the shop's own orders and the entries
+ * typed by hand — into one table, and the sales journal PDF is printed from
+ * exactly the same rows.
  */
 class AccountingController extends Controller
 {
+    /** The list of sales months. */
     public function sales(): View
     {
         return view('admin.accounting.index', $this->listData('sales'));
     }
 
+    /** The list of purchase months. */
     public function purchases(): View
     {
         return view('admin.accounting.index', $this->listData('purchases'));
     }
 
+    /** One month of sales: the table of lines and its totals. */
     public function salesMonth(string $month): View
     {
         return view('admin.accounting.month', $this->monthData('sales', $month));
     }
 
+    /** One month of purchases. Still empty, and shares the month template. */
     public function purchasesMonth(string $month): View
     {
         return view('admin.accounting.month', $this->monthData('purchases', $month));
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * What a list of months needs: the months themselves and their counts.
+     *
+     * @return array<string, mixed>
+     */
     private function listData(string $section): array
     {
         return [
@@ -85,7 +98,10 @@ class AccountingController extends Controller
     }
 
     /**
+     * Counts rows per calendar month, keyed "2026-03".
+     *
      * @param  Builder<covariant \Illuminate\Database\Eloquent\Model>  $query
+     * @param  string  $column  The date column to group on.
      * @return Collection<string, int>
      */
     private function countByMonth(Builder $query, string $column): Collection
@@ -101,9 +117,17 @@ class AccountingController extends Controller
             ->pluck('total', 'month');
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * What one month's page needs.
+     *
+     * Purchases get the heading and nothing else; sales also get the lines and
+     * the lists the entry form offers.
+     *
+     * @return array<string, mixed>
+     */
     private function monthData(string $section, string $month): array
     {
+        // An unparseable or out-of-range month has no page at all.
         $period = AccountingPeriods::parse($month);
 
         abort_if($period === null, 404);
@@ -129,10 +153,23 @@ class AccountingController extends Controller
      * Sorted by date, among one another — an entry written by hand is not an
      * appendix to the table, it is a line of it.
      *
+     * Both sources are flattened into the same shape so the table, the totals
+     * and the PDF read one list and never ask where a line came from. Each row
+     * carries:
+     *
+     * - `kind`, `order`, `entry`: which source it came from, and the model
+     *   behind it when a link or an edit button is needed.
+     * - the printed columns: `invoice`, `client`, `channel`, `type`,
+     *   `total_cents`, `fees_cents`, `payment`, `remark`.
+     * - `type_fr`, `payment_fr`: the same two labels in French, for the PDF.
+     * - `counts`: whether the line joins the totals. False for a refund.
+     * - `refunded`: whether to strike it through.
+     *
      * @return Collection<int, array<string, mixed>>
      */
     private function rowsOf(string $section, CarbonImmutable $period): Collection
     {
+        // The shop's own orders, as table rows.
         $orders = $this->salesOf($period)->map(fn (Order $order): array => [
             'kind' => 'order',
             'date' => $order->created_at->startOfDay(),
@@ -154,6 +191,7 @@ class AccountingController extends Controller
             'refunded' => $order->status === 'refunded',
         ]);
 
+        // The entries typed by hand for this section and this month.
         $entries = AccountingEntry::query()
             ->section($section)
             ->whereBetween('entered_on', [$period, $period->endOfMonth()])
@@ -179,6 +217,9 @@ class AccountingController extends Controller
                 'refunded' => false,
             ]);
 
+        // `toBase()` first: merging arrays into an Eloquent collection makes
+        // it try to read a key off each one. The invoice number breaks ties so
+        // two lines of the same day keep a stable order between page loads.
         return $orders->toBase()
             ->merge($entries->toBase())
             ->sortBy([['date', 'asc'], ['invoice', 'asc']])
@@ -210,13 +251,17 @@ class AccountingController extends Controller
      * What a month's journal carries.
      *
      * The same lines and the same totals as the page: a document that said
-     * something else would be worth nothing.
+     * something else would be worth nothing. The screen and the PDF both come
+     * through here, which is what keeps them in step.
      *
      * @return array<string, mixed>
      */
     private function journalData(CarbonImmutable $period): array
     {
         $rows = $this->rowsOf('sales', $period);
+
+        // Refunds are listed but join no total, so the sums run on the
+        // counted lines while `rows` keeps everything to print.
         $counted = $rows->where('counts', true);
 
         return [
@@ -229,30 +274,39 @@ class AccountingController extends Controller
         ];
     }
 
+    /** Records an entry typed by hand, and returns to the month it belongs to. */
     public function storeEntry(StoreAccountingEntryRequest $request, string $section, string $month): RedirectResponse
     {
         $period = $this->sectionPeriod($section, $month);
 
-        AccountingEntry::query()->create($request->entryPayload($section, $period));
+        AccountingEntry::query()->create($request->entryPayload($section));
 
         return redirect()
             ->route('admin.accounting.'.$section.'.month', ['month' => AccountingPeriods::key($period)])
             ->with('status', 'Entry added.');
     }
 
+    /**
+     * Corrects an entry.
+     *
+     * `keepAuthor` leaves the original author in place: correcting an entry
+     * does not make you the one who wrote it.
+     */
     public function updateEntry(StoreAccountingEntryRequest $request, string $section, string $month, AccountingEntry $entry): RedirectResponse
     {
         $period = $this->sectionPeriod($section, $month);
 
+        // A sales URL must not reach a purchases entry, whatever the id says.
         abort_unless($entry->section === $section, 404);
 
-        $entry->update($request->entryPayload($section, $period, keepAuthor: true));
+        $entry->update($request->entryPayload($section, keepAuthor: true));
 
         return redirect()
             ->route('admin.accounting.'.$section.'.month', ['month' => AccountingPeriods::key($period)])
             ->with('status', 'Entry updated.');
     }
 
+    /** Removes an entry. Orders are never touched here, only hand-written lines. */
     public function destroyEntry(string $section, string $month, AccountingEntry $entry): RedirectResponse
     {
         $period = $this->sectionPeriod($section, $month);
@@ -266,6 +320,12 @@ class AccountingController extends Controller
             ->with('status', 'Entry deleted.');
     }
 
+    /**
+     * Reads the section and month out of the URL, or 404s.
+     *
+     * The entry routes take the section as a parameter rather than having one
+     * route each, so it is checked here rather than trusted.
+     */
     private function sectionPeriod(string $section, string $month): CarbonImmutable
     {
         abort_unless(in_array($section, ['sales', 'purchases'], true), 404);
@@ -310,11 +370,13 @@ class AccountingController extends Controller
             ->excludingTest();
     }
 
+    /** The heading, and the browser tab. */
     private function title(string $section): string
     {
         return $section === 'sales' ? 'Sales' : 'Purchases';
     }
 
+    /** The sentence under the heading, saying what the section holds. */
     private function lede(string $section): string
     {
         return $section === 'sales'

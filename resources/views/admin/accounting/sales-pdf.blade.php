@@ -3,6 +3,14 @@
 
     One page per month, landscape: ten columns do not stand upright without
     cutting names in half. Dressed like the other documents of the house.
+
+    Written in French, unlike the admin screen: it is filed with the accounts.
+    The rows come from AccountingController::journalData(), the same ones the
+    screen shows, so the paper and the page cannot drift apart.
+
+    Every style is inline in this file. The PDF renderer has no access to the
+    site's stylesheets, and the widths below are tuned against real data —
+    changing one shifts every column after it.
 --}}
 <!DOCTYPE html>
 <html lang="fr">
@@ -39,6 +47,7 @@
         }
         .title-meta { text-align: right; font-size: 10.5px; color: #6b6b6b; }
 
+        /* The three boxes under the title: period, entry count, print date. */
         table.meta { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
         table.meta td {
             width: 33.33%;
@@ -56,6 +65,9 @@
         }
         table.meta .value { padding-top: 3px; font-size: 11.5px; color: #2c2c2c; }
 
+        /* The journal itself. Column widths total 98%, leaving a margin; they
+           are set per column because the renderer will otherwise share the
+           width by content and wrap a long client name. */
         table.journal { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
         table.journal thead td {
             padding: 6px 4px;
@@ -106,6 +118,8 @@
             border: 1px solid #e8e6e3;
         }
 
+        /* The totals row: heavier rule above, and its own headings, so the
+           bottom of a long page reads without going back up. */
         table.journal tfoot td {
             padding: 9px 4px;
             font-size: 10.5px;
@@ -166,6 +180,7 @@
 <body>
     {{-- The journal belongs to the company, not to the shop sign: SwiftShelf
          keeps the accounts, ArmoOutdoor is only the shop. --}}
+    {{-- Letterhead: the company, top left, where a letterhead belongs. --}}
     <table class="header">
         <tr>
             <td class="company-info">
@@ -217,6 +232,7 @@
     </table>
 
     <table class="journal">
+        {{-- Date, invoice, client, channel, kind, the three amounts, payment. --}}
         <thead>
             <tr>
                 <td class="col-date">Date</td>
@@ -230,6 +246,7 @@
                 <td class="col-payment">Règlement</td>
             </tr>
         </thead>
+        {{-- Orders and hand-written entries alike, already sorted by date. --}}
         <tbody>
             @foreach ($rows as $row)
                 <tr class="{{ $row['refunded'] ? 'refunded' : '' }}">
@@ -250,6 +267,7 @@
                 </tr>
             @endforeach
         </tbody>
+        {{-- The month's totals. Refunds are printed above but counted here. --}}
         <tfoot>
             <tr>
                 <td colspan="5">

@@ -25,6 +25,14 @@ class AccountingSalesPdfTest extends TestCase
         $this->travelTo('2026-08-26 10:00:00');
     }
 
+    /** A real sale, placed on the given date. `created_at` is forced: it is not fillable. */
+    /**
+     * A real sale placed on the given date.
+     *
+     * `created_at` is forced after creation: it is not fillable, so Eloquent
+     * would otherwise stamp it with now and the sale would land in the wrong
+     * month.
+     */
     private function order(string $placedAt, array $overrides = []): Order
     {
         $order = Order::query()->create(array_merge([
@@ -44,6 +52,7 @@ class AccountingSalesPdfTest extends TestCase
         return $order->refresh();
     }
 
+    /** A hand-written entry, on the given date. */
     private function entry(string $on, array $overrides = []): AccountingEntry
     {
         return AccountingEntry::query()->create(array_merge([
@@ -59,6 +68,7 @@ class AccountingSalesPdfTest extends TestCase
         ], $overrides));
     }
 
+    /** The journal's HTML, before the renderer turns it into a PDF. */
     private function render(string $month = '2026-03'): string
     {
         $period = CarbonImmutable::createFromFormat('Y-m-d', $month.'-01')->startOfMonth();

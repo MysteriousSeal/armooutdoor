@@ -1,3 +1,13 @@
+{{--
+    One month of the accounts.
+
+    Sales show a table mixing the shop's orders and the entries typed by hand,
+    `$rows` carrying both in one shape (see AccountingController::rowsOf).
+    Purchases share this template and show only the heading for now.
+
+    Two dialogs live at the bottom: one form serving both adding and correcting
+    an entry, and a confirmation before deleting one.
+--}}
 @extends('layouts.admin')
 
 @section('title', $title.' — '.\App\Support\AccountingPeriods::label($period))
@@ -49,6 +59,7 @@
             @if ($rows->isEmpty())
                 <p class="empty-state">No sales this month.</p>
             @else
+                {{-- The month's lines, oldest first, orders and entries together. --}}
                 <div class="admin-table-wrap">
                     <table class="admin-table accounting-table">
                         <thead>
@@ -86,6 +97,8 @@
                                     <td class="admin-table-num">{{ format_euros($row['total_cents'] - $row['fees_cents']) }}</td>
                                     <td>{{ $row['payment'] }}</td>
                                     <td class="accounting-remark">{{ $row['remark'] }}</td>
+                                    {{-- Edit and delete, on hand-written lines only:
+                                         an order is corrected on the order itself. --}}
                                     <td class="accounting-row-actions">
                                         @if ($row['kind'] === 'entry')
                                             @php
@@ -136,6 +149,7 @@
                                 </tr>
                             @endforeach
                         </tbody>
+                        {{-- The month's totals, refunds left out of all three. --}}
                         <tfoot>
                             <tr>
                                 <td colspan="5">
@@ -153,11 +167,15 @@
                     </table>
                 </div>
 
+                {{-- Says out loud what the figures leave out, so the totals are
+                     not taken for something they are not. --}}
                 <p class="accounting-note">
                     Fees are the marketplace commission and the payment charge. Shipping paid out of pocket is a cost of its own and is not deducted here. Refunded orders are listed but left out of every total.
                 </p>
             @endif
 
+            {{-- One dialog for both jobs: the JS points the form at the right
+                 URL and swaps the method (see admin-accounting-entry.js). --}}
             <dialog id="entry-modal" class="modal modal--wide" aria-labelledby="entry-modal-title">
                 <form method="POST" id="entry-form" action="{{ route('admin.accounting.entries.store', ['section' => $section, 'month' => $monthKey]) }}">
                     @csrf
@@ -167,6 +185,7 @@
                     <h3 class="modal-title" id="entry-modal-title">Add an entry</h3>
                     <p class="modal-body">Anything sold outside a shop order: a prestation, a repair, a sale made by hand.</p>
 
+                    {{-- The same columns the table prints, in the same order. --}}
                     <div class="entry-form-grid">
                         <div class="form-group">
                             <label for="entry-date">Date</label>
@@ -248,6 +267,7 @@
                 </form>
             </dialog>
 
+            {{-- Deleting is not undoable, so it asks first and names the line. --}}
             <dialog id="entry-delete-modal" class="modal" aria-labelledby="entry-delete-title">
                 <form method="POST" id="entry-delete-form">
                     @csrf

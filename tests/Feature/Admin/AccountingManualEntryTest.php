@@ -23,7 +23,11 @@ class AccountingManualEntryTest extends TestCase
         $this->travelTo('2026-08-26 10:00:00');
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * A complete, valid entry. Overrides replace single fields.
+     *
+     * @return array<string, mixed>
+     */
     private function payload(array $overrides = []): array
     {
         return array_merge([
@@ -39,6 +43,8 @@ class AccountingManualEntryTest extends TestCase
         ], $overrides);
     }
 
+    /** A real sale, placed on the given date. `created_at` is forced: it is not fillable. */
+    /** A real sale on the given date, so entries can be checked among orders. */
     private function order(string $placedAt, int $totalCents = 10000): Order
     {
         $order = Order::query()->create([
@@ -58,6 +64,7 @@ class AccountingManualEntryTest extends TestCase
         return $order->refresh();
     }
 
+    /** Posts an entry into a month, as the owner. */
     private function submit(array $payload, string $month = '2026-03'): TestResponse
     {
         return $this->actingAs(User::factory()->admin()->create())

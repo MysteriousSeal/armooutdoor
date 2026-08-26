@@ -1,9 +1,18 @@
+{{--
+    The list of accounting months, sales or purchases.
+
+    Both sections share this template; `$section` names which one, and drives
+    where a month card links. `$years` holds the months grouped by year, newest
+    first, and `$counts` how many lines each month carries — empty for
+    purchases, which has nothing to count yet.
+--}}
 @extends('layouts.admin')
 
 @section('title', $title)
 
 @section('content')
     <div class="admin-list-page">
+        {{-- Heading, and the sentence saying what the section holds. --}}
         <header class="admin-list-hero">
             <p class="admin-list-kicker">Accounting</p>
             <h2 class="admin-list-title">{{ $title }}</h2>
@@ -14,6 +23,7 @@
              and it should stay in the same place from one month to the
              next. --}}
         @foreach ($years as $year => $months)
+            {{-- One block per year, its months as cards. --}}
             <section class="accounting-year" aria-labelledby="accounting-year-{{ $year }}">
                 <h3 class="accounting-year-title" id="accounting-year-{{ $year }}">{{ $year }}</h3>
                 <ul class="accounting-months">

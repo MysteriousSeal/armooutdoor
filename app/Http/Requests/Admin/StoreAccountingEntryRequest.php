@@ -4,12 +4,16 @@ namespace App\Http\Requests\Admin;
 
 use App\Models\AccountingEntry;
 use App\Support\AccountingPeriods;
-use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
-/** An entry written by hand into the accounting journal. */
+/**
+ * An entry written by hand into the accounting journal.
+ *
+ * Serves both adding and correcting, since the two take exactly the same
+ * fields. Money arrives as decimal euros and leaves as integer cents.
+ */
 class StoreAccountingEntryRequest extends FormRequest
 {
     public function authorize(): bool
@@ -17,7 +21,12 @@ class StoreAccountingEntryRequest extends FormRequest
         return Auth::user()?->isOwner() === true;
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * Only the date, the kind, the amount and the payment are required: an
+     * entry can be written before its invoice number is known.
+     *
+     * @return array<string, mixed>
+     */
     public function rules(): array
     {
         return [
@@ -26,6 +35,8 @@ class StoreAccountingEntryRequest extends FormRequest
             'client' => ['nullable', 'string', 'max:120'],
             'channel' => ['nullable', 'string', 'max:80'],
             'type' => ['required', Rule::in(array_keys(AccountingEntry::TYPES))],
+            // A negative total is allowed: a credit note is a line of the
+            // journal like any other.
             'total' => ['required', 'numeric', 'min:-99999.99', 'max:99999.99'],
             // Fees are typed as a positive figure and held back: the sign is
             // read in the column, not entered in the field.
@@ -60,8 +71,17 @@ class StoreAccountingEntryRequest extends FormRequest
         });
     }
 
-    /** @return array<string, mixed> */
-    public function entryPayload(string $section, CarbonImmutable $period, bool $keepAuthor = false): array
+    /**
+     * Turns the validated fields into columns.
+     *
+     * The month is not taken here: `withValidator()` has already refused a date
+     * outside it, so `entered_on` can be trusted as it stands.
+     *
+     * @param  bool  $keepAuthor  True when correcting: the entry keeps whoever
+     *                            wrote it rather than taking the current admin.
+     * @return array<string, mixed>
+     */
+    public function entryPayload(string $section, bool $keepAuthor = false): array
     {
         $validated = $this->validated();
 
@@ -72,6 +92,8 @@ class StoreAccountingEntryRequest extends FormRequest
             'client' => $validated['client'] ?? null,
             'channel' => $validated['channel'] ?? null,
             'type' => $validated['type'],
+            // Decimal euros in, integer cents stored, like every other amount
+            // in the shop.
             'total_cents' => (int) round($validated['total'] * 100),
             'fees_cents' => (int) round(($validated['fees'] ?? 0) * 100),
             'payment_method' => $validated['payment_method'],

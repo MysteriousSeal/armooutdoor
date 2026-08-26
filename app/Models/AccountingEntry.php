@@ -59,6 +59,7 @@ class AccountingEntry extends Model
         'cheque' => 'Chèque',
     ];
 
+    /** @return array<string, string> */
     protected function casts(): array
     {
         return [
@@ -68,31 +69,37 @@ class AccountingEntry extends Model
         ];
     }
 
+    /** The admin who first wrote this entry. Kept through later corrections. */
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by_user_id');
     }
 
+    /** Narrows to one side of the accounts, sales or purchases. */
     public function scopeSection(Builder $query, string $section): void
     {
         $query->where('section', $section);
     }
 
+    /** The kind of sale, for the admin screen. */
     public function typeLabel(): string
     {
         return self::TYPES[$this->type] ?? $this->type;
     }
 
+    /** How the money landed, for the admin screen. */
     public function paymentLabel(): string
     {
         return self::PAYMENT_METHODS[$this->payment_method] ?? $this->payment_method;
     }
 
+    /** The kind of sale, for the printed journal. */
     public function typeLabelFr(): string
     {
         return self::TYPES_FR[$this->type] ?? $this->typeLabel();
     }
 
+    /** How the money landed, for the printed journal. */
     public function paymentLabelFr(): string
     {
         return self::PAYMENT_METHODS_FR[$this->payment_method] ?? $this->paymentLabel();

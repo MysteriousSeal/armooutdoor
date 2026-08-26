@@ -29,6 +29,9 @@ class AccountingPeriods
         $first = self::firstMonth();
         $months = collect();
 
+        // Walked back from today rather than stored, so a new month appears by
+        // itself at midnight on the first, with nothing to create.
+
         for ($month = self::currentMonth(); $month->greaterThanOrEqualTo($first); $month = $month->subMonth()) {
             $months->push($month);
         }
@@ -97,16 +100,19 @@ class AccountingPeriods
         return $month->lessThan(self::currentMonth());
     }
 
+    /** The month as it appears in a URL and as an array key: "2026-03". */
     public static function key(CarbonImmutable $month): string
     {
         return $month->format('Y-m');
     }
 
+    /** January 2026, as a date. */
     private static function firstMonth(): CarbonImmutable
     {
         return CarbonImmutable::createFromFormat('Y-m-d', self::FIRST.'-01')->startOfMonth();
     }
 
+    /** The month we are in, which is the last one the list shows. */
     private static function currentMonth(): CarbonImmutable
     {
         return CarbonImmutable::now()->startOfMonth();

@@ -24,6 +24,13 @@ class AccountingSalesTableTest extends TestCase
     }
 
     /** @param array<string, mixed> $overrides */
+    /** A real sale, placed on the given date. `created_at` is forced: it is not fillable. */
+    /**
+     * A real sale placed on the given date.
+     *
+     * `created_at` is forced after creation: it is not fillable, so Eloquent
+     * would otherwise stamp it with now.
+     */
     private function order(string $placedAt, array $overrides = []): Order
     {
         $order = Order::query()->create(array_merge([
@@ -46,6 +53,7 @@ class AccountingSalesTableTest extends TestCase
         return $order->refresh();
     }
 
+    /** Opens a month of sales as the owner. */
     private function page(string $month = '2026-03'): TestResponse
     {
         return $this->actingAs(User::factory()->admin()->create())

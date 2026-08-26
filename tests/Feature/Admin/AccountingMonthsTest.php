@@ -12,6 +12,7 @@ class AccountingMonthsTest extends TestCase
 {
     use RefreshDatabase;
 
+    /** The rendered list of months for a section. */
     private function list(string $section = 'sales'): string
     {
         return $this->actingAs(User::factory()->admin()->create())
