@@ -163,7 +163,7 @@
             <input type="hidden" name="status" value="{{ $status }}">
 
             <div class="admin-filter-search">
-                <label class="admin-filter-label" for="order-search">Search</label>
+                <label class="admin-field-label" for="order-search">Search</label>
                 <input
                     id="order-search"
                     type="search"
@@ -176,7 +176,7 @@
 
             <div class="admin-filter-row">
                 <div class="admin-filter-field">
-                    <label class="admin-filter-label" for="order-marketplace">Marketplace</label>
+                    <label class="admin-field-label" for="order-marketplace">Marketplace</label>
                     <select id="order-marketplace" name="marketplace_id" class="form-control">
                         <option value="">All marketplaces</option>
                         @foreach ($marketplaces as $marketplace)
@@ -185,7 +185,7 @@
                     </select>
                 </div>
                 <div class="admin-filter-field admin-filter-field--dates">
-                    <span class="admin-filter-label" id="order-dates-label">Placed between</span>
+                    <span class="admin-field-label" id="order-dates-label">Placed between</span>
                     <div class="admin-filter-date-range" role="group" aria-labelledby="order-dates-label">
                         <label class="sr-only" for="order-date-from">From</label>
                         <input

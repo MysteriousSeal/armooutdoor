@@ -104,9 +104,9 @@
                                         </td>
                                         <td>
                                             @if ($item->product)
-                                                <a href="{{ route('admin.products.edit', $item->product) }}" class="admin-table-strong po-line-name" title="{{ $item->name }}">{{ $item->name }}</a>
+                                                <a href="{{ route('admin.products.edit', $item->product) }}" class="admin-table-strong admin-name-clamp" title="{{ $item->name }}">{{ $item->name }}</a>
                                             @else
-                                                <span class="admin-table-strong po-line-name" title="{{ $item->name }}">{{ $item->name }}</span>
+                                                <span class="admin-table-strong admin-name-clamp" title="{{ $item->name }}">{{ $item->name }}</span>
                                                 <span class="po-line-note">product deleted</span>
                                             @endif
                                             @if (filled($item->sku))

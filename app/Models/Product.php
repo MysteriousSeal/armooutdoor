@@ -534,6 +534,39 @@ class Product extends Model
         return $this->restockingPurchaseItems()->exists();
     }
 
+    /** The wording printed on this product's label, when it has any. */
+    public function label(): HasOne
+    {
+        return $this->hasOne(ProductLabel::class);
+    }
+
+    /**
+     * What a label still needs before it can be printed.
+     *
+     * The wording lives on the product, the codes on the article — the product
+     * itself when it has no variants, each variant when it has. An empty list
+     * means the label can go.
+     *
+     * @return array<int, string>
+     */
+    public function labelRequirements(?ProductVariant $variant = null): array
+    {
+        $article = $variant ?? $this;
+
+        return collect([
+            'title' => filled($this->label?->title),
+            'subtitle' => filled($this->label?->subtitle),
+            'reference' => filled($article->sku),
+            'barcode' => filled($article->gtin),
+        ])->reject(fn (bool $present): bool => $present)->keys()->all();
+    }
+
+    /** Whether a label can be printed for this article as it stands. */
+    public function labelIsPrintable(?ProductVariant $variant = null): bool
+    {
+        return $this->labelRequirements($variant) === [];
+    }
+
     public function isBackorderable(): bool
     {
         return ! $this->isRestocking()

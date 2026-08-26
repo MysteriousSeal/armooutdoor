@@ -47,7 +47,7 @@
         <form method="GET" action="{{ route('admin.products.stock-history', $product) }}" class="admin-filter-bar">
             <div class="admin-filter-row">
                 <div class="admin-filter-field">
-                    <label class="admin-filter-label" for="stock-reason">Reason</label>
+                    <label class="admin-field-label" for="stock-reason">Reason</label>
                     <select id="stock-reason" name="reason" class="form-control">
                         <option value="">All reasons</option>
                         @foreach (\App\Enums\StockMovementReason::cases() as $case)
@@ -57,7 +57,7 @@
                 </div>
                 @if ($product->hasVariants())
                     <div class="admin-filter-field">
-                        <label class="admin-filter-label" for="stock-variant">Variant</label>
+                        <label class="admin-field-label" for="stock-variant">Variant</label>
                         <select id="stock-variant" name="variant" class="form-control">
                             <option value="">All variants</option>
                             @foreach ($product->variants as $variant)

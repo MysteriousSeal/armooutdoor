@@ -40,7 +40,7 @@
         <form method="GET" action="{{ route('admin.purchase-orders.index') }}" class="admin-filter-bar">
             <input type="hidden" name="tab" value="{{ $tab }}">
             <div class="admin-filter-field admin-filter-field--search">
-                <label class="admin-filter-label" for="po-search">Search</label>
+                <label class="admin-field-label" for="po-search">Search</label>
                 <input
                     id="po-search"
                     type="search"
@@ -51,7 +51,7 @@
                 >
             </div>
             <div class="admin-filter-field">
-                <label class="admin-filter-label" for="po-supplier">Supplier</label>
+                <label class="admin-field-label" for="po-supplier">Supplier</label>
                 <select id="po-supplier" name="supplier_id" class="form-control">
                     <option value="">All suppliers</option>
                     @foreach ($suppliers as $supplier)

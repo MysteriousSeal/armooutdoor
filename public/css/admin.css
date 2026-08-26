@@ -3384,7 +3384,7 @@ a.admin-stat-card:hover {
 /* Deux lignes puis les points de suspension : un nom de produit long garde
    sa hauteur de ligne au lieu de pousser la colonne et d'aplatir la
    vignette. Le titre complet reste au survol. */
-.po-line-name {
+.admin-name-clamp {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
@@ -4209,7 +4209,10 @@ a.admin-pagination-page:hover {
     border: 1px solid var(--border);
 }
 
-.admin-filter-label {
+/* The small heading over a field, wherever one is asked for: filters, the
+   label form. Named for what it labels rather than for the filter bar it was
+   first written in. */
+.admin-field-label {
     display: block;
     margin-bottom: 0.35rem;
     font-size: 0.6875rem;
@@ -4237,6 +4240,10 @@ a.admin-pagination-page:hover {
 
 .admin-filter-row--customers {
     grid-template-columns: minmax(16rem, 1.6fr) minmax(17rem, 1.2fr) auto;
+}
+
+.admin-filter-row--labels {
+    grid-template-columns: minmax(16rem, 1.8fr) auto;
 }
 
 .admin-filter-field--search .admin-toolbar-search {
@@ -5318,7 +5325,8 @@ input[type="date"].form-control {
     }
 
 .admin-filter-row--products,
-    .admin-filter-row--customers {
+    .admin-filter-row--customers,
+    .admin-filter-row--labels {
         grid-template-columns: 1fr;
     }
 
@@ -7907,4 +7915,218 @@ a.order-stepper-btn:focus-visible {
     align-items: center;
     flex-wrap: wrap;
     gap: 0.6rem;
+}
+
+/* Where a row stands, in the same family as the other chips of the admin:
+   green when the sheet can be printed, amber when something is still to be
+   filled in. Amber rather than red — nothing is broken, a label is unfinished. */
+.label-status {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 0.5rem;
+    padding: 0.18rem 0.45rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    border: 1px solid transparent;
+}
+
+.label-status.is-ready {
+    color: #3d6b4e;
+    background: #eef4ef;
+    border-color: #d5e4d8;
+}
+
+.label-status.is-incomplete {
+    color: #8a6d1f;
+    background: #fbf3dc;
+    border-color: #ecd9a3;
+}
+
+[data-theme='dark'] .label-status.is-ready {
+    color: #9dccab;
+    background: color-mix(in srgb, #9dccab 12%, var(--surface));
+    border-color: color-mix(in srgb, #9dccab 32%, var(--border));
+}
+
+[data-theme='dark'] .label-status.is-incomplete {
+    color: #e0b673;
+    background: color-mix(in srgb, #e0b673 12%, var(--surface));
+    border-color: color-mix(in srgb, #e0b673 32%, var(--border));
+}
+
+/* An absent reference or barcode, said with a dash: quiet, since the row is
+   read for its button first. */
+.label-missing {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.admin-labels-page .admin-table-wrap {
+    box-shadow: var(--shadow);
+}
+
+.admin-table-code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8125rem;
+}
+
+/* The button column stays at its own width whatever the missing line says. */
+.label-action {
+    width: 1%;
+    white-space: nowrap;
+    text-align: right;
+}
+
+.label-action .label-status {
+    margin-right: 0.45rem;
+}
+
+.admin-labels-page .btn-small {
+    height: 1.85rem;
+    min-width: 0;
+    padding: 0 0.7rem;
+    font-size: 0.75rem;
+}
+
+/* The incomplete tab borrows the red the rest of the site uses, and only when
+   there is something to look at: a red zero is a warning that gets ignored. */
+.admin-tabs a.label-tab-attention .admin-tab-count {
+    color: #a44;
+    background: #f7ecec;
+    border-color: #e3c6c6;
+}
+
+[data-theme='dark'] .admin-tabs a.label-tab-attention .admin-tab-count {
+    color: #e08585;
+    background: color-mix(in srgb, #e08585 12%, var(--surface));
+    border-color: color-mix(in srgb, #e08585 32%, var(--border));
+}
+
+/* A product and the form under it are one block, so the pair takes the ground
+   together and forty products read as forty blocks. */
+.label-row.has-form > td {
+    border-bottom: 0;
+}
+
+.label-row.is-even > td,
+.label-form-row.is-even > td {
+    background: color-mix(in srgb, var(--bg) 45%, var(--surface));
+}
+
+.label-row:hover > td,
+.label-row.has-form:hover + .label-form-row > td {
+    background: color-mix(in srgb, var(--accent) 4%, var(--surface));
+}
+
+/* The wording, edited on the line it is read on: two rows of fields, each as
+   wide as what goes in it, and the save at the end. */
+.label-form-row > td {
+    padding-top: 0.6rem;
+    padding-bottom: 0.95rem;
+    border-bottom: 2px solid var(--border);
+    /* An accent edge ties the form to the row above rather than leaving it
+       floating between two products. */
+    box-shadow: inset 3px 0 0 color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.label-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 0.75rem 1rem;
+    padding: 0.9rem 1rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.label-form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 0;
+}
+
+/* The two long ones sit on the second line, under the two short ones. */
+.label-form-field--wide {
+    grid-row: 2;
+}
+
+.label-form .form-control {
+    width: 100%;
+    min-width: 0;
+    height: 2.5rem;
+    padding: 0 0.65rem;
+    font-size: 0.875rem;
+}
+
+/* The save closes the second line, aligned with the fields' feet. */
+.label-form-actions {
+    grid-column: 3;
+    grid-row: 2;
+    align-self: end;
+}
+
+.label-form-actions .btn {
+    height: 2.5rem;
+    min-width: 5.5rem;
+}
+
+.label-form-optional {
+    margin-left: 0.25rem;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+    opacity: 0.75;
+}
+
+/* Edited and not yet saved: the button steps forward and the block takes an
+   accent edge, so a row left half-filled is visible from a distance. */
+.label-form.is-dirty .btn {
+    color: #fff;
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.label-form-row:has(.label-form.is-dirty) > td {
+    box-shadow: inset 3px 0 0 var(--accent);
+}
+
+/* Where the wording is not editable because a size above carries it. */
+.label-shared {
+    font-style: italic;
+}
+
+@media (max-width: 900px) {
+    .label-form {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .label-form-field--wide {
+        grid-row: auto;
+    }
+
+    .label-form-actions {
+        grid-column: 1;
+        grid-row: auto;
+    }
+
+    .label-form-actions .btn {
+        width: 100%;
+    }
+}
+
+/* The columns stay readable down a long page. */
+.admin-labels-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+/* The name and the line under it are printed in capitals and stored that way,
+   so the field shows them as they will be rather than as they were typed. */
+.label-form .form-control.is-uppercase {
+    text-transform: uppercase;
 }

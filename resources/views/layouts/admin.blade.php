@@ -71,7 +71,7 @@
                 // il doit encore dire qu'il y a quelque chose à traiter dedans.
                 $salesBadge = $ordersAwaitingStartCount + $unviewedCustomerCount + $unreadMessageCount;
                 $salesActive = request()->routeIs('admin.orders.*', 'admin.customers.*', 'admin.conversations.*', 'admin.discounts.*', 'admin.discount-codes.*');
-                $catalogueActive = request()->routeIs('admin.products.*', 'admin.categories.*', 'admin.purchase-orders.*', 'admin.marketplaces.*');
+                $catalogueActive = request()->routeIs('admin.products.*', 'admin.categories.*', 'admin.labels.*', 'admin.purchase-orders.*', 'admin.marketplaces.*');
                 $systemActive = request()->routeIs('admin.settings.*', 'admin.stripe.*', 'admin.activity', 'admin.changelog');
                 $accountingActive = request()->routeIs('admin.accounting.*');
                 // The group that opens the right-hand block carries the
@@ -116,7 +116,7 @@
 
             <div class="admin-nav-group">
                 <button type="button" class="admin-nav-link admin-nav-trigger {{ $catalogueActive ? 'active' : '' }}" data-nav-toggle aria-haspopup="true" aria-expanded="false">
-                    Catalogue
+                    Catalog
                     @if ($purchaseOrdersAwaitingReceiptCount > 0)
                         <span class="admin-nav-badge" title="{{ $purchaseOrdersAwaitingReceiptCount }} awaiting receipt">{{ $purchaseOrdersAwaitingReceiptCount }}</span>
                     @endif
@@ -127,6 +127,7 @@
                 <div class="admin-nav-menu" data-nav-menu hidden>
                     <a href="{{ route('admin.products.index') }}" class="admin-nav-menu-item {{ request()->routeIs('admin.products.*') ? 'active' : '' }}">Products</a>
                     <a href="{{ route('admin.categories.index') }}" class="admin-nav-menu-item {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">Categories</a>
+                    <a href="{{ route('admin.labels.index') }}" class="admin-nav-menu-item {{ request()->routeIs('admin.labels.*') ? 'active' : '' }}">Labels</a>
                     <a href="{{ route('admin.purchase-orders.index') }}" class="admin-nav-menu-item {{ request()->routeIs('admin.purchase-orders.*') ? 'active' : '' }}">
                         Purchase orders
                         @if ($purchaseOrdersAwaitingReceiptCount > 0)

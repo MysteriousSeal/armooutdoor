@@ -14,6 +14,7 @@ use App\Models\Marketplace;
 use App\Models\Order;
 use App\Models\PackageType;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\PurchaseOrder;
 use App\Models\Supplier;
 use App\Models\User;
@@ -45,6 +46,13 @@ class AdminAuthorizationTest extends TestCase
     {
         $category = Category::factory()->create();
         $product = Product::factory()->create(['category_id' => $category->id]);
+        $variant = ProductVariant::query()->create([
+            'product_id' => $product->id,
+            'label' => ['en' => 'M', 'fr' => 'M'],
+            'quantity' => 1,
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
         $discount = Discount::query()->create(['product_id' => $product->id, 'type' => 'percentage', 'value' => 10]);
         $discountCode = DiscountCode::query()->create(['code' => 'AUDIT', 'type' => 'percentage', 'value' => 10]);
         $customer = User::factory()->create();
@@ -98,6 +106,7 @@ class AdminAuthorizationTest extends TestCase
         $bindings = [
             'category' => $category->id,
             'product' => $product->id,
+            'variant' => $variant->id,
             'discount' => $discount->id,
             'discountCode' => $discountCode->id,
             'customer' => $customer->id,

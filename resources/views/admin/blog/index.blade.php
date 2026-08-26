@@ -39,7 +39,7 @@
             <input type="hidden" name="tab" value="{{ $tab }}">
             <div class="admin-filter-row">
                 <div class="admin-filter-field admin-filter-field--search">
-                    <label class="admin-filter-label" for="blog-search">Search</label>
+                    <label class="admin-field-label" for="blog-search">Search</label>
                     <input id="blog-search" type="search" name="search" class="form-control admin-toolbar-search" placeholder="Title…" value="{{ $search }}">
                 </div>
                 <div class="admin-filter-actions">
@@ -86,7 +86,7 @@
                 </table>
             </div>
 
-            @include('partials.pager', ['paginator' => $posts])
+            @include('admin.partials.pager', ['paginator' => $posts])
         @endif
     </div>
 @endsection
