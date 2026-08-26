@@ -16,7 +16,7 @@
     @php
         $monthKey = \App\Support\AccountingPeriods::key($period);
     @endphp
-    <div class="admin-list-page">
+    <div class="admin-list-page accounting-month-page">
         <header class="admin-list-hero">
             <div class="admin-list-hero-row">
                 <div>
@@ -29,44 +29,55 @@
                     </p>
                 </div>
                 @if ($section === 'sales')
-                    <div class="admin-order-actions">
-                        {{-- The button stays in place, switched off: the current
-                             month is still taking money in, so its journal
-                             cannot be ruled off. --}}
-                        <div class="accounting-download">
+                    <div class="accounting-hero-actions">
+                        <div class="accounting-hero-buttons">
+                            {{-- The button stays in place, switched off: the current
+                                 month is still taking money in, so its journal
+                                 cannot be ruled off. --}}
                             @if (\App\Support\AccountingPeriods::isClosed($period))
                                 <a href="{{ route('admin.accounting.sales.pdf', ['month' => $monthKey]) }}" class="btn btn-secondary">Download PDF</a>
                             @else
                                 <span class="btn btn-secondary is-disabled" aria-disabled="true" title="Available once the month has ended">Download PDF</span>
                             @endif
+                            <button type="button" class="btn btn-primary" data-modal-open="entry-modal" data-entry-new>Add entry</button>
+                        </div>
 
-                            {{-- Under the button, where the decision to take a
-                                 copy out is made. --}}
-                            @if ($lastDownload && $stale)
-                                {{-- The filed copy no longer matches the month:
-                                     said plainly, since a journal that disagrees
-                                     with the accounts is worse than none. --}}
-                                <p class="accounting-download-note is-stale">
-                                    <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">
-                                        <path d="M12 8v5m0 3.5v.1M10.3 4.3 2.8 17.5A1.5 1.5 0 0 0 4.1 20h15.8a1.5 1.5 0 0 0 1.3-2.5L13.7 4.3a1.5 1.5 0 0 0-2.6 0z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                    Changed since the copy of {{ $lastDownload->created_at->format('j M Y') }} at {{ $lastDownload->created_at->format('H:i') }} — download it again
-                                </p>
-                            @elseif ($lastDownload)
-                                <p class="accounting-download-note">
+                        {{-- Under the buttons, where the decision to take a
+                             copy out is made. --}}
+                        @if ($lastDownload && $stale)
+                            {{-- The filed copy no longer matches the month:
+                                 said plainly, since a journal that disagrees
+                                 with the accounts is worse than none. --}}
+                            <p class="accounting-download-note is-stale">
+                                <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">
+                                    <path d="M12 8v5m0 3.5v.1M10.3 4.3 2.8 17.5A1.5 1.5 0 0 0 4.1 20h15.8a1.5 1.5 0 0 0 1.3-2.5L13.7 4.3a1.5 1.5 0 0 0-2.6 0z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span>Changed since the copy of {{ $lastDownload->created_at->format('j M Y') }} at {{ $lastDownload->created_at->format('H:i') }} — download it again</span>
+                            </p>
+                        @elseif ($lastDownload)
+                            <p class="accounting-download-note is-filed">
+                                <span>
                                     Last downloaded {{ $lastDownload->created_at->format('j M Y') }} at {{ $lastDownload->created_at->format('H:i') }}
                                     @if ($lastDownload->user)
                                         by {{ $lastDownload->user->name }}
                                     @endif
-                                </p>
-                            @else
-                                <p class="accounting-download-note is-never">Never downloaded</p>
-                            @endif
-                        </div>
-                        <button type="button" class="btn btn-primary" data-modal-open="entry-modal" data-entry-new>Add entry</button>
+                                </span>
+                            </p>
+                        @else
+                            <p class="accounting-download-note is-never">Never downloaded</p>
+                        @endif
                     </div>
                 @endif
             </div>
+            @if ($section === 'sales')
+                <div class="admin-list-meta">
+                    @if (\App\Support\AccountingPeriods::isClosed($period))
+                        <span class="admin-list-chip admin-list-chip--shipped">Closed</span>
+                    @else
+                        <span class="admin-list-chip">In progress</span>
+                    @endif
+                </div>
+            @endif
         </header>
 
         @if ($section !== 'sales')
@@ -84,8 +95,23 @@
             @if ($rows->isEmpty())
                 <p class="empty-state">No sales this month.</p>
             @else
+                <div class="admin-stat-grid accounting-kpis">
+                    <div class="admin-stat-card">
+                        <span class="admin-stat-label">Total</span>
+                        <span class="admin-stat-value">{{ format_euros($totalCents) }}</span>
+                    </div>
+                    <div class="admin-stat-card">
+                        <span class="admin-stat-label">Fees</span>
+                        <span class="admin-stat-value">{{ $feesCents > 0 ? '−'.format_euros($feesCents) : '—' }}</span>
+                    </div>
+                    <div class="admin-stat-card">
+                        <span class="admin-stat-label">Perceived</span>
+                        <span class="admin-stat-value accounting-perceived">{{ format_euros($totalCents - $feesCents) }}</span>
+                    </div>
+                </div>
+
                 {{-- The month's lines, oldest first, orders and entries together. --}}
-                <div class="admin-table-wrap">
+                <div class="admin-table-wrap accounting-journal">
                     <table class="admin-table accounting-table">
                         <thead>
                             <tr>
@@ -107,20 +133,22 @@
                                 <tr class="{{ $row['refunded'] ? 'is-refunded' : '' }} {{ $row['kind'] === 'entry' ? 'is-manual' : '' }}">
                                     <td class="accounting-date">{{ $row['date']->format('d/m/Y') }}</td>
                                     <td>
-                                        @if ($row['kind'] === 'order')
-                                            <a href="{{ route('admin.orders.show', $row['order']) }}" class="admin-table-strong">{{ $row['invoice'] }}</a>
-                                        @else
-                                            <span class="admin-table-strong">{{ $row['invoice'] }}</span>
-                                            <span class="order-chip order-chip--manual" title="Entered by hand">Manual</span>
-                                        @endif
+                                        <span class="accounting-invoice">
+                                            @if ($row['kind'] === 'order')
+                                                <a href="{{ route('admin.orders.show', $row['order']) }}" class="admin-table-strong">{{ $row['invoice'] }}</a>
+                                            @else
+                                                <span class="admin-table-strong">{{ $row['invoice'] }}</span>
+                                                <span class="order-chip order-chip--manual" title="Entered by hand">Manual</span>
+                                            @endif
+                                        </span>
                                     </td>
                                     <td>{{ $row['client'] }}</td>
-                                    <td>{{ $row['channel'] }}</td>
-                                    <td>{{ $row['type'] }}</td>
+                                    <td><span class="order-chip order-chip--channel">{{ $row['channel'] }}</span></td>
+                                    <td><span class="order-chip">{{ $row['type'] }}</span></td>
                                     <td class="admin-table-num">{{ format_euros($row['total_cents']) }}</td>
                                     <td class="admin-table-num">{{ $row['fees_cents'] > 0 ? '−'.format_euros($row['fees_cents']) : '—' }}</td>
                                     <td class="admin-table-num">{{ format_euros($row['total_cents'] - $row['fees_cents']) }}</td>
-                                    <td>{{ $row['payment'] }}</td>
+                                    <td><span class="order-chip">{{ $row['payment'] }}</span></td>
                                     <td class="accounting-remark">{{ $row['remark'] }}</td>
                                     {{-- Edit and delete, on hand-written lines only:
                                          an order is corrected on the order itself. --}}

@@ -7411,70 +7411,94 @@ a.order-stepper-btn:focus-visible {
    and the year serves as the heading, because you look for a financial year
    before you look for a month. */
 .accounting-year {
-    margin-bottom: 1.75rem;
+    margin-bottom: 1.35rem;
+    padding: 1.25rem 1.25rem 1.2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
 }
 
 .accounting-year-title {
-    margin: 0 0 0.7rem;
+    margin: 0 0 0.85rem;
     font-size: 0.6875rem;
     font-weight: 600;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--text-muted);
+    color: var(--accent);
     font-variant-numeric: tabular-nums;
 }
 
 .accounting-months {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
-    gap: 0.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(14.5rem, 1fr));
+    gap: 0.65rem;
     padding: 0;
     margin: 0;
     list-style: none;
 }
 
 .accounting-month {
-    display: flex;
-    align-items: baseline;
-    gap: 0.6rem;
-    padding: 0.85rem 0.9rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    align-items: center;
+    column-gap: 0.5rem;
+    row-gap: 0.45rem;
+    padding: 0.95rem 1rem 0.9rem;
     color: var(--text);
     text-decoration: none;
-    background: var(--surface);
+    background: var(--bg);
     border: 1px solid var(--border);
-    transition: border-color 0.12s ease, background-color 0.12s ease;
+    transition: border-color 0.12s ease, background-color 0.12s ease, box-shadow 0.12s ease;
 }
 
 .accounting-month:hover,
 .accounting-month:focus-visible {
     border-color: var(--accent);
-    background: var(--bg);
+    background: var(--surface);
+    box-shadow: var(--shadow);
 }
 
 .accounting-month-name {
-    font-size: 0.9375rem;
+    grid-column: 1;
+    font-size: 1rem;
     font-weight: 600;
+    letter-spacing: -0.02em;
 }
 
 /* A month's key is an address, not a sentence: tabular figures so a column
    of cards lines up. */
 .accounting-month-meta {
-    margin-left: auto;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    margin-left: 0;
     font-size: 0.75rem;
     color: var(--text-muted);
     font-variant-numeric: tabular-nums;
 }
 
 .accounting-month-arrow {
+    grid-column: 2;
+    grid-row: 1;
     align-self: center;
     flex-shrink: 0;
     color: var(--text-muted);
+}
+
+.accounting-month:hover .accounting-month-arrow,
+.accounting-month:focus-visible .accounting-month-arrow {
+    color: var(--accent-hover);
 }
 
 /* The current month is not closed: it stands out quietly, through an accent
    rule down its left edge. */
 .accounting-month.is-current {
     border-left: 2px solid var(--accent);
+    background: color-mix(in srgb, var(--accent) 7%, var(--surface));
 }
 
 .accounting-month.is-current .accounting-month-meta {
@@ -7497,6 +7521,11 @@ a.order-stepper-btn:focus-visible {
 .accounting-table td,
 .accounting-table th {
     white-space: nowrap;
+}
+
+.accounting-table td:has(.accounting-invoice),
+.accounting-table td:has(.order-chip) {
+    white-space: normal;
 }
 
 .accounting-date {
@@ -7537,32 +7566,72 @@ a.order-stepper-btn:focus-visible {
 
 .accounting-note {
     margin: 0.9rem 0 0;
-    max-width: 44rem;
+    max-width: none;
+    padding: 0.85rem 1rem;
     font-size: 0.8125rem;
     color: var(--text-muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.accounting-kpis {
+    margin-bottom: 1.15rem;
+}
+
+.accounting-kpis .admin-stat-value {
+    font-size: 1.45rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.accounting-journal {
+    box-shadow: var(--shadow);
+}
+
+.accounting-invoice {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.accounting-table tbody tr:hover td {
+    background: color-mix(in srgb, var(--accent) 5%, var(--surface));
+}
+
+.accounting-table tbody tr.is-refunded:hover td {
+    background: color-mix(in srgb, var(--bg) 70%, var(--surface));
 }
 
 /* How many entries a month holds, on its card. */
 .accounting-month-count {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.18rem 0.45rem;
     font-variant-numeric: tabular-nums;
+    font-weight: 500;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
 }
 
 .accounting-month-count.is-none {
-    opacity: 0.55;
+    color: var(--text-muted);
+    background: transparent;
 }
 
 /* The current month is not closed: its count will still move. */
 .accounting-month-running {
-    display: block;
-    margin-top: 0.15rem;
+    display: inline-flex;
+    align-items: center;
+    margin-top: 0;
+    padding: 0.18rem 0.45rem;
     font-size: 0.6875rem;
+    font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--accent-hover);
-}
-
-.accounting-month-meta {
-    text-align: right;
+    background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--accent) 32%, var(--border));
 }
 
 /* What the footer leaves out: said quietly, but said. */
@@ -7659,6 +7728,45 @@ a.order-stepper-btn:focus-visible {
     border-style: dashed;
 }
 
+/* Title on the left, the two buttons on one line, the download note under them. */
+.accounting-month-page .admin-list-hero-row {
+    align-items: flex-start;
+}
+
+.accounting-hero-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.45rem;
+    margin-left: auto;
+    flex-shrink: 0;
+    min-width: 0;
+    max-width: min(28rem, 100%);
+}
+
+.accounting-hero-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .accounting-hero-actions {
+        align-items: stretch;
+        max-width: none;
+        width: 100%;
+    }
+
+    .accounting-hero-buttons .btn {
+        flex: 1;
+    }
+
+    .accounting-download-note {
+        max-width: none;
+        text-align: left;
+    }
+}
+
 /* The download button and what it says about the last copy taken out. */
 .accounting-download {
     display: flex;
@@ -7669,36 +7777,75 @@ a.order-stepper-btn:focus-visible {
 
 /* Quieter than the button: it reports, it does not ask to be clicked. */
 .accounting-download-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
     margin: 0;
+    max-width: 100%;
+    padding: 0.45rem 0.6rem;
     font-size: 0.75rem;
+    line-height: 1.45;
+    text-align: left;
     color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    box-sizing: border-box;
+}
+
+.accounting-download-note svg {
+    flex-shrink: 0;
+    margin-top: 0.12rem;
+}
+
+.accounting-download-note span {
+    min-width: 0;
+    flex: 1;
 }
 
 /* Never taken out is not a warning, only a fact: dashed rather than red. */
 .accounting-download-note.is-never {
-    padding-bottom: 0.05rem;
-    border-bottom: 1px dashed var(--border);
+    color: var(--text-muted);
+    background: transparent;
+    border-style: dashed;
+}
+
+/* The filed copy still matches the month. */
+.accounting-download-note.is-filed {
+    color: #3d6b4e;
+    background: #eef4ef;
+    border-color: #d5e4d8;
+}
+
+[data-theme='dark'] .accounting-download-note.is-filed {
+    color: #8fceac;
+    background: color-mix(in srgb, #8fceac 12%, var(--surface));
+    border-color: color-mix(in srgb, #8fceac 32%, var(--border));
 }
 
 /* A month already filed, on its card in the list. */
 .accounting-month-filed {
     display: inline-flex;
     align-items: center;
-    margin-left: 0.4rem;
+    padding: 0.18rem 0.45rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
     color: #3d6b4e;
+    background: #eef4ef;
+    border: 1px solid #d5e4d8;
 }
 
 [data-theme='dark'] .accounting-month-filed {
     color: #9dccab;
+    background: color-mix(in srgb, #9dccab 12%, var(--surface));
+    border-color: color-mix(in srgb, #9dccab 28%, var(--border));
 }
 
 /* The filed copy no longer matches the month. Amber rather than red: nothing
    is broken, a sheet is simply out of date. */
 .accounting-download-note.is-stale {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    padding: 0.25rem 0.5rem;
+    display: flex;
+    align-items: flex-start;
     font-weight: 500;
     color: #8a6d1f;
     background: #fbf3dc;
@@ -7713,8 +7860,12 @@ a.order-stepper-btn:focus-visible {
 
 .accounting-month-filed.is-stale {
     color: #8a6d1f;
+    background: #fbf3dc;
+    border-color: #ecd9a3;
 }
 
 [data-theme='dark'] .accounting-month-filed.is-stale {
     color: #e0b673;
+    background: color-mix(in srgb, #e0b673 12%, var(--surface));
+    border-color: color-mix(in srgb, #e0b673 32%, var(--border));
 }
