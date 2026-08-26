@@ -195,6 +195,10 @@ class AccountingController extends Controller
     {
         $period = $this->sectionPeriod('sales', $month);
 
+        // Un mois qui court encore n'a pas de journal : deux éditions du même
+        // mois ne diraient pas la même chose et circuleraient toutes les deux.
+        abort_unless(AccountingPeriods::isClosed($period), 404);
+
         $pdf = Pdf::loadView('admin.accounting.sales-pdf', $this->journalData($period))
             // Dix colonnes ne tiennent pas debout sans couper les noms.
             ->setPaper('a4', 'landscape');

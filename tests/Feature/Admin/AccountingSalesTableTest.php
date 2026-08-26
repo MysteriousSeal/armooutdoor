@@ -136,7 +136,9 @@ class AccountingSalesTableTest extends TestCase
 
         $response = $this->page()
             ->assertSee($refunded->number)
-            ->assertSee('Refunded')
+            // La facture barrée dit déjà tout : pas de pastille en plus. La
+            // note sous le tableau garde le mot, elle explique la règle.
+            ->assertDontSee('order-chip--refunded', false)
             ->assertSee('is-refunded', false)
             ->assertSee('1 refund left out')
             ->assertSee('1 sale');

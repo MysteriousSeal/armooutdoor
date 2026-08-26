@@ -128,7 +128,10 @@ class AccountingSalesPdfTest extends TestCase
         $html = $this->render();
 
         $this->assertStringContainsString('INV-'.$refunded->number, $html);
-        $this->assertStringContainsString('Remboursé', $html);
+        // La facture barrée suffit : une étiquette répéterait le trait.
+        $this->assertStringNotContainsString('Remboursé', $html);
+        $this->assertMatchesRegularExpression('/tr\.refunded \.col-invoice\s*\{[^}]*line-through/s', $html);
+        $this->assertStringContainsString('<tr class="refunded">', $html);
         $this->assertStringContainsString('1 remboursement hors total', $html);
         // 100 € seuls : les 40 € remboursés ne s'ajoutent pas.
         $this->assertStringContainsString('100,00', $html);
@@ -291,5 +294,59 @@ class AccountingSalesPdfTest extends TestCase
         // Le mois s'écrit en entier et garde son accent une fois capitalisé.
         $this->assertStringContainsString('Août 2026', $html);
         $this->assertStringContainsString('1 Août au 31 Août 2026', $html);
+    }
+
+    public function test_a_long_client_name_stays_on_one_line(): void
+    {
+        $order = $this->order('2026-03-12 09:00:00');
+        $order->user->update(['first_name' => 'Briek', 'last_name' => 'Vancompernolle']);
+
+        $html = $this->render();
+
+        // La colonne doit tenir le nom le plus long du mois sans le replier :
+        // une ligne sur deux hauteurs déforme tout le tableau.
+        $this->assertStringContainsString('Briek VANCOMPERNOLLE', $html);
+        preg_match('/\.col-client\s*\{[^}]*width:\s*(\d+)%/s', $html, $width);
+        $this->assertGreaterThanOrEqual(15, (int) $width[1]);
+    }
+
+    public function test_the_month_in_progress_has_no_sheet(): void
+    {
+        // On est en août : le mois encaisse encore, deux éditions du même
+        // journal ne diraient pas la même chose.
+        $this->order('2026-08-03 09:00:00');
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/accounting/sales/2026-08/pdf')
+            ->assertNotFound();
+    }
+
+    public function test_the_button_is_greyed_out_until_the_month_ends(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $running = $this->actingAs($admin)->get('/admin/accounting/sales/2026-08')->assertOk();
+        $running->assertSee('is-disabled', false)
+            ->assertSee('Available once the month has ended')
+            ->assertDontSee('/admin/accounting/sales/2026-08/pdf', false);
+
+        // Un mois clos garde son bouton vivant.
+        $closed = $this->actingAs($admin)->get('/admin/accounting/sales/2026-07')->assertOk();
+        $closed->assertSee('/admin/accounting/sales/2026-07/pdf', false)
+            ->assertDontSee('is-disabled', false);
+    }
+
+    public function test_the_sheet_carries_the_company_address_whatever_the_settings_say(): void
+    {
+        CompanySetting::current()->update(['contact_email' => 'boutique@armooutdoor.fr']);
+
+        $this->order('2026-03-12 09:00:00');
+
+        $html = $this->render();
+
+        // Le journal est un document de la société : le contact du magasin
+        // peut changer dans les réglages sans que le livre de comptes bouge.
+        $this->assertStringContainsString('hello@swiftshelf.fr', $html);
+        $this->assertStringNotContainsString('boutique@armooutdoor.fr', $html);
     }
 }

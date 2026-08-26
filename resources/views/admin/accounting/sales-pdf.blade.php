@@ -77,7 +77,7 @@
         .num { text-align: right; white-space: nowrap; }
         .col-date { width: 8%; white-space: nowrap; }
         .col-invoice { width: 13%; }
-        .col-client { width: 12%; }
+        .col-client { width: 15%; }
         .col-channel { width: 11%; }
         .col-type { width: 10%; }
         .col-money { width: 9%; }
@@ -96,10 +96,11 @@
         /* Le règlement finit au bord droit du tableau, comme la date
            commence au bord gauche. L'écart avec le perçu vient de là : le
            mot se range à la fin plutôt que de se coller au chiffre. */
-        .col-payment { width: 15%; text-align: right; }
+        .col-payment { width: 12%; text-align: right; }
 
         /* Une ligne remboursée reste au journal — elle a eu lieu — mais ne
-           s'ajoute à rien. Barrée, elle se lit comme telle. */
+           s'ajoute à rien. La facture barrée le dit ; une étiquette de plus
+           répéterait ce que le trait montre déjà. */
         tr.refunded td { color: #8b7e74; }
         tr.refunded .col-invoice { text-decoration: line-through; }
         .tag {
@@ -187,7 +188,11 @@
                         </td>
                         <td>
                             {{ $company->formattedPhone() }}<br>
-                            {{ $company->value('contact_email') }}
+                            {{-- L'adresse de la société, pas celle de la boutique :
+                                 le journal est un document de SwiftShelf, et le
+                                 contact du magasin peut changer dans les réglages
+                                 sans que le livre de comptes bouge. --}}
+                            hello@swiftshelf.fr
                         </td>
                     </tr>
                 </table>
@@ -241,9 +246,6 @@
                         {{ $row['invoice'] }}
                         @if ($row['kind'] === 'entry')
                             <span class="tag">Saisie</span>
-                        @endif
-                        @if ($row['refunded'])
-                            <span class="tag">Remboursé</span>
                         @endif
                     </td>
                     <td class="col-client">{{ $row['client'] }}</td>

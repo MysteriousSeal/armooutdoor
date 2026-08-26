@@ -85,6 +85,17 @@ class AccountingPeriods
             .($withYear ? ' '.$date->format('Y') : '');
     }
 
+    /**
+     * Un mois clos est un mois qu'on peut arrêter.
+     *
+     * Le mois en cours encaisse encore : un journal édité le 12 dirait
+     * autre chose que le même journal édité le 30, et les deux circuleraient.
+     */
+    public static function isClosed(CarbonImmutable $month): bool
+    {
+        return $month->lessThan(self::currentMonth());
+    }
+
     public static function key(CarbonImmutable $month): string
     {
         return $month->format('Y-m');

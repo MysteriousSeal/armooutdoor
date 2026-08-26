@@ -7648,3 +7648,13 @@ a.order-stepper-btn:focus-visible {
         transition: none;
     }
 }
+
+/* Un bouton éteint plutôt que disparu : la barre d'actions ne doit pas se
+   réorganiser d'un mois à l'autre, et l'absence du bouton se lirait comme un
+   oubli plutôt que comme une règle. */
+.btn.is-disabled {
+    opacity: 0.5;
+    cursor: default;
+    pointer-events: none;
+    border-style: dashed;
+}

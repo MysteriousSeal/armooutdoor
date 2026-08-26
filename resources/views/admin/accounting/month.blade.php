@@ -20,7 +20,13 @@
                 </div>
                 @if ($section === 'sales')
                     <div class="admin-order-actions">
-                        <a href="{{ route('admin.accounting.sales.pdf', ['month' => $monthKey]) }}" class="btn btn-secondary">Download PDF</a>
+                        {{-- Le bouton reste en place, éteint : le mois en cours
+                             encaisse encore, son journal n'est pas arrêtable. --}}
+                        @if (\App\Support\AccountingPeriods::isClosed($period))
+                            <a href="{{ route('admin.accounting.sales.pdf', ['month' => $monthKey]) }}" class="btn btn-secondary">Download PDF</a>
+                        @else
+                            <span class="btn btn-secondary is-disabled" aria-disabled="true" title="Available once the month has ended">Download PDF</span>
+                        @endif
                         <button type="button" class="btn btn-primary" data-modal-open="entry-modal" data-entry-new>Add entry</button>
                     </div>
                 @endif
@@ -69,9 +75,6 @@
                                         @else
                                             <span class="admin-table-strong">{{ $row['invoice'] }}</span>
                                             <span class="order-chip order-chip--manual" title="Entered by hand">Manual</span>
-                                        @endif
-                                        @if ($row['refunded'])
-                                            <span class="order-chip order-chip--refunded">Refunded</span>
                                         @endif
                                     </td>
                                     <td>{{ $row['client'] }}</td>
