@@ -93,7 +93,7 @@
 
             <div class="admin-filter-row admin-filter-row--products">
                 <div class="admin-filter-field admin-filter-field--search">
-                    <label class="admin-filter-label" for="product-search">Search</label>
+                    <label class="admin-field-label" for="product-search">Search</label>
                     <input
                         id="product-search"
                         type="search"
@@ -104,7 +104,7 @@
                     >
                 </div>
                 <div class="admin-filter-field">
-                    <label class="admin-filter-label" for="product-category">Category</label>
+                    <label class="admin-field-label" for="product-category">Category</label>
                     <select id="product-category" name="category" class="form-control">
                         <option value="">All categories</option>
                         @foreach ($categories as $category)
@@ -119,7 +119,7 @@
                     </select>
                 </div>
                 <div class="admin-filter-field">
-                    <label class="admin-filter-label" for="product-supplier">Supplier</label>
+                    <label class="admin-field-label" for="product-supplier">Supplier</label>
                     <select id="product-supplier" name="supplier" class="form-control">
                         <option value="">All suppliers</option>
                         @foreach ($suppliers as $supplier)

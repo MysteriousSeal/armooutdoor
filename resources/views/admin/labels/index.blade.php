@@ -46,7 +46,7 @@
             @endif
             <div class="admin-filter-row">
                 <div class="admin-filter-field admin-filter-field--search">
-                    <label class="admin-filter-label" for="label-search">Search</label>
+                    <label class="admin-field-label" for="label-search">Search</label>
                     <input
                         id="label-search"
                         type="search"
@@ -66,10 +66,20 @@
         </form>
 
         @if ($articles->isEmpty())
-            <p class="empty-state">No article to show here.</p>
+            <p class="empty-state">
+                @if ($search !== '')
+                    Nothing matches “{{ $search }}” on this tab.
+                @elseif ($tab === 'ready')
+                    No article is ready to print yet.
+                @elseif ($tab === 'incomplete')
+                    Every article has its wording and its codes.
+                @else
+                    No product to label yet.
+                @endif
+            </p>
         @else
             <div class="admin-table-wrap">
-                <table class="admin-table">
+                <table class="admin-table admin-labels-table">
                     <thead>
                         <tr>
                             <th></th>
@@ -83,7 +93,10 @@
                     <tbody>
                         @foreach ($articles as $article)
                             @php($product = $article['product'])
-                            <tr>
+                            {{-- A row and the form under it are one block: the pair
+                                 alternates ground so forty products read as forty
+                                 blocks rather than eighty rows. --}}
+                            <tr class="label-row {{ $loop->iteration % 2 === 0 ? 'is-even' : '' }} {{ $article['editable'] ? 'has-form' : '' }}">
                                 <td>
                                     <a href="{{ route('admin.products.edit', $product) }}">
                                         <img class="admin-product-thumb" src="{{ $article['variant']?->imageUrl() ?: $product->imageUrl() }}" alt="" loading="lazy">
@@ -100,6 +113,12 @@
                                     {{-- The size is what tells two rows of the same product apart. --}}
                                     @if ($article['name'])
                                         {{ $article['name'] }}
+                                        {{-- Said here rather than in a row of its own:
+                                             a whole row per size to say one thing cost
+                                             more than it told. --}}
+                                        @unless ($article['editable'])
+                                            <span class="admin-table-sub label-shared">Wording shared</span>
+                                        @endunless
                                     @else
                                         <span class="label-missing">—</span>
                                     @endif
@@ -144,9 +163,13 @@
                                     data-variant="{{ $article['variant']?->id ?? '' }}"
                                     data-url="{{ $article['url'] }}"
                                 >
+                                    {{-- Status then action: a row says where it stands
+                                         without the button's state having to be read. --}}
                                     @if ($article['missing'] === [])
+                                        <span class="label-status is-ready">Ready</span>
                                         <a href="{{ $article['url'] }}" class="btn btn-secondary btn-small">Download label</a>
                                     @else
+                                        <span class="label-status is-incomplete">Incomplete</span>
                                         {{-- Switched off rather than hidden: the fields
                                              that would switch it on are on the line
                                              below, so there is nothing to explain. --}}
@@ -158,35 +181,41 @@
                                 {{-- The wording, editable where it is read. One line,
                                      one Save: the list is worked through a row at a
                                      time. --}}
-                                <tr class="label-form-row">
+                                <tr class="label-form-row {{ $loop->iteration % 2 === 0 ? 'is-even' : '' }}">
                                     <td colspan="6">
+                                        {{-- Two lines: the name and the line under it,
+                                             then the two long optional ones. Each field
+                                             is as wide as what goes in it. --}}
                                         <form method="POST" action="{{ route('admin.labels.update', $product) }}" class="label-form" data-label-form data-product="{{ $product->id }}">
                                             @csrf
                                             @method('PUT')
                                             <input type="hidden" name="back" value="{{ request()->fullUrl() }}">
 
-                                            <label class="sr-only" for="label-title-{{ $product->id }}">Label title</label>
-                                            <input type="text" id="label-title-{{ $product->id }}" name="label_title" class="form-control is-uppercase" value="{{ $product->label?->title }}" maxlength="120" placeholder="Title">
+                                            <div class="label-form-field">
+                                                <label class="admin-field-label" for="label-title-{{ $product->id }}">Title</label>
+                                                <input type="text" id="label-title-{{ $product->id }}" name="label_title" class="form-control is-uppercase" value="{{ $product->label?->title }}" maxlength="120" placeholder="Gants tactiques M-Pact">
+                                            </div>
 
-                                            <label class="sr-only" for="label-subtitle-{{ $product->id }}">Label subtitle</label>
-                                            <input type="text" id="label-subtitle-{{ $product->id }}" name="label_subtitle" class="form-control is-uppercase" value="{{ $product->label?->subtitle }}" maxlength="120" placeholder="Subtitle">
+                                            <div class="label-form-field">
+                                                <label class="admin-field-label" for="label-subtitle-{{ $product->id }}">Subtitle</label>
+                                                <input type="text" id="label-subtitle-{{ $product->id }}" name="label_subtitle" class="form-control is-uppercase" value="{{ $product->label?->subtitle }}" maxlength="120" placeholder="Taille M — Woodland">
+                                            </div>
 
-                                            <label class="sr-only" for="label-composition-{{ $product->id }}">Composition</label>
-                                            <input type="text" id="label-composition-{{ $product->id }}" name="label_composition" class="form-control" value="{{ $product->label?->composition }}" maxlength="500" placeholder="Composition (optional)">
+                                            <div class="label-form-field label-form-field--wide">
+                                                <label class="admin-field-label" for="label-composition-{{ $product->id }}">Composition <span class="label-form-optional">optional</span></label>
+                                                <input type="text" id="label-composition-{{ $product->id }}" name="label_composition" class="form-control" value="{{ $product->label?->composition }}" maxlength="500" placeholder="60 % polyester, 40 % cuir de synthèse">
+                                            </div>
 
-                                            <label class="sr-only" for="label-mention-{{ $product->id }}">Mention</label>
-                                            <input type="text" id="label-mention-{{ $product->id }}" name="label_mention" class="form-control" value="{{ $product->label?->mention }}" maxlength="500" placeholder="Mention (optional)">
+                                            <div class="label-form-field label-form-field--wide">
+                                                <label class="admin-field-label" for="label-mention-{{ $product->id }}">Mention <span class="label-form-optional">optional</span></label>
+                                                <input type="text" id="label-mention-{{ $product->id }}" name="label_mention" class="form-control" value="{{ $product->label?->mention }}" maxlength="500" placeholder="Ne convient pas aux enfants de moins de 14 ans">
+                                            </div>
 
-                                            <button type="submit" class="btn btn-secondary btn-small">Save</button>
+                                            <div class="label-form-actions">
+                                                <button type="submit" class="btn btn-secondary btn-small" data-label-submit>Save</button>
+                                            </div>
                                         </form>
                                     </td>
-                                </tr>
-                            @elseif ($article['name'])
-                                {{-- The other sizes of one product share its wording,
-                                     so they show none: two forms on the same fields
-                                     would overwrite each other. --}}
-                                <tr class="label-form-row">
-                                    <td colspan="6"><span class="label-shared">Wording shared with the sizes above.</span></td>
                                 </tr>
                             @endif
                         @endforeach

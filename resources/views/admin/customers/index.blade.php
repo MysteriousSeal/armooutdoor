@@ -62,7 +62,7 @@
 
             <div class="admin-filter-row admin-filter-row--customers">
                 <div class="admin-filter-field admin-filter-field--search">
-                    <label class="admin-filter-label" for="customer-search">Search</label>
+                    <label class="admin-field-label" for="customer-search">Search</label>
                     <input
                         id="customer-search"
                         type="search"
@@ -73,7 +73,7 @@
                     >
                 </div>
                 <div class="admin-filter-field admin-filter-field--dates">
-                    <span class="admin-filter-label" id="customer-dates-label">Joined between</span>
+                    <span class="admin-field-label" id="customer-dates-label">Joined between</span>
                     <div class="admin-filter-date-range" role="group" aria-labelledby="customer-dates-label">
                         <label class="sr-only" for="customer-date-from">From</label>
                         <input

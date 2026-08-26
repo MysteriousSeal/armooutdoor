@@ -148,9 +148,15 @@ class LabelListTest extends TestCase
             ->assertDontSee('ARM-OK');
     }
 
-    public function test_an_empty_result_says_so(): void
+    public function test_an_empty_result_says_which_emptiness_it_is(): void
     {
-        $this->page(['search' => 'rien-du-tout'])->assertSee('No article to show here.');
+        // One sentence per situation: a search that found nothing does not
+        // read like a catalogue with nothing in it.
+        $this->page(['search' => 'rien-du-tout'])->assertSee('Nothing matches');
+        $this->page()->assertSee('No product to label yet.');
+
+        $this->ready();
+        $this->page(['tab' => 'incomplete'])->assertSee('Every article has its wording and its codes.');
     }
 
     public function test_the_page_hangs_under_the_catalog_menu(): void
@@ -239,7 +245,9 @@ class LabelListTest extends TestCase
         // One form per set of fields: two rows of one product editing the same
         // wording would overwrite each other without either saying so.
         $this->assertSame(1, substr_count($html, 'name="label_title"'));
-        $this->assertStringContainsString('Wording shared with the sizes above.', $html);
+        // Said under the size's own name rather than in a row of its own.
+        $this->assertStringContainsString('Wording shared', $html);
+        $this->assertStringNotContainsString('colspan="6"><span class="label-shared"', $html);
     }
 
     public function test_a_wording_too_long_is_refused(): void
@@ -503,5 +511,69 @@ class LabelListTest extends TestCase
         // Typed in lowercase, shown in capitals: the field and the sheet agree
         // before the save rather than after it.
         $this->page()->assertSee('is-uppercase', false);
+    }
+
+    public function test_a_row_says_where_it_stands(): void
+    {
+        $this->ready(['sku' => 'ARM-OK']);
+        $this->unworded(['sku' => 'ARM-KO', 'gtin' => '5901234123457']);
+
+        $html = $this->page()->getContent();
+
+        // Status then action: the row reads without the button's state having
+        // to be interpreted.
+        $this->assertMatchesRegularExpression('#label-status is-ready.*?Ready#s', $html);
+        $this->assertMatchesRegularExpression('#label-status is-incomplete.*?Incomplete#s', $html);
+    }
+
+    public function test_the_chips_are_dressed_for_both_themes(): void
+    {
+        $css = (string) file_get_contents(public_path('css/admin.css'));
+
+        // The green and the amber the admin already uses, and their dark
+        // counterparts: a chip must not vanish when the theme flips.
+        $this->assertMatchesRegularExpression('/\.label-status\.is-ready\s*\{[^}]*#3d6b4e/s', $css);
+        $this->assertMatchesRegularExpression('/\.label-status\.is-incomplete\s*\{[^}]*#8a6d1f/s', $css);
+        $this->assertMatchesRegularExpression("/\[data-theme='dark'\]\s*\.label-status\.is-ready/s", $css);
+        $this->assertMatchesRegularExpression("/\[data-theme='dark'\]\s*\.label-status\.is-incomplete/s", $css);
+    }
+
+    public function test_the_fields_are_labelled_and_laid_out_on_two_lines(): void
+    {
+        $this->ready();
+
+        $html = $this->page()->getContent();
+
+        // From the form itself: the search field above the table wears the
+        // same class, and counting the page would count that too.
+        $form = substr($html, strpos($html, 'label-form" data-label-form'));
+        $form = substr($form, 0, strpos($form, '</form>'));
+
+        // A label above each field rather than a placeholder doing that job,
+        // so a filled-in field still says what it is.
+        $this->assertSame(4, substr_count($form, 'admin-field-label'));
+        $this->assertSame(2, substr_count($html, 'label-form-field--wide'));
+        $this->assertStringContainsString('label-form-actions', $html);
+        $this->assertStringNotContainsString('class="sr-only" for="label-title', $html);
+    }
+
+    public function test_a_product_and_its_form_read_as_one_block(): void
+    {
+        $this->ready();
+
+        $this->page()
+            ->assertSee('label-row', false)
+            ->assertSee('has-form', false)
+            ->assertSee('label-form-row', false);
+    }
+
+    public function test_the_columns_stay_readable_down_a_long_page(): void
+    {
+        $this->ready();
+
+        $css = (string) file_get_contents(public_path('css/admin.css'));
+
+        $this->page()->assertSee('admin-labels-table', false);
+        $this->assertMatchesRegularExpression('/\.admin-labels-table thead th\s*\{[^}]*position:\s*sticky/s', $css);
     }
 }

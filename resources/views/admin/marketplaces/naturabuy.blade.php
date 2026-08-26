@@ -76,7 +76,7 @@
             <input type="hidden" name="tab" value="{{ $tab }}">
             <div class="admin-filter-row">
                 <div class="admin-filter-field admin-filter-field--search">
-                    <label class="admin-filter-label" for="nb-search">Search</label>
+                    <label class="admin-field-label" for="nb-search">Search</label>
                     <input id="nb-search" type="search" name="search" class="form-control admin-toolbar-search" placeholder="Title or internal code…" value="{{ $search }}">
                 </div>
                 <div class="admin-filter-actions">

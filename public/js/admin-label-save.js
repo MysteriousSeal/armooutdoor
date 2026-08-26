@@ -76,7 +76,21 @@
         });
     }
 
+    /**
+     * Marks a form as edited, or as settled again.
+     *
+     * A row half filled in and left alone is the easy mistake on a long list;
+     * the accent edge and the button say which rows are waiting.
+     */
+    function markDirty(form, dirty) {
+        form.classList.toggle('is-dirty', dirty);
+    }
+
     forms.forEach(function (form) {
+        form.addEventListener('input', function () {
+            markDirty(form, true);
+        });
+
         form.addEventListener('submit', function (event) {
             event.preventDefault();
 
@@ -107,6 +121,7 @@
                 .then(function (result) {
                     if (result.ok) {
                         toast(result.payload.message || 'Label wording saved.');
+                        markDirty(form, false);
                         switchOn(form.getAttribute('data-product'), result.payload.printable || []);
 
                         return;
