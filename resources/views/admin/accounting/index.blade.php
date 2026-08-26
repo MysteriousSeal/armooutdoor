@@ -24,11 +24,16 @@
                                 class="accounting-month {{ $loop->parent->first && $loop->first ? 'is-current' : '' }}"
                             >
                                 <span class="accounting-month-name">{{ $month->locale('en')->isoFormat('MMMM') }}</span>
+                                @php($entries = (int) ($counts[\App\Support\AccountingPeriods::key($month)] ?? 0))
                                 <span class="accounting-month-meta">
+                                    {{-- Le compte plutôt que la clé du mois : c'est ce
+                                         qu'on cherche avant d'ouvrir. Le mois en cours
+                                         le dit aussi, en précisant qu'il court encore. --}}
+                                    <span class="accounting-month-count {{ $entries === 0 ? 'is-none' : '' }}">
+                                        {{ trans_choice('{0}none|{1}:count entry|[2,*]:count entries', $entries, ['count' => $entries]) }}
+                                    </span>
                                     @if ($loop->parent->first && $loop->first)
-                                        In progress
-                                    @else
-                                        {{ \App\Support\AccountingPeriods::key($month) }}
+                                        <span class="accounting-month-running">In progress</span>
                                     @endif
                                 </span>
                                 <svg class="accounting-month-arrow" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">

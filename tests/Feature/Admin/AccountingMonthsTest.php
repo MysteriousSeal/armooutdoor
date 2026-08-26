@@ -94,7 +94,7 @@ class AccountingMonthsTest extends TestCase
             ->assertOk()
             ->assertSee('March 2026')
             ->assertSee('1 March to 31 March 2026')
-            ->assertSee('Nothing here yet.');
+            ->assertSee('No sales this month.');
     }
 
     public function test_a_month_outside_the_period_is_a_404(): void

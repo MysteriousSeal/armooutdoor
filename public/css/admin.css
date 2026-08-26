@@ -7486,3 +7486,88 @@ a.order-stepper-btn:focus-visible {
         transition: none;
     }
 }
+
+/* Le tableau des ventes d'un mois.
+   Des chiffres qu'on additionne du regard : chasse tabulaire partout, et les
+   colonnes de montants collées à droite. */
+.accounting-table {
+    font-variant-numeric: tabular-nums;
+}
+
+.accounting-table td,
+.accounting-table th {
+    white-space: nowrap;
+}
+
+.accounting-date {
+    color: var(--text-muted);
+}
+
+/* La remarque porte le numéro de commande : utile, jamais lu en diagonale. */
+.accounting-remark {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Une ligne remboursée reste dans le tableau — la comptabilité doit la voir —
+   mais se lit comme une ligne qui ne compte plus tout à fait. */
+.accounting-table tbody tr.is-refunded td {
+    color: var(--text-muted);
+}
+
+.accounting-table tbody tr.is-refunded .admin-table-strong {
+    text-decoration: line-through;
+}
+
+/* Le pied porte les totaux : un filet plus marqué que les lignes, et rien
+   d'autre, pour qu'on descende droit dessus. */
+.accounting-table tfoot td {
+    padding-top: 0.9rem;
+    padding-bottom: 0.9rem;
+    font-weight: 600;
+    background: color-mix(in srgb, var(--bg) 60%, var(--surface));
+    border-top: 2px solid var(--border);
+    border-bottom: 0;
+}
+
+.accounting-table tfoot .accounting-perceived {
+    color: var(--accent-hover);
+}
+
+.accounting-note {
+    margin: 0.9rem 0 0;
+    max-width: 44rem;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+
+/* Le compte d'écritures d'un mois, dans sa carte. */
+.accounting-month-count {
+    font-variant-numeric: tabular-nums;
+}
+
+.accounting-month-count.is-none {
+    opacity: 0.55;
+}
+
+/* Le mois en cours n'est pas clos : son compte bougera encore. */
+.accounting-month-running {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.6875rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent-hover);
+}
+
+.accounting-month-meta {
+    text-align: right;
+}
+
+/* Ce que le pied laisse de côté : dit à voix basse, mais dit. */
+.accounting-foot-note {
+    margin-left: 0.5rem;
+    font-weight: 400;
+    color: var(--text-muted);
+}
