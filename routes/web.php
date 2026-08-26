@@ -153,6 +153,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/products', [AdminProductController::class, 'store'])->name('products.store');
         Route::get('/products/{product}/edit', [AdminProductController::class, 'edit'])->name('products.edit');
         Route::get('/products/{product}/stock-history', [AdminProductController::class, 'stockHistory'])->name('products.stock-history');
+        // One label per article: a plain product, or one variant of a product
+        // that has them.
+        Route::get('/products/{product}/label', [AdminProductController::class, 'label'])->name('products.label');
+        Route::get('/products/{product}/variants/{variant}/label', [AdminProductController::class, 'label'])->name('products.variants.label');
         Route::get('/products/{product}/average-cost', [AdminProductController::class, 'averageCost'])->name('products.average-cost');
         Route::put('/products/{product}', [AdminProductController::class, 'update'])->name('products.update');
         Route::patch('/products/{product}/status', [AdminProductController::class, 'toggleStatus'])->name('products.status');

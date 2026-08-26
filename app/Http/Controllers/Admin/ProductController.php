@@ -15,9 +15,11 @@ use App\Models\ProductVariant;
 use App\Models\PurchaseOrderItem;
 use App\Models\Supplier;
 use App\Support\Csv;
+use App\Support\Ean13;
 use App\Support\HtmlSanitizer;
 use App\Support\ImageThumbnailer;
 use App\Support\StockContext;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -172,6 +174,50 @@ class ProductController extends Controller
         return redirect()
             ->route('admin.products.edit', $product)
             ->with('status', 'Product created.');
+    }
+
+    /**
+     * A printable label for one article.
+     *
+     * An article is a product without variants, or one variant of a product
+     * that has them: each carries its own reference and its own barcode, and a
+     * label belongs to one of those, never to the pair.
+     *
+     * A label needs its wording and both codes: one without a name says
+     * nothing about the article, one without a barcode cannot be scanned, and
+     * one without a reference cannot be looked up.
+     */
+    public function label(Product $product, ?ProductVariant $variant = null): Response
+    {
+        if ($variant !== null) {
+            abort_unless($variant->product_id === $product->id, 404);
+        }
+
+        $article = $variant ?? $product;
+
+        // The same four the form checks before it offers the button: a label
+        // with a gap in it is not a label.
+        abort_unless($product->labelIsPrintable($variant), 404);
+
+        $pdf = Pdf::loadView('admin.products.label-pdf', [
+            // The wording lives on the product: every size says the same
+            // thing, only the reference and the barcode differ.
+            'title' => $product->label_title,
+            'subtitle' => $product->label_subtitle,
+            'composition' => $product->label_composition,
+            'mention' => $product->label_mention,
+            'sku' => $article->sku,
+            'gtin' => Ean13::normalise($article->gtin),
+            'modules' => Ean13::modules($article->gtin),
+            // The batch is the day the labels are printed: they go out on what
+            // is packed today, and nothing stored would say otherwise.
+            'batchDate' => now()->format('d/m/Y'),
+        ])
+            // 500 × 700 CSS pixels at 96dpi: a portrait sheet, with the label
+            // printed across it on its side.
+            ->setPaper([0, 0, 375, 525]);
+
+        return $pdf->download('label-'.Str::slug($article->sku).'.pdf');
     }
 
     public function edit(Product $product): View
@@ -604,6 +650,10 @@ class ProductController extends Controller
             'image_may_vary' => $request->boolean('image_may_vary'),
             'sku' => $request->filled('sku') ? $request->string('sku')->trim()->toString() : null,
             'gtin' => $request->filled('gtin') ? $request->string('gtin')->trim()->toString() : null,
+            'label_title' => $request->filled('label_title') ? $request->string('label_title')->trim()->toString() : null,
+            'label_subtitle' => $request->filled('label_subtitle') ? $request->string('label_subtitle')->trim()->toString() : null,
+            'label_composition' => $request->filled('label_composition') ? $request->string('label_composition')->trim()->toString() : null,
+            'label_mention' => $request->filled('label_mention') ? $request->string('label_mention')->trim()->toString() : null,
             'weight_grams' => $request->filled('weight_grams') ? $request->integer('weight_grams') : null,
             'carrier_ids' => array_map('intval', $request->input('carrier_ids', [])),
             'name' => [

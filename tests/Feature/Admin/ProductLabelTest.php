@@ -1,0 +1,423 @@
+<?php
+
+namespace Tests\Feature\Admin;
+
+use App\Models\Product;
+use App\Models\ProductVariant;
+use App\Models\User;
+use App\Support\Ean13;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+/** A printable label for one article. */
+class ProductLabelTest extends TestCase
+{
+    use RefreshDatabase;
+
+    /** A variant of a product, with its own codes. */
+    private function variant(Product $product, ?string $sku, ?string $gtin): ProductVariant
+    {
+        return ProductVariant::query()->create([
+            'product_id' => $product->id,
+            'label' => ['en' => 'M', 'fr' => 'M'],
+            'sku' => $sku,
+            'gtin' => $gtin,
+            'quantity' => 1,
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+    }
+
+    public function test_a_product_with_both_codes_prints_a_label(): void
+    {
+        $product = Product::factory()->create(['sku' => 'ARM-TENT-2P-GRN', 'gtin' => '4006381333931', 'label_title' => 'Tente 2 places', 'label_subtitle' => 'Verte']);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/products/'.$product->id.'/label')
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf')
+            ->assertDownload('label-arm-tent-2p-grn.pdf');
+    }
+
+    public function test_the_label_carries_what_a_package_must_say(): void
+    {
+        $product = Product::factory()->create(['sku' => 'ARM-TENT-2P-GRN', 'gtin' => '4006381333931', 'label_title' => 'Tente 2 places', 'label_subtitle' => 'Verte']);
+
+        $html = view('admin.products.label-pdf', [
+            'title' => $product->label_title,
+            'subtitle' => $product->label_subtitle,
+            'composition' => $product->label_composition,
+            'mention' => $product->label_mention,
+            'sku' => $product->sku,
+            'gtin' => Ean13::normalise($product->gtin),
+            'modules' => Ean13::modules($product->gtin),
+            'batchDate' => now()->format('d/m/Y'),
+        ])->render();
+
+        $this->assertStringContainsString('ARM-TENT-2P-GRN', $html);
+        $this->assertStringContainsString('4006381333931', $html);
+        $this->assertStringContainsString('SwiftShelf', $html);
+        $this->assertStringContainsString('22 rue Anita Conti', $html);
+        $this->assertStringContainsString('44300 Nantes, FR', $html);
+        $this->assertStringContainsString('hello@swiftshelf.fr', $html);
+        $this->assertStringContainsString('Made in PRC', $html);
+        // The batch is the day it was printed, not anything stored.
+        $this->assertStringContainsString(now()->format('d/m/Y'), $html);
+    }
+
+    public function test_the_barcode_is_drawn_as_bars(): void
+    {
+        $product = Product::factory()->create(['sku' => 'ARM-1', 'gtin' => '4006381333931', 'label_title' => 'Gants', 'label_subtitle' => 'Taille M']);
+
+        $html = view('admin.products.label-pdf', [
+            'title' => $product->label_title,
+            'subtitle' => $product->label_subtitle,
+            'composition' => $product->label_composition,
+            'mention' => $product->label_mention,
+            'sku' => $product->sku,
+            'gtin' => Ean13::normalise($product->gtin),
+            'modules' => Ean13::modules($product->gtin),
+            'batchDate' => now()->format('d/m/Y'),
+        ])->render();
+
+        // 95 modules, each one cell, black or white.
+        $this->assertSame(95, substr_count($html, '<td class="bar"') + substr_count($html, '<td class="space"'));
+    }
+
+    public function test_a_variant_prints_its_own_label(): void
+    {
+        $product = Product::factory()->create(['sku' => null, 'gtin' => null, 'label_title' => 'T-shirt', 'label_subtitle' => 'Respirant']);
+        $variant = $this->variant($product, 'ARM-TSHIRT-M', '5901234123457');
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/products/'.$product->id.'/variants/'.$variant->id.'/label')
+            ->assertOk()
+            ->assertDownload('label-arm-tshirt-m.pdf');
+    }
+
+    public function test_an_article_missing_either_code_has_no_label(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $noGtin = Product::factory()->create(['sku' => 'ARM-2', 'gtin' => null]);
+        $noSku = Product::factory()->create(['sku' => null, 'gtin' => '4006381333931']);
+
+        // A label without a reference names nothing; one without a barcode
+        // cannot be scanned.
+        $this->actingAs($admin)->get('/admin/products/'.$noGtin->id.'/label')->assertNotFound();
+        $this->actingAs($admin)->get('/admin/products/'.$noSku->id.'/label')->assertNotFound();
+    }
+
+    public function test_a_variant_of_another_product_is_refused(): void
+    {
+        $product = Product::factory()->create(['sku' => 'ARM-3', 'gtin' => '4006381333931', 'label_title' => 'Gants', 'label_subtitle' => 'Taille M']);
+        $other = Product::factory()->create(['sku' => null, 'gtin' => null]);
+        $variant = $this->variant($other, 'ARM-OTHER-M', '5901234123457');
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/products/'.$product->id.'/variants/'.$variant->id.'/label')
+            ->assertNotFound();
+    }
+
+    public function test_the_label_section_offers_the_download_when_nothing_is_missing(): void
+    {
+        $ready = Product::factory()->create([
+            'sku' => 'ARM-4',
+            'gtin' => '4006381333931',
+            'label_title' => 'Gants',
+            'label_subtitle' => 'Taille M',
+        ]);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/products/'.$ready->id.'/edit')
+            ->assertOk()
+            ->assertSee('Download label')
+            ->assertSee('/admin/products/'.$ready->id.'/label', false)
+            ->assertDontSee('Missing:');
+    }
+
+    public function test_the_button_is_switched_off_and_names_what_is_missing(): void
+    {
+        $bare = Product::factory()->create([
+            'sku' => 'ARM-5',
+            'gtin' => null,
+            'label_title' => 'Gants',
+            'label_subtitle' => null,
+        ]);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/products/'.$bare->id.'/edit')
+            ->assertOk()
+            // Named rather than left to be guessed at, and the URL is not
+            // offered at all.
+            ->assertSee('Missing: subtitle, barcode')
+            ->assertSee('is-disabled', false)
+            ->assertDontSee('/admin/products/'.$bare->id.'/label', false);
+    }
+
+    public function test_a_product_missing_its_wording_cannot_print_a_label(): void
+    {
+        $product = Product::factory()->create([
+            'sku' => 'ARM-13',
+            'gtin' => '4006381333931',
+            'label_title' => 'Gants',
+            'label_subtitle' => null,
+        ]);
+
+        // The title and the subtitle are not needed to save a product, but a
+        // label without them says nothing about the article.
+        $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/products/'.$product->id.'/label')
+            ->assertNotFound();
+    }
+
+    public function test_the_wording_is_not_required_to_save_a_product(): void
+    {
+        $product = Product::factory()->create(['label_title' => 'Gants', 'label_subtitle' => 'Taille M']);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->put('/admin/products/'.$product->id, $this->productPayload($product, [
+                'label_title' => '',
+                'label_subtitle' => '',
+            ]))
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $this->assertNull($product->fresh()->label_title);
+    }
+
+    public function test_each_variant_gets_its_own_row_in_the_label_section(): void
+    {
+        $product = Product::factory()->create(['sku' => null, 'gtin' => null, 'label_title' => 'T-shirt', 'label_subtitle' => 'Respirant']);
+        $ready = $this->variant($product, 'ARM-TSHIRT-M', '5901234123457');
+        $bare = ProductVariant::query()->create([
+            'product_id' => $product->id,
+            'label' => ['en' => 'L', 'fr' => 'L'],
+            'sku' => 'ARM-TSHIRT-L',
+            'gtin' => null,
+            'quantity' => 1,
+            'is_active' => true,
+            'sort_order' => 2,
+        ]);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/products/'.$product->id.'/edit')
+            ->assertOk()
+            // One row per size, each saying whether its own label can go.
+            ->assertSee('/admin/products/'.$product->id.'/variants/'.$ready->id.'/label', false)
+            ->assertDontSee('/admin/products/'.$product->id.'/variants/'.$bare->id.'/label', false)
+            ->assertSee('Missing: barcode');
+    }
+
+    public function test_a_staff_admin_can_print_one(): void
+    {
+        $product = Product::factory()->create(['sku' => 'ARM-6', 'gtin' => '4006381333931', 'label_title' => 'Gants', 'label_subtitle' => 'Taille M']);
+
+        // A label is a shipping job, not an accounting one.
+        $this->actingAs(User::factory()->staffAdmin()->create())
+            ->get('/admin/products/'.$product->id.'/label')
+            ->assertOk();
+    }
+
+    public function test_a_customer_cannot_print_one(): void
+    {
+        $product = Product::factory()->create(['sku' => 'ARM-7', 'gtin' => '4006381333931', 'label_title' => 'Gants', 'label_subtitle' => 'Taille M']);
+
+        $this->actingAs(User::factory()->create())
+            ->get('/admin/products/'.$product->id.'/label')
+            ->assertRedirect();
+    }
+
+    public function test_the_sheet_is_portrait(): void
+    {
+        $product = Product::factory()->create(['sku' => 'ARM-8', 'gtin' => '4006381333931', 'label_title' => 'Gants', 'label_subtitle' => 'Taille M']);
+
+        $pdf = $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/products/'.$product->id.'/label')
+            ->assertOk()
+            ->getContent();
+
+        preg_match('/MediaBox\s*\[[\d.\s]*?([\d.]+)\s+([\d.]+)\s*\]/', $pdf, $box);
+
+        $this->assertNotEmpty($box, 'No page size in the PDF.');
+        // 500 × 700 CSS pixels, given to the renderer as points.
+        $this->assertSame(375.0, (float) $box[1]);
+        $this->assertSame(525.0, (float) $box[2]);
+        $this->assertGreaterThan((float) $box[1], (float) $box[2]);
+    }
+
+    public function test_the_label_is_printed_across_the_sheet(): void
+    {
+        $product = Product::factory()->create(['sku' => 'ARM-9', 'gtin' => '4006381333931', 'label_title' => 'Gants', 'label_subtitle' => 'Taille M']);
+
+        $source = file_get_contents(resource_path('views/admin/products/label-pdf.blade.php'));
+
+        // One quarter turn, on the reading face. The barcode is drawn flat and
+        // ends up upright against the label's own reading direction; nesting a
+        // second rotation inside the first is not something the renderer is
+        // reliable about.
+        $this->assertSame(1, substr_count($source, 'rotate('));
+        $this->assertMatchesRegularExpression('/\.face\s*\{[^}]*transform:\s*rotate\(-90deg\)/s', $source);
+
+        $pdf = $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/products/'.$product->id.'/label')
+            ->assertOk()
+            ->getContent();
+
+        // The renderer honoured it: a rotation matrix reaches the page. Worth
+        // reading the drawing itself, since dompdf ignores transforms it does
+        // not understand and would simply lay the barcode down flat.
+        $this->assertMatchesRegularExpression('/0\.000 1\.000 -1\.000 0\.000/', $this->contentStreams($pdf));
+    }
+
+    /** The drawing commands inside a PDF, inflated. */
+    private function contentStreams(string $pdf): string
+    {
+        preg_match_all('/stream\r?\n(.*?)endstream/s', $pdf, $matches);
+
+        return collect($matches[1])
+            ->map(fn (string $stream): string => (string) @gzuncompress($stream))
+            ->join("\n");
+    }
+
+    /** The label's HTML for a product, as the controller builds it. */
+    private function labelHtml(Product $product): string
+    {
+        return view('admin.products.label-pdf', [
+            'title' => $product->label_title,
+            'subtitle' => $product->label_subtitle,
+            'composition' => $product->label_composition,
+            'mention' => $product->label_mention,
+            'sku' => $product->sku,
+            'gtin' => Ean13::normalise($product->gtin),
+            'modules' => Ean13::modules($product->gtin),
+            'batchDate' => now()->format('d/m/Y'),
+        ])->render();
+    }
+
+    public function test_the_wording_typed_on_the_product_reaches_its_label(): void
+    {
+        $product = Product::factory()->create([
+            'sku' => 'ARM-10',
+            'gtin' => '4006381333931',
+            'label_title' => 'Gants tactiques M-Pact',
+            'label_subtitle' => 'Taille M — Woodland',
+            'label_composition' => '60 % polyester, 40 % cuir de synthèse',
+            'label_mention' => 'Ne convient pas aux enfants de moins de 14 ans',
+        ]);
+
+        $html = $this->labelHtml($product);
+
+        $this->assertStringContainsString('Gants tactiques M-Pact', $html);
+        $this->assertStringContainsString('Taille M — Woodland', $html);
+        $this->assertStringContainsString('Composition', $html);
+        $this->assertStringContainsString('60 % polyester', $html);
+        $this->assertStringContainsString('Ne convient pas aux enfants', $html);
+    }
+
+    public function test_the_name_is_read_before_the_reference(): void
+    {
+        $product = Product::factory()->create([
+            'sku' => 'ARM-11',
+            'gtin' => '4006381333931',
+            'label_title' => 'Gants tactiques M-Pact',
+        ]);
+
+        // From the body only: the reference also appears in the document's
+        // title, which is not what is being ordered here.
+        $html = $this->labelHtml($product);
+        $body = substr($html, strpos($html, '<body>'));
+
+        // A label is read as a product first, as a reference second.
+        $this->assertLessThan(strpos($body, 'ARM-11'), strpos($body, 'Gants tactiques M-Pact'));
+    }
+
+    public function test_an_optional_field_left_empty_prints_nothing_at_all(): void
+    {
+        $product = Product::factory()->create([
+            'sku' => 'ARM-12',
+            'gtin' => '4006381333931',
+            'label_title' => 'Gants',
+            'label_subtitle' => 'Taille M',
+        ]);
+
+        $html = $this->labelHtml($product);
+
+        // Not even the heading: a heading with nothing under it says less than
+        // no heading at all.
+        $this->assertStringNotContainsString('Composition', $html);
+        $this->assertStringNotContainsString('class="mention"', $html);
+        $this->assertStringContainsString('ARM-12', $html);
+    }
+
+    public function test_every_variant_of_a_product_says_the_same_thing(): void
+    {
+        $product = Product::factory()->create([
+            'sku' => null,
+            'gtin' => null,
+            'label_title' => 'T-shirt respirant',
+            'label_subtitle' => 'Taille M',
+        ]);
+        $medium = $this->variant($product, 'ARM-TS-M', '5901234123457');
+
+        $pdf = $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/products/'.$product->id.'/variants/'.$medium->id.'/label')
+            ->assertOk();
+
+        // The wording lives on the product: only the reference and the barcode
+        // change from one size to the next.
+        $pdf->assertDownload('label-arm-ts-m.pdf');
+        $this->assertSame('T-shirt respirant', $product->fresh()->label_title);
+    }
+
+    public function test_the_form_carries_the_label_section(): void
+    {
+        $product = Product::factory()->create(['label_title' => 'Gants tactiques M-Pact']);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/products/'.$product->id.'/edit')
+            ->assertOk()
+            ->assertSee('>Label</h3>', false)
+            ->assertSee('name="label_title"', false)
+            ->assertSee('name="label_subtitle"', false)
+            ->assertSee('name="label_composition"', false)
+            ->assertSee('name="label_mention"', false)
+            ->assertSee('Gants tactiques M-Pact');
+    }
+
+    public function test_the_wording_is_saved_from_the_form(): void
+    {
+        $product = Product::factory()->create();
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->put('/admin/products/'.$product->id, $this->productPayload($product, [
+                'label_title' => 'Cibles rondes fluo',
+                'label_subtitle' => '10 cm — lot de 100',
+                'label_composition' => 'Papier multicouche autocollant',
+                'label_mention' => 'Tenir hors de portée des enfants',
+            ]))
+            ->assertRedirect();
+
+        $product->refresh();
+        $this->assertSame('Cibles rondes fluo', $product->label_title);
+        $this->assertSame('10 cm — lot de 100', $product->label_subtitle);
+        $this->assertSame('Papier multicouche autocollant', $product->label_composition);
+        $this->assertSame('Tenir hors de portée des enfants', $product->label_mention);
+    }
+
+    /**
+     * The fields the product form requires, plus whatever is under test.
+     *
+     * @return array<string, mixed>
+     */
+    private function productPayload(Product $product, array $overrides = []): array
+    {
+        return array_merge([
+            'name' => $product->localizedName(),
+            'description' => '<p>Une description.</p>',
+            'category_id' => $product->category_id,
+            'price' => '19.90',
+            'quantity' => 3,
+        ], $overrides);
+    }
+}

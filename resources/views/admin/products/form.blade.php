@@ -308,6 +308,83 @@
                         </div>
                     </section>
 
+                    {{-- What the printed label says. Apart from the catalogue's own
+                         name and description: a label is read on a package, in a few
+                         words, and rarely says what a product page says. Shared by
+                         every variant, since only the reference and the barcode
+                         differ from one size to the next. --}}
+                    <section class="order-panel">
+                        <h3 class="order-panel-title">Label</h3>
+                        <p class="form-hint">
+                            The wording printed on this product's label. Everything here is optional and prints only
+                            when filled in. The reference, the barcode, the importer and the batch date are added
+                            automatically.
+                        </p>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="label_title">Title</label>
+                                <input type="text" id="label_title" name="label_title" class="form-control" value="{{ old('label_title', $product->label_title) }}" maxlength="120" placeholder="e.g. Gants tactiques M-Pact">
+                                @error('label_title') <p class="form-error">{{ $message }}</p> @enderror
+                            </div>
+                            <div class="form-group">
+                                <label for="label_subtitle">Subtitle</label>
+                                <input type="text" id="label_subtitle" name="label_subtitle" class="form-control" value="{{ old('label_subtitle', $product->label_subtitle) }}" maxlength="120" placeholder="e.g. Taille M — Woodland">
+                                @error('label_subtitle') <p class="form-error">{{ $message }}</p> @enderror
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="label_composition">Composition</label>
+                            <textarea id="label_composition" name="label_composition" class="form-control" rows="2" maxlength="500" placeholder="e.g. 60 % polyester, 40 % cuir de synthèse">{{ old('label_composition', $product->label_composition) }}</textarea>
+                            <p class="form-hint">What the article is made of. Left empty, the line does not appear.</p>
+                            @error('label_composition') <p class="form-error">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="label_mention">Mention</label>
+                            <textarea id="label_mention" name="label_mention" class="form-control" rows="2" maxlength="500" placeholder="e.g. Ne convient pas aux enfants de moins de 14 ans">{{ old('label_mention', $product->label_mention) }}</textarea>
+                            <p class="form-hint">A warning or a legal notice. Left empty, the line does not appear.</p>
+                            @error('label_mention') <p class="form-error">{{ $message }}</p> @enderror
+                        </div>
+
+                        @if ($product->exists)
+                            {{-- The buttons sit with the wording they print. A label
+                                 needs its title, its subtitle and the article's two
+                                 codes; short of any of them the button is switched
+                                 off and says which. --}}
+                            <div class="product-labels">
+                                @php
+                                    $labelArticles = $product->hasVariants()
+                                        ? $product->variants->map(fn ($variant) => [
+                                            'name' => $variant->label() ?: $variant->sku,
+                                            'url' => route('admin.products.variants.label', ['product' => $product, 'variant' => $variant]),
+                                            'missing' => $product->labelRequirements($variant),
+                                        ])
+                                        : collect([[
+                                            'name' => null,
+                                            'url' => route('admin.products.label', $product),
+                                            'missing' => $product->labelRequirements(),
+                                        ]]);
+                                @endphp
+
+                                @foreach ($labelArticles as $article)
+                                    <div class="product-label-row">
+                                        @if ($article['name'])
+                                            <span class="product-label-name">{{ $article['name'] }}</span>
+                                        @endif
+                                        @if ($article['missing'] === [])
+                                            <a href="{{ $article['url'] }}" class="btn btn-secondary btn-small">Download label</a>
+                                        @else
+                                            <span class="btn btn-secondary btn-small is-disabled" aria-disabled="true">Download label</span>
+                                            <span class="product-label-missing">Missing: {{ implode(', ', $article['missing']) }}</span>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </section>
+
                     @php
                         $allCarrierIds = $carriers->pluck('id')->all();
                         $selectedCarrierIds = old('carrier_ids', $product->exists ? ($product->carrier_ids ?? $allCarrierIds) : $allCarrierIds);

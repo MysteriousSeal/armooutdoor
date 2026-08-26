@@ -7908,3 +7908,32 @@ a.order-stepper-btn:focus-visible {
     flex-wrap: wrap;
     gap: 0.6rem;
 }
+
+/* The label downloads, under the wording they print. One row per article, so a
+   product with sizes shows which button belongs to which. */
+.product-labels {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.35rem;
+}
+
+.product-label-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+/* The variant's own name, wide enough that a column of buttons lines up. */
+.product-label-name {
+    min-width: 9rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+/* What is still missing, said plainly rather than left to be guessed at. */
+.product-label-missing {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
