@@ -36,12 +36,27 @@ class AccountingEntry extends Model
         'other' => 'Other',
     ];
 
+    /** Les mêmes natures en français : les documents comptables le sont. */
+    public const TYPES_FR = [
+        'stock_sale' => 'Vente sur stock',
+        'prestation' => 'Prestation',
+        'repair' => 'Réparation',
+        'other' => 'Autre',
+    ];
+
     /** Ce qui arrive sur le compte. Le virement, jusqu'à preuve du contraire. */
     public const PAYMENT_METHODS = [
         'bank_wire' => 'Bank wire',
         'card' => 'Card',
         'cash' => 'Cash',
         'cheque' => 'Cheque',
+    ];
+
+    public const PAYMENT_METHODS_FR = [
+        'bank_wire' => 'Virement',
+        'card' => 'Carte',
+        'cash' => 'Espèces',
+        'cheque' => 'Chèque',
     ];
 
     protected function casts(): array
@@ -71,6 +86,16 @@ class AccountingEntry extends Model
     public function paymentLabel(): string
     {
         return self::PAYMENT_METHODS[$this->payment_method] ?? $this->payment_method;
+    }
+
+    public function typeLabelFr(): string
+    {
+        return self::TYPES_FR[$this->type] ?? $this->typeLabel();
+    }
+
+    public function paymentLabelFr(): string
+    {
+        return self::PAYMENT_METHODS_FR[$this->payment_method] ?? $this->paymentLabel();
     }
 
     /** Ce qui reste une fois les frais retenus. */

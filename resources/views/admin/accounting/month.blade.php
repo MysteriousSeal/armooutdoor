@@ -20,6 +20,7 @@
                 </div>
                 @if ($section === 'sales')
                     <div class="admin-order-actions">
+                        <a href="{{ route('admin.accounting.sales.pdf', ['month' => $monthKey]) }}" class="btn btn-secondary">Download PDF</a>
                         <button type="button" class="btn btn-primary" data-modal-open="entry-modal" data-entry-new>Add entry</button>
                     </div>
                 @endif

@@ -4,6 +4,7 @@ namespace App\Support;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 /**
  * Les mois que la comptabilité couvre.
@@ -59,9 +60,29 @@ class AccountingPeriods
         return $parsed;
     }
 
+    /** Pour l'administration, qui est en anglais. */
     public static function label(CarbonImmutable $month): string
     {
         return $month->locale('en')->isoFormat('MMMM YYYY');
+    }
+
+    /**
+     * Pour les documents comptables, qui sont en français.
+     *
+     * Le français écrit les mois en minuscule, mais un titre de document et
+     * une case d'en-tête commencent par une capitale.
+     */
+    public static function labelFr(CarbonImmutable $month): string
+    {
+        return Str::ucfirst($month->locale('fr')->isoFormat('MMMM')).' '.$month->format('Y');
+    }
+
+    /** Une date en toutes lettres, mois capitalisé : « 1 Juillet 2026 ». */
+    public static function dateFr(CarbonImmutable $date, bool $withYear = true): string
+    {
+        return $date->format('j').' '
+            .Str::ucfirst($date->locale('fr')->isoFormat('MMMM'))
+            .($withYear ? ' '.$date->format('Y') : '');
     }
 
     public static function key(CarbonImmutable $month): string

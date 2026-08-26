@@ -5,13 +5,16 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreAccountingEntryRequest;
 use App\Models\AccountingEntry;
+use App\Models\CompanySetting;
 use App\Models\Order;
 use App\Support\AccountingPeriods;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * La comptabilité : ce qui est entré, ce qui est sorti.
@@ -139,9 +142,13 @@ class AccountingController extends Controller
             'client' => $order->user?->name ?? '—',
             'channel' => $order->marketplace_name ?: ($order->marketplace?->name ?? 'Direct'),
             'type' => 'Stock sale',
+            // Les documents comptables sont en français ; l'écran reste en
+            // anglais comme le reste de l'administration.
+            'type_fr' => AccountingEntry::TYPES_FR['stock_sale'],
             'total_cents' => $order->total_cents,
             'fees_cents' => ($order->marketplace_commission_cents ?? 0) + ($order->payment_fee_cents ?? 0),
             'payment' => 'Bank wire',
+            'payment_fr' => AccountingEntry::PAYMENT_METHODS_FR['bank_wire'],
             'remark' => $order->number,
             'counts' => $order->status !== 'refunded',
             'refunded' => $order->status === 'refunded',
@@ -162,9 +169,11 @@ class AccountingController extends Controller
                 'client' => $entry->client ?: '—',
                 'channel' => $entry->channel ?: 'Direct',
                 'type' => $entry->typeLabel(),
+                'type_fr' => $entry->typeLabelFr(),
                 'total_cents' => $entry->total_cents,
                 'fees_cents' => $entry->fees_cents,
                 'payment' => $entry->paymentLabel(),
+                'payment_fr' => $entry->paymentLabelFr(),
                 'remark' => $entry->remark ?: '',
                 'counts' => true,
                 'refunded' => false,
@@ -174,6 +183,46 @@ class AccountingController extends Controller
             ->merge($entries->toBase())
             ->sortBy([['date', 'asc'], ['invoice', 'asc']])
             ->values();
+    }
+
+    /**
+     * Le journal du mois en PDF, pour le livre de comptes.
+     *
+     * Les mêmes lignes et les mêmes totaux que la page : un document qui
+     * dirait autre chose que l'écran ne servirait à rien.
+     */
+    public function salesPdf(string $month): Response
+    {
+        $period = $this->sectionPeriod('sales', $month);
+
+        $pdf = Pdf::loadView('admin.accounting.sales-pdf', $this->journalData($period))
+            // Dix colonnes ne tiennent pas debout sans couper les noms.
+            ->setPaper('a4', 'landscape');
+
+        return $pdf->download('ventes-'.AccountingPeriods::key($period).'.pdf');
+    }
+
+    /**
+     * Ce que porte le journal d'un mois.
+     *
+     * Les mêmes lignes et les mêmes totaux que la page : un document qui
+     * dirait autre chose que l'écran ne servirait à rien.
+     *
+     * @return array<string, mixed>
+     */
+    private function journalData(CarbonImmutable $period): array
+    {
+        $rows = $this->rowsOf('sales', $period);
+        $counted = $rows->where('counts', true);
+
+        return [
+            'period' => $period,
+            'rows' => $rows,
+            'refunded' => $rows->count() - $counted->count(),
+            'totalCents' => $counted->sum('total_cents'),
+            'feesCents' => $counted->sum('fees_cents'),
+            'company' => CompanySetting::current(),
+        ];
     }
 
     public function storeEntry(StoreAccountingEntryRequest $request, string $section, string $month): RedirectResponse

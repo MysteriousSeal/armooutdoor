@@ -113,6 +113,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 ->where('month', '\d{4}-\d{2}')
                 ->name('accounting.purchases.month');
 
+            Route::get('/accounting/sales/{month}/pdf', [AdminAccountingController::class, 'salesPdf'])
+                ->where('month', '\d{4}-\d{2}')
+                ->name('accounting.sales.pdf');
+
             // Les écritures à la main, dans le mois qu'on lit.
             Route::post('/accounting/{section}/{month}/entries', [AdminAccountingController::class, 'storeEntry'])
                 ->where(['section' => 'sales|purchases', 'month' => '\d{4}-\d{2}'])
