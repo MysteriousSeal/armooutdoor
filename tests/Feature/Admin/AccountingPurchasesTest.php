@@ -267,4 +267,34 @@ class AccountingPurchasesTest extends TestCase
             ->assertSee('Available once the month has ended')
             ->assertSee('is-disabled', false);
     }
+
+    public function test_a_remark_typed_on_a_purchase_is_shown_back(): void
+    {
+        $this->submit($this->payload(['remark' => 'Réassort gants, livré le 18']));
+
+        // The field was saved and then never displayed, so a remark could only
+        // be read by reopening the entry that held it.
+        $this->page()
+            ->assertSee('Remark')
+            ->assertSee('Réassort gants, livré le 18');
+    }
+
+    public function test_the_totals_row_still_spans_the_table(): void
+    {
+        $this->submit($this->payload());
+
+        $content = $this->page()->getContent();
+
+        $head = substr($content, strpos($content, '<thead>'), strpos($content, '</thead>') - strpos($content, '<thead>'));
+        $foot = substr($content, strpos($content, '<tfoot>'));
+
+        // A column added to the head has to be paid for in the foot, or the
+        // totals slide out from under their figures.
+        preg_match_all('/colspan="(\d+)"/', $foot, $spans);
+        // `<th[\s>]` rather than `<th`, which also matches the `<thead>` the
+        // slice opens with.
+        $columns = preg_match_all('/<th[\s>]/', $head);
+
+        $this->assertSame($columns, array_sum(array_map('intval', $spans[1])) + substr_count($foot, '<td class='));
+    }
 }

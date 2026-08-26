@@ -22,12 +22,14 @@ use Symfony\Component\HttpFoundation\Response;
  * The accounting section: what came in, what went out.
  *
  * Two halves, sales and purchases, each showing a list of months and then one
- * page per month. Sales is built out; purchases holds its place in the
- * navigation and its address, and the figures come next.
+ * page per month, and each able to print a month as a journal for the
+ * accounting book.
  *
- * A month's page mixes two sources — the shop's own orders and the entries
- * typed by hand — into one table, and the sales journal PDF is printed from
- * exactly the same rows.
+ * The two differ in where their lines come from. A month of sales mixes the
+ * shop's own orders with entries typed by hand; a month of purchases is
+ * hand-written throughout, since a purchase order carries its own VAT rate
+ * and its own receipt dates. Either way the journal PDF prints exactly the
+ * rows the screen shows, which is what keeps the paper and the page in step.
  */
 class AccountingController extends Controller
 {
@@ -49,7 +51,7 @@ class AccountingController extends Controller
         return view('admin.accounting.month', $this->monthData('sales', $month));
     }
 
-    /** One month of purchases. Still empty, and shares the month template. */
+    /** One month of purchases: what was paid out, and to whom. */
     public function purchasesMonth(string $month): View
     {
         return view('admin.accounting.month', $this->monthData('purchases', $month));
@@ -130,8 +132,9 @@ class AccountingController extends Controller
     /**
      * What one month's page needs.
      *
-     * Purchases get the heading and nothing else; sales also get the lines and
-     * the lists the entry form offers.
+     * Both sections get their lines, the state of the last copy taken out and
+     * whether one can be taken at all; only sales carry the lists their entry
+     * form offers, purchases writing their kind out instead.
      *
      * @return array<string, mixed>
      */

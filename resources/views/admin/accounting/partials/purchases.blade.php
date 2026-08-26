@@ -71,6 +71,7 @@
                         <th class="admin-table-num">VAT</th>
                         <th class="admin-table-num">Incl. VAT</th>
                         <th>Payment</th>
+                        <th>Remark</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -90,6 +91,7 @@
                             </td>
                             <td class="admin-table-num">{{ format_euros($entry->total_cents) }}</td>
                             <td>{{ $entry->paymentLabel() }}</td>
+                            <td class="accounting-remark">{{ $entry->remark }}</td>
                             {{-- Every line here was typed, so every line can be corrected. --}}
                             <td class="accounting-row-actions">
                                 <button
@@ -142,14 +144,14 @@
                         <td class="admin-table-num">{{ format_euros($exVatCents) }}</td>
                         <td class="admin-table-num">{{ format_euros($vatCents) }}</td>
                         <td class="admin-table-num accounting-perceived">{{ format_euros($totalCents) }}</td>
-                        <td colspan="2"></td>
+                        <td colspan="3"></td>
                     </tr>
                 </tfoot>
             </table>
         </div>
 
         <p class="accounting-note">
-            Each line is recorded as its invoice reads: the total paid and the rate charged. The amount before tax and the tax itself are worked back from those, so a line always adds up to the paper it came from.
+            For each line you enter the total incl. VAT and the VAT rate, both taken from the supplier's invoice. The amount excl. VAT and the VAT are calculated from those two figures.
         </p>
     @endif
 

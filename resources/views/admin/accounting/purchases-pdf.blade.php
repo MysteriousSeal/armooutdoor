@@ -262,7 +262,7 @@
     </table>
 
     <div class="notes-body">
-        Chaque ligne est enregistrée telle que sa facture la donne : le total réglé et le taux appliqué. Le montant hors taxe et la taxe elle-même en sont déduits, de sorte qu'une ligne retombe toujours sur le papier dont elle vient.
+        Pour chaque ligne, on saisit le total TTC et le taux de TVA figurant sur la facture du fournisseur. Le total HT et la TVA sont calculés à partir de ces deux montants.
     </div>
 
     <table class="signature">
