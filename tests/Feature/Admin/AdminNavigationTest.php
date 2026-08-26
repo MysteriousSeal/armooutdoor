@@ -32,12 +32,13 @@ class AdminNavigationTest extends TestCase
         }
     }
 
-    public function test_the_bar_holds_four_groups_and_no_more(): void
+    public function test_the_bar_holds_its_groups_and_no_more(): void
     {
         $content = $this->dashboard()->getContent();
 
-        $this->assertSame(3, substr_count($content, 'data-nav-toggle'));
-        $this->assertSame(3, substr_count($content, 'data-nav-menu'));
+        // Sales, Catalogue, Accounting and System for the owner.
+        $this->assertSame(4, substr_count($content, 'data-nav-toggle'));
+        $this->assertSame(4, substr_count($content, 'data-nav-menu'));
     }
 
     public function test_the_open_section_marks_its_group(): void

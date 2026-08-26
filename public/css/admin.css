@@ -7405,3 +7405,506 @@ a.order-stepper-btn:focus-visible {
         transition: none;
     }
 }
+
+/* The list of accounting months.
+   A grid rather than a column: twelve months then sit under the eye at once,
+   and the year serves as the heading, because you look for a financial year
+   before you look for a month. */
+.accounting-year {
+    margin-bottom: 1.35rem;
+    padding: 1.25rem 1.25rem 1.2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.accounting-year-title {
+    margin: 0 0 0.85rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+}
+
+.accounting-months {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(14.5rem, 1fr));
+    gap: 0.65rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.accounting-month {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    align-items: center;
+    column-gap: 0.5rem;
+    row-gap: 0.45rem;
+    padding: 0.95rem 1rem 0.9rem;
+    color: var(--text);
+    text-decoration: none;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    transition: border-color 0.12s ease, background-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.accounting-month:hover,
+.accounting-month:focus-visible {
+    border-color: var(--accent);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+}
+
+.accounting-month-name {
+    grid-column: 1;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+/* A month's key is an address, not a sentence: tabular figures so a column
+   of cards lines up. */
+.accounting-month-meta {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    margin-left: 0;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.accounting-month-arrow {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    flex-shrink: 0;
+    color: var(--text-muted);
+}
+
+.accounting-month:hover .accounting-month-arrow,
+.accounting-month:focus-visible .accounting-month-arrow {
+    color: var(--accent-hover);
+}
+
+/* The current month is not closed: it stands out quietly, through an accent
+   rule down its left edge. */
+.accounting-month.is-current {
+    border-left: 2px solid var(--accent);
+    background: color-mix(in srgb, var(--accent) 7%, var(--surface));
+}
+
+.accounting-month.is-current .accounting-month-meta {
+    color: var(--accent-hover);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .accounting-month {
+        transition: none;
+    }
+}
+
+/* A month's table of sales.
+   Figures added up by eye: tabular figures throughout, and the amount columns
+   held against the right. */
+.accounting-table {
+    font-variant-numeric: tabular-nums;
+}
+
+.accounting-table td,
+.accounting-table th {
+    white-space: nowrap;
+}
+
+.accounting-table td:has(.accounting-invoice),
+.accounting-table td:has(.order-chip) {
+    white-space: normal;
+}
+
+.accounting-date {
+    color: var(--text-muted);
+}
+
+/* The remark carries the order number: useful, never skimmed. */
+.accounting-remark {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* A refunded line stays in the table — the accounts have to see it — but
+   reads as a line that no longer quite counts. */
+.accounting-table tbody tr.is-refunded td {
+    color: var(--text-muted);
+}
+
+.accounting-table tbody tr.is-refunded .admin-table-strong {
+    text-decoration: line-through;
+}
+
+/* The footer carries the totals: a heavier rule than the rows and nothing
+   else, so the eye drops straight onto it. */
+.accounting-table tfoot td {
+    padding-top: 0.9rem;
+    padding-bottom: 0.9rem;
+    font-weight: 600;
+    background: color-mix(in srgb, var(--bg) 60%, var(--surface));
+    border-top: 2px solid var(--border);
+    border-bottom: 0;
+}
+
+.accounting-table tfoot .accounting-perceived {
+    color: var(--accent-hover);
+}
+
+.accounting-note {
+    margin: 0.9rem 0 0;
+    max-width: none;
+    padding: 0.85rem 1rem;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.accounting-kpis {
+    margin-bottom: 1.15rem;
+}
+
+.accounting-kpis .admin-stat-value {
+    font-size: 1.45rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.accounting-journal {
+    box-shadow: var(--shadow);
+}
+
+.accounting-invoice {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.accounting-table tbody tr:hover td {
+    background: color-mix(in srgb, var(--accent) 5%, var(--surface));
+}
+
+.accounting-table tbody tr.is-refunded:hover td {
+    background: color-mix(in srgb, var(--bg) 70%, var(--surface));
+}
+
+/* How many entries a month holds, on its card. */
+.accounting-month-count {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.18rem 0.45rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.accounting-month-count.is-none {
+    color: var(--text-muted);
+    background: transparent;
+}
+
+/* The current month is not closed: its count will still move. */
+.accounting-month-running {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 0;
+    padding: 0.18rem 0.45rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent-hover);
+    background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--accent) 32%, var(--border));
+}
+
+/* What the footer leaves out: said quietly, but said. */
+.accounting-foot-note {
+    margin-left: 0.5rem;
+    font-weight: 400;
+    color: var(--text-muted);
+}
+
+/* The entry form: two columns, because ten fields in a pile make a dialog
+   taller than the screen. */
+.entry-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 1rem;
+}
+
+.entry-form-grid .form-group {
+    margin-bottom: 0.9rem;
+}
+
+.entry-form-wide {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 640px) {
+    .entry-form-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.modal--wide {
+    max-width: 34rem;
+    width: 100%;
+}
+
+/* A hand-written entry differs from an order: the rule on the left says
+   where the line comes from without adding a column. */
+.accounting-table tbody tr.is-manual td:first-child {
+    box-shadow: inset 2px 0 0 var(--accent);
+}
+
+.order-chip--manual {
+    color: var(--accent-hover);
+    border-color: color-mix(in srgb, var(--accent) 32%, var(--border));
+    background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+}
+
+/* The row's actions: quiet until the row is hovered. */
+.accounting-row-actions {
+    white-space: nowrap;
+    text-align: right;
+}
+
+.accounting-row-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    color: var(--text-muted);
+    background: none;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: color 0.12s ease, border-color 0.12s ease;
+}
+
+.accounting-row-btn:hover,
+.accounting-row-btn:focus-visible {
+    color: var(--text);
+    border-color: var(--border);
+}
+
+.accounting-row-btn.is-danger:hover,
+.accounting-row-btn.is-danger:focus-visible {
+    color: var(--danger, #a44);
+    border-color: color-mix(in srgb, #a44 40%, var(--border));
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .accounting-row-btn {
+        transition: none;
+    }
+}
+
+/* A button switched off rather than removed: the action bar must not
+   rearrange from one month to the next, and a missing button would read as an
+   oversight rather than a rule. */
+.btn.is-disabled {
+    opacity: 0.5;
+    cursor: default;
+    pointer-events: none;
+    border-style: dashed;
+}
+
+/* Title on the left, the two buttons on one line, the download note under them. */
+.accounting-month-page .admin-list-hero-row {
+    align-items: flex-start;
+}
+
+.accounting-hero-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.45rem;
+    margin-left: auto;
+    flex-shrink: 0;
+    min-width: 0;
+    max-width: min(28rem, 100%);
+}
+
+.accounting-hero-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .accounting-hero-actions {
+        align-items: stretch;
+        max-width: none;
+        width: 100%;
+    }
+
+    .accounting-hero-buttons .btn {
+        flex: 1;
+    }
+
+    .accounting-download-note {
+        max-width: none;
+        text-align: left;
+    }
+}
+
+/* The download button and what it says about the last copy taken out. */
+.accounting-download {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.35rem;
+}
+
+/* Quieter than the button: it reports, it does not ask to be clicked. */
+.accounting-download-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    margin: 0;
+    max-width: 100%;
+    padding: 0.45rem 0.6rem;
+    font-size: 0.75rem;
+    line-height: 1.45;
+    text-align: left;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    box-sizing: border-box;
+}
+
+.accounting-download-note svg {
+    flex-shrink: 0;
+    margin-top: 0.12rem;
+}
+
+.accounting-download-note span {
+    min-width: 0;
+    flex: 1;
+}
+
+/* Never taken out is not a warning, only a fact: dashed rather than red. */
+.accounting-download-note.is-never {
+    color: var(--text-muted);
+    background: transparent;
+    border-style: dashed;
+}
+
+/* The filed copy still matches the month. */
+.accounting-download-note.is-filed {
+    color: #3d6b4e;
+    background: #eef4ef;
+    border-color: #d5e4d8;
+}
+
+[data-theme='dark'] .accounting-download-note.is-filed {
+    color: #8fceac;
+    background: color-mix(in srgb, #8fceac 12%, var(--surface));
+    border-color: color-mix(in srgb, #8fceac 32%, var(--border));
+}
+
+/* A month already filed, on its card in the list. */
+.accounting-month-filed {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.18rem 0.45rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: #3d6b4e;
+    background: #eef4ef;
+    border: 1px solid #d5e4d8;
+}
+
+[data-theme='dark'] .accounting-month-filed {
+    color: #9dccab;
+    background: color-mix(in srgb, #9dccab 12%, var(--surface));
+    border-color: color-mix(in srgb, #9dccab 28%, var(--border));
+}
+
+/* The filed copy no longer matches the month. Amber rather than red: nothing
+   is broken, a sheet is simply out of date. */
+.accounting-download-note.is-stale {
+    display: flex;
+    align-items: flex-start;
+    font-weight: 500;
+    color: #8a6d1f;
+    background: #fbf3dc;
+    border: 1px solid #ecd9a3;
+}
+
+[data-theme='dark'] .accounting-download-note.is-stale {
+    color: #e0b673;
+    background: color-mix(in srgb, #e0b673 12%, var(--surface));
+    border-color: color-mix(in srgb, #e0b673 32%, var(--border));
+}
+
+.accounting-month-filed.is-stale {
+    color: #8a6d1f;
+    background: #fbf3dc;
+    border-color: #ecd9a3;
+}
+
+[data-theme='dark'] .accounting-month-filed.is-stale {
+    color: #e0b673;
+    background: color-mix(in srgb, #e0b673 12%, var(--surface));
+    border-color: color-mix(in srgb, #e0b673 32%, var(--border));
+}
+
+/* A closed month holding lines that nobody has filed yet. The blue the admin
+   uses everywhere for "here is something to do", so it reads as an invitation
+   next to the green of a month already filed. */
+.accounting-month-available {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.18rem 0.45rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: #2f5d8a;
+    background: #eef3f8;
+    border: 1px solid #c6d8e8;
+}
+
+[data-theme='dark'] .accounting-month-available {
+    color: #8ab4dd;
+    background: color-mix(in srgb, #8ab4dd 12%, var(--surface));
+    border-color: color-mix(in srgb, #8ab4dd 35%, var(--border));
+}
+
+/* The rate beside the tax it produced: small, since the amount is what is
+   read and the rate only explains it. */
+.accounting-vat-rate {
+    margin-left: 0.3rem;
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+}
+
+
+/* The month's name and its standing on one line: the chip qualifies the
+   month, so it reads with the name rather than under the dates. */
+.accounting-month-heading {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}

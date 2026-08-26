@@ -7,6 +7,7 @@ use App\Http\Controllers\Account\ConversationController as AccountConversationCo
 use App\Http\Controllers\Account\DiscountCodeController as AccountDiscountCodeController;
 use App\Http\Controllers\Account\ProfileController;
 // Admin (back office)
+use App\Http\Controllers\Admin\AccountingController as AdminAccountingController;
 use App\Http\Controllers\Admin\ActivityController as AdminActivityController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
@@ -100,6 +101,37 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
         Route::get('/changelog', AdminChangelogController::class)->name('changelog');
         Route::get('/search', [AdminSearchController::class, 'index'])->name('search');
+        // Owner only, like the rest of what touches money: these pages will
+        // carry revenue and costs.
+        Route::middleware('admin.owner')->group(function (): void {
+            Route::get('/accounting/sales', [AdminAccountingController::class, 'sales'])->name('accounting.sales');
+            Route::get('/accounting/sales/{month}', [AdminAccountingController::class, 'salesMonth'])
+                ->where('month', '\d{4}-\d{2}')
+                ->name('accounting.sales.month');
+            Route::get('/accounting/purchases', [AdminAccountingController::class, 'purchases'])->name('accounting.purchases');
+            Route::get('/accounting/purchases/{month}', [AdminAccountingController::class, 'purchasesMonth'])
+                ->where('month', '\d{4}-\d{2}')
+                ->name('accounting.purchases.month');
+            Route::get('/accounting/purchases/{month}/pdf', [AdminAccountingController::class, 'purchasesPdf'])
+                ->where('month', '\d{4}-\d{2}')
+                ->name('accounting.purchases.pdf');
+
+            Route::get('/accounting/sales/{month}/pdf', [AdminAccountingController::class, 'salesPdf'])
+                ->where('month', '\d{4}-\d{2}')
+                ->name('accounting.sales.pdf');
+
+            // The hand-written entries, inside the month being read.
+            Route::post('/accounting/{section}/{month}/entries', [AdminAccountingController::class, 'storeEntry'])
+                ->where(['section' => 'sales|purchases', 'month' => '\d{4}-\d{2}'])
+                ->name('accounting.entries.store');
+            Route::put('/accounting/{section}/{month}/entries/{entry}', [AdminAccountingController::class, 'updateEntry'])
+                ->where(['section' => 'sales|purchases', 'month' => '\d{4}-\d{2}'])
+                ->name('accounting.entries.update');
+            Route::delete('/accounting/{section}/{month}/entries/{entry}', [AdminAccountingController::class, 'destroyEntry'])
+                ->where(['section' => 'sales|purchases', 'month' => '\d{4}-\d{2}'])
+                ->name('accounting.entries.destroy');
+        });
+
         Route::get('/activity', [AdminActivityController::class, 'index'])->name('activity');
         Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');
         Route::get('/customers/export', [AdminCustomerController::class, 'export'])->name('customers.export');

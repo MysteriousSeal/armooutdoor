@@ -73,6 +73,10 @@
                 $salesActive = request()->routeIs('admin.orders.*', 'admin.customers.*', 'admin.conversations.*', 'admin.discounts.*', 'admin.discount-codes.*');
                 $catalogueActive = request()->routeIs('admin.products.*', 'admin.categories.*', 'admin.purchase-orders.*', 'admin.marketplaces.*');
                 $systemActive = request()->routeIs('admin.settings.*', 'admin.stripe.*', 'admin.activity', 'admin.changelog');
+                $accountingActive = request()->routeIs('admin.accounting.*');
+                // The group that opens the right-hand block carries the
+                // margin: without Accounting, System pushes, as before.
+                $showsAccounting = auth()->user()?->isOwner() === true;
             @endphp
 
             <a href="{{ route('admin.dashboard') }}" class="admin-nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard</a>
@@ -135,7 +139,22 @@
 
             <a href="{{ route('admin.blog.index') }}" class="admin-nav-link {{ request()->routeIs('admin.blog.*') ? 'active' : '' }}">Blog</a>
 
-            <div class="admin-nav-group admin-nav-group--end">
+            @if ($showsAccounting)
+                <div class="admin-nav-group admin-nav-group--end">
+                    <button type="button" class="admin-nav-link admin-nav-trigger {{ $accountingActive ? 'active' : '' }}" data-nav-toggle aria-haspopup="true" aria-expanded="false">
+                        Accounting
+                        <svg class="admin-nav-chevron" viewBox="0 0 24 24" width="11" height="11" aria-hidden="true">
+                            <path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div class="admin-nav-menu" data-nav-menu hidden>
+                        <a href="{{ route('admin.accounting.sales') }}" class="admin-nav-menu-item {{ request()->routeIs('admin.accounting.sales') ? 'active' : '' }}">Sales</a>
+                        <a href="{{ route('admin.accounting.purchases') }}" class="admin-nav-menu-item {{ request()->routeIs('admin.accounting.purchases') ? 'active' : '' }}">Purchases</a>
+                    </div>
+                </div>
+            @endif
+
+            <div class="admin-nav-group {{ $showsAccounting ? '' : 'admin-nav-group--end' }}">
                 <button type="button" class="admin-nav-link admin-nav-trigger {{ $systemActive ? 'active' : '' }}" data-nav-toggle aria-haspopup="true" aria-expanded="false">
                     System
                     <svg class="admin-nav-chevron" viewBox="0 0 24 24" width="11" height="11" aria-hidden="true">

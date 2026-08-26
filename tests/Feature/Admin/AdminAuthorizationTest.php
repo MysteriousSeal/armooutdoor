@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\AccountingEntry;
 use App\Models\BlogPost;
 use App\Models\Carrier;
 use App\Models\Category;
@@ -16,6 +17,7 @@ use App\Models\Product;
 use App\Models\PurchaseOrder;
 use App\Models\Supplier;
 use App\Models\User;
+use App\Support\AccountingPeriods;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Route as RoutingRoute;
 use Illuminate\Support\Facades\Route;
@@ -84,6 +86,15 @@ class AdminAuthorizationTest extends TestCase
 
         $blogPost = BlogPost::factory()->create();
 
+        $accountingEntry = AccountingEntry::query()->create([
+            'section' => 'sales',
+            'entered_on' => AccountingPeriods::FIRST.'-05',
+            'type' => 'other',
+            'total_cents' => 1000,
+            'fees_cents' => 0,
+            'payment_method' => 'bank_wire',
+        ]);
+
         $bindings = [
             'category' => $category->id,
             'product' => $product->id,
@@ -101,6 +112,12 @@ class AdminAuthorizationTest extends TestCase
             'conversation' => $conversation->id,
             'message' => $conversationMessage->id,
             'post' => $blogPost->id,
+            // A month inside the accounting period: outside it the route
+            // does not even match, and this sweep would read a 404 as an
+            // unguarded door.
+            'month' => AccountingPeriods::FIRST,
+            'section' => 'sales',
+            'entry' => $accountingEntry->id,
         ];
 
         $nonAdmin = User::factory()->create();
