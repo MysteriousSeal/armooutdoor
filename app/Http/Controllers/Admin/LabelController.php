@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 /**
@@ -163,7 +165,7 @@ class LabelController extends Controller
      * a line at a time, and losing your place after each save would make that
      * unbearable.
      */
-    public function update(Request $request, Product $product): RedirectResponse
+    public function update(Request $request, Product $product): RedirectResponse|JsonResponse
     {
         $validated = $request->validate([
             'label_title' => ['nullable', 'string', 'max:120'],
@@ -173,9 +175,19 @@ class LabelController extends Controller
         ]);
 
         $wording = collect($validated)
-            ->mapWithKeys(fn (?string $value, string $field): array => [
-                str_replace('label_', '', $field) => filled($value) ? trim($value) : null,
-            ]);
+            ->mapWithKeys(function (?string $value, string $field): array {
+                $name = str_replace('label_', '', $field);
+                $value = filled($value) ? trim($value) : null;
+
+                // The name and the line under it are printed in capitals, so
+                // they are stored that way: the label then reads the same
+                // whoever typed it. `Str::upper` handles the accents.
+                if ($value !== null && in_array($name, ['title', 'subtitle'], true)) {
+                    $value = Str::upper($value);
+                }
+
+                return [$name => $value];
+            });
 
         // A label emptied of everything is deleted rather than kept as four
         // nulls: the row's existence is what "this product has wording" means.
@@ -185,9 +197,40 @@ class LabelController extends Controller
             $product->label()->updateOrCreate([], $wording->all());
         }
 
+        // Saved in place when the page can do it itself. The answer names the
+        // articles that can be printed now, so their buttons stop lying
+        // without a reload.
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Label wording saved.',
+                'printable' => $this->printableArticlesOf($product->fresh('label', 'variants')),
+            ]);
+        }
+
         return redirect()
             ->to($request->input('back', route('admin.labels.index')))
             ->with('status', 'Label wording saved.');
+    }
+
+    /**
+     * Which of a product's articles can be printed as it stands.
+     *
+     * A variant is named by its id and a plain product by nothing at all, the
+     * way the rows of the page identify themselves.
+     *
+     * @return array<int, string>
+     */
+    private function printableArticlesOf(Product $product): array
+    {
+        if (! $product->hasVariants()) {
+            return $product->labelIsPrintable() ? [''] : [];
+        }
+
+        return $product->variants
+            ->filter(fn (ProductVariant $variant): bool => $product->labelIsPrintable($variant))
+            ->map(fn (ProductVariant $variant): string => (string) $variant->id)
+            ->values()
+            ->all();
     }
 
     /**

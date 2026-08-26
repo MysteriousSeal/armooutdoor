@@ -7988,3 +7988,9 @@ a.order-stepper-btn:focus-visible {
         flex: 1 1 14rem;
     }
 }
+
+/* The name and the line under it are printed in capitals and stored that way,
+   so the field shows them as they will be rather than as they were typed. */
+.label-form .form-control.is-uppercase {
+    text-transform: uppercase;
+}

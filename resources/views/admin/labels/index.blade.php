@@ -134,7 +134,16 @@
                                         <span class="label-missing">—</span>
                                     @endif
                                 </td>
-                                <td class="label-action">
+                                {{-- The script switches this on when a save fills the
+                                     last gap, so it needs to know which article the
+                                     cell belongs to and where its sheet lives. --}}
+                                <td
+                                    class="label-action"
+                                    data-label-action
+                                    data-product="{{ $product->id }}"
+                                    data-variant="{{ $article['variant']?->id ?? '' }}"
+                                    data-url="{{ $article['url'] }}"
+                                >
                                     @if ($article['missing'] === [])
                                         <a href="{{ $article['url'] }}" class="btn btn-secondary btn-small">Download label</a>
                                     @else
@@ -151,16 +160,16 @@
                                      time. --}}
                                 <tr class="label-form-row">
                                     <td colspan="6">
-                                        <form method="POST" action="{{ route('admin.labels.update', $product) }}" class="label-form">
+                                        <form method="POST" action="{{ route('admin.labels.update', $product) }}" class="label-form" data-label-form data-product="{{ $product->id }}">
                                             @csrf
                                             @method('PUT')
                                             <input type="hidden" name="back" value="{{ request()->fullUrl() }}">
 
                                             <label class="sr-only" for="label-title-{{ $product->id }}">Label title</label>
-                                            <input type="text" id="label-title-{{ $product->id }}" name="label_title" class="form-control" value="{{ $product->label?->title }}" maxlength="120" placeholder="Title">
+                                            <input type="text" id="label-title-{{ $product->id }}" name="label_title" class="form-control is-uppercase" value="{{ $product->label?->title }}" maxlength="120" placeholder="Title">
 
                                             <label class="sr-only" for="label-subtitle-{{ $product->id }}">Label subtitle</label>
-                                            <input type="text" id="label-subtitle-{{ $product->id }}" name="label_subtitle" class="form-control" value="{{ $product->label?->subtitle }}" maxlength="120" placeholder="Subtitle">
+                                            <input type="text" id="label-subtitle-{{ $product->id }}" name="label_subtitle" class="form-control is-uppercase" value="{{ $product->label?->subtitle }}" maxlength="120" placeholder="Subtitle">
 
                                             <label class="sr-only" for="label-composition-{{ $product->id }}">Composition</label>
                                             <input type="text" id="label-composition-{{ $product->id }}" name="label_composition" class="form-control" value="{{ $product->label?->composition }}" maxlength="500" placeholder="Composition (optional)">
@@ -192,4 +201,5 @@
 
 @push('scripts')
     <script src="{{ asset('js/admin-copy-code.js') }}" defer></script>
+    <script src="{{ asset('js/admin-label-save.js') }}" defer></script>
 @endpush

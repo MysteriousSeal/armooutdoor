@@ -87,7 +87,9 @@ class LabelListTest extends TestCase
             // button on are on the line below it.
             ->assertSee('is-disabled', false)
             ->assertDontSee('Missing:')
-            ->assertDontSee('/admin/products/'.$product->id.'/label', false);
+            // The cell knows its own address so the script can switch the
+            // button on after a save; what must not be there is the link.
+            ->assertDontSee('<a href="'.route('admin.products.label', $product).'"', false);
     }
 
     public function test_a_product_with_variants_gives_one_row_per_size(): void
@@ -102,8 +104,11 @@ class LabelListTest extends TestCase
         // own barcode.
         $this->assertStringContainsString('ARM-TS-M', $html);
         $this->assertStringContainsString('ARM-TS-L', $html);
-        $this->assertStringContainsString('/admin/products/'.$product->id.'/variants/'.$medium->id.'/label', $html);
-        $this->assertStringNotContainsString('/admin/products/'.$product->id.'/variants/'.$large->id.'/label', $html);
+        $link = fn (ProductVariant $variant): string => '<a href="'
+            .route('admin.products.variants.label', ['product' => $product, 'variant' => $variant]).'"';
+
+        $this->assertStringContainsString($link($medium), $html);
+        $this->assertStringNotContainsString($link($large), $html);
         $this->assertStringContainsString('is-disabled', $html);
     }
 
@@ -216,8 +221,9 @@ class LabelListTest extends TestCase
             ->assertSessionHas('status');
 
         $label = $product->refresh()->label;
-        $this->assertSame('Gants tactiques M-Pact', $label->title);
-        $this->assertSame('Taille M', $label->subtitle);
+        // Stored in capitals, whatever the case it was typed in.
+        $this->assertSame('GANTS TACTIQUES M-PACT', $label->title);
+        $this->assertSame('TAILLE M', $label->subtitle);
         $this->assertSame('60 % polyester', $label->composition);
         $this->assertNull($label->mention);
     }
@@ -347,8 +353,8 @@ class LabelListTest extends TestCase
         $this->assertDatabaseCount('product_labels', 1);
         $this->assertDatabaseHas('product_labels', [
             'product_id' => $product->id,
-            'title' => 'Gants',
-            'subtitle' => 'Taille M',
+            'title' => 'GANTS',
+            'subtitle' => 'TAILLE M',
         ]);
     }
 
@@ -359,7 +365,7 @@ class LabelListTest extends TestCase
         $this->save($product, ['label_title' => 'Gants Woodland', 'label_subtitle' => 'Taille L']);
 
         $this->assertDatabaseCount('product_labels', 1);
-        $this->assertSame('Gants Woodland', $product->fresh()->label->title);
+        $this->assertSame('GANTS WOODLAND', $product->fresh()->label->title);
     }
 
     public function test_emptying_every_field_removes_the_row(): void
@@ -393,5 +399,109 @@ class LabelListTest extends TestCase
     {
         return $this->actingAs(User::factory()->admin()->create())
             ->put('/admin/labels/'.$product->id, $wording);
+    }
+
+    public function test_a_save_from_the_page_answers_in_place(): void
+    {
+        $product = $this->unworded();
+
+        $response = $this->actingAs(User::factory()->admin()->create())
+            ->putJson('/admin/labels/'.$product->id, [
+                'label_title' => 'Gants',
+                'label_subtitle' => 'Taille M',
+            ])
+            ->assertOk()
+            ->assertJsonPath('message', 'Label wording saved.');
+
+        // The article can be printed now, so the answer says so and its button
+        // stops claiming otherwise without a reload. A plain product answers
+        // with an empty name, the way its cell identifies itself.
+        $response->assertJsonPath('printable', ['']);
+    }
+
+    public function test_the_answer_names_only_the_sizes_that_can_be_printed(): void
+    {
+        $product = $this->unworded(['sku' => null, 'gtin' => null]);
+        $medium = $this->variant($product, 'M', 'ARM-TS-M', '4006381333931');
+        $large = $this->variant($product, 'L', 'ARM-TS-L', null);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->putJson('/admin/labels/'.$product->id, [
+                'label_title' => 'T-shirt',
+                'label_subtitle' => 'Respirant',
+            ])
+            ->assertOk()
+            ->assertJsonPath('printable', [(string) $medium->id]);
+
+        $this->assertNotContains((string) $large->id, [(string) $medium->id]);
+    }
+
+    public function test_a_refused_save_comes_back_as_errors(): void
+    {
+        $product = $this->ready();
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->putJson('/admin/labels/'.$product->id, ['label_title' => str_repeat('a', 121)])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('label_title');
+    }
+
+    public function test_the_page_carries_what_the_script_needs(): void
+    {
+        $product = $this->ready(['gtin' => null]);
+
+        $this->page()
+            ->assertSee('js/admin-label-save.js', false)
+            ->assertSee('data-label-form', false)
+            // The cell knows its article and where its sheet lives, so a save
+            // can switch the button on.
+            ->assertSee('data-label-action', false)
+            ->assertSee('data-url="'.route('admin.products.label', $product).'"', false);
+    }
+
+    public function test_the_name_and_the_line_under_it_are_stored_in_capitals(): void
+    {
+        $product = $this->unworded();
+
+        $this->save($product, [
+            'label_title' => 'Gants tactiques M-Pact',
+            'label_subtitle' => 'Taille M — woodland',
+            'label_composition' => '60 % polyester',
+            'label_mention' => 'Ne convient pas aux enfants',
+        ]);
+
+        $label = $product->fresh()->label;
+
+        // Whoever types it, the label reads the same.
+        $this->assertSame('GANTS TACTIQUES M-PACT', $label->title);
+        $this->assertSame('TAILLE M — WOODLAND', $label->subtitle);
+        // The other two are sentences, and keep their case.
+        $this->assertSame('60 % polyester', $label->composition);
+        $this->assertSame('Ne convient pas aux enfants', $label->mention);
+    }
+
+    public function test_the_capitals_keep_their_accents(): void
+    {
+        $product = $this->unworded();
+
+        // A byte-by-byte upper would turn "é" into something unprintable.
+        $this->save($product, [
+            'label_title' => 'Cibles réactives fluo',
+            'label_subtitle' => 'Lot de cent — numérotées',
+        ]);
+
+        $label = $product->fresh()->label;
+
+        $this->assertSame('CIBLES RÉACTIVES FLUO', $label->title);
+        $this->assertSame('LOT DE CENT — NUMÉROTÉES', $label->subtitle);
+    }
+
+    public function test_the_field_shows_what_will_be_stored(): void
+    {
+        $this->ready();
+
+        // Typed in lowercase, shown in capitals: the field and the sheet agree
+        // before the save rather than after it.
+        $this->page()->assertSee('is-uppercase', false);
     }
 }
