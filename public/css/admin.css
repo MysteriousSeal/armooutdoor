@@ -4242,6 +4242,10 @@ a.admin-pagination-page:hover {
     grid-template-columns: minmax(16rem, 1.6fr) minmax(17rem, 1.2fr) auto;
 }
 
+.admin-filter-row--labels {
+    grid-template-columns: minmax(16rem, 1.8fr) auto;
+}
+
 .admin-filter-field--search .admin-toolbar-search {
     width: 100%;
     max-width: none;
@@ -5321,7 +5325,8 @@ input[type="date"].form-control {
     }
 
 .admin-filter-row--products,
-    .admin-filter-row--customers {
+    .admin-filter-row--customers,
+    .admin-filter-row--labels {
         grid-template-columns: 1fr;
     }
 
@@ -7959,6 +7964,10 @@ a.order-stepper-btn:focus-visible {
     color: var(--text-muted);
 }
 
+.admin-labels-page .admin-table-wrap {
+    box-shadow: var(--shadow);
+}
+
 .admin-table-code {
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 0.8125rem;
@@ -7969,6 +7978,17 @@ a.order-stepper-btn:focus-visible {
     width: 1%;
     white-space: nowrap;
     text-align: right;
+}
+
+.label-action .label-status {
+    margin-right: 0.45rem;
+}
+
+.admin-labels-page .btn-small {
+    height: 1.85rem;
+    min-width: 0;
+    padding: 0 0.7rem;
+    font-size: 0.75rem;
 }
 
 /* The incomplete tab borrows the red the rest of the site uses, and only when
@@ -8014,20 +8034,32 @@ a.order-stepper-btn:focus-visible {
 
 .label-form {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
     align-items: end;
-    gap: 0.6rem 0.75rem;
+    gap: 0.75rem 1rem;
+    padding: 0.9rem 1rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.label-form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 0;
 }
 
 /* The two long ones sit on the second line, under the two short ones. */
 .label-form-field--wide {
-    grid-column: span 1;
+    grid-row: 2;
 }
 
 .label-form .form-control {
-    height: 2.15rem;
-    padding: 0 0.55rem;
-    font-size: 0.8125rem;
+    width: 100%;
+    min-width: 0;
+    height: 2.5rem;
+    padding: 0 0.65rem;
+    font-size: 0.875rem;
 }
 
 /* The save closes the second line, aligned with the fields' feet. */
@@ -8035,6 +8067,11 @@ a.order-stepper-btn:focus-visible {
     grid-column: 3;
     grid-row: 2;
     align-self: end;
+}
+
+.label-form-actions .btn {
+    height: 2.5rem;
+    min-width: 5.5rem;
 }
 
 .label-form-optional {
@@ -8067,9 +8104,17 @@ a.order-stepper-btn:focus-visible {
         grid-template-columns: minmax(0, 1fr);
     }
 
+    .label-form-field--wide {
+        grid-row: auto;
+    }
+
     .label-form-actions {
         grid-column: 1;
         grid-row: auto;
+    }
+
+    .label-form-actions .btn {
+        width: 100%;
     }
 }
 

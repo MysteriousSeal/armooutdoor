@@ -11,20 +11,29 @@
         Articles that cannot be printed yet are listed too, saying what they
         are short of: this page is also the list of what needs filling in.
     --}}
-    <div class="admin-list-page">
+    <div class="admin-list-page admin-labels-page">
         <header class="admin-list-hero">
-            <p class="admin-list-kicker">Catalog</p>
-            <h2 class="admin-list-title">Labels</h2>
-            <p class="admin-list-lede">
-                One sheet per article. A label needs a title, a subtitle, a reference and a barcode — the wording is
-                set on the product, under Label.
-            </p>
+            <div class="admin-list-hero-row">
+                <div>
+                    <p class="admin-list-kicker">Catalog</p>
+                    <h2 class="admin-list-title">Labels</h2>
+                    <p class="admin-list-lede">
+                        One sheet per article. A label needs a title, a subtitle, a reference and a barcode — the wording is
+                        set on the product, under Label.
+                    </p>
+                </div>
+            </div>
+            <div class="admin-list-meta">
+                <span class="label-status is-ready">{{ number_format($readyCount) }} ready</span>
+                <span class="label-status is-incomplete">{{ number_format($incompleteCount) }} incomplete</span>
+            </div>
         </header>
 
         <nav class="admin-tabs" aria-label="Label readiness">
             @php($tabQuery = fn (string $value) => array_filter(['tab' => $value === 'all' ? null : $value, 'search' => $search ?: null]))
             <a href="{{ route('admin.labels.index', $tabQuery('all')) }}" class="{{ $tab === 'all' ? 'active' : '' }}">
                 All
+                <span class="admin-tab-count">{{ number_format($readyCount + $incompleteCount) }}</span>
             </a>
             <a href="{{ route('admin.labels.index', $tabQuery('ready')) }}" class="{{ $tab === 'ready' ? 'active' : '' }}">
                 Ready
@@ -44,7 +53,7 @@
             @if ($tab !== 'all')
                 <input type="hidden" name="tab" value="{{ $tab }}">
             @endif
-            <div class="admin-filter-row">
+            <div class="admin-filter-row admin-filter-row--labels">
                 <div class="admin-filter-field admin-filter-field--search">
                     <label class="admin-field-label" for="label-search">Search</label>
                     <input
@@ -57,7 +66,7 @@
                     >
                 </div>
                 <div class="admin-filter-actions">
-                    <button type="submit" class="btn btn-secondary">Search</button>
+                    <button type="submit" class="btn btn-primary">Search</button>
                     @if ($search !== '')
                         <a href="{{ route('admin.labels.index', array_filter(['tab' => $tab === 'all' ? null : $tab])) }}" class="admin-link">Clear</a>
                     @endif
