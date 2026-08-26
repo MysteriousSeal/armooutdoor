@@ -94,46 +94,22 @@
                             <td class="accounting-remark">{{ $entry->remark }}</td>
                             {{-- Every line here was typed, so every line can be corrected. --}}
                             <td class="accounting-row-actions">
-                                <button
-                                    type="button"
-                                    class="accounting-row-btn"
-                                    data-modal-open="entry-modal"
-                                    data-entry-edit
-                                    data-entry-action="{{ route('admin.accounting.entries.update', ['section' => 'purchases', 'month' => $monthKey, 'entry' => $entry]) }}"
-                                    @php
-                                        $entryPayload = [
-                                            'entered_on' => $entry->entered_on->format('Y-m-d'),
-                                            'invoice_number' => $entry->invoice_number,
-                                            'client' => $entry->client,
-                                            'type' => $entry->type,
-                                            'total' => number_format($entry->total_cents / 100, 2, '.', ''),
-                                            'vat_rate' => rtrim(rtrim(number_format($entry->vatRatePercent() ?? 0, 2, '.', ''), '0'), '.'),
-                                            'payment_method' => $entry->payment_method,
-                                            'remark' => $entry->remark,
-                                        ];
-                                    @endphp
-                                    data-entry='@json($entryPayload)'
-                                    aria-label="Edit this entry"
-                                    title="Edit this entry"
-                                >
-                                    <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
-                                        <path d="M4 20h4L19 9a2 2 0 0 0-3-3L5 17z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
-                                    </svg>
-                                </button>
-                                <button
-                                    type="button"
-                                    class="accounting-row-btn is-danger"
-                                    data-modal-open="entry-delete-modal"
-                                    data-entry-delete
-                                    data-entry-action="{{ route('admin.accounting.entries.destroy', ['section' => 'purchases', 'month' => $monthKey, 'entry' => $entry]) }}"
-                                    data-entry-label="{{ $entry->invoice_number ?: $entry->type }}"
-                                    aria-label="Delete this entry"
-                                    title="Delete this entry"
-                                >
-                                    <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
-                                        <path d="M5 7h14M10 7V5h4v2m-8 0 1 13h10l1-13" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </button>
+                                @php
+                                    // The form reads these values to fill itself in.
+                                    $payload = [
+                                        'entered_on' => $entry->entered_on->format('Y-m-d'),
+                                        'invoice_number' => $entry->invoice_number,
+                                        'client' => $entry->client,
+                                        'type' => $entry->type,
+                                        'total' => number_format($entry->total_cents / 100, 2, '.', ''),
+                                        'vat_rate' => rtrim(rtrim(number_format($entry->vatRatePercent() ?? 0, 2, '.', ''), '0'), '.'),
+                                        'payment_method' => $entry->payment_method,
+                                        'remark' => $entry->remark,
+                                    ];
+                                @endphp
+                                @include('admin.accounting.partials.row-actions', [
+                                    'label' => $entry->invoice_number ?: $entry->type,
+                                ])
                             </td>
                         </tr>
                     @endforeach

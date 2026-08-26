@@ -1,71 +1,15 @@
 {{--
-    A month's journal of purchases, for the accounting book.
+    A month's journal of purchases.
 
-    The counterpart of the sales journal and dressed the same way, so the two
-    file together: one page per month, landscape, written in French.
-
-    The lines come from AccountingController::purchaseJournalData(), the same
-    ones the screen shows. Each is recorded as its invoice reads — the total
-    paid and the rate charged — and the amount before tax and the tax itself
-    are worked back from those.
-
-    Every style is inline in this file. The PDF renderer has no access to the
-    site's stylesheets, and the widths below are tuned against real data —
-    changing one shifts every column after it.
+    Eight columns, and a supplier name that must not be cut in half. The rows
+    come from AccountingController::purchaseJournalData(), the same ones the
+    screen shows.
 --}}
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Journal des achats {{ \App\Support\AccountingPeriods::key($period) }}</title>
-    <style>
-        @page { margin: 0; }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: DejaVu Sans, sans-serif;
-            font-size: 11.5px;
-            line-height: 1.45;
-            color: #2c2c2c;
-            padding: 48px 56px;
-        }
+@extends('admin.accounting.journal-pdf')
 
-        .header { width: 100%; border-collapse: collapse; margin-bottom: 22px; }
-        .header td { vertical-align: top; }
-        .company-info { font-size: 9.5px; line-height: 1.4; color: #6b6b6b; }
-        .company-info .name { margin-bottom: 2px; font-size: 11px; font-weight: bold; color: #2c2c2c; }
-        table.company-cols { border-collapse: collapse; }
-        table.company-cols td { vertical-align: top; }
-        table.company-cols td + td { padding-left: 16px; }
+@section('title', 'Journal des achats')
 
-        .title-row { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-        .title-row td { vertical-align: bottom; }
-        .title {
-            font-size: 20.5px;
-            font-weight: bold;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: #2c2c2c;
-        }
-        .title-meta { text-align: right; font-size: 10.5px; color: #6b6b6b; }
-
-        /* The three boxes under the title: period, entry count, print date. */
-        table.meta { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
-        table.meta td {
-            width: 33.33%;
-            padding: 8px 10px;
-            background: #f7f6f4;
-            border: 1px solid #e8e6e3;
-        }
-        table.meta td + td { border-left: 0; }
-        table.meta .label {
-            font-size: 8.5px;
-            font-weight: bold;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: #8b7e74;
-        }
-        table.meta .value { padding-top: 3px; font-size: 11.5px; color: #2c2c2c; }
-
+@push('styles')
         /* The journal itself. Column widths total 98%, leaving a margin; they
            are set per column because the renderer will otherwise share the
            width by content and wrap a long client name. */
@@ -112,109 +56,9 @@
             border-top: 1.5px solid #8b7e74;
         }
         table.journal tfoot .paid { font-size: 12px; }
-        /* The heading above a total, in small type: it recalls the column
-           without weighing more than the figure. */
-        .foot-label {
-            display: block;
-            margin-bottom: 2px;
-            font-size: 7.5px;
-            font-weight: bold;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: #8b7e74;
-        }
+@endpush
 
-        .notes-body { margin-bottom: 12px; font-size: 9.5px; line-height: 1.5; color: #6b6b6b; }
-
-        /* The signature, at the foot of the page. A frame rather than three
-           bare rules: a missing signature has to show at a glance on a filed
-           sheet, without reading the labels. */
-        table.signature { width: 100%; border-collapse: collapse; margin-top: 24px; }
-        table.signature td {
-            padding: 9px 12px 10px;
-            border: 1px solid #e8e6e3;
-            background: #f7f6f4;
-            vertical-align: top;
-        }
-        table.signature td.sign-name { width: 34%; }
-        table.signature td.sign-date { width: 22%; }
-        table.signature td + td { border-left: 0; }
-        .sign-label {
-            font-size: 8.5px;
-            font-weight: bold;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: #8b7e74;
-        }
-        .sign-scope { margin-bottom: 7px; font-size: 10.5px; color: #2c2c2c; }
-        /* Tall enough for a real handwritten signature, not a paraph. */
-        .sign-rule { height: 46px; }
-        .sign-rule-short { height: 22px; }
-
-        .footer {
-            margin-top: 22px;
-            padding-top: 8px;
-            border-top: 1px solid #e8e6e3;
-            text-align: center;
-            font-size: 9px;
-            color: #6b6b6b;
-        }
-    </style>
-</head>
-<body>
-    {{-- The journal belongs to the company, not to the shop sign: SwiftShelf
-         keeps the accounts, ArmoOutdoor is only the shop. --}}
-    {{-- Letterhead: the company, top left, where a letterhead belongs. --}}
-    <table class="header">
-        <tr>
-            <td class="company-info">
-                <div class="name">{{ $company->value('company_name') }}</div>
-                <table class="company-cols">
-                    <tr>
-                        <td>
-                            @foreach ($company->addressLines() as $line)
-                                {{ $line }}<br>
-                            @endforeach
-                            SIRET {{ $company->value('siret') }}
-                        </td>
-                        <td>
-                            {{ $company->formattedPhone() }}<br>
-                            {{-- The company address, not the shop's: the journal is
-                                 a SwiftShelf document, and the shop contact can
-                                 change in the settings without the accounting
-                                 book following. --}}
-                            hello@swiftshelf.fr
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
-
-    <table class="title-row">
-        <tr>
-            <td><div class="title">Journal des achats</div></td>
-            <td class="title-meta">{{ \App\Support\AccountingPeriods::labelFr($period) }}</td>
-        </tr>
-    </table>
-
-    <table class="meta">
-        <tr>
-            <td>
-                <div class="label">Période</div>
-                <div class="value">{{ \App\Support\AccountingPeriods::dateFr($period, false) }} au {{ \App\Support\AccountingPeriods::dateFr($period->endOfMonth()) }}</div>
-            </td>
-            <td>
-                <div class="label">Écritures</div>
-                <div class="value">{{ $rows->count() }}</div>
-            </td>
-            <td>
-                <div class="label">Édité le</div>
-                <div class="value">{{ \App\Support\AccountingPeriods::dateFr(\Carbon\CarbonImmutable::now()) }}</div>
-            </td>
-        </tr>
-    </table>
-
+@section('table')
     <table class="journal">
         {{-- Date, invoice, supplier, kind, the three amounts, payment. --}}
         <thead>
@@ -260,36 +104,8 @@
             </tr>
         </tfoot>
     </table>
+@endsection
 
-    <div class="notes-body">
-        Pour chaque ligne, on saisit le total TTC et le taux de TVA figurant sur la facture du fournisseur. Le total HT et la TVA sont calculés à partir de ces deux montants.
-    </div>
-
-    <table class="signature">
-        <tr>
-            <td colspan="3" style="border-bottom: 0; background: #fff; padding-bottom: 2px;">
-                <div class="sign-label">Signature</div>
-                <div class="sign-scope">Pour {{ $company->value('company_name') }}</div>
-            </td>
-        </tr>
-        <tr>
-            <td class="sign-name">
-                <div class="sign-label">Nom</div>
-                <div class="sign-rule-short"></div>
-            </td>
-            <td class="sign-date">
-                <div class="sign-label">Date</div>
-                <div class="sign-rule-short"></div>
-            </td>
-            <td>
-                <div class="sign-label">Signature</div>
-                <div class="sign-rule"></div>
-            </td>
-        </tr>
-    </table>
-
-    <div class="footer">
-        Journal des achats — {{ \App\Support\AccountingPeriods::labelFr($period) }}
-    </div>
-</body>
-</html>
+@section('note')
+    Pour chaque ligne, on saisit le total TTC et le taux de TVA figurant sur la facture du fournisseur. Le total HT et la TVA sont calculés à partir de ces deux montants.
+@endsection

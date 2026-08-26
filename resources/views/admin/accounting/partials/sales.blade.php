@@ -108,7 +108,7 @@
                                         @php
                                             $entry = $row['entry'];
                                             // The form reads these values to fill itself in.
-                                            $entryPayload = [
+                                            $payload = [
                                                 'entered_on' => $entry->entered_on->format('Y-m-d'),
                                                 'invoice_number' => $entry->invoice_number,
                                                 'client' => $entry->client,
@@ -120,34 +120,9 @@
                                                 'remark' => $entry->remark,
                                             ];
                                         @endphp
-                                        <button
-                                            type="button"
-                                            class="accounting-row-btn"
-                                            data-modal-open="entry-modal"
-                                            data-entry-edit
-                                            data-entry-action="{{ route('admin.accounting.entries.update', ['section' => $section, 'month' => $monthKey, 'entry' => $entry]) }}"
-                                            data-entry='@json($entryPayload)'
-                                            aria-label="Edit this entry"
-                                            title="Edit this entry"
-                                        >
-                                            <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
-                                                <path d="M4 20h4L19 9a2 2 0 0 0-3-3L5 17z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
-                                            </svg>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            class="accounting-row-btn is-danger"
-                                            data-modal-open="entry-delete-modal"
-                                            data-entry-delete
-                                            data-entry-action="{{ route('admin.accounting.entries.destroy', ['section' => $section, 'month' => $monthKey, 'entry' => $entry]) }}"
-                                            data-entry-label="{{ $entry->invoice_number ?: $entry->typeLabel() }}"
-                                            aria-label="Delete this entry"
-                                            title="Delete this entry"
-                                        >
-                                            <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
-                                                <path d="M5 7h14M10 7V5h4v2m-8 0 1 13h10l1-13" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-                                            </svg>
-                                        </button>
+                                        @include('admin.accounting.partials.row-actions', [
+                                            'label' => $entry->invoice_number ?: $entry->typeLabel(),
+                                        ])
                                     @endif
                                 </td>
                             </tr>

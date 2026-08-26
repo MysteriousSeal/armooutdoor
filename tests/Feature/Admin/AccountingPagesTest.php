@@ -154,4 +154,31 @@ class AccountingPagesTest extends TestCase
             $content
         );
     }
+
+    public function test_both_journals_are_printed_in_the_same_frame(): void
+    {
+        $this->travelTo('2026-08-26 10:00:00');
+
+        // One layout carries the letterhead, the meta boxes and the signature
+        // block, so an edit to any of them is made once.
+        foreach (['sales-pdf', 'purchases-pdf'] as $journal) {
+            $source = file_get_contents(resource_path('views/admin/accounting/'.$journal.'.blade.php'));
+
+            $this->assertStringContainsString("@extends('admin.accounting.journal-pdf')", $source);
+            $this->assertStringNotContainsString('<!DOCTYPE html>', $source);
+            $this->assertStringNotContainsString('class="signature"', $source);
+        }
+    }
+
+    public function test_the_row_buttons_are_written_once(): void
+    {
+        // The pencil and the bin are the same on both sides; only what fills
+        // the form differs.
+        foreach (['sales', 'purchases'] as $section) {
+            $source = file_get_contents(resource_path('views/admin/accounting/partials/'.$section.'.blade.php'));
+
+            $this->assertStringContainsString("@include('admin.accounting.partials.row-actions'", $source);
+            $this->assertStringNotContainsString('data-entry-delete', $source);
+        }
+    }
 }

@@ -151,26 +151,24 @@ class AccountingController extends Controller
             'period' => $period,
         ];
 
-        if ($section === 'purchases') {
-            $data['rows'] = $this->purchaseRowsOf($period);
-            $data['paymentMethods'] = AccountingEntry::PAYMENT_METHODS;
-            $data['lastDownload'] = AccountingJournalDownload::latestFor($section, $month);
-            $data['stale'] = $data['lastDownload']?->isStaleAgainst($this->purchaseFingerprint($data['rows'])) ?? false;
-            $data['downloadable'] = AccountingPeriods::isClosed($period) && $data['rows']->isNotEmpty();
+        $rows = $section === 'purchases'
+            ? $this->purchaseRowsOf($period)
+            : $this->rowsOf($section, $period);
 
-            return $data;
-        }
+        $lastDownload = AccountingJournalDownload::latestFor($section, $month);
+
+        $data['rows'] = $rows;
+        $data['paymentMethods'] = AccountingEntry::PAYMENT_METHODS;
+        $data['lastDownload'] = $lastDownload;
+        // Whether the filed copy still says what the month says now.
+        $data['stale'] = $lastDownload?->isStaleAgainst($this->fingerprintOf($section, $rows)) ?? false;
+        // A month with no line has nothing to print, so its button is off for
+        // the same reason a running month's is.
+        $data['downloadable'] = AccountingPeriods::isClosed($period) && $rows->isNotEmpty();
 
         if ($section === 'sales') {
-            $data['rows'] = $this->rowsOf($section, $period);
-            $data['lastDownload'] = AccountingJournalDownload::latestFor($section, $month);
-            // A month with no line has nothing to print, so its button is off
-            // for the same reason a running month's is.
-            $data['downloadable'] = AccountingPeriods::isClosed($period) && $data['rows']->isNotEmpty();
-            // Whether the filed copy still says what the month says now.
-            $data['stale'] = $data['lastDownload']?->isStaleAgainst($this->fingerprint($data['rows'])) ?? false;
+            // Only sales pick their kind from a list; a purchase writes it out.
             $data['entryTypes'] = AccountingEntry::TYPES;
-            $data['paymentMethods'] = AccountingEntry::PAYMENT_METHODS;
         }
 
         return $data;
@@ -263,32 +261,17 @@ class AccountingController extends Controller
      */
     public function salesPdf(Request $request, string $month): Response
     {
-        $period = $this->sectionPeriod('sales', $month);
+        $period = $this->journalPeriod('sales', $month, $rows);
 
-        // A month still running has no journal: two printings of the same
-        // month would not agree, and both would be filed.
-        abort_unless(AccountingPeriods::isClosed($period), 404);
-
-        $rows = $this->rowsOf('sales', $period);
-
-        // Nor has a month that sold nothing: an empty sheet is not a document,
-        // and the button that leads here is switched off for the same reason.
-        abort_if($rows->isEmpty(), 404);
-
-        $pdf = Pdf::loadView('admin.accounting.sales-pdf', $this->journalData($period))
-            // Ten columns do not stand upright without cutting names in half.
-            ->setPaper('a4', 'landscape');
-
-        // Written down before the file is handed over: an accounting book
-        // leaving the admin is worth a trail.
-        AccountingJournalDownload::record(
+        return $this->journal(
+            $request,
             'sales',
-            AccountingPeriods::key($period),
+            $period,
+            'admin.accounting.sales-pdf',
+            $this->journalData($period),
             $this->fingerprint($rows),
-            $request->user()?->id,
+            'ventes',
         );
-
-        return $pdf->download('ventes-'.AccountingPeriods::key($period).'.pdf');
     }
 
     /**
@@ -310,11 +293,11 @@ class AccountingController extends Controller
                 return [$month => false];
             }
 
-            $fingerprint = $section === 'purchases'
-                ? $this->purchaseFingerprint($this->purchaseRowsOf($period))
-                : $this->fingerprint($this->rowsOf('sales', $period));
+            $rows = $section === 'purchases'
+                ? $this->purchaseRowsOf($period)
+                : $this->rowsOf('sales', $period);
 
-            return [$month => $download->isStaleAgainst($fingerprint)];
+            return [$month => $download->isStaleAgainst($this->fingerprintOf($section, $rows))];
         });
     }
 
@@ -374,26 +357,17 @@ class AccountingController extends Controller
      */
     public function purchasesPdf(Request $request, string $month): Response
     {
-        $period = $this->sectionPeriod('purchases', $month);
+        $period = $this->journalPeriod('purchases', $month, $rows);
 
-        abort_unless(AccountingPeriods::isClosed($period), 404);
-
-        $rows = $this->purchaseRowsOf($period);
-
-        abort_if($rows->isEmpty(), 404);
-
-        $pdf = Pdf::loadView('admin.accounting.purchases-pdf', $this->purchaseJournalData($period, $rows))
-            // Eight columns, and a supplier name that must not be cut in half.
-            ->setPaper('a4', 'landscape');
-
-        AccountingJournalDownload::record(
+        return $this->journal(
+            $request,
             'purchases',
-            AccountingPeriods::key($period),
+            $period,
+            'admin.accounting.purchases-pdf',
+            $this->purchaseJournalData($period, $rows),
             $this->purchaseFingerprint($rows),
-            $request->user()?->id,
+            'achats',
         );
-
-        return $pdf->download('achats-'.AccountingPeriods::key($period).'.pdf');
     }
 
     /**
@@ -437,6 +411,81 @@ class AccountingController extends Controller
             $entry->total_cents,
             $entry->payment_method,
         ]))->join("\n"));
+    }
+
+    /**
+     * The signature of a month's lines, whichever side of the accounts.
+     *
+     * The two shapes are hashed differently — an array row on one side, an
+     * entry model on the other — but the question is the same, so the choice
+     * is made once here rather than at each call site.
+     *
+     * @param  Collection<int, mixed>  $rows
+     */
+    private function fingerprintOf(string $section, Collection $rows): string
+    {
+        return $section === 'purchases'
+            ? $this->purchaseFingerprint($rows)
+            : $this->fingerprint($rows);
+    }
+
+    /**
+     * The month a journal may be printed for, and the lines it would hold.
+     *
+     * Refuses a month still running, since two printings of it would not agree
+     * and both would be filed, and a month with nothing in it, since an empty
+     * sheet is not a document. The button that leads here is switched off for
+     * the same two reasons.
+     *
+     * @param  Collection<int, mixed>|null  $rows  Filled in with the month's lines.
+     */
+    private function journalPeriod(string $section, string $month, ?Collection &$rows): CarbonImmutable
+    {
+        $period = $this->sectionPeriod($section, $month);
+
+        abort_unless(AccountingPeriods::isClosed($period), 404);
+
+        $rows = $section === 'purchases'
+            ? $this->purchaseRowsOf($period)
+            : $this->rowsOf($section, $period);
+
+        abort_if($rows->isEmpty(), 404);
+
+        return $period;
+    }
+
+    /**
+     * Renders a journal and writes down that it was taken.
+     *
+     * Both sections come through here, so neither can drift from the other on
+     * the page shape or on what is recorded.
+     *
+     * @param  array<string, mixed>  $data
+     * @param  string  $stem  The French word the file is named after.
+     */
+    private function journal(
+        Request $request,
+        string $section,
+        CarbonImmutable $period,
+        string $view,
+        array $data,
+        string $fingerprint,
+        string $stem,
+    ): Response {
+        // Landscape on both: neither journal stands upright without cutting a
+        // client or a supplier name in half.
+        $pdf = Pdf::loadView($view, $data)->setPaper('a4', 'landscape');
+
+        // Written down before the file is handed over: an accounting book
+        // leaving the admin is worth a trail.
+        AccountingJournalDownload::record(
+            $section,
+            AccountingPeriods::key($period),
+            $fingerprint,
+            $request->user()?->id,
+        );
+
+        return $pdf->download($stem.'-'.AccountingPeriods::key($period).'.pdf');
     }
 
     /**
