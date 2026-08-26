@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 #[ObservedBy(StockMovementObserver::class)]
 #[Fillable([
@@ -47,6 +48,28 @@ use Illuminate\Support\Collection;
 ])]
 class Product extends Model
 {
+    /**
+     * Ce qu'on regarde avant d'acheter, dans cet ordre.
+     *
+     * Les étiquettes viennent du vocabulaire que le catalogue réemploie d'une
+     * fiche à l'autre — voir `docs/admin/make-products-ok.md`.
+     */
+    private const KEY_CHARACTERISTIC_LABELS = [
+        'quantité',
+        'diamètre',
+        'dimensions',
+        'taille',
+        'longueur',
+        'capacité',
+        'contenance',
+        'calibre',
+        'matière',
+        'couleur',
+        'format',
+        'distance conseillée',
+        'type',
+    ];
+
     /** TVA française applicable à l'achat fournisseur, en points de base. */
     public const VAT_RATE_BASIS_POINTS = 2000;
 
@@ -301,6 +324,25 @@ class Product extends Model
         return $this->relationLoaded('reviews') ? $this->reviews->count() : $this->reviews()->count();
     }
 
+    /**
+     * Combien d'avis par note, de 5 à 1.
+     *
+     * Les notes sans avis valent zéro plutôt que de manquer : la répartition
+     * se lit comme un histogramme, et une barre absente se confondrait avec
+     * une barre courte.
+     *
+     * @return array<int, int>
+     */
+    public function ratingDistribution(): array
+    {
+        $counts = ($this->relationLoaded('reviews') ? $this->reviews : $this->reviews()->get())
+            ->countBy('rating');
+
+        return collect(range(5, 1))
+            ->mapWithKeys(fn (int $stars): array => [$stars => (int) $counts->get($stars, 0)])
+            ->all();
+    }
+
     public function averageRating(): ?float
     {
         $average = $this->relationLoaded('reviews')
@@ -344,6 +386,40 @@ class Product extends Model
     public function canBeReviewedBy(?User $user): bool
     {
         return $this->eligibleOrderFor($user) !== null;
+    }
+
+    /**
+     * Les quelques caractéristiques qui décident d'un achat.
+     *
+     * Le tableau complet vit en bas de page, seize lignes toutes de même
+     * poids ; celle qu'on vérifie avant de cliquer se trouve à la deuxième ou
+     * à la quatorzième. On en remonte quelques-unes près du prix.
+     *
+     * L'ordre suit une liste d'étiquettes, celles que le catalogue réutilise
+     * d'une fiche à l'autre. Une fiche qui n'en emploie aucune garde ses
+     * premières lignes plutôt que rien : mieux vaut un choix approximatif que
+     * pas de résumé du tout.
+     *
+     * @return array<int, array<string, string>>
+     */
+    public function keyCharacteristics(int $max = 4): array
+    {
+        $rows = collect($this->characteristics ?? [])
+            ->filter(fn ($row): bool => filled($row['label'] ?? null) && filled($row['value'] ?? null))
+            // Le poids du colis ferme le tableau complet : il renseigne le
+            // port, il ne décide pas d'un achat.
+            ->reject(fn (array $row): bool => Str::startsWith(Str::lower($row['label']), 'poids'))
+            ->values();
+
+        $ranked = $rows->sortBy(function (array $row) use ($rows): array {
+            $rank = array_search(Str::lower($row['label']), self::KEY_CHARACTERISTIC_LABELS, true);
+
+            // À égalité de rang, l'ordre du tableau départage : deux lignes
+            // hors liste ne doivent pas s'inverser d'un affichage à l'autre.
+            return [$rank === false ? PHP_INT_MAX : $rank, $rows->search($row, true)];
+        });
+
+        return $ranked->take($max)->values()->all();
     }
 
     public function localizedName(): string

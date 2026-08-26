@@ -8,6 +8,32 @@
     @if ($product->blogPosts->isNotEmpty())
         <link rel="stylesheet" href="{{ versioned_asset('css/blog.css') }}">
     @endif
+    <script type="application/ld+json">
+        {!! json_encode(\App\Support\ProductSchema::for($product), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+    </script>
+    <script type="application/ld+json">
+        {!! json_encode([
+            '@@context' => 'https://schema.org',
+            '@@type' => 'BreadcrumbList',
+            'itemListElement' => collect([
+                ['name' => __('store.breadcrumb_home'), 'item' => localized_route('home')],
+                $product->category?->parent ? [
+                    'name' => $product->category->parent->localizedName(),
+                    'item' => localized_route('categories.show', ['category' => $product->category->parent->slug]),
+                ] : null,
+                $product->category ? [
+                    'name' => $product->category->localizedName(),
+                    'item' => localized_route('categories.show', ['category' => $product->category->slug]),
+                ] : null,
+                ['name' => $product->localizedName(), 'item' => localized_route('products.show', ['product' => $product->slug])],
+            ])->filter()->values()->map(fn (array $crumb, int $index): array => [
+                '@@type' => 'ListItem',
+                'position' => $index + 1,
+                'name' => $crumb['name'],
+                'item' => $crumb['item'],
+            ])->all(),
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+    </script>
 @endpush
 
 @section('content')
@@ -61,7 +87,13 @@
                                 class="product-detail-thumb {{ $loop->first ? 'is-active' : '' }}"
                                 data-full-src="{{ $src['full'] }}"
                             >
-                                <img src="{{ $src['thumb'] }}" alt="" loading="lazy">
+                                <img
+                                    src="{{ $src['thumb'] }}"
+                                    alt=""
+                                    width="{{ \App\Support\ImageThumbnailer::SIZE }}"
+                                    height="{{ \App\Support\ImageThumbnailer::SIZE }}"
+                                    loading="lazy"
+                                >
                             </button>
                         @endforeach
                     </div>
@@ -82,6 +114,7 @@
                     // La référence affichée est celle de ce qui partira au
                     // panier : celle de la variante si elle en a une.
                     $displaySku = $displayVariant?->sku ?: $product->sku;
+                    $keySpecs = $product->keyCharacteristics();
                 @endphp
 
                 @if ($product->category)
@@ -98,10 +131,21 @@
                     <span class="product-detail-sku-value" id="product-detail-sku-value">{{ $displaySku }}</span>
                 </p>
 
-                <div class="product-detail-rating">
+                {{-- On regarde les étoiles en haut, puis on cherche les avis en
+                     bas : autant que les premières y mènent. Le lien porte la
+                     note en toutes lettres, les étoiles n'étant qu'un dessin. --}}
+                <a class="product-detail-rating" href="#product-reviews-title">
                     <span class="star-rating" aria-hidden="true">{{ str_repeat('★', (int) round($product->averageRating() ?? 0)) }}{{ str_repeat('☆', 5 - (int) round($product->averageRating() ?? 0)) }}</span>
-                    <span class="card-rating-count">({{ $product->reviewsCount() }})</span>
-                </div>
+                    <span class="card-rating-count" aria-hidden="true">({{ $product->reviewsCount() }})</span>
+                    <span class="sr-only">
+                        @if ($product->reviewsCount() > 0)
+                            {{ __('store.reviews_rating_summary', ['rating' => number_format($product->averageRating(), 1, ',', ''), 'count' => $product->reviewsCount()]) }}
+                        @else
+                            {{ __('store.reviews_empty') }}
+                        @endif
+                    </span>
+                    <span class="product-detail-rating-link" aria-hidden="true">{{ __('store.reviews_see_all') }}</span>
+                </a>
                 <div class="product-detail-meta">
                     <span
                         class="badge badge-active cart-line-discount-badge"
@@ -130,6 +174,20 @@
                         {{ __('store.'.($stockState === 'at_supplier' ? 'available_at_supplier' : $stockState)) }}
                     </span>
                 </div>
+
+                {{-- Ce qu'on vérifie avant de cliquer, à côté du prix. Le
+                     tableau complet reste en bas : ici on répond aux trois ou
+                     quatre questions qui décident, sans faire défiler. --}}
+                @if ($keySpecs !== [])
+                    <dl class="product-key-specs">
+                        @foreach ($keySpecs as $spec)
+                            <div class="product-key-spec">
+                                <dt>{{ $spec['label'] }}</dt>
+                                <dd title="{{ $spec['value'] }}">{{ $spec['value'] }}</dd>
+                            </div>
+                        @endforeach
+                    </dl>
+                @endif
                 @php
                     $displayLeadTimeSource = $product->hasVariants() ? $displayVariant : $product;
                     $displayLeadTimeVisible = $product->hasVariants()
@@ -309,14 +367,25 @@
                     </button>
                 </form>
 
+                {{-- Un titre, puis ses lignes. Répété une fois par mode de
+                     livraison, « Livraison France » se lisait deux fois de
+                     suite pour dire une seule chose. --}}
                 <ul class="product-detail-perks">
-                    @if ($allowedHomeCarriers->isNotEmpty())
-                        <li>{{ __('store.home_trust_ship_title') }} — À domicile : {{ $allowedHomeCarriers->join(', ', ' et ') }}</li>
+                    @if ($allowedHomeCarriers->isNotEmpty() || $allowedRelayCarriers->isNotEmpty())
+                        <li>
+                            <span class="product-perk-title">{{ __('store.home_trust_ship_title') }}</span>
+                            @if ($allowedHomeCarriers->isNotEmpty())
+                                <span class="product-perk-line">{{ __('store.shipping_home') }} : {{ $allowedHomeCarriers->join(', ', ' et ') }}</span>
+                            @endif
+                            @if ($allowedRelayCarriers->isNotEmpty())
+                                <span class="product-perk-line">{{ __('store.shipping_relay') }} : {{ $allowedRelayCarriers->join(', ', ' et ') }}</span>
+                            @endif
+                        </li>
                     @endif
-                    @if ($allowedRelayCarriers->isNotEmpty())
-                        <li>{{ __('store.home_trust_ship_title') }} — Point relais : {{ $allowedRelayCarriers->join(', ', ' et ') }}</li>
-                    @endif
-                    <li>{{ __('store.home_trust_pay_title') }} — {{ __('store.footer_payment_card') }}, {{ __('store.footer_payment_paypal') }}</li>
+                    <li>
+                        <span class="product-perk-title">{{ __('store.home_trust_pay_title') }}</span>
+                        <span class="product-perk-line">{{ __('store.footer_payment_card') }}, {{ __('store.footer_payment_paypal') }}</span>
+                    </li>
                 </ul>
             </div>
         </article>
@@ -347,22 +416,80 @@
 
             <div class="reviews-summary">
                 @if ($product->averageRating() !== null)
+                    {{-- Les étoiles sont un dessin : la note se lit à côté, en
+                         toutes lettres, pour l'œil comme pour la synthèse vocale. --}}
                     <span class="star-rating" aria-hidden="true">{{ str_repeat('★', (int) round($product->averageRating())) }}{{ str_repeat('☆', 5 - (int) round($product->averageRating())) }}</span>
                     <span class="reviews-summary-value">{{ number_format($product->averageRating(), 1) }} / 5</span>
                 @endif
                 <span class="reviews-summary-count">{{ trans_choice('store.reviews_count', $product->reviewsCount(), ['count' => $product->reviewsCount()]) }}</span>
             </div>
 
+            @if ($product->reviewsCount() > 0)
+                {{-- Une moyenne cache son échantillon : 3,5 sur deux avis n'est
+                     pas un verdict, c'est deux opinions. La répartition le dit
+                     mieux que la moyenne seule. --}}
+                @php($ratingCounts = $product->ratingDistribution())
+                <table class="reviews-distribution">
+                    <caption class="sr-only">{{ __('store.reviews_distribution_title') }}</caption>
+                    <tbody>
+                        @foreach ($ratingCounts as $stars => $count)
+                            <tr>
+                                <th scope="row">
+                                    <span aria-hidden="true">{{ $stars }} ★</span>
+                                    <span class="sr-only">{{ trans_choice('store.review_rating_value', $stars, ['count' => $stars]) }}</span>
+                                </th>
+                                <td class="reviews-distribution-track">
+                                    <span
+                                        class="reviews-distribution-bar {{ $count === 0 ? 'is-empty' : '' }}"
+                                        style="--share: {{ $product->reviewsCount() > 0 ? round($count / $product->reviewsCount() * 100) : 0 }}%"
+                                    ></span>
+                                </td>
+                                <td class="reviews-distribution-count">
+                                    <span aria-hidden="true">{{ $count }}</span>
+                                    <span class="sr-only">{{ __('store.reviews_distribution_row', ['count' => $count, 'stars' => $stars]) }}</span>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @endif
+
+            {{-- La boutique n'accepte un avis que d'un client dont la commande
+                 est partie. C'est une garantie que peu de boutiques peuvent
+                 donner, et la page ne la disait nulle part. --}}
+            <p class="reviews-gate">
+                <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+                    <path d="M12 3l7 3v5c0 4.4-3 8.2-7 10-4-1.8-7-5.6-7-10V6l7-3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                    <path d="m9 12 2 2 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                {{ __('store.reviews_gate') }}
+            </p>
+
             @auth
                 @if ($product->canBeReviewedBy(auth()->user()))
-                    <form method="POST" action="{{ localized_route('reviews.store', ['product' => $product->slug]) }}" class="review-form">
+                    {{-- Personne n'a encore écrit : c'est le seul moment où la
+                         page a une raison de demander, et elle ne le faisait
+                         pas. Ailleurs, le titre habituel suffit. --}}
+                    @php($isFirstReview = $product->reviews->isEmpty())
+                    <form method="POST" action="{{ localized_route('reviews.store', ['product' => $product->slug]) }}" class="review-form {{ $isFirstReview ? 'is-first' : '' }}">
                         @csrf
-                        <h4 class="review-form-title">{{ __('store.review_form_title') }}</h4>
+                        <h4 class="review-form-title">
+                            {{ $isFirstReview ? __('store.review_form_title_first') : __('store.review_form_title') }}
+                        </h4>
+                        @if ($isFirstReview)
+                            <p class="review-form-intro">{{ __('store.review_form_intro_first') }}</p>
+                        @endif
 
+                        {{-- De 1 à 5, dans l'ordre du document. Écrites à
+                             l'envers et retournées en CSS, les flèches du
+                             clavier parcouraient les notes de droite à gauche. --}}
                         <div class="star-input" role="radiogroup" aria-label="{{ __('store.review_rating_label') }}">
-                            @for ($value = 5; $value >= 1; $value--)
+                            @for ($value = 1; $value <= 5; $value++)
                                 <input type="radio" name="rating" id="rating-{{ $value }}" value="{{ $value }}" @checked((int) old('rating') === $value) required>
-                                <label for="rating-{{ $value }}">★</label>
+                                <label for="rating-{{ $value }}">
+                                    <span aria-hidden="true">★</span>
+                                    <span class="sr-only">{{ trans_choice('store.review_rating_value', $value, ['count' => $value]) }}</span>
+                                </label>
                             @endfor
                         </div>
                         @error('rating') <p class="form-error">{{ $message }}</p> @enderror
@@ -381,14 +508,27 @@
             @endauth
 
             @if ($product->reviews->isEmpty())
-                <p class="reviews-empty">{{ __('store.reviews_empty') }}</p>
+                {{-- Le formulaire dit déjà qu'il n'y a rien : le répéter en
+                     dessous ferait deux fois la même phrase. --}}
+                @unless (auth()->check() && $product->canBeReviewedBy(auth()->user()))
+                    <p class="reviews-empty">{{ __('store.reviews_empty') }}</p>
+                @endunless
             @else
                 <ul class="reviews-list">
                     @foreach ($product->reviews as $review)
                         <li class="review-item">
                             <div class="review-item-head">
                                 <span class="star-rating" aria-hidden="true">{{ str_repeat('★', $review->rating) }}{{ str_repeat('☆', 5 - $review->rating) }}</span>
+                                <span class="sr-only">{{ trans_choice('store.review_rating_value', $review->rating, ['count' => $review->rating]) }}</span>
                                 <span class="review-item-author">{{ $review->reviewerName() }}</span>
+                                @if ($review->order_id)
+                                    <span class="review-verified" title="{{ __('store.review_verified_hint') }}">
+                                        <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">
+                                            <path d="m5 13 4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                        {{ __('store.review_verified') }}
+                                    </span>
+                                @endif
                                 <span class="review-item-date">{{ $review->created_at->translatedFormat('d F Y') }}</span>
                             </div>
                             @if (filled($review->comment))

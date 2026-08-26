@@ -1567,11 +1567,40 @@
     user-select: all;
 }
 
+/* Les étoiles du haut mènent aux avis du bas. Elles gardent l'allure d'une
+   note plutôt que celle d'un lien : c'est « voir les avis », en retrait, qui
+   dit qu'on peut cliquer, et qui se souligne au survol. */
 .product-detail-rating {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 0.35rem;
     margin-top: 0.5rem;
+    color: inherit;
+    text-decoration: none;
+}
+
+.product-detail-rating-link {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    border-bottom: 1px solid transparent;
+    transition: color 0.12s ease, border-color 0.12s ease;
+}
+
+.product-detail-rating:hover .product-detail-rating-link,
+.product-detail-rating:focus-visible .product-detail-rating-link {
+    color: var(--accent);
+    border-bottom-color: currentColor;
+}
+
+.product-detail-rating:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .product-detail-rating-link {
+        transition: none;
+    }
 }
 
 .product-detail-meta {
@@ -1934,7 +1963,17 @@
 }
 
 .product-detail-perks li + li {
-    margin-top: 0.25rem;
+    margin-top: 0.55rem;
+}
+
+.product-perk-title {
+    display: block;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.product-perk-line {
+    display: block;
 }
 
 .product-desc {
@@ -1960,40 +1999,117 @@
     color: var(--text);
 }
 
+/* Le premier paragraphe dit ce qu'est le produit ; les suivants le
+   détaillent. Tous du même poids, cette phrase-là se perdait entre la
+   matière et la distance de tir conseillée. */
+.product-detail-text > p:first-child {
+    font-size: 1.0625rem;
+    line-height: 1.6;
+}
+
 .product-specs {
     margin: 0 0 2rem;
     padding: 1.75rem 1.75rem 1.6rem;
     background: var(--surface);
     border: 1px solid var(--border);
+    box-shadow: var(--shadow);
 }
 
+/* Le résumé, près du prix. Deux colonnes de fiches courtes : on les lit d'un
+   coup d'œil, là où le tableau du bas se parcourt ligne à ligne. */
+.product-key-specs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+    width: 100%;
+    margin: 1rem 0 0;
+}
+
+.product-key-spec {
+    padding: 0.7rem 0.8rem 0.75rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.product-key-spec dt {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #5b5c3b;
+}
+
+/* Deux lignes puis les points de suspension : une valeur bavarde ne doit pas
+   repousser le bouton d'achat. Elle est entière au survol, et dans le tableau
+   du bas. */
+.product-key-spec dd {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    margin: 0.2rem 0 0;
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+[data-theme='dark'] .product-key-spec dt {
+    color: var(--accent);
+}
+
+@media (max-width: 560px) {
+    .product-key-specs {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* Seize lignes en une colonne font sept cents pixels de défilement où tout se
+   ressemble. Deux colonnes coupent la hauteur en deux, et un tableau de
+   caractéristiques se parcourt par ses étiquettes de toute façon. */
 .product-specs-list {
-    max-width: 40rem;
+    width: 100%;
     margin: 0;
+    column-count: 2;
+    column-gap: 0.75rem;
+}
+
+/* Une ligne ne doit pas se couper entre les deux colonnes. */
+.product-specs-list .product-specs-row {
+    break-inside: avoid;
+}
+
+@media (max-width: 720px) {
+    .product-specs-list {
+        column-count: 1;
+    }
 }
 
 .product-specs-row {
-    display: grid;
-    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.4fr);
-    gap: 1rem;
-    padding: 0.6rem 0;
-    border-bottom: 1px solid var(--border);
-}
-
-.product-specs-row:last-child {
-    border-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.22rem;
+    padding: 0.75rem 0.9rem 0.8rem;
+    margin: 0 0 0.55rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
 }
 
 .product-specs-row dt {
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--text-muted);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #5b5c3b;
 }
 
 .product-specs-row dd {
     margin: 0;
-    font-size: 0.9375rem;
+    font-size: 0.9rem;
+    line-height: 1.45;
     color: var(--text);
+}
+
+[data-theme='dark'] .product-specs-row dt {
+    color: var(--accent);
 }
 
 .product-reviews {
@@ -2035,15 +2151,38 @@
     border-bottom: 1px solid var(--border);
 }
 
+/* La demande du premier avis se distingue du formulaire ordinaire : encadrée
+   et posée sur le fond de page, c'est une invitation, pas un champ de plus. */
+.review-form.is-first {
+    padding: 1.1rem 1.25rem 1.35rem;
+    background: color-mix(in srgb, var(--accent) 4%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--border));
+    border-bottom-color: color-mix(in srgb, var(--accent) 22%, var(--border));
+}
+
 .review-form-title {
     margin: 0 0 0.85rem;
     font-size: 0.8125rem;
     font-weight: 600;
 }
 
+.review-form.is-first .review-form-title {
+    margin-bottom: 0.3rem;
+    font-size: 0.9375rem;
+}
+
+.review-form-intro {
+    margin: 0 0 0.9rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+/* Les étoiles vont de 1 à 5, dans l'ordre du document comme à l'écran.
+   Retournées en CSS, elles se parcouraient à l'envers au clavier : la flèche
+   droite baissait la note. */
 .star-input {
     display: inline-flex;
-    flex-direction: row-reverse;
     gap: 0.2rem;
     margin-bottom: 0.85rem;
 }
@@ -2063,10 +2202,84 @@
     transition: color 0.1s ease;
 }
 
-.star-input input:checked ~ label,
-.star-input label:hover,
-.star-input label:hover ~ label {
+/* Tout se remplit, puis on vide ce qui suit la note choisie. CSS ne sait pas
+   désigner les frères précédents, mais il sait très bien les suivants. */
+.star-input:has(input:checked) label {
     color: var(--accent);
+}
+
+.star-input input:checked ~ label {
+    color: var(--border);
+}
+
+.star-input input:checked + label {
+    color: var(--accent);
+}
+
+/* Le survol prime sur la note déjà posée : on montre ce qu'on s'apprête à
+   choisir, pas ce qu'on a choisi. */
+.star-input:hover input ~ label {
+    color: var(--accent);
+}
+
+.star-input label:hover ~ label {
+    color: var(--border);
+}
+
+/* Les boutons radio sont invisibles : sans cela, la tabulation entrait dans
+   le groupe sans que rien ne le montre. */
+.star-input input:focus-visible + label {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+/* La répartition des notes, cinq barres sous la moyenne. */
+.reviews-distribution {
+    width: 100%;
+    max-width: 22rem;
+    margin: 0 0 1.5rem;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+}
+
+.reviews-distribution th,
+.reviews-distribution td {
+    padding: 0.15rem 0;
+    font-weight: 400;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.reviews-distribution th {
+    width: 3rem;
+    text-align: left;
+}
+
+.reviews-distribution-track {
+    width: 100%;
+    padding-right: 0.6rem;
+    padding-left: 0.2rem;
+}
+
+.reviews-distribution-bar {
+    display: block;
+    width: var(--share);
+    height: 0.5rem;
+    background: var(--accent);
+}
+
+/* Une note que personne n'a donnée garde son rail : la ligne doit rester
+   lisible comme un zéro, pas disparaître. */
+.reviews-distribution-track {
+    background-image: linear-gradient(var(--border), var(--border));
+    background-size: calc(100% - 0.8rem) 0.5rem;
+    background-position: 0.2rem center;
+    background-repeat: no-repeat;
+}
+
+.reviews-distribution-count {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
 }
 
 .reviews-list {
@@ -2076,6 +2289,43 @@
     padding: 0;
     margin: 0;
     list-style: none;
+}
+
+/* La règle d'accès aux avis, dite une fois en haut de la section. Discrète :
+   elle rassure, elle ne se vend pas. */
+.reviews-gate {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: -0.75rem 0 1.5rem;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+
+.reviews-gate svg {
+    flex-shrink: 0;
+    color: var(--accent);
+}
+
+/* Et rappelée sur chaque avis, en vert : c'est une garantie, pas une
+   étiquette de plus. */
+.review-verified {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.1rem 0.4rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: #3d6b4e;
+    background: #eef4ef;
+    border: 1px solid #d5e4d8;
+}
+
+[data-theme='dark'] .review-verified {
+    color: #9dccab;
+    background: color-mix(in srgb, #9dccab 12%, var(--surface));
+    border-color: color-mix(in srgb, #9dccab 32%, var(--border));
 }
 
 .review-item {
