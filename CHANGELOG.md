@@ -2,6 +2,26 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-26 — v0.17.0 — build 8DISR4
+
+### Storefront
+
+- **A product's old address keeps working.** Every slug a product has ever carried is now kept, the current one marked active, and visiting a retired one answers with a permanent redirect to the page's current URL. Renaming a product used to break every link already in circulation — shared, indexed by search engines, or printed on a marketplace listing. A retired slug also belongs to that product for good: it can never be handed to another one, since the redirect would quietly start pointing at the wrong item. A product may always return to one of its own former addresses.
+
+### Admin
+
+- **The product list carries the slug and a review flag.** The slug sits under the name and reference in small monospaced type, cut with an ellipsis and shown in full on hover, since it is an address read character by character rather than a name skimmed. A new "AI OK" column shows a tick or a cross for `ai_validated`, a field that records whether a page has been reviewed and passed; it changes nothing on the storefront. The ID column no longer claims more width than a few digits need.
+
+- The products API can now write the `slug` and the new `ai_validated` field. Uniqueness is checked against the whole slug history, so a generated slug skips past a retired one rather than stealing a live redirect.
+
+### Documentation
+
+- **How a product page is brought up to standard is written down**, in `docs/admin/make-products-ok.md`: what counts as finished, the order to work in, and the two steps that get skipped first and cost the most — looking at the photographs before writing about the product, and reading the rendered page before marking it validated. The products API reference gained the slug and review-flag rules alongside it.
+
+### Catalogue
+
+- Several products gained real photographs.
+
 ## 2026-08-25 — v0.16.0 — build K2GHJS
 
 ### Admin
