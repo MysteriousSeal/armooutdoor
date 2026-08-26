@@ -211,7 +211,7 @@ class ProductController extends Controller
             'modules' => Ean13::modules($article->gtin),
             // The batch is the day the labels are printed: they go out on what
             // is packed today, and nothing stored would say otherwise.
-            'batchDate' => now()->format('d/m/Y'),
+            'batchDate' => now()->format('Y-m-d'),
         ])
             // 500 × 700 CSS pixels at 96dpi: a portrait sheet, with the label
             // printed across it on its side.

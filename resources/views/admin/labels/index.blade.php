@@ -47,6 +47,21 @@
                     <span class="admin-tab-count">{{ $incompleteCount }}</span>
                 @endif
             </a>
+
+            {{-- One requirement each, apart from the three above: a page of
+                 "missing a barcode" is a list of what to go and find, which is
+                 a different job from working through everything unfinished. --}}
+            @foreach (['no-title' => 'Missing title', 'no-subtitle' => 'Missing subtitle', 'no-sku' => 'Missing SKU', 'no-gtin' => 'Missing GTIN'] as $value => $name)
+                <a
+                    href="{{ route('admin.labels.index', $tabQuery($value)) }}"
+                    class="label-tab-attention {{ $loop->first ? 'starts-group' : '' }} {{ $tab === $value ? 'active' : '' }}"
+                >
+                    {{ $name }}
+                    @if ($missingCounts[$value] > 0)
+                        <span class="admin-tab-count">{{ number_format($missingCounts[$value]) }}</span>
+                    @endif
+                </a>
+            @endforeach
         </nav>
 
         <form method="GET" action="{{ route('admin.labels.index') }}" class="admin-filter-bar">
@@ -82,6 +97,14 @@
                     No article is ready to print yet.
                 @elseif ($tab === 'incomplete')
                     Every article has its wording and its codes.
+                @elseif ($tab === 'no-title')
+                    Every product has a label title.
+                @elseif ($tab === 'no-subtitle')
+                    Every product has a label subtitle.
+                @elseif ($tab === 'no-sku')
+                    Every article has a reference.
+                @elseif ($tab === 'no-gtin')
+                    Every article has a barcode.
                 @else
                     No product to label yet.
                 @endif
@@ -108,7 +131,10 @@
                             <tr class="label-row {{ $loop->iteration % 2 === 0 ? 'is-even' : '' }} {{ $article['editable'] ? 'has-form' : '' }}">
                                 <td>
                                     <a href="{{ route('admin.products.edit', $product) }}">
-                                        <img class="admin-product-thumb" src="{{ $article['variant']?->imageUrl() ?: $product->imageUrl() }}" alt="" loading="lazy">
+                                        {{-- The thumbnail, not the full photograph: forty
+                                             rows of 1000 px images to fill a 44 px square
+                                             is a megabyte a page for nothing. --}}
+                                        <img class="admin-product-thumb" src="{{ $article['variant']?->thumbnailUrl() ?: $product->thumbnailUrl() }}" alt="" loading="lazy">
                                     </a>
                                 </td>
                                 <td>
@@ -202,22 +228,22 @@
 
                                             <div class="label-form-field">
                                                 <label class="admin-field-label" for="label-title-{{ $product->id }}">Title</label>
-                                                <input type="text" id="label-title-{{ $product->id }}" name="label_title" class="form-control is-uppercase" value="{{ $product->label?->title }}" maxlength="120" placeholder="Gants tactiques M-Pact">
+                                                <input type="text" id="label-title-{{ $product->id }}" name="label_title" class="form-control is-uppercase" value="{{ $product->label?->title }}" maxlength="120">
                                             </div>
 
                                             <div class="label-form-field">
                                                 <label class="admin-field-label" for="label-subtitle-{{ $product->id }}">Subtitle</label>
-                                                <input type="text" id="label-subtitle-{{ $product->id }}" name="label_subtitle" class="form-control is-uppercase" value="{{ $product->label?->subtitle }}" maxlength="120" placeholder="Taille M — Woodland">
+                                                <input type="text" id="label-subtitle-{{ $product->id }}" name="label_subtitle" class="form-control is-uppercase" value="{{ $product->label?->subtitle }}" maxlength="120">
                                             </div>
 
                                             <div class="label-form-field label-form-field--wide">
                                                 <label class="admin-field-label" for="label-composition-{{ $product->id }}">Composition <span class="label-form-optional">optional</span></label>
-                                                <input type="text" id="label-composition-{{ $product->id }}" name="label_composition" class="form-control" value="{{ $product->label?->composition }}" maxlength="500" placeholder="60 % polyester, 40 % cuir de synthèse">
+                                                <input type="text" id="label-composition-{{ $product->id }}" name="label_composition" class="form-control" value="{{ $product->label?->composition }}" maxlength="500">
                                             </div>
 
                                             <div class="label-form-field label-form-field--wide">
                                                 <label class="admin-field-label" for="label-mention-{{ $product->id }}">Mention <span class="label-form-optional">optional</span></label>
-                                                <input type="text" id="label-mention-{{ $product->id }}" name="label_mention" class="form-control" value="{{ $product->label?->mention }}" maxlength="500" placeholder="Ne convient pas aux enfants de moins de 14 ans">
+                                                <input type="text" id="label-mention-{{ $product->id }}" name="label_mention" class="form-control" value="{{ $product->label?->mention }}" maxlength="500">
                                             </div>
 
                                             <div class="label-form-actions">

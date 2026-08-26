@@ -576,4 +576,148 @@ class LabelListTest extends TestCase
         $this->page()->assertSee('admin-labels-table', false);
         $this->assertMatchesRegularExpression('/\.admin-labels-table thead th\s*\{[^}]*position:\s*sticky/s', $css);
     }
+
+    public function test_the_wording_fields_carry_no_placeholder(): void
+    {
+        $this->ready();
+
+        $html = $this->page()->getContent();
+        $form = substr($html, strpos($html, 'label-form" data-label-form'));
+        $form = substr($form, 0, strpos($form, '</form>'));
+
+        // The heading over each field says what it is; an example inside it
+        // only reads as a value that is already there.
+        $this->assertStringNotContainsString('placeholder', $form);
+    }
+
+    public function test_a_tab_singles_out_one_missing_requirement(): void
+    {
+        $this->ready(['sku' => 'ARM-OK']);
+        $this->ready(['sku' => 'ARM-NO-TITLE', 'gtin' => '5901234123457'], ['title' => null]);
+        $this->ready(['sku' => 'ARM-NO-SUB', 'gtin' => '4006381333932'], ['subtitle' => null]);
+        $this->ready(['sku' => null, 'gtin' => '4006381333933']);
+        $this->ready(['sku' => 'ARM-NO-GTIN', 'gtin' => null]);
+
+        $this->page(['tab' => 'no-title'])->assertSee('ARM-NO-TITLE')->assertDontSee('ARM-OK');
+        $this->page(['tab' => 'no-subtitle'])->assertSee('ARM-NO-SUB')->assertDontSee('ARM-OK');
+        $this->page(['tab' => 'no-gtin'])->assertSee('ARM-NO-GTIN')->assertDontSee('ARM-OK');
+
+        // The one without a reference has none to show, so the row is found by
+        // what it is missing rather than by a code.
+        $this->page(['tab' => 'no-sku'])->assertSee('Missing SKU')->assertDontSee('ARM-OK');
+    }
+
+    public function test_each_tab_counts_the_whole_catalogue(): void
+    {
+        $this->ready(['sku' => 'ARM-OK']);
+        $this->ready(['sku' => 'ARM-NO-TITLE', 'gtin' => '5901234123457'], ['title' => null]);
+        $this->ready(['sku' => 'ARM-NO-GTIN', 'gtin' => null]);
+
+        $html = $this->page()->getContent();
+
+        $this->assertMatchesRegularExpression('#Missing title.*?admin-tab-count">1<#s', $html);
+        $this->assertMatchesRegularExpression('#Missing GTIN.*?admin-tab-count">1<#s', $html);
+    }
+
+    public function test_a_product_short_of_its_wording_puts_every_size_on_the_tab(): void
+    {
+        $product = $this->unworded(['sku' => null, 'gtin' => null]);
+        $this->variant($product, 'M', 'ARM-TS-M', '4006381333931');
+        $this->variant($product, 'L', 'ARM-TS-L', '5901234123457');
+
+        // The wording belongs to the product, so both sizes are waiting on it.
+        $this->page(['tab' => 'no-title'])
+            ->assertSee('ARM-TS-M')
+            ->assertSee('ARM-TS-L');
+    }
+
+    public function test_a_missing_code_puts_only_its_own_size_on_the_tab(): void
+    {
+        $product = $this->ready(['sku' => null, 'gtin' => null]);
+        $this->variant($product, 'M', 'ARM-TS-M', '4006381333931');
+        $this->variant($product, 'L', 'ARM-TS-L', null);
+
+        // A code belongs to the article, not to the product.
+        $this->page(['tab' => 'no-gtin'])
+            ->assertSee('ARM-TS-L')
+            ->assertDontSee('ARM-TS-M');
+    }
+
+    public function test_an_unknown_tab_falls_back_to_all(): void
+    {
+        $this->ready(['sku' => 'ARM-OK']);
+
+        $this->page(['tab' => 'whatever'])->assertSee('ARM-OK');
+    }
+
+    public function test_the_row_shows_the_thumbnail_not_the_full_photograph(): void
+    {
+        // A photograph whose thumbnail is really on disk: `thumbnailUrl()`
+        // falls back to the full image when there is none, and the test would
+        // then pass without proving anything.
+        $image = $this->imageWithAThumbnail();
+        $product = $this->ready(['image' => $image]);
+
+        // Forty rows of 1000 px photographs to fill a 44 px square is a
+        // megabyte a page for nothing.
+        $this->page()
+            ->assertSee('src="'.$product->thumbnailUrl().'"', false)
+            ->assertDontSee('src="'.$product->imageUrl().'"', false);
+    }
+
+    public function test_a_size_with_its_own_photograph_shows_its_own_thumbnail(): void
+    {
+        $image = $this->imageWithAThumbnail();
+        $product = $this->ready(['sku' => null, 'gtin' => null]);
+        $variant = $this->variant($product, 'M', 'ARM-TS-M', '4006381333931');
+        $variant->update(['image' => $image]);
+
+        $this->page()->assertSee('src="'.$variant->fresh()->thumbnailUrl().'"', false);
+    }
+
+    /** A catalogue image that has a generated thumbnail beside it. */
+    private function imageWithAThumbnail(): string
+    {
+        $thumb = collect(glob(public_path('images/products/thumbs/*.webp')))->first();
+
+        $this->assertNotNull($thumb, 'No generated thumbnail to test against.');
+
+        return 'products/'.basename((string) $thumb);
+    }
+
+    public function test_a_retired_product_is_not_listed(): void
+    {
+        $this->ready(['sku' => 'ARM-ON-SALE']);
+        $this->ready(['sku' => 'ARM-RETIRED', 'gtin' => '5901234123457', 'is_active' => false]);
+
+        // A product taken off the shop needs no label.
+        $this->page()
+            ->assertSee('ARM-ON-SALE')
+            ->assertDontSee('ARM-RETIRED');
+    }
+
+    public function test_a_retired_product_counts_for_nothing(): void
+    {
+        $this->unworded(['sku' => 'ARM-RETIRED', 'is_active' => false]);
+
+        $html = $this->page()->getContent();
+
+        // Neither tab claims work that will never be done: the All tab counts
+        // nothing and none of the others carries a count at all.
+        $this->assertMatchesRegularExpression('#All\s*<span class="admin-tab-count">0<#s', $html);
+        $this->assertSame(1, substr_count($html, 'admin-tab-count'));
+        $this->assertStringContainsString('No product to label yet.', $html);
+    }
+
+    public function test_a_size_withdrawn_from_a_product_still_on_sale_is_not_listed(): void
+    {
+        $product = $this->ready(['sku' => null, 'gtin' => null]);
+        $this->variant($product, 'M', 'ARM-TS-M', '4006381333931');
+        $withdrawn = $this->variant($product, 'L', 'ARM-TS-L', '5901234123457');
+        $withdrawn->update(['is_active' => false]);
+
+        $this->page()
+            ->assertSee('ARM-TS-M')
+            ->assertDontSee('ARM-TS-L');
+    }
 }

@@ -51,7 +51,7 @@ class ProductLabelTest extends TestCase
             'sku' => $product->sku,
             'gtin' => Ean13::normalise($product->gtin),
             'modules' => Ean13::modules($product->gtin),
-            'batchDate' => now()->format('d/m/Y'),
+            'batchDate' => now()->format('Y-m-d'),
         ])->render();
 
         $this->assertStringContainsString('ARM-TENT-2P-GRN', $html);
@@ -61,8 +61,10 @@ class ProductLabelTest extends TestCase
         $this->assertStringContainsString('44300 Nantes, FR', $html);
         $this->assertStringContainsString('hello@swiftshelf.fr', $html);
         $this->assertStringContainsString('Made in PRC', $html);
-        // The batch is the day it was printed, not anything stored.
-        $this->assertStringContainsString(now()->format('d/m/Y'), $html);
+        // The batch is the day it was printed, not anything stored, and reads
+        // year first: a label is filed and compared, not read aloud.
+        $this->assertStringContainsString(now()->format('Y-m-d'), $html);
+        $this->assertStringNotContainsString(now()->format('d/m/Y'), $html);
     }
 
     public function test_the_barcode_is_drawn_as_bars(): void
@@ -77,7 +79,7 @@ class ProductLabelTest extends TestCase
             'sku' => $product->sku,
             'gtin' => Ean13::normalise($product->gtin),
             'modules' => Ean13::modules($product->gtin),
-            'batchDate' => now()->format('d/m/Y'),
+            'batchDate' => now()->format('Y-m-d'),
         ])->render();
 
         // 95 modules, each one cell, black or white.
@@ -214,7 +216,7 @@ class ProductLabelTest extends TestCase
             'sku' => $product->sku,
             'gtin' => Ean13::normalise($product->gtin),
             'modules' => Ean13::modules($product->gtin),
-            'batchDate' => now()->format('d/m/Y'),
+            'batchDate' => now()->format('Y-m-d'),
         ])->render();
     }
 
@@ -326,5 +328,25 @@ class ProductLabelTest extends TestCase
         $this->assertSame('Gants tactiques M-Pact', $label->title);
         $this->assertSame('Taille M', $label->subtitle);
         $this->assertSame('60 % polyester', $label->composition);
+    }
+
+    public function test_the_batch_on_the_printed_sheet_reads_year_first(): void
+    {
+        $product = Product::factory()
+            ->labelled(['title' => 'Gants', 'subtitle' => 'Taille M'])
+            ->create(['sku' => 'ARM-15', 'gtin' => '4006381333931']);
+
+        $pdf = $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/products/'.$product->id.'/label')
+            ->assertOk()
+            ->getContent();
+
+        // Read from the drawing itself, since the format is decided by the
+        // controller and no view test would catch it changing. The renderer
+        // writes text two bytes per character.
+        $drawn = str_replace("\0", '', $this->contentStreams($pdf));
+
+        $this->assertStringContainsString(now()->format('Y-m-d'), $drawn);
+        $this->assertStringNotContainsString(now()->format('d/m/Y'), $drawn);
     }
 }

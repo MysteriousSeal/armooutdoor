@@ -28,9 +28,26 @@ class LabelController extends Controller
 {
     private const PER_PAGE = 40;
 
+    /**
+     * The tabs, and what each one keeps.
+     *
+     * The four last ones single out one requirement each: a page of "missing
+     * a barcode" is a list of what to go and find, which is a different job
+     * from working through everything unfinished.
+     */
+    private const TABS = ['ready', 'incomplete', 'no-title', 'no-subtitle', 'no-sku', 'no-gtin'];
+
+    /** Which requirement a tab is about, for the tabs that are about one. */
+    private const TAB_REQUIREMENTS = [
+        'no-title' => 'title',
+        'no-subtitle' => 'subtitle',
+        'no-sku' => 'reference',
+        'no-gtin' => 'barcode',
+    ];
+
     public function index(Request $request): View
     {
-        $tab = in_array($request->query('tab'), ['ready', 'incomplete'], true)
+        $tab = in_array($request->query('tab'), self::TABS, true)
             ? $request->query('tab')
             : 'all';
 
@@ -42,7 +59,11 @@ class LabelController extends Controller
         // too, so a page of the Ready tab is forty products that have
         // something ready rather than forty products of which three do.
         $products = Product::query()
-            ->with('variants', 'label')
+            // A product taken off the shop has nothing to label, and a page of
+            // retired articles would say there is work to do where there is
+            // none.
+            ->active()
+            ->with(['variants' => fn ($variants) => $variants->where('is_active', true), 'label'])
             ->when($search !== '', fn (Builder $query) => $query->where(function (Builder $inner) use ($search): void {
                 $inner->where('name', 'like', '%'.$search.'%')
                     ->orWhere('sku', 'like', '%'.$search.'%')
@@ -66,6 +87,8 @@ class LabelController extends Controller
             // stopped at forty would only ever report the page size.
             'readyCount' => $this->countArticles(true),
             'incompleteCount' => $this->countArticles(false),
+            'missingCounts' => collect(self::TAB_REQUIREMENTS)
+                ->map(fn (string $requirement): int => $this->countMissing($requirement)),
         ]);
     }
 
@@ -89,6 +112,26 @@ class LabelController extends Controller
                     ->orWhereHas('variants', fn (Builder $variant) => $this->hasCodes($variant)));
         }
 
+        // One requirement at a time: the wording belongs to the product, so a
+        // product short of it puts all its articles on the tab; a code belongs
+        // to the article, so only the articles missing it come.
+        if (isset(self::TAB_REQUIREMENTS[$tab])) {
+            $requirement = self::TAB_REQUIREMENTS[$tab];
+
+            if (in_array($requirement, ['title', 'subtitle'], true)) {
+                return $query->whereNot(fn (Builder $wording) => $this->hasWordingField($wording, $requirement));
+            }
+
+            $column = $requirement === 'reference' ? 'sku' : 'gtin';
+
+            return $query->where(fn (Builder $article) => $article
+                ->where(fn (Builder $plain) => $plain
+                    ->whereDoesntHave('variants')
+                    ->whereNot(fn (Builder $code) => $this->hasCode($code, $column)))
+                ->orWhereHas('variants', fn (Builder $variant) => $variant
+                    ->whereNot(fn (Builder $code) => $this->hasCode($code, $column))));
+        }
+
         // Short of its wording, every article of the product is unfinished;
         // otherwise it is the articles missing a code that put it here.
         return $query->where(fn (Builder $incomplete) => $incomplete
@@ -101,6 +144,39 @@ class LabelController extends Controller
     }
 
     /**
+     * How many articles of the catalogue are short of one requirement.
+     *
+     * @param  'title'|'subtitle'|'reference'|'barcode'  $requirement
+     */
+    private function countMissing(string $requirement): int
+    {
+        if (in_array($requirement, ['title', 'subtitle'], true)) {
+            // The wording is the product's, so every article of a product
+            // short of it counts.
+            $plain = $this->plainProducts()
+                ->whereNot(fn (Builder $query) => $this->hasWordingField($query, $requirement))
+                ->count();
+
+            $variants = $this->sellableVariants()
+                ->whereHas('product', fn (Builder $product) => $product
+                    ->active()
+                    ->whereNot(fn (Builder $query) => $this->hasWordingField($query, $requirement)))
+                ->count();
+
+            return $plain + $variants;
+        }
+
+        $column = $requirement === 'reference' ? 'sku' : 'gtin';
+
+        return $this->plainProducts()
+            ->whereNot(fn (Builder $query) => $this->hasCode($query, $column))
+            ->count()
+            + $this->sellableVariants()
+                ->whereNot(fn (Builder $query) => $this->hasCode($query, $column))
+                ->count();
+    }
+
+    /**
      * How many articles of the catalogue are ready, or are not.
      *
      * Counted with two queries rather than by walking every product: the page
@@ -108,15 +184,14 @@ class LabelController extends Controller
      */
     private function countArticles(bool $ready): int
     {
-        $readyPlain = Product::query()
-            ->whereDoesntHave('variants')
+        $readyPlain = $this->plainProducts()
             ->tap(fn (Builder $query) => $this->hasWording($query))
             ->tap(fn (Builder $query) => $this->hasCodes($query))
             ->count();
 
-        $readyVariants = ProductVariant::query()
+        $readyVariants = $this->sellableVariants()
             ->tap(fn (Builder $query) => $this->hasCodes($query))
-            ->whereHas('product', fn (Builder $product) => $this->hasWording($product))
+            ->whereHas('product', fn (Builder $product) => $this->hasWording($product->active()))
             ->count();
 
         if ($ready) {
@@ -125,10 +200,38 @@ class LabelController extends Controller
 
         // Everything that is not ready: one article per plain product, one per
         // variant, less the ones already counted.
-        return Product::query()->whereDoesntHave('variants')->count()
-            + ProductVariant::query()->count()
+        return $this->plainProducts()->count()
+            + $this->sellableVariants()->count()
             - $readyPlain
             - $readyVariants;
+    }
+
+    /**
+     * The products that are one article on their own.
+     *
+     * On sale and without sizes: a retired product needs no label, and one
+     * with sizes is counted through them.
+     *
+     * @return Builder<Product>
+     */
+    private function plainProducts(): Builder
+    {
+        return Product::query()->active()->whereDoesntHave('variants');
+    }
+
+    /**
+     * The sizes that are one article each.
+     *
+     * On sale, and belonging to a product that is: a size withdrawn from a
+     * product still on the shop needs no label either.
+     *
+     * @return Builder<ProductVariant>
+     */
+    private function sellableVariants(): Builder
+    {
+        return ProductVariant::query()
+            ->where('is_active', true)
+            ->whereHas('product', fn (Builder $product) => $product->active());
     }
 
     /**
@@ -141,9 +244,21 @@ class LabelController extends Controller
      */
     private function hasWording(Builder $query): Builder
     {
+        return $query
+            ->tap(fn (Builder $inner) => $this->hasWordingField($inner, 'title'))
+            ->tap(fn (Builder $inner) => $this->hasWordingField($inner, 'subtitle'));
+    }
+
+    /**
+     * A product whose label carries one of its two words.
+     *
+     * @param  Builder<Product>  $query
+     * @param  'title'|'subtitle'  $field
+     */
+    private function hasWordingField(Builder $query, string $field): Builder
+    {
         return $query->whereHas('label', fn (Builder $label) => $label
-            ->whereNotNull('title')->where('title', '!=', '')
-            ->whereNotNull('subtitle')->where('subtitle', '!=', ''));
+            ->whereNotNull($field)->where($field, '!=', ''));
     }
 
     /**
@@ -154,8 +269,19 @@ class LabelController extends Controller
     private function hasCodes(Builder $query): Builder
     {
         return $query
-            ->whereNotNull('sku')->where('sku', '!=', '')
-            ->whereNotNull('gtin')->where('gtin', '!=', '');
+            ->tap(fn (Builder $inner) => $this->hasCode($inner, 'sku'))
+            ->tap(fn (Builder $inner) => $this->hasCode($inner, 'gtin'));
+    }
+
+    /**
+     * An article carrying one of its codes.
+     *
+     * @param  Builder<Product>|Builder<ProductVariant>  $query
+     * @param  'sku'|'gtin'  $column
+     */
+    private function hasCode(Builder $query, string $column): Builder
+    {
+        return $query->whereNotNull($column)->where($column, '!=', '');
     }
 
     /**
@@ -247,6 +373,7 @@ class LabelController extends Controller
             }
 
             return $product->variants
+                ->where('is_active', true)
                 ->sortBy(fn (ProductVariant $variant) => $variant->sizeSortRank() ?? $variant->sort_order)
                 ->values()
                 ->map(fn (ProductVariant $variant, int $index): array => $this->article($product, $variant, $index === 0))
@@ -280,6 +407,14 @@ class LabelController extends Controller
      */
     private function onTab(Collection $articles, string $tab): Collection
     {
+        if (isset(self::TAB_REQUIREMENTS[$tab])) {
+            $requirement = self::TAB_REQUIREMENTS[$tab];
+
+            return $articles
+                ->filter(fn (array $article): bool => in_array($requirement, $article['missing'], true))
+                ->values();
+        }
+
         return match ($tab) {
             'ready' => $articles->where('missing', [])->values(),
             'incomplete' => $articles->where('missing', '!=', [])->values(),
