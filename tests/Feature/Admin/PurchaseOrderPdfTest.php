@@ -73,7 +73,7 @@ class PurchaseOrderPdfTest extends TestCase
             ->get('/admin/purchase-orders/'.$order->number)
             ->assertOk()
             ->assertSee('/admin/purchase-orders/'.$order->number.'/pdf', false)
-            ->assertSee('Download PDF');
+            ->assertSee('Purchase order PDF');
     }
 
     public function test_the_document_carries_what_was_ordered(): void

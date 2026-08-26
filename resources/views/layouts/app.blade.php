@@ -84,9 +84,6 @@
                         <span>{{ __('store.nav_categories') }}</span>
                     </button>
                     <nav class="sort-tabs" aria-label="{{ __('store.footer_shop') }}">
-                        <a href="{{ localized_route('home') }}" class="sort-tab {{ request()->routeIs('home') ? 'active' : '' }}">
-                            {{ __('store.nav_home') }}
-                        </a>
                         <a href="{{ route('products.new-arrivals') }}" class="sort-tab {{ request()->routeIs('products.new-arrivals') ? 'active' : '' }}">
                             {{ __('store.footer_shop_new') }}
                         </a>

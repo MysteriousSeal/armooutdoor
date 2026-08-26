@@ -170,6 +170,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/purchase-orders', [AdminPurchaseOrderController::class, 'store'])->name('purchase-orders.store');
         Route::get('/purchase-orders/{purchaseOrder}', [AdminPurchaseOrderController::class, 'show'])->name('purchase-orders.show');
         Route::get('/purchase-orders/{purchaseOrder}/pdf', [AdminPurchaseOrderController::class, 'pdf'])->name('purchase-orders.pdf');
+        Route::get('/purchase-orders/{purchaseOrder}/receipt-pdf', [AdminPurchaseOrderController::class, 'receiptPdf'])->name('purchase-orders.receipt-pdf');
         Route::get('/purchase-orders/{purchaseOrder}/edit', [AdminPurchaseOrderController::class, 'edit'])->name('purchase-orders.edit');
         Route::put('/purchase-orders/{purchaseOrder}', [AdminPurchaseOrderController::class, 'update'])->name('purchase-orders.update');
         Route::patch('/purchase-orders/{purchaseOrder}/send', [AdminPurchaseOrderController::class, 'send'])->name('purchase-orders.send');

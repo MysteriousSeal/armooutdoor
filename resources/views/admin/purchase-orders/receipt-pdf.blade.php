@@ -1,16 +1,17 @@
 {{--
-    Le bon de commande envoyé au fournisseur.
+    Le bon de réception : la feuille qu'on tient à la main en ouvrant les
+    colis.
 
-    Même habillage que le bon de livraison : c'est la même maison qui écrit,
-    les deux documents doivent se ressembler. Ce qui a été reçu n'y figure
-    pas : le fournisseur lit ce qu'on lui commande, pas l'état de nos
-    réceptions, qui changera après l'envoi.
+    Pas de prix, pas de totaux — ce n'est pas ce qu'on vérifie une caisse
+    ouverte. Les cases partent vides quel que soit l'état de la commande dans
+    l'outil : une case déjà cochée invite à faire confiance au papier plutôt
+    qu'à regarder dans le carton.
 --}}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Bon de commande {{ $purchaseOrder->number }}</title>
+    <title>Bon de réception {{ $purchaseOrder->number }}</title>
     <style>
         @page { margin: 0; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -94,35 +95,37 @@
             color: #8b7e74;
             border-bottom: 1px solid #8b7e74;
         }
+        table.items thead td.col-check { text-align: center; }
+        /* Les lignes respirent plus que sur le bon de commande : on écrit
+           dessus, souvent debout, un carton dans l'autre main. */
         table.items tbody td {
-            padding: 9px 5px;
+            padding: 13px 5px;
             vertical-align: middle;
             border-bottom: 1px solid #e8e6e3;
         }
         .col-thumb { width: 42px; }
         .col-thumb img { width: 36px; height: 36px; }
-        /* La désignation prend toute la largeur qui reste. La variante et la
-           référence passent en dessous, en petit : elles précisent le nom,
-           elles n'ont pas besoin d'une colonne à elles, qui n'était pleine
-           que sur quelques lignes et volait la place aux noms longs. */
         .col-name { font-size: 11.5px; }
         .line-detail { margin-top: 2px; font-size: 9.5px; color: #6b6b6b; }
-        .col-qty { width: 8%; text-align: right; white-space: nowrap; }
-        .col-num { width: 15%; text-align: right; white-space: nowrap; }
+        .col-qty { width: 8%; text-align: right; white-space: nowrap; font-weight: bold; }
 
-        /* Les totaux à droite, alignés sur la colonne des montants du tableau
-           au-dessus : l'œil descend la même colonne jusqu'au total. */
-        table.totals { width: 46%; margin-left: auto; border-collapse: collapse; margin-bottom: 18px; }
-        table.totals td { padding: 4px 5px; }
-        table.totals .label { color: #6b6b6b; }
-        table.totals .amount { text-align: right; white-space: nowrap; }
-        table.totals tr.rule td { padding: 0; }
-        table.totals tr.rule hr { height: 1px; border: 0; background: #e8e6e3; }
-        table.totals tr.grand td {
-            padding-top: 7px;
-            font-size: 13px;
-            font-weight: bold;
-            color: #2c2c2c;
+        /* La case où l'on écrit le compte trouvé : un tiret coché ne dit pas
+           qu'il en manque trois. */
+        .col-count { width: 13%; text-align: center; }
+        .count-box {
+            width: 42px;
+            height: 22px;
+            margin: 0 auto;
+            border: 1px solid #b9b2aa;
+            background: #fbfaf9;
+        }
+
+        .col-check { width: 12%; text-align: center; }
+        .check-box {
+            width: 17px;
+            height: 17px;
+            margin: 0 auto;
+            border: 1.5px solid #8b7e74;
         }
 
         .section-label {
@@ -135,6 +138,16 @@
         }
         .notes-body { margin-bottom: 14px; font-size: 10.5px; line-height: 1.55; color: #6b6b6b; }
         .notes-count { font-size: 11.5px; }
+
+        /* De quoi signer et dater : une feuille de réception sans nom ni date
+           ne prouve rien un mois plus tard. */
+        table.signoff { width: 100%; border-collapse: collapse; margin-top: 26px; }
+        table.signoff td { width: 33.33%; padding-right: 18px; vertical-align: top; }
+        .signoff-line {
+            height: 34px;
+            margin-top: 4px;
+            border-bottom: 1px solid #b9b2aa;
+        }
 
         /* La signature, en bas de page. Un cadre plutôt que trois traits :
            on doit voir d'un coup d'œil s'il manque une signature sur une
@@ -202,7 +215,7 @@
 
     <table class="title-row">
         <tr>
-            <td><div class="title">Bon de commande</div></td>
+            <td><div class="title">Bon de réception</div></td>
             <td class="title-meta">{{ $purchaseOrder->number }} · {{ $purchaseOrder->created_at->format('d/m/Y') }}</td>
         </tr>
     </table>
@@ -214,8 +227,8 @@
                 <div class="value">{{ $purchaseOrder->number }}</div>
             </td>
             <td>
-                <div class="label">Date</div>
-                <div class="value">{{ $purchaseOrder->created_at->translatedFormat('d F Y') }}</div>
+                <div class="label">Fournisseur</div>
+                <div class="value">{{ $purchaseOrder->supplier_name }}</div>
             </td>
             <td>
                 <div class="label">Livraison souhaitée</div>
@@ -255,9 +268,10 @@
             <tr>
                 <td class="col-thumb"></td>
                 <td class="col-name">Désignation</td>
-                <td class="col-qty">Qté</td>
-                <td class="col-num">P.U. HT</td>
-                <td class="col-num">Total HT</td>
+                <td class="col-qty">Cdé</td>
+                <td class="col-count">Reçu</td>
+                <td class="col-check">Received</td>
+                <td class="col-check">Handled</td>
             </tr>
         </thead>
         <tbody>
@@ -281,49 +295,12 @@
                         @endif
                     </td>
                     <td class="col-qty">{{ $item->quantity_ordered }}</td>
-                    <td class="col-num">{{ format_euros($item->unit_cost_cents) }}</td>
-                    <td class="col-num">{{ format_euros($item->lineTotalCents()) }}</td>
+                    <td class="col-count"><div class="count-box"></div></td>
+                    <td class="col-check"><div class="check-box"></div></td>
+                    <td class="col-check"><div class="check-box"></div></td>
                 </tr>
             @endforeach
         </tbody>
-    </table>
-
-    <table class="totals">
-        <tr>
-            <td class="label">Sous-total HT</td>
-            <td class="amount">{{ format_euros($purchaseOrder->subtotalCents()) }}</td>
-        </tr>
-        <tr>
-            <td class="label">Port</td>
-            <td class="amount">{{ format_euros($purchaseOrder->shipping_cents) }}</td>
-        </tr>
-        @if ($purchaseOrder->additional_costs_cents > 0)
-            <tr>
-                <td class="label">Frais annexes</td>
-                <td class="amount">{{ format_euros($purchaseOrder->additional_costs_cents) }}</td>
-            </tr>
-        @endif
-        @if ($purchaseOrder->discount_cents > 0)
-            <tr>
-                <td class="label">Remise</td>
-                <td class="amount">−{{ format_euros($purchaseOrder->discount_cents) }}</td>
-            </tr>
-        @endif
-        <tr class="rule"><td colspan="2"><hr></td></tr>
-        <tr>
-            <td class="label">Total HT</td>
-            <td class="amount">{{ format_euros($purchaseOrder->totalCents()) }}</td>
-        </tr>
-        @if ($purchaseOrder->hasVat())
-            <tr>
-                <td class="label">TVA {{ rtrim(rtrim(number_format($purchaseOrder->vatRatePercent(), 1), '0'), '.') }} %</td>
-                <td class="amount">{{ format_euros($purchaseOrder->vatAmountCents()) }}</td>
-            </tr>
-            <tr class="grand">
-                <td>Total TTC</td>
-                <td class="amount">{{ format_euros($purchaseOrder->totalInclVatCents()) }}</td>
-            </tr>
-        @endif
     </table>
 
     @if ($purchaseOrder->notes)
@@ -331,8 +308,25 @@
         <div class="notes-body">{{ $purchaseOrder->notes }}</div>
     @endif
 
-    <div class="section-label">Nombre d'articles</div>
+    <div class="section-label">Nombre d'articles commandés</div>
     <div class="notes-count">{{ $purchaseOrder->items->sum('quantity_ordered') }}</div>
+
+    <table class="signoff">
+        <tr>
+            <td>
+                <div class="section-label">Reçu le</div>
+                <div class="signoff-line"></div>
+            </td>
+            <td>
+                <div class="section-label">Par</div>
+                <div class="signoff-line"></div>
+            </td>
+            <td>
+                <div class="section-label">Observations</div>
+                <div class="signoff-line"></div>
+            </td>
+        </tr>
+    </table>
 
     <table class="signature">
         <tr>
@@ -358,7 +352,7 @@
     </table>
 
     <div class="footer">
-        Bon de commande — merci d'accuser réception
+        Document interne — à reporter dans la fiche de la commande une fois les colis ouverts
     </div>
 </body>
 </html>

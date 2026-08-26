@@ -136,6 +136,25 @@ class PurchaseOrderController extends Controller
         return $pdf->download('bc-'.$purchaseOrder->number.'.pdf');
     }
 
+    /**
+     * Le bon de réception : la feuille qu'on tient en ouvrant les colis.
+     *
+     * Ni prix ni totaux — ce n'est pas ce qu'on vérifie une caisse ouverte.
+     * Les cases sortent vides même sur une commande déjà reçue en partie :
+     * cocher d'avance inviterait à croire le papier plutôt que le carton.
+     */
+    public function receiptPdf(PurchaseOrder $purchaseOrder): Response
+    {
+        $purchaseOrder->load(['supplier', 'items.product', 'items.variant']);
+
+        $pdf = Pdf::loadView('admin.purchase-orders.receipt-pdf', [
+            'purchaseOrder' => $purchaseOrder,
+            'company' => CompanySetting::current(),
+        ])->setPaper('a4');
+
+        return $pdf->download('br-'.$purchaseOrder->number.'.pdf');
+    }
+
     public function edit(PurchaseOrder $purchaseOrder): View
     {
         abort_unless($purchaseOrder->isEditable(), 404);
