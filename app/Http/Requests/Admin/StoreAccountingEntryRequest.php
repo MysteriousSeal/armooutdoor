@@ -29,12 +29,20 @@ class StoreAccountingEntryRequest extends FormRequest
      */
     public function rules(): array
     {
+        $purchases = $this->section() === 'purchases';
+
         return [
             'entered_on' => ['required', 'date'],
             'invoice_number' => ['nullable', 'string', 'max:80'],
             'client' => ['nullable', 'string', 'max:120'],
             'channel' => ['nullable', 'string', 'max:80'],
-            'type' => ['required', Rule::in(array_keys(AccountingEntry::TYPES))],
+            // Sales pick from a short list that gets totalled; a purchase is
+            // whatever the invoice is for, so it is written out.
+            'type' => $purchases
+                ? ['required', 'string', 'max:120']
+                : ['required', Rule::in(array_keys(AccountingEntry::TYPES))],
+            // The rate is what the supplier charged. 20% arrives as 20.
+            'vat_rate' => [$purchases ? 'required' : 'prohibited', 'numeric', 'min:0', 'max:100'],
             // A negative total is allowed: a credit note is a line of the
             // journal like any other.
             'total' => ['required', 'numeric', 'min:-99999.99', 'max:99999.99'],
@@ -44,6 +52,12 @@ class StoreAccountingEntryRequest extends FormRequest
             'payment_method' => ['required', Rule::in(array_keys(AccountingEntry::PAYMENT_METHODS))],
             'remark' => ['nullable', 'string', 'max:255'],
         ];
+    }
+
+    /** Which side of the accounts this entry belongs to, read from the URL. */
+    private function section(): string
+    {
+        return (string) $this->route('section');
     }
 
     /**
@@ -86,6 +100,9 @@ class StoreAccountingEntryRequest extends FormRequest
         $validated = $this->validated();
 
         $payload = [
+            'vat_rate_basis_points' => isset($validated['vat_rate'])
+                ? (int) round($validated['vat_rate'] * 100)
+                : null,
             'section' => $section,
             'entered_on' => $validated['entered_on'],
             'invoice_number' => $validated['invoice_number'] ?? null,

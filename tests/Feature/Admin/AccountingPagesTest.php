@@ -90,4 +90,68 @@ class AccountingPagesTest extends TestCase
         $this->assertSame(1, substr_count($content, 'admin-nav-group--end'));
         $this->assertMatchesRegularExpression('#admin-nav-group--end".*?System#s', $content);
     }
+
+    public function test_each_section_renders_its_own_page(): void
+    {
+        $owner = User::factory()->admin()->create();
+
+        // The two sections diverge from the first line, so each owns its page
+        // whole rather than branching inside a shared one.
+        $sales = $this->actingAs($owner)->get('/admin/accounting/sales/2026-07')->assertOk();
+        $sales->assertSee('Channel')->assertDontSee('Excl. VAT');
+
+        $purchases = $this->actingAs($owner)->get('/admin/accounting/purchases/2026-07')->assertOk();
+        $purchases->assertSee('Supplier')->assertDontSee('Channel');
+    }
+
+    public function test_both_sections_share_one_heading(): void
+    {
+        $owner = User::factory()->admin()->create();
+
+        foreach (['sales', 'purchases'] as $section) {
+            $this->actingAs($owner)
+                ->get('/admin/accounting/'.$section.'/2026-07')
+                ->assertOk()
+                ->assertSee('July 2026')
+                ->assertSee('1 July to 31 July 2026');
+        }
+    }
+
+    public function test_both_sections_say_where_the_month_stands(): void
+    {
+        $owner = User::factory()->admin()->create();
+        $this->travelTo('2026-08-26 10:00:00');
+
+        foreach (['sales', 'purchases'] as $section) {
+            // A closed month can be ruled off and printed; one still running
+            // cannot, and that holds on both sides of the accounts.
+            $this->actingAs($owner)
+                ->get('/admin/accounting/'.$section.'/2026-07')
+                ->assertOk()
+                ->assertSee('Closed')
+                ->assertDontSee('In progress');
+
+            $this->actingAs($owner)
+                ->get('/admin/accounting/'.$section.'/2026-08')
+                ->assertOk()
+                ->assertSee('In progress');
+        }
+    }
+
+    public function test_the_chip_sits_on_the_title_line(): void
+    {
+        $this->travelTo('2026-08-26 10:00:00');
+
+        $content = $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/accounting/sales/2026-07')
+            ->assertOk()
+            ->getContent();
+
+        // Beside the month's name, not under the dates: the chip qualifies the
+        // month, so it belongs on its line.
+        $this->assertMatchesRegularExpression(
+            '#accounting-month-heading.*?July 2026.*?admin-list-chip.*?</div>.*?admin-list-lede#s',
+            $content
+        );
+    }
 }

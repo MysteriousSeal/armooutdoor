@@ -7890,3 +7890,21 @@ a.order-stepper-btn:focus-visible {
     background: color-mix(in srgb, #8ab4dd 12%, var(--surface));
     border-color: color-mix(in srgb, #8ab4dd 35%, var(--border));
 }
+
+/* The rate beside the tax it produced: small, since the amount is what is
+   read and the rate only explains it. */
+.accounting-vat-rate {
+    margin-left: 0.3rem;
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+}
+
+
+/* The month's name and its standing on one line: the chip qualifies the
+   month, so it reads with the name rather than under the dates. */
+.accounting-month-heading {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}

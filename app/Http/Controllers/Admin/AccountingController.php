@@ -69,7 +69,7 @@ class AccountingController extends Controller
             // Grouped by year: past twelve months, one long column of months
             // no longer says where a financial year begins.
             'years' => AccountingPeriods::months()->groupBy(fn ($month): string => $month->format('Y')),
-            'counts' => $section === 'sales' ? $this->salesCountByMonth() : collect(),
+            'counts' => $this->countsByMonth($section),
             // Which months have already been filed, so a year-end sweep shows
             // at a glance what is left to take out.
             'downloads' => $downloads = AccountingJournalDownload::latestByMonth($section),
@@ -86,9 +86,13 @@ class AccountingController extends Controller
      *
      * @return Collection<string, int>
      */
-    private function salesCountByMonth(string $section = 'sales'): Collection
+    private function countsByMonth(string $section): Collection
     {
-        $orders = $this->countByMonth($this->soldQuery(), 'created_at');
+        // Purchases are hand-written only; sales also count the shop's orders.
+        $orders = $section === 'sales'
+            ? $this->countByMonth($this->soldQuery(), 'created_at')
+            : collect();
+
         $entries = $this->countByMonth(
             AccountingEntry::query()->section($section),
             'entered_on',
@@ -143,6 +147,13 @@ class AccountingController extends Controller
             'title' => $this->title($section),
             'period' => $period,
         ];
+
+        if ($section === 'purchases') {
+            $data['rows'] = $this->purchaseRowsOf($period);
+            $data['paymentMethods'] = AccountingEntry::PAYMENT_METHODS;
+
+            return $data;
+        }
 
         if ($section === 'sales') {
             $data['rows'] = $this->rowsOf($section, $period);
@@ -299,6 +310,26 @@ class AccountingController extends Controller
 
             return [$month => $download->isStaleAgainst($this->fingerprint($this->rowsOf('sales', $period)))];
         });
+    }
+
+    /**
+     * The month's purchases, oldest first.
+     *
+     * Hand-written only for now: a purchase order carries its own VAT rate and
+     * its own receipt dates, and folding those in raises a question this table
+     * does not answer yet — whether a line belongs to the month it was ordered
+     * or the month it arrived.
+     *
+     * @return Collection<int, AccountingEntry>
+     */
+    private function purchaseRowsOf(CarbonImmutable $period): Collection
+    {
+        return AccountingEntry::query()
+            ->section('purchases')
+            ->whereBetween('entered_on', [$period, $period->endOfMonth()])
+            ->orderBy('entered_on')
+            ->orderBy('id')
+            ->get();
     }
 
     /**

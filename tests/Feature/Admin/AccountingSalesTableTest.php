@@ -183,14 +183,16 @@ class AccountingSalesTableTest extends TestCase
         $this->page('2026-01')->assertSee('No sales this month.');
     }
 
-    public function test_the_purchases_month_is_still_empty(): void
+    public function test_a_sale_never_shows_among_the_purchases(): void
     {
-        $this->order('2026-03-12 09:00:00');
+        $order = $this->order('2026-03-12 09:00:00');
 
+        // The two sides are kept apart: purchases hold what was paid out.
         $this->actingAs(User::factory()->admin()->create())
             ->get('/admin/accounting/purchases/2026-03')
             ->assertOk()
-            ->assertSee('Nothing here yet.');
+            ->assertSee('No purchases this month.')
+            ->assertDontSee($order->number);
     }
 
     public function test_the_month_list_counts_the_entries(): void

@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'channel',
     'type',
     'total_cents',
+    'vat_rate_basis_points',
     'fees_cents',
     'payment_method',
     'remark',
@@ -65,6 +66,7 @@ class AccountingEntry extends Model
         return [
             'entered_on' => 'date',
             'total_cents' => 'integer',
+            'vat_rate_basis_points' => 'integer',
             'fees_cents' => 'integer',
         ];
     }
@@ -103,6 +105,40 @@ class AccountingEntry extends Model
     public function paymentLabelFr(): string
     {
         return self::PAYMENT_METHODS_FR[$this->payment_method] ?? $this->paymentLabel();
+    }
+
+    /**
+     * The rate as a percentage, for display: 2000 basis points is 20.
+     *
+     * Null on a sale, where VAT is settled elsewhere.
+     */
+    public function vatRatePercent(): ?float
+    {
+        return $this->vat_rate_basis_points === null
+            ? null
+            : $this->vat_rate_basis_points / 100;
+    }
+
+    /**
+     * The amount before tax.
+     *
+     * `total_cents` is what was actually paid, tax included, because that is
+     * the figure printed on the invoice and the one that leaves the bank. The
+     * two others are worked back from it.
+     */
+    public function exVatCents(): int
+    {
+        if (! $this->vat_rate_basis_points) {
+            return $this->total_cents;
+        }
+
+        return (int) round($this->total_cents / (1 + $this->vat_rate_basis_points / 10000));
+    }
+
+    /** The tax itself, which is what gets reclaimed. */
+    public function vatCents(): int
+    {
+        return $this->total_cents - $this->exVatCents();
     }
 
     /** What is left once the fees are held back. */
