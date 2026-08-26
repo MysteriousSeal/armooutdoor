@@ -2,6 +2,22 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-26 — v0.19.0 — build VEL512
+
+### Admin
+
+- **The shop keeps its own accounts.** A new Accounting section, owner only, holds two halves — sales and purchases — each listing every month from January 2026 onwards. A month appears by itself on the first, with nothing to create, and each card says how many lines it holds.
+
+- **A month of sales shows what came in**, line by line: the date, the invoice number, the client, the channel it was sold through, the kind of sale, the total, the fees withheld and what is actually perceived once they are. The shop's own orders and anything typed by hand sit in the same table, sorted by date, since an entry written by hand is a line of the accounts and not an appendix to them. Refunded orders are listed struck through but join no total: the money went back out.
+
+- **A month of purchases shows what went out**, entered as a supplier's invoice reads — the total paid and the rate charged — with the amount before tax and the tax itself worked back from those.
+
+- **Either month prints as a journal for the accounting book.** One page per month, landscape, in French, carrying the company's letterhead and a blank block to date and sign. The sheet prints exactly the lines the screen shows.
+
+- **A month cannot be printed while it is still running**, nor when it holds nothing: an accounting sheet that would say something different a fortnight later is worse than none, and an empty one is not a document. The button says which of the two it is.
+
+- **Every copy taken out is written down** — which month, by whom, at what time — and each download keeps a fingerprint of what the sheet said. A month whose figures have moved since then says so and asks to be printed again, while a change the journal never prints, an internal note or a tracking number, says nothing. The list of months marks at a glance what has been filed, what has moved, and what is still waiting.
+
 ## 2026-08-26 — v0.18.0 — build XI4OWN
 
 ### Storefront
