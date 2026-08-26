@@ -112,6 +112,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/accounting/purchases/{month}', [AdminAccountingController::class, 'purchasesMonth'])
                 ->where('month', '\d{4}-\d{2}')
                 ->name('accounting.purchases.month');
+
+            // Les écritures à la main, dans le mois qu'on lit.
+            Route::post('/accounting/{section}/{month}/entries', [AdminAccountingController::class, 'storeEntry'])
+                ->where(['section' => 'sales|purchases', 'month' => '\d{4}-\d{2}'])
+                ->name('accounting.entries.store');
+            Route::put('/accounting/{section}/{month}/entries/{entry}', [AdminAccountingController::class, 'updateEntry'])
+                ->where(['section' => 'sales|purchases', 'month' => '\d{4}-\d{2}'])
+                ->name('accounting.entries.update');
+            Route::delete('/accounting/{section}/{month}/entries/{entry}', [AdminAccountingController::class, 'destroyEntry'])
+                ->where(['section' => 'sales|purchases', 'month' => '\d{4}-\d{2}'])
+                ->name('accounting.entries.destroy');
         });
 
         Route::get('/activity', [AdminActivityController::class, 'index'])->name('activity');

@@ -7571,3 +7571,80 @@ a.order-stepper-btn:focus-visible {
     font-weight: 400;
     color: var(--text-muted);
 }
+
+/* Le formulaire d'écriture : deux colonnes, parce que dix champs en pile
+   font une boîte plus haute que l'écran. */
+.entry-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 1rem;
+}
+
+.entry-form-grid .form-group {
+    margin-bottom: 0.9rem;
+}
+
+.entry-form-wide {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 640px) {
+    .entry-form-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.modal--wide {
+    max-width: 34rem;
+    width: 100%;
+}
+
+/* Une écriture saisie se distingue d'une commande : le filet à gauche dit
+   d'où vient la ligne sans ajouter une colonne. */
+.accounting-table tbody tr.is-manual td:first-child {
+    box-shadow: inset 2px 0 0 var(--accent);
+}
+
+.order-chip--manual {
+    color: var(--accent-hover);
+    border-color: color-mix(in srgb, var(--accent) 32%, var(--border));
+    background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+}
+
+/* Les gestes de la ligne : discrets tant qu'on ne survole pas la ligne. */
+.accounting-row-actions {
+    white-space: nowrap;
+    text-align: right;
+}
+
+.accounting-row-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    color: var(--text-muted);
+    background: none;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: color 0.12s ease, border-color 0.12s ease;
+}
+
+.accounting-row-btn:hover,
+.accounting-row-btn:focus-visible {
+    color: var(--text);
+    border-color: var(--border);
+}
+
+.accounting-row-btn.is-danger:hover,
+.accounting-row-btn.is-danger:focus-visible {
+    color: var(--danger, #a44);
+    border-color: color-mix(in srgb, #a44 40%, var(--border));
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .accounting-row-btn {
+        transition: none;
+    }
+}

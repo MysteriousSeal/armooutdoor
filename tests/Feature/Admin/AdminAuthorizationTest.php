@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\AccountingEntry;
 use App\Models\BlogPost;
 use App\Models\Carrier;
 use App\Models\Category;
@@ -85,6 +86,15 @@ class AdminAuthorizationTest extends TestCase
 
         $blogPost = BlogPost::factory()->create();
 
+        $accountingEntry = AccountingEntry::query()->create([
+            'section' => 'sales',
+            'entered_on' => AccountingPeriods::FIRST.'-05',
+            'type' => 'other',
+            'total_cents' => 1000,
+            'fees_cents' => 0,
+            'payment_method' => 'bank_wire',
+        ]);
+
         $bindings = [
             'category' => $category->id,
             'product' => $product->id,
@@ -106,6 +116,8 @@ class AdminAuthorizationTest extends TestCase
             // correspond même pas, et le balayage lirait un 404 comme une
             // porte ouverte.
             'month' => AccountingPeriods::FIRST,
+            'section' => 'sales',
+            'entry' => $accountingEntry->id,
         ];
 
         $nonAdmin = User::factory()->create();
