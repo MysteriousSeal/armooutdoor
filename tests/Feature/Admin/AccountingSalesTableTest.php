@@ -206,8 +206,10 @@ class AccountingSalesTableTest extends TestCase
 
         $this->assertMatchesRegularExpression('#March.*?2 entries#s', $html);
         $this->assertMatchesRegularExpression('#May.*?1 entry#s', $html);
-        // A month with no entry says so rather than printing a bare zero.
-        $this->assertMatchesRegularExpression('#January.*?none#s', $html);
+        // An empty month counts like any other: "0 entries", in the same
+        // shape as its neighbours, only quieter.
+        $this->assertMatchesRegularExpression('#January.*?0 entries#s', $html);
+        $this->assertStringContainsString('accounting-month-count is-none', $html);
     }
 
     public function test_the_count_ignores_drafts_and_test_orders(): void

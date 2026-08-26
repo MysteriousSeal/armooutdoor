@@ -308,4 +308,75 @@ class AccountingDownloadLogTest extends TestCase
             ->assertOk()
             ->assertSee('Changed since the copy of');
     }
+
+    public function test_a_month_waiting_to_be_filed_says_so(): void
+    {
+        $this->order('2026-04-12 09:00:00');
+
+        $html = $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/accounting/sales')
+            ->assertOk()
+            ->getContent();
+
+        $this->assertMatchesRegularExpression('#April.*?Download available#s', $html);
+    }
+
+    public function test_an_empty_month_is_never_offered(): void
+    {
+        $this->order('2026-04-12 09:00:00');
+
+        $html = $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/accounting/sales')
+            ->assertOk()
+            ->getContent();
+
+        // Only April sold anything: the other months have nothing to print.
+        $this->assertSame(1, substr_count($html, 'Download available'));
+    }
+
+    public function test_the_running_month_is_never_offered(): void
+    {
+        // August is the month in progress and cannot be ruled off yet.
+        $this->order('2026-08-03 09:00:00');
+
+        $html = $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/accounting/sales')
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringNotContainsString('Download available', $html);
+    }
+
+    public function test_the_offer_disappears_once_the_month_is_filed(): void
+    {
+        $this->order('2026-04-12 09:00:00');
+        $owner = User::factory()->admin()->create();
+
+        $this->actingAs($owner)->get('/admin/accounting/sales/2026-04/pdf')->assertOk();
+
+        $html = $this->actingAs($owner)
+            ->get('/admin/accounting/sales')
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringNotContainsString('Download available', $html);
+        $this->assertStringContainsString('Downloaded', $html);
+    }
+
+    public function test_the_offer_chip_wears_the_admin_blue_in_both_themes(): void
+    {
+        $css = (string) file_get_contents(public_path('css/admin.css'));
+
+        // The same blue as the other "something to do" chips, so the three
+        // states of a month read as one family: blue to file, green filed,
+        // amber out of date.
+        $this->assertMatchesRegularExpression(
+            '/\.accounting-month-available\s*\{[^}]*color:\s*#2f5d8a/s',
+            $css
+        );
+        $this->assertMatchesRegularExpression(
+            "/\[data-theme='dark'\]\s*\.accounting-month-available\s*\{[^}]*#8ab4dd/s",
+            $css
+        );
+    }
 }

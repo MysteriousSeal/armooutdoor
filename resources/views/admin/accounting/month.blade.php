@@ -31,13 +31,17 @@
                 @if ($section === 'sales')
                     <div class="accounting-hero-actions">
                         <div class="accounting-hero-buttons">
-                            {{-- The button stays in place, switched off: the current
-                                 month is still taking money in, so its journal
-                                 cannot be ruled off. --}}
-                            @if (\App\Support\AccountingPeriods::isClosed($period))
+                            {{-- The button stays in place, switched off: a month
+                                 still taking money in cannot be ruled off, and a
+                                 month with no line has nothing to print. --}}
+                            @if ($downloadable)
                                 <a href="{{ route('admin.accounting.sales.pdf', ['month' => $monthKey]) }}" class="btn btn-secondary">Download PDF</a>
                             @else
-                                <span class="btn btn-secondary is-disabled" aria-disabled="true" title="Available once the month has ended">Download PDF</span>
+                                <span
+                                    class="btn btn-secondary is-disabled"
+                                    aria-disabled="true"
+                                    title="{{ \App\Support\AccountingPeriods::isClosed($period) ? 'Nothing to print for this month' : 'Available once the month has ended' }}"
+                                >Download PDF</span>
                             @endif
                             <button type="button" class="btn btn-primary" data-modal-open="entry-modal" data-entry-new>Add entry</button>
                         </div>

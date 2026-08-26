@@ -46,7 +46,7 @@
                                          you look for before opening. The current month
                                          says it too, and adds that it is still running. --}}
                                     <span class="accounting-month-count {{ $entries === 0 ? 'is-none' : '' }}">
-                                        {{ trans_choice('{0}none|{1}:count entry|[2,*]:count entries', $entries, ['count' => $entries]) }}
+                                        {{ trans_choice('{1}:count entry|[0,*]:count entries', $entries, ['count' => $entries]) }}
                                     </span>
                                     {{-- The current month cannot be ruled off, so a
                                          download status there would be noise. --}}
@@ -57,6 +57,13 @@
                                         >
                                             {{ $hasMoved ? 'Changed' : 'Downloaded' }}
                                         </span>
+                                    @endif
+                                    {{-- Closed, holding lines, and never taken out:
+                                         a sheet is waiting to be filed. A month that
+                                         sold nothing is not offered, since there is
+                                         nothing to print. --}}
+                                    @if (! $download && ! $isCurrent && $entries > 0)
+                                        <span class="accounting-month-available">Download available</span>
                                     @endif
                                     @if ($isCurrent)
                                         <span class="accounting-month-running">In progress</span>

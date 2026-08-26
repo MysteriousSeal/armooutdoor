@@ -147,6 +147,9 @@ class AccountingController extends Controller
         if ($section === 'sales') {
             $data['rows'] = $this->rowsOf($section, $period);
             $data['lastDownload'] = AccountingJournalDownload::latestFor($section, $month);
+            // A month with no line has nothing to print, so its button is off
+            // for the same reason a running month's is.
+            $data['downloadable'] = AccountingPeriods::isClosed($period) && $data['rows']->isNotEmpty();
             // Whether the filed copy still says what the month says now.
             $data['stale'] = $data['lastDownload']?->isStaleAgainst($this->fingerprint($data['rows'])) ?? false;
             $data['entryTypes'] = AccountingEntry::TYPES;
@@ -249,6 +252,12 @@ class AccountingController extends Controller
         // month would not agree, and both would be filed.
         abort_unless(AccountingPeriods::isClosed($period), 404);
 
+        $rows = $this->rowsOf('sales', $period);
+
+        // Nor has a month that sold nothing: an empty sheet is not a document,
+        // and the button that leads here is switched off for the same reason.
+        abort_if($rows->isEmpty(), 404);
+
         $pdf = Pdf::loadView('admin.accounting.sales-pdf', $this->journalData($period))
             // Ten columns do not stand upright without cutting names in half.
             ->setPaper('a4', 'landscape');
@@ -258,7 +267,7 @@ class AccountingController extends Controller
         AccountingJournalDownload::record(
             'sales',
             AccountingPeriods::key($period),
-            $this->fingerprint($this->rowsOf('sales', $period)),
+            $this->fingerprint($rows),
             $request->user()?->id,
         );
 

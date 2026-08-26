@@ -254,7 +254,7 @@ class AccountingManualEntryTest extends TestCase
             ->getContent();
 
         // A card carries one count only: saying "1 entry" is enough to say
-        // it does not say "none".
+        // it does not say "0 entries".
         $this->assertMatchesRegularExpression('#March.*?1 entry#s', $html);
     }
 
@@ -274,6 +274,6 @@ class AccountingManualEntryTest extends TestCase
             ->assertOk()
             ->getContent();
 
-        $this->assertMatchesRegularExpression('#March.*?none#s', $html);
+        $this->assertMatchesRegularExpression('#March.*?0 entries#s', $html);
     }
 }

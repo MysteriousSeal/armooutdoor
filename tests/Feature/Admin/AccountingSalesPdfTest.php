@@ -95,6 +95,9 @@ class AccountingSalesPdfTest extends TestCase
 
     public function test_the_page_offers_the_download(): void
     {
+        // A month has to hold a line before it has a sheet to offer.
+        $this->order('2026-03-12 09:00:00');
+
         $this->actingAs(User::factory()->admin()->create())
             ->get('/admin/accounting/sales/2026-03')
             ->assertOk()
@@ -334,6 +337,8 @@ class AccountingSalesPdfTest extends TestCase
     public function test_the_button_is_greyed_out_until_the_month_ends(): void
     {
         $admin = User::factory()->admin()->create();
+        $this->order('2026-07-12 09:00:00');
+        $this->order('2026-08-03 09:00:00');
 
         $running = $this->actingAs($admin)->get('/admin/accounting/sales/2026-08')->assertOk();
         $running->assertSee('is-disabled', false)
@@ -358,5 +363,30 @@ class AccountingSalesPdfTest extends TestCase
         // the settings without the accounting book following.
         $this->assertStringContainsString('hello@swiftshelf.fr', $html);
         $this->assertStringNotContainsString('boutique@armooutdoor.fr', $html);
+    }
+
+    public function test_an_empty_month_cannot_be_downloaded(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        // March sold nothing: an empty sheet is not a document.
+        $this->actingAs($admin)
+            ->get('/admin/accounting/sales/2026-03')
+            ->assertOk()
+            ->assertSee('is-disabled', false)
+            ->assertSee('Nothing to print for this month')
+            ->assertDontSee('/admin/accounting/sales/2026-03/pdf', false);
+
+        $this->actingAs($admin)->get('/admin/accounting/sales/2026-03/pdf')->assertNotFound();
+    }
+
+    public function test_a_hand_written_entry_is_enough_to_print_a_month(): void
+    {
+        $this->entry('2026-03-14');
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/accounting/sales/2026-03/pdf')
+            ->assertOk()
+            ->assertDownload('ventes-2026-03.pdf');
     }
 }
