@@ -7,6 +7,7 @@ use App\Http\Controllers\Account\ConversationController as AccountConversationCo
 use App\Http\Controllers\Account\DiscountCodeController as AccountDiscountCodeController;
 use App\Http\Controllers\Account\ProfileController;
 // Admin (back office)
+use App\Http\Controllers\Admin\AccountingController as AdminAccountingController;
 use App\Http\Controllers\Admin\ActivityController as AdminActivityController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
@@ -100,6 +101,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
         Route::get('/changelog', AdminChangelogController::class)->name('changelog');
         Route::get('/search', [AdminSearchController::class, 'index'])->name('search');
+        // Réservées au propriétaire, comme le reste de ce qui touche à
+        // l'argent : ces pages porteront le chiffre d'affaires et les coûts.
+        Route::middleware('admin.owner')->group(function (): void {
+            Route::get('/accounting/sales', [AdminAccountingController::class, 'sales'])->name('accounting.sales');
+            Route::get('/accounting/purchases', [AdminAccountingController::class, 'purchases'])->name('accounting.purchases');
+        });
+
         Route::get('/activity', [AdminActivityController::class, 'index'])->name('activity');
         Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');
         Route::get('/customers/export', [AdminCustomerController::class, 'export'])->name('customers.export');
