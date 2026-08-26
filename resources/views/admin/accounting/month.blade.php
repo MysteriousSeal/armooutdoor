@@ -33,11 +33,36 @@
                         {{-- The button stays in place, switched off: the current
                              month is still taking money in, so its journal
                              cannot be ruled off. --}}
-                        @if (\App\Support\AccountingPeriods::isClosed($period))
-                            <a href="{{ route('admin.accounting.sales.pdf', ['month' => $monthKey]) }}" class="btn btn-secondary">Download PDF</a>
-                        @else
-                            <span class="btn btn-secondary is-disabled" aria-disabled="true" title="Available once the month has ended">Download PDF</span>
-                        @endif
+                        <div class="accounting-download">
+                            @if (\App\Support\AccountingPeriods::isClosed($period))
+                                <a href="{{ route('admin.accounting.sales.pdf', ['month' => $monthKey]) }}" class="btn btn-secondary">Download PDF</a>
+                            @else
+                                <span class="btn btn-secondary is-disabled" aria-disabled="true" title="Available once the month has ended">Download PDF</span>
+                            @endif
+
+                            {{-- Under the button, where the decision to take a
+                                 copy out is made. --}}
+                            @if ($lastDownload && $stale)
+                                {{-- The filed copy no longer matches the month:
+                                     said plainly, since a journal that disagrees
+                                     with the accounts is worse than none. --}}
+                                <p class="accounting-download-note is-stale">
+                                    <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">
+                                        <path d="M12 8v5m0 3.5v.1M10.3 4.3 2.8 17.5A1.5 1.5 0 0 0 4.1 20h15.8a1.5 1.5 0 0 0 1.3-2.5L13.7 4.3a1.5 1.5 0 0 0-2.6 0z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Changed since the copy of {{ $lastDownload->created_at->format('j M Y') }} at {{ $lastDownload->created_at->format('H:i') }} — download it again
+                                </p>
+                            @elseif ($lastDownload)
+                                <p class="accounting-download-note">
+                                    Last downloaded {{ $lastDownload->created_at->format('j M Y') }} at {{ $lastDownload->created_at->format('H:i') }}
+                                    @if ($lastDownload->user)
+                                        by {{ $lastDownload->user->name }}
+                                    @endif
+                                </p>
+                            @else
+                                <p class="accounting-download-note is-never">Never downloaded</p>
+                            @endif
+                        </div>
                         <button type="button" class="btn btn-primary" data-modal-open="entry-modal" data-entry-new>Add entry</button>
                     </div>
                 @endif

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreAccountingEntryRequest;
 use App\Models\AccountingEntry;
+use App\Models\AccountingJournalDownload;
 use App\Models\CompanySetting;
 use App\Models\Order;
 use App\Support\AccountingPeriods;
@@ -12,6 +13,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
@@ -68,6 +70,10 @@ class AccountingController extends Controller
             // no longer says where a financial year begins.
             'years' => AccountingPeriods::months()->groupBy(fn ($month): string => $month->format('Y')),
             'counts' => $section === 'sales' ? $this->salesCountByMonth() : collect(),
+            // Which months have already been filed, so a year-end sweep shows
+            // at a glance what is left to take out.
+            'downloads' => $downloads = AccountingJournalDownload::latestByMonth($section),
+            'stale' => $this->staleMonths($section, $downloads),
         ];
     }
 
@@ -140,6 +146,9 @@ class AccountingController extends Controller
 
         if ($section === 'sales') {
             $data['rows'] = $this->rowsOf($section, $period);
+            $data['lastDownload'] = AccountingJournalDownload::latestFor($section, $month);
+            // Whether the filed copy still says what the month says now.
+            $data['stale'] = $data['lastDownload']?->isStaleAgainst($this->fingerprint($data['rows'])) ?? false;
             $data['entryTypes'] = AccountingEntry::TYPES;
             $data['paymentMethods'] = AccountingEntry::PAYMENT_METHODS;
         }
@@ -232,7 +241,7 @@ class AccountingController extends Controller
      * The same lines and the same totals as the page: a document that said
      * something else would be worth nothing.
      */
-    public function salesPdf(string $month): Response
+    public function salesPdf(Request $request, string $month): Response
     {
         $period = $this->sectionPeriod('sales', $month);
 
@@ -244,7 +253,70 @@ class AccountingController extends Controller
             // Ten columns do not stand upright without cutting names in half.
             ->setPaper('a4', 'landscape');
 
+        // Written down before the file is handed over: an accounting book
+        // leaving the admin is worth a trail.
+        AccountingJournalDownload::record(
+            'sales',
+            AccountingPeriods::key($period),
+            $this->fingerprint($this->rowsOf('sales', $period)),
+            $request->user()?->id,
+        );
+
         return $pdf->download('ventes-'.AccountingPeriods::key($period).'.pdf');
+    }
+
+    /**
+     * The filed months whose figures have moved since.
+     *
+     * Only months already downloaded are rebuilt: a month nobody has taken a
+     * copy of cannot be out of date, and rebuilding every month of the list
+     * would read the whole year to answer a question about a handful.
+     *
+     * @param  Collection<string, AccountingJournalDownload>  $downloads
+     * @return Collection<string, bool>
+     */
+    private function staleMonths(string $section, Collection $downloads): Collection
+    {
+        if ($section !== 'sales') {
+            return collect();
+        }
+
+        return $downloads->mapWithKeys(function (AccountingJournalDownload $download, string $month): array {
+            $period = AccountingPeriods::parse($month);
+
+            if ($period === null) {
+                return [$month => false];
+            }
+
+            return [$month => $download->isStaleAgainst($this->fingerprint($this->rowsOf('sales', $period)))];
+        });
+    }
+
+    /**
+     * A signature of the lines a journal prints.
+     *
+     * Only the printed values go in: touching a tracking number or an internal
+     * note leaves it unchanged, while a total, a fee, a status or a deleted
+     * entry moves it. A date could not say as much — a removed line touches
+     * nothing at all.
+     *
+     * @param  Collection<int, array<string, mixed>>  $rows
+     */
+    private function fingerprint(Collection $rows): string
+    {
+        return hash('sha256', $rows->map(fn (array $row): string => implode('|', [
+            $row['date']->format('Y-m-d'),
+            $row['invoice'],
+            $row['client'],
+            $row['channel'],
+            $row['type'],
+            $row['total_cents'],
+            $row['fees_cents'],
+            $row['payment'],
+            $row['remark'],
+            $row['counts'] ? '1' : '0',
+            $row['refunded'] ? '1' : '0',
+        ]))->join("\n"));
     }
 
     /**

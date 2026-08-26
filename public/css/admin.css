@@ -7658,3 +7658,63 @@ a.order-stepper-btn:focus-visible {
     pointer-events: none;
     border-style: dashed;
 }
+
+/* The download button and what it says about the last copy taken out. */
+.accounting-download {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.35rem;
+}
+
+/* Quieter than the button: it reports, it does not ask to be clicked. */
+.accounting-download-note {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Never taken out is not a warning, only a fact: dashed rather than red. */
+.accounting-download-note.is-never {
+    padding-bottom: 0.05rem;
+    border-bottom: 1px dashed var(--border);
+}
+
+/* A month already filed, on its card in the list. */
+.accounting-month-filed {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.4rem;
+    color: #3d6b4e;
+}
+
+[data-theme='dark'] .accounting-month-filed {
+    color: #9dccab;
+}
+
+/* The filed copy no longer matches the month. Amber rather than red: nothing
+   is broken, a sheet is simply out of date. */
+.accounting-download-note.is-stale {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.5rem;
+    font-weight: 500;
+    color: #8a6d1f;
+    background: #fbf3dc;
+    border: 1px solid #ecd9a3;
+}
+
+[data-theme='dark'] .accounting-download-note.is-stale {
+    color: #e0b673;
+    background: color-mix(in srgb, #e0b673 12%, var(--surface));
+    border-color: color-mix(in srgb, #e0b673 32%, var(--border));
+}
+
+.accounting-month-filed.is-stale {
+    color: #8a6d1f;
+}
+
+[data-theme='dark'] .accounting-month-filed.is-stale {
+    color: #e0b673;
+}

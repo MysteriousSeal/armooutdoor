@@ -46,6 +46,28 @@
                                         <span class="accounting-month-running">In progress</span>
                                     @endif
                                 </span>
+                                {{-- A month already filed carries a tick, so a
+                                     year-end sweep shows what is left. --}}
+                                @php($download = $downloads[\App\Support\AccountingPeriods::key($month)] ?? null)
+                                @if ($download)
+                                    @php($hasMoved = (bool) ($stale[\App\Support\AccountingPeriods::key($month)] ?? false))
+                                    <span
+                                        class="accounting-month-filed {{ $hasMoved ? 'is-stale' : '' }}"
+                                        title="{{ $hasMoved ? 'Changed since the copy of' : 'Downloaded' }} {{ $download->created_at->format('j M Y') }} at {{ $download->created_at->format('H:i') }}{{ $download->user ? ' by '.$download->user->name : '' }}"
+                                    >
+                                        @if ($hasMoved)
+                                            <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">
+                                                <path d="M12 8v5m0 3.5v.1M10.3 4.3 2.8 17.5A1.5 1.5 0 0 0 4.1 20h15.8a1.5 1.5 0 0 0 1.3-2.5L13.7 4.3a1.5 1.5 0 0 0-2.6 0z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                            <span class="sr-only">Changed since the last download</span>
+                                        @else
+                                            <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">
+                                                <path d="m5 13 4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                            <span class="sr-only">Downloaded</span>
+                                        @endif
+                                    </span>
+                                @endif
                                 <svg class="accounting-month-arrow" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
                                     <path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
