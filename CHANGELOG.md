@@ -2,6 +2,26 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-26 — v0.20.0 — build 49Y3T8
+
+### Admin
+
+- **Every article can be given a printed label.** An article is a product without sizes, or one size of a product that has them: each carries its own reference and its own barcode, and each is one sheet. The label prints the name, the line under it, the reference, an EAN-13 barcode, the importer, the origin, the batch date, and optionally what the article is made of and a warning to show.
+
+- **A page under Catalog lists every article that could wear one**, with its thumbnail, its size, its two codes and a button to print. The wording is typed on the line it is read on, saved without leaving the page, and the button switches on the moment an article has everything it needs. Products taken off the shop, and sizes withdrawn from products still on it, are left out: a retired article needs no label.
+
+- **Tabs sort the work.** Ready and Incomplete for a sweep, then one tab per missing piece — title, subtitle, reference, barcode — because a list of what has no barcode is a different job from a list of everything unfinished. Every count speaks for the whole catalogue rather than the page in hand.
+
+- The name and the line under it are stored in capitals, so a label reads the same whoever typed it.
+
+### Under the hood
+
+- The barcode is drawn from the encoding itself, ninety-five bars and their three guards, rather than by pulling in a library to paint rectangles. A twelve-digit code is padded to thirteen; a length belonging to another symbology prints its digits alone rather than bars a scanner would misread.
+
+- The label's wording lives in its own table rather than as four columns on every product, and a label emptied of every field is deleted: the row's existence is what "this product has wording" means.
+
+- "Catalogue" in the admin menu is spelled Catalog, and the small heading over a field is named for what it labels rather than for the filter bar it was first written in.
+
 ## 2026-08-26 — v0.19.0 — build VEL512
 
 ### Admin
