@@ -112,9 +112,9 @@ class AdminAuthorizationTest extends TestCase
             'conversation' => $conversation->id,
             'message' => $conversationMessage->id,
             'post' => $blogPost->id,
-            // Un mois de la période comptable : hors bornes, la route ne
-            // correspond même pas, et le balayage lirait un 404 comme une
-            // porte ouverte.
+            // A month inside the accounting period: outside it the route
+            // does not even match, and this sweep would read a 404 as an
+            // unguarded door.
             'month' => AccountingPeriods::FIRST,
             'section' => 'sales',
             'entry' => $accountingEntry->id,

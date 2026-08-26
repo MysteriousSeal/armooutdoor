@@ -7,7 +7,7 @@ use App\Support\AccountingPeriods;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-/** La liste des mois comptables, et la page d'un mois. */
+/** The list of accounting months, and a month's own page. */
 class AccountingMonthsTest extends TestCase
 {
     use RefreshDatabase;
@@ -37,8 +37,8 @@ class AccountingMonthsTest extends TestCase
 
         $html = $this->list();
 
-        // Le mois qui vient de se clore reste en haut plutôt que de descendre
-        // d'un cran chaque mois.
+        // The month that has just closed stays at the top rather than
+        // dropping a row each month.
         $this->assertLessThan(strpos($html, '>January<'), strpos($html, '>August<'));
     }
 
@@ -73,7 +73,7 @@ class AccountingMonthsTest extends TestCase
 
         $this->assertStringContainsString('is-current', $html);
         $this->assertStringContainsString('In progress', $html);
-        // Un seul mois en cours, pas un par année.
+        // One month in progress, not one per year.
         $this->assertSame(1, substr_count($html, 'In progress'));
     }
 
@@ -103,7 +103,7 @@ class AccountingMonthsTest extends TestCase
 
         $admin = User::factory()->admin()->create();
 
-        // Avant le premier mois compté, et dans un futur qui n'a rien encaissé.
+        // Before the first month counted, and in a future that took nothing in.
         $this->actingAs($admin)->get('/admin/accounting/sales/2025-12')->assertNotFound();
         $this->actingAs($admin)->get('/admin/accounting/sales/2026-09')->assertNotFound();
         $this->actingAs($admin)->get('/admin/accounting/purchases/2025-12')->assertNotFound();

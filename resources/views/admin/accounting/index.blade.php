@@ -10,9 +10,9 @@
             <p class="admin-list-lede">{{ $lede }}</p>
         </header>
 
-        {{-- Le mois en cours en tête : c'est celui qu'on ouvre presque
-             toujours, et il doit rester à la même place d'un mois sur
-             l'autre. --}}
+        {{-- The current month first: it is the one opened almost every time,
+             and it should stay in the same place from one month to the
+             next. --}}
         @foreach ($years as $year => $months)
             <section class="accounting-year" aria-labelledby="accounting-year-{{ $year }}">
                 <h3 class="accounting-year-title" id="accounting-year-{{ $year }}">{{ $year }}</h3>
@@ -26,9 +26,9 @@
                                 <span class="accounting-month-name">{{ $month->locale('en')->isoFormat('MMMM') }}</span>
                                 @php($entries = (int) ($counts[\App\Support\AccountingPeriods::key($month)] ?? 0))
                                 <span class="accounting-month-meta">
-                                    {{-- Le compte plutôt que la clé du mois : c'est ce
-                                         qu'on cherche avant d'ouvrir. Le mois en cours
-                                         le dit aussi, en précisant qu'il court encore. --}}
+                                    {{-- The count rather than the month key: it is what
+                                         you look for before opening. The current month
+                                         says it too, and adds that it is still running. --}}
                                     <span class="accounting-month-count {{ $entries === 0 ? 'is-none' : '' }}">
                                         {{ trans_choice('{0}none|{1}:count entry|[2,*]:count entries', $entries, ['count' => $entries]) }}
                                     </span>

@@ -17,10 +17,10 @@ use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * La comptabilité : ce qui est entré, ce qui est sorti.
+ * The accounts: what came in, what went out.
  *
- * Les pages sont encore vides. Elles existent d'abord pour tenir la place
- * dans la navigation et fixer l'adresse ; les chiffres viendront dedans.
+ * The pages hold the place in the navigation and fix the address; the
+ * figures come next.
  */
 class AccountingController extends Controller
 {
@@ -51,19 +51,19 @@ class AccountingController extends Controller
             'section' => $section,
             'title' => $this->title($section),
             'lede' => $this->lede($section),
-            // Groupés par année : passé douze mois, une seule colonne de mois
-            // ne dit plus où commence l'exercice.
+            // Grouped by year: past twelve months, one long column of months
+            // no longer says where a financial year begins.
             'years' => AccountingPeriods::months()->groupBy(fn ($month): string => $month->format('Y')),
             'counts' => $section === 'sales' ? $this->salesCountByMonth() : collect(),
         ];
     }
 
     /**
-     * Combien d'écritures par mois, en deux requêtes.
+     * How many entries each month holds, in two queries.
      *
-     * Une par mois affiché ferait douze requêtes pour une liste qui n'affiche
-     * qu'un nombre. Les écritures saisies comptent comme les commandes : la
-     * liste dit combien de lignes il y a à lire dans le mois.
+     * One query per month shown would be twelve for a list that prints a
+     * number. Hand-written entries count like orders: the list says how many
+     * lines there are to read in the month.
      *
      * @return Collection<string, int>
      */
@@ -90,8 +90,8 @@ class AccountingController extends Controller
      */
     private function countByMonth(Builder $query, string $column): Collection
     {
-        // SQLite en développement, MySQL en production : les deux ne
-        // découpent pas une date de la même façon.
+        // SQLite in development, MySQL in production: the two do not cut a
+        // date apart the same way.
         $month = $query->getConnection()->getDriverName() === 'sqlite'
             ? "strftime('%Y-%m', {$column})"
             : "DATE_FORMAT({$column}, '%Y-%m')";
@@ -124,10 +124,10 @@ class AccountingController extends Controller
     }
 
     /**
-     * Les lignes du mois : les commandes et les écritures à la main.
+     * The month's lines: the orders and the hand-written entries.
      *
-     * Rangées à la date, les unes parmi les autres — une écriture saisie
-     * n'est pas une annexe du tableau, c'est une ligne du tableau.
+     * Sorted by date, among one another — an entry written by hand is not an
+     * appendix to the table, it is a line of it.
      *
      * @return Collection<int, array<string, mixed>>
      */
@@ -142,8 +142,8 @@ class AccountingController extends Controller
             'client' => $order->user?->name ?? '—',
             'channel' => $order->marketplace_name ?: ($order->marketplace?->name ?? 'Direct'),
             'type' => 'Stock sale',
-            // Les documents comptables sont en français ; l'écran reste en
-            // anglais comme le reste de l'administration.
+            // The accounting documents are in French; the screen stays in
+            // English like the rest of the admin.
             'type_fr' => AccountingEntry::TYPES_FR['stock_sale'],
             'total_cents' => $order->total_cents,
             'fees_cents' => ($order->marketplace_commission_cents ?? 0) + ($order->payment_fee_cents ?? 0),
@@ -186,31 +186,31 @@ class AccountingController extends Controller
     }
 
     /**
-     * Le journal du mois en PDF, pour le livre de comptes.
+     * The month's journal as a PDF, for the accounting book.
      *
-     * Les mêmes lignes et les mêmes totaux que la page : un document qui
-     * dirait autre chose que l'écran ne servirait à rien.
+     * The same lines and the same totals as the page: a document that said
+     * something else would be worth nothing.
      */
     public function salesPdf(string $month): Response
     {
         $period = $this->sectionPeriod('sales', $month);
 
-        // Un mois qui court encore n'a pas de journal : deux éditions du même
-        // mois ne diraient pas la même chose et circuleraient toutes les deux.
+        // A month still running has no journal: two printings of the same
+        // month would not agree, and both would be filed.
         abort_unless(AccountingPeriods::isClosed($period), 404);
 
         $pdf = Pdf::loadView('admin.accounting.sales-pdf', $this->journalData($period))
-            // Dix colonnes ne tiennent pas debout sans couper les noms.
+            // Ten columns do not stand upright without cutting names in half.
             ->setPaper('a4', 'landscape');
 
         return $pdf->download('ventes-'.AccountingPeriods::key($period).'.pdf');
     }
 
     /**
-     * Ce que porte le journal d'un mois.
+     * What a month's journal carries.
      *
-     * Les mêmes lignes et les mêmes totaux que la page : un document qui
-     * dirait autre chose que l'écran ne servirait à rien.
+     * The same lines and the same totals as the page: a document that said
+     * something else would be worth nothing.
      *
      * @return array<string, mixed>
      */
@@ -278,12 +278,12 @@ class AccountingController extends Controller
     }
 
     /**
-     * Les ventes du mois, dans l'ordre où elles ont été passées.
+     * The month's sales, in the order they were placed.
      *
-     * La date de commande décide du mois, pas celle d'expédition : c'est
-     * celle que porte la facture. Les brouillons ne sont pas des ventes et
-     * les commandes de test ne comptent nulle part ; un remboursement, si :
-     * la comptabilité doit le voir, pas le perdre.
+     * The order date decides the month, not the shipping date: it is the one
+     * the invoice carries. A draft is not a sale and a test order counts
+     * nowhere; a refund does count as a line, since the accounts have to see
+     * it rather than lose it.
      *
      * @return Collection<int, Order>
      */
@@ -298,11 +298,10 @@ class AccountingController extends Controller
     }
 
     /**
-     * Ce qui compte comme une vente.
+     * What counts as a sale.
      *
-     * Un brouillon n'en est pas une, une commande de test ne compte nulle
-     * part. Un remboursement reste : la comptabilité doit le voir passer,
-     * même s'il ne s'ajoute à aucun total.
+     * A draft is not one, and a test order counts nowhere. A refund stays:
+     * the accounts must see it go by, even though it adds to no total.
      */
     private function soldQuery(): Builder
     {

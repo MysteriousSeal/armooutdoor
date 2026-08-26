@@ -10,7 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
-/** Les écritures saisies à la main dans le journal des ventes. */
+/** Entries written by hand into the sales journal. */
 class AccountingManualEntryTest extends TestCase
 {
     use RefreshDatabase;
@@ -94,7 +94,7 @@ class AccountingManualEntryTest extends TestCase
             ->assertSee('14/03/2026')
             ->assertSee('240,00', false)
             ->assertSee('12,50', false)
-            // 240 € moins 12,50 € de frais.
+            // 240 € less 12,50 € of fees.
             ->assertSee('227,50', false);
     }
 
@@ -109,7 +109,7 @@ class AccountingManualEntryTest extends TestCase
             ->assertOk()
             ->getContent();
 
-        // Rangée à sa date, pas ajoutée en bout de tableau.
+        // Sorted to its date, not appended to the end of the table.
         $this->assertLessThan(strpos($html, 'INV-2026-014'), strpos($html, $early->number));
         $this->assertLessThan(strpos($html, $late->number), strpos($html, 'INV-2026-014'));
     }
@@ -126,7 +126,7 @@ class AccountingManualEntryTest extends TestCase
 
         $foot = substr($content, strpos($content, '<tfoot>'));
 
-        // 100 € + 240 € = 340 €, 12,50 € de frais, 327,50 € perçus.
+        // 100 € + 240 € = 340 €, 12,50 € of fees, 327,50 € perceived.
         $this->assertStringContainsString('340,00', $foot);
         $this->assertStringContainsString('327,50', $foot);
         $this->assertStringContainsString('2 sales', $foot);
@@ -134,7 +134,7 @@ class AccountingManualEntryTest extends TestCase
 
     public function test_a_date_outside_the_month_is_refused(): void
     {
-        // Enregistrée, elle disparaîtrait de la page qui vient de l'accepter.
+        // Saved, it would vanish from the page that had just accepted it.
         $this->submit($this->payload(['entered_on' => '2026-04-02']))
             ->assertSessionHasErrors('entered_on');
 
@@ -189,7 +189,7 @@ class AccountingManualEntryTest extends TestCase
         $entry = AccountingEntry::query()->firstOrFail();
         $this->assertSame($author->id, $entry->created_by_user_id);
 
-        // Corriger une écriture ne fait pas de vous son auteur.
+        // Correcting an entry does not make you its author.
         $this->actingAs(User::factory()->admin()->create())
             ->put('/admin/accounting/sales/2026-03/entries/'.$entry->id, $this->payload(['client' => 'Autre']));
 
@@ -233,7 +233,7 @@ class AccountingManualEntryTest extends TestCase
             ->assertOk()
             ->getContent();
 
-        // Une commande et une écriture : la liste annonce deux lignes à lire.
+        // One order and one entry: the list announces two lines to read.
         $this->assertMatchesRegularExpression('#March.*?2 entries#s', $html);
     }
 
@@ -246,8 +246,8 @@ class AccountingManualEntryTest extends TestCase
             ->assertOk()
             ->getContent();
 
-        // Une carte ne porte qu'un compte : dire « 1 entry » suffit à dire
-        // qu'elle ne dit pas « none ».
+        // A card carries one count only: saying "1 entry" is enough to say
+        // it does not say "none".
         $this->assertMatchesRegularExpression('#March.*?1 entry#s', $html);
     }
 

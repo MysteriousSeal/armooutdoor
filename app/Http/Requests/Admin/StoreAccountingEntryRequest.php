@@ -9,7 +9,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
-/** Une écriture saisie à la main dans le journal comptable. */
+/** An entry written by hand into the accounting journal. */
 class StoreAccountingEntryRequest extends FormRequest
 {
     public function authorize(): bool
@@ -27,8 +27,8 @@ class StoreAccountingEntryRequest extends FormRequest
             'channel' => ['nullable', 'string', 'max:80'],
             'type' => ['required', Rule::in(array_keys(AccountingEntry::TYPES))],
             'total' => ['required', 'numeric', 'min:-99999.99', 'max:99999.99'],
-            // Les frais se saisissent en positif et se retiennent : le signe
-            // se lit dans la colonne, pas dans la saisie.
+            // Fees are typed as a positive figure and held back: the sign is
+            // read in the column, not entered in the field.
             'fees' => ['nullable', 'numeric', 'min:0', 'max:99999.99'],
             'payment_method' => ['required', Rule::in(array_keys(AccountingEntry::PAYMENT_METHODS))],
             'remark' => ['nullable', 'string', 'max:255'],
@@ -36,10 +36,10 @@ class StoreAccountingEntryRequest extends FormRequest
     }
 
     /**
-     * La date doit tomber dans le mois qu'on est en train de lire.
+     * The date has to fall inside the month being read.
      *
-     * Sans quoi l'écriture serait enregistrée puis disparaîtrait de la page
-     * qui vient de l'accepter.
+     * Otherwise the entry would be saved and then vanish from the page that
+     * had just accepted it.
      */
     public function withValidator($validator): void
     {

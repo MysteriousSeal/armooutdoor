@@ -1,7 +1,7 @@
-// Le formulaire d'écriture comptable, en ajout comme en correction.
+// The accounting entry form, for adding as well as correcting.
 //
-// Une seule boîte de dialogue sert aux deux : deux formulaires identiques se
-// seraient désaccordés au premier champ ajouté.
+// One dialog serves both: two identical forms would have drifted apart at the
+// first field added.
 (function () {
     'use strict';
 
@@ -39,8 +39,8 @@
     document.querySelectorAll('[data-entry-edit]').forEach(function (trigger) {
         trigger.addEventListener('click', function () {
             form.setAttribute('action', trigger.getAttribute('data-entry-action'));
-            // La méthode passe par le champ caché : un formulaire HTML ne sait
-            // pas envoyer un PUT.
+            // The method goes through the hidden field: an HTML form cannot
+            // send a PUT.
             method.value = 'PUT';
             title.textContent = 'Edit this entry';
             submit.textContent = 'Save changes';
@@ -48,8 +48,8 @@
             try {
                 fill(JSON.parse(trigger.getAttribute('data-entry')));
             } catch (error) {
-                // Un attribut illisible ne doit pas bloquer l'ouverture : le
-                // formulaire s'ouvre alors sur les valeurs précédentes.
+                // An unreadable attribute must not block the dialog: the form
+                // then opens on whatever values it already held.
             }
         });
     });

@@ -8,10 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Une écriture saisie à la main dans le journal.
+ * An entry written by hand into the journal.
  *
- * Elle porte les mêmes colonnes qu'une commande dans le tableau du mois, à
- * ceci près qu'elle ne vient d'aucune commande.
+ * It carries the same columns as an order in the month's table, except that
+ * it comes from no order at all.
  */
 #[Fillable([
     'section',
@@ -28,7 +28,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class AccountingEntry extends Model
 {
-    /** Les natures de vente. La liste est courte exprès : elle se totalise. */
+    /** The kinds of sale. The list is short on purpose: it gets totalled. */
     public const TYPES = [
         'stock_sale' => 'Stock sale',
         'prestation' => 'Prestation',
@@ -36,7 +36,7 @@ class AccountingEntry extends Model
         'other' => 'Other',
     ];
 
-    /** Les mêmes natures en français : les documents comptables le sont. */
+    /** The same kinds in French, since the accounting documents are. */
     public const TYPES_FR = [
         'stock_sale' => 'Vente sur stock',
         'prestation' => 'Prestation',
@@ -44,7 +44,7 @@ class AccountingEntry extends Model
         'other' => 'Autre',
     ];
 
-    /** Ce qui arrive sur le compte. Le virement, jusqu'à preuve du contraire. */
+    /** How the money lands. A bank wire, until proven otherwise. */
     public const PAYMENT_METHODS = [
         'bank_wire' => 'Bank wire',
         'card' => 'Card',
@@ -98,7 +98,7 @@ class AccountingEntry extends Model
         return self::PAYMENT_METHODS_FR[$this->payment_method] ?? $this->paymentLabel();
     }
 
-    /** Ce qui reste une fois les frais retenus. */
+    /** What is left once the fees are held back. */
     public function perceivedCents(): int
     {
         return $this->total_cents - $this->fees_cents;

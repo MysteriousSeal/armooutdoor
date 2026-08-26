@@ -12,7 +12,7 @@ use Database\Seeders\ShippingSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-/** Le journal des ventes d'un mois, en PDF. */
+/** A month's journal of sales, as a PDF. */
 class AccountingSalesPdfTest extends TestCase
 {
     use RefreshDatabase;
@@ -63,8 +63,8 @@ class AccountingSalesPdfTest extends TestCase
     {
         $period = CarbonImmutable::createFromFormat('Y-m-d', $month.'-01')->startOfMonth();
 
-        // Les données viennent du contrôleur, pas d'un calcul refait ici :
-        // sinon le test vérifierait sa propre arithmétique.
+        // The data comes from the controller rather than being recomputed
+        // here: otherwise the test would check its own arithmetic.
         $controller = app(AccountingController::class);
         $method = new \ReflectionMethod($controller, 'journalData');
         $method->setAccessible(true);
@@ -114,7 +114,7 @@ class AccountingSalesPdfTest extends TestCase
 
         $html = $this->render();
 
-        // 100 € + 240 € = 340 € ; 2,50 € + 12,50 € de frais ; 325 € perçus.
+        // 100 € + 240 € = 340 €; 2,50 € + 12,50 € of fees; 325 € perceived.
         $this->assertStringContainsString('340,00', $html);
         $this->assertStringContainsString('15,00', $html);
         $this->assertStringContainsString('325,00', $html);
@@ -128,12 +128,12 @@ class AccountingSalesPdfTest extends TestCase
         $html = $this->render();
 
         $this->assertStringContainsString('INV-'.$refunded->number, $html);
-        // La facture barrée suffit : une étiquette répéterait le trait.
+        // The struck-through invoice is enough: a label would repeat the strike.
         $this->assertStringNotContainsString('Remboursé', $html);
         $this->assertMatchesRegularExpression('/tr\.refunded \.col-invoice\s*\{[^}]*line-through/s', $html);
         $this->assertStringContainsString('<tr class="refunded">', $html);
         $this->assertStringContainsString('1 remboursement hors total', $html);
-        // 100 € seuls : les 40 € remboursés ne s'ajoutent pas.
+        // 100 € alone: the 40 € refunded do not add on.
         $this->assertStringContainsString('100,00', $html);
         $this->assertStringNotContainsString('140,00', $html);
     }
@@ -146,7 +146,7 @@ class AccountingSalesPdfTest extends TestCase
 
         $company = CompanySetting::current()->value('company_name');
 
-        // Le journal appartient à la société, pas à l'enseigne.
+        // The journal belongs to the company, not to the shop sign.
         $this->assertStringContainsString('class="signature"', $html);
         $this->assertStringContainsString('Pour '.$company, $html);
         $this->assertStringNotContainsString('Pour ArmoOutdoor', $html);
@@ -188,8 +188,8 @@ class AccountingSalesPdfTest extends TestCase
             ->assertOk()
             ->getContent();
 
-        // A4 couché : 842 points de large. Debout, les dix colonnes se
-        // replieraient les unes sur les autres.
+        // A4 on its side: 842 points wide. Upright, the ten columns would
+        // fold onto one another.
         preg_match('/MediaBox\s*\[[\d.\s]*?([\d.]+)\s+([\d.]+)\s*\]/', $pdf, $box);
 
         $this->assertNotEmpty($box, 'Pas de format de page dans le PDF.');
@@ -203,8 +203,8 @@ class AccountingSalesPdfTest extends TestCase
         $html = $this->render();
         $company = CompanySetting::current()->value('company_name');
 
-        // C'est un document de la société : ni le nom de l'enseigne ni sa
-        // signature n'ont à figurer sur le livre de comptes.
+        // This is a company document: neither the shop's name nor its
+        // signature belongs on the accounting book.
         $this->assertStringNotContainsString('ArmoOutdoor', $html);
         $this->assertStringNotContainsString('Stand et terrain', $html);
         $this->assertStringContainsString($company, $html);
@@ -216,7 +216,7 @@ class AccountingSalesPdfTest extends TestCase
 
         $html = $this->render();
 
-        // La remarque encombrait dix colonnes déjà serrées.
+        // The remark crowded ten columns that were already tight.
         $this->assertStringNotContainsString('Remarque', $html);
         $this->assertStringNotContainsString('Initiation du samedi', $html);
     }
@@ -228,7 +228,7 @@ class AccountingSalesPdfTest extends TestCase
         $html = $this->render();
         $foot = substr($html, strpos($html, '<tfoot>'));
 
-        // Sur une page longue, le bas du tableau se lit sans remonter.
+        // On a long page, the bottom of the table reads without going back up.
         $this->assertSame(3, substr_count($foot, 'foot-label'));
         $this->assertStringContainsString('>Total<', $foot);
         $this->assertStringContainsString('>Frais<', $foot);
@@ -242,9 +242,9 @@ class AccountingSalesPdfTest extends TestCase
 
         $html = $this->render();
 
-        // Le mois, la nature et le règlement : un livre de comptes français
-        // ne doit pas garder des mots de l'écran d'administration.
-        // Le mois porte une capitale : c'est un titre, pas une phrase.
+        // The month, the kind and the payment: a French accounting book must
+        // not keep words from the admin screen.
+        // The month carries a capital: it is a title, not a sentence.
         $this->assertStringContainsString('Mars 2026', $html);
         $this->assertStringNotContainsString('mars 2026', $html);
         $this->assertStringContainsString('Vente sur stock', $html);
@@ -262,9 +262,9 @@ class AccountingSalesPdfTest extends TestCase
 
         $html = $this->render();
 
-        // Le règlement finit au bord droit du tableau, comme la date commence
-        // au bord gauche : c'est l'alignement qui l'écarte du perçu, sans
-        // filet ni colonne vide.
+        // The payment ends at the right edge of the table, the way the date
+        // starts at the left one: the alignment is what sets it apart from the
+        // perceived figure, with no rule and no empty column.
         $this->assertMatchesRegularExpression('/\.col-payment\s*\{[^}]*text-align:\s*right/s', $html);
         $this->assertDoesNotMatchRegularExpression('/\.col-payment\s*\{[^}]*border-left:\s*[^0]/s', $html);
         $this->assertStringNotContainsString('col-gap', $html);
@@ -278,7 +278,7 @@ class AccountingSalesPdfTest extends TestCase
 
         preg_match_all('/\.col-[a-z-]+\s*\{[^}]*width:\s*(\d+)%/s', $html, $matches);
 
-        // `col-money` sert deux colonnes : sa largeur compte deux fois.
+        // `col-money` serves two columns: its width counts twice.
         $widths = array_map('intval', $matches[1]);
         $total = array_sum($widths) + 9;
 
@@ -291,7 +291,7 @@ class AccountingSalesPdfTest extends TestCase
 
         $html = $this->render('2026-08');
 
-        // Le mois s'écrit en entier et garde son accent une fois capitalisé.
+        // The month is written out in full and keeps its accent once capitalised.
         $this->assertStringContainsString('Août 2026', $html);
         $this->assertStringContainsString('1 Août au 31 Août 2026', $html);
     }
@@ -303,8 +303,8 @@ class AccountingSalesPdfTest extends TestCase
 
         $html = $this->render();
 
-        // La colonne doit tenir le nom le plus long du mois sans le replier :
-        // une ligne sur deux hauteurs déforme tout le tableau.
+        // The column has to hold the longest name of the month without
+        // wrapping it: one row of double height throws off the whole table.
         $this->assertStringContainsString('Briek VANCOMPERNOLLE', $html);
         preg_match('/\.col-client\s*\{[^}]*width:\s*(\d+)%/s', $html, $width);
         $this->assertGreaterThanOrEqual(15, (int) $width[1]);
@@ -312,8 +312,8 @@ class AccountingSalesPdfTest extends TestCase
 
     public function test_the_month_in_progress_has_no_sheet(): void
     {
-        // On est en août : le mois encaisse encore, deux éditions du même
-        // journal ne diraient pas la même chose.
+        // It is August: the month is still taking money in, and two printings
+        // of the same journal would not agree.
         $this->order('2026-08-03 09:00:00');
 
         $this->actingAs(User::factory()->admin()->create())
@@ -330,7 +330,7 @@ class AccountingSalesPdfTest extends TestCase
             ->assertSee('Available once the month has ended')
             ->assertDontSee('/admin/accounting/sales/2026-08/pdf', false);
 
-        // Un mois clos garde son bouton vivant.
+        // A closed month keeps its button alive.
         $closed = $this->actingAs($admin)->get('/admin/accounting/sales/2026-07')->assertOk();
         $closed->assertSee('/admin/accounting/sales/2026-07/pdf', false)
             ->assertDontSee('is-disabled', false);
@@ -344,8 +344,8 @@ class AccountingSalesPdfTest extends TestCase
 
         $html = $this->render();
 
-        // Le journal est un document de la société : le contact du magasin
-        // peut changer dans les réglages sans que le livre de comptes bouge.
+        // The journal is a company document: the shop contact can change in
+        // the settings without the accounting book following.
         $this->assertStringContainsString('hello@swiftshelf.fr', $html);
         $this->assertStringNotContainsString('boutique@armooutdoor.fr', $html);
     }

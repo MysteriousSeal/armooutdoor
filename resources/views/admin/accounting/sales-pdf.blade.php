@@ -1,8 +1,8 @@
 {{--
-    Le journal des ventes d'un mois, pour le livre de comptes.
+    A month's journal of sales, for the accounting book.
 
-    Une page par mois, en paysage : dix colonnes ne tiennent pas debout sans
-    couper les noms. Même habillage que les autres documents de la maison.
+    One page per month, landscape: ten columns do not stand upright without
+    cutting names in half. Dressed like the other documents of the house.
 --}}
 <!DOCTYPE html>
 <html lang="fr">
@@ -72,8 +72,8 @@
             vertical-align: top;
             border-bottom: 1px solid #e8e6e3;
         }
-        /* Les montants à droite, en colonne : c'est ainsi qu'on les additionne
-           du regard, et le pied tombe pile dessous. */
+        /* Amounts on the right, in a column: that is how they are added up by
+           eye, and the footer falls right underneath. */
         .num { text-align: right; white-space: nowrap; }
         .col-date { width: 8%; white-space: nowrap; }
         .col-invoice { width: 13%; }
@@ -81,26 +81,19 @@
         .col-channel { width: 11%; }
         .col-type { width: 10%; }
         .col-money { width: 9%; }
-        /* Le perçu est le chiffre qu'on vient chercher. Aligné à droite, il
-           touchait le bord de sa colonne, donc le mot d'à côté : le retrait
-           de droite le ramène vers l'intérieur. Élargir la colonne ne
-           servait à rien, cela poussait le chiffre encore plus à droite. */
+        /* The perceived figure is the one you come looking for: a little
+           wider than its neighbours. */
         .col-money-wide { width: 11%; }
-        /* Le règlement a de la place de reste : le mot commence plus loin
-           plutôt que de coller au perçu. C'est le retrait qui sépare les
-           deux, pas un filet — un trait de plus dans un tableau déjà réglé
-           se lirait comme une colonne coupée en deux. */
-        /* Sélecteur plus fort que `table.journal tbody td`, qui pose le
-           padding de toutes les cellules : sans cela le retrait était écrasé
-           et le mot restait collé au chiffre. */
-        /* Le règlement finit au bord droit du tableau, comme la date
-           commence au bord gauche. L'écart avec le perçu vient de là : le
-           mot se range à la fin plutôt que de se coller au chiffre. */
+        /* The payment ends at the right edge of the table, the way the date
+           starts at the left one. That alignment is what sets it apart from
+           the perceived figure — widening that column only pushed its number
+           closer to the word, and dompdf ignores padding declared on a table
+           cell, with or without !important. */
         .col-payment { width: 12%; text-align: right; }
 
-        /* Une ligne remboursée reste au journal — elle a eu lieu — mais ne
-           s'ajoute à rien. La facture barrée le dit ; une étiquette de plus
-           répéterait ce que le trait montre déjà. */
+        /* A refunded line stays in the journal — it happened — but adds to
+           nothing. The struck-through invoice says so; a label beside the
+           strike would say it twice. */
         tr.refunded td { color: #8b7e74; }
         tr.refunded .col-invoice { text-decoration: line-through; }
         .tag {
@@ -121,8 +114,8 @@
         }
         table.journal tfoot .perceived { font-size: 12px; }
         .foot-note { font-weight: normal; font-size: 9px; color: #6b6b6b; }
-        /* L'intitulé au-dessus du total, en petit : il rappelle la colonne
-           sans peser plus que le chiffre. */
+        /* The heading above a total, in small type: it recalls the column
+           without weighing more than the figure. */
         .foot-label {
             display: block;
             margin-bottom: 2px;
@@ -135,9 +128,9 @@
 
         .notes-body { margin-bottom: 12px; font-size: 9.5px; line-height: 1.5; color: #6b6b6b; }
 
-        /* La signature, en bas de page. Un cadre plutôt que trois traits :
-           on doit voir d'un coup d'œil s'il manque une signature sur une
-           feuille classée, sans lire les intitulés. */
+        /* The signature, at the foot of the page. A frame rather than three
+           bare rules: a missing signature has to show at a glance on a filed
+           sheet, without reading the labels. */
         table.signature { width: 100%; border-collapse: collapse; margin-top: 24px; }
         table.signature td {
             padding: 9px 12px 10px;
@@ -156,7 +149,7 @@
             color: #8b7e74;
         }
         .sign-scope { margin-bottom: 7px; font-size: 10.5px; color: #2c2c2c; }
-        /* Assez haut pour une vraie signature manuscrite, pas un paraphe. */
+        /* Tall enough for a real handwritten signature, not a paraph. */
         .sign-rule { height: 46px; }
         .sign-rule-short { height: 22px; }
 
@@ -171,9 +164,8 @@
     </style>
 </head>
 <body>
-    {{-- Le journal appartient à la société, pas à l'enseigne : c'est
-         SwiftShelf qui tient les comptes, ArmoOutdoor n'est que la
-         boutique. --}}
+    {{-- The journal belongs to the company, not to the shop sign: SwiftShelf
+         keeps the accounts, ArmoOutdoor is only the shop. --}}
     <table class="header">
         <tr>
             <td class="company-info">
@@ -188,10 +180,10 @@
                         </td>
                         <td>
                             {{ $company->formattedPhone() }}<br>
-                            {{-- L'adresse de la société, pas celle de la boutique :
-                                 le journal est un document de SwiftShelf, et le
-                                 contact du magasin peut changer dans les réglages
-                                 sans que le livre de comptes bouge. --}}
+                            {{-- The company address, not the shop's: the journal is
+                                 a SwiftShelf document, and the shop contact can
+                                 change in the settings without the accounting
+                                 book following. --}}
                             hello@swiftshelf.fr
                         </td>
                     </tr>
@@ -266,8 +258,8 @@
                         <span class="foot-note">— {{ $refunded }} remboursement{{ $refunded > 1 ? 's' : '' }} hors total</span>
                     @endif
                 </td>
-                {{-- Les intitulés reviennent au pied : sur une page longue, le
-                     bas du tableau se lit sans remonter à l'en-tête. --}}
+                {{-- The headings come back at the foot: on a long page, the
+                     bottom of the table reads without going back up. --}}
                 <td class="num"><span class="foot-label">Total</span>{{ format_euros($totalCents) }}</td>
                 <td class="num"><span class="foot-label">Frais</span>{{ $feesCents > 0 ? '−'.format_euros($feesCents) : '—' }}</td>
                 <td class="num perceived col-money-wide"><span class="foot-label">Perçu</span>{{ format_euros($totalCents - $feesCents) }}</td>

@@ -10,7 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
-/** Le tableau des ventes d'un mois. */
+/** A month's table of sales. */
 class AccountingSalesTableTest extends TestCase
 {
     use RefreshDatabase;
@@ -39,8 +39,8 @@ class AccountingSalesTableTest extends TestCase
             'total_cents' => 10000, 'payment_method' => 'card',
         ], $overrides));
 
-        // `created_at` n'est pas remplissable : Eloquent le réécrit à
-        // maintenant. Une vente de mars doit rester en mars.
+        // `created_at` is not fillable: Eloquent stamps it with now. A sale
+        // made in March has to stay in March.
         $order->forceFill(['created_at' => $placedAt])->save();
 
         return $order->refresh();
@@ -62,18 +62,18 @@ class AccountingSalesTableTest extends TestCase
 
         $this->page()
             ->assertSee('INV-'.$order->number)
-            // Le nom s'affiche comme partout dans l'admin : nom de famille
-            // en capitales.
+            // The name shows as it does everywhere in the admin: family name
+            // in capitals.
             ->assertSee('Camille ROY')
             ->assertSee('Direct')
             ->assertSee('Stock sale')
             ->assertSee('Bank wire')
             ->assertSee('12/03/2026')
-            // 100 € encaissés, 11,50 € de frais, 88,50 € perçus.
+            // 100 € taken, 11,50 € of fees, 88,50 € perceived.
             ->assertSee('100,00', false)
             ->assertSee('11,50', false)
             ->assertSee('88,50', false)
-            // La remarque porte le numéro de commande.
+            // The remark carries the order number.
             ->assertSee($order->number);
     }
 
@@ -91,8 +91,9 @@ class AccountingSalesTableTest extends TestCase
 
     public function test_own_shipping_is_never_deducted(): void
     {
-        // Le port payé de sa poche est une dépense, pas une retenue sur la
-        // vente : il ne doit ni baisser le perçu ni entrer dans les frais.
+        // Shipping paid out of pocket is a cost of its own, not a deduction
+        // from the sale: it must neither lower the perceived figure nor join
+        // the fees.
         $this->order('2026-03-12 09:00:00', [
             'payment_fee_cents' => 250,
             'shipping_paid_cents' => 1200,
@@ -111,7 +112,7 @@ class AccountingSalesTableTest extends TestCase
 
         $this->page()
             ->assertSee('2 sales')
-            // 150 € au total, 10 € de frais, 140 € perçus.
+            // 150 € in total, 10 € of fees, 140 € perceived.
             ->assertSee('150,00', false)
             ->assertSee('10,00', false)
             ->assertSee('140,00', false);
@@ -136,8 +137,8 @@ class AccountingSalesTableTest extends TestCase
 
         $response = $this->page()
             ->assertSee($refunded->number)
-            // La facture barrée dit déjà tout : pas de pastille en plus. La
-            // note sous le tableau garde le mot, elle explique la règle.
+            // The struck-through invoice already says it: no badge as well.
+            // The note under the table keeps the word, it states the rule.
             ->assertDontSee('order-chip--refunded', false)
             ->assertSee('is-refunded', false)
             ->assertSee('1 refund left out')
@@ -146,8 +147,8 @@ class AccountingSalesTableTest extends TestCase
         $content = $response->getContent();
         $foot = substr($content, strpos($content, '<tfoot>'));
 
-        // L'argent est reparti : ni les 40 € ni leur euro de frais n'entrent
-        // dans le pied. 100 € encaissés, 2,50 € de frais, 97,50 € perçus.
+        // The money went back out: neither the 40 € nor its euro of fees
+        // reaches the footer. 100 € taken, 2,50 € of fees, 97,50 € perceived.
         $this->assertStringContainsString('100,00', $foot);
         $this->assertStringContainsString('2,50', $foot);
         $this->assertStringContainsString('97,50', $foot);
@@ -197,7 +198,7 @@ class AccountingSalesTableTest extends TestCase
 
         $this->assertMatchesRegularExpression('#March.*?2 entries#s', $html);
         $this->assertMatchesRegularExpression('#May.*?1 entry#s', $html);
-        // Un mois sans écriture le dit plutôt que d'afficher un zéro sec.
+        // A month with no entry says so rather than printing a bare zero.
         $this->assertMatchesRegularExpression('#January.*?none#s', $html);
     }
 
@@ -218,8 +219,8 @@ class AccountingSalesTableTest extends TestCase
 
     public function test_a_refund_still_counts_as_an_entry_in_the_list(): void
     {
-        // Le compte dit combien de lignes il y a à lire, pas combien
-        // d'argent est entré.
+        // The count says how many lines there are to read, not how much
+        // money came in.
         $this->order('2026-03-02 09:00:00', ['status' => 'refunded']);
 
         $html = $this->actingAs(User::factory()->admin()->create())

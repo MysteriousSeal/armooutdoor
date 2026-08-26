@@ -5,11 +5,10 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Les écritures saisies à la main.
+ * Entries written by hand.
  *
- * Tout n'arrive pas par une commande de la boutique : une prestation, une
- * vente de la main à la main, une réparation. Elles se rangent dans le même
- * tableau que les commandes, à leur date.
+ * Not everything arrives as a shop order: a prestation, a sale made across a
+ * counter, a repair. They sit in the same table as the orders, at their date.
  */
 return new class extends Migration
 {
@@ -17,8 +16,8 @@ return new class extends Migration
     {
         Schema::create('accounting_entries', function (Blueprint $table): void {
             $table->id();
-            // Ventes aujourd'hui, achats plus tard : la colonne évite d'avoir
-            // à dédoubler la table le jour venu.
+            // Sales today, purchases later: the column saves doubling the
+            // table when that day comes.
             $table->string('section')->default('sales');
             $table->date('entered_on');
             $table->string('invoice_number')->nullable();
@@ -32,7 +31,7 @@ return new class extends Migration
             $table->foreignId('created_by_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
 
-            // Le tableau d'un mois lit toujours ces deux colonnes ensemble.
+            // A month's table always reads these two columns together.
             $table->index(['section', 'entered_on']);
         });
     }

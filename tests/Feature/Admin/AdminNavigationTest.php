@@ -36,7 +36,7 @@ class AdminNavigationTest extends TestCase
     {
         $content = $this->dashboard()->getContent();
 
-        // Sales, Catalogue, Accounting et System pour le propriétaire.
+        // Sales, Catalogue, Accounting and System for the owner.
         $this->assertSame(4, substr_count($content, 'data-nav-toggle'));
         $this->assertSame(4, substr_count($content, 'data-nav-menu'));
     }

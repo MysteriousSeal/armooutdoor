@@ -7,20 +7,20 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 /**
- * Les mois que la comptabilité couvre.
+ * The months the accounts cover.
  *
- * La boutique compte à partir de janvier 2026 ; un mois s'ajoute de lui-même
- * le premier jour du mois suivant, sans qu'on ait rien à créer.
+ * The shop starts counting in January 2026, and a month adds itself on the
+ * first of the next one, with nothing to create.
  */
 class AccountingPeriods
 {
     public const FIRST = '2026-01';
 
     /**
-     * Du mois en cours jusqu'au premier, le plus récent d'abord.
+     * From the current month back to the first, newest first.
      *
-     * C'est le mois qui vient de se clore qu'on ouvre presque toujours : il
-     * doit rester en haut plutôt que descendre d'un cran chaque mois.
+     * The month that has just closed is the one opened almost every time, so
+     * it stays at the top rather than dropping a row each month.
      *
      * @return Collection<int, CarbonImmutable>
      */
@@ -36,7 +36,7 @@ class AccountingPeriods
         return $months;
     }
 
-    /** Le mois demandé, ou null s'il ne fait pas partie de la période. */
+    /** The month asked for, or null when it falls outside the period. */
     public static function parse(?string $month): ?CarbonImmutable
     {
         if (! is_string($month) || preg_match('/^\d{4}-\d{2}$/', $month) !== 1) {
@@ -51,8 +51,8 @@ class AccountingPeriods
 
         $parsed = $parsed->startOfMonth();
 
-        // Ni avant le premier mois compté, ni dans un futur qui n'a rien
-        // encaissé : les deux répondent 404 plutôt qu'une page vide de plus.
+        // Neither before the first month counted, nor in a future that has
+        // taken nothing in: both answer 404 rather than one more empty page.
         if ($parsed->lessThan(self::firstMonth()) || $parsed->greaterThan(self::currentMonth())) {
             return null;
         }
@@ -60,24 +60,24 @@ class AccountingPeriods
         return $parsed;
     }
 
-    /** Pour l'administration, qui est en anglais. */
+    /** For the admin, which is in English. */
     public static function label(CarbonImmutable $month): string
     {
         return $month->locale('en')->isoFormat('MMMM YYYY');
     }
 
     /**
-     * Pour les documents comptables, qui sont en français.
+     * For the accounting documents, which are in French.
      *
-     * Le français écrit les mois en minuscule, mais un titre de document et
-     * une case d'en-tête commencent par une capitale.
+     * French writes months in lowercase, but a document title and a header
+     * box start with a capital.
      */
     public static function labelFr(CarbonImmutable $month): string
     {
         return Str::ucfirst($month->locale('fr')->isoFormat('MMMM')).' '.$month->format('Y');
     }
 
-    /** Une date en toutes lettres, mois capitalisé : « 1 Juillet 2026 ». */
+    /** A date written out, month capitalised: "1 Juillet 2026". */
     public static function dateFr(CarbonImmutable $date, bool $withYear = true): string
     {
         return $date->format('j').' '
@@ -86,10 +86,11 @@ class AccountingPeriods
     }
 
     /**
-     * Un mois clos est un mois qu'on peut arrêter.
+     * A closed month is one that can be ruled off.
      *
-     * Le mois en cours encaisse encore : un journal édité le 12 dirait
-     * autre chose que le même journal édité le 30, et les deux circuleraient.
+     * The current month is still taking money in: a journal printed on the
+     * 12th would not say what the same journal says on the 30th, and both
+     * would be filed.
      */
     public static function isClosed(CarbonImmutable $month): bool
     {

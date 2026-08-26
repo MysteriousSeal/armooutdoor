@@ -20,8 +20,9 @@
                 </div>
                 @if ($section === 'sales')
                     <div class="admin-order-actions">
-                        {{-- Le bouton reste en place, éteint : le mois en cours
-                             encaisse encore, son journal n'est pas arrêtable. --}}
+                        {{-- The button stays in place, switched off: the current
+                             month is still taking money in, so its journal
+                             cannot be ruled off. --}}
                         @if (\App\Support\AccountingPeriods::isClosed($period))
                             <a href="{{ route('admin.accounting.sales.pdf', ['month' => $monthKey]) }}" class="btn btn-secondary">Download PDF</a>
                         @else
@@ -37,8 +38,8 @@
             <p class="empty-state">Nothing here yet.</p>
         @else
             @php
-                // Un remboursement reste dans le tableau — il a eu lieu — mais
-                // ne s'ajoute à rien : l'argent est reparti.
+                // A refund stays in the table — it happened — but adds to
+                // nothing: the money went back out.
                 $counted = $rows->where('counts', true);
                 $refunded = $rows->count() - $counted->count();
                 $totalCents = $counted->sum('total_cents');
@@ -89,7 +90,7 @@
                                         @if ($row['kind'] === 'entry')
                                             @php
                                                 $entry = $row['entry'];
-                                                // Le formulaire lit ces valeurs pour se pré-remplir.
+                                                // The form reads these values to fill itself in.
                                                 $entryPayload = [
                                                     'entered_on' => $entry->entered_on->format('Y-m-d'),
                                                     'invoice_number' => $entry->invoice_number,
@@ -160,7 +161,7 @@
             <dialog id="entry-modal" class="modal modal--wide" aria-labelledby="entry-modal-title">
                 <form method="POST" id="entry-form" action="{{ route('admin.accounting.entries.store', ['section' => $section, 'month' => $monthKey]) }}">
                     @csrf
-                    {{-- Remplacé par PUT à l'édition ; le formulaire sert aux deux. --}}
+                    {{-- Swapped for PUT when editing; one form serves both. --}}
                     <input type="hidden" name="_method" id="entry-method" value="POST">
 
                     <h3 class="modal-title" id="entry-modal-title">Add an entry</h3>
@@ -228,7 +229,7 @@
 
                         <div class="form-group">
                             <label for="entry-fees">Fees €</label>
-                            {{-- Saisis en positif : la retenue se lit dans la colonne. --}}
+                            {{-- Typed as a positive figure: the column reads it as held back. --}}
                             <input type="number" id="entry-fees" name="fees" class="form-control" value="{{ old('fees') }}" step="0.01" min="0" placeholder="0.00">
                             @error('fees') <p class="form-error">{{ $message }}</p> @enderror
                         </div>

@@ -7406,10 +7406,10 @@ a.order-stepper-btn:focus-visible {
     }
 }
 
-/* La liste des mois de la comptabilité.
-   Une grille plutôt qu'une colonne : douze mois tiennent alors sous les yeux
-   d'un coup, et l'année sert de titre parce qu'on cherche un exercice avant
-   de chercher un mois. */
+/* The list of accounting months.
+   A grid rather than a column: twelve months then sit under the eye at once,
+   and the year serves as the heading, because you look for a financial year
+   before you look for a month. */
 .accounting-year {
     margin-bottom: 1.75rem;
 }
@@ -7456,8 +7456,8 @@ a.order-stepper-btn:focus-visible {
     font-weight: 600;
 }
 
-/* La clé du mois est une adresse, pas une phrase : chiffres tabulaires pour
-   qu'une colonne de cartes s'aligne. */
+/* A month's key is an address, not a sentence: tabular figures so a column
+   of cards lines up. */
 .accounting-month-meta {
     margin-left: auto;
     font-size: 0.75rem;
@@ -7471,8 +7471,8 @@ a.order-stepper-btn:focus-visible {
     color: var(--text-muted);
 }
 
-/* Le mois en cours n'est pas clos : il se distingue sans crier, par un filet
-   d'accent à gauche. */
+/* The current month is not closed: it stands out quietly, through an accent
+   rule down its left edge. */
 .accounting-month.is-current {
     border-left: 2px solid var(--accent);
 }
@@ -7487,9 +7487,9 @@ a.order-stepper-btn:focus-visible {
     }
 }
 
-/* Le tableau des ventes d'un mois.
-   Des chiffres qu'on additionne du regard : chasse tabulaire partout, et les
-   colonnes de montants collées à droite. */
+/* A month's table of sales.
+   Figures added up by eye: tabular figures throughout, and the amount columns
+   held against the right. */
 .accounting-table {
     font-variant-numeric: tabular-nums;
 }
@@ -7503,15 +7503,15 @@ a.order-stepper-btn:focus-visible {
     color: var(--text-muted);
 }
 
-/* La remarque porte le numéro de commande : utile, jamais lu en diagonale. */
+/* The remark carries the order number: useful, never skimmed. */
 .accounting-remark {
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 0.75rem;
     color: var(--text-muted);
 }
 
-/* Une ligne remboursée reste dans le tableau — la comptabilité doit la voir —
-   mais se lit comme une ligne qui ne compte plus tout à fait. */
+/* A refunded line stays in the table — the accounts have to see it — but
+   reads as a line that no longer quite counts. */
 .accounting-table tbody tr.is-refunded td {
     color: var(--text-muted);
 }
@@ -7520,8 +7520,8 @@ a.order-stepper-btn:focus-visible {
     text-decoration: line-through;
 }
 
-/* Le pied porte les totaux : un filet plus marqué que les lignes, et rien
-   d'autre, pour qu'on descende droit dessus. */
+/* The footer carries the totals: a heavier rule than the rows and nothing
+   else, so the eye drops straight onto it. */
 .accounting-table tfoot td {
     padding-top: 0.9rem;
     padding-bottom: 0.9rem;
@@ -7542,7 +7542,7 @@ a.order-stepper-btn:focus-visible {
     color: var(--text-muted);
 }
 
-/* Le compte d'écritures d'un mois, dans sa carte. */
+/* How many entries a month holds, on its card. */
 .accounting-month-count {
     font-variant-numeric: tabular-nums;
 }
@@ -7551,7 +7551,7 @@ a.order-stepper-btn:focus-visible {
     opacity: 0.55;
 }
 
-/* Le mois en cours n'est pas clos : son compte bougera encore. */
+/* The current month is not closed: its count will still move. */
 .accounting-month-running {
     display: block;
     margin-top: 0.15rem;
@@ -7565,15 +7565,15 @@ a.order-stepper-btn:focus-visible {
     text-align: right;
 }
 
-/* Ce que le pied laisse de côté : dit à voix basse, mais dit. */
+/* What the footer leaves out: said quietly, but said. */
 .accounting-foot-note {
     margin-left: 0.5rem;
     font-weight: 400;
     color: var(--text-muted);
 }
 
-/* Le formulaire d'écriture : deux colonnes, parce que dix champs en pile
-   font une boîte plus haute que l'écran. */
+/* The entry form: two columns, because ten fields in a pile make a dialog
+   taller than the screen. */
 .entry-form-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -7599,8 +7599,8 @@ a.order-stepper-btn:focus-visible {
     width: 100%;
 }
 
-/* Une écriture saisie se distingue d'une commande : le filet à gauche dit
-   d'où vient la ligne sans ajouter une colonne. */
+/* A hand-written entry differs from an order: the rule on the left says
+   where the line comes from without adding a column. */
 .accounting-table tbody tr.is-manual td:first-child {
     box-shadow: inset 2px 0 0 var(--accent);
 }
@@ -7611,7 +7611,7 @@ a.order-stepper-btn:focus-visible {
     background: color-mix(in srgb, var(--accent) 10%, var(--surface));
 }
 
-/* Les gestes de la ligne : discrets tant qu'on ne survole pas la ligne. */
+/* The row's actions: quiet until the row is hovered. */
 .accounting-row-actions {
     white-space: nowrap;
     text-align: right;
@@ -7649,9 +7649,9 @@ a.order-stepper-btn:focus-visible {
     }
 }
 
-/* Un bouton éteint plutôt que disparu : la barre d'actions ne doit pas se
-   réorganiser d'un mois à l'autre, et l'absence du bouton se lirait comme un
-   oubli plutôt que comme une règle. */
+/* A button switched off rather than removed: the action bar must not
+   rearrange from one month to the next, and a missing button would read as an
+   oversight rather than a rule. */
 .btn.is-disabled {
     opacity: 0.5;
     cursor: default;

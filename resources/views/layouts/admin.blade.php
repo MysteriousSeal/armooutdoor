@@ -74,8 +74,8 @@
                 $catalogueActive = request()->routeIs('admin.products.*', 'admin.categories.*', 'admin.purchase-orders.*', 'admin.marketplaces.*');
                 $systemActive = request()->routeIs('admin.settings.*', 'admin.stripe.*', 'admin.activity', 'admin.changelog');
                 $accountingActive = request()->routeIs('admin.accounting.*');
-                // Le groupe qui ouvre le bloc de droite porte la marge : sans
-                // Accounting, c'est System qui pousse, comme avant.
+                // The group that opens the right-hand block carries the
+                // margin: without Accounting, System pushes, as before.
                 $showsAccounting = auth()->user()?->isOwner() === true;
             @endphp
 

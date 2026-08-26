@@ -101,8 +101,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
         Route::get('/changelog', AdminChangelogController::class)->name('changelog');
         Route::get('/search', [AdminSearchController::class, 'index'])->name('search');
-        // Réservées au propriétaire, comme le reste de ce qui touche à
-        // l'argent : ces pages porteront le chiffre d'affaires et les coûts.
+        // Owner only, like the rest of what touches money: these pages will
+        // carry revenue and costs.
         Route::middleware('admin.owner')->group(function (): void {
             Route::get('/accounting/sales', [AdminAccountingController::class, 'sales'])->name('accounting.sales');
             Route::get('/accounting/sales/{month}', [AdminAccountingController::class, 'salesMonth'])
@@ -117,7 +117,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 ->where('month', '\d{4}-\d{2}')
                 ->name('accounting.sales.pdf');
 
-            // Les écritures à la main, dans le mois qu'on lit.
+            // The hand-written entries, inside the month being read.
             Route::post('/accounting/{section}/{month}/entries', [AdminAccountingController::class, 'storeEntry'])
                 ->where(['section' => 'sales|purchases', 'month' => '\d{4}-\d{2}'])
                 ->name('accounting.entries.store');

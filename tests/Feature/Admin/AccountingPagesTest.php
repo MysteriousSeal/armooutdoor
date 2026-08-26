@@ -6,7 +6,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-/** Les deux pages de comptabilité, encore vides. */
+/** The two accounting pages, still empty. */
 class AccountingPagesTest extends TestCase
 {
     use RefreshDatabase;
@@ -31,8 +31,8 @@ class AccountingPagesTest extends TestCase
     {
         $staff = User::factory()->staffAdmin()->create();
 
-        // Ces pages porteront le chiffre d'affaires et les coûts : même
-        // porte que le reste de ce qui touche à l'argent.
+        // These pages will carry revenue and costs: the same door as the
+        // rest of what touches money.
         $this->actingAs($staff)->get('/admin/accounting/sales')->assertForbidden();
         $this->actingAs($staff)->get('/admin/accounting/purchases')->assertForbidden();
     }
@@ -71,7 +71,7 @@ class AccountingPagesTest extends TestCase
             ->assertOk()
             ->getContent();
 
-        // C'est Accounting qui pousse vers la droite, et System le suit.
+        // Accounting pushes the right-hand block, and System follows it.
         $this->assertMatchesRegularExpression(
             '#admin-nav-group admin-nav-group--end".*?Accounting.*?admin-nav-group ".*?System#s',
             $content
@@ -86,7 +86,7 @@ class AccountingPagesTest extends TestCase
             ->assertOk()
             ->getContent();
 
-        // Sans Accounting, la barre doit garder System collé à droite.
+        // Without Accounting, the bar must keep System against the right.
         $this->assertSame(1, substr_count($content, 'admin-nav-group--end'));
         $this->assertMatchesRegularExpression('#admin-nav-group--end".*?System#s', $content);
     }
