@@ -50,12 +50,6 @@ class StoreProductRequest extends FormRequest
                 'regex:/^(\d{8}|\d{12,14})$/',
                 new UniqueCatalogIdentifier('gtin', $product?->id),
             ],
-            // The label's own wording. All optional: a label prints what it
-            // has been given and nothing more.
-            'label_title' => ['nullable', 'string', 'max:120'],
-            'label_subtitle' => ['nullable', 'string', 'max:120'],
-            'label_composition' => ['nullable', 'string', 'max:500'],
-            'label_mention' => ['nullable', 'string', 'max:500'],
             'characteristic_label' => ['nullable', 'array'],
             'characteristic_label.*' => ['nullable', 'string', 'max:120'],
             'characteristic_value' => ['nullable', 'array'],

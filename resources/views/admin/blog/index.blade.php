@@ -86,7 +86,7 @@
                 </table>
             </div>
 
-            @include('partials.pager', ['paginator' => $posts])
+            @include('admin.partials.pager', ['paginator' => $posts])
         @endif
     </div>
 @endsection

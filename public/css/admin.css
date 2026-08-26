@@ -7909,31 +7909,82 @@ a.order-stepper-btn:focus-visible {
     gap: 0.6rem;
 }
 
-/* The label downloads, under the wording they print. One row per article, so a
-   product with sizes shows which button belongs to which. */
-.product-labels {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    margin-top: 0.35rem;
-}
-
-.product-label-row {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-}
-
-/* The variant's own name, wide enough that a column of buttons lines up. */
-.product-label-name {
-    min-width: 9rem;
-    font-size: 0.8125rem;
-    font-weight: 600;
-}
-
-/* What is still missing, said plainly rather than left to be guessed at. */
-.product-label-missing {
+/* An absent reference or barcode, said with a dash: quiet, since the row is
+   read for its button first. */
+.label-missing {
+    display: block;
+    margin-top: 0.2rem;
     font-size: 0.75rem;
     color: var(--text-muted);
+}
+
+.admin-table-code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8125rem;
+}
+
+/* The button column stays at its own width whatever the missing line says. */
+.label-action {
+    width: 1%;
+    white-space: nowrap;
+    text-align: right;
+}
+
+/* The incomplete tab borrows the red the rest of the site uses, and only when
+   there is something to look at: a red zero is a warning that gets ignored. */
+.admin-tabs a.label-tab-attention .admin-tab-count {
+    color: #a44;
+    background: #f7ecec;
+    border-color: #e3c6c6;
+}
+
+[data-theme='dark'] .admin-tabs a.label-tab-attention .admin-tab-count {
+    color: #e08585;
+    background: color-mix(in srgb, #e08585 12%, var(--surface));
+    border-color: color-mix(in srgb, #e08585 32%, var(--border));
+}
+
+/* The wording, edited on the line it is read on. Four fields and a button in
+   one row, so a product is filled in without leaving the list. */
+.label-form-row td {
+    padding-top: 0.5rem;
+    padding-bottom: 0.9rem;
+    background: color-mix(in srgb, var(--bg) 55%, var(--surface));
+    border-bottom: 2px solid var(--border);
+}
+
+.label-form {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* The two required fields take the room; the optional ones take what is left. */
+.label-form .form-control {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 2.15rem;
+    padding: 0 0.55rem;
+    font-size: 0.8125rem;
+}
+
+.label-form .btn {
+    flex-shrink: 0;
+}
+
+/* Said once per product, under the size that carries the form. */
+.label-shared {
+    font-size: 0.75rem;
+    font-style: italic;
+    color: var(--text-muted);
+}
+
+@media (max-width: 1100px) {
+    .label-form {
+        flex-wrap: wrap;
+    }
+
+    .label-form .form-control {
+        flex: 1 1 14rem;
+    }
 }

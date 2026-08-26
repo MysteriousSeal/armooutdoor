@@ -131,7 +131,7 @@
                     </table>
                 </div>
 
-                @include('partials.pager', ['paginator' => $missing])
+                @include('admin.partials.pager', ['paginator' => $missing])
             @endif
         @elseif ($listings->isEmpty())
             <p class="empty-state">
@@ -237,7 +237,7 @@
                 </table>
             </div>
 
-            @include('partials.pager', ['paginator' => $listings])
+            @include('admin.partials.pager', ['paginator' => $listings])
         @endif
     </div>
 @endsection

@@ -36,7 +36,7 @@ class AdminNavigationTest extends TestCase
     {
         $content = $this->dashboard()->getContent();
 
-        // Sales, Catalogue, Accounting and System for the owner.
+        // Sales, Catalog, Accounting and System for the owner.
         $this->assertSame(4, substr_count($content, 'data-nav-toggle'));
         $this->assertSame(4, substr_count($content, 'data-nav-menu'));
     }
@@ -49,7 +49,7 @@ class AdminNavigationTest extends TestCase
 
         // Le groupe replié doit dire où l'on est, sinon la barre n'indique plus rien.
         $this->assertMatchesRegularExpression(
-            '#admin-nav-trigger active"[^>]*>\s*Catalogue#s',
+            '#admin-nav-trigger active"[^>]*>\s*Catalog#s',
             $response->getContent()
         );
         $this->assertMatchesRegularExpression(

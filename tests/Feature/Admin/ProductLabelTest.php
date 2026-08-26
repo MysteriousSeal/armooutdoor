@@ -119,42 +119,6 @@ class ProductLabelTest extends TestCase
             ->assertNotFound();
     }
 
-    public function test_the_label_section_offers_the_download_when_nothing_is_missing(): void
-    {
-        $ready = Product::factory()->create([
-            'sku' => 'ARM-4',
-            'gtin' => '4006381333931',
-            'label_title' => 'Gants',
-            'label_subtitle' => 'Taille M',
-        ]);
-
-        $this->actingAs(User::factory()->admin()->create())
-            ->get('/admin/products/'.$ready->id.'/edit')
-            ->assertOk()
-            ->assertSee('Download label')
-            ->assertSee('/admin/products/'.$ready->id.'/label', false)
-            ->assertDontSee('Missing:');
-    }
-
-    public function test_the_button_is_switched_off_and_names_what_is_missing(): void
-    {
-        $bare = Product::factory()->create([
-            'sku' => 'ARM-5',
-            'gtin' => null,
-            'label_title' => 'Gants',
-            'label_subtitle' => null,
-        ]);
-
-        $this->actingAs(User::factory()->admin()->create())
-            ->get('/admin/products/'.$bare->id.'/edit')
-            ->assertOk()
-            // Named rather than left to be guessed at, and the URL is not
-            // offered at all.
-            ->assertSee('Missing: subtitle, barcode')
-            ->assertSee('is-disabled', false)
-            ->assertDontSee('/admin/products/'.$bare->id.'/label', false);
-    }
-
     public function test_a_product_missing_its_wording_cannot_print_a_label(): void
     {
         $product = Product::factory()->create([
@@ -169,44 +133,6 @@ class ProductLabelTest extends TestCase
         $this->actingAs(User::factory()->admin()->create())
             ->get('/admin/products/'.$product->id.'/label')
             ->assertNotFound();
-    }
-
-    public function test_the_wording_is_not_required_to_save_a_product(): void
-    {
-        $product = Product::factory()->create(['label_title' => 'Gants', 'label_subtitle' => 'Taille M']);
-
-        $this->actingAs(User::factory()->admin()->create())
-            ->put('/admin/products/'.$product->id, $this->productPayload($product, [
-                'label_title' => '',
-                'label_subtitle' => '',
-            ]))
-            ->assertRedirect()
-            ->assertSessionHasNoErrors();
-
-        $this->assertNull($product->fresh()->label_title);
-    }
-
-    public function test_each_variant_gets_its_own_row_in_the_label_section(): void
-    {
-        $product = Product::factory()->create(['sku' => null, 'gtin' => null, 'label_title' => 'T-shirt', 'label_subtitle' => 'Respirant']);
-        $ready = $this->variant($product, 'ARM-TSHIRT-M', '5901234123457');
-        $bare = ProductVariant::query()->create([
-            'product_id' => $product->id,
-            'label' => ['en' => 'L', 'fr' => 'L'],
-            'sku' => 'ARM-TSHIRT-L',
-            'gtin' => null,
-            'quantity' => 1,
-            'is_active' => true,
-            'sort_order' => 2,
-        ]);
-
-        $this->actingAs(User::factory()->admin()->create())
-            ->get('/admin/products/'.$product->id.'/edit')
-            ->assertOk()
-            // One row per size, each saying whether its own label can go.
-            ->assertSee('/admin/products/'.$product->id.'/variants/'.$ready->id.'/label', false)
-            ->assertDontSee('/admin/products/'.$product->id.'/variants/'.$bare->id.'/label', false)
-            ->assertSee('Missing: barcode');
     }
 
     public function test_a_staff_admin_can_print_one(): void
@@ -370,54 +296,47 @@ class ProductLabelTest extends TestCase
         $this->assertSame('T-shirt respirant', $product->fresh()->label_title);
     }
 
-    public function test_the_form_carries_the_label_section(): void
+    public function test_the_product_form_says_nothing_about_labels(): void
     {
-        $product = Product::factory()->create(['label_title' => 'Gants tactiques M-Pact']);
+        $product = Product::factory()->create([
+            'sku' => 'ARM-14',
+            'gtin' => '4006381333931',
+            'label_title' => 'Gants tactiques M-Pact',
+            'label_subtitle' => 'Taille M',
+        ]);
 
+        // Labels are edited from Catalog › Labels; the product form has no
+        // section of its own for them.
         $this->actingAs(User::factory()->admin()->create())
             ->get('/admin/products/'.$product->id.'/edit')
             ->assertOk()
-            ->assertSee('>Label</h3>', false)
-            ->assertSee('name="label_title"', false)
-            ->assertSee('name="label_subtitle"', false)
-            ->assertSee('name="label_composition"', false)
-            ->assertSee('name="label_mention"', false)
-            ->assertSee('Gants tactiques M-Pact');
+            ->assertDontSee('name="label_title"', false)
+            ->assertDontSee('Download label');
     }
 
-    public function test_the_wording_is_saved_from_the_form(): void
+    public function test_saving_a_product_leaves_its_label_wording_alone(): void
     {
-        $product = Product::factory()->create();
+        $product = Product::factory()->create([
+            'label_title' => 'Gants tactiques M-Pact',
+            'label_subtitle' => 'Taille M',
+            'label_composition' => '60 % polyester',
+        ]);
 
+        // The form no longer carries the fields, so it must not blank them
+        // either: an absent field is not an emptied one.
         $this->actingAs(User::factory()->admin()->create())
-            ->put('/admin/products/'.$product->id, $this->productPayload($product, [
-                'label_title' => 'Cibles rondes fluo',
-                'label_subtitle' => '10 cm — lot de 100',
-                'label_composition' => 'Papier multicouche autocollant',
-                'label_mention' => 'Tenir hors de portée des enfants',
-            ]))
+            ->put('/admin/products/'.$product->id, [
+                'name' => $product->localizedName(),
+                'description' => '<p>Une description.</p>',
+                'category_id' => $product->category_id,
+                'price' => '19.90',
+                'quantity' => 3,
+            ])
             ->assertRedirect();
 
         $product->refresh();
-        $this->assertSame('Cibles rondes fluo', $product->label_title);
-        $this->assertSame('10 cm — lot de 100', $product->label_subtitle);
-        $this->assertSame('Papier multicouche autocollant', $product->label_composition);
-        $this->assertSame('Tenir hors de portée des enfants', $product->label_mention);
-    }
-
-    /**
-     * The fields the product form requires, plus whatever is under test.
-     *
-     * @return array<string, mixed>
-     */
-    private function productPayload(Product $product, array $overrides = []): array
-    {
-        return array_merge([
-            'name' => $product->localizedName(),
-            'description' => '<p>Une description.</p>',
-            'category_id' => $product->category_id,
-            'price' => '19.90',
-            'quantity' => 3,
-        ], $overrides);
+        $this->assertSame('Gants tactiques M-Pact', $product->label_title);
+        $this->assertSame('Taille M', $product->label_subtitle);
+        $this->assertSame('60 % polyester', $product->label_composition);
     }
 }

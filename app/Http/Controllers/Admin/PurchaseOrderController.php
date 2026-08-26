@@ -44,7 +44,9 @@ class PurchaseOrderController extends Controller
             })
             ->when($supplierId !== null, fn ($query) => $query->where('supplier_id', $supplierId))
             ->latest()
-            ->simplePaginate(20)
+            // Numbered pages, like the other admin lists: it costs one count
+            // per load, which on a few dozen orders is nothing.
+            ->paginate(20)
             ->withQueryString();
 
         $open = PurchaseOrder::query()->open()->with('items')->get();

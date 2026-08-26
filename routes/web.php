@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\DiscountCodeController as AdminDiscountCodeController;
 use App\Http\Controllers\Admin\DiscountController as AdminDiscountController;
 use App\Http\Controllers\Admin\InvoiceSettingController as AdminInvoiceSettingController;
+use App\Http\Controllers\Admin\LabelController as AdminLabelController;
 use App\Http\Controllers\Admin\MarketplaceController as AdminMarketplaceController;
 use App\Http\Controllers\Admin\MarketplaceListingController as AdminMarketplaceListingController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
@@ -155,6 +156,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/products/{product}/stock-history', [AdminProductController::class, 'stockHistory'])->name('products.stock-history');
         // One label per article: a plain product, or one variant of a product
         // that has them.
+        // The list of every article that could wear a label.
+        Route::get('/labels', [AdminLabelController::class, 'index'])->name('labels.index');
+        Route::put('/labels/{product}', [AdminLabelController::class, 'update'])->name('labels.update');
         Route::get('/products/{product}/label', [AdminProductController::class, 'label'])->name('products.label');
         Route::get('/products/{product}/variants/{variant}/label', [AdminProductController::class, 'label'])->name('products.variants.label');
         Route::get('/products/{product}/average-cost', [AdminProductController::class, 'averageCost'])->name('products.average-cost');

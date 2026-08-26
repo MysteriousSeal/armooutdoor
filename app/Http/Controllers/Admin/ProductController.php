@@ -650,10 +650,6 @@ class ProductController extends Controller
             'image_may_vary' => $request->boolean('image_may_vary'),
             'sku' => $request->filled('sku') ? $request->string('sku')->trim()->toString() : null,
             'gtin' => $request->filled('gtin') ? $request->string('gtin')->trim()->toString() : null,
-            'label_title' => $request->filled('label_title') ? $request->string('label_title')->trim()->toString() : null,
-            'label_subtitle' => $request->filled('label_subtitle') ? $request->string('label_subtitle')->trim()->toString() : null,
-            'label_composition' => $request->filled('label_composition') ? $request->string('label_composition')->trim()->toString() : null,
-            'label_mention' => $request->filled('label_mention') ? $request->string('label_mention')->trim()->toString() : null,
             'weight_grams' => $request->filled('weight_grams') ? $request->integer('weight_grams') : null,
             'carrier_ids' => array_map('intval', $request->input('carrier_ids', [])),
             'name' => [
