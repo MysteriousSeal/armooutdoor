@@ -112,6 +112,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/accounting/purchases/{month}', [AdminAccountingController::class, 'purchasesMonth'])
                 ->where('month', '\d{4}-\d{2}')
                 ->name('accounting.purchases.month');
+            Route::get('/accounting/purchases/{month}/pdf', [AdminAccountingController::class, 'purchasesPdf'])
+                ->where('month', '\d{4}-\d{2}')
+                ->name('accounting.purchases.pdf');
 
             Route::get('/accounting/sales/{month}/pdf', [AdminAccountingController::class, 'salesPdf'])
                 ->where('month', '\d{4}-\d{2}')

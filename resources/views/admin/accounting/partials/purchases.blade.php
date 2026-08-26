@@ -15,9 +15,21 @@
                  has to be looked for. --}}
             <div class="accounting-hero-actions">
                 <div class="accounting-hero-buttons">
-                    <span class="btn btn-secondary is-disabled" aria-disabled="true" title="Not available yet">Download PDF</span>
+                    {{-- Switched off while the month still runs, and on a month
+                         that bought nothing: an empty sheet is not a document. --}}
+                    @if ($downloadable)
+                        <a href="{{ route('admin.accounting.purchases.pdf', ['month' => $monthKey]) }}" class="btn btn-secondary">Download PDF</a>
+                    @else
+                        <span
+                            class="btn btn-secondary is-disabled"
+                            aria-disabled="true"
+                            title="{{ \App\Support\AccountingPeriods::isClosed($period) ? 'Nothing to print for this month' : 'Available once the month has ended' }}"
+                        >Download PDF</span>
+                    @endif
                     <button type="button" class="btn btn-primary" data-modal-open="entry-modal" data-entry-new>Add entry</button>
                 </div>
+
+                @include('admin.accounting.partials.download-note')
             </div>
         </div>
     </header>

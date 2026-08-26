@@ -151,6 +151,9 @@ class AccountingController extends Controller
         if ($section === 'purchases') {
             $data['rows'] = $this->purchaseRowsOf($period);
             $data['paymentMethods'] = AccountingEntry::PAYMENT_METHODS;
+            $data['lastDownload'] = AccountingJournalDownload::latestFor($section, $month);
+            $data['stale'] = $data['lastDownload']?->isStaleAgainst($this->purchaseFingerprint($data['rows'])) ?? false;
+            $data['downloadable'] = AccountingPeriods::isClosed($period) && $data['rows']->isNotEmpty();
 
             return $data;
         }
@@ -297,18 +300,18 @@ class AccountingController extends Controller
      */
     private function staleMonths(string $section, Collection $downloads): Collection
     {
-        if ($section !== 'sales') {
-            return collect();
-        }
-
-        return $downloads->mapWithKeys(function (AccountingJournalDownload $download, string $month): array {
+        return $downloads->mapWithKeys(function (AccountingJournalDownload $download, string $month) use ($section): array {
             $period = AccountingPeriods::parse($month);
 
             if ($period === null) {
                 return [$month => false];
             }
 
-            return [$month => $download->isStaleAgainst($this->fingerprint($this->rowsOf('sales', $period)))];
+            $fingerprint = $section === 'purchases'
+                ? $this->purchaseFingerprint($this->purchaseRowsOf($period))
+                : $this->fingerprint($this->rowsOf('sales', $period));
+
+            return [$month => $download->isStaleAgainst($fingerprint)];
         });
     }
 
@@ -356,6 +359,80 @@ class AccountingController extends Controller
             $row['remark'],
             $row['counts'] ? '1' : '0',
             $row['refunded'] ? '1' : '0',
+        ]))->join("\n"));
+    }
+
+    /**
+     * The month's purchases as a PDF, for the accounting book.
+     *
+     * Held to the same rules as the sales journal: a month still running has
+     * no journal, nor has one that bought nothing, and every copy taken out is
+     * written down with a fingerprint of what it said.
+     */
+    public function purchasesPdf(Request $request, string $month): Response
+    {
+        $period = $this->sectionPeriod('purchases', $month);
+
+        abort_unless(AccountingPeriods::isClosed($period), 404);
+
+        $rows = $this->purchaseRowsOf($period);
+
+        abort_if($rows->isEmpty(), 404);
+
+        $pdf = Pdf::loadView('admin.accounting.purchases-pdf', $this->purchaseJournalData($period, $rows))
+            // Eight columns, and a supplier name that must not be cut in half.
+            ->setPaper('a4', 'landscape');
+
+        AccountingJournalDownload::record(
+            'purchases',
+            AccountingPeriods::key($period),
+            $this->purchaseFingerprint($rows),
+            $request->user()?->id,
+        );
+
+        return $pdf->download('achats-'.AccountingPeriods::key($period).'.pdf');
+    }
+
+    /**
+     * What a month's purchase journal carries.
+     *
+     * The screen and the PDF both come through here, which is what keeps them
+     * in step.
+     *
+     * @param  Collection<int, AccountingEntry>  $rows
+     * @return array<string, mixed>
+     */
+    private function purchaseJournalData(CarbonImmutable $period, Collection $rows): array
+    {
+        return [
+            'period' => $period,
+            'rows' => $rows,
+            'exVatCents' => $rows->sum(fn (AccountingEntry $entry): int => $entry->exVatCents()),
+            'vatCents' => $rows->sum(fn (AccountingEntry $entry): int => $entry->vatCents()),
+            'totalCents' => $rows->sum('total_cents'),
+            'company' => CompanySetting::current(),
+        ];
+    }
+
+    /**
+     * A signature of the lines a purchase journal prints.
+     *
+     * Same idea as the sales one: only what is printed goes in, so a remark
+     * left alone raises nothing while an amount or a deleted line does.
+     *
+     * @param  Collection<int, AccountingEntry>  $rows
+     */
+    private function purchaseFingerprint(Collection $rows): string
+    {
+        return hash('sha256', $rows->map(fn (AccountingEntry $entry): string => implode('|', [
+            $entry->entered_on->format('Y-m-d'),
+            (string) $entry->invoice_number,
+            (string) $entry->client,
+            (string) $entry->type,
+            $entry->exVatCents(),
+            $entry->vatCents(),
+            $entry->total_cents,
+            $entry->payment_method,
         ]))->join("\n"));
     }
 

@@ -245,14 +245,26 @@ class AccountingPurchasesTest extends TestCase
         );
     }
 
-    public function test_the_pdf_button_is_switched_off_until_it_does_something(): void
+    public function test_a_closed_month_holding_lines_can_be_printed(): void
     {
         $this->submit($this->payload());
 
         $this->page()
-            ->assertSee('Not available yet')
+            ->assertSee('/admin/accounting/purchases/2026-07/pdf', false)
+            ->assertDontSee('is-disabled', false);
+    }
+
+    public function test_the_button_is_switched_off_when_there_is_nothing_to_print(): void
+    {
+        // A month that bought nothing, and a month still running: neither has
+        // a journal, exactly as on the sales side.
+        $this->page()
+            ->assertSee('Nothing to print for this month')
             ->assertSee('is-disabled', false)
-            // Nothing to click through to yet.
             ->assertDontSee('/admin/accounting/purchases/2026-07/pdf', false);
+
+        $this->page('2026-08')
+            ->assertSee('Available once the month has ended')
+            ->assertSee('is-disabled', false);
     }
 }
