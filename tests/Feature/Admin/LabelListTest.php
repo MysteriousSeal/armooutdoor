@@ -14,15 +14,32 @@ class LabelListTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** A product whose label is ready to print. */
-    private function ready(array $overrides = []): Product
+    /**
+     * A product whose label is ready to print.
+     *
+     * The wording lives in its own row, so `title` and `subtitle` are passed
+     * separately from the product's own columns; either can be nulled to make
+     * the article unfinished.
+     *
+     * @param  array<string, mixed>  $overrides
+     * @param  array<string, string|null>  $wording
+     */
+    private function ready(array $overrides = [], array $wording = []): Product
+    {
+        return Product::factory()->labelled($wording)->create(array_merge([
+            'name' => ['en' => 'Tactical gloves', 'fr' => 'Gants tactiques'],
+            'sku' => 'ARM-GLOVE-M',
+            'gtin' => '4006381333931',
+        ], $overrides));
+    }
+
+    /** A product with no label wording at all. */
+    private function unworded(array $overrides = []): Product
     {
         return Product::factory()->create(array_merge([
             'name' => ['en' => 'Tactical gloves', 'fr' => 'Gants tactiques'],
             'sku' => 'ARM-GLOVE-M',
             'gtin' => '4006381333931',
-            'label_title' => 'Gants tactiques M-Pact',
-            'label_subtitle' => 'Taille M',
         ], $overrides));
     }
 
@@ -63,7 +80,7 @@ class LabelListTest extends TestCase
 
     public function test_an_article_short_of_something_is_listed_with_its_button_off(): void
     {
-        $product = $this->ready(['label_subtitle' => null, 'gtin' => null]);
+        $product = $this->ready(['gtin' => null], ['subtitle' => null]);
 
         $this->page()
             // Listed rather than hidden: the fields that would switch the
@@ -93,7 +110,7 @@ class LabelListTest extends TestCase
     public function test_the_tabs_split_what_can_be_printed_from_what_cannot(): void
     {
         $this->ready(['sku' => 'ARM-OK']);
-        $this->ready(['sku' => 'ARM-KO', 'gtin' => '5901234123457', 'label_title' => null]);
+        $this->unworded(['sku' => 'ARM-KO', 'gtin' => '5901234123457']);
 
         $this->page(['tab' => 'ready'])
             ->assertSee('ARM-OK')
@@ -108,8 +125,8 @@ class LabelListTest extends TestCase
 
     public function test_the_search_finds_a_product_by_reference_or_label_title(): void
     {
-        $this->ready(['sku' => 'ARM-FOUND', 'label_title' => 'Gants Woodland']);
-        $this->ready(['sku' => 'ARM-OTHER', 'label_title' => 'Cibles rondes', 'gtin' => '5901234123457']);
+        $this->ready(['sku' => 'ARM-FOUND'], ['title' => 'Gants Woodland']);
+        $this->ready(['sku' => 'ARM-OTHER', 'gtin' => '5901234123457'], ['title' => 'Cibles rondes']);
 
         $this->page(['search' => 'ARM-FOUND'])->assertSee('ARM-FOUND')->assertDontSee('ARM-OTHER');
         $this->page(['search' => 'Woodland'])->assertSee('ARM-FOUND')->assertDontSee('ARM-OTHER');
@@ -118,7 +135,7 @@ class LabelListTest extends TestCase
     public function test_the_search_survives_a_tab(): void
     {
         $this->ready(['sku' => 'ARM-OK']);
-        $this->ready(['sku' => 'ARM-KO', 'label_title' => null, 'gtin' => '5901234123457']);
+        $this->unworded(['sku' => 'ARM-KO', 'gtin' => '5901234123457']);
 
         // Both filters hold at once, rather than one clearing the other.
         $this->page(['tab' => 'incomplete', 'search' => 'ARM-KO'])
@@ -182,7 +199,7 @@ class LabelListTest extends TestCase
 
     public function test_saving_the_wording_comes_back_where_you_were(): void
     {
-        $product = $this->ready(['label_title' => null, 'label_subtitle' => null]);
+        $product = $this->unworded();
         $back = '/admin/labels?tab=incomplete&search=ARM';
 
         $this->actingAs(User::factory()->admin()->create())
@@ -198,11 +215,11 @@ class LabelListTest extends TestCase
             ->assertRedirect($back)
             ->assertSessionHas('status');
 
-        $product->refresh();
-        $this->assertSame('Gants tactiques M-Pact', $product->label_title);
-        $this->assertSame('Taille M', $product->label_subtitle);
-        $this->assertSame('60 % polyester', $product->label_composition);
-        $this->assertNull($product->label_mention);
+        $label = $product->refresh()->label;
+        $this->assertSame('Gants tactiques M-Pact', $label->title);
+        $this->assertSame('Taille M', $label->subtitle);
+        $this->assertSame('60 % polyester', $label->composition);
+        $this->assertNull($label->mention);
     }
 
     public function test_only_the_first_size_carries_the_form(): void
@@ -232,7 +249,7 @@ class LabelListTest extends TestCase
 
     public function test_the_list_carries_no_label_title_column(): void
     {
-        $this->ready(['label_title' => 'Gants tactiques M-Pact']);
+        $this->ready();
 
         // The wording is on the form below each row, so a column repeating it
         // would say the same thing twice.
@@ -243,7 +260,7 @@ class LabelListTest extends TestCase
     {
         // More products than fit on a page: a count that stopped at the page
         // size would only ever report the page size.
-        Product::factory()->count(45)->create(['sku' => null, 'gtin' => null, 'label_title' => null]);
+        Product::factory()->count(45)->create(['sku' => null, 'gtin' => null]);
         $this->ready(['sku' => 'ARM-OK-1']);
         $this->ready(['sku' => 'ARM-OK-2', 'gtin' => '5901234123457']);
 
@@ -258,7 +275,7 @@ class LabelListTest extends TestCase
 
     public function test_a_tab_pages_through_its_own_articles(): void
     {
-        Product::factory()->count(45)->create(['sku' => null, 'gtin' => null, 'label_title' => null]);
+        Product::factory()->count(45)->create(['sku' => null, 'gtin' => null]);
         $this->ready(['sku' => 'ARM-OK-1']);
 
         // The one ready article is on the first page of its tab, not buried
@@ -279,7 +296,7 @@ class LabelListTest extends TestCase
 
     public function test_a_product_short_of_its_wording_is_incomplete_whatever_its_codes(): void
     {
-        $this->ready(['sku' => 'ARM-CODED', 'label_subtitle' => null]);
+        $this->ready(['sku' => 'ARM-CODED'], ['subtitle' => null]);
 
         $this->page(['tab' => 'incomplete'])->assertSee('ARM-CODED');
         $this->page(['tab' => 'ready'])->assertDontSee('ARM-CODED');
@@ -303,5 +320,78 @@ class LabelListTest extends TestCase
         $this->ready(['sku' => null]);
 
         $this->page()->assertDontSee('data-copy-code', false);
+    }
+
+    public function test_a_long_product_name_is_cut_by_the_browser_not_the_server(): void
+    {
+        $long = 'Cibles rondes réactives fluorescentes 10 cm numérotées, lot de cent';
+        $this->ready(['name' => ['en' => $long, 'fr' => $long]]);
+
+        // Two lines then the ellipsis, so the whole name stays in the markup
+        // and in the tooltip rather than being lost to a truncation.
+        $this->page()
+            ->assertSee('admin-name-clamp', false)
+            ->assertSee('title="'.e($long).'"', false)
+            // The whole name, not a truncation: the ellipsis on the page is
+            // the search placeholder's, so the name itself is what is checked.
+            ->assertSee($long);
+    }
+
+    public function test_the_wording_lives_in_its_own_row(): void
+    {
+        $product = $this->unworded();
+
+        $this->save($product, ['label_title' => 'Gants', 'label_subtitle' => 'Taille M']);
+
+        // One row per product, whatever its number of sizes.
+        $this->assertDatabaseCount('product_labels', 1);
+        $this->assertDatabaseHas('product_labels', [
+            'product_id' => $product->id,
+            'title' => 'Gants',
+            'subtitle' => 'Taille M',
+        ]);
+    }
+
+    public function test_saving_again_writes_to_the_same_row(): void
+    {
+        $product = $this->ready();
+
+        $this->save($product, ['label_title' => 'Gants Woodland', 'label_subtitle' => 'Taille L']);
+
+        $this->assertDatabaseCount('product_labels', 1);
+        $this->assertSame('Gants Woodland', $product->fresh()->label->title);
+    }
+
+    public function test_emptying_every_field_removes_the_row(): void
+    {
+        $product = $this->ready();
+
+        $this->save($product, [
+            'label_title' => '',
+            'label_subtitle' => '',
+            'label_composition' => '',
+            'label_mention' => '',
+        ]);
+
+        // The row's existence is what "this product has wording" means, so an
+        // emptied label is deleted rather than kept as four nulls.
+        $this->assertDatabaseCount('product_labels', 0);
+        $this->assertNull($product->fresh()->label);
+    }
+
+    public function test_deleting_a_product_takes_its_wording_with_it(): void
+    {
+        $product = $this->ready();
+
+        $product->delete();
+
+        $this->assertDatabaseCount('product_labels', 0);
+    }
+
+    /** Posts the label form for a product, as the owner. */
+    private function save(Product $product, array $wording): TestResponse
+    {
+        return $this->actingAs(User::factory()->admin()->create())
+            ->put('/admin/labels/'.$product->id, $wording);
     }
 }

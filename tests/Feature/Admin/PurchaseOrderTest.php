@@ -590,7 +590,7 @@ class PurchaseOrderTest extends TestCase
 
         // Coupé à l'affichage, pas à l'enregistrement : le nom complet reste
         // dans la ligne et au survol.
-        $this->assertStringContainsString('po-line-name', $html);
+        $this->assertStringContainsString('admin-name-clamp', $html);
         $this->assertStringContainsString('title="'.e($long).'"', $html);
         $this->assertStringContainsString($long, $html);
     }
@@ -601,7 +601,7 @@ class PurchaseOrderTest extends TestCase
 
         // Sans le plancher, le max-width global des images laisse la tuile
         // s'écraser dans une cellule serrée.
-        $this->assertMatchesRegularExpression('/\.po-line-name\s*\{[^}]*line-clamp:\s*2/s', $css);
+        $this->assertMatchesRegularExpression('/\.admin-name-clamp\s*\{[^}]*line-clamp:\s*2/s', $css);
         // Le sélecteur est groupé avec .admin-stock-media : il peut donc être
         // suivi d'une virgule autant que d'une accolade.
         $this->assertMatchesRegularExpression('/\.admin-table-media\s+\.admin-product-thumb\s*[,{][^}]*min-width/s', $css);

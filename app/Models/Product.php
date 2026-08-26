@@ -32,10 +32,6 @@ use Illuminate\Support\Str;
     'ai_validated',
     'sku',
     'gtin',
-    'label_title',
-    'label_subtitle',
-    'label_composition',
-    'label_mention',
     'weight_grams',
     'carrier_ids',
     'age_restricted',
@@ -538,6 +534,12 @@ class Product extends Model
         return $this->restockingPurchaseItems()->exists();
     }
 
+    /** The wording printed on this product's label, when it has any. */
+    public function label(): HasOne
+    {
+        return $this->hasOne(ProductLabel::class);
+    }
+
     /**
      * What a label still needs before it can be printed.
      *
@@ -552,8 +554,8 @@ class Product extends Model
         $article = $variant ?? $this;
 
         return collect([
-            'title' => filled($this->label_title),
-            'subtitle' => filled($this->label_subtitle),
+            'title' => filled($this->label?->title),
+            'subtitle' => filled($this->label?->subtitle),
             'reference' => filled($article->sku),
             'barcode' => filled($article->gtin),
         ])->reject(fn (bool $present): bool => $present)->keys()->all();

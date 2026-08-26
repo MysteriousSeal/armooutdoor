@@ -90,9 +90,11 @@
                                     </a>
                                 </td>
                                 <td>
-                                    <a href="{{ route('admin.products.edit', $product) }}" class="admin-table-strong">
-                                        {{ \Illuminate\Support\Str::limit($product->name['fr'] ?? $product->localizedName(), 40) }}
-                                    </a>
+                                    {{-- Two lines then the ellipsis, cut by the browser
+                                         rather than by the server: the whole name stays
+                                         in the markup and in the tooltip. --}}
+                                    @php($name = $product->name['fr'] ?? $product->localizedName())
+                                    <a href="{{ route('admin.products.edit', $product) }}" class="admin-table-strong admin-name-clamp" title="{{ $name }}">{{ $name }}</a>
                                 </td>
                                 <td>
                                     {{-- The size is what tells two rows of the same product apart. --}}
@@ -155,16 +157,16 @@
                                             <input type="hidden" name="back" value="{{ request()->fullUrl() }}">
 
                                             <label class="sr-only" for="label-title-{{ $product->id }}">Label title</label>
-                                            <input type="text" id="label-title-{{ $product->id }}" name="label_title" class="form-control" value="{{ $product->label_title }}" maxlength="120" placeholder="Title">
+                                            <input type="text" id="label-title-{{ $product->id }}" name="label_title" class="form-control" value="{{ $product->label?->title }}" maxlength="120" placeholder="Title">
 
                                             <label class="sr-only" for="label-subtitle-{{ $product->id }}">Label subtitle</label>
-                                            <input type="text" id="label-subtitle-{{ $product->id }}" name="label_subtitle" class="form-control" value="{{ $product->label_subtitle }}" maxlength="120" placeholder="Subtitle">
+                                            <input type="text" id="label-subtitle-{{ $product->id }}" name="label_subtitle" class="form-control" value="{{ $product->label?->subtitle }}" maxlength="120" placeholder="Subtitle">
 
                                             <label class="sr-only" for="label-composition-{{ $product->id }}">Composition</label>
-                                            <input type="text" id="label-composition-{{ $product->id }}" name="label_composition" class="form-control" value="{{ $product->label_composition }}" maxlength="500" placeholder="Composition (optional)">
+                                            <input type="text" id="label-composition-{{ $product->id }}" name="label_composition" class="form-control" value="{{ $product->label?->composition }}" maxlength="500" placeholder="Composition (optional)">
 
                                             <label class="sr-only" for="label-mention-{{ $product->id }}">Mention</label>
-                                            <input type="text" id="label-mention-{{ $product->id }}" name="label_mention" class="form-control" value="{{ $product->label_mention }}" maxlength="500" placeholder="Mention (optional)">
+                                            <input type="text" id="label-mention-{{ $product->id }}" name="label_mention" class="form-control" value="{{ $product->label?->mention }}" maxlength="500" placeholder="Mention (optional)">
 
                                             <button type="submit" class="btn btn-secondary btn-small">Save</button>
                                         </form>

@@ -30,7 +30,7 @@ class ProductLabelTest extends TestCase
 
     public function test_a_product_with_both_codes_prints_a_label(): void
     {
-        $product = Product::factory()->create(['sku' => 'ARM-TENT-2P-GRN', 'gtin' => '4006381333931', 'label_title' => 'Tente 2 places', 'label_subtitle' => 'Verte']);
+        $product = Product::factory()->labelled(['title' => 'Tente 2 places', 'subtitle' => 'Verte'])->create(['sku' => 'ARM-TENT-2P-GRN', 'gtin' => '4006381333931']);
 
         $this->actingAs(User::factory()->admin()->create())
             ->get('/admin/products/'.$product->id.'/label')
@@ -41,13 +41,13 @@ class ProductLabelTest extends TestCase
 
     public function test_the_label_carries_what_a_package_must_say(): void
     {
-        $product = Product::factory()->create(['sku' => 'ARM-TENT-2P-GRN', 'gtin' => '4006381333931', 'label_title' => 'Tente 2 places', 'label_subtitle' => 'Verte']);
+        $product = Product::factory()->labelled(['title' => 'Tente 2 places', 'subtitle' => 'Verte'])->create(['sku' => 'ARM-TENT-2P-GRN', 'gtin' => '4006381333931']);
 
         $html = view('admin.products.label-pdf', [
-            'title' => $product->label_title,
-            'subtitle' => $product->label_subtitle,
-            'composition' => $product->label_composition,
-            'mention' => $product->label_mention,
+            'title' => $product->label?->title,
+            'subtitle' => $product->label?->subtitle,
+            'composition' => $product->label?->composition,
+            'mention' => $product->label?->mention,
             'sku' => $product->sku,
             'gtin' => Ean13::normalise($product->gtin),
             'modules' => Ean13::modules($product->gtin),
@@ -67,13 +67,13 @@ class ProductLabelTest extends TestCase
 
     public function test_the_barcode_is_drawn_as_bars(): void
     {
-        $product = Product::factory()->create(['sku' => 'ARM-1', 'gtin' => '4006381333931', 'label_title' => 'Gants', 'label_subtitle' => 'Taille M']);
+        $product = Product::factory()->labelled(['title' => 'Gants', 'subtitle' => 'Taille M'])->create(['sku' => 'ARM-1', 'gtin' => '4006381333931']);
 
         $html = view('admin.products.label-pdf', [
-            'title' => $product->label_title,
-            'subtitle' => $product->label_subtitle,
-            'composition' => $product->label_composition,
-            'mention' => $product->label_mention,
+            'title' => $product->label?->title,
+            'subtitle' => $product->label?->subtitle,
+            'composition' => $product->label?->composition,
+            'mention' => $product->label?->mention,
             'sku' => $product->sku,
             'gtin' => Ean13::normalise($product->gtin),
             'modules' => Ean13::modules($product->gtin),
@@ -86,7 +86,7 @@ class ProductLabelTest extends TestCase
 
     public function test_a_variant_prints_its_own_label(): void
     {
-        $product = Product::factory()->create(['sku' => null, 'gtin' => null, 'label_title' => 'T-shirt', 'label_subtitle' => 'Respirant']);
+        $product = Product::factory()->labelled(['title' => 'T-shirt', 'subtitle' => 'Respirant'])->create(['sku' => null, 'gtin' => null]);
         $variant = $this->variant($product, 'ARM-TSHIRT-M', '5901234123457');
 
         $this->actingAs(User::factory()->admin()->create())
@@ -110,7 +110,7 @@ class ProductLabelTest extends TestCase
 
     public function test_a_variant_of_another_product_is_refused(): void
     {
-        $product = Product::factory()->create(['sku' => 'ARM-3', 'gtin' => '4006381333931', 'label_title' => 'Gants', 'label_subtitle' => 'Taille M']);
+        $product = Product::factory()->labelled(['title' => 'Gants', 'subtitle' => 'Taille M'])->create(['sku' => 'ARM-3', 'gtin' => '4006381333931']);
         $other = Product::factory()->create(['sku' => null, 'gtin' => null]);
         $variant = $this->variant($other, 'ARM-OTHER-M', '5901234123457');
 
@@ -121,12 +121,9 @@ class ProductLabelTest extends TestCase
 
     public function test_a_product_missing_its_wording_cannot_print_a_label(): void
     {
-        $product = Product::factory()->create([
-            'sku' => 'ARM-13',
-            'gtin' => '4006381333931',
-            'label_title' => 'Gants',
-            'label_subtitle' => null,
-        ]);
+        $product = Product::factory()
+            ->labelled(['title' => 'Gants', 'subtitle' => null])
+            ->create(['sku' => 'ARM-13', 'gtin' => '4006381333931']);
 
         // The title and the subtitle are not needed to save a product, but a
         // label without them says nothing about the article.
@@ -137,7 +134,7 @@ class ProductLabelTest extends TestCase
 
     public function test_a_staff_admin_can_print_one(): void
     {
-        $product = Product::factory()->create(['sku' => 'ARM-6', 'gtin' => '4006381333931', 'label_title' => 'Gants', 'label_subtitle' => 'Taille M']);
+        $product = Product::factory()->labelled(['title' => 'Gants', 'subtitle' => 'Taille M'])->create(['sku' => 'ARM-6', 'gtin' => '4006381333931']);
 
         // A label is a shipping job, not an accounting one.
         $this->actingAs(User::factory()->staffAdmin()->create())
@@ -147,7 +144,7 @@ class ProductLabelTest extends TestCase
 
     public function test_a_customer_cannot_print_one(): void
     {
-        $product = Product::factory()->create(['sku' => 'ARM-7', 'gtin' => '4006381333931', 'label_title' => 'Gants', 'label_subtitle' => 'Taille M']);
+        $product = Product::factory()->labelled(['title' => 'Gants', 'subtitle' => 'Taille M'])->create(['sku' => 'ARM-7', 'gtin' => '4006381333931']);
 
         $this->actingAs(User::factory()->create())
             ->get('/admin/products/'.$product->id.'/label')
@@ -156,7 +153,7 @@ class ProductLabelTest extends TestCase
 
     public function test_the_sheet_is_portrait(): void
     {
-        $product = Product::factory()->create(['sku' => 'ARM-8', 'gtin' => '4006381333931', 'label_title' => 'Gants', 'label_subtitle' => 'Taille M']);
+        $product = Product::factory()->labelled(['title' => 'Gants', 'subtitle' => 'Taille M'])->create(['sku' => 'ARM-8', 'gtin' => '4006381333931']);
 
         $pdf = $this->actingAs(User::factory()->admin()->create())
             ->get('/admin/products/'.$product->id.'/label')
@@ -174,7 +171,7 @@ class ProductLabelTest extends TestCase
 
     public function test_the_label_is_printed_across_the_sheet(): void
     {
-        $product = Product::factory()->create(['sku' => 'ARM-9', 'gtin' => '4006381333931', 'label_title' => 'Gants', 'label_subtitle' => 'Taille M']);
+        $product = Product::factory()->labelled(['title' => 'Gants', 'subtitle' => 'Taille M'])->create(['sku' => 'ARM-9', 'gtin' => '4006381333931']);
 
         $source = file_get_contents(resource_path('views/admin/products/label-pdf.blade.php'));
 
@@ -210,10 +207,10 @@ class ProductLabelTest extends TestCase
     private function labelHtml(Product $product): string
     {
         return view('admin.products.label-pdf', [
-            'title' => $product->label_title,
-            'subtitle' => $product->label_subtitle,
-            'composition' => $product->label_composition,
-            'mention' => $product->label_mention,
+            'title' => $product->label?->title,
+            'subtitle' => $product->label?->subtitle,
+            'composition' => $product->label?->composition,
+            'mention' => $product->label?->mention,
             'sku' => $product->sku,
             'gtin' => Ean13::normalise($product->gtin),
             'modules' => Ean13::modules($product->gtin),
@@ -223,14 +220,14 @@ class ProductLabelTest extends TestCase
 
     public function test_the_wording_typed_on_the_product_reaches_its_label(): void
     {
-        $product = Product::factory()->create([
-            'sku' => 'ARM-10',
-            'gtin' => '4006381333931',
-            'label_title' => 'Gants tactiques M-Pact',
-            'label_subtitle' => 'Taille M — Woodland',
-            'label_composition' => '60 % polyester, 40 % cuir de synthèse',
-            'label_mention' => 'Ne convient pas aux enfants de moins de 14 ans',
-        ]);
+        $product = Product::factory()
+            ->labelled([
+                'title' => 'Gants tactiques M-Pact',
+                'subtitle' => 'Taille M — Woodland',
+                'composition' => '60 % polyester, 40 % cuir de synthèse',
+                'mention' => 'Ne convient pas aux enfants de moins de 14 ans',
+            ])
+            ->create(['sku' => 'ARM-10', 'gtin' => '4006381333931']);
 
         $html = $this->labelHtml($product);
 
@@ -243,11 +240,9 @@ class ProductLabelTest extends TestCase
 
     public function test_the_name_is_read_before_the_reference(): void
     {
-        $product = Product::factory()->create([
-            'sku' => 'ARM-11',
-            'gtin' => '4006381333931',
-            'label_title' => 'Gants tactiques M-Pact',
-        ]);
+        $product = Product::factory()
+            ->labelled(['title' => 'Gants tactiques M-Pact'])
+            ->create(['sku' => 'ARM-11', 'gtin' => '4006381333931']);
 
         // From the body only: the reference also appears in the document's
         // title, which is not what is being ordered here.
@@ -260,12 +255,9 @@ class ProductLabelTest extends TestCase
 
     public function test_an_optional_field_left_empty_prints_nothing_at_all(): void
     {
-        $product = Product::factory()->create([
-            'sku' => 'ARM-12',
-            'gtin' => '4006381333931',
-            'label_title' => 'Gants',
-            'label_subtitle' => 'Taille M',
-        ]);
+        $product = Product::factory()
+            ->labelled(['title' => 'Gants', 'subtitle' => 'Taille M'])
+            ->create(['sku' => 'ARM-12', 'gtin' => '4006381333931']);
 
         $html = $this->labelHtml($product);
 
@@ -278,12 +270,9 @@ class ProductLabelTest extends TestCase
 
     public function test_every_variant_of_a_product_says_the_same_thing(): void
     {
-        $product = Product::factory()->create([
-            'sku' => null,
-            'gtin' => null,
-            'label_title' => 'T-shirt respirant',
-            'label_subtitle' => 'Taille M',
-        ]);
+        $product = Product::factory()
+            ->labelled(['title' => 'T-shirt respirant', 'subtitle' => 'Taille M'])
+            ->create(['sku' => null, 'gtin' => null]);
         $medium = $this->variant($product, 'ARM-TS-M', '5901234123457');
 
         $pdf = $this->actingAs(User::factory()->admin()->create())
@@ -293,17 +282,14 @@ class ProductLabelTest extends TestCase
         // The wording lives on the product: only the reference and the barcode
         // change from one size to the next.
         $pdf->assertDownload('label-arm-ts-m.pdf');
-        $this->assertSame('T-shirt respirant', $product->fresh()->label_title);
+        $this->assertSame('T-shirt respirant', $product->fresh()->label->title);
     }
 
     public function test_the_product_form_says_nothing_about_labels(): void
     {
-        $product = Product::factory()->create([
-            'sku' => 'ARM-14',
-            'gtin' => '4006381333931',
-            'label_title' => 'Gants tactiques M-Pact',
-            'label_subtitle' => 'Taille M',
-        ]);
+        $product = Product::factory()
+            ->labelled(['title' => 'Gants tactiques M-Pact', 'subtitle' => 'Taille M'])
+            ->create(['sku' => 'ARM-14', 'gtin' => '4006381333931']);
 
         // Labels are edited from Catalog › Labels; the product form has no
         // section of its own for them.
@@ -316,14 +302,16 @@ class ProductLabelTest extends TestCase
 
     public function test_saving_a_product_leaves_its_label_wording_alone(): void
     {
-        $product = Product::factory()->create([
-            'label_title' => 'Gants tactiques M-Pact',
-            'label_subtitle' => 'Taille M',
-            'label_composition' => '60 % polyester',
-        ]);
+        $product = Product::factory()
+            ->labelled([
+                'title' => 'Gants tactiques M-Pact',
+                'subtitle' => 'Taille M',
+                'composition' => '60 % polyester',
+            ])
+            ->create();
 
-        // The form no longer carries the fields, so it must not blank them
-        // either: an absent field is not an emptied one.
+        // The product form never carried the fields, and saving it must not
+        // reach into the label's own row either.
         $this->actingAs(User::factory()->admin()->create())
             ->put('/admin/products/'.$product->id, [
                 'name' => $product->localizedName(),
@@ -334,9 +322,9 @@ class ProductLabelTest extends TestCase
             ])
             ->assertRedirect();
 
-        $product->refresh();
-        $this->assertSame('Gants tactiques M-Pact', $product->label_title);
-        $this->assertSame('Taille M', $product->label_subtitle);
-        $this->assertSame('60 % polyester', $product->label_composition);
+        $label = $product->refresh()->label;
+        $this->assertSame('Gants tactiques M-Pact', $label->title);
+        $this->assertSame('Taille M', $label->subtitle);
+        $this->assertSame('60 % polyester', $label->composition);
     }
 }

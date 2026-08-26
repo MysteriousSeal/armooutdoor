@@ -202,10 +202,10 @@ class ProductController extends Controller
         $pdf = Pdf::loadView('admin.products.label-pdf', [
             // The wording lives on the product: every size says the same
             // thing, only the reference and the barcode differ.
-            'title' => $product->label_title,
-            'subtitle' => $product->label_subtitle,
-            'composition' => $product->label_composition,
-            'mention' => $product->label_mention,
+            'title' => $product->label?->title,
+            'subtitle' => $product->label?->subtitle,
+            'composition' => $product->label?->composition,
+            'mention' => $product->label?->mention,
             'sku' => $article->sku,
             'gtin' => Ean13::normalise($article->gtin),
             'modules' => Ean13::modules($article->gtin),

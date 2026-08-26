@@ -12,6 +12,25 @@ use Illuminate\Support\Str;
  */
 class ProductFactory extends Factory
 {
+    /**
+     * A product whose label carries wording.
+     *
+     * The four fields live in their own table, so a test that wants a
+     * printable article asks for them here rather than spelling out the
+     * relation at every call site.
+     *
+     * @param  array<string, string|null>  $wording
+     */
+    public function labelled(array $wording = []): static
+    {
+        return $this->afterCreating(function (Product $product) use ($wording): void {
+            $product->label()->create(array_merge([
+                'title' => 'Gants tactiques M-Pact',
+                'subtitle' => 'Taille M',
+            ], $wording));
+        });
+    }
+
     public function definition(): array
     {
         $name = fake()->unique()->words(3, true);

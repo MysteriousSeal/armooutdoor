@@ -3384,7 +3384,7 @@ a.admin-stat-card:hover {
 /* Deux lignes puis les points de suspension : un nom de produit long garde
    sa hauteur de ligne au lieu de pousser la colonne et d'aplatir la
    vignette. Le titre complet reste au survol. */
-.po-line-name {
+.admin-name-clamp {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;

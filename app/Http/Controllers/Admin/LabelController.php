@@ -40,11 +40,11 @@ class LabelController extends Controller
         // too, so a page of the Ready tab is forty products that have
         // something ready rather than forty products of which three do.
         $products = Product::query()
-            ->with('variants')
+            ->with('variants', 'label')
             ->when($search !== '', fn (Builder $query) => $query->where(function (Builder $inner) use ($search): void {
                 $inner->where('name', 'like', '%'.$search.'%')
                     ->orWhere('sku', 'like', '%'.$search.'%')
-                    ->orWhere('label_title', 'like', '%'.$search.'%')
+                    ->orWhereHas('label', fn (Builder $label) => $label->where('title', 'like', '%'.$search.'%'))
                     ->orWhereHas('variants', fn (Builder $variants) => $variants->where('sku', 'like', '%'.$search.'%'));
             }))
             ->when($tab !== 'all', fn (Builder $query) => $this->holdingAn($query, $tab))
@@ -132,15 +132,16 @@ class LabelController extends Controller
     /**
      * A product whose label wording is filled in.
      *
+     * The wording lives in its own row, so a product with no row has none.
      * Empty strings count as missing, the way `filled()` reads them.
      *
      * @param  Builder<Product>  $query
      */
     private function hasWording(Builder $query): Builder
     {
-        return $query
-            ->whereNotNull('label_title')->where('label_title', '!=', '')
-            ->whereNotNull('label_subtitle')->where('label_subtitle', '!=', '');
+        return $query->whereHas('label', fn (Builder $label) => $label
+            ->whereNotNull('title')->where('title', '!=', '')
+            ->whereNotNull('subtitle')->where('subtitle', '!=', ''));
     }
 
     /**
@@ -171,9 +172,18 @@ class LabelController extends Controller
             'label_mention' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $product->update(collect($validated)
-            ->map(fn (?string $value): ?string => filled($value) ? trim($value) : null)
-            ->all());
+        $wording = collect($validated)
+            ->mapWithKeys(fn (?string $value, string $field): array => [
+                str_replace('label_', '', $field) => filled($value) ? trim($value) : null,
+            ]);
+
+        // A label emptied of everything is deleted rather than kept as four
+        // nulls: the row's existence is what "this product has wording" means.
+        if ($wording->filter()->isEmpty()) {
+            $product->label?->delete();
+        } else {
+            $product->label()->updateOrCreate([], $wording->all());
+        }
 
         return redirect()
             ->to($request->input('back', route('admin.labels.index')))
