@@ -105,7 +105,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // l'argent : ces pages porteront le chiffre d'affaires et les coûts.
         Route::middleware('admin.owner')->group(function (): void {
             Route::get('/accounting/sales', [AdminAccountingController::class, 'sales'])->name('accounting.sales');
+            Route::get('/accounting/sales/{month}', [AdminAccountingController::class, 'salesMonth'])
+                ->where('month', '\d{4}-\d{2}')
+                ->name('accounting.sales.month');
             Route::get('/accounting/purchases', [AdminAccountingController::class, 'purchases'])->name('accounting.purchases');
+            Route::get('/accounting/purchases/{month}', [AdminAccountingController::class, 'purchasesMonth'])
+                ->where('month', '\d{4}-\d{2}')
+                ->name('accounting.purchases.month');
         });
 
         Route::get('/activity', [AdminActivityController::class, 'index'])->name('activity');

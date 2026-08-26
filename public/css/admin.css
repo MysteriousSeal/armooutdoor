@@ -7405,3 +7405,84 @@ a.order-stepper-btn:focus-visible {
         transition: none;
     }
 }
+
+/* La liste des mois de la comptabilité.
+   Une grille plutôt qu'une colonne : douze mois tiennent alors sous les yeux
+   d'un coup, et l'année sert de titre parce qu'on cherche un exercice avant
+   de chercher un mois. */
+.accounting-year {
+    margin-bottom: 1.75rem;
+}
+
+.accounting-year-title {
+    margin: 0 0 0.7rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.accounting-months {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+    gap: 0.5rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.accounting-month {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    padding: 0.85rem 0.9rem;
+    color: var(--text);
+    text-decoration: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+
+.accounting-month:hover,
+.accounting-month:focus-visible {
+    border-color: var(--accent);
+    background: var(--bg);
+}
+
+.accounting-month-name {
+    font-size: 0.9375rem;
+    font-weight: 600;
+}
+
+/* La clé du mois est une adresse, pas une phrase : chiffres tabulaires pour
+   qu'une colonne de cartes s'aligne. */
+.accounting-month-meta {
+    margin-left: auto;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.accounting-month-arrow {
+    align-self: center;
+    flex-shrink: 0;
+    color: var(--text-muted);
+}
+
+/* Le mois en cours n'est pas clos : il se distingue sans crier, par un filet
+   d'accent à gauche. */
+.accounting-month.is-current {
+    border-left: 2px solid var(--accent);
+}
+
+.accounting-month.is-current .accounting-month-meta {
+    color: var(--accent-hover);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .accounting-month {
+        transition: none;
+    }
+}

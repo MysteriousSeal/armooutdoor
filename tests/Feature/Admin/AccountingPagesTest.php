@@ -19,12 +19,12 @@ class AccountingPagesTest extends TestCase
             ->assertOk()
             ->assertSee('Sales')
             ->assertSee('Accounting')
-            ->assertSee('Nothing here yet.');
+            ->assertSee('January');
 
         $this->actingAs($owner)->get('/admin/accounting/purchases')
             ->assertOk()
             ->assertSee('Purchases')
-            ->assertSee('Nothing here yet.');
+            ->assertSee('January');
     }
 
     public function test_a_staff_admin_is_turned_away(): void

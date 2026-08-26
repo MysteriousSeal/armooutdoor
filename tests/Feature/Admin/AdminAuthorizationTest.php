@@ -16,6 +16,7 @@ use App\Models\Product;
 use App\Models\PurchaseOrder;
 use App\Models\Supplier;
 use App\Models\User;
+use App\Support\AccountingPeriods;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Route as RoutingRoute;
 use Illuminate\Support\Facades\Route;
@@ -101,6 +102,10 @@ class AdminAuthorizationTest extends TestCase
             'conversation' => $conversation->id,
             'message' => $conversationMessage->id,
             'post' => $blogPost->id,
+            // Un mois de la période comptable : hors bornes, la route ne
+            // correspond même pas, et le balayage lirait un 404 comme une
+            // porte ouverte.
+            'month' => AccountingPeriods::FIRST,
         ];
 
         $nonAdmin = User::factory()->create();
