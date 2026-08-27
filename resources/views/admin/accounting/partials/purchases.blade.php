@@ -38,6 +38,10 @@
         $exVatCents = $rows->sum(fn ($entry) => $entry->exVatCents());
         $vatCents = $rows->sum(fn ($entry) => $entry->vatCents());
         $totalCents = $rows->sum('total_cents');
+        // Lines whose invoice exists on paper but has not been attached. A line
+        // with no invoice number is left out: nothing can be attached to it, so
+        // counting it would show a figure that never reaches zero.
+        $missingInvoices = $rows->filter(fn ($entry) => $entry->isMissingInvoiceFile())->count();
     @endphp
 
     @if ($rows->isEmpty())
@@ -56,6 +60,18 @@
             <div class="admin-stat-card">
                 <span class="admin-stat-label">Total incl. VAT</span>
                 <span class="admin-stat-value">{{ format_euros($totalCents) }}</span>
+            </div>
+            {{-- What is still owed to the file, not a figure of money: a month
+                 whose paperwork is complete says so rather than showing a bare
+                 zero to interpret. --}}
+            <div class="admin-stat-card accounting-missing-card {{ $missingInvoices === 0 ? 'is-complete' : '' }}">
+                <span class="admin-stat-label">Invoices missing</span>
+                @if ($missingInvoices === 0)
+                    <span class="admin-stat-value accounting-missing-none">All attached</span>
+                @else
+                    <span class="admin-stat-value">{{ $missingInvoices }}</span>
+                    <span class="accounting-missing-note">{{ trans_choice('{1}line without its PDF|[2,*]lines without their PDF', $missingInvoices) }}</span>
+                @endif
             </div>
         </div>
 
@@ -79,7 +95,57 @@
                     @foreach ($rows as $entry)
                         <tr>
                             <td class="accounting-date">{{ $entry->entered_on->format('d/m/Y') }}</td>
-                            <td><span class="admin-table-strong">{{ $entry->invoice_number ?: '—' }}</span></td>
+                            <td>
+                                <span class="admin-table-strong">{{ $entry->invoice_number ?: '—' }}</span>
+                                {{-- The paper behind the line, attached to the
+                                     number it belongs to. --}}
+                                <span class="accounting-invoice-file">
+                                    @if ($entry->hasInvoiceFile())
+                                        <a
+                                            href="{{ route('admin.accounting.entries.invoice.show', ['section' => 'purchases', 'month' => $monthKey, 'entry' => $entry]) }}"
+                                            class="accounting-invoice-link"
+                                            target="_blank"
+                                            rel="noopener"
+                                            title="Open {{ $entry->invoiceFileName() }}"
+                                        >
+                                            <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">
+                                                <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
+                                                <path d="M14 3v5h5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
+                                            </svg>
+                                            PDF
+                                        </a>
+                                        <form
+                                            method="POST"
+                                            action="{{ route('admin.accounting.entries.invoice.destroy', ['section' => 'purchases', 'month' => $monthKey, 'entry' => $entry]) }}"
+                                            class="accounting-invoice-form"
+                                        >
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="accounting-invoice-detach" title="Remove this invoice" aria-label="Remove the invoice attached to this line">&times;</button>
+                                        </form>
+                                    @elseif ($entry->acceptsInvoiceFile())
+                                        {{-- A label rather than a button: the file
+                                             picker is the input itself, and the form
+                                             sends as soon as a file is chosen. Only
+                                             offered where there is paper to attach. --}}
+                                        <form
+                                            method="POST"
+                                            action="{{ route('admin.accounting.entries.invoice.store', ['section' => 'purchases', 'month' => $monthKey, 'entry' => $entry]) }}"
+                                            class="accounting-invoice-form"
+                                            enctype="multipart/form-data"
+                                        >
+                                            @csrf
+                                            <label class="accounting-invoice-attach">
+                                                <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">
+                                                    <path d="M21 11.5 12.5 20a5 5 0 0 1-7-7l8-8a3.5 3.5 0 0 1 5 5l-8 8a2 2 0 0 1-3-3l7.5-7.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
+                                                Attach
+                                                <input type="file" name="invoice_file" accept="application/pdf" data-invoice-file hidden>
+                                            </label>
+                                        </form>
+                                    @endif
+                                </span>
+                            </td>
                             <td>{{ $entry->client ?: '—' }}</td>
                             <td>{{ $entry->type ?: '—' }}</td>
                             <td class="admin-table-num">{{ format_euros($entry->exVatCents()) }}</td>

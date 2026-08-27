@@ -8130,3 +8130,108 @@ a.order-stepper-btn:focus-visible {
 .label-form .form-control.is-uppercase {
     text-transform: uppercase;
 }
+
+/* The supplier's invoice, attached under the number it belongs to. */
+.accounting-invoice-file {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-left: 0.45rem;
+}
+
+.accounting-invoice-form {
+    display: inline-flex;
+    margin: 0;
+}
+
+/* An attached file, and the way to attach one: the same small chip, so a row
+   reads the same whether the paper is there or not. */
+.accounting-invoice-link,
+.accounting-invoice-attach {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.1rem 0.35rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: color 0.12s ease, border-color 0.12s ease, background-color 0.12s ease;
+}
+
+/* Attached: the blue the admin uses for something to look at. */
+.accounting-invoice-link {
+    color: #2f5d8a;
+    background: #eef3f8;
+    border-color: #c6d8e8;
+}
+
+[data-theme='dark'] .accounting-invoice-link {
+    color: #8ab4dd;
+    background: color-mix(in srgb, #8ab4dd 12%, var(--surface));
+    border-color: color-mix(in srgb, #8ab4dd 35%, var(--border));
+}
+
+/* Nothing attached yet: quiet, dashed, an invitation rather than a state. */
+.accounting-invoice-attach {
+    color: var(--text-muted);
+    background: transparent;
+    border-style: dashed;
+}
+
+.accounting-invoice-link:hover,
+.accounting-invoice-attach:hover {
+    color: var(--accent-hover);
+    border-color: var(--accent);
+}
+
+.accounting-invoice-detach {
+    padding: 0 0.2rem;
+    font-size: 0.875rem;
+    line-height: 1;
+    color: var(--text-muted);
+    background: none;
+    border: 0;
+    cursor: pointer;
+}
+
+.accounting-invoice-detach:hover {
+    color: #a44;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .accounting-invoice-link,
+    .accounting-invoice-attach {
+        transition: none;
+    }
+}
+
+/* How much paperwork the month is still owed. Not a figure of money, so it
+   does not sit in the same tabular type as its neighbours. */
+.accounting-missing-card .admin-stat-value {
+    color: #8a6d1f;
+}
+
+.accounting-missing-note {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* A month whose invoices are all on file: green, and said in words rather
+   than as a zero to interpret. */
+.accounting-missing-card.is-complete .accounting-missing-none {
+    font-size: 1.0625rem;
+    color: #3d6b4e;
+}
+
+[data-theme='dark'] .accounting-missing-card .admin-stat-value {
+    color: #e0b673;
+}
+
+[data-theme='dark'] .accounting-missing-card.is-complete .accounting-missing-none {
+    color: #9dccab;
+}

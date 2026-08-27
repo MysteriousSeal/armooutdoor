@@ -76,3 +76,17 @@
         });
     });
 })();
+
+// Attaching an invoice: the file picker is the whole control, so the form
+// sends as soon as a file is chosen rather than asking for a second click.
+(function () {
+    'use strict';
+
+    document.querySelectorAll('[data-invoice-file]').forEach(function (input) {
+        input.addEventListener('change', function () {
+            if (input.files.length > 0) {
+                input.form.submit();
+            }
+        });
+    });
+})();

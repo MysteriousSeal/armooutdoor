@@ -128,6 +128,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('/accounting/{section}/{month}/entries/{entry}', [AdminAccountingController::class, 'updateEntry'])
                 ->where(['section' => 'sales|purchases', 'month' => '\d{4}-\d{2}'])
                 ->name('accounting.entries.update');
+            // The supplier's invoice, attached to the line it paid for. The
+            // file has no public URL: it is read off the private disk here,
+            // behind the same owner-only door as the rest of the accounts.
+            Route::post('/accounting/{section}/{month}/entries/{entry}/invoice', [AdminAccountingController::class, 'storeInvoiceFile'])
+                ->where(['section' => 'sales|purchases', 'month' => '\d{4}-\d{2}'])
+                ->name('accounting.entries.invoice.store');
+            Route::get('/accounting/{section}/{month}/entries/{entry}/invoice', [AdminAccountingController::class, 'showInvoiceFile'])
+                ->where(['section' => 'sales|purchases', 'month' => '\d{4}-\d{2}'])
+                ->name('accounting.entries.invoice.show');
+            Route::delete('/accounting/{section}/{month}/entries/{entry}/invoice', [AdminAccountingController::class, 'destroyInvoiceFile'])
+                ->where(['section' => 'sales|purchases', 'month' => '\d{4}-\d{2}'])
+                ->name('accounting.entries.invoice.destroy');
+
             Route::delete('/accounting/{section}/{month}/entries/{entry}', [AdminAccountingController::class, 'destroyEntry'])
                 ->where(['section' => 'sales|purchases', 'month' => '\d{4}-\d{2}'])
                 ->name('accounting.entries.destroy');

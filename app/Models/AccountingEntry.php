@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 /**
  * An entry written by hand into the journal.
@@ -17,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'section',
     'entered_on',
     'invoice_number',
+    'invoice_path',
     'client',
     'channel',
     'type',
@@ -139,6 +141,44 @@ class AccountingEntry extends Model
     public function vatCents(): int
     {
         return $this->total_cents - $this->exVatCents();
+    }
+
+    /** Whether the supplier's invoice has been attached to this line. */
+    public function hasInvoiceFile(): bool
+    {
+        return filled($this->invoice_path);
+    }
+
+    /**
+     * Whether a file can be attached at all.
+     *
+     * A line with no invoice number has no paper behind it to attach — a
+     * shop receipt, a marketplace charge — so nothing is offered for it.
+     */
+    public function acceptsInvoiceFile(): bool
+    {
+        return $this->section === 'purchases' && filled($this->invoice_number);
+    }
+
+    /** A line whose invoice exists on paper but has not been attached yet. */
+    public function isMissingInvoiceFile(): bool
+    {
+        return $this->acceptsInvoiceFile() && ! $this->hasInvoiceFile();
+    }
+
+    /**
+     * What the attached file is called when it is opened.
+     *
+     * Supplier and invoice number, so a file saved out of the browser still
+     * says which purchase it belongs to. A line with no number falls back to
+     * its date, which identifies it just as well.
+     */
+    public function invoiceFileName(): string
+    {
+        $supplier = Str::slug((string) $this->client) ?: 'fournisseur';
+        $reference = Str::slug((string) $this->invoice_number) ?: $this->entered_on->format('Y-m-d');
+
+        return $supplier.'_'.$reference.'.pdf';
     }
 
     /** What is left once the fees are held back. */
