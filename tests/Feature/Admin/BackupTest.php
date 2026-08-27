@@ -15,9 +15,17 @@ class BackupTest extends TestCase
 
     private string $fixtures = '';
 
+    private string $archives = '';
+
     protected function setUp(): void
     {
         parent::setUp();
+
+        // A directory of this test's own. These tests delete every archive
+        // they find, and the suite runs against the real storage path: aimed
+        // at the live directory they would wipe the site's actual backups.
+        $this->archives = storage_path('app/private/backup-test-'.getmypid());
+        config(['backup.directory' => $this->archives]);
 
         $this->clearBackups();
 
@@ -50,9 +58,11 @@ class BackupTest extends TestCase
     /** The archives are real files on disk, so each test starts from none. */
     private function clearBackups(): void
     {
-        foreach (glob(storage_path('app/private/'.SiteBackup::DIRECTORY.'/*.zip')) ?: [] as $file) {
+        foreach (glob($this->archives.'/*.zip') ?: [] as $file) {
             unlink($file);
         }
+
+        @rmdir($this->archives);
     }
 
     public function test_the_owner_can_write_a_backup(): void
@@ -178,6 +188,7 @@ class BackupTest extends TestCase
 
         // A backup holds every order and every customer's address.
         $this->assertStringStartsWith(storage_path('app/private'), SiteBackup::path($name));
+        $this->assertStringStartsWith(storage_path('app/private'), config('backup.directory'));
         $this->assertFileDoesNotExist(public_path(SiteBackup::DIRECTORY.'/'.$name));
     }
 
@@ -236,5 +247,16 @@ class BackupTest extends TestCase
         $this->assertContains('database/base.sqlite', $names);
 
         @unlink($database);
+    }
+
+    public function test_the_tests_never_touch_the_real_backup_directory(): void
+    {
+        // This file deletes every archive it finds. Pointed at the live
+        // directory it would wipe the site's own backups, which is exactly
+        // what happened before the directory became configurable.
+        $this->assertNotSame(
+            storage_path('app/private/'.SiteBackup::DIRECTORY),
+            config('backup.directory'),
+        );
     }
 }

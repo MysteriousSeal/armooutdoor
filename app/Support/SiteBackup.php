@@ -161,8 +161,14 @@ class SiteBackup
         }
     }
 
+    /**
+     * Where the archives are kept.
+     *
+     * Read from config, not built here: the tests delete every archive they
+     * find, and must never be pointed at the real directory.
+     */
     private static function directory(): string
     {
-        return storage_path('app/private/'.self::DIRECTORY);
+        return (string) config('backup.directory', storage_path('app/private/'.self::DIRECTORY));
     }
 }
