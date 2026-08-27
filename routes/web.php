@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\AccountingController as AdminAccountingController
 use App\Http\Controllers\Admin\ActivityController as AdminActivityController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
+use App\Http\Controllers\Admin\BackupController as AdminBackupController;
 use App\Http\Controllers\Admin\BlogPostController as AdminBlogPostController;
 use App\Http\Controllers\Admin\CarrierPriceTierController as AdminCarrierPriceTierController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
@@ -144,6 +145,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::delete('/accounting/{section}/{month}/entries/{entry}', [AdminAccountingController::class, 'destroyEntry'])
                 ->where(['section' => 'sales|purchases', 'month' => '\d{4}-\d{2}'])
                 ->name('accounting.entries.destroy');
+        });
+
+        // Owner only, like the accounts: an archive holds every order and
+        // every customer's address.
+        Route::middleware('admin.owner')->group(function (): void {
+            Route::get('/backups', [AdminBackupController::class, 'index'])->name('backups.index');
+            Route::post('/backups', [AdminBackupController::class, 'store'])->name('backups.store');
+            Route::get('/backups/{name}', [AdminBackupController::class, 'show'])->name('backups.show');
+            Route::delete('/backups/{name}', [AdminBackupController::class, 'destroy'])->name('backups.destroy');
         });
 
         Route::get('/activity', [AdminActivityController::class, 'index'])->name('activity');

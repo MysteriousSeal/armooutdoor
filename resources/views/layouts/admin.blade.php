@@ -72,11 +72,12 @@
                 $salesBadge = $ordersAwaitingStartCount + $unviewedCustomerCount + $unreadMessageCount;
                 $salesActive = request()->routeIs('admin.orders.*', 'admin.customers.*', 'admin.conversations.*', 'admin.discounts.*', 'admin.discount-codes.*');
                 $catalogueActive = request()->routeIs('admin.products.*', 'admin.categories.*', 'admin.labels.*', 'admin.purchase-orders.*', 'admin.marketplaces.*');
-                $systemActive = request()->routeIs('admin.settings.*', 'admin.stripe.*', 'admin.activity', 'admin.changelog');
+                $systemActive = request()->routeIs('admin.settings.*', 'admin.stripe.*', 'admin.activity', 'admin.changelog', 'admin.backups.*');
                 $accountingActive = request()->routeIs('admin.accounting.*');
-                // The group that opens the right-hand block carries the
-                // margin: without Accounting, System pushes, as before.
-                $showsAccounting = auth()->user()?->isOwner() === true;
+                // Accounting and Backups are the owner's alone, and the group
+                // that opens the right-hand block carries the margin: without
+                // Accounting, System pushes, as before.
+                $isOwner = auth()->user()?->isOwner() === true;
             @endphp
 
             <a href="{{ route('admin.dashboard') }}" class="admin-nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard</a>
@@ -140,7 +141,7 @@
 
             <a href="{{ route('admin.blog.index') }}" class="admin-nav-link {{ request()->routeIs('admin.blog.*') ? 'active' : '' }}">Blog</a>
 
-            @if ($showsAccounting)
+            @if ($isOwner)
                 <div class="admin-nav-group admin-nav-group--end">
                     <button type="button" class="admin-nav-link admin-nav-trigger {{ $accountingActive ? 'active' : '' }}" data-nav-toggle aria-haspopup="true" aria-expanded="false">
                         Accounting
@@ -155,7 +156,7 @@
                 </div>
             @endif
 
-            <div class="admin-nav-group {{ $showsAccounting ? '' : 'admin-nav-group--end' }}">
+            <div class="admin-nav-group {{ $isOwner ? '' : 'admin-nav-group--end' }}">
                 <button type="button" class="admin-nav-link admin-nav-trigger {{ $systemActive ? 'active' : '' }}" data-nav-toggle aria-haspopup="true" aria-expanded="false">
                     System
                     <svg class="admin-nav-chevron" viewBox="0 0 24 24" width="11" height="11" aria-hidden="true">
@@ -165,6 +166,11 @@
                 <div class="admin-nav-menu admin-nav-menu--right" data-nav-menu hidden>
                     <a href="{{ route('admin.settings.index') }}" class="admin-nav-menu-item {{ request()->routeIs('admin.settings.*', 'admin.stripe.*') ? 'active' : '' }}">Settings</a>
                     <a href="{{ route('admin.activity') }}" class="admin-nav-menu-item {{ request()->routeIs('admin.activity') ? 'active' : '' }}">Activity</a>
+                    @if ($isOwner)
+                        {{-- Owner only, like the accounts: an archive holds every
+                             order and every customer's address. --}}
+                        <a href="{{ route('admin.backups.index') }}" class="admin-nav-menu-item {{ request()->routeIs('admin.backups.*') ? 'active' : '' }}">Backups</a>
+                    @endif
                     <a href="{{ route('admin.changelog') }}" class="admin-nav-menu-item {{ request()->routeIs('admin.changelog') ? 'active' : '' }}">Changelog</a>
                 </div>
             </div>

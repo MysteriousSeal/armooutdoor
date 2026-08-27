@@ -8274,3 +8274,153 @@ a.order-stepper-btn:focus-visible {
     background: color-mix(in srgb, #9dccab 12%, var(--surface));
     border-color: color-mix(in srgb, #9dccab 28%, var(--border));
 }
+
+/* The backups page. An archive is written while you wait, so the page says so
+   before the button is pressed rather than after. */
+.admin-backups-page .admin-list-hero-row {
+    align-items: flex-start;
+}
+
+.admin-backups-page .admin-order-actions {
+    padding-top: 0.15rem;
+}
+
+.backup-warning {
+    margin: 0 0 1.25rem;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: #8a6d1f;
+    background: #fbf3dc;
+    border: 1px solid #ecd9a3;
+}
+
+[data-theme='dark'] .backup-warning {
+    color: #e0b673;
+    background: color-mix(in srgb, #e0b673 12%, var(--surface));
+    border-color: color-mix(in srgb, #e0b673 32%, var(--border));
+}
+
+.backup-panel {
+    padding: 0.7rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.backup-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.backup-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 0.75rem 1rem;
+    padding: 0.95rem 1rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.backup-item.is-latest {
+    border-left: 2px solid var(--accent);
+    background: color-mix(in srgb, var(--accent) 7%, var(--surface));
+}
+
+.backup-item-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+}
+
+.backup-item-when {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+.backup-item-ago {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* The file name is an address, not prose: read character by character when
+   matching an archive against what is on someone's disk. */
+.backup-name {
+    display: block;
+    overflow: hidden;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.backup-item-size {
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.backup-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.4rem;
+    white-space: nowrap;
+}
+
+.admin-backups-page .btn-small {
+    height: 1.85rem;
+    min-width: 0;
+    padding: 0 0.7rem;
+    font-size: 0.75rem;
+}
+
+.backup-empty {
+    padding: 2rem 1.25rem;
+    text-align: center;
+    background: var(--surface);
+    border: 1px dashed var(--border);
+}
+
+.backup-empty .empty-state {
+    margin: 0;
+    color: var(--text-muted);
+}
+
+@media (max-width: 768px) {
+    .backup-item {
+        grid-template-columns: minmax(0, 1fr) auto;
+        row-gap: 0.7rem;
+    }
+
+    .backup-item-size {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .backup-actions {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+    }
+}
+
+.btn-small {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
+}
+
+/* Pressed once and working: the label says so, and a second press is refused
+   rather than starting a second archive. */
+[data-backup-submit]:disabled {
+    opacity: 0.65;
+    cursor: progress;
+}
