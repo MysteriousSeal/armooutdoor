@@ -30,6 +30,28 @@ if (! function_exists('format_person_name')) {
     }
 }
 
+if (! function_exists('format_bytes')) {
+    /**
+     * A file size a person can read: 145 MB rather than 152043520.
+     *
+     * Rounded to one decimal above a megabyte, none below: the exact byte
+     * count of a backup tells nobody anything.
+     */
+    function format_bytes(int $bytes): string
+    {
+        $units = ['B', 'kB', 'MB', 'GB', 'TB'];
+        $unit = 0;
+        $size = max(0, $bytes);
+
+        while ($size >= 1024 && $unit < count($units) - 1) {
+            $size /= 1024;
+            $unit++;
+        }
+
+        return number_format($size, $unit >= 2 ? 1 : 0, ',', ' ').' '.$units[$unit];
+    }
+}
+
 if (! function_exists('versioned_asset')) {
     /**
      * Appends the site version as a cache-busting query string, so a version
