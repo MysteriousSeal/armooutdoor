@@ -76,3 +76,34 @@
         });
     });
 })();
+
+// Attaching an invoice: the file picker is the whole control, so the form
+// sends as soon as a file is chosen rather than asking for a second click.
+//
+// Detaching asks first, and the confirmation is one dialog shared by every
+// row: the buttons carry the URL and the line to name.
+(function () {
+    'use strict';
+
+    document.querySelectorAll('[data-invoice-file]').forEach(function (input) {
+        input.addEventListener('change', function () {
+            if (input.files.length > 0) {
+                input.form.submit();
+            }
+        });
+    });
+
+    var deleteForm = document.getElementById('invoice-delete-form');
+    var deleteLabel = document.getElementById('invoice-delete-label');
+
+    if (!deleteForm) {
+        return;
+    }
+
+    document.querySelectorAll('[data-invoice-delete]').forEach(function (trigger) {
+        trigger.addEventListener('click', function () {
+            deleteForm.setAttribute('action', trigger.getAttribute('data-invoice-action'));
+            deleteLabel.textContent = trigger.getAttribute('data-invoice-label') || 'this line';
+        });
+    });
+})();

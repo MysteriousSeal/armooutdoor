@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -33,6 +34,9 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class AccountingController extends Controller
 {
+    /** Where attached invoices live on the private disk. */
+    private const INVOICE_DIRECTORY = 'accounting/invoices';
+
     /** The list of sales months. */
     public function sales(): View
     {
@@ -75,6 +79,9 @@ class AccountingController extends Controller
             // Which months have already been filed, so a year-end sweep shows
             // at a glance what is left to take out.
             'downloads' => $downloads = AccountingJournalDownload::latestByMonth($section),
+            // How much paperwork each month is still owed, so the list shows
+            // where the work is without opening every month.
+            'missingInvoices' => $this->missingInvoicesByMonth($section),
             'stale' => $this->staleMonths($section, $downloads),
         ];
     }
@@ -107,6 +114,31 @@ class AccountingController extends Controller
             ->mapWithKeys(fn (string $month): array => [
                 $month => (int) ($orders[$month] ?? 0) + (int) ($entries[$month] ?? 0),
             ]);
+    }
+
+    /**
+     * Invoices still owed, per month, keyed "2026-06".
+     *
+     * A purchase counts only when it names an invoice: a line with no number
+     * has no paper behind it, so it can never be brought to zero. Sales carry
+     * no supplier invoice at all and answer with nothing.
+     *
+     * @return Collection<string, int>
+     */
+    private function missingInvoicesByMonth(string $section): Collection
+    {
+        if ($section !== 'purchases') {
+            return collect();
+        }
+
+        return $this->countByMonth(
+            AccountingEntry::query()
+                ->section('purchases')
+                ->whereNotNull('invoice_number')
+                ->where('invoice_number', '!=', '')
+                ->whereNull('invoice_path'),
+            'entered_on',
+        );
     }
 
     /**
@@ -545,6 +577,86 @@ class AccountingController extends Controller
         return redirect()
             ->route('admin.accounting.'.$section.'.month', ['month' => AccountingPeriods::key($period)])
             ->with('status', 'Entry updated.');
+    }
+
+    /**
+     * Attaches the supplier's invoice to a purchase.
+     *
+     * The file goes to the private disk, never under public/: an accounting
+     * document is nobody's business but the owner's, and anything under
+     * public/ is readable by whoever guesses its name. Uploading again
+     * replaces what was there, and the old file is deleted rather than left
+     * behind.
+     */
+    public function storeInvoiceFile(Request $request, string $section, string $month, AccountingEntry $entry): RedirectResponse
+    {
+        $this->sectionPeriod($section, $month);
+
+        // Only purchases carry a supplier invoice: a sale has the one the shop
+        // issues itself. A line with no invoice number has no paper to attach,
+        // and the page offers nothing for it either.
+        abort_unless($section === 'purchases' && $entry->acceptsInvoiceFile(), 404);
+
+        $request->validate([
+            'invoice_file' => ['required', 'file', 'mimetypes:application/pdf', 'max:10240'],
+        ], [], ['invoice_file' => 'invoice']);
+
+        $previous = $entry->invoice_path;
+
+        $entry->update([
+            'invoice_path' => $request->file('invoice_file')->store(self::INVOICE_DIRECTORY),
+        ]);
+
+        if ($previous && $previous !== $entry->invoice_path) {
+            Storage::delete($previous);
+        }
+
+        return $this->backToMonth($section, $month, 'Invoice attached.');
+    }
+
+    /** Detaches an invoice and removes the file. */
+    public function destroyInvoiceFile(string $section, string $month, AccountingEntry $entry): RedirectResponse
+    {
+        $this->sectionPeriod($section, $month);
+
+        abort_unless($section === 'purchases' && $entry->section === 'purchases', 404);
+
+        if ($entry->invoice_path) {
+            Storage::delete($entry->invoice_path);
+            $entry->update(['invoice_path' => null]);
+        }
+
+        return $this->backToMonth($section, $month, 'Invoice removed.');
+    }
+
+    /**
+     * Serves an attached invoice, in the browser rather than as a download.
+     *
+     * The file has no public URL at all; it is read off the private disk and
+     * handed over here, behind the same owner-only door as the rest of the
+     * accounts. `inline` opens it in the tab; the name follows the purchase
+     * so a copy saved from the viewer still says what it is.
+     */
+    public function showInvoiceFile(string $section, string $month, AccountingEntry $entry): Response
+    {
+        $this->sectionPeriod($section, $month);
+
+        abort_unless($section === 'purchases' && $entry->section === 'purchases', 404);
+        abort_unless($entry->invoice_path && Storage::exists($entry->invoice_path), 404);
+
+        return response(Storage::get($entry->invoice_path), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="'.$entry->invoiceFileName().'"',
+            // The file is one owner's paperwork: no cache anywhere but here.
+            'Cache-Control' => 'private, no-store',
+        ]);
+    }
+
+    private function backToMonth(string $section, string $month, string $status): RedirectResponse
+    {
+        return redirect()
+            ->route('admin.accounting.'.$section.'.month', ['month' => $month])
+            ->with('status', $status);
     }
 
     /** Removes an entry. Orders are never touched here, only hand-written lines. */
