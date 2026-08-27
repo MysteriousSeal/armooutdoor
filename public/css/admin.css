@@ -8235,3 +8235,42 @@ a.order-stepper-btn:focus-visible {
 [data-theme='dark'] .accounting-missing-card.is-complete .accounting-missing-none {
     color: #9dccab;
 }
+
+/* What a month still owes the file, beside its name. Amber, and never wider
+   than the figure it holds: the name stays the thing being read. */
+.accounting-month-owed {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.3rem;
+    height: 1.3rem;
+    margin-left: 0.35rem;
+    padding: 0 0.3rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    vertical-align: 0.08em;
+    color: #8a6d1f;
+    background: #fbf3dc;
+    border: 1px solid #ecd9a3;
+}
+
+/* Nothing owed: a tick in the same footprint, so the row does not shift when
+   a month is finished. */
+.accounting-month-owed.is-complete {
+    color: #3d6b4e;
+    background: #eef4ef;
+    border-color: #d5e4d8;
+}
+
+[data-theme='dark'] .accounting-month-owed {
+    color: #e0b673;
+    background: color-mix(in srgb, #e0b673 12%, var(--surface));
+    border-color: color-mix(in srgb, #e0b673 32%, var(--border));
+}
+
+[data-theme='dark'] .accounting-month-owed.is-complete {
+    color: #9dccab;
+    background: color-mix(in srgb, #9dccab 12%, var(--surface));
+    border-color: color-mix(in srgb, #9dccab 28%, var(--border));
+}

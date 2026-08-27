@@ -40,7 +40,29 @@
                                 href="{{ route('admin.accounting.'.$section.'.month', ['month' => $monthKey]) }}"
                                 class="accounting-month {{ $isCurrent ? 'is-current' : '' }}"
                             >
-                                <span class="accounting-month-name">{{ $month->locale('en')->isoFormat('MMMM') }}</span>
+                                <span class="accounting-month-name">
+                                    {{ $month->locale('en')->isoFormat('MMMM') }}
+                                    {{-- What the month still owes the file, beside its
+                                         name: the list then shows where the work is
+                                         without opening every month. A month with
+                                         nothing in it has nothing to owe. --}}
+                                    @if ($section === 'purchases' && $entries > 0)
+                                        @php($owed = (int) ($missingInvoices[$monthKey] ?? 0))
+                                        @if ($owed > 0)
+                                            <span class="accounting-month-owed" title="{{ trans_choice('{1}:count invoice still to attach|[2,*]:count invoices still to attach', $owed, ['count' => $owed]) }}">
+                                                {{ $owed }}
+                                                <span class="sr-only">{{ trans_choice('{1}invoice missing|[2,*]invoices missing', $owed) }}</span>
+                                            </span>
+                                        @else
+                                            <span class="accounting-month-owed is-complete" title="Every invoice attached">
+                                                <svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true">
+                                                    <path d="m5 13 4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
+                                                <span class="sr-only">Every invoice attached</span>
+                                            </span>
+                                        @endif
+                                    @endif
+                                </span>
                                 <span class="accounting-month-meta">
                                     {{-- The count rather than the month key: it is what
                                          you look for before opening. The current month

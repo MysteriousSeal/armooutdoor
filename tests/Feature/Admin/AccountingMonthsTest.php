@@ -39,8 +39,12 @@ class AccountingMonthsTest extends TestCase
         $html = $this->list();
 
         // The month that has just closed stays at the top rather than
-        // dropping a row each month.
-        $this->assertLessThan(strpos($html, '>January<'), strpos($html, '>August<'));
+        // dropping a row each month. The name no longer ends its element —
+        // a marker can follow it — so the match allows for that.
+        $this->assertLessThan(
+            preg_match('/accounting-month-name">\s*January/', $html, $m, PREG_OFFSET_CAPTURE) ? $m[0][1] : PHP_INT_MAX,
+            preg_match('/accounting-month-name">\s*August/', $html, $a, PREG_OFFSET_CAPTURE) ? $a[0][1] : PHP_INT_MAX,
+        );
     }
 
     public function test_a_new_month_appears_on_the_first(): void

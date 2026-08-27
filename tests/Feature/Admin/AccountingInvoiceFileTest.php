@@ -262,4 +262,113 @@ class AccountingInvoiceFileTest extends TestCase
             ->assertSee('All attached')
             ->assertSee('is-complete', false);
     }
+
+    public function test_the_month_list_says_how_many_invoices_a_month_owes(): void
+    {
+        $this->entry(['invoice_number' => 'F-1']);
+        $this->entry(['invoice_number' => 'F-2']);
+        $attached = $this->entry(['invoice_number' => 'F-3']);
+        // No number, so nothing to owe on that line.
+        $this->entry(['invoice_number' => null]);
+        $this->upload($attached);
+
+        $html = $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/accounting/purchases')
+            ->assertOk()
+            ->getContent();
+
+        // Two lines still owe their PDF, beside the month's own name.
+        $this->assertMatchesRegularExpression(
+            '#accounting-month-name">\s*June.*?accounting-month-owed[^>]*>\s*2#s',
+            $html
+        );
+    }
+
+    public function test_a_month_with_every_invoice_on_file_shows_a_tick(): void
+    {
+        $entry = $this->entry();
+        $this->upload($entry);
+
+        $html = $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/accounting/purchases')
+            ->assertOk()
+            ->getContent();
+
+        $this->assertMatchesRegularExpression(
+            '#accounting-month-name">\s*June.*?accounting-month-owed is-complete#s',
+            $html
+        );
+    }
+
+    public function test_an_empty_month_is_marked_neither_way(): void
+    {
+        $this->entry();
+
+        $html = $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/accounting/purchases')
+            ->assertOk()
+            ->getContent();
+
+        // Only June holds anything: a month with no line owes nothing and
+        // claims nothing.
+        $this->assertSame(1, substr_count($html, 'accounting-month-owed'));
+    }
+
+    public function test_the_sales_list_carries_no_such_marker(): void
+    {
+        $this->entry(['section' => 'sales', 'type' => 'prestation']);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/accounting/sales')
+            ->assertOk()
+            // A sale has no supplier invoice to be owed.
+            ->assertDontSee('accounting-month-owed', false);
+    }
+
+    public function test_detaching_asks_before_it_deletes(): void
+    {
+        $entry = $this->entry();
+        $this->upload($entry);
+
+        $html = $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/accounting/purchases/2026-06')
+            ->assertOk()
+            ->getContent();
+
+        // The × opens the shared dialog rather than sending straight away.
+        $this->assertStringContainsString('data-modal-open="invoice-delete-modal"', $html);
+        $this->assertStringContainsString('<dialog id="invoice-delete-modal"', $html);
+        $this->assertStringContainsString('Remove this invoice?', $html);
+        // It names the line, and says the purchase itself survives.
+        $this->assertStringContainsString('data-invoice-label="FV-26005188"', $html);
+        $this->assertStringContainsString('The purchase itself stays on the month.', $html);
+
+        // The URL travels on the button; the form is aimed at it on opening.
+        $this->assertMatchesRegularExpression(
+            '#data-invoice-action="[^"]*/entries/'.$entry->id.'/invoice"#',
+            $html
+        );
+    }
+
+    public function test_the_dialog_appears_only_where_something_is_attached(): void
+    {
+        $this->entry();
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/accounting/purchases/2026-06')
+            ->assertOk()
+            ->assertDontSee('data-invoice-delete', false);
+    }
+
+    public function test_a_line_without_a_number_names_its_date_instead(): void
+    {
+        $entry = $this->entry(['invoice_number' => 'F-9']);
+        $this->upload($entry);
+        $entry->update(['invoice_number' => null]);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/accounting/purchases/2026-06')
+            ->assertOk()
+            ->assertSee('data-invoice-label="10/06/2026"', false);
+    }
 }

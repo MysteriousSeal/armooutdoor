@@ -114,15 +114,19 @@
                                             </svg>
                                             PDF
                                         </a>
-                                        <form
-                                            method="POST"
-                                            action="{{ route('admin.accounting.entries.invoice.destroy', ['section' => 'purchases', 'month' => $monthKey, 'entry' => $entry]) }}"
-                                            class="accounting-invoice-form"
-                                        >
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="accounting-invoice-detach" title="Remove this invoice" aria-label="Remove the invoice attached to this line">&times;</button>
-                                        </form>
+                                        {{-- Asks first: a detached invoice is gone from
+                                             the disk, and the paper may not be
+                                             anywhere else. --}}
+                                        <button
+                                            type="button"
+                                            class="accounting-invoice-detach"
+                                            data-modal-open="invoice-delete-modal"
+                                            data-invoice-delete
+                                            data-invoice-action="{{ route('admin.accounting.entries.invoice.destroy', ['section' => 'purchases', 'month' => $monthKey, 'entry' => $entry]) }}"
+                                            data-invoice-label="{{ $entry->invoice_number ?: $entry->entered_on->format('d/m/Y') }}"
+                                            title="Remove this invoice"
+                                            aria-label="Remove the invoice attached to this line"
+                                        >&times;</button>
                                     @elseif ($entry->acceptsInvoiceFile())
                                         {{-- A label rather than a button: the file
                                              picker is the input itself, and the form
@@ -197,7 +201,24 @@
         </p>
     @endif
 
-    @include('admin.accounting.partials.entry-modal', [
+    {{-- Detaching an invoice asks first, like every other removal in the admin. --}}
+<dialog id="invoice-delete-modal" class="modal" aria-labelledby="invoice-delete-title">
+    <form method="POST" id="invoice-delete-form">
+        @csrf
+        @method('DELETE')
+        <h3 class="modal-title" id="invoice-delete-title">Remove this invoice?</h3>
+        <p class="modal-body">
+            The invoice attached to <span id="invoice-delete-label"></span> will be deleted.
+            The purchase itself stays on the month.
+        </p>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+            <button type="submit" class="btn btn-danger">Remove</button>
+        </div>
+    </form>
+</dialog>
+
+@include('admin.accounting.partials.entry-modal', [
         'section' => 'purchases',
         'monthKey' => $monthKey,
         'period' => $period,

@@ -79,6 +79,9 @@ class AccountingController extends Controller
             // Which months have already been filed, so a year-end sweep shows
             // at a glance what is left to take out.
             'downloads' => $downloads = AccountingJournalDownload::latestByMonth($section),
+            // How much paperwork each month is still owed, so the list shows
+            // where the work is without opening every month.
+            'missingInvoices' => $this->missingInvoicesByMonth($section),
             'stale' => $this->staleMonths($section, $downloads),
         ];
     }
@@ -111,6 +114,31 @@ class AccountingController extends Controller
             ->mapWithKeys(fn (string $month): array => [
                 $month => (int) ($orders[$month] ?? 0) + (int) ($entries[$month] ?? 0),
             ]);
+    }
+
+    /**
+     * Invoices still owed, per month, keyed "2026-06".
+     *
+     * A purchase counts only when it names an invoice: a line with no number
+     * has no paper behind it, so it can never be brought to zero. Sales carry
+     * no supplier invoice at all and answer with nothing.
+     *
+     * @return Collection<string, int>
+     */
+    private function missingInvoicesByMonth(string $section): Collection
+    {
+        if ($section !== 'purchases') {
+            return collect();
+        }
+
+        return $this->countByMonth(
+            AccountingEntry::query()
+                ->section('purchases')
+                ->whereNotNull('invoice_number')
+                ->where('invoice_number', '!=', '')
+                ->whereNull('invoice_path'),
+            'entered_on',
+        );
     }
 
     /**
