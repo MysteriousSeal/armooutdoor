@@ -176,6 +176,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/products/create', [AdminProductController::class, 'create'])->name('products.create');
         Route::post('/products', [AdminProductController::class, 'store'])->name('products.store');
         Route::get('/products/{product}/edit', [AdminProductController::class, 'edit'])->name('products.edit');
+        // The cover as a JPEG: the shop stores WebP, which no marketplace form
+        // or supplier wants.
+        Route::get('/products/{product}/cover.jpg', [AdminProductController::class, 'coverImage'])->name('products.cover');
         Route::get('/products/{product}/stock-history', [AdminProductController::class, 'stockHistory'])->name('products.stock-history');
         // One label per article: a plain product, or one variant of a product
         // that has them.

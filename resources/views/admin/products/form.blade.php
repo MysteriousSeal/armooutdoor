@@ -39,7 +39,25 @@
             <div class="admin-order-create-grid">
                 <div class="order-main">
                     <section class="order-panel">
-                        <h3 class="order-panel-title">Images</h3>
+                        <div class="admin-panel-head">
+                            <h3 class="order-panel-title">Images</h3>
+                            @if ($hasMainImage)
+                                {{-- The cover as a JPEG, converted on the way out:
+                                     the shop stores WebP, which no marketplace form
+                                     or supplier wants. --}}
+                                <a
+                                    href="{{ route('admin.products.cover', $product) }}"
+                                    class="btn btn-secondary btn-small"
+                                    title="Download the cover, full size, as a JPEG"
+                                >
+                                    <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                                        <path d="M12 4v11m0 0-4-4m4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Cover as JPG
+                                </a>
+                            @endif
+                        </div>
                         <p class="form-hint">Drag tiles to reorder — the first is the cover shown across the shop. Drop more below.</p>
 
                         <div

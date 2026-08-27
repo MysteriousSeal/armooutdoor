@@ -32,6 +32,9 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProductController extends Controller
 {
+    /** Enough for a marketplace listing without doubling the file. */
+    private const COVER_JPEG_QUALITY = 90;
+
     private const SORTS = ['id-asc', 'id-desc', 'name-asc', 'name-desc', 'stock-asc', 'stock-desc', 'supplier-asc', 'supplier-desc', 'price-asc', 'price-desc'];
 
     private const DEFAULT_SORT = 'id-desc';
@@ -280,6 +283,43 @@ class ProductController extends Controller
      * ni paiement, et celui qui réceptionne la marchandise est justement
      * celui qui a besoin de la relire.
      */
+    /**
+     * The cover image as a JPEG, converted on the way out.
+     *
+     * The shop stores WebP, which is right for a browser and wrong for
+     * everywhere else — a marketplace form, a supplier, a printer. The file
+     * on disk is left alone: this is a copy made for the download and thrown
+     * away with the response.
+     */
+    public function coverImage(Product $product): Response
+    {
+        $source = $product->image !== '' ? public_path('images/'.$product->image) : null;
+
+        abort_if($source === null || ! is_file($source), 404);
+
+        $image = @imagecreatefromstring((string) file_get_contents($source));
+
+        abort_if($image === false, 404);
+
+        // A JPEG has no transparency: anything see-through would come out
+        // black without a ground of its own.
+        $flattened = imagecreatetruecolor(imagesx($image), imagesy($image));
+        imagefill($flattened, 0, 0, imagecolorallocate($flattened, 255, 255, 255));
+        imagecopy($flattened, $image, 0, 0, 0, 0, imagesx($image), imagesy($image));
+
+        ob_start();
+        imagejpeg($flattened, null, self::COVER_JPEG_QUALITY);
+        $jpeg = (string) ob_get_clean();
+
+        imagedestroy($image);
+        imagedestroy($flattened);
+
+        return response($jpeg, 200, [
+            'Content-Type' => 'image/jpeg',
+            'Content-Disposition' => 'attachment; filename="'.$product->slug.'.jpg"',
+        ]);
+    }
+
     public function stockHistory(Request $request, Product $product): View
     {
         $product->load('variants');

@@ -8424,3 +8424,24 @@ a.order-stepper-btn:focus-visible {
     opacity: 0.65;
     cursor: progress;
 }
+
+/* A panel's title and the one action that belongs to it, on one line: the
+   button sits with what it acts on rather than at the far end of the form. */
+.admin-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.35rem;
+}
+
+.admin-panel-head .order-panel-title {
+    margin-bottom: 0;
+}
+
+.admin-panel-head .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex-shrink: 0;
+}
