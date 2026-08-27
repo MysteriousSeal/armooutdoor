@@ -202,11 +202,21 @@ class ProductController extends Controller
         // with a gap in it is not a label.
         abort_unless($product->labelIsPrintable($variant), 404);
 
+        // The wording lives on the product, so every size says the same thing.
+        // The variant is the one part that differs, and it is named on the
+        // subtitle: two labels from the same product are otherwise identical
+        // to the eye, and the reference under them is easy to misread.
+        $subtitle = $product->label?->subtitle;
+
+        if ($variant !== null) {
+            // The trim carries the edge cases: a variant with no attributes to
+            // name, or a product whose subtitle is empty, leaves no stray dash.
+            $subtitle = trim($subtitle.' - '.$variant->label(), ' -');
+        }
+
         $pdf = Pdf::loadView('admin.products.label-pdf', [
-            // The wording lives on the product: every size says the same
-            // thing, only the reference and the barcode differ.
             'title' => $product->label?->title,
-            'subtitle' => $product->label?->subtitle,
+            'subtitle' => $subtitle,
             'composition' => $product->label?->composition,
             'mention' => $product->label?->mention,
             'sku' => $article->sku,

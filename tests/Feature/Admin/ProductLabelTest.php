@@ -349,4 +349,104 @@ class ProductLabelTest extends TestCase
         $this->assertStringContainsString(now()->format('Y-m-d'), $drawn);
         $this->assertStringNotContainsString(now()->format('d/m/Y'), $drawn);
     }
+
+    /** A variant carrying attributes, as the catalogue really stores them. */
+    private function variantWithAttributes(Product $product, array $attributes, string $sku, string $gtin): ProductVariant
+    {
+        return ProductVariant::query()->create([
+            'product_id' => $product->id,
+            'attribute_values' => $attributes,
+            'sku' => $sku,
+            'gtin' => $gtin,
+            'quantity' => 1,
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+    }
+
+    /** The subtitle as it reaches the PDF, for one article. */
+    private function subtitleOf(Product $product, ?ProductVariant $variant = null): string
+    {
+        $url = '/admin/products/'.$product->id
+            .($variant ? '/variants/'.$variant->id : '')
+            .'/label';
+
+        $pdf = $this->actingAs(User::factory()->admin()->create())->get($url)->assertOk()->getContent();
+
+        // The wording is read back out of the produced PDF rather than out of
+        // the controller: what is printed is what matters.
+        return $this->textOf($pdf);
+    }
+
+    /**
+     * The words a PDF prints, flattened.
+     *
+     * The page is a compressed stream of drawing operations; the text sits in
+     * `[(…)] TJ` runs, two bytes per glyph. Spaces are dropped so the
+     * assertions do not depend on how the words were laid out.
+     */
+    private function textOf(string $pdf): string
+    {
+        $text = '';
+
+        foreach (explode('stream', $pdf) as $chunk) {
+            $inflated = @gzuncompress(ltrim($chunk, "\r\n"));
+
+            if ($inflated === false) {
+                continue;
+            }
+
+            preg_match_all('/\[\((.*?)\)\]\s*TJ/s', $inflated, $runs);
+            $text .= implode('', $runs[1]);
+        }
+
+        // The label prints its wording in capitals, so the comparison is made
+        // on capitals too rather than on how it was typed.
+        return mb_strtoupper(str_replace(["\x00", ' '], '', $text));
+    }
+
+    public function test_a_variant_label_names_the_variant_in_its_subtitle(): void
+    {
+        $product = Product::factory()->labelled(['title' => 'T-shirt', 'subtitle' => 'Respirant'])->create(['sku' => null, 'gtin' => null]);
+        $variant = $this->variantWithAttributes($product, [['label' => 'Taille', 'value' => 'M']], 'ARM-TSHIRT-M', '5901234123457');
+
+        // Two sizes of one product print the same words otherwise, and the
+        // reference underneath is easy to misread.
+        $this->assertStringContainsString('RESPIRANT-M', $this->subtitleOf($product, $variant));
+    }
+
+    public function test_a_product_without_variants_keeps_its_subtitle_alone(): void
+    {
+        $product = Product::factory()->labelled(['title' => 'Tente 2 places', 'subtitle' => 'Verte'])->create(['sku' => 'ARM-TENT-2P-GRN', 'gtin' => '4006381333931']);
+
+        $printed = $this->subtitleOf($product);
+
+        $this->assertStringContainsString('VERTE', $printed);
+        $this->assertStringNotContainsString('VERTE-', $printed);
+    }
+
+    public function test_a_variant_with_two_attributes_names_both(): void
+    {
+        $product = Product::factory()->labelled(['title' => 'T-shirt', 'subtitle' => 'Respirant'])->create(['sku' => null, 'gtin' => null]);
+
+        $variant = $this->variantWithAttributes($product, [
+            ['label' => 'Couleur', 'value' => 'Blanc'],
+            ['label' => 'Taille', 'value' => 'M'],
+        ], 'ARM-TSHIRT-WHT-M', '5901234123457');
+
+        // Otherwise two variants differing only by colour print alike.
+        $this->assertStringContainsString('RESPIRANT-BLANC/M', $this->subtitleOf($product, $variant));
+    }
+
+    public function test_a_variant_naming_nothing_leaves_no_stray_dash(): void
+    {
+        $product = Product::factory()->labelled(['title' => 'T-shirt', 'subtitle' => 'Respirant'])->create(['sku' => null, 'gtin' => null]);
+        // No attributes to name: the label reads as it would without a variant.
+        $variant = $this->variant($product, 'ARM-TSHIRT-M', '5901234123457');
+
+        $printed = $this->subtitleOf($product, $variant);
+
+        $this->assertStringContainsString('RESPIRANT', $printed);
+        $this->assertStringNotContainsString('RESPIRANT-', $printed);
+    }
 }
