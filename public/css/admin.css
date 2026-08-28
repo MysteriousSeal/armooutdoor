@@ -8633,6 +8633,23 @@ a.order-stepper-btn:focus-visible {
     color: var(--text-muted);
 }
 
+.admin-review-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.admin-review-view {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.admin-review-view svg {
+    flex-shrink: 0;
+    opacity: 0.75;
+}
+
 @media (max-width: 640px) {
     .admin-review-stats {
         grid-template-columns: 1fr 1fr;

@@ -140,8 +140,22 @@
                             @endif
                         </div>
 
-                        @if (auth()->user()->isOwner())
-                            <div class="admin-review-actions">
+                        <div class="admin-review-actions">
+                            @if ($product)
+                                {{-- Straight to the review's own section of the page, not the top of it. --}}
+                                <a
+                                    href="{{ route('products.show', $product) }}#product-reviews-title"
+                                    class="btn btn-sm btn-secondary admin-review-view"
+                                    target="_blank"
+                                    rel="noopener"
+                                >
+                                    View in shop
+                                    <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                                        <path d="M14 5h5v5M19 5l-8 8M9 5H6.5A1.5 1.5 0 0 0 5 6.5v11A1.5 1.5 0 0 0 6.5 19h11a1.5 1.5 0 0 0 1.5-1.5V15" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </a>
+                            @endif
+                            @if (auth()->user()->isOwner())
                                 <button type="button" class="btn btn-sm btn-secondary" data-modal-open="review-delete-{{ $review->id }}">Delete</button>
                                 <dialog id="review-delete-{{ $review->id }}" class="modal" aria-labelledby="review-delete-{{ $review->id }}-title">
                                     <form method="POST" action="{{ route('admin.reviews.destroy', $review) }}">
@@ -157,8 +171,8 @@
                                         </div>
                                     </form>
                                 </dialog>
-                            </div>
-                        @endif
+                            @endif
+                        </div>
                     </li>
                 @endforeach
             </ul>

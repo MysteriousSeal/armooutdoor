@@ -101,6 +101,19 @@ class AdminReviewTest extends TestCase
         $this->assertDatabaseHas('admin_activity_logs', ['action' => 'review.deleted']);
     }
 
+    public function test_each_review_links_to_its_product_on_the_shop(): void
+    {
+        $product = Product::factory()->create();
+        $this->reviewFor($product);
+
+        // Every admin gets the link, not just the owner: reading the shop
+        // isn't a destructive act.
+        $this->actingAs(User::factory()->staffAdmin()->create())
+            ->get('/admin/reviews')
+            ->assertOk()
+            ->assertSee(route('products.show', $product).'#product-reviews-title');
+    }
+
     public function test_a_staff_admin_can_read_but_not_delete(): void
     {
         $review = $this->reviewFor(Product::factory()->create());
