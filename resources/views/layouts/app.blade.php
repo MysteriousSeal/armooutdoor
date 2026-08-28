@@ -84,13 +84,13 @@
                         <span>{{ __('store.nav_categories') }}</span>
                     </button>
                     <nav class="sort-tabs" aria-label="{{ __('store.footer_shop') }}">
-                        <a href="{{ route('products.new-arrivals') }}" class="sort-tab {{ request()->routeIs('products.new-arrivals') ? 'active' : '' }}">
+                        <a href="{{ route('products.new-arrivals') }}" class="sort-tab sort-tab--in-menu-on-mobile {{ request()->routeIs('products.new-arrivals') ? 'active' : '' }}">
                             {{ __('store.footer_shop_new') }}
                         </a>
-                        <a href="{{ route('products.promotions') }}" class="sort-tab {{ request()->routeIs('products.promotions') ? 'active' : '' }}">
+                        <a href="{{ route('products.promotions') }}" class="sort-tab sort-tab--in-menu-on-mobile {{ request()->routeIs('products.promotions') ? 'active' : '' }}">
                             {{ __('store.footer_shop_promotions') }}
                         </a>
-                        <a href="{{ route('products.best-sellers') }}" class="sort-tab {{ request()->routeIs('products.best-sellers') ? 'active' : '' }}">
+                        <a href="{{ route('products.best-sellers') }}" class="sort-tab sort-tab--in-menu-on-mobile {{ request()->routeIs('products.best-sellers') ? 'active' : '' }}">
                             {{ __('store.footer_shop_best_sellers') }}
                         </a>
                         <a href="{{ route('blog.index') }}" class="sort-tab {{ request()->routeIs('blog.*') ? 'active' : '' }}">
@@ -194,6 +194,17 @@
                     </section>
                 @endforeach
             </div>
+            <nav class="site-cat-menu-shortcuts" aria-label="{{ __('store.footer_shop') }}">
+                <a href="{{ route('products.new-arrivals') }}" class="{{ request()->routeIs('products.new-arrivals') ? 'is-active' : '' }}">
+                    {{ __('store.footer_shop_new') }}
+                </a>
+                <a href="{{ route('products.promotions') }}" class="{{ request()->routeIs('products.promotions') ? 'is-active' : '' }}">
+                    {{ __('store.footer_shop_promotions') }}
+                </a>
+                <a href="{{ route('products.best-sellers') }}" class="{{ request()->routeIs('products.best-sellers') ? 'is-active' : '' }}">
+                    {{ __('store.footer_shop_best_sellers') }}
+                </a>
+            </nav>
             <div class="site-cat-menu-footer">
                 <a href="{{ route('categories.index') }}">{{ __('store.see_all_categories') }}</a>
             </div>
