@@ -4547,6 +4547,10 @@ body.has-menu-open {
         display: none;
     }
 
+    .sort-tabs {
+        justify-content: flex-end;
+    }
+
     .site-cat-menu-shortcuts {
         display: grid;
     }
