@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-28 — v0.27.0 — build PT7XEW
+
+### Storefront
+
+- **The forgot-password form stops answering questions nobody should ask it.** It used to say "impossible d'envoyer" for an address without an account — and its cooldown only ever fired for addresses *with* one, so either message told a prober which emails are registered here. Unknown and known addresses now get the same neutral answer, and the one-per-minute cooldown is keyed on the address as typed rather than on the broker's table of real accounts, so the two cases are indistinguishable at every step. A retry inside the cooldown says a link is already on its way instead of pretending failure.
+
+  The form also stopped reloading the page: it asks over AJAX with a small spinner in the button, confirms with the site's usual toast, shows cooldown and rate-limit answers inline under the field, and locks itself once the link is sent. If JavaScript is broken it falls back to the plain form post rather than dead-ending.
+
+- **The reset form no longer knows your email.** The link in the email used to carry the address in its URL — lingering in browser history and server logs — and the form displayed it and sent it back with the new password, making the token only half the secret. The link now carries the token alone; the server works out whose it is by checking the hash against the broker's open resets, and the form shows nothing but two password fields.
+
 ## 2026-08-28 — v0.26.0 — build GFF5VT
 
 ### Admin
