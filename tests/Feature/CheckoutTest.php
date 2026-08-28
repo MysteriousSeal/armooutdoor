@@ -76,6 +76,23 @@ class CheckoutTest extends TestCase
         $this->assertStringContainsString('disabled', $paypalCard);
     }
 
+    public function test_card_is_shown_but_disabled_with_a_soon_badge(): void
+    {
+        $user = User::factory()->create();
+        $product = Product::query()->where('slug', 'ridge-tent')->firstOrFail();
+
+        $this->actingAs($user)
+            ->post('/cart', ['product_id' => $product->id, 'quantity' => 1]);
+
+        $response = $this->actingAs($user)->get('/checkout');
+
+        $response->assertOk()
+            ->assertSee('Bientôt disponible');
+
+        $cardCard = Str::before(Str::after($response->getContent(), 'value="card"'), '</label>');
+        $this->assertStringContainsString('disabled', $cardCard);
+    }
+
     public function test_checkout_shows_a_notice_after_a_canceled_stripe_payment(): void
     {
         $user = User::factory()->create();

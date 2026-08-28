@@ -417,12 +417,13 @@
                                 name="payment_method"
                                 value="card"
                                 form="checkout-form"
-                                @checked($selectedPaymentMethod === 'card')
+                                disabled
                             >
                             <span class="choice-card-body">
                                 <span class="choice-card-title">
                                     <img src="{{ asset('images/payments/cb.png') }}" alt="" class="carrier-logo">
                                     {{ __('store.payment_card') }}
+                                    <span class="choice-card-badge">{{ __('store.payment_card_soon') }}</span>
                                 </span>
                                 <span class="choice-card-meta">{{ __('store.payment_card_lede') }}</span>
                             </span>

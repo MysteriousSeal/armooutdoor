@@ -300,6 +300,7 @@ return [
     'payment_section' => 'Paiement',
     'payment_card' => 'Carte bancaire',
     'payment_card_lede' => 'Visa, Mastercard et autres cartes.',
+    'payment_card_soon' => 'Bientôt disponible',
     'payment_paypal' => 'PayPal',
     'payment_paypal_lede' => 'Payez avec votre compte PayPal.',
     'payment_paypal_soon' => 'Bientôt disponible',
