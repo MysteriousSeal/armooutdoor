@@ -2,17 +2,27 @@
     var toggle = document.getElementById('site-menu-toggle');
     var panel = document.getElementById('site-cat-menu');
     var subheader = document.getElementById('site-subheader');
+    var closeBtn = document.getElementById('site-cat-menu-close');
 
     if (!toggle || !panel) {
         return;
     }
 
-    function setOpen(isOpen) {
-        if (isOpen && subheader) {
-            // Pins the panel to where the subheader actually sits right now
-            // rather than assuming it — that bottom edge moves depending on
-            // whether the page is scrolled and the sticky bar has caught up.
+    function measureTop() {
+        if (subheader) {
             panel.style.setProperty('--cat-menu-top', subheader.getBoundingClientRect().bottom + 'px');
+        }
+    }
+
+    function setOpen(isOpen) {
+        if (isOpen) {
+            // iOS Safari's address bar can still be mid-transition right
+            // when this fires, which throws the measurement off — a second
+            // pass next frame, once that's settled, corrects it in
+            // practice. The in-panel close button is the guaranteed
+            // fallback for whatever this doesn't catch.
+            measureTop();
+            requestAnimationFrame(measureTop);
         }
 
         panel.hidden = !isOpen;
@@ -24,6 +34,14 @@
         event.stopPropagation();
         setOpen(panel.hidden);
     });
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function (event) {
+            event.stopPropagation();
+            setOpen(false);
+            toggle.focus();
+        });
+    }
 
     document.addEventListener('click', function (event) {
         if (panel.hidden) {

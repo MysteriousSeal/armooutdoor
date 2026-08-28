@@ -10,6 +10,7 @@ return [
     'search_label' => 'Rechercher',
     'theme_toggle' => 'Activer le mode sombre',
     'menu_toggle' => 'Ouvrir le menu des catégories',
+    'menu_close' => 'Fermer le menu',
     'hero_kicker' => 'Boutique',
     'hero_title' => 'Du matériel pour le stand et le terrain',
     'hero_text' => 'Cibles, entretien, vêtements et petit matériel. Livraison à domicile ou en point relais.',

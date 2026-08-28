@@ -16,6 +16,22 @@
             }
         })();
     </script>
+    <script>
+        (function () {
+            // The mobile category menu's close button only exists for this
+            // browser: iOS Safari's own address bar can collapse/expand
+            // independently of our layout measurements and occasionally
+            // covers the menu's regular toggle button, with no other way
+            // left to close it. Every other browser doesn't need the
+            // button, so it stays out of their way.
+            var ua = navigator.userAgent;
+            var isIOS = /iPad|iPhone|iPod/.test(ua);
+            var isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
+            if (isIOS && isSafari) {
+                document.documentElement.classList.add('is-safari-ios');
+            }
+        })();
+    </script>
     <title>@yield('title', config('app.name'))</title>
     <meta name="description" content="@yield('meta_description', __('store.meta_home'))">
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
@@ -194,6 +210,14 @@
                 : ($routeProduct instanceof \App\Models\Product ? $routeProduct->category : null);
         @endphp
         <div class="site-cat-menu" id="site-cat-menu" hidden>
+            <button
+                type="button"
+                class="site-cat-menu-close"
+                id="site-cat-menu-close"
+                aria-label="{{ __('store.menu_close') }}"
+            >
+                @include('partials.icon', ['name' => 'xmark', 'size' => 18])
+            </button>
             <nav class="site-cat-menu-shortcuts" aria-label="{{ __('store.footer_shop') }}">
                 <a href="{{ route('products.new-arrivals') }}" class="{{ request()->routeIs('products.new-arrivals') ? 'is-active' : '' }}">
                     {{ __('store.footer_shop_new') }}

@@ -361,6 +361,10 @@ body.has-menu-open {
     padding: 0 1.5rem 1.15rem;
 }
 
+.site-cat-menu-close {
+    display: none;
+}
+
 .site-cat-menu-footer a {
     font-size: 0.75rem;
     font-weight: 700;
@@ -4677,12 +4681,46 @@ body.has-menu-open {
         display: grid;
     }
 
+    /* Clears the fixed close button pinned over this corner, iOS Safari only. */
+    html.is-safari-ios .site-cat-menu-shortcuts {
+        padding-top: 3.75rem;
+    }
+
     .site-cat-menu {
         position: fixed;
         top: var(--cat-menu-top, 4.5rem);
         bottom: 0;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
+    }
+
+    /*
+     * Fixed to the viewport, not the scrolling panel, and independent of the
+     * hamburger toggle button on purpose: this is the guaranteed fallback
+     * if the panel ever mispositions itself on iOS Safari and ends up
+     * covering that button. Scoped to html.is-safari-ios (set in
+     * layouts/app.blade.php's <head>) since no other browser needs it.
+     */
+    html.is-safari-ios .site-cat-menu-close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        top: calc(var(--cat-menu-top, 4.5rem) + 0.75rem);
+        right: 1rem;
+        z-index: 130;
+        width: 2.4rem;
+        height: 2.4rem;
+        padding: 0;
+        color: var(--text-muted);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        cursor: pointer;
+    }
+
+    .site-cat-menu-close:hover {
+        color: var(--text);
+        border-color: var(--accent);
     }
 }
 
