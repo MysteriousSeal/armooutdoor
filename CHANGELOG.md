@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-28 — v0.25.0 — build 8IGRZ0
+
+### Admin
+
+- **A customer can be banned.** Owner only, from their page, behind the usual confirmation dialog — and reversible from the same spot. The ban closes every door at once: the login form refuses the account with its own message rather than a misleading wrong-password error, sessions already open are cut on their very next request, remember-me cookies included, and database-held sessions are purged the moment the ban lands. What the customer already did — orders, reviews, messages — stays untouched; a ban stops the future, it doesn't rewrite the past. Banned accounts leave the regular customer tabs and counts entirely and gather on their own Banned tab, kept apart at the far right of the row. Admin accounts can't be banned, and every ban and unban is written to the activity log.
+
+- **The customer page reads like a dossier now.** The flat run of chips under the name becomes four tiles — total spent, orders, average order, customer since — each carrying its footnote, the way the dashboard already counts. Three things the page only counted, or didn't mention at all, now show themselves: the reviews the customer posted, their contact conversations — matched by account *and* by email, so messages sent before signing up surface too — and the wishlist's actual products with thumbnails and prices. The email gained a copy button, order lines carry their total right beside the number instead of a View button at the far end, and "Create manual order" opens the form with the customer already picked. The initials avatar squares up to the full height of the name-and-email block beside it.
+
 ## 2026-08-28 — v0.24.2 — build 3OZJC4
 
 ### Under the hood
