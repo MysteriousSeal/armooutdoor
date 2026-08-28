@@ -65,7 +65,10 @@ class AdminOrderLifecycleTest extends TestCase
 
         $this->assertSame(
             ['placed', 'preparing', 'shipped', 'in_transit', 'delivered'],
-            $order->fresh()->statusHistories()->orderBy('id')->pluck('status')->all()
+            // reorder(), not orderBy(): the relation carries latest(), and a
+            // mere orderBy appends after it — created_at desc then id asc —
+            // which flips the list whenever the test crosses a second boundary.
+            $order->fresh()->statusHistories()->reorder('id')->pluck('status')->all()
         );
     }
 

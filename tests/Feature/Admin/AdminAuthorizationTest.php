@@ -14,6 +14,7 @@ use App\Models\Marketplace;
 use App\Models\Order;
 use App\Models\PackageType;
 use App\Models\Product;
+use App\Models\ProductReview;
 use App\Models\ProductVariant;
 use App\Models\PurchaseOrder;
 use App\Models\Supplier;
@@ -94,6 +95,15 @@ class AdminAuthorizationTest extends TestCase
 
         $blogPost = BlogPost::factory()->create();
 
+        // A manual review needs no account and no order, the cheapest kind
+        // to stand in for the {review} parameter.
+        $review = ProductReview::query()->create([
+            'product_id' => $product->id,
+            'author_name' => 'Audit Reviewer',
+            'rating' => 5,
+            'comment' => 'Audit review.',
+        ]);
+
         $accountingEntry = AccountingEntry::query()->create([
             'section' => 'sales',
             'entered_on' => AccountingPeriods::FIRST.'-05',
@@ -121,6 +131,7 @@ class AdminAuthorizationTest extends TestCase
             'conversation' => $conversation->id,
             'message' => $conversationMessage->id,
             'post' => $blogPost->id,
+            'review' => $review->id,
             // A month inside the accounting period: outside it the route
             // does not even match, and this sweep would read a 404 as an
             // unguarded door.
