@@ -434,12 +434,13 @@
                                 name="payment_method"
                                 value="paypal"
                                 form="checkout-form"
-                                @checked($selectedPaymentMethod === 'paypal')
+                                disabled
                             >
                             <span class="choice-card-body">
                                 <span class="choice-card-title">
                                     <img src="{{ asset('images/payments/paypal.png') }}" alt="" class="carrier-logo">
                                     {{ __('store.payment_paypal') }}
+                                    <span class="choice-card-badge">{{ __('store.payment_paypal_soon') }}</span>
                                 </span>
                                 <span class="choice-card-meta">{{ __('store.payment_paypal_lede') }}</span>
                             </span>

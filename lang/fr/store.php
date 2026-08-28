@@ -302,6 +302,7 @@ return [
     'payment_card_lede' => 'Visa, Mastercard et autres cartes.',
     'payment_paypal' => 'PayPal',
     'payment_paypal_lede' => 'Payez avec votre compte PayPal.',
+    'payment_paypal_soon' => 'Bientôt disponible',
     'order_payment' => 'Paiement',
     'order_placed' => 'Votre commande est enregistrée.',
     'stripe_order_line_name' => 'Commande :shop',

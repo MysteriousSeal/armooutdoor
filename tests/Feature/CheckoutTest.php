@@ -12,6 +12,7 @@ use App\Models\User;
 use Database\Seeders\CatalogSeeder;
 use Database\Seeders\ShippingSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class CheckoutTest extends TestCase
@@ -56,6 +57,23 @@ class CheckoutTest extends TestCase
             ->assertSee('PayPal')
             ->assertDontSee('Stripe')
             ->assertSee('Nouvelle adresse');
+    }
+
+    public function test_paypal_is_shown_but_disabled_with_a_soon_badge(): void
+    {
+        $user = User::factory()->create();
+        $product = Product::query()->where('slug', 'ridge-tent')->firstOrFail();
+
+        $this->actingAs($user)
+            ->post('/cart', ['product_id' => $product->id, 'quantity' => 1]);
+
+        $response = $this->actingAs($user)->get('/checkout');
+
+        $response->assertOk()
+            ->assertSee('Bientôt disponible');
+
+        $paypalCard = Str::before(Str::after($response->getContent(), 'value="paypal"'), '</label>');
+        $this->assertStringContainsString('disabled', $paypalCard);
     }
 
     public function test_checkout_shows_a_notice_after_a_canceled_stripe_payment(): void

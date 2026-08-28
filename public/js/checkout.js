@@ -99,6 +99,9 @@
         var locked = !!isRelay && !hasRelayPoint;
 
         document.querySelectorAll('input[name="payment_method"]').forEach(function (input) {
+            if (input.value === 'paypal') {
+                return;
+            }
             input.disabled = locked;
             if (locked) {
                 input.checked = false;
