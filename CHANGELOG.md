@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-28 — v0.25.1 — build PGMT88
+
+### Under the hood
+
+- **One test caught up with v0.25.0, no shipped code touched.** The test-order check still looked for the customer page's old "15,00 € spent" chip; the amount lives in the "Total spent" tile now, on its own line, and the test reads it there.
+
 ## 2026-08-28 — v0.25.0 — build 8IGRZ0
 
 ### Admin
