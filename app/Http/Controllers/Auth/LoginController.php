@@ -32,6 +32,18 @@ class LoginController extends Controller
             ]);
         }
 
+        // Told apart from a wrong password on purpose: a banned customer
+        // shouldn't burn time resetting a password that was never the problem.
+        if ($request->user()->isBanned()) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            throw ValidationException::withMessages([
+                'email' => __('store.account_banned'),
+            ]);
+        }
+
         $request->session()->regenerate();
         $cart->claimFor($request->user());
 

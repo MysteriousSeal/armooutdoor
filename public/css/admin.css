@@ -8757,3 +8757,51 @@ a.order-stepper-btn:focus-visible {
     background: color-mix(in srgb, var(--accent) 12%, var(--surface));
     border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
 }
+
+/* --- Banning a customer ------------------------------------------------- */
+
+/* Kept apart at the far end of the row: the banned list is a different kind
+   of place than the other tabs, and its position says so. */
+.admin-tabs .admin-tab--banned {
+    margin-left: auto;
+}
+
+.badge-banned {
+    color: #a03d3d;
+    background: color-mix(in srgb, #c0564f 12%, var(--surface));
+    border: 1px solid color-mix(in srgb, #c0564f 35%, var(--border));
+}
+
+[data-theme='dark'] .badge-banned {
+    color: #e09a94;
+}
+
+/* The ban control sits last in the account panel, behind a hairline like the
+   reset-link form above it — present, but never mistaken for routine. */
+.admin-customer-ban {
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+}
+
+.admin-customer-ban-hint {
+    margin: 0 0 0.75rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+.admin-customer-ban.is-banned .admin-customer-ban-hint {
+    color: #a03d3d;
+}
+
+[data-theme='dark'] .admin-customer-ban.is-banned .admin-customer-ban-hint {
+    color: #e09a94;
+}
+
+/* The button only turns red where it acts: quiet in the panel, loud on hover. */
+.admin-customer-ban-button:hover {
+    color: #fff;
+    background: #a03d3d;
+    border-color: #a03d3d;
+}

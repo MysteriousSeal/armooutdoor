@@ -189,6 +189,7 @@ return [
     'password_confirmation' => 'Confirmer le mot de passe',
     'remember' => 'Rester connecté',
     'auth_failed' => 'Ces informations ne correspondent pas à nos enregistrements.',
+    'account_banned' => 'Ce compte a été suspendu. Contactez-nous si vous pensez qu\'il s\'agit d\'une erreur.',
     'logged_in' => 'Vous êtes connecté.',
     'logged_out' => 'Vous êtes déconnecté.',
     'registered' => 'Bienvenue. Votre compte est prêt.',

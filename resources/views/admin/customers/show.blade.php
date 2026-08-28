@@ -21,6 +21,9 @@
                                 @if ($customer->external)
                                     <span class="badge badge-placed">External</span>
                                 @endif
+                                @if ($customer->isBanned())
+                                    <span class="badge badge-banned" title="Banned {{ $customer->banned_at->format('d M Y') }}">Banned</span>
+                                @endif
                             </div>
                             <p class="admin-list-lede">
                                 @if ($customer->email)
@@ -170,6 +173,39 @@
                         <p class="admin-customer-reset-hint">Emails a password reset link. Nobody at Armo Outdoor sees or sets the password directly.</p>
                         <button type="submit" class="btn btn-secondary">Send password reset link</button>
                     </form>
+
+                    @if (auth()->user()->isOwner())
+                        <div class="admin-customer-ban {{ $customer->isBanned() ? 'is-banned' : '' }}">
+                            @if ($customer->isBanned())
+                                <p class="admin-customer-ban-hint">
+                                    Banned since {{ $customer->banned_at->format('d M Y') }} — this account can't sign in. Their orders and reviews are untouched.
+                                </p>
+                                <form method="POST" action="{{ route('admin.customers.unban', $customer) }}">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="btn btn-secondary">Lift the ban</button>
+                                </form>
+                            @else
+                                <p class="admin-customer-ban-hint">
+                                    Banning locks the account out of the shop — no sign-in, so no orders, reviews or messages. Everything already placed stays. Reversible at any time.
+                                </p>
+                                <button type="button" class="btn btn-secondary admin-customer-ban-button" data-modal-open="customer-ban">Ban this account</button>
+                                <dialog id="customer-ban" class="modal" aria-labelledby="customer-ban-title">
+                                    <form method="POST" action="{{ route('admin.customers.ban', $customer) }}">
+                                        @csrf
+                                        @method('PATCH')
+                                        <p class="modal-kicker">{{ $displayName }}</p>
+                                        <h3 class="modal-title" id="customer-ban-title">Ban this account?</h3>
+                                        <p class="modal-body">They're signed out everywhere immediately and can't log back in. Their orders and reviews stay. You can lift the ban later.</p>
+                                        <div class="modal-actions">
+                                            <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                                            <button type="submit" class="btn btn-primary">Ban account</button>
+                                        </div>
+                                    </form>
+                                </dialog>
+                            @endif
+                        </div>
+                    @endif
 
                     <dl class="admin-customer-facts admin-customer-facts--readonly">
                         <div>

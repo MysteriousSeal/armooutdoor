@@ -165,6 +165,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/customers/{customer}/notes', [AdminCustomerController::class, 'updateNotes'])->name('customers.notes.update');
         Route::patch('/customers/{customer}', [AdminCustomerController::class, 'updateAccount'])->name('customers.update');
         Route::post('/customers/{customer}/send-reset-link', [AdminCustomerController::class, 'sendResetLink'])->name('customers.send-reset-link');
+        Route::patch('/customers/{customer}/ban', [AdminCustomerController::class, 'ban'])->middleware('admin.owner')->name('customers.ban');
+        Route::patch('/customers/{customer}/unban', [AdminCustomerController::class, 'unban'])->middleware('admin.owner')->name('customers.unban');
         Route::get('/conversations', [AdminConversationController::class, 'index'])->name('conversations.index');
         Route::get('/conversations/{conversation}', [AdminConversationController::class, 'show'])->name('conversations.show');
         Route::post('/conversations/{conversation}/reply', [AdminConversationController::class, 'reply'])->name('conversations.reply');

@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsureAdminApiToken;
 use App\Http\Middleware\EnsureUserIsAdmin;
+use App\Http\Middleware\EnsureUserIsNotBanned;
 use App\Http\Middleware\EnsureUserIsOwner;
 use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
@@ -18,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
+            EnsureUserIsNotBanned::class,
             SecurityHeaders::class,
         ]);
 

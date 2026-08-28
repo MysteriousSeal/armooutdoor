@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Support\Csv;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -31,14 +32,16 @@ class CustomerController extends Controller
             ->simplePaginate(20)
             ->withQueryString();
 
-        $customerCount = $this->shopCustomers()->count();
-        $withOrdersCount = $this->shopCustomers()->whereHas('orders', $countedOrders)->count();
+        // Counted without the banned, like the lists they sit above.
+        $customerCount = $this->shopCustomers()->whereNull('banned_at')->count();
+        $withOrdersCount = $this->shopCustomers()->whereNull('banned_at')->whereHas('orders', $countedOrders)->count();
 
         return view('admin.customers.index', [
             'customers' => $customers,
             'customerCount' => $customerCount,
             'withOrdersCount' => $withOrdersCount,
             'noOrdersCount' => $customerCount - $withOrdersCount,
+            'bannedCount' => $this->shopCustomers()->whereNotNull('banned_at')->count(),
             'newCustomers30d' => $this->shopCustomers()->where('created_at', '>=', now()->subDays(30))->count(),
             'search' => $filters['search'],
             'tab' => $filters['tab'],
@@ -97,7 +100,7 @@ class CustomerController extends Controller
     private function customerFilters(Request $request): array
     {
         return [
-            'tab' => in_array($request->query('tab'), ['with-orders', 'no-orders'], true)
+            'tab' => in_array($request->query('tab'), ['with-orders', 'no-orders', 'banned'], true)
                 ? $request->query('tab')
                 : 'all',
             'search' => trim((string) $request->query('search', '')),
@@ -125,7 +128,11 @@ class CustomerController extends Controller
             ->when($filters['date_from'] !== '', fn ($query) => $query->whereDate('created_at', '>=', $filters['date_from']))
             ->when($filters['date_to'] !== '', fn ($query) => $query->whereDate('created_at', '<=', $filters['date_to']))
             ->when($filters['tab'] === 'with-orders', fn ($query) => $query->whereHas('orders', $countedOrders))
-            ->when($filters['tab'] === 'no-orders', fn ($query) => $query->whereDoesntHave('orders', $countedOrders));
+            ->when($filters['tab'] === 'no-orders', fn ($query) => $query->whereDoesntHave('orders', $countedOrders))
+            // Banned customers live only on their own tab: they are no longer
+            // customers being browsed, they are a record being kept.
+            ->when($filters['tab'] === 'banned', fn ($query) => $query->whereNotNull('banned_at'))
+            ->when($filters['tab'] !== 'banned', fn ($query) => $query->whereNull('banned_at'));
     }
 
     public function show(User $customer): View
@@ -199,5 +206,45 @@ class CustomerController extends Controller
         AdminActivityLog::record('customer.password_reset_sent', $customer, 'Sent a password reset link to '.$customer->name);
 
         return back()->with('status', 'Password reset link sent.');
+    }
+
+    /**
+     * Bans the account: the login form refuses it, and every session it
+     * already holds is cut on its next request. Orders, reviews and messages
+     * already left stay — a ban stops the future, it doesn't rewrite the past.
+     */
+    public function ban(User $customer): RedirectResponse
+    {
+        abort_if($customer->is_admin, 404);
+
+        if ($customer->isBanned()) {
+            return back()->with('status', 'This account is already banned.');
+        }
+
+        $customer->banned_at = now();
+        $customer->save();
+
+        // Database-held sessions die right away rather than at the whim of
+        // the middleware's next look; any other driver still gets caught by
+        // the middleware.
+        if (config('session.driver') === 'database') {
+            DB::table(config('session.table', 'sessions'))->where('user_id', $customer->id)->delete();
+        }
+
+        AdminActivityLog::record('customer.banned', $customer, 'Banned '.$customer->name);
+
+        return back()->with('status', 'Account banned.');
+    }
+
+    public function unban(User $customer): RedirectResponse
+    {
+        abort_if($customer->is_admin, 404);
+
+        $customer->banned_at = null;
+        $customer->save();
+
+        AdminActivityLog::record('customer.unbanned', $customer, 'Lifted the ban on '.$customer->name);
+
+        return back()->with('status', 'Ban lifted.');
     }
 }

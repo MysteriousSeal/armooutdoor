@@ -53,6 +53,9 @@
             <a href="{{ route('admin.customers.index', [...$baseFilters, 'tab' => 'no-orders']) }}" class="{{ $tab === 'no-orders' ? 'active' : '' }}">
                 No orders <span class="admin-tab-count">{{ number_format($noOrdersCount) }}</span>
             </a>
+            <a href="{{ route('admin.customers.index', [...$baseFilters, 'tab' => 'banned']) }}" class="admin-tab--banned {{ $tab === 'banned' ? 'active' : '' }}">
+                Banned <span class="admin-tab-count">{{ number_format($bannedCount) }}</span>
+            </a>
         </nav>
 
         <form method="GET" action="{{ route('admin.customers.index') }}" class="admin-filter-bar">
@@ -130,6 +133,7 @@
             $tabLabel = match ($tab) {
                 'with-orders' => 'customers with orders',
                 'no-orders' => 'customers without orders',
+                'banned' => 'banned customers',
                 default => 'customers',
             };
         @endphp
@@ -184,6 +188,9 @@
                                                 </a>
                                                 @if ($customer->admin_viewed_at === null)
                                                     <span class="admin-new-chip" title="You haven't opened this profile yet">New</span>
+                                                @endif
+                                                @if ($customer->isBanned())
+                                                    <span class="badge badge-banned" title="Banned {{ $customer->banned_at->format('d M Y') }}">Banned</span>
                                                 @endif
                                             </span>
                                             @if ($customer->name !== '')

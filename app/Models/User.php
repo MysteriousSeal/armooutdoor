@@ -35,7 +35,13 @@ class User extends Authenticatable
             'admin_deactivated_at' => 'datetime',
             'admin_viewed_at' => 'datetime',
             'external' => 'boolean',
+            'banned_at' => 'datetime',
         ];
+    }
+
+    public function isBanned(): bool
+    {
+        return $this->banned_at !== null;
     }
 
     public function cartItems(): HasMany
