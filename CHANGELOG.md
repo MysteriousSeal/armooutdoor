@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-28 — v0.24.2 — build 3OZJC4
+
+### Under the hood
+
+- **Two test repairs, no shipped code touched.** The authorization sweep — the test that walks every admin route as a guest and expects the login door — was never given a review to build the delete-review URL with, so it knocked on a literal `{review}` and read the 404 as an unguarded route; it now carries a manual review among its fixtures. And the order-lifecycle test only passed while the clock stood still: it appended `orderBy('id')` to a relation that already orders newest-first, which merely tiebreaks — so a run crossing a second boundary flipped the history it was asserting. It now replaces the ordering instead of appending to it.
+
 ## 2026-08-28 — v0.24.1 — build 1D4MMA
 
 ### Storefront
