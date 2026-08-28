@@ -2,6 +2,30 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-28 — v0.22.0 — build JMRP3F
+
+### Storefront
+
+- **The mobile header carries only what fits.** Below 640px, the top bar used to repeat itself — a cart button up top, a second one lower down, a full name and a "Déconnexion" button squeezed into a row of their own. All of it now folds into five equal icon buttons next to the hamburger: cart, account, contact and theme, each the same fixed width so the row reads as one control strip rather than five different-sized boxes. A cart carrying items, or an account with unread messages, is the one exception — those two widen just enough for their badge rather than clipping the number.
+
+  Nouveautés, Promotions, Meilleures ventes and Blog moved out of that bar entirely and into the opened category menu, at its top, two per row above the categories themselves. Only Contact stays in the bar's icon row, since the storefront's mailbox is a text form, not phone support — it reads as an envelope now, not a headset.
+
+- **The opened category menu no longer traps itself off-screen.** It used to cap its own height and lock the page behind it from scrolling, which meant a menu opened before the page had scrolled — subheader not yet stuck to the top — could render its bottom edge past the visible viewport with no way left to reach it. It now measures where the subheader actually sits the moment it opens and pins itself to the viewport instead, so the whole menu is always reachable and scrolls on its own.
+
+- **The account hub page ends on a logout button** instead of leaving the header as the only way out. Styled deliberately quieter than the navigation cards above it — a plain bordered button behind a hairline, not another destination to click into.
+
+- **A pretty maintenance page.** `/503` used to fall back to Laravel's bare default. It now matches the site's own 404 and 500 pages — except it deliberately doesn't share their layout, since that layout queries the database for its category menu, and a 503 fires exactly when the database might be mid-migration or unreachable. Verified with a test that it renders zero database queries.
+
+### Under the hood
+
+- **`deploy.sh` no longer serves a half-updated site while it deploys.** It now wraps the risky window — pulling code, installing dependencies, migrating — in Laravel's maintenance mode, and checks the site actually responds before taking it back out of maintenance; a failed health check leaves the maintenance page up rather than exposing a broken one. PHP-FPM is reloaded rather than restarted, so in-flight requests aren't dropped, and the code is now pulled with `fetch` + `reset --hard` instead of `pull`, closing off the chance of a surprise merge commit on the server.
+
+- **`robots.txt` is generated instead of shipped as a static file.** The static one was still pointing at a local development URL, which would have gone dead the day the site actually launched. It's now built from the live `sitemap.xml` route, and disallows `/admin`, `/cart` and `/checkout`.
+
+- **Every response now carries a baseline of security headers** — CSP, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, and HSTS once a request is actually over HTTPS.
+
+- Fixed a CSS cascade bug hit twice this cycle: two rules setting the same property for overlapping `max-width` breakpoints resolve to whichever one is written later in the file, not the narrower one. Both the category menu's column count and the mobile cart button's default visibility had fallen on the wrong side of that, in different files, before the fix.
+
 ## 2026-08-28 — v0.21.0 — build EKT5MZ
 
 ### Storefront
