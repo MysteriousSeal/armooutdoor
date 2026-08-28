@@ -2,6 +2,46 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-28 — v0.21.0 — build EKT5MZ
+
+### Storefront
+
+- **Card and PayPal are both off at checkout for now.** Neither the live Stripe account nor PayPal is configured yet; each option stays visible with a "Bientôt disponible" badge rather than disappearing, so the choice is still legible while nothing can actually be selected. Checkout cannot be completed until at least one comes back.
+
+- **The product-card grid gives ground below 640px.** The homepage's category grid drops to one per row, a card's price and stock chip stop crowding side by side and stack instead, and the low-stock, supplier-availability and restocking chips swap to a shorter label rather than wrapping.
+
+- `robots.txt` is now generated from the current `sitemap.xml` route instead of shipped as a static file — it was still pointing at a local dev URL, which would have gone dead the day the site actually shipped. `/admin`, `/cart` and `/checkout` are disallowed too.
+
+### Admin
+
+- **A month's accounts can carry the supplier's own paperwork.** A purchase line takes its invoice as a PDF, held on the private disk and served through the same owner-only door as the rest of the accounts — nothing under `public/` for anyone to guess at. The file opens named after the supplier and the invoice number, uploading again replaces what was there, and a PNG renamed `.pdf` is turned away because the check reads the file rather than its name. The month list now says how many of its lines are still owed a PDF, and detaching one asks first, in the same dialog the rest of the admin already uses.
+
+- **The shop can back itself up from the admin.** One archive holding the database, the product photographs and the other private files — the code itself stays out, since it already lives in git. The button says what it's about to do, then says it again while it works, and can't be pressed twice; the archive lives outside `public/`, and its own directory is excluded so a backup never nests the ones before it.
+
+- **An empty category can be deleted.** Products cascade with their category, and a category with children would have dropped them back to root, so deletion only opens up once a category holds nothing — no products, no subcategories. A category still in use shows the site's usual disabled-button tooltip instead.
+
+- **A variant's own wording sits under it on the printed label**, not just its reference — two sizes of the same product used to print identical words, and the reference alone is easy to misread on a shelf. "Respirant — M" now reads directly, or the full wording where a variant names more than one thing.
+
+- **The cover photo can be pulled as a JPEG.** The shop stores WebP, which a marketplace form, a supplier or a printer won't take. The Images panel now offers the cover full size, converted on the way out and flattened onto white first since a JPEG has no transparency to keep. Nothing stored is touched — the copy is made for the download and thrown away after.
+
+- **Admin users can now be listed and edited over the same JSON API used for the catalogue** — name, email, role and password — with the same guardrails as the web admin: the last remaining owner can't be demoted, and every change is written to the activity log.
+
+### Under the hood
+
+- **Every web response now carries a baseline of security headers** — CSP, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, and HSTS once the request is actually over HTTPS.
+
+- **Nine admin areas that were only reachable through their activity-log row — or not reachable by a test at all — are now covered directly**: settings that store euros as cents, a carrier-tier grid that replaces rather than appends, a checkbox that has to be coerced because an untouched one sends nothing, and six more guards, each checked by reverting the line it protects and watching the test fail.
+
+- `deploy.sh` added: pull, install dependencies, build assets, migrate, recache config/routes/views, restart PHP-FPM. Points at `armooutdoor.fr`, the domain the site is shipping under.
+
+- The backup tests were deleting the site's own real backups — the suite swaps the database for one in memory but never moved the storage path, so every run wiped the real archive directory. Where archives live now comes from config, like the rest of the backup code already did, and a test asserts the real path and the test path are never the same.
+
+- `.env.example` no longer lists three NaturaBuy keys the real `.env` doesn't set — they still work through their own defaults in `config/services.php` if ever needed, so nothing changes; the example file just stops overpromising.
+
+### Catalogue
+
+- Several products gained real photographs.
+
 ## 2026-08-26 — v0.20.0 — build 49Y3T8
 
 ### Admin
