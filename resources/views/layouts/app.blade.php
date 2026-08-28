@@ -93,12 +93,30 @@
                         <a href="{{ route('products.best-sellers') }}" class="sort-tab sort-tab--in-menu-on-mobile {{ request()->routeIs('products.best-sellers') ? 'active' : '' }}">
                             {{ __('store.footer_shop_best_sellers') }}
                         </a>
-                        <a href="{{ route('blog.index') }}" class="sort-tab {{ request()->routeIs('blog.*') ? 'active' : '' }}">
+                        <a href="{{ route('blog.index') }}" class="sort-tab sort-tab--in-menu-on-mobile {{ request()->routeIs('blog.*') ? 'active' : '' }}">
                             {{ __('store.nav_blog') }}
                         </a>
-                        <a href="{{ localized_route('contact.show') }}" class="sort-tab {{ request()->routeIs('contact.show') ? 'active' : '' }}">
-                            {{ __('store.footer_help_contact') }}
+                        @include('partials.cart-button', ['class' => 'cart-btn--subheader-mobile'])
+                        <a
+                            href="{{ localized_route('contact.show') }}"
+                            class="sort-tab sort-tab--contact {{ request()->routeIs('contact.show') ? 'active' : '' }}"
+                            aria-label="{{ __('store.footer_help_contact') }}"
+                        >
+                            <span class="sort-tab-icon" aria-hidden="true">
+                                @include('partials.icon', ['name' => 'envelope', 'size' => 16])
+                            </span>
+                            <span class="sort-tab-label">{{ __('store.footer_help_contact') }}</span>
                         </a>
+                        <button
+                            type="button"
+                            class="theme-toggle-btn theme-toggle-btn--subheader-mobile"
+                            data-theme="{{ $theme }}"
+                            title="{{ __('store.theme_toggle') }}"
+                            aria-label="{{ __('store.theme_toggle') }}"
+                        >
+                            <span class="theme-toggle-icon theme-toggle-icon-sun" aria-hidden="true">☀</span>
+                            <span class="theme-toggle-icon theme-toggle-icon-moon" aria-hidden="true">☾</span>
+                        </button>
                     </nav>
                 </div>
 
@@ -159,6 +177,9 @@
                 </a>
                 <a href="{{ route('products.best-sellers') }}" class="{{ request()->routeIs('products.best-sellers') ? 'is-active' : '' }}">
                     {{ __('store.footer_shop_best_sellers') }}
+                </a>
+                <a href="{{ route('blog.index') }}" class="{{ request()->routeIs('blog.*') ? 'is-active' : '' }}">
+                    {{ __('store.nav_blog') }}
                 </a>
             </nav>
             <div class="site-cat-menu-inner">

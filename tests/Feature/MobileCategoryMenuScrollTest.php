@@ -2,10 +2,14 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class MobileCategoryMenuScrollTest extends TestCase
 {
+    use RefreshDatabase;
+
+
     public function test_the_menu_is_pinned_to_the_viewport_and_scrollable_on_mobile(): void
     {
         $css = (string) file_get_contents(public_path('css/app.css'));
@@ -30,6 +34,21 @@ class MobileCategoryMenuScrollTest extends TestCase
 
         $this->assertStringContainsString("subheader.getBoundingClientRect().bottom", $js);
         $this->assertStringContainsString("panel.style.setProperty('--cat-menu-top'", $js);
+    }
+
+    public function test_contact_link_shows_an_icon_instead_of_its_label_on_mobile(): void
+    {
+        $html = $this->get('/')->getContent();
+        $css = (string) file_get_contents(public_path('css/app.css'));
+
+        $this->assertStringContainsString('sort-tab--contact', $html);
+        $this->assertStringContainsString('sort-tab-icon', $html);
+        $this->assertStringContainsString('sort-tab-label', $html);
+
+        $this->assertStringContainsString('.sort-tab--contact .sort-tab-icon {
+        display: inline-flex;', $css);
+        $this->assertStringContainsString('.sort-tab--contact .sort-tab-label {
+        display: none;', $css);
     }
 
     public function test_blog_and_contact_align_to_the_far_right_on_mobile(): void
