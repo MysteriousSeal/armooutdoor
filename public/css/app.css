@@ -2315,7 +2315,11 @@ body.has-menu-open {
     text-align: left;
 }
 
-.reviews-distribution-track {
+/* Written as td.…-track on purpose: the blanket cell rule above zeroes
+   horizontal padding with higher specificity, and without this padding the
+   filled bar draws wider than the rail behind it — a full bucket's bar stuck
+   out past every empty line and touched its count. */
+.reviews-distribution td.reviews-distribution-track {
     width: 100%;
     padding-right: 0.6rem;
     padding-left: 0.2rem;
