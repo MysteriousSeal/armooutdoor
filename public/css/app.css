@@ -176,6 +176,10 @@
     box-shadow: var(--shadow-hover);
 }
 
+body.has-menu-open {
+    overflow: hidden;
+}
+
 .site-cat-menu[hidden] {
     display: none;
 }
@@ -323,14 +327,18 @@
 
 .site-cat-menu-shortcuts {
     display: none;
-    flex-direction: column;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.5rem;
     max-width: 1280px;
     margin: 0 auto;
-    padding: 0 1.5rem 1.15rem;
+    padding: 1.15rem 1.5rem 0.5rem;
 }
 
 .site-cat-menu-shortcuts a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
     padding: 0.75rem 1rem;
     font-size: 0.875rem;
     font-weight: 500;
@@ -4540,7 +4548,15 @@
     }
 
     .site-cat-menu-shortcuts {
-        display: flex;
+        display: grid;
+    }
+
+    .site-cat-menu {
+        position: fixed;
+        top: var(--cat-menu-top, 4.5rem);
+        bottom: 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
 }
 

@@ -150,6 +150,17 @@
                 : ($routeProduct instanceof \App\Models\Product ? $routeProduct->category : null);
         @endphp
         <div class="site-cat-menu" id="site-cat-menu" hidden>
+            <nav class="site-cat-menu-shortcuts" aria-label="{{ __('store.footer_shop') }}">
+                <a href="{{ route('products.new-arrivals') }}" class="{{ request()->routeIs('products.new-arrivals') ? 'is-active' : '' }}">
+                    {{ __('store.footer_shop_new') }}
+                </a>
+                <a href="{{ route('products.promotions') }}" class="{{ request()->routeIs('products.promotions') ? 'is-active' : '' }}">
+                    {{ __('store.footer_shop_promotions') }}
+                </a>
+                <a href="{{ route('products.best-sellers') }}" class="{{ request()->routeIs('products.best-sellers') ? 'is-active' : '' }}">
+                    {{ __('store.footer_shop_best_sellers') }}
+                </a>
+            </nav>
             <div class="site-cat-menu-inner">
                 @foreach ($navCategories as $navCategory)
                     @php
@@ -194,17 +205,6 @@
                     </section>
                 @endforeach
             </div>
-            <nav class="site-cat-menu-shortcuts" aria-label="{{ __('store.footer_shop') }}">
-                <a href="{{ route('products.new-arrivals') }}" class="{{ request()->routeIs('products.new-arrivals') ? 'is-active' : '' }}">
-                    {{ __('store.footer_shop_new') }}
-                </a>
-                <a href="{{ route('products.promotions') }}" class="{{ request()->routeIs('products.promotions') ? 'is-active' : '' }}">
-                    {{ __('store.footer_shop_promotions') }}
-                </a>
-                <a href="{{ route('products.best-sellers') }}" class="{{ request()->routeIs('products.best-sellers') ? 'is-active' : '' }}">
-                    {{ __('store.footer_shop_best_sellers') }}
-                </a>
-            </nav>
             <div class="site-cat-menu-footer">
                 <a href="{{ route('categories.index') }}">{{ __('store.see_all_categories') }}</a>
             </div>
