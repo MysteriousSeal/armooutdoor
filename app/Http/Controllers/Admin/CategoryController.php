@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreCategoryRequest;
+use App\Models\AdminActivityLog;
 use App\Models\Category;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
@@ -18,7 +19,7 @@ class CategoryController extends Controller
         $categories = Category::query()
             ->whereNull('parent_id')
             ->with(['children' => fn ($query) => $query->withCount('products')])
-            ->withCount('products')
+            ->withCount(['products', 'children'])
             ->orderBy('sort_order')
             ->get();
 
@@ -71,6 +72,24 @@ class CategoryController extends Controller
         return redirect()
             ->route('admin.categories.index')
             ->with('status', 'Category saved.');
+    }
+
+    public function destroy(Category $category): RedirectResponse
+    {
+        if ($category->products()->exists() || $category->children()->exists()) {
+            return redirect()
+                ->route('admin.categories.index')
+                ->with('status', 'That category still has products or subcategories — it can\'t be removed.');
+        }
+
+        $name = $category->localizedName();
+        $this->deleteStoredImageFile($category->image);
+        $category->delete();
+        AdminActivityLog::record('category.deleted', null, 'Removed category '.$name);
+
+        return redirect()
+            ->route('admin.categories.index')
+            ->with('status', 'Category removed.');
     }
 
     /**

@@ -42,7 +42,10 @@
                                 <td>{{ $category->slug }}</td>
                                 <td>{{ $category->products_count }}</td>
                                 <td>
-                                    <a href="{{ route('admin.categories.edit', $category) }}" class="btn btn-sm btn-secondary">Edit</a>
+                                    <div class="admin-table-actions">
+                                        <a href="{{ route('admin.categories.edit', $category) }}" class="btn btn-sm btn-secondary">Edit</a>
+                                        @include('admin.categories.partials.delete-action', ['category' => $category, 'blocked' => $category->products_count > 0 || $category->children_count > 0, 'blockedReason' => $category->children_count > 0 ? 'Has subcategories' : 'Has products'])
+                                    </div>
                                 </td>
                             </tr>
                             @foreach ($category->children as $child)
@@ -51,7 +54,10 @@
                                     <td>{{ $child->slug }}</td>
                                     <td>{{ $child->products_count }}</td>
                                     <td>
-                                        <a href="{{ route('admin.categories.edit', $child) }}" class="btn btn-sm btn-secondary">Edit</a>
+                                        <div class="admin-table-actions">
+                                            <a href="{{ route('admin.categories.edit', $child) }}" class="btn btn-sm btn-secondary">Edit</a>
+                                            @include('admin.categories.partials.delete-action', ['category' => $child, 'blocked' => $child->products_count > 0, 'blockedReason' => 'Has products'])
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach
