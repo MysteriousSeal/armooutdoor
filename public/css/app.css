@@ -99,10 +99,6 @@
         min-width: 0;
     }
 
-    .site-cat-menu-inner {
-        grid-template-columns: 1fr;
-    }
-
     .site-menu-toggle span {
         display: none;
     }
@@ -4500,6 +4496,18 @@
         text-align: left;
     }
 
+}
+
+/*
+ * Comes after the 768px block above on purpose: both set
+ * .site-cat-menu-inner's column count, and CSS gives the later rule the
+ * win whenever their max-width ranges overlap. This one needs to be last
+ * to actually take effect below 640px.
+ */
+@media (max-width: 640px) {
+    .site-cat-menu-inner {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 480px) {
