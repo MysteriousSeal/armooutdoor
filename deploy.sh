@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-cd /var/www/armooutdoor.com
+cd /var/www/armooutdoor.fr
 git pull
 composer install --no-dev --optimize-autoloader
 npm install
