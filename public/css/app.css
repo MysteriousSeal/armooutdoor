@@ -176,10 +176,6 @@
     box-shadow: var(--shadow-hover);
 }
 
-body.has-menu-open {
-    overflow: hidden;
-}
-
 .site-cat-menu[hidden] {
     display: none;
 }
@@ -4677,10 +4673,18 @@ body.has-menu-open {
         display: grid;
     }
 
+    /*
+     * position:fixed here used to be pinned to a JS-measured pixel offset,
+     * to lock page scroll while the menu was open. Mobile Safari's address
+     * bar collapsing/expanding independently of that measurement could
+     * throw it off enough to cover the toggle button, with no way left to
+     * close the menu. Plain position:absolute + top:100% (relative to the
+     * subheader, its positioned ancestor) is correct by construction in
+     * every browser — no measurement, no fixed-viewport quirks — at the
+     * cost of the page behind staying scrollable while the menu is open.
+     */
     .site-cat-menu {
-        position: fixed;
-        top: var(--cat-menu-top, 4.5rem);
-        bottom: 0;
+        max-height: 80vh;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
     }

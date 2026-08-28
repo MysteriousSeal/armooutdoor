@@ -10,30 +10,34 @@ class MobileCategoryMenuScrollTest extends TestCase
     use RefreshDatabase;
 
 
-    public function test_the_menu_is_pinned_to_the_viewport_and_scrollable_on_mobile(): void
+    public function test_the_menu_stays_below_the_subheader_with_no_js_measurement(): void
     {
+        // position:absolute + top:100% (set on the base .site-cat-menu rule,
+        // relative to its sticky positioned ancestor #site-subheader) is
+        // correct by construction in every browser, unlike the previous
+        // fixed-position + JS-measured-pixel approach, which mobile Safari's
+        // independently-collapsing address bar could throw off enough to
+        // cover the toggle button with no way left to close the menu.
         $css = (string) file_get_contents(public_path('css/app.css'));
 
         $this->assertStringContainsString('.site-cat-menu {
-        position: fixed;
-        top: var(--cat-menu-top, 4.5rem);
-        bottom: 0;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;', $css);
+
+        $this->assertStringContainsString('.site-cat-menu {
+        max-height: 80vh;
         overflow-y: auto;', $css);
     }
 
-    public function test_the_toggle_script_locks_body_scroll_while_open(): void
+    public function test_the_toggle_script_has_no_position_measurement_left(): void
     {
         $js = (string) file_get_contents(public_path('js/site-menu-toggle.js'));
 
-        $this->assertStringContainsString("document.body.classList.toggle('has-menu-open', isOpen);", $js);
-    }
-
-    public function test_the_toggle_script_measures_the_subheader_before_opening(): void
-    {
-        $js = (string) file_get_contents(public_path('js/site-menu-toggle.js'));
-
-        $this->assertStringContainsString("subheader.getBoundingClientRect().bottom", $js);
-        $this->assertStringContainsString("panel.style.setProperty('--cat-menu-top'", $js);
+        $this->assertStringNotContainsString('getBoundingClientRect', $js);
+        $this->assertStringNotContainsString('cat-menu-top', $js);
+        $this->assertStringNotContainsString('has-menu-open', $js);
     }
 
     public function test_contact_link_shows_an_icon_instead_of_its_label_on_mobile(): void
