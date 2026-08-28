@@ -279,10 +279,13 @@ class OrderController extends Controller
             });
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
         return view('admin.orders.create', [
             'order' => null,
+            // Arriving from a customer's page, that customer is already the
+            // answer to the form's first question.
+            'preselectedCustomerId' => (int) $request->query('user_id'),
             'customers' => $this->customerOptions(),
             'products' => Product::query()->active()->with('variants')->orderBy('name')->get(),
             'carriers' => Carrier::query()->active()->get(),

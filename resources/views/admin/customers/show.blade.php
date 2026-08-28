@@ -28,6 +28,12 @@
                             <p class="admin-list-lede">
                                 @if ($customer->email)
                                     <a href="mailto:{{ $customer->email }}">{{ $customer->email }}</a>
+                                    <button type="button" class="admin-copy-code" data-copy-code="{{ $customer->email }}" title="Copy email" aria-label="Copy email">
+                                        <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+                                            <rect x="9" y="9" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.75"/>
+                                            <path d="M6 15H4.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V6" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </button>
                                 @else
                                     No email
                                 @endif
@@ -36,23 +42,45 @@
                     </div>
                 </div>
                 <div class="admin-list-hero-actions">
-                    <a href="{{ route('admin.orders.create') }}" class="btn btn-primary">Create manual order</a>
+                    <a href="{{ route('admin.orders.create', ['user_id' => $customer->id]) }}" class="btn btn-primary">Create manual order</a>
                 </div>
             </div>
-            <div class="admin-list-meta">
-                <span class="admin-list-chip">{{ number_format($orders->count()) }} {{ \Illuminate\Support\Str::plural('order', $orders->count()) }}</span>
-                <span class="admin-list-chip">{{ format_euros($spentCents) }} spent</span>
-                @if ($testOrderCount > 0)
-                    <span class="admin-list-chip admin-list-chip--muted">
-                        excluding {{ $testOrderCount }} test {{ \Illuminate\Support\Str::plural('order', $testOrderCount) }}
+
+            {{-- The four numbers that say who this customer is to the shop,
+                 each with its footnote, instead of a flat run of chips. --}}
+            <div class="admin-customer-kpis">
+                <div class="dash-tile">
+                    <span class="dash-tile-label">Total spent</span>
+                    <span class="dash-tile-value">{{ format_euros($spentCents) }}</span>
+                    <span class="dash-tile-foot">
+                        @if ($testOrderCount > 0)
+                            excluding {{ $testOrderCount }} test {{ \Illuminate\Support\Str::plural('order', $testOrderCount) }}
+                        @else
+                            all orders included
+                        @endif
                     </span>
-                @endif
-                @if ($averageOrderCents > 0)
-                    <span class="admin-list-chip">Avg. {{ format_euros($averageOrderCents) }}</span>
-                @endif
-                <span class="admin-list-chip">{{ number_format($customer->addresses->count()) }} {{ \Illuminate\Support\Str::plural('address', $customer->addresses->count()) }}</span>
-                <span class="admin-list-chip">{{ number_format($discountCodes->count()) }} {{ \Illuminate\Support\Str::plural('code', $discountCodes->count()) }}</span>
-                <span class="admin-list-chip">Joined {{ $customer->created_at->format('d M Y') }}</span>
+                </div>
+                <div class="dash-tile">
+                    <span class="dash-tile-label">Orders</span>
+                    <span class="dash-tile-value">{{ number_format($orders->count()) }}</span>
+                    <span class="dash-tile-foot">
+                        @if ($lastOrder)
+                            last on {{ $lastOrder->created_at->format('d M Y') }}
+                        @else
+                            none yet
+                        @endif
+                    </span>
+                </div>
+                <div class="dash-tile">
+                    <span class="dash-tile-label">Average order</span>
+                    <span class="dash-tile-value">{{ $averageOrderCents > 0 ? format_euros($averageOrderCents) : '—' }}</span>
+                    <span class="dash-tile-foot">{{ number_format($customer->addresses->count()) }} {{ \Illuminate\Support\Str::plural('address', $customer->addresses->count()) }} · {{ number_format($discountCodes->count()) }} {{ \Illuminate\Support\Str::plural('code', $discountCodes->count()) }}</span>
+                </div>
+                <div class="dash-tile">
+                    <span class="dash-tile-label">Customer since</span>
+                    <span class="dash-tile-value">{{ $customer->created_at->format('d M Y') }}</span>
+                    <span class="dash-tile-foot">{{ $customer->created_at->diffForHumans() }}</span>
+                </div>
             </div>
         </header>
 
@@ -70,7 +98,10 @@
                             @foreach ($orders as $order)
                                 <li>
                                     <div class="admin-dash-list-main">
-                                        <a href="{{ route('admin.orders.show', $order) }}" class="admin-table-strong">{{ $order->number }}</a>
+                                        <span class="admin-customer-order-line">
+                                            <a href="{{ route('admin.orders.show', $order) }}" class="admin-table-strong">{{ $order->number }}</a>
+                                            <span class="admin-customer-order-total">{{ $order->formattedTotal() }}</span>
+                                        </span>
                                         <span class="admin-table-sub">
                                             {{ $order->created_at->format('d M Y · H:i') }}
                                             · {{ $order->items_count }} {{ \Illuminate\Support\Str::plural('item', $order->items_count) }}
@@ -86,8 +117,6 @@
                                         <span class="badge badge-test" title="Left out of the total spent">Test</span>
                                     @endif
                                     <span class="badge badge-{{ $order->status }}">{{ $order->statusLabel() }}</span>
-                                    <span class="admin-dash-list-value">{{ $order->formattedTotal() }}</span>
-                                    <a href="{{ route('admin.orders.show', $order) }}" class="btn btn-sm btn-primary">View</a>
                                 </li>
                             @endforeach
                         </ul>
@@ -135,6 +164,75 @@
                                         {{ $discountCode->statusLabel() }}
                                     </span>
                                     <a href="{{ route('admin.discount-codes.edit', $discountCode) }}" class="btn btn-sm btn-secondary">Edit</a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
+                </section>
+
+                <section class="order-panel">
+                    <div class="admin-customer-section-head">
+                        <h3 class="order-panel-title">Reviews</h3>
+                        <span class="admin-tab-count">{{ number_format($reviews->count()) }}</span>
+                        @if ($reviews->isNotEmpty())
+                            <a href="{{ route('admin.reviews.index', ['search' => $customer->email]) }}" class="btn btn-sm btn-secondary">See in Reviews</a>
+                        @endif
+                    </div>
+                    @if ($reviews->isEmpty())
+                        <p class="empty-state">No reviews posted.</p>
+                    @else
+                        <ul class="admin-customer-reviews">
+                            @foreach ($reviews as $review)
+                                <li>
+                                    <div class="admin-dash-list-main">
+                                        <span class="admin-customer-review-head">
+                                            @if ($review->product)
+                                                <a href="{{ route('admin.products.edit', $review->product) }}" class="admin-table-strong">{{ $review->product->localizedName() }}</a>
+                                            @else
+                                                <span class="admin-table-strong">Deleted product</span>
+                                            @endif
+                                            <span class="admin-review-rating" role="img" aria-label="{{ $review->rating }} out of 5">
+                                                <span class="admin-review-stars" aria-hidden="true">{{ str_repeat('★', $review->rating) }}</span><span class="admin-review-stars is-empty" aria-hidden="true">{{ str_repeat('★', 5 - $review->rating) }}</span>
+                                            </span>
+                                        </span>
+                                        @if (filled($review->comment))
+                                            <span class="admin-customer-review-comment">{{ $review->comment }}</span>
+                                        @endif
+                                    </div>
+                                    <span class="admin-table-sub">{{ $review->created_at->format('d M Y') }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
+                </section>
+
+                <section class="order-panel">
+                    <div class="admin-customer-section-head">
+                        <h3 class="order-panel-title">Conversations</h3>
+                        <span class="admin-tab-count">{{ number_format($conversations->count()) }}</span>
+                    </div>
+                    @if ($conversations->isEmpty())
+                        <p class="empty-state">No messages from this customer.</p>
+                    @else
+                        <ul class="admin-customer-conversations">
+                            @foreach ($conversations as $conversation)
+                                <li>
+                                    <div class="admin-dash-list-main">
+                                        <a href="{{ route('admin.conversations.show', $conversation) }}" class="admin-table-strong">{{ $conversation->subject }}</a>
+                                        <span class="admin-table-sub">
+                                            {{ $conversation->updated_at->format('d M Y · H:i') }}
+                                            @if ($conversation->latestMessage)
+                                                · {{ \Illuminate\Support\Str::limit($conversation->latestMessage->body, 70) }}
+                                            @endif
+                                        </span>
+                                    </div>
+                                    @if ($conversation->hasUnreadForAdmin())
+                                        <span class="badge badge-placed">Unread</span>
+                                    @endif
+                                    <span class="badge {{ $conversation->isOpen() ? 'badge-active' : 'badge-disabled' }}">
+                                        {{ $conversation->isOpen() ? 'Open' : 'Closed' }}
+                                    </span>
+                                    <a href="{{ route('admin.conversations.show', $conversation) }}" class="btn btn-sm btn-secondary">View</a>
                                 </li>
                             @endforeach
                         </ul>
@@ -207,26 +305,6 @@
                         </div>
                     @endif
 
-                    <dl class="admin-customer-facts admin-customer-facts--readonly">
-                        <div>
-                            <dt>Joined</dt>
-                            <dd>{{ $customer->created_at->format('d M Y · H:i') }}</dd>
-                        </div>
-                        <div>
-                            <dt>Last order</dt>
-                            <dd>
-                                @if ($lastOrder)
-                                    <a href="{{ route('admin.orders.show', $lastOrder) }}">{{ $lastOrder->created_at->format('d M Y') }}</a>
-                                @else
-                                    —
-                                @endif
-                            </dd>
-                        </div>
-                        <div>
-                            <dt>Wishlist</dt>
-                            <dd>{{ number_format($wishlistCount) }} {{ \Illuminate\Support\Str::plural('item', $wishlistCount) }}</dd>
-                        </div>
-                    </dl>
                 </section>
 
                 <section class="order-fact">
@@ -262,6 +340,33 @@
                                 </article>
                             @endforeach
                         </div>
+                    @endif
+                </section>
+
+                <section class="order-fact">
+                    <h3 class="order-fact-title">Wishlist</h3>
+                    @if ($wishlistItems->isEmpty())
+                        <p>Nothing wished for yet.</p>
+                    @else
+                        <ul class="admin-customer-wishlist">
+                            @foreach ($wishlistItems as $item)
+                                @php($product = $item->product)
+                                <li>
+                                    @if ($product)
+                                        <a href="{{ route('admin.products.edit', $product) }}" class="admin-customer-wishlist-media">
+                                            <img src="{{ $product->imageUrl() }}" alt="" width="40" height="40" loading="lazy">
+                                        </a>
+                                        <div class="admin-customer-wishlist-main">
+                                            <a href="{{ route('admin.products.edit', $product) }}">{{ $product->localizedName() }}</a>
+                                            <span class="admin-table-sub">{{ $product->formattedPrice() }}</span>
+                                        </div>
+                                    @else
+                                        <span class="admin-customer-wishlist-media is-empty"></span>
+                                        <div class="admin-customer-wishlist-main">Deleted product</div>
+                                    @endif
+                                </li>
+                            @endforeach
+                        </ul>
                     @endif
                 </section>
 

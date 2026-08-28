@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AdminActivityLog;
+use App\Models\Conversation;
+use App\Models\ProductReview;
 use App\Models\User;
 use App\Support\Csv;
 use Illuminate\Http\RedirectResponse;
@@ -158,8 +160,22 @@ class CustomerController extends Controller
             'averageOrderCents' => $paidOrders->isNotEmpty()
                 ? (int) round($spentCents / $paidOrders->count())
                 : 0,
-            'wishlistCount' => $customer->wishlistItems()->count(),
+            'wishlistItems' => $customer->wishlistItems()->with('product')->latest()->get(),
             'discountCodes' => $customer->discountCodes()->withCount('orders')->get(),
+            'reviews' => ProductReview::query()
+                ->where('user_id', $customer->id)
+                ->with('product')
+                ->latest()
+                ->get(),
+            // By account or by email: a customer may have written before
+            // signing up, and those messages belong on this page too.
+            'conversations' => Conversation::query()
+                ->where(fn ($query) => $query
+                    ->where('user_id', $customer->id)
+                    ->when($customer->email, fn ($inner) => $inner->orWhere('email', $customer->email)))
+                ->with('latestMessage')
+                ->latest('updated_at')
+                ->get(),
         ]);
     }
 

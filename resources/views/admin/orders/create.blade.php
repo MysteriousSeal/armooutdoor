@@ -9,7 +9,9 @@
 @php
     $customerIsExternal = $isEdit && $order->user && $order->user->external;
     $defaultCustomerMode = $customerIsExternal ? 'new' : 'existing';
-    $defaultCustomerId = $isEdit && $order->user && ! $order->user->external ? $order->user_id : '';
+    $defaultCustomerId = $isEdit && $order->user && ! $order->user->external
+        ? $order->user_id
+        : (($preselectedCustomerId ?? 0) > 0 ? $preselectedCustomerId : '');
 
     $customerOptions = $customers->map(fn ($customer) => [
         'id' => $customer->id,
