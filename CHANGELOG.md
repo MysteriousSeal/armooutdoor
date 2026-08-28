@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-28 — v0.24.0 — build 3WGTAI
+
+### Admin
+
+- **A review posted elsewhere can be copied home.** The shop sells through marketplaces too, and a review left there was stranded — invisible to anyone reading the product page here. The Reviews page now opens a form in a dialog: pick the product by name or reference through the same search the discount form uses, then the customer's name as the marketplace showed it, the stars picked by clicking them, and the review itself. Optionally, which marketplace it came from and the date it was posted there — a backdated review sorts among the others as if it had always been here.
+
+  On the shop it reads like any other review; only the admin list marks it with a quiet chip naming its marketplace, or "Added manually". Under the hood a review no longer requires a customer account and an order — the two are optional now, filled only when a review was really posted here, and the imported name travels in its own column.
+
 ## 2026-08-28 — v0.23.1 — build A3119V
 
 ### Admin
