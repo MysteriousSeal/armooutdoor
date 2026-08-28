@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\User;
 use Database\Seeders\ShippingSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class AdminApiTest extends TestCase
@@ -142,5 +143,52 @@ class AdminApiTest extends TestCase
             ->assertStatus(422);
 
         $this->assertDatabaseCount('orders', 0);
+    }
+
+    public function test_admins_index_lists_admin_users_only(): void
+    {
+        User::factory()->admin()->create();
+        User::factory()->create();
+
+        $response = $this->getJson('/api/admin/admins', $this->headers())->assertOk();
+
+        $this->assertCount(1, $response->json('data'));
+    }
+
+    public function test_admins_update_persists_info_and_password(): void
+    {
+        $admin = User::factory()->staffAdmin()->create(['email' => 'staff@example.com']);
+
+        $this->patchJson('/api/admin/admins/'.$admin->id, [
+            'first_name' => 'Jean',
+            'email' => 'jean@example.com',
+            'password' => 'a-new-password',
+            'password_confirmation' => 'a-new-password',
+        ], $this->headers())
+            ->assertOk()
+            ->assertJsonPath('data.first_name', 'Jean')
+            ->assertJsonPath('data.email', 'jean@example.com');
+
+        $admin->refresh();
+        $this->assertSame('jean@example.com', $admin->email);
+        $this->assertTrue(Hash::check('a-new-password', $admin->password));
+    }
+
+    public function test_admins_update_cannot_demote_the_last_owner(): void
+    {
+        $owner = User::factory()->admin()->create();
+
+        $this->patchJson('/api/admin/admins/'.$owner->id, ['role' => 'staff'], $this->headers())
+            ->assertStatus(422);
+
+        $this->assertSame('owner', $owner->fresh()->role);
+    }
+
+    public function test_admins_update_rejects_a_non_admin_user(): void
+    {
+        $user = User::factory()->create();
+
+        $this->patchJson('/api/admin/admins/'.$user->id, ['first_name' => 'X'], $this->headers())
+            ->assertStatus(404);
     }
 }
