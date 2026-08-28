@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-28 — v0.24.1 — build 1D4MMA
+
+### Storefront
+
+- **Fixed:** in the rating distribution under "Avis clients", a full bar drew longer than the empty rails beside it — a rating holding every review ran past where the other lines end and touched its count. The rails are painted with an inset at each end, and the cell was meant to carry matching padding so the filled bars sit exactly on them; a blanket cell rule with higher specificity was silently zeroing that padding. The padding rule now out-specifies it, and every bar — full, partial or empty — ends on the same line.
+
 ## 2026-08-28 — v0.24.0 — build 3WGTAI
 
 ### Admin

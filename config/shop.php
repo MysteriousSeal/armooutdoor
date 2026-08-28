@@ -6,5 +6,5 @@ return [
     // alphabétique des libellés français, celui du menu déroulant.
     'countries' => ['FR', 'DE', 'BE', 'ES', 'IE', 'IT', 'LU', 'NL', 'PT', 'CH'],
     'customer_countries' => ['FR'],
-    'version' => '0.24.0',
+    'version' => '0.24.1',
 ];
