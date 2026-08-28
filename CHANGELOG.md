@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-28 — v0.26.0 — build GFF5VT
+
+### Admin
+
+- **An email test bench, under Settings.** Owner only: type an address — your own is already filled in — press send, and a branded test email goes out, stamped with when it was sent and through what transport, so two tests can't be mistaken for one another. It's also the shop's first real HTML email, styled to the site's palette, so the test doubles as a look at what Armo Outdoor mail looks like in an inbox. Beside the form, the current mail configuration read straight from the environment — transport, host, port, encryption, whether the username and password are filled in but never their values, and the From identity. A dead SMTP server answers on the page as the error it raised, not a stack trace; the `log` transport gets an amber warning saying emails end in a file and nothing will be delivered. Encryption reads "auto (STARTTLS when offered)" rather than a false "none" when no scheme is forced — the transport upgrades on its own whenever the server allows. Every send lands in the activity log.
+
 ## 2026-08-28 — v0.25.1 — build PGMT88
 
 ### Under the hood
