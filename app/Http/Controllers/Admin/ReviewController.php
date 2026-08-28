@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AdminActivityLog;
+use App\Models\Product;
 use App\Models\ProductReview;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -63,7 +64,61 @@ class ReviewController extends Controller
             'average' => $total > 0 ? round((float) ProductReview::query()->avg('rating'), 1) : null,
             'ratingCounts' => collect(range(5, 1))
                 ->mapWithKeys(fn (int $stars): array => [$stars => (int) ($distribution[$stars] ?? 0)]),
+            'products' => $this->searchableProducts(),
         ]);
+    }
+
+    /**
+     * The whole catalogue for the add-review search, ordered the way the
+     * dropdown lists it.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, Product>
+     */
+    private function searchableProducts()
+    {
+        $nameSql = Product::query()->getConnection()->getDriverName() === 'sqlite'
+            ? "json_extract(name, '$.fr')"
+            : "json_unquote(json_extract(name, '$.fr'))";
+
+        return Product::query()->orderByRaw($nameSql)->get();
+    }
+
+    /**
+     * A review typed in by hand — one posted on a marketplace the shop sells
+     * through, which the product page here should carry too. No customer, no
+     * order: only the name the marketplace showed.
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'product_id' => ['required', 'integer', 'exists:products,id'],
+            'author_name' => ['required', 'string', 'max:100'],
+            'rating' => ['required', 'integer', 'min:1', 'max:5'],
+            'comment' => ['required', 'string', 'max:2000'],
+            'source' => ['nullable', 'string', 'max:50'],
+            'posted_at' => ['nullable', 'date', 'before_or_equal:today'],
+        ]);
+
+        $review = ProductReview::query()->create([
+            'product_id' => $validated['product_id'],
+            'author_name' => trim($validated['author_name']),
+            'rating' => $validated['rating'],
+            'comment' => trim($validated['comment']),
+            'source' => filled($validated['source'] ?? null) ? trim($validated['source']) : null,
+        ]);
+
+        // Dated when the marketplace published it, not when it was copied
+        // over: the review sorts among the others as if posted here.
+        if (filled($validated['posted_at'] ?? null)) {
+            $review->created_at = $validated['posted_at'];
+            $review->save();
+        }
+
+        AdminActivityLog::record('review.created', $review, 'Added a review of '.$review->product->localizedName().' by '.$review->author_name.($review->source ? ' from '.$review->source : ''));
+
+        return redirect()
+            ->route('admin.reviews.index')
+            ->with('status', 'Review added.');
     }
 
     public function destroy(Request $request, ProductReview $review): RedirectResponse

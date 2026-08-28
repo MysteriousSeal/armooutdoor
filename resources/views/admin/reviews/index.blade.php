@@ -2,6 +2,19 @@
 
 @section('title', 'Reviews')
 
+@php
+    $productOptions = $products->map(fn ($option) => [
+        'id' => $option->id,
+        'label' => $option->localizedName(),
+        'name' => $option->localizedName(),
+        'sku' => $option->sku ?: '',
+        'meta' => $option->sku ? 'SKU '.$option->sku : '',
+        'image' => $option->image ? $option->imageUrl() : '',
+        'search' => $option->localizedName().' '.($option->sku ?? ''),
+    ]);
+    $selectedCreateProduct = $products->firstWhere('id', (int) old('product_id'));
+@endphp
+
 @section('content')
     <div class="admin-list-page admin-reviews-page">
         <header class="admin-list-hero">
@@ -13,8 +26,119 @@
                         What customers wrote about the products, across the whole catalogue. Deleting a review removes it from the product page for good.
                     </p>
                 </div>
+                <button type="button" class="btn btn-primary" data-modal-open="review-create">Add review</button>
             </div>
         </header>
+
+        {{-- A review posted on a marketplace, copied over by hand so the
+             product page here carries it too. --}}
+        <dialog id="review-create" class="modal admin-review-create" aria-labelledby="review-create-title">
+            <form method="POST" action="{{ route('admin.reviews.store') }}">
+                @csrf
+                <input type="hidden" name="_form" value="review-create">
+                <p class="modal-kicker">Posted on a marketplace</p>
+                <h3 class="modal-title" id="review-create-title">Add a review</h3>
+
+                <div class="form-group">
+                    <label for="create-product">Product</label>
+                    <div class="search-select" data-search-select data-source="products">
+                        <input type="hidden" name="product_id" value="{{ old('product_id') }}">
+                        <input
+                            type="text"
+                            id="create-product"
+                            class="form-control search-select-input"
+                            placeholder="Search by name or SKU…"
+                            value="{{ $selectedCreateProduct?->localizedName() ?? '' }}"
+                            autocomplete="off"
+                            spellcheck="false"
+                        >
+                        <ul class="search-select-list" hidden></ul>
+                    </div>
+                    @error('product_id') <p class="form-error">{{ $message }}</p> @enderror
+                </div>
+
+                <div class="admin-review-create-row">
+                    <div class="form-group">
+                        <label for="create-author">Customer name</label>
+                        <input
+                            id="create-author"
+                            type="text"
+                            name="author_name"
+                            class="form-control"
+                            placeholder="As shown on the marketplace"
+                            value="{{ old('author_name') }}"
+                            maxlength="100"
+                            required
+                        >
+                        @error('author_name') <p class="form-error">{{ $message }}</p> @enderror
+                    </div>
+                    <div class="form-group">
+                        <label id="create-rating-label">Rating</label>
+                        <div class="admin-star-picker" role="radiogroup" aria-labelledby="create-rating-label">
+                            @foreach ([5, 4, 3, 2, 1] as $stars)
+                                <input
+                                    type="radio"
+                                    id="create-rating-{{ $stars }}"
+                                    name="rating"
+                                    value="{{ $stars }}"
+                                    @checked((int) old('rating') === $stars)
+                                    required
+                                >
+                                <label for="create-rating-{{ $stars }}" aria-label="{{ $stars }} {{ $stars === 1 ? 'star' : 'stars' }}">★</label>
+                            @endforeach
+                        </div>
+                        @error('rating') <p class="form-error">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="create-comment">Review</label>
+                    <textarea
+                        id="create-comment"
+                        name="comment"
+                        class="form-control"
+                        rows="4"
+                        placeholder="The review as the customer wrote it…"
+                        maxlength="2000"
+                        required
+                    >{{ old('comment') }}</textarea>
+                    @error('comment') <p class="form-error">{{ $message }}</p> @enderror
+                </div>
+
+                <div class="admin-review-create-row">
+                    <div class="form-group">
+                        <label for="create-source">Source <span class="admin-field-optional">optional</span></label>
+                        <input
+                            id="create-source"
+                            type="text"
+                            name="source"
+                            class="form-control"
+                            placeholder="Naturabuy, Amazon…"
+                            value="{{ old('source') }}"
+                            maxlength="50"
+                        >
+                        @error('source') <p class="form-error">{{ $message }}</p> @enderror
+                    </div>
+                    <div class="form-group">
+                        <label for="create-posted-at">Posted on <span class="admin-field-optional">optional</span></label>
+                        <input
+                            id="create-posted-at"
+                            type="date"
+                            name="posted_at"
+                            class="form-control"
+                            value="{{ old('posted_at') }}"
+                            max="{{ now()->toDateString() }}"
+                        >
+                        @error('posted_at') <p class="form-error">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add review</button>
+                </div>
+            </form>
+        </dialog>
 
         @if ($total > 0)
             <div class="admin-review-stats">
@@ -123,6 +247,8 @@
                             <p class="admin-review-meta">
                                 @if ($review->user)
                                     <a href="{{ route('admin.customers.show', $review->user) }}">{{ $review->user->name }}</a>
+                                @elseif ($review->isManual())
+                                    {{ $review->author_name }}
                                 @else
                                     Deleted customer
                                 @endif
@@ -131,6 +257,9 @@
                                 @if ($review->order)
                                     <span aria-hidden="true">·</span>
                                     <a href="{{ route('admin.orders.show', $review->order) }}">{{ $review->order->number }}</a>
+                                @endif
+                                @if ($review->isManual())
+                                    <span class="admin-review-source">{{ $review->source ?? 'Added manually' }}</span>
                                 @endif
                             </p>
                             @if (filled($review->comment))
@@ -181,3 +310,18 @@
         @endif
     </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('js/admin-search-select.js') }}"></script>
+    <script>
+        AdminSearchSelect.catalogs.products = @json($productOptions);
+        AdminSearchSelect.mountAll();
+    </script>
+    @if ($errors->any() && old('_form') === 'review-create')
+        {{-- A refused submission reopens the modal it came from, errors and
+             typed values still in place. --}}
+        <script>
+            document.getElementById('review-create')?.showModal();
+        </script>
+    @endif
+@endpush

@@ -8668,3 +8668,92 @@ a.order-stepper-btn:focus-visible {
         justify-self: start;
     }
 }
+
+/* --- Adding a review by hand -------------------------------------------- */
+
+/* The form needs more room than a confirmation dialog. */
+.modal.admin-review-create {
+    width: min(32rem, calc(100vw - 2rem));
+}
+
+.admin-review-create .form-group + .form-group,
+.admin-review-create .admin-review-create-row + .form-group,
+.admin-review-create .form-group + .admin-review-create-row,
+.admin-review-create .admin-review-create-row + .admin-review-create-row {
+    margin-top: 1rem;
+}
+
+.admin-review-create-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1rem;
+    align-items: start;
+}
+
+.admin-review-create-row .form-group + .form-group {
+    margin-top: 0;
+}
+
+.admin-field-optional {
+    font-size: 0.72rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+}
+
+/* Five stars picked by clicking one: laid out 5→1 in the DOM and reversed
+   here, so "every star after the checked one" — the only direction CSS can
+   look — is the run from the choice down to one star, shown to its left. */
+.admin-star-picker {
+    display: inline-flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 0.1rem;
+}
+
+.admin-star-picker input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.admin-star-picker label {
+    margin: 0;
+    font-size: 1.6rem;
+    line-height: 1.2;
+    color: color-mix(in srgb, #d9a53f 25%, var(--border));
+    cursor: pointer;
+    transition: color 0.1s ease, transform 0.1s ease;
+}
+
+.admin-star-picker label:hover {
+    transform: scale(1.12);
+}
+
+.admin-star-picker input:checked ~ label,
+.admin-star-picker label:hover,
+.admin-star-picker label:hover ~ label {
+    color: #d9a53f;
+}
+
+.admin-star-picker input:focus-visible + label {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* Where an imported review came from, worn as a quiet chip in the meta line. */
+.admin-review-source {
+    display: inline-block;
+    margin-left: 0.35rem;
+    padding: 0.1rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent-hover);
+    background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
+}

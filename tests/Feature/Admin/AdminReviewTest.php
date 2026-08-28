@@ -128,6 +128,84 @@ class AdminReviewTest extends TestCase
         $this->assertDatabaseHas('product_reviews', ['id' => $review->id]);
     }
 
+    public function test_a_review_from_a_marketplace_can_be_added_by_hand(): void
+    {
+        $product = Product::factory()->create();
+
+        // Staff, not owner: adding a review isn't gated like deleting one.
+        $this->actingAs(User::factory()->staffAdmin()->create())
+            ->post('/admin/reviews', [
+                'product_id' => $product->id,
+                'author_name' => 'Jean D.',
+                'rating' => 4,
+                'comment' => 'Vu sur Naturabuy, tres bien.',
+                'source' => 'Naturabuy',
+            ])
+            ->assertRedirect(route('admin.reviews.index'))
+            ->assertSessionHas('status');
+
+        $this->assertDatabaseHas('product_reviews', [
+            'product_id' => $product->id,
+            'user_id' => null,
+            'order_id' => null,
+            'author_name' => 'Jean D.',
+            'source' => 'Naturabuy',
+            'rating' => 4,
+        ]);
+        $this->assertDatabaseHas('admin_activity_logs', ['action' => 'review.created']);
+    }
+
+    public function test_a_manual_review_can_carry_the_marketplace_date(): void
+    {
+        $product = Product::factory()->create();
+
+        $this->actingAs($this->owner())->post('/admin/reviews', [
+            'product_id' => $product->id,
+            'author_name' => 'Jean D.',
+            'rating' => 5,
+            'comment' => 'Parfait.',
+            'posted_at' => '2026-03-15',
+        ]);
+
+        $this->assertSame(
+            '2026-03-15',
+            ProductReview::query()->sole()->created_at->toDateString(),
+        );
+    }
+
+    public function test_a_manual_review_needs_a_valid_rating_and_a_comment(): void
+    {
+        $product = Product::factory()->create();
+
+        $this->actingAs($this->owner())
+            ->post('/admin/reviews', [
+                'product_id' => $product->id,
+                'author_name' => 'Jean D.',
+                'rating' => 6,
+                'comment' => '',
+            ])
+            ->assertSessionHasErrors(['rating', 'comment']);
+
+        $this->assertDatabaseCount('product_reviews', 0);
+    }
+
+    public function test_a_manual_review_shows_on_the_product_page_under_its_author_name(): void
+    {
+        $product = Product::factory()->create();
+
+        $this->actingAs($this->owner())->post('/admin/reviews', [
+            'product_id' => $product->id,
+            'author_name' => 'Jean D.',
+            'rating' => 5,
+            'comment' => 'Vu sur Naturabuy, parfait.',
+        ]);
+
+        $this->get('/products/'.$product->slug)
+            ->assertOk()
+            ->assertSee('Jean D.')
+            ->assertSee('Vu sur Naturabuy, parfait.');
+    }
+
     public function test_a_customer_cannot_reach_the_page(): void
     {
         $this->actingAs(User::factory()->create())

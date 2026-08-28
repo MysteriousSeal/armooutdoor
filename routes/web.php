@@ -211,6 +211,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Customer reviews, read across the whole catalogue at once
         Route::get('/reviews', [AdminReviewController::class, 'index'])->name('reviews.index');
+        Route::post('/reviews', [AdminReviewController::class, 'store'])->name('reviews.store');
         Route::delete('/reviews/{review}', [AdminReviewController::class, 'destroy'])->middleware('admin.owner')->name('reviews.destroy');
 
         // Product discounts (sale price on a single product, no code needed)
