@@ -30,6 +30,7 @@ use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PackageTypeController as AdminPackageTypeController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\PurchaseOrderController as AdminPurchaseOrderController;
+use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Admin\SearchController as AdminSearchController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\ShippingSettingController as AdminShippingSettingController;
@@ -207,6 +208,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/blog/{post}/edit', [AdminBlogPostController::class, 'edit'])->name('blog.edit');
         Route::put('/blog/{post}', [AdminBlogPostController::class, 'update'])->name('blog.update');
         Route::delete('/blog/{post}', [AdminBlogPostController::class, 'destroy'])->name('blog.destroy');
+
+        // Customer reviews, read across the whole catalogue at once
+        Route::get('/reviews', [AdminReviewController::class, 'index'])->name('reviews.index');
+        Route::delete('/reviews/{review}', [AdminReviewController::class, 'destroy'])->middleware('admin.owner')->name('reviews.destroy');
 
         // Product discounts (sale price on a single product, no code needed)
         Route::get('/discounts', [AdminDiscountController::class, 'index'])->name('discounts.index');

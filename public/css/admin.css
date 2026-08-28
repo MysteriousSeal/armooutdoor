@@ -8445,3 +8445,209 @@ a.order-stepper-btn:focus-visible {
     gap: 0.3rem;
     flex-shrink: 0;
 }
+
+/* --- Reviews ------------------------------------------------------------ */
+
+/* The shop's rating at a glance: the number, how many voices are behind it,
+   and how they spread across the five stars. */
+.admin-review-stats {
+    display: grid;
+    grid-template-columns: auto auto minmax(14rem, 22rem);
+    align-items: stretch;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.admin-review-stat {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.3rem;
+    padding: 1.1rem 1.4rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.admin-review-stat-value {
+    display: flex;
+    align-items: baseline;
+    gap: 0.55rem;
+    font-size: 1.75rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text);
+}
+
+.admin-review-stat-label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+}
+
+/* Stars wear amber wherever they appear on the page: filled ones full
+   strength, empty ones only an outline of it. */
+.admin-review-stars {
+    font-size: 0.95em;
+    letter-spacing: 0.1em;
+    color: #d9a53f;
+}
+
+.admin-review-stars.is-empty {
+    color: color-mix(in srgb, #d9a53f 30%, var(--border));
+}
+
+.admin-review-stat--bars {
+    gap: 0.35rem;
+    padding-block: 0.85rem;
+}
+
+.admin-review-bar-row {
+    display: grid;
+    grid-template-columns: 2.2rem 1fr 2.5rem;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.admin-review-bar-stars {
+    white-space: nowrap;
+}
+
+.admin-review-bar-track {
+    display: block;
+    height: 0.45rem;
+    background: color-mix(in srgb, var(--border) 55%, var(--surface));
+    overflow: hidden;
+}
+
+.admin-review-bar-fill {
+    display: block;
+    height: 100%;
+    background: #d9a53f;
+}
+
+.admin-review-bar-count {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* One review per card, reading like it does on the product page: who said
+   what about which product, and the stars they gave it. */
+.admin-review-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 0 0 1.5rem;
+    padding: 0;
+    list-style: none;
+}
+
+.admin-review-card {
+    display: grid;
+    grid-template-columns: 3.5rem minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 1rem 1.1rem;
+    padding: 1rem 1.2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: box-shadow 0.15s ease;
+}
+
+.admin-review-card:hover {
+    box-shadow: var(--shadow-hover);
+}
+
+.admin-review-media {
+    display: block;
+    width: 3.5rem;
+    aspect-ratio: 1 / 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.admin-review-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.admin-review-main {
+    min-width: 0;
+}
+
+.admin-review-head {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.8rem;
+}
+
+.admin-review-product {
+    margin: 0;
+    font-weight: 600;
+}
+
+.admin-review-product a {
+    color: var(--text);
+    text-decoration: none;
+}
+
+.admin-review-product a:hover {
+    color: var(--accent-hover);
+    text-decoration: underline;
+}
+
+.admin-review-rating .admin-review-stars {
+    font-size: 0.85rem;
+}
+
+.admin-review-meta {
+    margin: 0.2rem 0 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.admin-review-meta a {
+    color: inherit;
+}
+
+.admin-review-meta a:hover {
+    color: var(--accent-hover);
+}
+
+.admin-review-comment {
+    margin: 0.5rem 0 0;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--text);
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+.admin-review-comment.is-empty {
+    font-style: italic;
+    color: var(--text-muted);
+}
+
+@media (max-width: 640px) {
+    .admin-review-stats {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .admin-review-stat--bars {
+        grid-column: 1 / -1;
+    }
+
+    .admin-review-card {
+        grid-template-columns: 3rem minmax(0, 1fr);
+    }
+
+    .admin-review-actions {
+        grid-column: 2;
+        justify-self: start;
+    }
+}
