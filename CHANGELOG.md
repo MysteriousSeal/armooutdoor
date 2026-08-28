@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-28 — v0.22.1 — build 3MBW7I
+
+### Storefront
+
+**Fixed:** the mobile category menu could become unclosable on Safari for iOS. It was pinned in place by a pixel offset measured once in JavaScript, and page scroll was locked while it stayed open — but Safari's address bar collapses and expands on its own, independently of that measurement, and could throw it off enough for the menu to render over the toggle button, with no way left to reach it. The menu is positioned with plain CSS now — `position: absolute` under its sticky header, the way the desktop version already worked — which no browser can get wrong, since there is no measurement to get wrong. The trade-off: the page behind the menu can be scrolled again while it's open, which the JavaScript version had briefly stopped.
+
 ## 2026-08-28 — v0.22.0 — build JMRP3F
 
 ### Storefront
