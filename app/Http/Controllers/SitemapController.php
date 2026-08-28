@@ -37,6 +37,20 @@ class SitemapController extends Controller
         return view('sitemap.html', compact('categories', 'products', 'posts', 'blogCategories'));
     }
 
+    public function robots(): Response
+    {
+        $lines = [
+            'User-agent: *',
+            'Disallow: /admin',
+            'Disallow: /cart',
+            'Disallow: /checkout',
+            '',
+            'Sitemap: '.route('sitemap.index'),
+        ];
+
+        return response(implode("\n", $lines)."\n")->header('Content-Type', 'text/plain');
+    }
+
     public function index(): Response
     {
         $sitemaps = [
