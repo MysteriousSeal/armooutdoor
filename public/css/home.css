@@ -1138,6 +1138,10 @@
         font-size: 2rem;
     }
 
+    .home .home-cats {
+        grid-template-columns: 1fr;
+    }
+
     .home .home-cats-header {
         flex-direction: column;
         align-items: flex-start;

@@ -44,7 +44,16 @@
                 {{-- Les cartes ont leurs propres libellés, plus courts, et une
                      variante encore plus courte sur cinq colonnes. --}}
                 <span class="card-stock-chip {{ $product->lowStock() ? 'is-low-stock' : ($product->inStock() ? 'is-in-stock' : ($cardRestocking ? 'is-restocking' : ($availableAtSupplier ? 'is-at-supplier' : 'is-out-of-stock'))) }}">
-                    {{ $product->lowStock() ? __($fiveColumn ? 'store.low_stock_short' : 'store.low_stock') : ($product->inStock() ? __('store.in_stock') : ($cardRestocking ? __($fiveColumn ? 'store.card_restocking_short' : 'store.card_restocking') : ($availableAtSupplier ? __($fiveColumn ? 'store.card_available_at_supplier_short' : 'store.card_available_at_supplier') : __('store.out_of_stock')))) }}
+                    @if ($product->lowStock() && ! $fiveColumn)
+                        {{-- Below 640px the full label wraps and crowds the price, so the short one takes over there. --}}
+                        <span class="card-stock-chip-full">{{ __('store.low_stock') }}</span><span class="card-stock-chip-short">{{ __('store.low_stock_short') }}</span>
+                    @elseif (! $product->lowStock() && ! $product->inStock() && ! $cardRestocking && $availableAtSupplier && ! $fiveColumn)
+                        <span class="card-stock-chip-full">{{ __('store.card_available_at_supplier') }}</span><span class="card-stock-chip-short">{{ __('store.card_available_at_supplier_short') }}</span>
+                    @elseif (! $product->lowStock() && ! $product->inStock() && $cardRestocking && ! $fiveColumn)
+                        <span class="card-stock-chip-full">{{ __('store.card_restocking') }}</span><span class="card-stock-chip-short">{{ __('store.card_restocking_short') }}</span>
+                    @else
+                        {{ $product->lowStock() ? __('store.low_stock_short') : ($product->inStock() ? __('store.in_stock') : ($cardRestocking ? __($fiveColumn ? 'store.card_restocking_short' : 'store.card_restocking') : ($availableAtSupplier ? __($fiveColumn ? 'store.card_available_at_supplier_short' : 'store.card_available_at_supplier') : __('store.out_of_stock')))) }}
+                    @endif
                 </span>
             </div>
             <div class="card-rating">
