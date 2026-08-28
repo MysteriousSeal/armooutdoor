@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-28 — v0.22.1 — build JA0IVA
+
+### Storefront
+
+**Fixed:** the mobile category menu could become unclosable on iOS Safari. Its position is measured in JavaScript against the header, and page scroll is locked while it's open — but iOS Safari's own address bar collapses and expands independently of that measurement, and could occasionally throw it off enough for the menu to render over its own toggle button, with no way left to reach it. A close button now sits fixed to the screen itself, inside the menu, unaffected by wherever the menu's own position ends up — a guaranteed way out regardless. It only appears on iOS Safari, the one browser this can happen on; every other browser's menu is unaffected and keeps its plain toggle button as the only way to close it.
+
 ## 2026-08-28 — v0.22.0 — build JMRP3F
 
 ### Storefront
