@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-28 — v0.23.1 — build A3119V
+
+### Admin
+
+- **A review can be read where the customers read it.** Each line of the Reviews page now carries a "View in shop" button next to Delete, opening the product's storefront page in a new tab, landed directly on its reviews section rather than the top of the page. It shows for every admin, not just the owner — reading the shop isn't a destructive act — and steps aside when the review's product has since been deleted, there being nothing left to view.
+
 ## 2026-08-28 — v0.23.0 — build 1YH5FE
 
 ### Admin
