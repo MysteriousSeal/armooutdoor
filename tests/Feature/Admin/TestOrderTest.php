@@ -202,7 +202,10 @@ class TestOrderTest extends TestCase
             ->assertSee($test->number)
             ->assertSee('badge-test', false)
             ->assertSee('excluding 1 test order')
-            ->assertSee(format_euros(1500).' spent');
+            // The total lives in the "Total spent" tile now, amount on its
+            // own line rather than a "… spent" chip.
+            ->assertSee('Total spent')
+            ->assertSee(format_euros(1500));
     }
 
     public function test_the_customer_list_agrees_with_the_customer_profile(): void
