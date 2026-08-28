@@ -11,24 +11,12 @@
 
                 <form method="POST" action="{{ localized_route('password.update') }}" class="auth-form">
                     @csrf
+                    {{-- No email field: the token is the whole identity here.
+                         Showing or resending the address would only leak it. --}}
                     <input type="hidden" name="token" value="{{ $token }}">
-
-                    <div class="form-group">
-                        <label for="email">{{ __('store.email') }}</label>
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            class="form-control"
-                            value="{{ old('email', $email) }}"
-                            required
-                            autofocus
-                            autocomplete="email"
-                        >
-                        @error('email')
-                            <p class="form-error">{{ $message }}</p>
-                        @enderror
-                    </div>
+                    @error('token')
+                        <p class="form-error">{{ $message }}</p>
+                    @enderror
 
                     <div class="form-group">
                         <label for="password">{{ __('store.password') }}</label>
@@ -38,6 +26,7 @@
                             name="password"
                             class="form-control"
                             required
+                            autofocus
                             autocomplete="new-password"
                         >
                         @error('password')

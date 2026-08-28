@@ -4996,3 +4996,31 @@ body.has-menu-open {
         padding: 0 0.55rem;
     }
 }
+
+/* Le rond qui tourne dans le bouton pendant l'envoi : invisible au repos,
+   il pousse le libellé d'un cran quand la requête part. */
+.btn-loader {
+    display: none;
+    width: 0.9em;
+    height: 0.9em;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: btn-loader-spin 0.7s linear infinite;
+}
+
+.btn.is-loading {
+    pointer-events: none;
+}
+
+.btn.is-loading .btn-loader {
+    display: inline-block;
+    vertical-align: -0.1em;
+    margin-right: 0.45em;
+}
+
+@keyframes btn-loader-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

@@ -10,7 +10,7 @@
                 <h2>{{ __('store.forgot_password_title') }}</h2>
                 <p class="auth-card-intro">{{ __('store.forgot_password_intro') }}</p>
 
-                <form method="POST" action="{{ localized_route('password.email') }}" class="auth-form">
+                <form method="POST" action="{{ localized_route('password.email') }}" class="auth-form" id="forgot-password-form" data-throttle-message="{{ __('store.password_reset_throttled') }}">
                     @csrf
 
                     <div class="form-group">
@@ -30,7 +30,10 @@
                         @enderror
                     </div>
 
-                    <button type="submit" class="btn btn-primary btn-block">{{ __('store.send_reset_link') }}</button>
+                    <button type="submit" class="btn btn-primary btn-block" data-done-label="{{ __('store.send_reset_link_done') }}">
+                        <span class="btn-loader" aria-hidden="true"></span>
+                        {{ __('store.send_reset_link') }}
+                    </button>
                 </form>
 
                 <p class="auth-card-footer">
@@ -40,3 +43,7 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('js/forgot-password.js') }}" defer></script>
+@endpush

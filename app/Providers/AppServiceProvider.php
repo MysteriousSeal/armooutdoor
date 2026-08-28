@@ -43,11 +43,10 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureRateLimiting();
 
+        // Token only — the address stays out of the URL, where it would
+        // otherwise linger in browser history and server logs.
         ResetPassword::createUrlUsing(function ($notifiable, string $token): string {
-            return localized_route('password.reset', [
-                'token' => $token,
-                'email' => $notifiable->getEmailForPasswordReset(),
-            ], 'fr');
+            return localized_route('password.reset', ['token' => $token], 'fr');
         });
 
         View::composer('layouts.app', function ($view): void {

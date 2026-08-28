@@ -415,8 +415,10 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
 
     Route::get('/forgot-password', [ForgotPasswordController::class, 'create'])->name('password.request');
+    // Looser than it looks: the controller already holds each address to one
+    // send a minute, so this IP-wide cap only guards against bulk abuse.
     Route::post('/forgot-password', [ForgotPasswordController::class, 'store'])
-        ->middleware('throttle:5,1')
+        ->middleware('throttle:12,1')
         ->name('password.email');
     Route::get('/reset-password/{token}', [ResetPasswordController::class, 'create'])->name('password.reset');
     Route::post('/reset-password', [ResetPasswordController::class, 'store'])->name('password.update');
