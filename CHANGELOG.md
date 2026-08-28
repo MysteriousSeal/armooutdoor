@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-28 — v0.23.0 — build 1YH5FE
+
+### Admin
+
+- **Reviews get their own page, under Catalog.** Until now a review could only be read where it was written — on its product's page, one product at a time. The new page reads the shop's whole voice at once: every review newest first, each carrying its product, its customer, its order and its date, all linking to their own admin pages. A strip up top gives the average rating, the total, and how the stars spread from five down to one; subtabs narrow the list to a single rating, and a search finds reviews by product name, reference, customer name or email.
+
+  A review that shouldn't stay can be deleted — owner only, like the rest of what destroys data — behind the admin's usual confirmation dialog, and the deletion lands in the activity log. It disappears from the product page for good; the customer isn't notified.
+
 ## 2026-08-28 — v0.22.0 — build JMRP3F
 
 ### Storefront
