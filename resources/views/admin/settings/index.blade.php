@@ -40,6 +40,10 @@
                     <span class="admin-stat-label">Stripe payments</span>
                     <span class="admin-stat-value admin-stat-value--sm">All checkout sessions and their matching orders</span>
                 </a>
+                <a href="{{ route('admin.settings.email') }}" class="admin-stat-card">
+                    <span class="admin-stat-label">Email test</span>
+                    <span class="admin-stat-value admin-stat-value--sm">Send a test email and inspect the mail transport</span>
+                </a>
             @endif
         </div>
     </div>

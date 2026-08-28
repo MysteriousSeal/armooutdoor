@@ -309,6 +309,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/settings/invoice', [AdminInvoiceSettingController::class, 'update'])->name('settings.invoice.update');
         Route::put('/settings/carriers/{carrier}/price-tiers', [AdminCarrierPriceTierController::class, 'update'])->name('settings.carriers.price-tiers.update');
         Route::get('/settings/orders', [AdminSettingsController::class, 'orders'])->name('settings.orders.edit');
+        Route::get('/settings/email', [AdminSettingsController::class, 'email'])->middleware('admin.owner')->name('settings.email');
+        Route::post('/settings/email/test', [AdminSettingsController::class, 'sendTestEmail'])->middleware('admin.owner')->name('settings.email.test');
         Route::post('/settings/marketplaces', [AdminMarketplaceController::class, 'store'])->name('settings.marketplaces.store');
         Route::put('/settings/marketplaces/{marketplace}', [AdminMarketplaceController::class, 'update'])->name('settings.marketplaces.update');
         Route::delete('/settings/marketplaces/{marketplace}', [AdminMarketplaceController::class, 'destroy'])->name('settings.marketplaces.destroy');
