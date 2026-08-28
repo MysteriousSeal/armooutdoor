@@ -471,6 +471,10 @@ body.has-menu-open {
     display: none;
 }
 
+.sort-tab--account {
+    display: none;
+}
+
 .sort-tab:hover,
 .nav-item:hover > .sort-tab,
 .nav-item:focus-within > .sort-tab {
@@ -2957,6 +2961,35 @@ body.has-menu-open {
     letter-spacing: 0.05em;
 }
 
+.account-hub-logout {
+    display: flex;
+    justify-content: center;
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+}
+
+.account-logout-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.75rem 1.5rem;
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: transparent;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.account-logout-btn:hover {
+    color: var(--accent-hover);
+    border-color: var(--accent);
+    background: var(--surface);
+}
+
 .account-card {
     max-width: 36rem;
 }
@@ -4563,8 +4596,15 @@ body.has-menu-open {
         justify-content: flex-end;
     }
 
+    .site-menu-toggle {
+        width: 2.4rem;
+        padding: 0;
+        justify-content: center;
+    }
+
     .sort-tab--contact {
-        padding: 0 0.75rem;
+        width: 2.4rem;
+        padding: 0;
     }
 
     .sort-tab--contact .sort-tab-icon {
@@ -4577,7 +4617,14 @@ body.has-menu-open {
 
     .cart-btn--subheader-mobile {
         display: inline-flex;
+        width: 2.4rem;
         height: 2.4rem;
+        padding: 0;
+    }
+
+    /* The badge needs room the fixed icon width can't spare it. */
+    .cart-btn--subheader-mobile:has(.cart-badge:not([hidden])) {
+        width: auto;
         padding: 0 0.75rem;
     }
 
@@ -4591,9 +4638,38 @@ body.has-menu-open {
 
     .theme-toggle-btn--subheader-mobile {
         display: inline-flex;
+        width: 2.4rem;
+        height: 2.4rem;
     }
 
     .theme-toggle-btn:not(.theme-toggle-btn--subheader-mobile) {
+        display: none;
+    }
+
+    .sort-tab--account {
+        display: inline-flex;
+        width: 2.4rem;
+        gap: 0.35rem;
+        padding: 0;
+    }
+
+    /* Same exception as cart: an unread-message count needs the room. */
+    .sort-tab--account:has(.site-auth-badge) {
+        width: auto;
+        padding: 0 0.75rem;
+    }
+
+    .sort-tab--account .sort-tab-icon {
+        display: inline-flex;
+    }
+
+    .site-auth-name,
+    .site-auth-logout,
+    .site-auth-guest-link {
+        display: none;
+    }
+
+    .site-auth {
         display: none;
     }
 

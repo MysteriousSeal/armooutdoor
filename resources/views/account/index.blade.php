@@ -123,5 +123,18 @@
                 </span>
             </a>
         </div>
+
+        <div class="account-hub-logout">
+            <form action="{{ localized_route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="account-logout-btn">
+                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                        <path d="M15 4h-4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M19 12H9m10 0-3-3m3 3-3 3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    {{ __('store.logout') }}
+                </button>
+            </form>
+        </div>
     </div>
 @endsection

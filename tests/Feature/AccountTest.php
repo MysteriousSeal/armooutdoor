@@ -38,6 +38,22 @@ class AccountTest extends TestCase
             ->assertSee('Adresses');
     }
 
+    public function test_account_hub_can_log_the_user_out(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get('/account')
+            ->assertOk()
+            ->assertSee(__('store.logout'));
+
+        $this->actingAs($user)
+            ->post(localized_route('logout'))
+            ->assertRedirect();
+
+        $this->assertGuest();
+    }
+
     public function test_a_user_can_update_their_profile(): void
     {
         $user = User::factory()->create([

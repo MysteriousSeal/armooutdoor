@@ -97,6 +97,32 @@
                             {{ __('store.nav_blog') }}
                         </a>
                         @include('partials.cart-button', ['class' => 'cart-btn--subheader-mobile'])
+                        @auth
+                            <a
+                                href="{{ localized_route('account.index') }}"
+                                class="sort-tab sort-tab--account {{ request()->routeIs('account.*') ? 'active' : '' }}"
+                                aria-label="{{ auth()->user()->name }}"
+                            >
+                                <span class="sort-tab-icon" aria-hidden="true">
+                                    @include('partials.icon', ['name' => 'user', 'size' => 16])
+                                </span>
+                                @if ($unreadConversationCount > 0)
+                                    <span class="site-auth-badge" aria-label="{{ trans_choice('store.conversation_unread_count', $unreadConversationCount, ['count' => $unreadConversationCount]) }}">
+                                        {{ $unreadConversationCount }}
+                                    </span>
+                                @endif
+                            </a>
+                        @else
+                            <a
+                                href="{{ localized_route('login') }}"
+                                class="sort-tab sort-tab--account {{ request()->routeIs('login') ? 'active' : '' }}"
+                                aria-label="{{ __('store.login') }}"
+                            >
+                                <span class="sort-tab-icon" aria-hidden="true">
+                                    @include('partials.icon', ['name' => 'user', 'size' => 16])
+                                </span>
+                            </a>
+                        @endauth
                         <a
                             href="{{ localized_route('contact.show') }}"
                             class="sort-tab sort-tab--contact {{ request()->routeIs('contact.show') ? 'active' : '' }}"
@@ -153,8 +179,8 @@
                             <button type="submit" class="btn btn-sm btn-secondary">{{ __('store.logout') }}</button>
                         </form>
                     @else
-                        <a href="{{ localized_route('login') }}" class="btn btn-sm btn-secondary {{ request()->routeIs('login') ? 'is-active' : '' }}">{{ __('store.login') }}</a>
-                        <a href="{{ localized_route('register') }}" class="btn btn-sm btn-primary {{ request()->routeIs('register') ? 'is-active' : '' }}">{{ __('store.register') }}</a>
+                        <a href="{{ localized_route('login') }}" class="btn btn-sm btn-secondary site-auth-guest-link {{ request()->routeIs('login') ? 'is-active' : '' }}">{{ __('store.login') }}</a>
+                        <a href="{{ localized_route('register') }}" class="btn btn-sm btn-primary site-auth-guest-link {{ request()->routeIs('register') ? 'is-active' : '' }}">{{ __('store.register') }}</a>
                     @endauth
                 </div>
             </div>

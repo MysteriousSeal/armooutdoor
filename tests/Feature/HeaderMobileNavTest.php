@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -133,6 +134,112 @@ class HeaderMobileNavTest extends TestCase
 
         $this->assertStringContainsString('.theme-toggle-btn:not(.theme-toggle-btn--subheader-mobile) {
         display: none;
+    }', $css);
+    }
+
+    public function test_guest_gets_a_compact_login_icon_on_mobile(): void
+    {
+        $html = $this->get('/')->getContent();
+
+        $subheaderNav = \Illuminate\Support\Str::before(
+            \Illuminate\Support\Str::after($html, 'class="sort-tabs"'),
+            '</nav>'
+        );
+
+        $this->assertStringContainsString('sort-tab--account', $subheaderNav);
+        $this->assertStringContainsString(route('login'), $subheaderNav);
+        $this->assertStringContainsString('site-auth-guest-link', $html);
+    }
+
+    public function test_logged_in_user_gets_account_icon_and_name_logout_hidden_on_mobile(): void
+    {
+        $user = User::factory()->create(['first_name' => 'Jean']);
+        $html = $this->actingAs($user)->get('/')->getContent();
+
+        $subheaderNav = \Illuminate\Support\Str::before(
+            \Illuminate\Support\Str::after($html, 'class="sort-tabs"'),
+            '</nav>'
+        );
+
+        $this->assertStringContainsString('sort-tab--account', $subheaderNav);
+        $this->assertStringContainsString(route('account.index'), $subheaderNav);
+
+        $css = (string) file_get_contents(public_path('css/app.css'));
+
+        $this->assertStringContainsString('.site-auth-name,
+    .site-auth-logout,
+    .site-auth-guest-link {
+        display: none;
+    }', $css);
+    }
+
+    public function test_account_icon_is_actually_shown_on_mobile(): void
+    {
+        $css = (string) file_get_contents(public_path('css/app.css'));
+
+        // .sort-tab--account being visible isn't enough — the icon span
+        // inside it defaults to display:none and needs its own override.
+        $this->assertStringContainsString('.sort-tab--account .sort-tab-icon {
+        display: inline-flex;
+    }', $css);
+    }
+
+    public function test_now_empty_site_auth_container_is_hidden_on_mobile(): void
+    {
+        // .site-auth has no visible children left below 640px (all moved into
+        // .sort-tabs), but was still wrapping onto its own empty row and
+        // adding a phantom gap below the button row. Hiding the container
+        // itself removes that.
+        $css = (string) file_get_contents(public_path('css/app.css'));
+
+        $this->assertStringContainsString('.site-auth {
+        display: none;
+    }', $css);
+    }
+
+    public function test_mobile_theme_toggle_matches_the_row_height(): void
+    {
+        $css = (string) file_get_contents(public_path('css/app.css'));
+
+        $this->assertStringContainsString('.theme-toggle-btn--subheader-mobile {
+        display: inline-flex;
+        width: 2.4rem;
+        height: 2.4rem;
+    }', $css);
+    }
+
+    public function test_mobile_icon_buttons_share_a_fixed_width(): void
+    {
+        $css = (string) file_get_contents(public_path('css/app.css'));
+
+        foreach ([
+            '.site-menu-toggle {
+        width: 2.4rem;',
+            '.sort-tab--contact {
+        width: 2.4rem;',
+            '.cart-btn--subheader-mobile {
+        display: inline-flex;
+        width: 2.4rem;',
+            '.sort-tab--account {
+        display: inline-flex;
+        width: 2.4rem;',
+        ] as $rule) {
+            $this->assertStringContainsString($rule, $css);
+        }
+    }
+
+    public function test_cart_and_account_widen_to_fit_their_badge(): void
+    {
+        $css = (string) file_get_contents(public_path('css/app.css'));
+
+        $this->assertStringContainsString('.cart-btn--subheader-mobile:has(.cart-badge:not([hidden])) {
+        width: auto;
+        padding: 0 0.75rem;
+    }', $css);
+
+        $this->assertStringContainsString('.sort-tab--account:has(.site-auth-badge) {
+        width: auto;
+        padding: 0 0.75rem;
     }', $css);
     }
 
