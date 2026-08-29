@@ -10,6 +10,7 @@ use App\Http\Controllers\Account\ProfileController;
 use App\Http\Controllers\Admin\AccountingController as AdminAccountingController;
 use App\Http\Controllers\Admin\ActivityController as AdminActivityController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\AnalyticsController as AdminAnalyticsController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\BackupController as AdminBackupController;
 use App\Http\Controllers\Admin\BlogPostController as AdminBlogPostController;
@@ -105,6 +106,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
         Route::get('/changelog', AdminChangelogController::class)->name('changelog');
         Route::get('/search', [AdminSearchController::class, 'index'])->name('search');
+        Route::get('/analytics', [AdminAnalyticsController::class, 'index'])->name('analytics.index');
+        Route::get('/analytics/active-now', [AdminAnalyticsController::class, 'activeNow'])->name('analytics.active-now');
         // Owner only, like the rest of what touches money: these pages will
         // carry revenue and costs.
         Route::middleware('admin.owner')->group(function (): void {
