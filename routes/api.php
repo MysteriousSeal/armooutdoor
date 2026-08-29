@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Admin\AdminUserController as ApiAdminAdminUserController;
+use App\Http\Controllers\Api\Admin\AnalyticsController as ApiAdminAnalyticsController;
 use App\Http\Controllers\Api\Admin\BlogPostController as ApiAdminBlogPostController;
 use App\Http\Controllers\Api\Admin\CategoryController as ApiAdminCategoryController;
 use App\Http\Controllers\Api\Admin\OrderController as ApiAdminOrderController;
@@ -30,6 +31,9 @@ Route::middleware(['throttle:admin-api', 'admin.api'])->prefix('admin')->name('a
     // Orders
     Route::post('/orders', [ApiAdminOrderController::class, 'createDraft'])->name('orders.store');
     Route::patch('/orders/{order}', [ApiAdminOrderController::class, 'updateDraft'])->name('orders.update');
+
+    // Analytics
+    Route::get('/analytics', [ApiAdminAnalyticsController::class, 'index'])->name('analytics.index');
 
     // Admin users
     Route::get('/admins', [ApiAdminAdminUserController::class, 'index'])->name('admins.index');

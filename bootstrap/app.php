@@ -4,6 +4,7 @@ use App\Http\Middleware\EnsureAdminApiToken;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\EnsureUserIsNotBanned;
 use App\Http\Middleware\EnsureUserIsOwner;
+use App\Http\Middleware\RecordSiteVisit;
 use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -21,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             EnsureUserIsNotBanned::class,
             SecurityHeaders::class,
+            RecordSiteVisit::class,
         ]);
 
         $middleware->alias([

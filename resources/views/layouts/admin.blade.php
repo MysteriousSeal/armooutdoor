@@ -37,6 +37,16 @@
             </div>
 
             <div class="admin-nav-actions">
+                <a
+                    href="{{ route('admin.analytics.index') }}"
+                    class="admin-list-chip admin-active-now-chip admin-nav-active-now"
+                    id="admin-nav-active-now"
+                    title="Distinct visitors with a page view in the last 2 minutes"
+                >
+                    <span class="admin-active-now-dot" aria-hidden="true"></span>
+                    <span class="admin-active-now-count">&hellip;</span>
+                    active
+                </a>
                 <form action="{{ route('admin.search') }}" method="GET" class="admin-nav-search">
                     <input
                         type="search"
@@ -167,6 +177,7 @@
                 <div class="admin-nav-menu admin-nav-menu--right" data-nav-menu hidden>
                     <a href="{{ route('admin.settings.index') }}" class="admin-nav-menu-item {{ request()->routeIs('admin.settings.*', 'admin.stripe.*') ? 'active' : '' }}">Settings</a>
                     <a href="{{ route('admin.activity') }}" class="admin-nav-menu-item {{ request()->routeIs('admin.activity') ? 'active' : '' }}">Activity</a>
+                    <a href="{{ route('admin.analytics.index') }}" class="admin-nav-menu-item {{ request()->routeIs('admin.analytics.*') ? 'active' : '' }}">Analytics</a>
                     @if ($isOwner)
                         {{-- Owner only, like the accounts: an archive holds every
                              order and every customer's address. --}}
@@ -213,6 +224,11 @@
     <script src="{{ asset('js/pretty-select.js') }}" defer></script>
     <script src="{{ asset('js/theme-toggle.js') }}" defer></script>
     <script src="{{ asset('js/admin-modal.js') }}" defer></script>
+    <script
+        src="{{ asset('js/admin-active-now.js') }}"
+        data-active-now-url="{{ route('admin.analytics.active-now') }}"
+        defer
+    ></script>
     @stack('scripts')
 </body>
 </html>
