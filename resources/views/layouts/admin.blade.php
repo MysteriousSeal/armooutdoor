@@ -52,7 +52,7 @@
                         type="search"
                         name="q"
                         class="admin-nav-search-input"
-                        placeholder="Search orders, customers, products…"
+                        placeholder="Search…"
                         value="{{ request()->routeIs('admin.search') ? request()->query('q') : '' }}"
                     >
                 </form>
