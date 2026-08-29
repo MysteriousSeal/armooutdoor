@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-29 — v0.28.0 — build 23WERS
+
+### Admin
+
+- **The shop now knows who's at the door.** Every public page view is written down — path, referrer, country and city, browser, device — and a new Analytics page under System reads it back: stat tiles for the chosen range, donut charts breaking traffic down by country, operating system, device, browser and logged-in versus guest, and a paginated log of every visit, each line linking a signed-in customer to their page. Bots are counted apart from people, caught two ways: by what they call themselves, and by how they behave — an IP firing twelve page loads inside a minute is automated no matter how honest its user agent looks, and gets flagged as such in the log. Four range tabs (24 hours, 7 days, 30 days, all time) frame everything on the page at once.
+
+  The recording itself costs the visitor nothing: it runs after their page has already been sent, and the geo lookup — CDN headers first, then a cached lookup, a day per address — is skipped entirely for bots and never allowed to wait long. The same visit log is also served as JSON at `/api/admin/analytics`, behind the same token as the rest of the admin API.
+
+- **A live pulse in the nav bar.** Next to the search field, a chip counts distinct visitors seen in the last two minutes, refreshing itself every ten seconds and glowing green when someone's actually there. It links to the Analytics page, where the same figure sits among the tiles, split into logged in, guests and bots.
+
 ## 2026-08-28 — v0.27.0 — build PT7XEW
 
 ### Storefront
