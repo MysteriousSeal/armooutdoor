@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-30 — v0.32.0 — build O4MGCS
+
+### Storefront
+
+- **The order writes again when someone starts packing it.** A short note this time — "votre commande est en préparation", we'll tell you when it ships, a button to follow it — rather than a second receipt. Sent only on the actual move into preparation, so an admin re-clicking the status never writes the customer twice, and to the same audience as the confirmation: marketplace orders and hand-typed accounts hear nothing. The policy the two emails share now lives under one name on the order, ready for the shipping email when its turn comes.
+
 ## 2026-08-30 — v0.31.0 — build 2ESZMM
 
 ### Storefront
