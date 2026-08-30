@@ -2,6 +2,20 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-30 — v0.35.0 — build WI1B7V
+
+### Admin
+
+- **The shop hears about its own orders.** Every path that makes an order real — the checkout, the Stripe finalizer, a manual creation, a validated draft — now also emails the address in `ORDER_NOTIFICATION_EMAIL` (blank meaning nobody). The full receipt, headed by the channel — website, manual, or the marketplace's name — and buttoned straight to the admin order page; the subject alone carries number and total, so the inbox list reads as a sales feed. Drafts stay silent until validated, and a mail outage logs rather than failing the order.
+
+### Storefront
+
+- **The legal pages caught up with the shop.** The CGV stop announcing themselves as a template, reserve regulated products (airsoft replicas, knives) to adults — what the product pages already promised — say delivery is mainland France only, and cite L612-1: the consumer mediator is named from two new company settings once the shop joins a scheme, with the EU dispute-resolution platform linked either way. The privacy policy owns up to the site's own audience measurement (visited pages and IP, cookieless, first-party) and names the actual processors — Stripe, the carriers, Sendcloud, the host. The withdrawal delay now runs from receipt by the customer or a designee. The wording still deserves a professional read before launch.
+
+- **Nothing promises PayPal any more while the checkout has it disabled.** The FAQ — whose answers feed its search-result markup — the secure-payment page, the footer and the homepage badges all said card or PayPal; they now say card, PayPal soon. The payment page keeps the PayPal logo, greyed, wearing the checkout's own "Bientôt disponible" chip, and finally names who actually handles the card: Stripe, with 3-D Secure. The FAQ's contact answer points at the real contact form, and every delivery mention agrees on France métropolitaine.
+
+**Migration:** one, run with `php artisan migrate` — two nullable mediator columns on company settings. Nothing is deleted.
+
 ## 2026-08-30 — v0.34.1 — build 3ZX692
 
 ### Under the hood
