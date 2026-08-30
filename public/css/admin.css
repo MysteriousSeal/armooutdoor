@@ -9658,3 +9658,8 @@ a.order-stepper-btn:focus-visible {
         max-height: 50vh;
     }
 }
+
+/* Under the composer of a guest thread: where the reply actually lands. */
+.admin-guest-reply-hint {
+    margin: 0.6rem 0 0;
+}

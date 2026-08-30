@@ -23,7 +23,54 @@ class Conversation extends Model
             'last_admin_message_at' => 'datetime',
             'admin_last_read_at' => 'datetime',
             'customer_last_read_at' => 'datetime',
+            'closed_at' => 'datetime',
         ];
+    }
+
+    /**
+     * How long a guest's private link keeps working after the thread closes.
+     */
+    public const GUEST_LINK_GRACE_DAYS = 30;
+
+    /**
+     * Hands the guest thread its private link key, minting one the first
+     * time it's asked for. Account threads never get one — their door is
+     * the account.
+     */
+    public function ensureGuestToken(): string
+    {
+        if ($this->guest_token === null) {
+            $this->guest_token = \Illuminate\Support\Str::random(48);
+            $this->save();
+        }
+
+        return $this->guest_token;
+    }
+
+    /**
+     * Whether the guest link should still open. Open threads always do;
+     * closed ones for a month, so an answer can still be read but old links
+     * in inboxes eventually go dead.
+     */
+    public function guestLinkUsable(): bool
+    {
+        if ($this->guest_token === null) {
+            return false;
+        }
+
+        if ($this->isOpen()) {
+            return true;
+        }
+
+        return $this->closed_at !== null
+            && $this->closed_at->gt(now()->subDays(self::GUEST_LINK_GRACE_DAYS));
+    }
+
+    public function guestUrl(): ?string
+    {
+        return $this->guest_token !== null
+            ? route('guest.conversations.show', ['token' => $this->guest_token])
+            : null;
     }
 
     public function user(): BelongsTo

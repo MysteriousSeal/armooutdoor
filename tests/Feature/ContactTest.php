@@ -707,8 +707,10 @@ class ContactTest extends TestCase
         $this->actingAs($admin)
             ->get('/admin/conversations/'.$message->id)
             ->assertOk()
-            ->assertSee('admin-message-link-chip--admin', false)
-            ->assertDontSee('Customer account')
+            // The sidebar names the sender as an admin rather than offering
+            // a customer-page link that would 404.
+            ->assertSee('This thread belongs to an admin account.')
+            ->assertDontSee('View customer page')
             ->assertDontSee(route('admin.customers.show', $sender), false);
     }
 

@@ -63,28 +63,34 @@ class ConversationNotificationTest extends TestCase
         Notification::assertNothingSent();
     }
 
-    public function test_a_guest_thread_never_produces_a_notification(): void
+    public function test_a_guest_thread_notifies_the_guest_at_their_own_address(): void
     {
         Notification::fake();
 
         $admin = User::factory()->admin()->create();
         $conversation = $this->conversationFor(null);
 
-        // Replying is refused outright for a guest thread…
         $this->actingAs($admin)
             ->post(route('admin.conversations.reply', $conversation), ['body' => 'Bonjour'])
-            ->assertForbidden();
+            ->assertRedirect();
 
-        Notification::assertNothingSent();
+        Notification::assertSentOnDemand(
+            ConversationReplied::class,
+            fn ($notification, $channels, $notifiable) => $notifiable->routes['mail'] === $conversation->email,
+        );
     }
 
-    public function test_the_notification_declines_to_send_on_a_guest_thread(): void
+    public function test_the_notification_declines_a_guest_thread_without_a_link(): void
     {
-        // …and even called directly, it refuses to pick a delivery channel.
+        // A guest thread only speaks once it holds a private link to point at.
         $conversation = $this->conversationFor(null);
         $notification = new ConversationReplied($conversation);
 
         $this->assertSame([], $notification->via(new User));
+
+        $conversation->ensureGuestToken();
+
+        $this->assertSame(['mail'], (new ConversationReplied($conversation->fresh()))->via(new User));
     }
 
     public function test_the_notification_uses_mail_for_a_customer_thread(): void

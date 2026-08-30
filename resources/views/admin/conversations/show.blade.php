@@ -46,16 +46,7 @@
                         @include('partials.conversation-thread', ['conversation' => $conversation, 'viewer' => 'admin'])
                     </div>
 
-                    @if ($conversation->isGuest())
-                        <div class="thread-guest-note admin-composer-note">
-                            <p class="form-hint">
-                                This message came from someone who wasn't signed in, so there's no account for
-                                them to read a reply in. Answer them by email instead.
-                            </p>
-                            <a href="mailto:{{ $conversation->email }}?subject={{ rawurlencode('Re: '.$conversation->subject) }}" class="btn btn-primary">Reply by email</a>
-                        </div>
-                    @else
-                        <div class="thread-closed-note admin-composer-note" id="conversation-closed-note" @if (! $conversation->isClosed()) hidden @endif>
+                    <div class="thread-closed-note admin-composer-note" id="conversation-closed-note" @if (! $conversation->isClosed()) hidden @endif>
                             <p class="form-hint">This conversation is closed. Reopen it to send a reply.</p>
                             <form method="POST" action="{{ route('admin.conversations.reopen', $conversation) }}" data-status-form="reopen">
                                 @csrf
@@ -84,8 +75,12 @@
                                     Send reply
                                 </button>
                             </div>
+                            @if ($conversation->isGuest())
+                                <p class="form-hint admin-guest-reply-hint">
+                                    No account behind this thread: they read and answer through a private link emailed to {{ $conversation->email }}.
+                                </p>
+                            @endif
                         </form>
-                    @endif
                 </section>
             </div>
 

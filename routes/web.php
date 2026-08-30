@@ -49,6 +49,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\GuestConversationController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\HelpController;
 use App\Http\Controllers\HomeController;
@@ -375,6 +376,15 @@ Route::view('/droit-de-retractation', 'legal.withdrawal')->name('legal.withdrawa
 Route::get('/faq', [FaqController::class, 'index'])->name('faq');
 Route::get('/contact', [ContactController::class, 'create'])->name('contact.show');
 Route::post('/contact', [ContactController::class, 'store'])->middleware('throttle:5,1')->name('contact.store');
+// A guest's private thread: the token is the whole key, so the routes accept
+// nothing shorter than a real one.
+Route::get('/messages/{token}', [GuestConversationController::class, 'show'])
+    ->where('token', '[A-Za-z0-9]{48}')
+    ->name('guest.conversations.show');
+Route::post('/messages/{token}/reply', [GuestConversationController::class, 'reply'])
+    ->where('token', '[A-Za-z0-9]{48}')
+    ->middleware('throttle:10,1')
+    ->name('guest.conversations.reply');
 Route::get('/livraison-et-retours', [HelpController::class, 'shippingReturns'])->name('help.shipping-returns');
 Route::get('/paiement-securise', [HelpController::class, 'securePayment'])->name('help.secure-payment');
 

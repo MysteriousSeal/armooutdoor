@@ -5024,3 +5024,109 @@ body.has-menu-open {
         transform: rotate(360deg);
     }
 }
+
+/* La page privée d'un échange sans compte : une seule carte, comme une
+   lettre — l'en-tête dit de quoi on parle, le fil se lit dessous, et la
+   réponse s'écrit au bas de la même feuille. */
+.guest-conversation-page {
+    max-width: 44rem;
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+}
+
+.guest-thread-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.guest-thread-head {
+    padding: 1.5rem 1.75rem 1.35rem;
+    border-bottom: 1px solid var(--border);
+    /* Un liseré discret aux couleurs de la boutique, pour que la carte ait
+       une tête et pas seulement des bords. */
+    border-top: 3px solid var(--accent);
+}
+
+.guest-conversation-kicker {
+    margin: 0 0 0.4rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.guest-thread-title {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.guest-thread-chip {
+    padding: 0.15rem 0.6rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.guest-thread-meta {
+    margin: 0.45rem 0 0;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+/* Le fil respire sur un fond légèrement en retrait de la carte, comme les
+   bulles d'une messagerie. */
+.guest-thread-body {
+    padding: 1.5rem 1.75rem 0.5rem;
+    background: color-mix(in srgb, var(--bg) 55%, var(--surface));
+}
+
+.guest-thread-body .thread {
+    margin-bottom: 1rem;
+}
+
+.guest-thread-foot {
+    padding: 1.25rem 1.75rem 1.5rem;
+    border-top: 1px solid var(--border);
+}
+
+.guest-thread-foot .form-control {
+    resize: vertical;
+}
+
+.guest-conversation-note {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    margin: 1.1rem 0 0;
+    font-size: 0.8125rem;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.guest-conversation-note svg {
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+@media (max-width: 640px) {
+    .guest-thread-head,
+    .guest-thread-body,
+    .guest-thread-foot {
+        padding-left: 1.1rem;
+        padding-right: 1.1rem;
+    }
+}

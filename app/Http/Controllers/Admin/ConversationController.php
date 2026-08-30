@@ -14,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\View\View;
 use Throwable;
 
@@ -71,9 +72,12 @@ class ConversationController extends Controller
 
     public function reply(StoreConversationReplyRequest $request, Conversation $conversation): RedirectResponse|JsonResponse
     {
-        // A guest has no account to read a reply in. Writing one would put an
-        // answer somewhere nobody can ever reach.
-        abort_if($conversation->isGuest(), 403);
+        // A guest reads through their private link instead of an account —
+        // minted here if the thread predates guest links, so the reply email
+        // always has somewhere to point.
+        if ($conversation->isGuest()) {
+            $conversation->ensureGuestToken();
+        }
 
         $message = $conversation->postMessage(
             $request->validated('body'),
@@ -153,7 +157,12 @@ class ConversationController extends Controller
     {
         app()->terminating(function () use ($conversation): void {
             try {
-                $conversation->user?->notify(new ConversationReplied($conversation));
+                if ($conversation->isGuest()) {
+                    Notification::route('mail', $conversation->email)
+                        ->notify(new ConversationReplied($conversation));
+                } else {
+                    $conversation->user->notify(new ConversationReplied($conversation));
+                }
             } catch (Throwable $exception) {
                 Log::error('Could not email a conversation reply notification.', [
                     'conversation_id' => $conversation->id,
@@ -166,6 +175,8 @@ class ConversationController extends Controller
     public function close(Request $request, Conversation $conversation): RedirectResponse|JsonResponse
     {
         $conversation->status = Conversation::STATUS_CLOSED;
+        // From when the guest link's thirty days of grace are counted.
+        $conversation->closed_at = now();
         $conversation->save();
 
         AdminActivityLog::record(
@@ -184,6 +195,7 @@ class ConversationController extends Controller
     public function reopen(Request $request, Conversation $conversation): RedirectResponse|JsonResponse
     {
         $conversation->status = Conversation::STATUS_OPEN;
+        $conversation->closed_at = null;
         $conversation->save();
 
         AdminActivityLog::record(

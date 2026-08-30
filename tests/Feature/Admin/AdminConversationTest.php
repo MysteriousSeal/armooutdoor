@@ -116,21 +116,24 @@ class AdminConversationTest extends TestCase
         $this->assertSame(config('app.name'), $response->json('authorLabel'));
     }
 
-    public function test_replying_to_a_guest_thread_is_refused(): void
+    public function test_replying_to_a_guest_thread_works_and_mints_their_link(): void
     {
         $admin = User::factory()->admin()->create();
         $conversation = $this->conversation();
 
         $this->assertTrue($conversation->isGuest());
+        $this->assertNull($conversation->guest_token);
 
         $this->actingAs($admin)
             ->post(route('admin.conversations.reply', $conversation), ['body' => 'Bonjour'])
-            ->assertForbidden();
+            ->assertRedirect();
 
-        $this->assertDatabaseCount('conversation_messages', 1);
+        $this->assertDatabaseCount('conversation_messages', 2);
+        // The reply is what mints the private link the guest reads it through.
+        $this->assertNotNull($conversation->fresh()->guest_token);
     }
 
-    public function test_a_guest_thread_shows_no_composer_only_an_email_fallback(): void
+    public function test_a_guest_thread_offers_the_composer_with_a_link_hint(): void
     {
         $admin = User::factory()->admin()->create();
         $conversation = $this->conversation();
@@ -138,9 +141,9 @@ class AdminConversationTest extends TestCase
         $this->actingAs($admin)
             ->get(route('admin.conversations.show', $conversation))
             ->assertOk()
-            ->assertDontSee('id="conversation-reply-form"', false)
-            ->assertSee('Reply by email')
-            ->assertSee('mailto:'.$conversation->email, false);
+            ->assertSee('id="conversation-reply-form"', false)
+            ->assertSee('private link emailed to')
+            ->assertSee($conversation->email);
     }
 
     public function test_a_customer_thread_shows_the_composer(): void

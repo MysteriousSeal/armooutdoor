@@ -273,7 +273,7 @@ class ConversationHardeningTest extends TestCase
         $this->assertNull($conversation->messages()->first()->user_id);
     }
 
-    public function test_an_admin_cannot_reply_to_a_thread_whose_customer_was_deleted(): void
+    public function test_a_thread_whose_customer_was_deleted_becomes_a_guest_thread(): void
     {
         $admin = User::factory()->admin()->create();
         $user = User::factory()->create();
@@ -281,16 +281,19 @@ class ConversationHardeningTest extends TestCase
 
         $user->forceDelete();
 
-        // Nobody left to read a reply, so the guest guard takes over.
+        // No account left behind it, so the guest machinery takes over: the
+        // reply lands, and a private emailed link is minted to read it by.
         $this->actingAs($admin)
             ->post(route('admin.conversations.reply', $conversation->fresh()), ['body' => 'Bonjour'])
-            ->assertForbidden();
+            ->assertRedirect();
+
+        $this->assertNotNull($conversation->fresh()->guest_token);
 
         $this->actingAs($admin)
             ->get(route('admin.conversations.show', $conversation->fresh()))
             ->assertOk()
-            ->assertDontSee('id="conversation-reply-form"', false)
-            ->assertSee('Reply by email');
+            ->assertSee('id="conversation-reply-form"', false)
+            ->assertSee('private link emailed to');
     }
 
     public function test_deleting_an_order_leaves_the_thread_intact(): void

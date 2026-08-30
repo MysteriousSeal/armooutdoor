@@ -22,9 +22,9 @@ class ConversationReplied extends Notification
      */
     public function via(object $notifiable): array
     {
-        // A guest thread has no account behind it. Nothing about it should ever
-        // reach an address we never authenticated, whatever the caller thinks.
-        if ($this->conversation->isGuest()) {
+        // A guest thread only speaks once it holds a private link to point
+        // at — never to an address with nothing safe to link to.
+        if ($this->conversation->isGuest() && $this->conversation->guest_token === null) {
             return [];
         }
 
@@ -33,13 +33,19 @@ class ConversationReplied extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
+        $isGuest = $this->conversation->isGuest();
+
         return (new MailMessage)
             ->subject(__('store.conversation_notification_subject', ['subject' => $this->conversation->subject]))
             ->greeting(__('store.conversation_notification_greeting', ['name' => $this->conversation->name]))
-            ->line(__('store.conversation_notification_line'))
+            ->line($isGuest
+                ? __('store.conversation_notification_line_guest')
+                : __('store.conversation_notification_line'))
             ->action(
                 __('store.conversation_notification_action'),
-                localized_route('account.conversations.show', ['conversation' => $this->conversation]),
+                $isGuest
+                    ? $this->conversation->guestUrl()
+                    : localized_route('account.conversations.show', ['conversation' => $this->conversation]),
             )
             ->salutation(__('store.conversation_notification_salutation', ['shop' => config('app.name')]));
     }
