@@ -2,6 +2,22 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-30 — v1.0.1 — build 0E41U4
+
+### Storefront
+
+- **A cookie banner, honestly earned.** Essential cookies — cart, login, theme — stay exempt from consent; the one processing that deserved a question is the session-id audience measurement, and that is precisely the question the banner asks. Declined or unanswered, the visit is still recorded without the identifier; accepted, it groups the pages of a single visit. Two real same-size buttons, a choice that holds for six months, and a "Cookies" footer link to change one's mind — the privacy policy tells the whole story.
+
+- **The copy stops congratulating itself for being French.** The selection is no longer "written in French" and prices no longer proudly "stay in euros" — this is a French shop selling in France, those feats go without saying. In their place, the one claim that means something: prices are shown TTC. The airgun becomes the airsoft the catalogue actually sells (hunting stays, it earns its keep in search), the imaginary workshops close, and the em dashes in visitor-facing prose give way to commas and colons — tab-title separators and empty-cell dashes remain.
+
+### Admin
+
+- **The visitor's path draws itself.** Analytics gains an eight-step flow diagram — entrance to order, every drop-off draining into "Left the site". Sessions group by the real session id every visit now carries (two visitors behind one IP no longer blur together); older rows fall back to the IP-and-thirty-minute-gap approximation. Hovering a node dims everything not connected to it, a legend names the page groups, labels go quiet on nodes too thin to carry them, and the table view groups by step with amber-tinted leaks and share bars.
+
+- **Abandoned carts get their page.** Sales → Carts lists what logged-in customers left sitting in their basket — items, quantities, value, last activity — searchable by name or email. A cart empties itself the instant its order completes, so every row is a purchase still hanging in the balance; guest carts live in their own browsers and never appear.
+
+**Migration:** one, run with `php artisan migrate` — a nullable, indexed `session_id` column on `site_visits`. Existing rows stay null and keep working through the fallback.
+
 ## 2026-08-30 — v0.37.0 — build FQ83MN
 
 ### Admin
