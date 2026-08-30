@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Str;
@@ -155,6 +156,12 @@ class Order extends Model
     public function discountCode(): BelongsTo
     {
         return $this->belongsTo(DiscountCode::class);
+    }
+
+    /** Le code offert depuis cette commande, s'il en existe un. */
+    public function generatedDiscountCode(): HasOne
+    {
+        return $this->hasOne(DiscountCode::class, 'source_order_id');
     }
 
     public function statusHistories(): HasMany

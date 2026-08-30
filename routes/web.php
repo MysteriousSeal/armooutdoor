@@ -298,6 +298,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('/orders/bulk/delete', [AdminOrderController::class, 'bulkDestroy'])->middleware('admin.owner')->name('orders.bulk-destroy');
         Route::delete('/orders/{order}', [AdminOrderController::class, 'destroy'])->middleware('admin.owner')->name('orders.destroy');
         Route::patch('/orders/{order}/tracking', [AdminOrderController::class, 'updateTracking'])->name('orders.tracking.update');
+        Route::post('/orders/{order}/discount-code', [AdminOrderController::class, 'createDiscountCode'])->name('orders.discount-code.store');
         Route::patch('/orders/{order}/marketplace-commission', [AdminOrderController::class, 'updateMarketplaceCommission'])->name('orders.marketplace-commission.update');
         Route::patch('/orders/{order}/shipping-paid', [AdminOrderController::class, 'updateShippingPaid'])->name('orders.shipping-paid.update');
         Route::patch('/orders/{order}/shipping-address', [AdminOrderController::class, 'updateShippingAddress'])->name('orders.address.shipping');

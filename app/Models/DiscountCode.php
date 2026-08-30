@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'type',
     'value',
     'user_id',
+    'source_order_id',
     'quantity',
     'max_uses_per_customer',
     'ends_at',
@@ -55,6 +56,12 @@ class DiscountCode extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /** La commande qui a valu ce code, quand il a été offert depuis une. */
+    public function sourceOrder(): BelongsTo
+    {
+        return $this->belongsTo(Order::class, 'source_order_id');
     }
 
     public function orders(): HasMany

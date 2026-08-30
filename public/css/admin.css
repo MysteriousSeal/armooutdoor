@@ -9744,3 +9744,40 @@ a.order-stepper-btn:focus-visible {
 .admin-guest-reply-hint {
     margin: 0.6rem 0 0;
 }
+
+/* Le code offert depuis une commande : une carte à liseré pointillé, comme
+   le coupon qu'elle deviendra une fois imprimée. */
+.order-gift-code {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 1rem;
+    border: 1px dashed var(--border);
+    background: var(--bg);
+    text-align: center;
+}
+
+.order-gift-code-value {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--text);
+    user-select: all;
+}
+
+.order-gift-code-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.order-gift-code-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.order-gift-code-form {
+    margin-top: 0.9rem;
+}

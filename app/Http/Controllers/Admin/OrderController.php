@@ -11,6 +11,7 @@ use App\Http\Requests\Admin\UpdateOrderShippingAddressRequest;
 use App\Models\AdminActivityLog;
 use App\Models\Carrier;
 use App\Models\CompanySetting;
+use App\Models\DiscountCode;
 use App\Models\Marketplace;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -954,6 +955,47 @@ class OrderController extends Controller
         ])->setPaper('a4');
 
         return $pdf->download('bdl-'.$order->number.'.pdf');
+    }
+
+    /**
+     * Offre un code de remerciement depuis la commande : 10 %, un seul
+     * usage, pour n'importe quel client, valable trois mois après la date
+     * de la commande. Un par commande — le second clic n'a rien à créer.
+     */
+    public function createDiscountCode(Order $order): RedirectResponse
+    {
+        abort_if($order->isDraft(), 422);
+
+        if ($order->generatedDiscountCode()->exists()) {
+            return back()->with('status', 'This order already has its discount code.');
+        }
+
+        // Sans voyelles ni caractères ambigus (0/O, 1/I) : le code se lit
+        // sur une carte et se retape sans hésiter — et ne forme pas de mot.
+        do {
+            $code = 'MERCI-'.collect(str_split('BCDFGHJKMNPQRSTVWXZ23456789'))
+                ->random(6)
+                ->implode('');
+        } while (DiscountCode::query()->where('code', $code)->exists());
+
+        $discountCode = DiscountCode::query()->create([
+            'code' => $code,
+            'type' => DiscountCode::TYPE_PERCENTAGE,
+            'value' => 10,
+            'user_id' => null,
+            'source_order_id' => $order->id,
+            'quantity' => 1,
+            'max_uses_per_customer' => 1,
+            'ends_at' => $order->created_at->copy()->addMonths(3),
+        ]);
+
+        AdminActivityLog::record(
+            'discount_code.created',
+            $discountCode,
+            'Created code '.$discountCode->code.' from order '.$order->number
+        );
+
+        return back()->with('status', 'Code '.$discountCode->code.' created.');
     }
 
     public function updateTracking(Request $request, Order $order): RedirectResponse

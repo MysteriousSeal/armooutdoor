@@ -599,6 +599,41 @@
                     @endunless
                 </section>
 
+                @unless ($order->isDraft())
+                    <section class="order-fact">
+                        <h3 class="order-fact-title">Thank-you code</h3>
+                        @php($giftCode = $order->generatedDiscountCode)
+                        @if ($giftCode)
+                            <div class="order-gift-code">
+                                <span class="order-gift-code-value">{{ $giftCode->code }}</span>
+                                <span class="order-gift-code-meta">10% · single use · any customer</span>
+                                <span class="order-gift-code-meta">
+                                    @if ($giftCode->isExpired())
+                                        Expired {{ $giftCode->formattedEndsAt() }}
+                                    @elseif ($giftCode->hasLimitedQuantity() && $giftCode->quantity <= 0)
+                                        Used
+                                    @else
+                                        Valid until {{ $giftCode->formattedEndsAt() }}
+                                    @endif
+                                </span>
+                                <div class="order-gift-code-actions">
+                                    <a href="{{ route('admin.discount-codes.label', $giftCode) }}" class="btn btn-sm btn-secondary">PDF</a>
+                                    <a href="{{ route('admin.discount-codes.edit', $giftCode) }}" class="btn btn-sm btn-secondary">Edit</a>
+                                </div>
+                            </div>
+                        @else
+                            <p class="order-fact-extra">
+                                A 10% code for the next order — anyone can use it, once,
+                                for three months from this order's date.
+                            </p>
+                            <form method="POST" action="{{ route('admin.orders.discount-code.store', $order) }}" class="order-gift-code-form">
+                                @csrf
+                                <button type="submit" class="btn btn-secondary btn-block">Create a discount code</button>
+                            </form>
+                        @endif
+                    </section>
+                @endunless
+
             </aside>
         </div>
 
