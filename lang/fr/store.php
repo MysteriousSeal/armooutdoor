@@ -521,6 +521,7 @@ return [
     'guest_started_keep' => 'Conservez cet email : le lien ci-dessus est votre accès à la conversation.',
     'guest_conversation_kicker' => 'Votre échange avec nous',
     'order_confirmed_subject' => 'Commande :number confirmée — merci !',
+    'order_preparing_subject' => 'Votre commande :number est en préparation',
     'guest_conversation_note' => 'Cette page est privée : seul le lien reçu par email y mène. Vous serez averti par email quand nous répondrons.',
     'legal_terms_title' => 'Conditions générales de vente',
     'legal_notice_title' => 'Mentions légales',

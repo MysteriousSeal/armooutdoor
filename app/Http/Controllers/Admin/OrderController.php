@@ -643,8 +643,16 @@ class OrderController extends Controller
     {
         abort_if($order->isDraft(), 404);
 
+        // Emailed only on the actual move into preparation: marking an
+        // already-preparing order again must not write the customer twice.
+        $wasPreparing = $order->status === 'preparing';
+
         $order->markStatus('preparing');
         AdminActivityLog::record('order.preparing', $order, 'Marked order '.$order->number.' as being prepared');
+
+        if (! $wasPreparing) {
+            $order->sendPreparingEmail();
+        }
 
         return $this->statusChangeResponse($request, $order, 'Order marked as being prepared.');
     }

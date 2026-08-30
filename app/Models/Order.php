@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\DeliveryMethod;
 use App\Enums\PaymentMethod;
 use App\Notifications\OrderConfirmed;
+use App\Notifications\OrderPreparing;
 use App\Support\DeferredMail;
 use App\Support\ShippingEstimate;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -557,14 +558,14 @@ class Order extends Model
     }
 
     /**
-     * Whether placing this order owes the customer a confirmation email.
+     * Whether this order's customer gets emails from us at all.
      *
-     * The whole policy, in one place: a marketplace order was already
-     * confirmed where it was placed, and an external shadow account's
+     * The whole policy, in one place: a marketplace order is the
+     * marketplace's to talk about, and an external shadow account's
      * address was typed in by an admin — never verified by its owner, so
      * never written to.
      */
-    public function wantsConfirmationEmail(): bool
+    public function wantsCustomerEmails(): bool
     {
         return $this->marketplace_id === null
             && $this->user !== null
@@ -578,12 +579,26 @@ class Order extends Model
      */
     public function sendConfirmationEmail(): void
     {
-        if (! $this->wantsConfirmationEmail()) {
+        if (! $this->wantsCustomerEmails()) {
             return;
         }
 
         DeferredMail::send('Could not email an order confirmation.', ['order_id' => $this->id],
             fn () => $this->user->notify(new OrderConfirmed($this)));
+    }
+
+    /**
+     * Tells the customer their order moved into preparation — same audience
+     * policy as the confirmation.
+     */
+    public function sendPreparingEmail(): void
+    {
+        if (! $this->wantsCustomerEmails()) {
+            return;
+        }
+
+        DeferredMail::send('Could not email an order preparation notice.', ['order_id' => $this->id],
+            fn () => $this->user->notify(new OrderPreparing($this)));
     }
 
     public function carrierName(): string
