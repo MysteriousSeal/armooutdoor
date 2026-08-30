@@ -99,7 +99,7 @@
         var locked = !!isRelay && !hasRelayPoint;
 
         document.querySelectorAll('input[name="payment_method"]').forEach(function (input) {
-            if (input.value === 'paypal' || input.value === 'card') {
+            if (input.value === 'paypal') {
                 return;
             }
             input.disabled = locked;
