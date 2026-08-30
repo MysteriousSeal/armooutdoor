@@ -137,7 +137,7 @@ class CarrierMaxWeightTest extends TestCase
             ->assertSee(__('store.shipping_from_amount', ['price' => format_euros($nextCents)]));
     }
 
-    public function test_the_settings_list_shows_the_tier_count_and_the_limit(): void
+    public function test_the_settings_cards_lay_out_the_rates_and_the_limit(): void
     {
         $carrier = Carrier::query()->where('slug', 'colissimo-home')->firstOrFail();
         $carrier->update(['max_weight_grams' => 4000]);
@@ -148,11 +148,43 @@ class CarrierMaxWeightTest extends TestCase
         $this->actingAs(User::factory()->admin()->create())
             ->get('/admin/settings/shipping')
             ->assertOk()
-            ->assertSee('2 tiers')
-            ->assertSee('max 4,000 g')
-            // Les autres transporteurs n'ont pas de limite : la liste le dit
+            // Le prix par défaut devient la première tranche, chaque palier
+            // borne la précédente, et la limite ferme la dernière.
+            ->assertSee('Under 1 000 g')
+            ->assertSee('1 000 g – 1 999 g')
+            ->assertSee('2 000 g – 4 000 g')
+            ->assertSee('Max weight')
+            ->assertSee('4 000 g')
+            // Les autres transporteurs n'ont pas de limite : la carte le dit
             // plutôt que de laisser un blanc.
-            ->assertSee('no max weight');
+            ->assertSee('No limit');
+    }
+
+    public function test_package_type_tags_carry_their_order_count(): void
+    {
+        $used = \App\Models\PackageType::query()->create(['name' => 'Boîte en carton']);
+        \App\Models\PackageType::query()->create(['name' => 'Enveloppe']);
+
+        $user = User::factory()->create();
+        $this->cartOfWeight($user, 500);
+        $carrier = Carrier::query()->where('slug', 'colissimo-home')->firstOrFail();
+        Address::factory()->for($user)->create();
+        $this->actingAs($user)->post('/checkout', [
+            'address_id' => Address::query()->value('id'),
+            'same_billing_address' => true,
+            'carrier_id' => $carrier->id,
+            'payment_method' => 'paypal',
+        ]);
+        Order::query()->firstOrFail()->update(['package_type_id' => $used->id]);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/settings/shipping')
+            ->assertOk()
+            ->assertSee('1 order used this type')
+            // Le type jamais employé le dit aussi, dans sa fenêtre de
+            // confirmation : retirer trois essais n'est pas retirer une
+            // habitude.
+            ->assertSee('No order ever used it.');
     }
 
     public function test_the_admin_modal_saves_and_clears_the_limit(): void

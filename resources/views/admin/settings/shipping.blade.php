@@ -26,6 +26,10 @@
         </header>
 
         <div class="admin-order-create-grid">
+            {{-- Colonne de gauche : deux panneaux courts empilés, pour que la
+                 hauteur du panneau transporteurs à droite ne creuse pas de
+                 blanc entre eux. --}}
+            <div class="shipping-settings-col">
             <form
                 method="POST"
                 action="{{ route('admin.settings.shipping.update') }}"
@@ -57,6 +61,15 @@
                     <label>Eligible carriers</label>
                     <p class="form-hint">These carriers become free once the order subtotal reaches the amount. Others keep their price.</p>
 
+                    @php
+                        $freeShippingLogos = [
+                            'lettre-suivie' => 'poste.png',
+                            'colissimo-home' => 'colissimo.png',
+                            'chronopost-home' => 'chronopost.png',
+                            'relais-pickup' => 'chronopost.png',
+                            'mondial-relay' => 'mondialrelay.png',
+                        ];
+                    @endphp
                     <div class="shipping-carrier-options">
                         @foreach ($carriers as $carrier)
                             <label class="admin-choice {{ in_array($carrier->id, $selectedCarrierIds) ? 'is-selected' : '' }}">
@@ -66,9 +79,12 @@
                                     value="{{ $carrier->id }}"
                                     @checked(in_array($carrier->id, $selectedCarrierIds))
                                 >
+                                @if (isset($freeShippingLogos[$carrier->slug]))
+                                    <img src="{{ asset('images/carriers/'.$freeShippingLogos[$carrier->slug]) }}" alt="" class="shipping-carrier-option-logo">
+                                @endif
                                 <span class="shipping-carrier-copy">
                                     <span class="admin-table-strong">{{ $carrier->localizedName() }}</span>
-                                    <span class="admin-table-sub">{{ $carrier->formattedStartingPrice() }} · {{ $carrier->method->value }}</span>
+                                    <span class="admin-table-sub">{{ $carrier->formattedStartingPrice() }} · {{ $carrier->method->value === 'relay' ? 'relay point' : 'home' }}</span>
                                 </span>
                             </label>
                         @endforeach
@@ -81,27 +97,147 @@
                 </div>
             </form>
 
+            <section class="order-panel admin-shipping-packages">
+                <h3 class="order-panel-title">Package types</h3>
+                <p class="form-hint">Used when adding tracking to an order. Removing one here doesn’t change orders that already used it.</p>
+
+                @if ($packageTypes->isNotEmpty())
+                    <div class="package-type-tags">
+                        @foreach ($packageTypes as $packageType)
+                            @php $packageTypeCount = $packageTypeUsage[$packageType->id] ?? 0; @endphp
+                            <span class="package-type-tag">
+                                <span class="package-type-tag-name">{{ $packageType->name }}</span>
+                                <span
+                                    class="package-type-tag-count"
+                                    title="{{ $packageTypeCount === 1 ? '1 order used this type' : $packageTypeCount.' orders used this type' }}"
+                                >{{ $packageTypeCount }}</span>
+                                <button
+                                    type="button"
+                                    class="package-type-tag-remove"
+                                    data-modal-open="package-type-delete-{{ $packageType->id }}"
+                                    aria-label="Remove {{ $packageType->name }}"
+                                >
+                                    <svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true">
+                                        <path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                                    </svg>
+                                </button>
+                            </span>
+                        @endforeach
+                    </div>
+
+                    @foreach ($packageTypes as $packageType)
+                        @php $packageTypeCount = $packageTypeUsage[$packageType->id] ?? 0; @endphp
+                        <dialog id="package-type-delete-{{ $packageType->id }}" class="modal" aria-labelledby="package-type-delete-{{ $packageType->id }}-title">
+                            <form method="POST" action="{{ route('admin.settings.package-types.destroy', $packageType) }}">
+                                @csrf
+                                @method('DELETE')
+                                <p class="modal-kicker">{{ $packageType->name }}</p>
+                                <h3 class="modal-title" id="package-type-delete-{{ $packageType->id }}-title">Remove this package type?</h3>
+                                <p class="modal-body">
+                                    {{ $packageTypeCount === 0 ? 'No order ever used it.' : ($packageTypeCount === 1 ? '1 order used it and keeps it on its tracking.' : $packageTypeCount.' orders used it and keep it on their tracking.') }}
+                                </p>
+                                <div class="modal-actions">
+                                    <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Remove package type</button>
+                                </div>
+                            </form>
+                        </dialog>
+                    @endforeach
+                @else
+                    <p class="variant-empty">No package types yet.</p>
+                @endif
+
+                <form method="POST" action="{{ route('admin.settings.package-types.store') }}" class="shipping-package-add">
+                    @csrf
+                    <div class="form-group">
+                        <label for="package_type_name" class="sr-only">Package type name</label>
+                        <input type="text" id="package_type_name" name="name" class="form-control" value="{{ old('name') }}" maxlength="80" placeholder="e.g. Boîte en carton">
+                        @error('name') <p class="form-error">{{ $message }}</p> @enderror
+                    </div>
+                    <button type="submit" class="btn btn-secondary">Add package type</button>
+                </form>
+            </section>
+            </div>
+
             <section class="order-panel">
                 <h3 class="order-panel-title">Carrier prices</h3>
                 <p class="form-hint">Priced by weight tier, with a default for anything a tier doesn’t cover.</p>
 
-                <ul class="admin-dash-list">
+                @php
+                    $carrierLogos = [
+                        'lettre-suivie' => 'poste.png',
+                        'colissimo-home' => 'colissimo.png',
+                        'chronopost-home' => 'chronopost.png',
+                        'relais-pickup' => 'chronopost.png',
+                        'mondial-relay' => 'mondialrelay.png',
+                    ];
+
+                    // Chaque carte répond « que facture-t-on ? » sans ouvrir
+                    // la fenêtre : le prix par défaut devient la première
+                    // tranche, chaque palier borne la précédente, et la
+                    // limite de poids ferme la dernière quand elle existe.
+                    $rateRowsFor = function ($carrier): array {
+                        $grams = fn (int $value): string => number_format($value, 0, ',', ' ').' g';
+                        $tiers = $carrier->priceTiers->sortBy('min_weight_grams')->values();
+                        $cap = $carrier->max_weight_grams;
+
+                        if ($tiers->isEmpty()) {
+                            return [[
+                                'range' => $cap !== null ? 'Up to '.$grams($cap) : 'All weights',
+                                'price' => $carrier->price_cents,
+                            ]];
+                        }
+
+                        $rows = [['range' => 'Under '.$grams($tiers->first()->min_weight_grams), 'price' => $carrier->price_cents]];
+
+                        foreach ($tiers as $index => $tier) {
+                            $next = $tiers[$index + 1] ?? null;
+                            $rows[] = [
+                                'range' => match (true) {
+                                    $next !== null => $grams($tier->min_weight_grams).' – '.$grams($next->min_weight_grams - 1),
+                                    $cap !== null => $grams($tier->min_weight_grams).' – '.$grams($cap),
+                                    default => $grams($tier->min_weight_grams).' and up',
+                                },
+                                'price' => $tier->price_cents,
+                            ];
+                        }
+
+                        return $rows;
+                    };
+                @endphp
+
+                <div class="shipping-carrier-cards">
                     @foreach ($carriers as $carrier)
-                        <li>
-                            <div class="admin-dash-list-main">
+                        <article class="shipping-carrier-card">
+                            <header class="shipping-carrier-card-head">
+                                @if (isset($carrierLogos[$carrier->slug]))
+                                    <img src="{{ asset('images/carriers/'.$carrierLogos[$carrier->slug]) }}" alt="" class="shipping-carrier-card-logo">
+                                @endif
                                 <span class="admin-table-strong">{{ $carrier->localizedName() }}</span>
-                                <span class="admin-table-sub">
-                                    From {{ $carrier->formattedStartingPrice() }}
-                                    · {{ $carrier->method->value }}
-                                    · {{ $carrier->priceTiers->count() === 1 ? '1 tier' : $carrier->priceTiers->count().' tiers' }}
-                                    · {{ $carrier->max_weight_grams !== null ? 'max '.number_format($carrier->max_weight_grams).' g' : 'no max weight' }}
-                                </span>
-                            </div>
-                            <button type="button" class="btn btn-sm btn-secondary" data-modal-open="carrier-price-tiers-{{ $carrier->id }}">Edit price</button>
-                        </li>
+                                <span class="shipping-method-chip is-{{ $carrier->method->value }}">{{ $carrier->method->value === 'relay' ? 'Relay point' : 'Home' }}</span>
+                                @if ($setting->free_shipping_threshold_cents !== null && in_array($carrier->id, $setting->free_shipping_carrier_ids ?? [], true))
+                                    <span class="shipping-free-chip">Free above {{ format_euros($setting->free_shipping_threshold_cents) }}</span>
+                                @endif
+                                <button type="button" class="btn btn-sm btn-secondary shipping-carrier-card-edit" data-modal-open="carrier-price-tiers-{{ $carrier->id }}">Edit</button>
+                            </header>
+
+                            <dl class="shipping-rate-table">
+                                @foreach ($rateRowsFor($carrier) as $row)
+                                    <div class="shipping-rate-row">
+                                        <dt>{{ $row['range'] }}</dt>
+                                        <dd>{{ format_euros($row['price']) }}</dd>
+                                    </div>
+                                @endforeach
+                                <div class="shipping-rate-row shipping-rate-row--limit">
+                                    <dt>Max weight</dt>
+                                    <dd>{{ $carrier->max_weight_grams !== null ? number_format($carrier->max_weight_grams, 0, ',', ' ').' g' : 'No limit' }}</dd>
+                                </div>
+                            </dl>
+                        </article>
                     @endforeach
-                </ul>
+                </div>
             </section>
+
         </div>
 
         @foreach ($carriers as $carrier)
@@ -208,46 +344,6 @@
             </dialog>
         @endforeach
 
-        <section class="order-panel admin-shipping-packages">
-            <h3 class="order-panel-title">Package types</h3>
-            <p class="form-hint">Used when adding tracking to an order. Removing one here doesn’t change orders that already used it.</p>
-
-            @if ($packageTypes->isNotEmpty())
-                <ul class="admin-dash-list">
-                    @foreach ($packageTypes as $packageType)
-                        <li>
-                            <span class="admin-table-primary">{{ $packageType->name }}</span>
-                            <button type="button" class="footer-text-btn" data-modal-open="package-type-delete-{{ $packageType->id }}">Remove</button>
-                            <dialog id="package-type-delete-{{ $packageType->id }}" class="modal" aria-labelledby="package-type-delete-{{ $packageType->id }}-title">
-                                <form method="POST" action="{{ route('admin.settings.package-types.destroy', $packageType) }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <p class="modal-kicker">{{ $packageType->name }}</p>
-                                    <h3 class="modal-title" id="package-type-delete-{{ $packageType->id }}-title">Remove this package type?</h3>
-                                    <p class="modal-body">Orders that already used it keep it on their tracking.</p>
-                                    <div class="modal-actions">
-                                        <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
-                                        <button type="submit" class="btn btn-primary">Remove package type</button>
-                                    </div>
-                                </form>
-                            </dialog>
-                        </li>
-                    @endforeach
-                </ul>
-            @else
-                <p class="variant-empty">No package types yet.</p>
-            @endif
-
-            <form method="POST" action="{{ route('admin.settings.package-types.store') }}" class="shipping-package-add">
-                @csrf
-                <div class="form-group">
-                    <label for="package_type_name" class="sr-only">Package type name</label>
-                    <input type="text" id="package_type_name" name="name" class="form-control" value="{{ old('name') }}" maxlength="80" placeholder="e.g. Boîte en carton">
-                    @error('name') <p class="form-error">{{ $message }}</p> @enderror
-                </div>
-                <button type="submit" class="btn btn-secondary">Add package type</button>
-            </form>
-        </section>
     </div>
 @endsection
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateShippingSettingRequest;
 use App\Models\AdminActivityLog;
 use App\Models\Carrier;
+use App\Models\Order;
 use App\Models\PackageType;
 use App\Models\ShippingSetting;
 use Illuminate\Http\RedirectResponse;
@@ -19,6 +20,14 @@ class ShippingSettingController extends Controller
             'setting' => ShippingSetting::current(),
             'carriers' => Carrier::query()->orderBy('sort_order')->with('priceTiers')->get(),
             'packageTypes' => PackageType::query()->orderBy('name')->get(),
+            // Combien de commandes ont porté chaque type : un seul groupBy
+            // pour toute la page, et l'admin sait si retirer un type efface
+            // une habitude ou trois essais.
+            'packageTypeUsage' => Order::query()
+                ->whereNotNull('package_type_id')
+                ->selectRaw('package_type_id, count(*) as aggregate')
+                ->groupBy('package_type_id')
+                ->pluck('aggregate', 'package_type_id'),
         ]);
     }
 
