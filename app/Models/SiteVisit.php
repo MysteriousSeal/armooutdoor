@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['path', 'product_id', 'category_id', 'user_id', 'ip_address', 'user_agent', 'referrer', 'country', 'city'])]
+#[Fillable(['path', 'session_id', 'product_id', 'category_id', 'user_id', 'ip_address', 'user_agent', 'referrer', 'country', 'city'])]
 class SiteVisit extends Model
 {
     const UPDATED_AT = null;

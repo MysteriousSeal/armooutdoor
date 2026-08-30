@@ -219,6 +219,87 @@
                 </div>
             @endif
 
+            @if ($flow['total'] > 0)
+                <section class="order-panel dash-chart-panel admin-analytics-section" aria-label="User flow for {{ $ranges[$range] }}">
+                    <div class="dash-panel-head">
+                        <h3 class="order-panel-title">User flow</h3>
+                        <span class="dash-panel-note">
+                            {{ number_format($flow['total']) }} human {{ \Illuminate\Support\Str::plural('session', $flow['total']) }} · from entrance onward · {{ strtolower($ranges[$range]) }}
+                        </span>
+                    </div>
+
+                    <div class="admin-flow">
+                        <div class="admin-flow-inner">
+                            <div class="admin-flow-columns">
+                                @foreach ($flow['columns'] as $column)
+                                    <span
+                                        class="admin-flow-column-title {{ $loop->last ? 'admin-flow-column-title--last' : '' }}"
+                                        style="left: {{ round($column['x'] / $flow['width'] * 100, 2) }}%"
+                                    >{{ $column['title'] }}</span>
+                                @endforeach
+                            </div>
+
+                            <svg class="admin-flow-svg" viewBox="0 0 {{ $flow['width'] }} {{ $flow['height'] }}" role="img" aria-label="Diagram of visitor paths through the site, entrance to step {{ count($flow['columns']) }}">
+                                @foreach ($flow['links'] as $link)
+                                    <path d="{{ $link['d'] }}" class="admin-flow-link" style="fill: {{ $link['color'] }}"></path>
+                                @endforeach
+                                @foreach ($flow['nodes'] as $node)
+                                    @php
+                                        $labelRight = $node['step'] < count($flow['columns']) - 1;
+                                        $textX = $labelRight ? $node['x'] + $node['width'] + 8 : $node['x'] - 8;
+                                    @endphp
+                                    <rect
+                                        x="{{ $node['x'] }}"
+                                        y="{{ $node['y'] }}"
+                                        width="{{ $node['width'] }}"
+                                        height="{{ $node['height'] }}"
+                                        rx="3"
+                                        class="admin-flow-node {{ $node['isExit'] ? 'admin-flow-node--exit' : '' }}"
+                                        style="fill: {{ $node['color'] }}"
+                                    >
+                                        <title>{{ $node['label'] }} — {{ number_format($node['count']) }} ({{ $node['percent'] }}%)</title>
+                                    </rect>
+                                    <text
+                                        x="{{ $textX }}"
+                                        y="{{ $node['y'] + $node['height'] / 2 }}"
+                                        class="admin-flow-label {{ $labelRight ? '' : 'admin-flow-label--left' }} {{ $node['isExit'] ? 'admin-flow-label--exit' : '' }}"
+                                    >{{ $node['label'] }} <tspan class="admin-flow-label-count">{{ number_format($node['count']) }}</tspan></text>
+                                @endforeach
+                            </svg>
+                        </div>
+                    </div>
+
+                    <details class="dash-table-view">
+                        <summary>Table view</summary>
+                        <div class="admin-table-wrap">
+                            <table class="admin-table">
+                                <caption class="sr-only">Transitions between steps of the user flow</caption>
+                                <thead>
+                                    <tr>
+                                        <th>Step</th>
+                                        <th>From</th>
+                                        <th>To</th>
+                                        <th class="admin-table-num">Sessions</th>
+                                        <th class="admin-table-num">Share</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($flow['table'] as $row)
+                                        <tr>
+                                            <td>{{ $row['layer'] }} → {{ $row['layer'] + 1 }}</td>
+                                            <td>{{ $row['from'] }}</td>
+                                            <td>{{ $row['to'] }}</td>
+                                            <td class="admin-table-num">{{ number_format($row['count']) }}</td>
+                                            <td class="admin-table-num">{{ $row['percent'] }}%</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </details>
+                </section>
+            @endif
+
             @if (! empty($charts))
                 <section class="admin-analytics-section" aria-label="Visit breakdown charts for {{ $ranges[$range] }}">
                     <header class="admin-analytics-section-header">

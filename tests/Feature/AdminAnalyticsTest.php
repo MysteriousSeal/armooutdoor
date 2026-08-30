@@ -42,6 +42,14 @@ class AdminAnalyticsTest extends TestCase
         $this->assertDatabaseHas('site_visits', ['path' => '/contact', 'country' => 'Local']);
     }
 
+    public function test_a_visit_is_recorded_with_the_session_id(): void
+    {
+        $this->get('/contact')->assertOk();
+
+        $visit = SiteVisit::query()->where('path', '/contact')->firstOrFail();
+        $this->assertNotNull($visit->session_id);
+    }
+
     public function test_admin_pages_and_non_get_requests_are_not_recorded(): void
     {
         $this->get('/admin');
@@ -225,6 +233,88 @@ class AdminAnalyticsTest extends TestCase
         $topCategories = collect($response->viewData('topCategories'))->keyBy('id');
         $this->assertSame(2, $topCategories[$category->id]['count']);
         $this->assertSame(1, $topCategories[$other->id]['count']);
+    }
+
+    public function test_the_page_shows_a_user_flow_from_entrance_to_order(): void
+    {
+        $human = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
+
+        // One visitor's session: home, a product, cart, checkout, order.
+        $journey = ['/', '/products/tente', '/cart', '/checkout', '/orders/A1B2'];
+        $base = now()->subMinutes(30);
+
+        foreach ($journey as $i => $path) {
+            $visit = SiteVisit::create(['path' => $path, 'ip_address' => '203.0.113.80', 'user_agent' => $human]);
+            $visit->created_at = $base->copy()->addMinutes($i);
+            $visit->save();
+        }
+
+        // A different visitor who only ever looks at the home page.
+        $bounce = SiteVisit::create(['path' => '/', 'ip_address' => '203.0.113.81', 'user_agent' => $human]);
+        $bounce->created_at = $base;
+        $bounce->save();
+
+        $response = $this->actingAsAdmin()->get('/admin/analytics')->assertOk()
+            ->assertSee('User flow')
+            ->assertSee('Entrance')
+            ->assertSee('Home')
+            ->assertSee('Checkout')
+            ->assertSee('Left the site');
+
+        $flow = $response->viewData('flow');
+        $this->assertSame(2, $flow['total']);
+
+        $entrance = collect($flow['nodes'])->firstWhere('step', 0);
+        $this->assertSame('Home', $entrance['label']);
+        $this->assertSame(2, $entrance['count']);
+    }
+
+    public function test_the_flow_splits_by_real_session_id_even_behind_the_same_ip(): void
+    {
+        $human = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
+        $now = now();
+
+        // Two different visitors sharing one IP (e.g. an office NAT) — the
+        // session id, not the IP, is what should separate them.
+        foreach (['sess-aaa', 'sess-bbb'] as $sessionId) {
+            $visit = SiteVisit::create([
+                'path' => '/',
+                'session_id' => $sessionId,
+                'ip_address' => '203.0.113.90',
+                'user_agent' => $human,
+            ]);
+            $visit->created_at = $now;
+            $visit->save();
+        }
+
+        $flow = $this->actingAsAdmin()->get('/admin/analytics')->viewData('flow');
+
+        $this->assertSame(2, $flow['total']);
+    }
+
+    public function test_the_flow_keeps_one_session_together_across_a_long_gap(): void
+    {
+        $human = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
+        $base = now()->subHours(2);
+
+        // Same real session id, over an hour apart — a real session id is
+        // authoritative, so this must stay one session, not split by the
+        // inactivity-gap heuristic used only when there's no session id.
+        foreach ([['/' , 0], ['/products/tente', 90]] as [$path, $minutesLater]) {
+            $visit = SiteVisit::create([
+                'path' => $path,
+                'session_id' => 'sess-long',
+                'ip_address' => '203.0.113.91',
+                'user_agent' => $human,
+            ]);
+            $visit->created_at = $base->copy()->addMinutes($minutesLater);
+            $visit->save();
+        }
+
+        $flow = $this->actingAsAdmin()->get('/admin/analytics?range=all')->viewData('flow');
+
+        // One session, not two — proof the gap heuristic didn't split it.
+        $this->assertSame(1, $flow['total']);
     }
 
     public function test_the_trend_leads_and_redundant_donuts_are_gone(): void

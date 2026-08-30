@@ -18,6 +18,10 @@ class VisitCounterService
 
         SiteVisit::create([
             'path' => mb_substr('/'.ltrim($request->path(), '/'), 0, 2048),
+            // The same first-party session cookie already used for the cart
+            // and login — reused here to group page views into a visit,
+            // never a separate tracking cookie of its own.
+            'session_id' => $request->hasSession() ? $request->session()->getId() : null,
             'product_id' => $productId,
             'category_id' => $categoryId,
             'user_id' => $request->user()?->id,

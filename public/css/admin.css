@@ -9526,6 +9526,82 @@ a.order-stepper-btn:focus-visible {
     font-size: 0.8125rem;
 }
 
+/* --- User flow (Sankey-style, entrance to step 4) --------------------- */
+
+.admin-flow {
+    overflow-x: auto;
+}
+
+.admin-flow-inner {
+    min-width: 1040px;
+}
+
+.admin-flow-columns {
+    position: relative;
+    height: 1.25rem;
+}
+
+.admin-flow-column-title {
+    position: absolute;
+    top: 0;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.admin-flow-column-title--last {
+    left: auto !important;
+    right: 0;
+    text-align: right;
+}
+
+.admin-flow-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+}
+
+.admin-flow-link {
+    opacity: 0.32;
+    transition: opacity 0.15s ease;
+}
+
+.admin-flow-link:hover {
+    opacity: 0.6;
+}
+
+.admin-flow-node {
+    stroke: var(--surface);
+    stroke-width: 1;
+}
+
+.admin-flow-node--exit {
+    opacity: 0.75;
+}
+
+.admin-flow-label {
+    font-size: 0.6875rem;
+    fill: var(--text);
+    dominant-baseline: middle;
+}
+
+.admin-flow-label--left {
+    text-anchor: end;
+}
+
+.admin-flow-label--exit {
+    fill: var(--text-muted);
+    font-style: italic;
+}
+
+.admin-flow-label-count {
+    fill: var(--text-muted);
+}
+
 .admin-analytics-charts {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));

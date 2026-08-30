@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\SiteVisit;
 use App\Support\DonutChart;
+use App\Support\SessionFlow;
 use App\Support\UserAgentParser;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
@@ -43,6 +44,7 @@ class AnalyticsController extends Controller
 
         $burstyIps = $this->burstyIps($since);
         $breakdown = $this->buildCharts($since, $burstyIps, $range);
+        $flow = $this->buildFlow($since, $burstyIps);
 
         $visitsQuery = SiteVisit::query()->with('user')->latest('created_at');
         $this->applyRange($visitsQuery, $since);
@@ -70,6 +72,7 @@ class AnalyticsController extends Controller
             'topReferrers' => $breakdown['topReferrers'],
             'topProducts' => $breakdown['topProducts'],
             'topCategories' => $breakdown['topCategories'],
+            'flow' => $flow,
             'range' => $range,
             'ranges' => $ranges,
             'hideBots' => $hideBots,
@@ -210,6 +213,79 @@ class AnalyticsController extends Controller
         }
 
         return $bursty;
+    }
+
+    /**
+     * Visits sharing a session id are grouped as one real session — that id
+     * already marks its start and end. Older rows recorded before session
+     * ids were captured fall back to an approximation: same visitor
+     * (account, or IP for guests), split apart whenever they're more than
+     * SESSION_GAP_MINUTES idle. Either way, each session becomes a sequence
+     * of page groups — SessionFlow does the layout of who went where, and
+     * where they left.
+     */
+    private function buildFlow(?CarbonInterface $since, array $burstyIps): array
+    {
+        $query = SiteVisit::query()->select(['user_id', 'ip_address', 'user_agent', 'session_id', 'path', 'created_at']);
+        $this->applyRange($query, $since);
+
+        $bySession = [];
+        $byVisitor = [];
+
+        foreach ($query->cursor() as $row) {
+            if (! filled($row->path)) {
+                continue;
+            }
+
+            $isBot = UserAgentParser::isBot($row->user_agent) || isset($burstyIps[$row->ip_address ?: 'unknown']);
+
+            if ($isBot) {
+                continue;
+            }
+
+            if (filled($row->session_id)) {
+                // A real session id already marks where one visit ends and
+                // the next begins — no need to guess it from an inactivity gap.
+                $bySession[$row->session_id][] = $row;
+
+                continue;
+            }
+
+            // Rows recorded before session ids were captured: fall back to
+            // the IP + inactivity-gap approximation used elsewhere on this page.
+            $key = $row->user_id ? 'u:'.$row->user_id : 'g:'.($row->ip_address ?: 'unknown');
+            $byVisitor[$key][] = $row;
+        }
+
+        $sessions = [];
+
+        foreach ($bySession as $visits) {
+            usort($visits, fn ($a, $b) => $a->created_at <=> $b->created_at);
+            $sessions[] = SessionFlow::groupSequence(array_map(fn ($visit) => $visit->path, $visits));
+        }
+
+        foreach ($byVisitor as $visits) {
+            usort($visits, fn ($a, $b) => $a->created_at <=> $b->created_at);
+
+            $chunkPaths = [];
+            $lastTime = null;
+
+            foreach ($visits as $visit) {
+                if ($lastTime !== null && $lastTime->diffInMinutes($visit->created_at) > SessionFlow::SESSION_GAP_MINUTES) {
+                    $sessions[] = SessionFlow::groupSequence($chunkPaths);
+                    $chunkPaths = [];
+                }
+
+                $chunkPaths[] = $visit->path;
+                $lastTime = $visit->created_at;
+            }
+
+            if ($chunkPaths !== []) {
+                $sessions[] = SessionFlow::groupSequence($chunkPaths);
+            }
+        }
+
+        return SessionFlow::build($sessions);
     }
 
     /**

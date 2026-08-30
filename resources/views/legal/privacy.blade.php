@@ -28,8 +28,9 @@
                 <li>Coordonnées : e-mail, téléphone, adresses de livraison et de facturation.</li>
                 <li>Données de commande : produits achetés, historique de commandes.</li>
                 <li>Données de connexion : identifiants de compte, mot de passe (stocké de façon chiffrée).</li>
-                <li>Données de fréquentation : pages consultées et adresse IP, mesurées par le site lui-même,
-                    sans cookie et sans transmission à un tiers.</li>
+                <li>Données de fréquentation : pages consultées et adresse IP, mesurées par le site lui-même à
+                    l'aide de l'identifiant de session déjà nécessaire à son fonctionnement (voir « Cookies »
+                    ci-dessous) — sans cookie supplémentaire et sans transmission à un tiers.</li>
             </ul>
             <p>Aucune donnée bancaire n'est stockée par nos soins ; le paiement est traité par un prestataire tiers sécurisé.</p>
 
@@ -78,7 +79,9 @@
             <p>
                 Le site utilise des cookies strictement nécessaires à son fonctionnement (panier, session de connexion,
                 préférence d'affichage clair/sombre). Ces cookies ne nécessitent pas de consentement préalable au titre
-                de la réglementation applicable.
+                de la réglementation applicable. Le même identifiant de session sert aussi, en interne, à regrouper les
+                pages consultées au cours d'une même visite à des fins de mesure d'audience ; il n'est ni partagé ni
+                utilisé à des fins de suivi publicitaire ou de profilage.
             </p>
 
             <h2>Sécurité</h2>
