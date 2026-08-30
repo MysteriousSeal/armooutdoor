@@ -163,7 +163,7 @@ class ConversationController extends Controller
         });
     }
 
-    public function close(Conversation $conversation): RedirectResponse
+    public function close(Request $request, Conversation $conversation): RedirectResponse|JsonResponse
     {
         $conversation->status = Conversation::STATUS_CLOSED;
         $conversation->save();
@@ -174,10 +174,14 @@ class ConversationController extends Controller
             'Closed the conversation with '.$conversation->name.' about "'.$conversation->subject.'"',
         );
 
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Conversation closed.', 'status' => $conversation->status]);
+        }
+
         return back()->with('status', 'Conversation closed.');
     }
 
-    public function reopen(Conversation $conversation): RedirectResponse
+    public function reopen(Request $request, Conversation $conversation): RedirectResponse|JsonResponse
     {
         $conversation->status = Conversation::STATUS_OPEN;
         $conversation->save();
@@ -187,6 +191,10 @@ class ConversationController extends Controller
             $conversation,
             'Reopened the conversation with '.$conversation->name.' about "'.$conversation->subject.'"',
         );
+
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Conversation reopened.', 'status' => $conversation->status]);
+        }
 
         return back()->with('status', 'Conversation reopened.');
     }

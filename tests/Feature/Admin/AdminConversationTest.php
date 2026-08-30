@@ -183,8 +183,42 @@ class AdminConversationTest extends TestCase
         $this->actingAs($admin)
             ->get(route('admin.conversations.show', $conversation))
             ->assertOk()
-            ->assertDontSee('id="conversation-reply-form"', false)
+            // Both the composer and the closed note are rendered — close and
+            // reopen swap their visibility in place, without a reload. On a
+            // closed thread the note stands open (no hidden attribute).
+            ->assertSee('id="conversation-reply-form"', false)
+            ->assertSee('id="conversation-closed-note" >', false)
             ->assertSee('Reopen to reply');
+    }
+
+    public function test_close_and_reopen_answer_in_json_for_the_in_place_toggle(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $conversation = $this->conversation(User::factory()->create());
+
+        $this->actingAs($admin)
+            ->patchJson(route('admin.conversations.close', $conversation))
+            ->assertOk()
+            ->assertJson(['message' => 'Conversation closed.', 'status' => 'closed']);
+
+        $this->actingAs($admin)
+            ->patchJson(route('admin.conversations.reopen', $conversation))
+            ->assertOk()
+            ->assertJson(['message' => 'Conversation reopened.', 'status' => 'open']);
+    }
+
+    public function test_the_sidebar_carries_the_customer_and_the_thread_facts(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $customer = User::factory()->create();
+        $conversation = $this->conversation($customer);
+
+        $this->actingAs($admin)
+            ->get(route('admin.conversations.show', $conversation))
+            ->assertOk()
+            ->assertSee('View customer page')
+            ->assertSee($customer->email)
+            ->assertSee('Last activity');
     }
 
     public function test_the_inbox_defaults_to_open_conversations(): void

@@ -7,127 +7,156 @@
 @endpush
 
 @section('content')
-    <div class="admin-list-page">
+    <div class="admin-list-page admin-conversation-page">
         <header class="admin-list-hero">
             <div class="admin-list-hero-row">
                 <div>
                     <p class="admin-list-kicker"><a href="{{ route('admin.conversations.index') }}">Messages</a></p>
                     <h2 class="admin-list-title">
                         {{ $conversation->subject }}
-                        @if ($conversation->isClosed())
-                            <span class="admin-status-chip admin-status-chip--closed">Closed</span>
-                        @endif
+                        <span class="admin-status-chip admin-status-chip--closed" id="conversation-closed-chip" @if (! $conversation->isClosed()) hidden @endif>Closed</span>
                     </h2>
                     <p class="admin-list-lede">
-                        From {{ $conversation->name }} ({{ $conversation->email }})
+                        From {{ $conversation->name }}
                         · <span class="admin-nowrap">started {{ $conversation->created_at->format('d M Y · H:i') }}</span>
                     </p>
                 </div>
                 <div class="admin-list-hero-actions">
-                    @if ($conversation->isClosed())
-                        <form method="POST" action="{{ route('admin.conversations.reopen', $conversation) }}">
-                            @csrf
-                            @method('PATCH')
-                            <button type="submit" class="btn btn-secondary">Reopen</button>
-                        </form>
-                    @else
-                        <form method="POST" action="{{ route('admin.conversations.close', $conversation) }}">
-                            @csrf
-                            @method('PATCH')
-                            <button type="submit" class="btn btn-secondary">Close</button>
-                        </form>
-                    @endif
+                    <form method="POST" action="{{ route('admin.conversations.close', $conversation) }}" data-status-form="close" @if ($conversation->isClosed()) hidden @endif>
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="btn btn-secondary">Close</button>
+                    </form>
+                    <form method="POST" action="{{ route('admin.conversations.reopen', $conversation) }}" data-status-form="reopen" @if (! $conversation->isClosed()) hidden @endif>
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="btn btn-secondary">Reopen</button>
+                    </form>
                 </div>
             </div>
-
-            @if ($conversation->user || $conversation->order || $possibleCustomer)
-                <div class="admin-message-links">
-                    @if ($conversation->user?->isAdmin())
-                        <span class="admin-message-link-chip admin-message-link-chip--admin">
-                            <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
-                                <path d="M12 3 4.5 6v5.5c0 4.3 3.1 8 7.5 9 4.4-1 7.5-4.7 7.5-9V6L12 3Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            Admin
-                        </span>
-                    @elseif ($conversation->user)
-                        <a href="{{ route('admin.customers.show', $conversation->user) }}" class="admin-message-link-chip">
-                            <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
-                                <path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Zm-7 9a7 7 0 0 1 14 0" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            Customer account
-                        </a>
-                    @elseif ($possibleCustomer)
-                        <a href="{{ route('admin.customers.show', $possibleCustomer) }}" class="admin-message-link-chip admin-message-link-chip--guess">
-                            <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
-                                <path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Zm-7 9a7 7 0 0 1 14 0" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            Possibly {{ $possibleCustomer->name }}
-                        </a>
-                    @endif
-                    @if ($conversation->order)
-                        <a href="{{ route('admin.orders.show', $conversation->order) }}" class="admin-message-link-chip">
-                            <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
-                                <path d="M4 7h16v13H4V7Zm4-3.5v3.5m8-3.5v3.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            Order {{ $conversation->order->number }}
-                        </a>
-                    @endif
-                </div>
-            @endif
         </header>
 
-        @include('partials.conversation-thread', ['conversation' => $conversation, 'viewer' => 'admin'])
+        <div class="admin-order-layout">
+            <div class="order-main">
+                {{-- One chat surface: the thread scrolls inside its own
+                     viewport, opened at the latest message, and the composer
+                     sits under it without ever leaving the screen. --}}
+                <section class="order-panel admin-thread-panel">
+                    <div class="admin-thread-viewport" id="conversation-viewport" tabindex="0" aria-label="Conversation history">
+                        @include('partials.conversation-thread', ['conversation' => $conversation, 'viewer' => 'admin'])
+                    </div>
 
-        @if ($conversation->isGuest())
-            {{-- No account behind this thread, so a reply here would have no reader. --}}
-            <section class="order-panel thread-guest-note">
-                <h3 class="order-panel-title">Sent without an account</h3>
-                <p class="form-hint">
-                    This message came from someone who wasn't signed in, so there's no account for them to
-                    read a reply in. Answer them by email instead.
-                </p>
-                <div class="admin-message-actions">
-                    <a href="mailto:{{ $conversation->email }}?subject={{ rawurlencode('Re: '.$conversation->subject) }}" class="btn btn-primary">Reply by email</a>
-                </div>
-            </section>
-        @elseif ($conversation->isClosed())
-            <section class="order-panel thread-closed-note">
-                <p class="form-hint">This conversation is closed. Reopen it to send a reply.</p>
-                <form method="POST" action="{{ route('admin.conversations.reopen', $conversation) }}">
-                    @csrf
-                    @method('PATCH')
-                    <button type="submit" class="btn btn-primary">Reopen to reply</button>
-                </form>
-            </section>
-        @else
-            <form
-                id="conversation-reply-form"
-                method="POST"
-                action="{{ route('admin.conversations.reply', $conversation) }}"
-                class="order-panel thread-composer"
-                data-thread-item-class="thread-item--admin"
-            >
-                @csrf
-                <label for="body" class="order-panel-title">Reply</label>
-                <p class="form-hint">{{ $conversation->name }} sees this as being from {{ config('app.name') }}, not from you.</p>
-                <textarea id="body" name="body" class="form-control" rows="5" maxlength="5000" required placeholder="Write your reply…"></textarea>
-                @error('body') <p class="form-error">{{ $message }}</p> @enderror
-                <div class="thread-composer-actions">
-                    <button type="submit" class="btn btn-primary">
-                        <span class="btn-loader" aria-hidden="true"></span>
-                        Send reply
-                    </button>
-                </div>
-            </form>
-        @endif
+                    @if ($conversation->isGuest())
+                        <div class="thread-guest-note admin-composer-note">
+                            <p class="form-hint">
+                                This message came from someone who wasn't signed in, so there's no account for
+                                them to read a reply in. Answer them by email instead.
+                            </p>
+                            <a href="mailto:{{ $conversation->email }}?subject={{ rawurlencode('Re: '.$conversation->subject) }}" class="btn btn-primary">Reply by email</a>
+                        </div>
+                    @else
+                        <div class="thread-closed-note admin-composer-note" id="conversation-closed-note" @if (! $conversation->isClosed()) hidden @endif>
+                            <p class="form-hint">This conversation is closed. Reopen it to send a reply.</p>
+                            <form method="POST" action="{{ route('admin.conversations.reopen', $conversation) }}" data-status-form="reopen">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="btn btn-primary">Reopen to reply</button>
+                            </form>
+                        </div>
 
-        <div class="admin-message-actions">
-            <a href="{{ route('admin.conversations.index') }}" class="btn btn-secondary">Back to messages</a>
+                        <form
+                            id="conversation-reply-form"
+                            method="POST"
+                            action="{{ route('admin.conversations.reply', $conversation) }}"
+                            class="thread-composer admin-thread-composer"
+                            data-thread-item-class="thread-item--admin"
+                            @if ($conversation->isClosed()) hidden @endif
+                        >
+                            @csrf
+                            <label for="body" class="sr-only">Reply</label>
+                            <textarea id="body" name="body" class="form-control" rows="2" maxlength="5000" required placeholder="Write your reply… ({{ config('app.name') }} signs it, not you)"></textarea>
+                            @error('body') <p class="form-error">{{ $message }}</p> @enderror
+                            <div class="thread-composer-actions admin-composer-actions">
+                                <span class="admin-composer-count" id="composer-count" hidden></span>
+                                <span class="admin-composer-hint">⌘⏎ sends</span>
+                                <button type="submit" class="btn btn-primary">
+                                    <span class="btn-loader" aria-hidden="true"></span>
+                                    Send reply
+                                </button>
+                            </div>
+                        </form>
+                    @endif
+                </section>
+            </div>
+
+            <aside class="order-facts">
+                <section class="order-fact">
+                    <h3 class="order-fact-title">Customer</h3>
+                    <div class="admin-convo-customer">
+                        <span class="admin-customer-avatar" aria-hidden="true">{{ $conversation->initials() }}</span>
+                        <div class="admin-convo-customer-main">
+                            <p class="admin-table-primary">{{ $conversation->name }}</p>
+                            <p class="admin-table-sub">
+                                {{ $conversation->email }}
+                                <button type="button" class="admin-copy-code" data-copy-code="{{ $conversation->email }}" title="Copy email" aria-label="Copy email">
+                                    <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                                        <rect x="9" y="9" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.75"/>
+                                        <path d="M6 15H4.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V6" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+                            </p>
+                        </div>
+                    </div>
+                    @if ($conversation->user?->isAdmin())
+                        <p class="form-hint">This thread belongs to an admin account.</p>
+                    @elseif ($conversation->user)
+                        <a href="{{ route('admin.customers.show', $conversation->user) }}" class="btn btn-sm btn-secondary admin-convo-fact-btn">View customer page</a>
+                    @elseif ($possibleCustomer)
+                        <p class="form-hint">Sent without an account, but the email matches a customer.</p>
+                        <a href="{{ route('admin.customers.show', $possibleCustomer) }}" class="btn btn-sm btn-secondary admin-convo-fact-btn">Possibly {{ $possibleCustomer->name }}</a>
+                    @else
+                        <p class="form-hint">No customer account uses this email.</p>
+                    @endif
+                </section>
+
+                @if ($conversation->order)
+                    <section class="order-fact">
+                        <h3 class="order-fact-title">About order</h3>
+                        <p class="admin-table-primary">{{ $conversation->order->number }}</p>
+                        <p class="admin-table-sub">
+                            {{ $conversation->order->created_at->format('d M Y') }}
+                            · {{ $conversation->order->formattedTotal() }}
+                        </p>
+                        <span class="badge badge-{{ $conversation->order->status }}">{{ $conversation->order->statusLabel() }}</span>
+                        <a href="{{ route('admin.orders.show', $conversation->order) }}" class="btn btn-sm btn-secondary admin-convo-fact-btn">View order</a>
+                    </section>
+                @endif
+
+                <section class="order-fact">
+                    <h3 class="order-fact-title">Thread</h3>
+                    <dl class="admin-email-diagnostics">
+                        <div>
+                            <dt>Messages</dt>
+                            <dd>{{ number_format($conversation->messages->count()) }}</dd>
+                        </div>
+                        <div>
+                            <dt>Started</dt>
+                            <dd>{{ $conversation->created_at->format('d M Y') }}</dd>
+                        </div>
+                        <div>
+                            <dt>Last activity</dt>
+                            <dd>{{ $conversation->messages->last()?->created_at->format('d M Y · H:i') ?? '—' }}</dd>
+                        </div>
+                    </dl>
+                </section>
+            </aside>
         </div>
     </div>
 @endsection
 
 @push('scripts')
+    <script src="{{ asset('js/admin-copy-code.js') }}" defer></script>
     <script src="{{ asset('js/conversation-reply.js') }}" defer></script>
     <script src="{{ asset('js/conversation-edit.js') }}" defer></script>
+    <script src="{{ asset('js/admin-conversation-page.js') }}" defer></script>
 @endpush

@@ -9561,3 +9561,100 @@ a.order-stepper-btn:focus-visible {
     color: #fff;
     background: #a03d3d;
 }
+
+/* --- The conversation page as a chat ------------------------------------ */
+
+/* The panel holds the whole exchange: history scrolling in its own window,
+   composer moored beneath it. The page itself never has to move. */
+.admin-thread-panel {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+}
+
+.admin-thread-viewport {
+    max-height: 58vh;
+    min-height: 16rem;
+    overflow-y: auto;
+    padding: 1.25rem 1.4rem;
+    scrollbar-width: thin;
+    overscroll-behavior: contain;
+}
+
+.admin-thread-viewport:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+}
+
+.admin-thread-composer {
+    padding: 1rem 1.4rem 1.2rem;
+    border-top: 1px solid var(--border);
+}
+
+.admin-thread-composer .form-control {
+    resize: none;
+    overflow-y: auto;
+}
+
+.admin-composer-note {
+    padding: 1.1rem 1.4rem 1.2rem;
+    border-top: 1px solid var(--border);
+}
+
+.admin-composer-note .btn {
+    margin-top: 0.6rem;
+}
+
+.admin-composer-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.9rem;
+    margin-top: 0.6rem;
+}
+
+.admin-composer-hint,
+.admin-composer-count {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* The counter appears only near the limit, and reads as a warning. */
+.admin-composer-count {
+    font-variant-numeric: tabular-nums;
+    color: #a03d3d;
+}
+
+/* The customer card in the side column. */
+.admin-convo-customer {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 0.75rem;
+}
+
+.admin-convo-customer-main {
+    min-width: 0;
+}
+
+.admin-convo-customer-main p {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.admin-convo-fact-btn {
+    margin-top: 0.75rem;
+}
+
+.order-fact .badge + .admin-convo-fact-btn {
+    display: inline-block;
+    margin-left: 0.6rem;
+    margin-top: 0;
+}
+
+@media (max-width: 900px) {
+    .admin-thread-viewport {
+        max-height: 50vh;
+    }
+}
