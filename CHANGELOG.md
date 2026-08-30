@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-30 — v0.34.1 — build 3ZX692
+
+### Under the hood
+
+- **The back-office can leave `/admin`.** Its URL prefix now comes from the environment — set `ADMIN_PATH` in production and the admin moves to a path a scanner won't guess, without the secret ever entering git; route names and the token-protected `/api/admin` stay where they were. `robots.txt` only names the path while it's still the default, since a path renamed to be unfindable has no business printed in the first file every scanner reads — a `noindex` header covers the admin pages whatever they're called instead. The login throttle — five attempts a minute, counted before the password check — already existed; a test now pins it so it can't quietly disappear.
+
 ## 2026-08-30 — v0.34.0 — build 3D5HZM
 
 ### Storefront
