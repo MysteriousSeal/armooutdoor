@@ -96,7 +96,7 @@ Route::post('/preferences/theme', [PreferenceController::class, 'theme'])->name(
 | Login is public; everything else sits behind the `admin` middleware.
 */
 
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
     Route::get('/', [AdminAuthController::class, 'create'])->name('login');
     Route::post('/login', [AdminAuthController::class, 'store'])
         ->middleware('throttle:5,1')

@@ -33,7 +33,9 @@ class RecordSiteVisit
             return false;
         }
 
-        if ($request->is('admin', 'admin/*', 'up', 'sitemap.xml', 'robots.txt')) {
+        $adminPath = config('shop.admin_path');
+
+        if ($request->is($adminPath, $adminPath.'/*', 'up', 'sitemap.xml', 'robots.txt')) {
             return false;
         }
 

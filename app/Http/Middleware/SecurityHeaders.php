@@ -25,6 +25,14 @@ class SecurityHeaders
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
         $response->headers->set('Content-Security-Policy', self::CSP);
 
+        // Le back-office ne s'indexe jamais — surtout pas sous un chemin
+        // renommé, que robots.txt ne cite plus justement pour le taire.
+        $adminPath = config('shop.admin_path');
+
+        if ($request->is($adminPath) || $request->is($adminPath.'/*')) {
+            $response->headers->set('X-Robots-Tag', 'noindex, nofollow');
+        }
+
         if ($request->secure()) {
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
         }

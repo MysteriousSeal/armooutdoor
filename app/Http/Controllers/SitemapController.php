@@ -39,14 +39,18 @@ class SitemapController extends Controller
 
     public function robots(): Response
     {
-        $lines = [
+        // Le back-office n'est cité que sous son nom par défaut : un chemin
+        // renommé pour être introuvable ne va pas s'imprimer dans le fichier
+        // que tout le monde lit en premier. Un en-tête noindex couvre ses
+        // pages quoi qu'il arrive.
+        $lines = array_values(array_filter([
             'User-agent: *',
-            'Disallow: /admin',
+            config('shop.admin_path') === 'admin' ? 'Disallow: /admin' : null,
             'Disallow: /cart',
             'Disallow: /checkout',
             '',
             'Sitemap: '.route('sitemap.index'),
-        ];
+        ], fn ($line) => $line !== null));
 
         return response(implode("\n", $lines)."\n")->header('Content-Type', 'text/plain');
     }
