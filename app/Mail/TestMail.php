@@ -22,8 +22,10 @@ class TestMail extends Mailable
 
     public function content(): Content
     {
+        // Rendered through the shop's shared mail theme on purpose: the test
+        // email exists to show what every other email will look like.
         return new Content(
-            view: 'emails.test',
+            markdown: 'emails.test',
             with: [
                 'sentAt' => now(),
                 'mailer' => (string) config('mail.default'),
