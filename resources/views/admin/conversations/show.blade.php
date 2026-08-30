@@ -113,7 +113,10 @@
                 <textarea id="body" name="body" class="form-control" rows="5" maxlength="5000" required placeholder="Write your reply…"></textarea>
                 @error('body') <p class="form-error">{{ $message }}</p> @enderror
                 <div class="thread-composer-actions">
-                    <button type="submit" class="btn btn-primary">Send reply</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="btn-loader" aria-hidden="true"></span>
+                        Send reply
+                    </button>
                 </div>
             </form>
         @endif

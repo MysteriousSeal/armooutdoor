@@ -8,6 +8,35 @@
 
     var textarea = form.querySelector('textarea[name="body"]');
     var submitButton = form.querySelector('button[type="submit"]');
+    var toastTimeout = null;
+
+    // The admin pages share one toast through armoToast; the account page
+    // builds the storefront's own. Same gesture either way: the reply
+    // confirms itself without the page moving.
+    function confirmSent(text) {
+        if (window.armoToast) {
+            window.armoToast.show(text);
+            return;
+        }
+
+        var toast = document.getElementById('store-toast');
+
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'store-toast';
+            document.body.appendChild(toast);
+        }
+
+        toast.className = 'store-toast is-success';
+        toast.setAttribute('role', 'status');
+        toast.textContent = text;
+        toast.classList.add('is-visible');
+
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(function () {
+            toast.classList.remove('is-visible');
+        }, 4500);
+    }
 
     function setError(text) {
         var error = form.querySelector('.form-error');
@@ -112,6 +141,7 @@
 
         if (submitButton) {
             submitButton.disabled = true;
+            submitButton.classList.add('is-loading');
         }
 
         fetch(form.action, {
@@ -138,8 +168,18 @@
                     throw new Error('conversation-reply-failed');
                 }
 
-                appendMessage(result.data);
+                // The reply is saved by now: a hiccup while drawing the
+                // bubble must reload to show it, never re-submit it — the
+                // form fallback below would post the same reply twice.
+                try {
+                    appendMessage(result.data);
+                } catch (renderError) {
+                    window.location.reload();
+                    return;
+                }
+
                 textarea.value = '';
+                confirmSent(result.data.message || 'Reply sent.');
             })
             .catch(function () {
                 form.setAttribute('data-bypass', '1');
@@ -148,6 +188,7 @@
             .finally(function () {
                 if (submitButton) {
                     submitButton.disabled = false;
+                    submitButton.classList.remove('is-loading');
                 }
             });
     });

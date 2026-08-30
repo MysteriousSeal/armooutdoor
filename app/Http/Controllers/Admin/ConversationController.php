@@ -143,21 +143,24 @@ class ConversationController extends Controller
 
     /**
      * The reply is already saved by the time this runs, so a mail outage must
-     * not turn a successful reply into a 500 for the admin. Sent inline rather
-     * than queued: no worker is supervised yet, and a queued notification with
-     * no worker would sit in the jobs table unnoticed. Add ShouldQueue to the
-     * notification once a worker is running.
+     * not turn a successful reply into a 500 for the admin — and the SMTP
+     * round-trip must not keep the admin waiting either: the send is deferred
+     * to after the response has been flushed. Same process, no queue worker
+     * to supervise, nothing to sit unsent in a jobs table — the admin is just
+     * no longer standing in line behind the mail server.
      */
     private function notifyCustomer(Conversation $conversation): void
     {
-        try {
-            $conversation->user?->notify(new ConversationReplied($conversation));
-        } catch (Throwable $exception) {
-            Log::error('Could not email a conversation reply notification.', [
-                'conversation_id' => $conversation->id,
-                'exception' => $exception->getMessage(),
-            ]);
-        }
+        app()->terminating(function () use ($conversation): void {
+            try {
+                $conversation->user?->notify(new ConversationReplied($conversation));
+            } catch (Throwable $exception) {
+                Log::error('Could not email a conversation reply notification.', [
+                    'conversation_id' => $conversation->id,
+                    'exception' => $exception->getMessage(),
+                ]);
+            }
+        });
     }
 
     public function close(Conversation $conversation): RedirectResponse

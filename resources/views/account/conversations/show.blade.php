@@ -65,7 +65,10 @@
                 ></textarea>
                 @error('body') <p class="form-error">{{ $message }}</p> @enderror
                 <div class="thread-composer-actions">
-                    <button type="submit" class="btn btn-primary">{{ __('store.conversation_reply_send') }}</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="btn-loader" aria-hidden="true"></span>
+                        {{ __('store.conversation_reply_send') }}
+                    </button>
                 </div>
             </form>
         @endif
