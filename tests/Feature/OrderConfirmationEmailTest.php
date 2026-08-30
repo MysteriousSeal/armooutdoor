@@ -128,7 +128,9 @@ class OrderConfirmationEmailTest extends TestCase
             ])
             ->assertRedirect();
 
-        Notification::assertNothingSent();
+        // Silencieux pour le client — la boutique elle-même, prévenue par
+        // AdminOrderPlaced, n'est pas le client.
+        Notification::assertSentTimes(OrderConfirmed::class, 0);
     }
 
     public function test_validating_a_draft_emails_the_confirmation(): void
@@ -172,7 +174,8 @@ class OrderConfirmationEmailTest extends TestCase
             ->assertRedirect();
 
         $this->assertTrue(Order::query()->sole()->user->external);
-        Notification::assertNothingSent();
+        // Rien pour le client fantôme ; la boutique, elle, est prévenue.
+        Notification::assertSentTimes(OrderConfirmed::class, 0);
     }
 
     public function test_a_manual_order_without_an_account_sends_nothing(): void

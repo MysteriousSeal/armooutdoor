@@ -9,5 +9,8 @@ return [
     // Le chemin du back-office. Renommé en production pour ne pas s'offrir
     // au premier scanner venu ; les noms de routes (admin.*) ne bougent pas.
     'admin_path' => env('ADMIN_PATH', 'admin'),
+    // Prévenu à chaque commande devenue réelle — boutique comme manuelle.
+    // Vide : personne n'est prévenu.
+    'order_notification_email' => env('ORDER_NOTIFICATION_EMAIL'),
     'version' => '0.34.1',
 ];

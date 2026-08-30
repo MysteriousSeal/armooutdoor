@@ -178,6 +178,7 @@ class StripeCheckoutFinalizer
         // was first made. Covers card orders wherever they finalize, the
         // success redirect and the webhook alike.
         $order->sendConfirmationEmail();
+        $order->sendAdminNewOrderEmail();
 
         return $order;
     }

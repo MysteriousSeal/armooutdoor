@@ -449,6 +449,7 @@ class CheckoutController extends Controller
         // Outside the transaction: a confirmation should only ever describe
         // an order that actually committed.
         $order->sendConfirmationEmail();
+        $order->sendAdminNewOrderEmail();
 
         return redirect(localized_route('orders.show', ['order' => $order->number]))
             ->with('status', __('store.order_placed'));

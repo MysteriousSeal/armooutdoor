@@ -346,6 +346,7 @@ class OrderController extends Controller
         // policy on the model says is owed it — a draft isn't placed yet.
         if ($finalize) {
             $savedOrder->sendConfirmationEmail();
+            $savedOrder->sendAdminNewOrderEmail();
         }
 
         return redirect()
@@ -1091,6 +1092,7 @@ class OrderController extends Controller
         AdminActivityLog::record('order.draft_validated', $order, 'Validated draft order '.$order->number);
 
         $order->sendConfirmationEmail();
+        $order->sendAdminNewOrderEmail();
 
         return back()->with('status', 'Draft validated into an order.');
     }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\DeliveryMethod;
 use App\Enums\PaymentMethod;
+use App\Notifications\AdminOrderPlaced;
 use App\Notifications\OrderConfirmed;
 use App\Notifications\OrderPreparing;
 use App\Support\DeferredMail;
@@ -16,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Lang;
+use Illuminate\Support\Facades\Notification as NotificationFacade;
 use Illuminate\Support\Str;
 
 #[Fillable([
@@ -592,6 +594,23 @@ class Order extends Model
 
         DeferredMail::send('Could not email an order confirmation.', ['order_id' => $this->id],
             fn () => $this->user->notify(new OrderConfirmed($this)));
+    }
+
+    /**
+     * Prévient la boutique elle-même — toute commande devenue réelle, y
+     * compris celles dont le client n'entend rien (manuelles, marketplace).
+     * Adresse vide : personne à prévenir, on passe.
+     */
+    public function sendAdminNewOrderEmail(): void
+    {
+        $address = (string) config('shop.order_notification_email');
+
+        if ($address === '') {
+            return;
+        }
+
+        DeferredMail::send('Could not email the new-order notice.', ['order_id' => $this->id],
+            fn () => NotificationFacade::route('mail', $address)->notify(new AdminOrderPlaced($this)));
     }
 
     /**
