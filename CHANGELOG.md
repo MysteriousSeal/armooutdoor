@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-30 — v0.32.1 — build TCVQSU
+
+### Storefront
+
+- **Card is back at checkout.** It had been switched off, showing "Bientôt disponible" like PayPal still does, until the shop had a live Stripe account to actually take a payment against. That account is live now, so the card option is on again — PayPal stays off.
+
 ## 2026-08-30 — v0.32.0 — build O4MGCS
 
 ### Storefront
