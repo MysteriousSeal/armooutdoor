@@ -9,14 +9,13 @@ use App\Models\Conversation;
 use App\Models\ConversationMessage;
 use App\Models\User;
 use App\Notifications\ConversationReplied;
+use App\Support\DeferredMail;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\View\View;
-use Throwable;
 
 class ConversationController extends Controller
 {
@@ -146,30 +145,15 @@ class ConversationController extends Controller
     }
 
     /**
-     * The reply is already saved by the time this runs, so a mail outage must
-     * not turn a successful reply into a 500 for the admin — and the SMTP
-     * round-trip must not keep the admin waiting either: the send is deferred
-     * to after the response has been flushed. Same process, no queue worker
-     * to supervise, nothing to sit unsent in a jobs table — the admin is just
-     * no longer standing in line behind the mail server.
+     * Tells the customer an answer is waiting — a guest at their own address,
+     * an account holder through their account.
      */
     private function notifyCustomer(Conversation $conversation): void
     {
-        app()->terminating(function () use ($conversation): void {
-            try {
-                if ($conversation->isGuest()) {
-                    Notification::route('mail', $conversation->email)
-                        ->notify(new ConversationReplied($conversation));
-                } else {
-                    $conversation->user->notify(new ConversationReplied($conversation));
-                }
-            } catch (Throwable $exception) {
-                Log::error('Could not email a conversation reply notification.', [
-                    'conversation_id' => $conversation->id,
-                    'exception' => $exception->getMessage(),
-                ]);
-            }
-        });
+        DeferredMail::send('Could not email a conversation reply notification.', ['conversation_id' => $conversation->id],
+            fn () => $conversation->isGuest()
+                ? Notification::route('mail', $conversation->email)->notify(new ConversationReplied($conversation))
+                : $conversation->user->notify(new ConversationReplied($conversation)));
     }
 
     public function close(Request $request, Conversation $conversation): RedirectResponse|JsonResponse

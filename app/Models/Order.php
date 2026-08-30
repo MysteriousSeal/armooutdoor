@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Enums\DeliveryMethod;
 use App\Enums\PaymentMethod;
+use App\Notifications\OrderConfirmed;
+use App\Support\DeferredMail;
 use App\Support\ShippingEstimate;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -552,6 +554,36 @@ class Order extends Model
     {
         return $this->billing_address_snapshot !== null
             && $this->billing_address_snapshot !== $this->address_snapshot;
+    }
+
+    /**
+     * Whether placing this order owes the customer a confirmation email.
+     *
+     * The whole policy, in one place: a marketplace order was already
+     * confirmed where it was placed, and an external shadow account's
+     * address was typed in by an admin — never verified by its owner, so
+     * never written to.
+     */
+    public function wantsConfirmationEmail(): bool
+    {
+        return $this->marketplace_id === null
+            && $this->user !== null
+            && ! $this->user->external;
+    }
+
+    /**
+     * Mails the confirmation to whoever the policy says is owed one. Safe to
+     * call from any path that just made the order real — the ineligible
+     * simply pass through in silence.
+     */
+    public function sendConfirmationEmail(): void
+    {
+        if (! $this->wantsConfirmationEmail()) {
+            return;
+        }
+
+        DeferredMail::send('Could not email an order confirmation.', ['order_id' => $this->id],
+            fn () => $this->user->notify(new OrderConfirmed($this)));
     }
 
     public function carrierName(): string

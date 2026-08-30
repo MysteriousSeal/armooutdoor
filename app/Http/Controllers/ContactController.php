@@ -7,12 +7,11 @@ use App\Models\CompanySetting;
 use App\Models\Conversation;
 use App\Models\ConversationMessage;
 use App\Notifications\GuestConversationStarted;
+use App\Support\DeferredMail;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\View\View;
-use Throwable;
 
 class ContactController extends Controller
 {
@@ -50,23 +49,12 @@ class ContactController extends Controller
         );
 
         // A guest can't come back through an account, so their door is a
-        // private link, mailed right away — after the response, so the form
-        // never waits on SMTP, and guarded, so a mail outage never turns a
-        // delivered message into an error page.
+        // private link, mailed right away.
         if ($user === null) {
             $conversation->ensureGuestToken();
 
-            app()->terminating(function () use ($conversation): void {
-                try {
-                    Notification::route('mail', $conversation->email)
-                        ->notify(new GuestConversationStarted($conversation));
-                } catch (Throwable $exception) {
-                    Log::error('Could not email a guest conversation link.', [
-                        'conversation_id' => $conversation->id,
-                        'exception' => $exception->getMessage(),
-                    ]);
-                }
-            });
+            DeferredMail::send('Could not email a guest conversation link.', ['conversation_id' => $conversation->id],
+                fn () => Notification::route('mail', $conversation->email)->notify(new GuestConversationStarted($conversation)));
         }
 
         if ($request->wantsJson()) {

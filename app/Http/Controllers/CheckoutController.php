@@ -437,6 +437,10 @@ class CheckoutController extends Controller
 
         session()->forget(self::DISCOUNT_CODE_SESSION_KEY);
 
+        // Outside the transaction: a confirmation should only ever describe
+        // an order that actually committed.
+        $order->sendConfirmationEmail();
+
         return redirect(localized_route('orders.show', ['order' => $order->number]))
             ->with('status', __('store.order_placed'));
     }

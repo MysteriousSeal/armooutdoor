@@ -65,7 +65,7 @@ class StripeCheckoutFinalizer
         // order and the admin pages never need to call Stripe to show it.
         $paymentFeeCents = $stripePaymentIntentId !== null ? StripeDashboard::fetchFeeCents($stripePaymentIntentId) : null;
 
-        return DB::transaction(function () use ($userId, $cart, $address, $billingAddress, $carrier, $relayPoint, $discountCodeId, $stripeCheckoutSessionId, $stripePaymentIntentId, $stripeCustomerId, $paymentFeeCents): Order {
+        $order = DB::transaction(function () use ($userId, $cart, $address, $billingAddress, $carrier, $relayPoint, $discountCodeId, $stripeCheckoutSessionId, $stripePaymentIntentId, $stripeCustomerId, $paymentFeeCents): Order {
             $subtotal = $cart->totalCents();
             $shipping = ShippingSetting::current()->effectivePriceCents($carrier, $subtotal, $cart->totalWeightGrams());
 
@@ -172,5 +172,13 @@ class StripeCheckoutFinalizer
 
             return $order;
         });
+
+        // After the commit, and only for a freshly created order — the
+        // already-finalized path returned earlier and was confirmed when it
+        // was first made. Covers card orders wherever they finalize, the
+        // success redirect and the webhook alike.
+        $order->sendConfirmationEmail();
+
+        return $order;
     }
 }

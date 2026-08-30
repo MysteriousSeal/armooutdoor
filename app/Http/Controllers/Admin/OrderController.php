@@ -341,6 +341,12 @@ class OrderController extends Controller
             default => 'Draft finalized into an order.',
         };
 
+        // Once really placed, the order confirms itself to whoever the
+        // policy on the model says is owed it — a draft isn't placed yet.
+        if ($finalize) {
+            $savedOrder->sendConfirmationEmail();
+        }
+
         return redirect()
             ->route('admin.orders.show', $savedOrder)
             ->with('status', $message);
@@ -1033,6 +1039,8 @@ class OrderController extends Controller
         });
 
         AdminActivityLog::record('order.draft_validated', $order, 'Validated draft order '.$order->number);
+
+        $order->sendConfirmationEmail();
 
         return back()->with('status', 'Draft validated into an order.');
     }
