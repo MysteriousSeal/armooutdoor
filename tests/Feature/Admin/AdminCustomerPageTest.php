@@ -65,6 +65,28 @@ class AdminCustomerPageTest extends TestCase
             ->assertSee('Avant inscription');
     }
 
+    public function test_the_reset_link_button_can_ask_in_json(): void
+    {
+        \Illuminate\Support\Facades\Notification::fake();
+        $customer = User::factory()->create();
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->postJson('/admin/customers/'.$customer->id.'/send-reset-link')
+            ->assertOk()
+            ->assertJson(['message' => 'Password reset link sent.']);
+
+        \Illuminate\Support\Facades\Notification::assertSentTo($customer, \Illuminate\Auth\Notifications\ResetPassword::class);
+        $this->assertDatabaseHas('admin_activity_logs', ['action' => 'customer.password_reset_sent']);
+
+        // Asking again inside the broker's minute comes back as a wait, not
+        // a failure — and as a 422 the page shows in a toast.
+        $this->actingAs($admin)
+            ->postJson('/admin/customers/'.$customer->id.'/send-reset-link')
+            ->assertStatus(422)
+            ->assertJsonPath('message', fn (string $message) => str_contains($message, 'Wait before resending'));
+    }
+
     public function test_the_manual_order_form_arrives_with_the_customer_preselected(): void
     {
         $customer = User::factory()->create();

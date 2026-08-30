@@ -269,7 +269,10 @@
                     <form method="POST" action="{{ route('admin.customers.send-reset-link', $customer) }}" class="admin-customer-reset-form">
                         @csrf
                         <p class="admin-customer-reset-hint">Emails a password reset link. Nobody at Armo Outdoor sees or sets the password directly.</p>
-                        <button type="submit" class="btn btn-secondary">Send password reset link</button>
+                        <button type="submit" class="btn btn-secondary" data-done-label="Link sent ✓">
+                            <span class="btn-loader" aria-hidden="true"></span>
+                            Send password reset link
+                        </button>
                     </form>
 
                     @if (auth()->user()->isOwner())
@@ -395,4 +398,5 @@
 
 @push('scripts')
     <script src="{{ asset('js/admin-copy-code.js') }}" defer></script>
+    <script src="{{ asset('js/admin-customer-reset.js') }}" defer></script>
 @endpush

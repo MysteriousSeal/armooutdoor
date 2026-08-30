@@ -9527,3 +9527,37 @@ a.order-stepper-btn:focus-visible {
         display: none;
     }
 }
+
+/* The spinner in a working button, same as the storefront's: invisible at
+   rest, it pushes the label aside while the request is out. */
+.btn-loader {
+    display: none;
+    width: 0.9em;
+    height: 0.9em;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: btn-loader-spin 0.7s linear infinite;
+}
+
+.btn.is-loading {
+    pointer-events: none;
+}
+
+.btn.is-loading .btn-loader {
+    display: inline-block;
+    vertical-align: -0.1em;
+    margin-right: 0.45em;
+}
+
+@keyframes btn-loader-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* A toast can carry bad news too. */
+.admin-toast.is-error {
+    color: #fff;
+    background: #a03d3d;
+}

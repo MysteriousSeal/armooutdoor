@@ -8,6 +8,7 @@ use App\Models\Conversation;
 use App\Models\ProductReview;
 use App\Models\User;
 use App\Support\Csv;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -209,17 +210,31 @@ class CustomerController extends Controller
         return back()->with('status', 'Account details saved.');
     }
 
-    public function sendResetLink(User $customer): RedirectResponse
+    public function sendResetLink(Request $request, User $customer): RedirectResponse|JsonResponse
     {
         abort_if($customer->is_admin, 404);
 
         $status = Password::sendResetLink(['email' => $customer->email]);
 
         if ($status !== Password::RESET_LINK_SENT) {
-            return back()->with('status', 'Could not send the reset link.');
+            // The broker cools each account down for a minute between links;
+            // that's a wait, not a failure, and the page should say which.
+            $message = $status === Password::RESET_THROTTLED
+                ? 'A link was already sent less than a minute ago. Wait before resending.'
+                : 'Could not send the reset link.';
+
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $message], 422);
+            }
+
+            return back()->with('status', $message);
         }
 
         AdminActivityLog::record('customer.password_reset_sent', $customer, 'Sent a password reset link to '.$customer->name);
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Password reset link sent.']);
+        }
 
         return back()->with('status', 'Password reset link sent.');
     }
