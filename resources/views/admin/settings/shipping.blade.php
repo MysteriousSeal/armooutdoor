@@ -90,7 +90,12 @@
                         <li>
                             <div class="admin-dash-list-main">
                                 <span class="admin-table-strong">{{ $carrier->localizedName() }}</span>
-                                <span class="admin-table-sub">From {{ $carrier->formattedStartingPrice() }} · {{ $carrier->method->value }}</span>
+                                <span class="admin-table-sub">
+                                    From {{ $carrier->formattedStartingPrice() }}
+                                    · {{ $carrier->method->value }}
+                                    · {{ $carrier->priceTiers->count() === 1 ? '1 tier' : $carrier->priceTiers->count().' tiers' }}
+                                    · {{ $carrier->max_weight_grams !== null ? 'max '.number_format($carrier->max_weight_grams).' g' : 'no max weight' }}
+                                </span>
                             </div>
                             <button type="button" class="btn btn-sm btn-secondary" data-modal-open="carrier-price-tiers-{{ $carrier->id }}">Edit price</button>
                         </li>

@@ -137,6 +137,24 @@ class CarrierMaxWeightTest extends TestCase
             ->assertSee(__('store.shipping_from_amount', ['price' => format_euros($nextCents)]));
     }
 
+    public function test_the_settings_list_shows_the_tier_count_and_the_limit(): void
+    {
+        $carrier = Carrier::query()->where('slug', 'colissimo-home')->firstOrFail();
+        $carrier->update(['max_weight_grams' => 4000]);
+        $carrier->priceTiers()->delete();
+        $carrier->priceTiers()->create(['min_weight_grams' => 1000, 'price_cents' => 890]);
+        $carrier->priceTiers()->create(['min_weight_grams' => 2000, 'price_cents' => 1090]);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/settings/shipping')
+            ->assertOk()
+            ->assertSee('2 tiers')
+            ->assertSee('max 4,000 g')
+            // Les autres transporteurs n'ont pas de limite : la liste le dit
+            // plutôt que de laisser un blanc.
+            ->assertSee('no max weight');
+    }
+
     public function test_the_admin_modal_saves_and_clears_the_limit(): void
     {
         $carrier = Carrier::query()->where('slug', 'colissimo-home')->firstOrFail();
