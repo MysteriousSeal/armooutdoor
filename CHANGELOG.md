@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-30 — v0.31.0 — build 2ESZMM
+
+### Storefront
+
+- **Ordering finally answers back.** The shop never sent an order confirmation — a customer checked out and heard nothing. Every real order now mails its receipt, dressed like the rest of the shop's email: the items in a table with the totals beneath, the carrier and delivery address — or the relay point — and a button to follow the order. When payment wasn't captured by card at checkout, a panel says so plainly: the order ships once the payment is confirmed.
+
+  "Every real order" is a policy the code states in one place: orders from the site, card or not, wherever the Stripe finalizer runs; manual orders an admin places for a real customer, phone orders included, and drafts the moment they're validated. Marketplace orders stay silent — the marketplace already confirmed them — and the shadow accounts behind hand-typed customers are never written to, their address having been typed by an admin rather than verified by its owner.
+
+### Under the hood
+
+- **One way to send mail from a request.** The deferred, guarded send that conversations pioneered — after the response, a log line on failure, never a broken page — became `DeferredMail`, and every email the application owes a request now goes through it.
+
 ## 2026-08-30 — v0.30.0 — build UT2962
 
 ### Storefront
