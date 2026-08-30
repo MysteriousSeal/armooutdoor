@@ -42,9 +42,11 @@ class AdminAnalyticsTest extends TestCase
         $this->assertDatabaseHas('site_visits', ['path' => '/contact', 'country' => 'Local']);
     }
 
-    public function test_a_visit_is_recorded_with_the_session_id(): void
+    public function test_a_visit_is_recorded_with_the_session_id_once_consented(): void
     {
-        $this->get('/contact')->assertOk();
+        // Le bandeau cookies conditionne l'identifiant : sans accord, la
+        // visite est enregistrée sans lui (couvert par CookieBannerTest).
+        $this->withUnencryptedCookie('cookie_consent', 'all')->get('/contact')->assertOk();
 
         $visit = SiteVisit::query()->where('path', '/contact')->firstOrFail();
         $this->assertNotNull($visit->session_id);

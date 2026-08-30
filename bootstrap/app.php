@@ -25,6 +25,11 @@ return Application::configure(basePath: dirname(__DIR__))
             RecordSiteVisit::class,
         ]);
 
+        // Posé par le bandeau cookies côté client et lu côté serveur pour
+        // décider si la mesure d'audience peut porter l'identifiant de
+        // session — il doit donc voyager en clair.
+        $middleware->encryptCookies(except: ['cookie_consent']);
+
         $middleware->alias([
             'admin' => EnsureUserIsAdmin::class,
             'admin.owner' => EnsureUserIsOwner::class,

@@ -324,6 +324,7 @@
                     <a href="{{ route('legal.notice') }}">{{ __('store.legal_notice_title') }}</a>
                     <a href="{{ route('legal.privacy') }}">{{ __('store.legal_privacy_title') }}</a>
                     <a href="{{ route('legal.withdrawal') }}">{{ __('store.legal_withdrawal_title') }}</a>
+                    <a href="{{ route('legal.privacy') }}" data-cookie-reopen>{{ __('store.footer_cookies') }}</a>
                     <a href="{{ route('sitemap.html') }}">{{ __('store.footer_sitemap') }}</a>
                 </nav>
             </div>
@@ -331,7 +332,9 @@
     </footer>
 
     @include('partials.add-to-cart-modal')
+    @include('partials.cookie-banner')
 
+    <script src="{{ asset('js/cookie-banner.js') }}" defer></script>
     <script src="{{ asset('js/pretty-select.js') }}" defer></script>
     <script src="{{ asset('js/site-menu-toggle.js') }}" defer></script>
     <script src="{{ asset('js/theme-toggle.js') }}" defer></script>
