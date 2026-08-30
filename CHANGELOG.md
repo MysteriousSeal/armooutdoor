@@ -2,6 +2,20 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-30 — v0.34.0 — build 3D5HZM
+
+### Storefront
+
+- **A carrier can now carry a maximum weight.** Above it, the carrier stays visible at checkout but greyed and unselectable, its delivery estimate replaced by the reason — « votre commande dépasse le poids maximum de ce transporteur » — and the server refuses the order even posted by hand. The default selection skips it, a free-relay code can no longer claim to waive delivery on a carrier that won't take the parcel, and the cart's « à partir de » shipping estimate stops quoting the price of a choice the weight has already greyed out.
+
+### Admin
+
+- **The shipping settings page answers "what do we charge?" at a glance.** Each carrier is now a rate card — logo, a Home or Relay point chip, and a "Free above" badge when the free-shipping rule covers it, so the two panels finally read against each other. Below, a menu-style table with dotted leaders running from weight range to price: the default price becomes the first range, each tier bounds the one before it, and the new weight limit closes the last. The maximum weight is set in the same per-carrier modal as the tiers; a carrier without one says "No limit" rather than leaving a blank.
+
+- **Package types read as tags**, each carrying how many orders used it — one grouped query for the whole page. The count matters most in the removal dialog, which now says what's at stake: "No order ever used it" reads differently from "12 orders used it and keep it on their tracking". The panel moved up beside Free shipping, in a left column that stacks its own panels so the tall carrier list opposite can't open a blank between them.
+
+**Migration:** one, run with `php artisan migrate` — a nullable maximum-weight column on carriers. Nothing is deleted.
+
 ## 2026-08-30 — v0.33.0 — build OKGYB1
 
 ### Admin
