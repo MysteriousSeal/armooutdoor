@@ -2,6 +2,20 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-30 — v0.33.0 — build OKGYB1
+
+### Admin
+
+- **An order can offer a thank-you code.** One click on the order page creates a 10 % code — a single use, for any customer, valid three months from the order's date — and remembers which order it was offered for, a different fact from which order later spends it. One per order: the panel then shows the code, its live state — valid until, used, expired — and hands it straight to the PDF card below. The code reads MERCI- plus six letters drawn without vowels or 0/O/1/I, so it retypes from a card without hesitation and spells no word. The customer's own order page never shows it — a code slipped into a parcel is handed over by the shop, not announced by the site — and a test holds that door shut.
+
+- **A discount code prints as a 70 × 50 mm card**, from a PDF button on the codes list — only the code on it, to slip into a parcel. The type size is computed from the card's width and the code's length, worst-case letter and spacing included, rather than guessed by steps: the first guesses cropped an eight-character code, and a floor set too generously cropped the longest ones. A test now sweeps every admissible length against the same arithmetic.
+
+- **"Available at supplier" flips from the product list.** A new At supplier column carries a clickable Yes/No chip, flipped in place without a reload; the row's availability reading redraws from the server's own verdict, since the flag can swing a product between "At supplier" and "Out of stock". A product sold in sizes shows a dash — the flag lives on each size — and one with no supplier a disabled chip, both refused server-side too.
+
+- **The product list tightened by a column.** Supplier is gone — the name is one click away on the edit page, and the new chip already says what the list needs — and Status now wears the same pastille as GTIN and AI OK beside it, a green check or a red cross, still clickable to flip. On the way, the test guarding the variant panel's colspan turned out to count `<thead>` itself as a column: the panel had been declared one column wider than the table all along, silently clamped by browsers.
+
+**Migration:** one, run with `php artisan migrate` — a nullable origin-order column on discount codes. Nothing is deleted.
+
 ## 2026-08-30 — v0.32.1 — build TCVQSU
 
 ### Storefront
