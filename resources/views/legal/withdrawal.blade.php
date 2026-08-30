@@ -18,7 +18,7 @@
             <h2>Délai de rétractation</h2>
             <p>
                 Conformément aux articles L221-18 et suivants du Code de la consommation, le Client dispose d'un
-                délai de 14 jours francs à compter de la réception du produit pour exercer son droit de rétractation,
+                délai de 14 jours francs à compter de la réception du produit par le Client, ou par un tiers qu'il a désigné, pour exercer son droit de rétractation,
                 sans avoir à justifier de motif ni à payer de pénalité.
             </p>
 

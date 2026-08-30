@@ -20,6 +20,8 @@ use Illuminate\Database\Eloquent\Model;
     'contact_email',
     'phone',
     'return_address',
+    'mediator_name',
+    'mediator_url',
     'invoice_footer_url',
     'invoice_footer_text',
     'invoice_footer_enabled',
@@ -30,7 +32,7 @@ class CompanySetting extends Model
      * Fields that are legitimately optional (e.g. an auto-entrepreneur has no
      * share capital) and shouldn't block isComplete() or show a placeholder.
      */
-    private const OPTIONAL_FIELDS = ['share_capital', 'invoice_footer_url', 'invoice_footer_text'];
+    private const OPTIONAL_FIELDS = ['share_capital', 'invoice_footer_url', 'invoice_footer_text', 'mediator_name', 'mediator_url'];
 
     protected function casts(): array
     {

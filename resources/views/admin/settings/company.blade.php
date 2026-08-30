@@ -109,6 +109,22 @@
                 @error('return_address') <p class="form-error">{{ $message }}</p> @enderror
             </div>
 
+            <h3 class="admin-panel-title">Consumer mediation</h3>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="mediator_name">Mediator name</label>
+                    <input type="text" id="mediator_name" name="mediator_name" class="form-control" value="{{ old('mediator_name', $setting->mediator_name) }}" maxlength="160">
+                    <p class="form-hint">The consumer mediation scheme the shop joined (e.g. CM2C). Named in the CGV once filled.</p>
+                    @error('mediator_name') <p class="form-error">{{ $message }}</p> @enderror
+                </div>
+                <div class="form-group">
+                    <label for="mediator_url">Mediator website</label>
+                    <input type="url" id="mediator_url" name="mediator_url" class="form-control" value="{{ old('mediator_url', $setting->mediator_url) }}" maxlength="255">
+                    @error('mediator_url') <p class="form-error">{{ $message }}</p> @enderror
+                </div>
+            </div>
+
             <h3 class="admin-panel-title">Hosting</h3>
 
             <div class="form-row">

@@ -28,6 +28,8 @@ class UpdateCompanySettingRequest extends FormRequest
             'host_name' => ['nullable', 'string', 'max:160'],
             'host_address' => ['nullable', 'string', 'max:255'],
             'host_phone' => ['nullable', 'string', 'max:30'],
+            'mediator_name' => ['nullable', 'string', 'max:160'],
+            'mediator_url' => ['nullable', 'url', 'max:255'],
             'contact_email' => ['nullable', 'email', 'max:160'],
             'phone' => ['nullable', 'string', 'max:30'],
             'return_address' => ['nullable', 'string', 'max:255'],

@@ -28,6 +28,8 @@
                 <li>Coordonnées : e-mail, téléphone, adresses de livraison et de facturation.</li>
                 <li>Données de commande : produits achetés, historique de commandes.</li>
                 <li>Données de connexion : identifiants de compte, mot de passe (stocké de façon chiffrée).</li>
+                <li>Données de fréquentation : pages consultées et adresse IP, mesurées par le site lui-même,
+                    sans cookie et sans transmission à un tiers.</li>
             </ul>
             <p>Aucune donnée bancaire n'est stockée par nos soins ; le paiement est traité par un prestataire tiers sécurisé.</p>
 
@@ -37,6 +39,7 @@
                 <li>Gestion du compte client (adresses, liste de souhaits, historique).</li>
                 <li>Réponse aux demandes de contact et service après-vente.</li>
                 <li>Respect de nos obligations légales et comptables.</li>
+                <li>Mesure d'audience du site, sur la base de notre intérêt légitime à connaître sa fréquentation.</li>
             </ul>
 
             <h2>Base légale</h2>
@@ -47,9 +50,10 @@
 
             <h2>Destinataires des données</h2>
             <p>
-                Les données sont destinées à {{ $company->value('company_name') }} et, le cas échéant, à ses prestataires techniques
-                (hébergement, transporteurs, prestataire de paiement), dans la stricte limite nécessaire à l'exécution
-                de la commande. Aucune donnée n'est vendue à des tiers.
+                Les données sont destinées à {{ $company->value('company_name') }} et, le cas échéant, à ses prestataires techniques,
+                dans la stricte limite nécessaire à l'exécution de la commande : le prestataire de paiement (Stripe),
+                les transporteurs choisis à la commande (La Poste/Colissimo, Chronopost, Mondial Relay), le service
+                de points relais (Sendcloud) et l'hébergeur du site. Aucune donnée n'est vendue à des tiers.
             </p>
 
             <h2>Durée de conservation</h2>
