@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
+use App\Models\Product;
 use App\Models\SiteVisit;
 use App\Support\DonutChart;
 use App\Support\UserAgentParser;
@@ -66,6 +68,8 @@ class AnalyticsController extends Controller
             'series' => $breakdown['series'],
             'topPages' => $breakdown['topPages'],
             'topReferrers' => $breakdown['topReferrers'],
+            'topProducts' => $breakdown['topProducts'],
+            'topCategories' => $breakdown['topCategories'],
             'range' => $range,
             'ranges' => $ranges,
             'hideBots' => $hideBots,
@@ -214,16 +218,16 @@ class AnalyticsController extends Controller
      * referrers — one pass over the rows for the four of them.
      *
      * @param  array<string, true>  $burstyIps
-     * @return array{charts: array<string, mixed>, series: list<array{label: string, humans: int, bots: int}>, topPages: list<array{path: string, count: int}>, topReferrers: list<array{host: string, count: int}>, botVisitIds: list<int>}
+     * @return array{charts: array<string, mixed>, series: list<array{label: string, humans: int, bots: int}>, topPages: list<array{path: string, count: int}>, topReferrers: list<array{host: string, count: int}>, topProducts: list<array{id: int, name: string, count: int}>, topCategories: list<array{id: int, name: string, count: int}>, botVisitIds: list<int>}
      */
     private function buildCharts(?CarbonInterface $since, array $burstyIps, string $range): array
     {
-        $query = SiteVisit::query()->select(['id', 'user_id', 'user_agent', 'ip_address', 'country', 'created_at', 'path', 'referrer']);
+        $query = SiteVisit::query()->select(['id', 'user_id', 'user_agent', 'ip_address', 'country', 'created_at', 'path', 'referrer', 'product_id', 'category_id']);
         $this->applyRange($query, $since);
         $rows = $query->get();
 
         if ($rows->isEmpty()) {
-            return ['charts' => [], 'series' => [], 'topPages' => [], 'topReferrers' => [], 'botVisitIds' => []];
+            return ['charts' => [], 'series' => [], 'topPages' => [], 'topReferrers' => [], 'topProducts' => [], 'topCategories' => [], 'botVisitIds' => []];
         }
 
         // Un seau par heure sur 24 h, par jour sur 7 et 30 jours, par mois
@@ -248,6 +252,8 @@ class AnalyticsController extends Controller
         $buckets = [];
         $pathCounts = [];
         $referrerCounts = [];
+        $productCounts = [];
+        $categoryCounts = [];
         $botVisitIds = [];
 
         foreach ($rows as $row) {
@@ -281,6 +287,14 @@ class AnalyticsController extends Controller
                     $pathCounts[$row->path] = ($pathCounts[$row->path] ?? 0) + 1;
                 }
 
+                if ($row->product_id) {
+                    $productCounts[$row->product_id] = ($productCounts[$row->product_id] ?? 0) + 1;
+                }
+
+                if ($row->category_id) {
+                    $categoryCounts[$row->category_id] = ($categoryCounts[$row->category_id] ?? 0) + 1;
+                }
+
                 $referrerHost = filled($row->referrer) ? (string) parse_url($row->referrer, PHP_URL_HOST) : '';
                 $referrerHost = preg_replace('/^www\./', '', $referrerHost) ?? '';
 
@@ -309,6 +323,25 @@ class AnalyticsController extends Controller
         $topReferrers = collect($referrerCounts)->take(10)
             ->map(fn (int $count, string $host) => ['host' => $host, 'count' => $count])->values()->all();
 
+        arsort($productCounts);
+        arsort($categoryCounts);
+
+        $topProductIds = array_slice(array_keys($productCounts), 0, 10);
+        $topCategoryIds = array_slice(array_keys($categoryCounts), 0, 10);
+        $products = Product::query()->whereIn('id', $topProductIds)->get()->keyBy('id');
+        $categories = Category::query()->whereIn('id', $topCategoryIds)->get()->keyBy('id');
+
+        // A product or category deleted since the visit was recorded is
+        // simply skipped — nothing left to link the ranking to.
+        $topProducts = collect($topProductIds)
+            ->filter(fn (int $id) => $products->has($id))
+            ->map(fn (int $id) => ['id' => $id, 'name' => $products[$id]->localizedName(), 'count' => $productCounts[$id]])
+            ->values()->all();
+        $topCategories = collect($topCategoryIds)
+            ->filter(fn (int $id) => $categories->has($id))
+            ->map(fn (int $id) => ['id' => $id, 'name' => $categories[$id]->localizedName(), 'count' => $categoryCounts[$id]])
+            ->values()->all();
+
         // Ni « users vs guests » ni « bot vs human » : les tuiles au-dessus
         // portent déjà ces deux répartitions en chiffres.
         $charts = [
@@ -334,6 +367,6 @@ class AnalyticsController extends Controller
             ),
         ];
 
-        return ['charts' => $charts, 'series' => $series, 'topPages' => $topPages, 'topReferrers' => $topReferrers, 'botVisitIds' => $botVisitIds];
+        return ['charts' => $charts, 'series' => $series, 'topPages' => $topPages, 'topReferrers' => $topReferrers, 'topProducts' => $topProducts, 'topCategories' => $topCategories, 'botVisitIds' => $botVisitIds];
     }
 }

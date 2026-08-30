@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\Category;
+use App\Models\Product;
 use App\Models\SiteVisit;
 use App\Models\User;
 use Database\Seeders\AdminSeeder;
@@ -78,6 +80,31 @@ class AdminAnalyticsTest extends TestCase
 
         Http::assertNothingSent();
         $this->assertDatabaseHas('site_visits', ['ip_address' => '203.0.113.9', 'country' => null]);
+    }
+
+    public function test_a_product_page_view_is_recorded_with_its_product_and_category(): void
+    {
+        $category = Category::factory()->create();
+        $product = Product::factory()->create(['category_id' => $category->id, 'is_active' => true]);
+
+        $this->get('/products/'.$product->slug)->assertOk();
+
+        $this->assertDatabaseHas('site_visits', [
+            'product_id' => $product->id,
+            'category_id' => $category->id,
+        ]);
+    }
+
+    public function test_a_category_page_view_is_recorded_with_its_category_but_no_product(): void
+    {
+        $category = Category::factory()->create();
+
+        $this->get('/categories/'.$category->slug)->assertOk();
+
+        $this->assertDatabaseHas('site_visits', [
+            'category_id' => $category->id,
+            'product_id' => null,
+        ]);
     }
 
     // ----------------------------------------------------------------- page
@@ -173,6 +200,31 @@ class AdminAnalyticsTest extends TestCase
         $series = $response->viewData('series');
         $this->assertSame(3, array_sum(array_column($series, 'humans')));
         $this->assertSame(1, array_sum(array_column($series, 'bots')));
+    }
+
+    public function test_the_page_shows_top_products_and_categories(): void
+    {
+        $human = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
+        $category = Category::factory()->create(['name' => ['fr' => 'Cibles', 'en' => 'Targets']]);
+        $other = Category::factory()->create();
+        $product = Product::factory()->create(['category_id' => $category->id, 'is_active' => true]);
+
+        $this->withHeaders(['User-Agent' => $human])->get('/products/'.$product->slug)->assertOk();
+        $this->withHeaders(['User-Agent' => $human])->get('/products/'.$product->slug)->assertOk();
+        $this->withHeaders(['User-Agent' => $human])->get('/categories/'.$other->slug)->assertOk();
+
+        $response = $this->actingAsAdmin()->get('/admin/analytics')->assertOk()
+            ->assertSee('Top products')
+            ->assertSee('Top categories')
+            ->assertSee($product->localizedName());
+
+        $topProducts = $response->viewData('topProducts');
+        $this->assertSame($product->id, $topProducts[0]['id']);
+        $this->assertSame(2, $topProducts[0]['count']);
+
+        $topCategories = collect($response->viewData('topCategories'))->keyBy('id');
+        $this->assertSame(2, $topCategories[$category->id]['count']);
+        $this->assertSame(1, $topCategories[$other->id]['count']);
     }
 
     public function test_the_trend_leads_and_redundant_donuts_are_gone(): void

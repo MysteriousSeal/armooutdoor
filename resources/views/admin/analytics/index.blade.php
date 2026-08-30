@@ -169,6 +169,56 @@
                 </div>
             @endif
 
+            @if (! empty($topProducts) || ! empty($topCategories))
+                <div class="admin-analytics-tops">
+                    <section class="order-panel">
+                        <div class="dash-panel-head">
+                            <h3 class="order-panel-title">Top products</h3>
+                            <span class="dash-panel-note">human views · {{ strtolower($ranges[$range]) }}</span>
+                        </div>
+                        @if (empty($topProducts))
+                            <p class="empty-state">No product pages viewed in this range.</p>
+                        @else
+                            <table class="admin-table">
+                                <tbody>
+                                    @foreach ($topProducts as $product)
+                                        <tr>
+                                            <td class="admin-analytics-top-path admin-analytics-top-path--name">
+                                                <a href="{{ route('admin.products.edit', $product['id']) }}">{{ $product['name'] }}</a>
+                                            </td>
+                                            <td class="admin-table-num">{{ number_format($product['count']) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @endif
+                    </section>
+
+                    <section class="order-panel">
+                        <div class="dash-panel-head">
+                            <h3 class="order-panel-title">Top categories</h3>
+                            <span class="dash-panel-note">human views · {{ strtolower($ranges[$range]) }}</span>
+                        </div>
+                        @if (empty($topCategories))
+                            <p class="empty-state">No category pages viewed in this range.</p>
+                        @else
+                            <table class="admin-table">
+                                <tbody>
+                                    @foreach ($topCategories as $category)
+                                        <tr>
+                                            <td class="admin-analytics-top-path admin-analytics-top-path--name">
+                                                <a href="{{ route('admin.categories.edit', $category['id']) }}">{{ $category['name'] }}</a>
+                                            </td>
+                                            <td class="admin-table-num">{{ number_format($category['count']) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @endif
+                    </section>
+                </div>
+            @endif
+
             @if (! empty($charts))
                 <section class="admin-analytics-section" aria-label="Visit breakdown charts for {{ $ranges[$range] }}">
                     <header class="admin-analytics-section-header">

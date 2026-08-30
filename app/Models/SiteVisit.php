@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['path', 'user_id', 'ip_address', 'user_agent', 'referrer', 'country', 'city'])]
+#[Fillable(['path', 'product_id', 'category_id', 'user_id', 'ip_address', 'user_agent', 'referrer', 'country', 'city'])]
 class SiteVisit extends Model
 {
     const UPDATED_AT = null;
@@ -16,6 +16,16 @@ class SiteVisit extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
     }
 
     /** Browser family or bot product name, derived from user_agent. */

@@ -10005,6 +10005,21 @@ a.order-stepper-btn:focus-visible {
     font-size: 0.8125rem;
 }
 
+/* Product and category names read better in the normal typeface than the
+   monospace used for raw paths and hostnames above. */
+.admin-analytics-top-path--name {
+    font-family: inherit;
+    font-size: 0.875rem;
+}
+
+.admin-analytics-top-path--name a {
+    color: inherit;
+}
+
+.admin-analytics-top-path--name a:hover {
+    color: var(--accent);
+}
+
 .admin-analytics-log-tools {
     display: flex;
     align-items: center;

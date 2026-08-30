@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-30 — v0.37.0 — build FQ83MN
+
+### Admin
+
+- **Analytics now knows which product and category got looked at.** Every recorded visit resolves its product and category from the route — a product page carries both, a category page carries its own — so the trend the last release added finally has a palmarès to match: Top products and Top categories sit beside Top pages and referrers, humans only, each name linking straight to its edit page. No extra query: the ids ride along on the same visit row, counted in the pass the other palmarès already runs.
+
+**Migration:** one, run with `php artisan migrate` — two nullable `product_id`/`category_id` columns on `site_visits`, both null on delete. Existing rows stay null; only visits recorded from here on carry them.
+
 ## 2026-08-30 — v0.36.0 — build BSJ9T7
 
 ### Admin
