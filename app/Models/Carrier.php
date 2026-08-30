@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'eta',
     'method',
     'price_cents',
+    'max_weight_grams',
     'sort_order',
     'active',
 ])]
@@ -28,6 +29,7 @@ class Carrier extends Model
             'eta' => 'array',
             'method' => DeliveryMethod::class,
             'price_cents' => 'integer',
+            'max_weight_grams' => 'integer',
             'sort_order' => 'integer',
             'active' => 'boolean',
         ];
@@ -36,6 +38,12 @@ class Carrier extends Model
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('active', true)->orderBy('sort_order');
+    }
+
+    /** Le transporteur prend-il un colis de ce poids ? Sans limite : oui. */
+    public function carriesWeight(int $weightGrams): bool
+    {
+        return $this->max_weight_grams === null || $weightGrams <= $this->max_weight_grams;
     }
 
     public function priceTiers(): HasMany

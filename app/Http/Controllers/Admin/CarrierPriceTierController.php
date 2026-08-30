@@ -14,8 +14,11 @@ class CarrierPriceTierController extends Controller
     public function update(UpdateCarrierPriceTierRequest $request, Carrier $carrier): RedirectResponse
     {
         DB::transaction(function () use ($request, $carrier): void {
+            $maxWeight = $request->validated('max_weight');
+
             $carrier->update([
                 'price_cents' => (int) round(((float) $request->validated('default_price')) * 100),
+                'max_weight_grams' => $maxWeight === null || $maxWeight === '' ? null : (int) $maxWeight,
             ]);
 
             $carrier->priceTiers()->delete();

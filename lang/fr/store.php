@@ -299,6 +299,7 @@ return [
     'relay_change' => 'Changer de point relais',
     'relay_selected_kicker' => 'Point relais choisi',
     'carrier_unavailable' => "Ce transporteur n'est plus disponible pour les articles de votre panier.",
+    'carrier_too_heavy' => 'Votre commande dépasse le poids maximum de ce transporteur.',
     'place_order' => 'Valider la commande',
     'payment_section' => 'Paiement',
     'payment_card' => 'Carte bancaire',

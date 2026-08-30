@@ -58,6 +58,10 @@ class PlaceOrderRequest extends FormRequest
                 if (! app(Cart::class)->allowsCarrier($carrier)) {
                     $validator->errors()->add('carrier_id', __('store.carrier_unavailable'));
                 }
+
+                if (! $carrier->carriesWeight(app(Cart::class)->totalWeightGrams())) {
+                    $validator->errors()->add('carrier_id', __('store.carrier_too_heavy'));
+                }
             },
         ];
     }

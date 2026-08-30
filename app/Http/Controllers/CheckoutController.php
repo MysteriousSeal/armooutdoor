@@ -45,16 +45,23 @@ class CheckoutController extends Controller
 
         $user = request()->user();
         $addresses = $user->addresses()->get();
+        $weightGrams = $cart->totalWeightGrams();
         $carriers = Carrier::query()->active()->get()->filter(fn (Carrier $carrier): bool => $cart->allowsCarrier($carrier))->values();
+        // Un transporteur dépassé par le poids du panier reste affiché,
+        // grisé — le client comprend pourquoi le choix a rétréci — mais ne
+        // se sélectionne pas, ni par lui ni par défaut.
+        $tooHeavyCarrierIds = $carriers
+            ->reject(fn (Carrier $carrier): bool => $carrier->carriesWeight($weightGrams))
+            ->pluck('id');
+        $selectableCarriers = $carriers->whereNotIn('id', $tooHeavyCarrierIds);
         $selectedAddressId = old('address_id', $addresses->firstWhere('is_default', true)?->id ?? $addresses->first()?->id);
         $selectedAddress = $addresses->firstWhere('id', (int) $selectedAddressId);
         $sameBillingAddress = old('same_billing_address', true);
         $selectedBillingAddressId = old('billing_address_id', $selectedAddressId);
-        $selectedCarrierId = old('carrier_id', request()->query('carrier_id', $carriers->first()?->id));
-        $selectedCarrier = $carriers->firstWhere('id', (int) $selectedCarrierId) ?? $carriers->first();
+        $selectedCarrierId = old('carrier_id', request()->query('carrier_id', $selectableCarriers->first()?->id));
+        $selectedCarrier = $selectableCarriers->firstWhere('id', (int) $selectedCarrierId) ?? $selectableCarriers->first();
 
         $subtotalCents = $cart->totalCents();
-        $weightGrams = $cart->totalWeightGrams();
         $shippingSetting = ShippingSetting::current();
         $carrierPricesCents = $carriers->mapWithKeys(
             fn (Carrier $carrier): array => [$carrier->id => $shippingSetting->effectivePriceCents($carrier, $subtotalCents, $weightGrams)],
@@ -88,6 +95,7 @@ class CheckoutController extends Controller
             'addresses' => $addresses,
             'homeCarriers' => $carriers->filter(fn (Carrier $carrier): bool => $carrier->method === DeliveryMethod::Home)->values(),
             'relayCarriers' => $carriers->filter(fn (Carrier $carrier): bool => $carrier->method === DeliveryMethod::Relay)->values(),
+            'tooHeavyCarrierIds' => $tooHeavyCarrierIds,
             'relayPoints' => $relayPoints,
             'relayPostalCode' => $relayPostalCode !== '' ? $relayPostalCode : ($selectedAddress?->postal_code ?? ''),
             'selectedAddressId' => $selectedAddressId,
@@ -250,6 +258,7 @@ class CheckoutController extends Controller
 
         return Carrier::query()->active()->get()
             ->filter(fn (Carrier $carrier): bool => $cart->allowsCarrier($carrier))
+            ->filter(fn (Carrier $carrier): bool => $carrier->carriesWeight($weightGrams))
             ->filter(fn (Carrier $carrier): bool => $discountCode->shippingDiscountCents(
                 $carrier,
                 $shippingSetting->effectivePriceCents($carrier, $subtotalCents, $weightGrams),

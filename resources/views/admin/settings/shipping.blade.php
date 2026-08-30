@@ -142,6 +142,23 @@
                         @error('default_price', 'carrierTiers'.$carrier->id) <p class="form-error">{{ $message }}</p> @enderror
                     </div>
 
+                    <div class="form-group">
+                        <label for="carrier-max-weight-{{ $carrier->id }}">Max weight (g)</label>
+                        <input
+                            type="number"
+                            id="carrier-max-weight-{{ $carrier->id }}"
+                            name="max_weight"
+                            class="form-control"
+                            min="1"
+                            max="999999"
+                            step="1"
+                            value="{{ old('max_weight', $carrier->max_weight_grams) }}"
+                            placeholder="No limit"
+                        >
+                        <p class="form-hint">Above this weight the carrier shows greyed out at checkout and can't be picked. Leave empty for no limit.</p>
+                        @error('max_weight', 'carrierTiers'.$carrier->id) <p class="form-error">{{ $message }}</p> @enderror
+                    </div>
+
                     <div class="tier-rows" data-tier-rows>
                         @forelse ($oldTiers as $index => $tier)
                             <div class="tier-row" data-tier-row>

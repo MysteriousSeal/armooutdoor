@@ -3797,6 +3797,15 @@ body.has-menu-open {
     color: var(--checkout-muted);
 }
 
+/* Pourquoi cette carte est grisée : le poids du panier dépasse ce que le
+   transporteur accepte. La carte entière est déjà estompée par la règle
+   input:disabled ; la note, elle, reste dans l'encre du texte pour se lire
+   à travers l'estompe. */
+.choice-card-meta--blocked {
+    color: var(--text);
+    font-weight: 500;
+}
+
 .relay-title,
 .relay-address {
     text-transform: uppercase;

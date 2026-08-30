@@ -23,6 +23,7 @@ class UpdateCarrierPriceTierRequest extends FormRequest
 
         return [
             'default_price' => ['required', 'numeric', 'min:0', 'max:9999.99'],
+            'max_weight' => ['nullable', 'integer', 'min:1', 'max:999999'],
             'tiers' => ['nullable', 'array'],
             'tiers.*.min_weight' => ['required', 'integer', 'min:0', 'max:999999'],
             'tiers.*.price' => ['required', 'numeric', 'min:0', 'max:9999.99'],

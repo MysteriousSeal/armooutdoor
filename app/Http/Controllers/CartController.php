@@ -253,6 +253,9 @@ class CartController extends Controller
 
         $cheapestShippingCents = Carrier::query()->active()->get()
             ->filter(fn (Carrier $carrier): bool => $cart->allowsCarrier($carrier))
+            // Un transporteur que le poids disqualifie ne peut pas fournir
+            // le « à partir de » : son prix serait celui d'un choix grisé.
+            ->filter(fn (Carrier $carrier): bool => $carrier->carriesWeight($weightGrams))
             ->map(fn (Carrier $carrier): int => $shippingSetting->effectivePriceCents($carrier, $subtotalCents, $weightGrams))
             ->min();
 

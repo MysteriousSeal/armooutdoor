@@ -235,6 +235,7 @@
                             <h4 class="shipping-group-title">{{ __('store.shipping_home') }}</h4>
                             <div class="choice-grid">
                                 @foreach ($homeCarriers as $carrier)
+                                    @php($carrierTooHeavy = $tooHeavyCarrierIds->contains($carrier->id))
                                     <label class="choice-card">
                                         <input
                                             type="radio"
@@ -242,6 +243,7 @@
                                             value="{{ $carrier->id }}"
                                             form="checkout-form"
                                             data-method="home"
+                                            @disabled($carrierTooHeavy)
                                             @checked((string) $selectedCarrierId === (string) $carrier->id)
                                         >
                                         <span class="choice-card-body">
@@ -255,7 +257,11 @@
                                                 </span>
                                             </span>
                                             <span class="choice-card-meta">{{ $carrier->localizedDescription() }}</span>
-                                            <span class="choice-card-meta">{{ $carrier->localizedEta() }}</span>
+                                            @if ($carrierTooHeavy)
+                                                <span class="choice-card-meta choice-card-meta--blocked">{{ __('store.carrier_too_heavy') }}</span>
+                                            @else
+                                                <span class="choice-card-meta">{{ $carrier->localizedEta() }}</span>
+                                            @endif
                                         </span>
                                     </label>
                                 @endforeach
@@ -268,6 +274,7 @@
                             <h4 class="shipping-group-title">{{ __('store.shipping_relay') }}</h4>
                             <div class="choice-grid">
                                 @foreach ($relayCarriers as $carrier)
+                                    @php($carrierTooHeavy = $tooHeavyCarrierIds->contains($carrier->id))
                                     <label class="choice-card">
                                         <input
                                             type="radio"
@@ -276,6 +283,7 @@
                                             form="checkout-form"
                                             data-method="relay"
                                             data-carrier-slug="{{ $carrier->slug }}"
+                                            @disabled($carrierTooHeavy)
                                             @checked((string) $selectedCarrierId === (string) $carrier->id)
                                         >
                                         <span class="choice-card-body">
@@ -289,7 +297,11 @@
                                                 </span>
                                             </span>
                                             <span class="choice-card-meta">{{ $carrier->localizedDescription() }}</span>
-                                            <span class="choice-card-meta">{{ $carrier->localizedEta() }}</span>
+                                            @if ($carrierTooHeavy)
+                                                <span class="choice-card-meta choice-card-meta--blocked">{{ __('store.carrier_too_heavy') }}</span>
+                                            @else
+                                                <span class="choice-card-meta">{{ $carrier->localizedEta() }}</span>
+                                            @endif
                                         </span>
                                     </label>
                                 @endforeach
