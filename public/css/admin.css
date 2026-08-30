@@ -3678,6 +3678,51 @@ a.admin-stat-card:hover {
     color: var(--text-muted);
 }
 
+.admin-carts-table {
+    table-layout: fixed;
+}
+
+.admin-carts-table th:nth-child(1),
+.admin-carts-table td:nth-child(1) {
+    width: 20%;
+}
+
+.admin-carts-table th:nth-child(2),
+.admin-carts-table td:nth-child(2) {
+    width: 34%;
+}
+
+.admin-carts-table th:nth-child(3),
+.admin-carts-table td:nth-child(3) {
+    width: 8%;
+}
+
+.admin-carts-table th:nth-child(4),
+.admin-carts-table td:nth-child(4) {
+    width: 12%;
+}
+
+.admin-carts-table th:nth-child(5),
+.admin-carts-table td:nth-child(5) {
+    width: 14%;
+}
+
+.admin-carts-table th:nth-child(6),
+.admin-carts-table td:nth-child(6) {
+    width: 12%;
+}
+
+.admin-carts-line {
+    display: block;
+    font-size: 0.8125rem;
+    line-height: 1.35;
+    overflow-wrap: break-word;
+}
+
+.admin-carts-line + .admin-carts-line {
+    margin-top: 0.3rem;
+}
+
 /* Le slug sous la référence. Plus effacé qu'elle, et en chasse fixe : c'est
    une adresse, on la lit caractère par caractère quand on la cherche, pas en
    diagonale comme un nom.

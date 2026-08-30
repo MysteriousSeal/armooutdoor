@@ -80,7 +80,7 @@
                 // Le badge d'un groupe additionne ceux de ses entrées : replié,
                 // il doit encore dire qu'il y a quelque chose à traiter dedans.
                 $salesBadge = $ordersAwaitingStartCount + $unviewedCustomerCount + $unreadMessageCount;
-                $salesActive = request()->routeIs('admin.orders.*', 'admin.customers.*', 'admin.conversations.*', 'admin.discounts.*', 'admin.discount-codes.*');
+                $salesActive = request()->routeIs('admin.orders.*', 'admin.carts.*', 'admin.customers.*', 'admin.conversations.*', 'admin.discounts.*', 'admin.discount-codes.*');
                 $catalogueActive = request()->routeIs('admin.products.*', 'admin.categories.*', 'admin.labels.*', 'admin.reviews.*', 'admin.purchase-orders.*', 'admin.marketplaces.*');
                 $systemActive = request()->routeIs('admin.settings.*', 'admin.stripe.*', 'admin.activity', 'admin.changelog', 'admin.backups.*');
                 $accountingActive = request()->routeIs('admin.accounting.*');
@@ -115,6 +115,7 @@
                             <span class="admin-nav-badge" title="{{ $unviewedCustomerCount }} not looked at yet">{{ $unviewedCustomerCount }}</span>
                         @endif
                     </a>
+                    <a href="{{ route('admin.carts.index') }}" class="admin-nav-menu-item {{ request()->routeIs('admin.carts.*') ? 'active' : '' }}">Carts</a>
                     <a href="{{ route('admin.conversations.index') }}" class="admin-nav-menu-item {{ request()->routeIs('admin.conversations.*') ? 'active' : '' }}">
                         Messages
                         @if ($unreadMessageCount > 0)

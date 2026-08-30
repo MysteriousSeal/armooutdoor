@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\BackupController as AdminBackupController;
 use App\Http\Controllers\Admin\BlogPostController as AdminBlogPostController;
 use App\Http\Controllers\Admin\CarrierPriceTierController as AdminCarrierPriceTierController;
+use App\Http\Controllers\Admin\CartController as AdminCartController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\ChangelogController as AdminChangelogController;
 use App\Http\Controllers\Admin\CompanySettingController as AdminCompanySettingController;
@@ -261,6 +262,8 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         // committed stock, and deleting cannot be taken back.
         Route::patch('/purchase-orders/{purchaseOrder}/cancel', [AdminPurchaseOrderController::class, 'cancel'])->middleware('admin.owner')->name('purchase-orders.cancel');
         Route::delete('/purchase-orders/{purchaseOrder}', [AdminPurchaseOrderController::class, 'destroy'])->middleware('admin.owner')->name('purchase-orders.destroy');
+
+        Route::get('/carts', [AdminCartController::class, 'index'])->name('carts.index');
 
         Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/export', [AdminOrderController::class, 'export'])->name('orders.export');
