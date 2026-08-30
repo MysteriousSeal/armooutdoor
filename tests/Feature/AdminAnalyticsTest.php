@@ -150,6 +150,73 @@ class AdminAnalyticsTest extends TestCase
         $this->assertSame(1, $response->viewData('rangeVisitors')['guests']);
     }
 
+    public function test_the_page_carries_a_time_series_and_top_tables(): void
+    {
+        $human = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
+        SiteVisit::create(['path' => '/products/cible-a', 'ip_address' => '203.0.113.40', 'user_agent' => $human]);
+        SiteVisit::create(['path' => '/products/cible-a', 'ip_address' => '203.0.113.41', 'user_agent' => $human]);
+        SiteVisit::create(['path' => '/products/cible-b', 'ip_address' => '203.0.113.42', 'user_agent' => $human, 'referrer' => 'https://www.google.com/search']);
+        // Un bot : compté dans la série, jamais dans les palmarès.
+        SiteVisit::create(['path' => '/products/cible-c', 'ip_address' => '203.0.113.43', 'user_agent' => 'Googlebot/2.1']);
+
+        $response = $this->actingAsAdmin()->get('/admin/analytics')->assertOk()
+            ->assertSee('Visits over time')
+            ->assertSee('Top pages')
+            ->assertSee('Top referrers')
+            ->assertSee('google.com');
+
+        $topPages = $response->viewData('topPages');
+        $this->assertSame('/products/cible-a', $topPages[0]['path']);
+        $this->assertSame(2, $topPages[0]['count']);
+        $this->assertNotContains('/products/cible-c', array_column($topPages, 'path'));
+
+        $series = $response->viewData('series');
+        $this->assertSame(3, array_sum(array_column($series, 'humans')));
+        $this->assertSame(1, array_sum(array_column($series, 'bots')));
+    }
+
+    public function test_the_trend_leads_and_redundant_donuts_are_gone(): void
+    {
+        SiteVisit::create([
+            'path' => '/',
+            'ip_address' => '203.0.113.60',
+            'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+        ]);
+
+        $html = $this->actingAsAdmin()->get('/admin/analytics')->assertOk()
+            // Les tuiles portent déjà ces deux répartitions en chiffres.
+            ->assertDontSee('Users vs guests')
+            ->assertDontSee('Bot vs human')
+            ->getContent();
+
+        // La tendance d'abord, la composition ensuite, le journal en dernier.
+        $chart = strpos($html, 'Visits over time');
+        $tops = strpos($html, 'Top pages');
+        $donuts = strpos($html, 'Breakdown');
+        $log = strpos($html, 'Visit log');
+
+        $this->assertTrue($chart < $tops && $tops < $donuts && $donuts < $log);
+    }
+
+    public function test_the_log_can_hide_bots(): void
+    {
+        SiteVisit::create(['path' => '/vu-par-un-bot', 'ip_address' => '203.0.113.50', 'user_agent' => 'Googlebot/2.1']);
+        SiteVisit::create([
+            'path' => '/vu-par-un-humain',
+            'ip_address' => '203.0.113.51',
+            'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+        ]);
+
+        $this->actingAsAdmin()->get('/admin/analytics?bots=hide')->assertOk()
+            ->assertSee('/vu-par-un-humain')
+            ->assertDontSee('/vu-par-un-bot')
+            ->assertSee('Bots hidden');
+
+        $this->actingAsAdmin()->get('/admin/analytics')->assertOk()
+            ->assertSee('/vu-par-un-bot')
+            ->assertSee('Hide bots');
+    }
+
     public function test_the_active_now_endpoint_returns_live_counts(): void
     {
         SiteVisit::create(['path' => '/', 'ip_address' => '203.0.113.30']);

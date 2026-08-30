@@ -21,29 +21,13 @@
                         · {{ number_format($activeNow['bots']) }} {{ \Illuminate\Support\Str::plural('bot', $activeNow['bots']) }}
                     </span>
                 </span>
-                <span class="admin-list-chip" title="Page views and distinct visitors in the selected range (bots counted separately from guests)">
-                    {{ number_format($visits->total()) }}
-                    {{ \Illuminate\Support\Str::plural('visit', $visits->total()) }}
-                    <span class="admin-list-chip-muted">
-                        · {{ number_format($rangeVisitors['total']) }}
-                        unique
-                        {{ \Illuminate\Support\Str::plural('visitor', $rangeVisitors['total']) }}
-                        · {{ number_format($rangeVisitors['users']) }}
-                        {{ \Illuminate\Support\Str::plural('customer', $rangeVisitors['users']) }}
-                        · {{ number_format($rangeVisitors['guests']) }}
-                        {{ \Illuminate\Support\Str::plural('guest', $rangeVisitors['guests']) }}
-                        · {{ number_format($rangeVisitors['bots']) }}
-                        {{ \Illuminate\Support\Str::plural('bot', $rangeVisitors['bots']) }}
-                        · {{ $ranges[$range] }}
-                    </span>
-                </span>
             </div>
         </header>
 
         <nav class="admin-list-tabs" aria-label="Time range">
             @foreach ($ranges as $key => $label)
                 <a
-                    href="{{ route('admin.analytics.index', ['range' => $key]) }}"
+                    href="{{ route('admin.analytics.index', array_filter(['range' => $key, 'bots' => $hideBots ? 'hide' : null])) }}"
                     class="admin-list-tab {{ $range === $key ? 'active' : '' }}"
                 >
                     {{ $label }}
@@ -91,6 +75,100 @@
                 @endif
             </p>
         @else
+
+            @if (! empty($series))
+                <section class="order-panel dash-chart-panel admin-analytics-section" aria-label="Visits over time for {{ $ranges[$range] }}">
+                    <div class="dash-panel-head">
+                        <h3 class="order-panel-title">Visits over time</h3>
+                        <span class="dash-legend">
+                            <span class="dash-legend-item"><span class="dash-swatch dash-swatch--current"></span>Humans</span>
+                            <span class="dash-legend-item"><span class="dash-swatch dash-swatch--previous"></span>Bots</span>
+                        </span>
+                    </div>
+
+                    <div
+                        class="dash-chart"
+                        data-visits-chart
+                        data-humans="{{ json_encode(collect($series)->pluck('humans')->all()) }}"
+                        data-bots="{{ json_encode(collect($series)->pluck('bots')->all()) }}"
+                        data-labels="{{ json_encode(collect($series)->pluck('label')->all()) }}"
+                    >
+                        <canvas height="220" aria-hidden="true"></canvas>
+                    </div>
+
+                    <details class="dash-table-view">
+                        <summary>Table view</summary>
+                        <div class="admin-table-wrap">
+                            <table class="admin-table">
+                                <caption class="sr-only">Page views over time, humans and bots apart</caption>
+                                <thead>
+                                    <tr>
+                                        <th>{{ $range === '24h' ? 'Hour' : ($range === 'all' ? 'Month' : 'Day') }}</th>
+                                        <th class="admin-table-num">Humans</th>
+                                        <th class="admin-table-num">Bots</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($series as $point)
+                                        <tr>
+                                            <td>{{ $point['label'] }}</td>
+                                            <td class="admin-table-num">{{ number_format($point['humans']) }}</td>
+                                            <td class="admin-table-num">{{ number_format($point['bots']) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </details>
+                </section>
+            @endif
+
+            @if (! empty($topPages) || ! empty($topReferrers))
+                <div class="admin-analytics-tops">
+                    <section class="order-panel">
+                        <div class="dash-panel-head">
+                            <h3 class="order-panel-title">Top pages</h3>
+                            <span class="dash-panel-note">human views · {{ strtolower($ranges[$range]) }}</span>
+                        </div>
+                        @if (empty($topPages))
+                            <p class="empty-state">No human page views in this range.</p>
+                        @else
+                            <table class="admin-table">
+                                <tbody>
+                                    @foreach ($topPages as $page)
+                                        <tr>
+                                            <td class="admin-analytics-top-path" title="{{ $page['path'] }}">{{ $page['path'] }}</td>
+                                            <td class="admin-table-num">{{ number_format($page['count']) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @endif
+                    </section>
+
+                    <section class="order-panel">
+                        <div class="dash-panel-head">
+                            <h3 class="order-panel-title">Top referrers</h3>
+                            <span class="dash-panel-note">external · {{ strtolower($ranges[$range]) }}</span>
+                        </div>
+                        @if (empty($topReferrers))
+                            <p class="empty-state">No external referrers in this range.</p>
+                        @else
+                            <table class="admin-table">
+                                <tbody>
+                                    @foreach ($topReferrers as $referrer)
+                                        <tr>
+                                            <td class="admin-analytics-top-path" title="{{ $referrer['host'] }}">{{ $referrer['host'] }}</td>
+                                            <td class="admin-table-num">{{ number_format($referrer['count']) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @endif
+                    </section>
+                </div>
+            @endif
+
             @if (! empty($charts))
                 <section class="admin-analytics-section" aria-label="Visit breakdown charts for {{ $ranges[$range] }}">
                     <header class="admin-analytics-section-header">
@@ -113,10 +191,18 @@
                             Page views for {{ strtolower($ranges[$range]) }}.
                         </p>
                     </div>
-                    <p class="admin-result-count admin-analytics-result-count">
-                        {{ $visits->firstItem() }}&ndash;{{ $visits->lastItem() }}
-                        of {{ number_format($visits->total()) }}
-                    </p>
+                    <div class="admin-analytics-log-tools">
+                        <a
+                            href="{{ route('admin.analytics.index', array_filter(['range' => $range, 'bots' => $hideBots ? null : 'hide'])) }}"
+                            class="admin-list-chip admin-analytics-bots-toggle {{ $hideBots ? 'is-on' : '' }}"
+                        >
+                            {{ $hideBots ? 'Bots hidden' : 'Hide bots' }}
+                        </a>
+                        <p class="admin-result-count admin-analytics-result-count">
+                            {{ $visits->firstItem() }}&ndash;{{ $visits->lastItem() }}
+                            of {{ number_format($visits->total()) }}
+                        </p>
+                    </div>
                 </header>
 
                 <div class="admin-visits-table">
@@ -203,3 +289,8 @@
         @endif
     </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ versioned_asset('js/vendor/chart.umd.min.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/admin-analytics-chart.js') }}" defer></script>
+@endpush

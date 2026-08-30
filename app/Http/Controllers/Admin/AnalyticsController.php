@@ -37,30 +37,44 @@ class AnalyticsController extends Controller
     {
         $range = $this->resolveRange($request->input('range'));
         $since = $this->sinceForRange($range);
+        $hideBots = $request->input('bots') === 'hide';
+
+        $burstyIps = $this->burstyIps($since);
+        $breakdown = $this->buildCharts($since, $burstyIps, $range);
 
         $visitsQuery = SiteVisit::query()->with('user')->latest('created_at');
         $this->applyRange($visitsQuery, $since);
 
+        // « Bot » n'est pas une colonne mais un verdict (signature d'agent +
+        // rafales d'IP), déjà rendu ligne par ligne en construisant les
+        // graphiques : le journal exclut ces mêmes lignes, pas une
+        // approximation SQL du verdict.
+        if ($hideBots && $breakdown['botVisitIds'] !== []) {
+            $visitsQuery->whereNotIn('id', $breakdown['botVisitIds']);
+        }
+
         $visits = $visitsQuery->paginate(50)->withQueryString();
-        $burstyIps = $this->burstyIps($since);
-        $charts = $this->buildCharts($since, $burstyIps);
         $ranges = self::RANGES;
         $activeNow = $this->countDistinctVisitors(Carbon::now()->subMinutes(2));
         $rangeVisitors = $this->countDistinctVisitors($since, $burstyIps);
         $burstThreshold = self::BURST_THRESHOLD;
         $burstWindowSeconds = self::BURST_WINDOW_SECONDS;
 
-        return view('admin.analytics.index', compact(
-            'visits',
-            'charts',
-            'range',
-            'ranges',
-            'activeNow',
-            'rangeVisitors',
-            'burstyIps',
-            'burstThreshold',
-            'burstWindowSeconds',
-        ));
+        return view('admin.analytics.index', [
+            'visits' => $visits,
+            'charts' => $breakdown['charts'],
+            'series' => $breakdown['series'],
+            'topPages' => $breakdown['topPages'],
+            'topReferrers' => $breakdown['topReferrers'],
+            'range' => $range,
+            'ranges' => $ranges,
+            'hideBots' => $hideBots,
+            'activeNow' => $activeNow,
+            'rangeVisitors' => $rangeVisitors,
+            'burstyIps' => $burstyIps,
+            'burstThreshold' => $burstThreshold,
+            'burstWindowSeconds' => $burstWindowSeconds,
+        ]);
     }
 
     /**
@@ -195,36 +209,48 @@ class AnalyticsController extends Controller
     }
 
     /**
-     * Aggregate visits for donut charts within the selected range.
+     * Aggregate visits within the selected range: the donut charts, the
+     * visits-over-time series (humans and bots apart) and the top pages and
+     * referrers — one pass over the rows for the four of them.
      *
      * @param  array<string, true>  $burstyIps
-     * @return array<string, array{title: string, total: int, gradient: string, slices: list<array{label: string, count: int, percent: float, color: string}>}>
+     * @return array{charts: array<string, mixed>, series: list<array{label: string, humans: int, bots: int}>, topPages: list<array{path: string, count: int}>, topReferrers: list<array{host: string, count: int}>, botVisitIds: list<int>}
      */
-    private function buildCharts(?CarbonInterface $since, array $burstyIps): array
+    private function buildCharts(?CarbonInterface $since, array $burstyIps, string $range): array
     {
-        $query = SiteVisit::query()->select(['user_id', 'user_agent', 'ip_address', 'country']);
+        $query = SiteVisit::query()->select(['id', 'user_id', 'user_agent', 'ip_address', 'country', 'created_at', 'path', 'referrer']);
         $this->applyRange($query, $since);
         $rows = $query->get();
 
         if ($rows->isEmpty()) {
-            return [];
+            return ['charts' => [], 'series' => [], 'topPages' => [], 'topReferrers' => [], 'botVisitIds' => []];
         }
 
-        $authCounts = ['Users' => 0, 'Guests' => 0];
+        // Un seau par heure sur 24 h, par jour sur 7 et 30 jours, par mois
+        // au-delà : assez fin pour lire le rythme, jamais mille barres.
+        $bucketFormat = match ($range) {
+            '24h' => 'Y-m-d H',
+            'all' => 'Y-m',
+            default => 'Y-m-d',
+        };
+        $bucketLabel = match ($range) {
+            '24h' => 'g A',
+            'all' => 'M Y',
+            default => 'M j',
+        };
+        $ownHost = (string) parse_url((string) config('app.url'), PHP_URL_HOST);
+
         $osCounts = [];
         $deviceCounts = [];
         $browserCounts = [];
         $countryCounts = [];
-        $botCounts = ['Human' => 0, 'Bot' => 0];
         $botNameCounts = [];
+        $buckets = [];
+        $pathCounts = [];
+        $referrerCounts = [];
+        $botVisitIds = [];
 
         foreach ($rows as $row) {
-            if ($row->user_id) {
-                $authCounts['Users']++;
-            } else {
-                $authCounts['Guests']++;
-            }
-
             $parsed = UserAgentParser::parse($row->user_agent);
             $isBot = $parsed['is_bot'] || isset($burstyIps[$row->ip_address ?: 'unknown']);
 
@@ -238,20 +264,54 @@ class AnalyticsController extends Controller
             $browserCounts[$browser] = ($browserCounts[$browser] ?? 0) + 1;
             $countryCounts[$country] = ($countryCounts[$country] ?? 0) + 1;
 
+            $bucket = $row->created_at->format($bucketFormat);
+            $buckets[$bucket] ??= ['humans' => 0, 'bots' => 0];
+
             if ($isBot) {
-                $botCounts['Bot']++;
                 $botName = $parsed['is_bot'] ? $parsed['browser'] : 'High-volume IP';
                 $botNameCounts[$botName] = ($botNameCounts[$botName] ?? 0) + 1;
+                $buckets[$bucket]['bots']++;
+                $botVisitIds[] = $row->id;
             } else {
-                $botCounts['Human']++;
+                $buckets[$bucket]['humans']++;
+
+                // Les palmarès ne comptent que les humains : un scraper qui
+                // aspire le catalogue ne dit rien de ce qui intéresse.
+                if (filled($row->path)) {
+                    $pathCounts[$row->path] = ($pathCounts[$row->path] ?? 0) + 1;
+                }
+
+                $referrerHost = filled($row->referrer) ? (string) parse_url($row->referrer, PHP_URL_HOST) : '';
+                $referrerHost = preg_replace('/^www\./', '', $referrerHost) ?? '';
+
+                if ($referrerHost !== '' && $referrerHost !== preg_replace('/^www\./', '', $ownHost)) {
+                    $referrerCounts[$referrerHost] = ($referrerCounts[$referrerHost] ?? 0) + 1;
+                }
             }
         }
 
-        return [
-            'auth' => array_merge(
-                ['title' => 'Users vs guests'],
-                DonutChart::fromCounts($authCounts, 2),
-            ),
+        ksort($buckets);
+        $series = [];
+
+        foreach ($buckets as $key => $counts) {
+            $series[] = [
+                'label' => Carbon::createFromFormat($bucketFormat, $key)->format($bucketLabel),
+                'humans' => $counts['humans'],
+                'bots' => $counts['bots'],
+            ];
+        }
+
+        arsort($pathCounts);
+        arsort($referrerCounts);
+
+        $topPages = collect($pathCounts)->take(10)
+            ->map(fn (int $count, string $path) => ['path' => $path, 'count' => $count])->values()->all();
+        $topReferrers = collect($referrerCounts)->take(10)
+            ->map(fn (int $count, string $host) => ['host' => $host, 'count' => $count])->values()->all();
+
+        // Ni « users vs guests » ni « bot vs human » : les tuiles au-dessus
+        // portent déjà ces deux répartitions en chiffres.
+        $charts = [
             'country' => array_merge(
                 ['title' => 'Country'],
                 DonutChart::fromCounts($countryCounts),
@@ -268,14 +328,12 @@ class AnalyticsController extends Controller
                 ['title' => 'Browser'],
                 DonutChart::fromCounts($browserCounts),
             ),
-            'bot' => array_merge(
-                ['title' => 'Bot vs human'],
-                DonutChart::fromCounts($botCounts, 2),
-            ),
             'botName' => array_merge(
                 ['title' => 'Bot name'],
                 DonutChart::fromCounts($botNameCounts),
             ),
         ];
+
+        return ['charts' => $charts, 'series' => $series, 'topPages' => $topPages, 'topReferrers' => $topReferrers, 'botVisitIds' => $botVisitIds];
     }
 }
