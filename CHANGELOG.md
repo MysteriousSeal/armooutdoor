@@ -2,6 +2,20 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-30 — v0.29.0 — build ENB06K
+
+### Storefront
+
+- **A guest can now hold a real conversation.** Writing through the contact form without an account used to be a message in a bottle — readable in the back office, unanswerable anywhere. It now mints a private link, emailed straight back ("votre message est bien arrivé"), opening a page where the whole exchange reads as one letter-like card: subject up top under a liseré in the shop's colour, the messages as bubbles on a softly recessed ground, and the reply box attached at the foot of the same sheet. Replies send in place with the usual spinner and toast, and each answer from the shop lands in the guest's inbox with the same link.
+
+  The link is the whole key — 48 random characters, hidden from search engines, and a page that answers 404 to anything it doesn't recognise, expired links included. It works while the conversation is open and for thirty days after it closes; after that, old links in inboxes go quietly dead. A closed thread still reads during those thirty days, but no longer answers.
+
+- **The account's conversation page wears the same card.** Same recessed ground, same accent edge, same moored composer — at the account page's own width, with its breadcrumbs and navigation untouched.
+
+### Admin
+
+- **Guest threads lost their dead-end.** The "no account, reply by email" note is gone: a guest conversation takes replies in the normal chat composer, with a line underneath saying where they land — the private emailed link, minted on the spot for threads that predate it, including threads whose customer account has since been deleted.
+
 ## 2026-08-29 — v0.28.0 — build 23WERS
 
 ### Admin
