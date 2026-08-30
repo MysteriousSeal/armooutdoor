@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-30 — v0.30.0 — build UT2962
+
+### Storefront
+
+- **The emails put on the shop's own coat.** Every notification the shop sends — password resets, "we've answered you", the guest's private link — used to go out in Laravel's stock grey: its font, its near-black button, its rounded corners, its "© Laravel" heritage showing at the seams. The mail templates are now the shop's: the two-tone ArmoOutdoor wordmark as a text header no mail client can strip, the site's warm palette on a hairline-bordered square card, the action button in the shop's accent, and a footer that goes somewhere — la boutique, nous contacter. One theme file dresses them all, so the next email the shop learns to send is born wearing it.
+
+### Admin
+
+- **The test email now tells the truth.** It had its own hand-built design — prettier than what customers actually received, which defeated a test email's purpose. It renders through the shared theme now, panel and button included, so what lands in the inbox from Settings → Email test is exactly what every real email looks like.
+
 ## 2026-08-30 — v0.29.0 — build ENB06K
 
 ### Storefront
