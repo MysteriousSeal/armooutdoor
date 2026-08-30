@@ -92,7 +92,7 @@ class SessionFlow
 
     /**
      * @param  list<list<string>>  $sessions  Each a groupSequence() result.
-     * @return array{total: int, columns: list<array{title: string, x: float}>, nodes: list<array<string, mixed>>, links: list<array<string, mixed>>, table: list<array<string, mixed>>}
+     * @return array{total: int, columns: list<array{title: string, x: float}>, nodes: list<array<string, mixed>>, links: list<array<string, mixed>>, table: list<array<string, mixed>>, legend: list<array{label: string, color: string}>}
      */
     public static function build(array $sessions, int $width = 1400, int $height = 420): array
     {
@@ -105,7 +105,7 @@ class SessionFlow
         );
 
         if ($total === 0) {
-            return ['total' => 0, 'columns' => [], 'nodes' => [], 'links' => [], 'table' => []];
+            return ['total' => 0, 'columns' => [], 'nodes' => [], 'links' => [], 'table' => [], 'legend' => []];
         }
 
         $nodeCounts = array_fill(0, self::STEPS, []);
@@ -163,6 +163,7 @@ class SessionFlow
                 $nodeInfo[$step][$label] = ['y0' => $y, 'y1' => $y + $nodeHeight, 'out' => $y, 'in' => $y];
 
                 $nodes[] = [
+                    'key' => $step.':'.$label,
                     'step' => $step,
                     'label' => $label,
                     'count' => $count,
@@ -173,6 +174,9 @@ class SessionFlow
                     'height' => round($nodeHeight, 2),
                     'color' => self::colorFor($label),
                     'isExit' => $label === self::EXIT_LABEL,
+                    // A label on a sliver of a node collides with its
+                    // neighbours; the tooltip still carries the numbers.
+                    'labelVisible' => $nodeHeight >= 12,
                 ];
 
                 $y += $nodeHeight + self::NODE_GAP;
@@ -211,6 +215,11 @@ class SessionFlow
                         $leftX, $targetY1, $midX, $targetY1, $midX, $sourceY1, $rightX, $sourceY1,
                     ),
                     'color' => self::colorFor($from),
+                    'from' => $layer.':'.$from,
+                    'to' => ($layer + 1).':'.$to,
+                    'label' => $from.' → '.$to,
+                    'count' => $count,
+                    'percent' => round(($count / $total) * 100, 1),
                 ];
 
                 $table[] = [
@@ -221,6 +230,20 @@ class SessionFlow
                     'percent' => round(($count / $total) * 100, 1),
                 ];
             }
+        }
+
+        // One swatch per page group actually on the diagram, in reading
+        // order (columns left to right, busiest first); the exit last.
+        $legend = [];
+
+        foreach ($nodes as $node) {
+            if (! $node['isExit'] && ! isset($legend[$node['label']])) {
+                $legend[$node['label']] = ['label' => $node['label'], 'color' => $node['color']];
+            }
+        }
+
+        if (array_filter($nodes, fn (array $node) => $node['isExit']) !== []) {
+            $legend[self::EXIT_LABEL] = ['label' => self::EXIT_LABEL, 'color' => self::EXIT_COLOR];
         }
 
         return [
@@ -235,6 +258,7 @@ class SessionFlow
             'nodes' => $nodes,
             'links' => $links,
             'table' => $table,
+            'legend' => array_values($legend),
         ];
     }
 

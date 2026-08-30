@@ -228,6 +228,14 @@
                         </span>
                     </div>
 
+                    <div class="dash-legend admin-flow-legend" aria-hidden="true">
+                        @foreach ($flow['legend'] as $entry)
+                            <span class="dash-legend-item">
+                                <span class="dash-swatch" style="--swatch-color: {{ $entry['color'] }}"></span>{{ $entry['label'] }}
+                            </span>
+                        @endforeach
+                    </div>
+
                     <div class="admin-flow">
                         <div class="admin-flow-inner">
                             <div class="admin-flow-columns">
@@ -239,9 +247,17 @@
                                 @endforeach
                             </div>
 
-                            <svg class="admin-flow-svg" viewBox="0 0 {{ $flow['width'] }} {{ $flow['height'] }}" role="img" aria-label="Diagram of visitor paths through the site, entrance to step {{ count($flow['columns']) }}">
+                            <svg class="admin-flow-svg" data-flow viewBox="0 0 {{ $flow['width'] }} {{ $flow['height'] }}" role="img" aria-label="Diagram of visitor paths through the site, entrance to step {{ count($flow['columns']) }}">
                                 @foreach ($flow['links'] as $link)
-                                    <path d="{{ $link['d'] }}" class="admin-flow-link" style="fill: {{ $link['color'] }}"></path>
+                                    <path
+                                        d="{{ $link['d'] }}"
+                                        class="admin-flow-link"
+                                        style="fill: {{ $link['color'] }}"
+                                        data-from="{{ $link['from'] }}"
+                                        data-to="{{ $link['to'] }}"
+                                    >
+                                        <title>{{ $link['label'] }} — {{ number_format($link['count']) }} ({{ $link['percent'] }}%)</title>
+                                    </path>
                                 @endforeach
                                 @foreach ($flow['nodes'] as $node)
                                     @php
@@ -256,14 +272,18 @@
                                         rx="3"
                                         class="admin-flow-node {{ $node['isExit'] ? 'admin-flow-node--exit' : '' }}"
                                         style="fill: {{ $node['color'] }}"
+                                        data-node="{{ $node['key'] }}"
                                     >
                                         <title>{{ $node['label'] }} — {{ number_format($node['count']) }} ({{ $node['percent'] }}%)</title>
                                     </rect>
-                                    <text
-                                        x="{{ $textX }}"
-                                        y="{{ $node['y'] + $node['height'] / 2 }}"
-                                        class="admin-flow-label {{ $labelRight ? '' : 'admin-flow-label--left' }} {{ $node['isExit'] ? 'admin-flow-label--exit' : '' }}"
-                                    >{{ $node['label'] }} <tspan class="admin-flow-label-count">{{ number_format($node['count']) }}</tspan></text>
+                                    @if ($node['labelVisible'])
+                                        <text
+                                            x="{{ $textX }}"
+                                            y="{{ $node['y'] + $node['height'] / 2 }}"
+                                            class="admin-flow-label {{ $labelRight ? '' : 'admin-flow-label--left' }} {{ $node['isExit'] ? 'admin-flow-label--exit' : '' }}"
+                                            data-node-label="{{ $node['key'] }}"
+                                        >{{ $node['label'] }} <tspan class="admin-flow-label-count">{{ number_format($node['count']) }} · {{ $node['percent'] }}%</tspan></text>
+                                    @endif
                                 @endforeach
                             </svg>
                         </div>
@@ -272,25 +292,33 @@
                     <details class="dash-table-view">
                         <summary>Table view</summary>
                         <div class="admin-table-wrap">
-                            <table class="admin-table">
+                            <table class="admin-table admin-flow-table">
                                 <caption class="sr-only">Transitions between steps of the user flow</caption>
                                 <thead>
                                     <tr>
-                                        <th>Step</th>
                                         <th>From</th>
                                         <th>To</th>
                                         <th class="admin-table-num">Sessions</th>
-                                        <th class="admin-table-num">Share</th>
+                                        <th class="admin-flow-share-head">Share</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($flow['table'] as $row)
-                                        <tr>
-                                            <td>{{ $row['layer'] }} → {{ $row['layer'] + 1 }}</td>
+                                        @if ($loop->first || $flow['table'][$loop->index - 1]['layer'] !== $row['layer'])
+                                            <tr class="admin-flow-step-row">
+                                                <th colspan="4" scope="rowgroup">
+                                                    {{ $flow['columns'][$row['layer'] - 1]['title'] }} → {{ $flow['columns'][$row['layer']]['title'] }}
+                                                </th>
+                                            </tr>
+                                        @endif
+                                        <tr class="{{ $row['to'] === \App\Support\SessionFlow::EXIT_LABEL ? 'admin-flow-row--exit' : '' }}">
                                             <td>{{ $row['from'] }}</td>
                                             <td>{{ $row['to'] }}</td>
                                             <td class="admin-table-num">{{ number_format($row['count']) }}</td>
-                                            <td class="admin-table-num">{{ $row['percent'] }}%</td>
+                                            <td class="admin-flow-share">
+                                                <span class="admin-flow-share-bar" style="--share: {{ $row['percent'] }}%" aria-hidden="true"></span>
+                                                <span class="admin-flow-share-value">{{ $row['percent'] }}%</span>
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -424,4 +452,5 @@
 @push('scripts')
     <script src="{{ versioned_asset('js/vendor/chart.umd.min.js') }}" defer></script>
     <script src="{{ versioned_asset('js/admin-analytics-chart.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/admin-analytics-flow.js') }}" defer></script>
 @endpush

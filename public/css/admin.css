@@ -9565,18 +9565,38 @@ a.order-stepper-btn:focus-visible {
     overflow: visible;
 }
 
+.admin-flow-legend {
+    flex-wrap: wrap;
+    margin-bottom: 0.85rem;
+}
+
 .admin-flow-link {
     opacity: 0.32;
     transition: opacity 0.15s ease;
 }
 
-.admin-flow-link:hover {
-    opacity: 0.6;
-}
-
 .admin-flow-node {
     stroke: var(--surface);
     stroke-width: 1;
+    transition: opacity 0.15s ease;
+}
+
+/* Survoler un nœud ou un ruban éteint tout ce qui n'y est pas relié : le
+   chemin suivi se lit d'un coup, sans rien déplacer. */
+.admin-flow-svg.is-hovering .admin-flow-link:not(.is-active) {
+    opacity: 0.07;
+}
+
+.admin-flow-svg.is-hovering .admin-flow-link.is-active {
+    opacity: 0.62;
+}
+
+.admin-flow-svg.is-hovering .admin-flow-node:not(.is-active) {
+    opacity: 0.25;
+}
+
+.admin-flow-svg.is-hovering .admin-flow-label:not(.is-active) {
+    opacity: 0.25;
 }
 
 .admin-flow-node--exit {
@@ -9600,6 +9620,71 @@ a.order-stepper-btn:focus-visible {
 
 .admin-flow-label-count {
     fill: var(--text-muted);
+}
+
+/* --- Table view of the flow ------------------------------------------- */
+
+.admin-flow-step-row th {
+    padding: 0.55rem 1rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    text-align: left;
+    color: var(--text-muted);
+    background: color-mix(in srgb, var(--bg) 55%, var(--surface));
+    border-bottom: 1px solid var(--border);
+}
+
+/* Les fuites en ambre, comme les bots dans le journal : c'est la ligne
+   qu'on vient chercher dans ce tableau. */
+.admin-flow-row--exit > td {
+    background: color-mix(in srgb, #c9a227 5%, transparent);
+    color: var(--text-muted);
+}
+
+.admin-flow-table tbody > tr.admin-flow-row--exit:hover > td {
+    background: color-mix(in srgb, #c9a227 9%, var(--surface));
+}
+
+.admin-flow-share-head {
+    width: 9rem;
+}
+
+.admin-flow-share {
+    position: relative;
+}
+
+.admin-flow-share-bar {
+    position: absolute;
+    top: 50%;
+    left: 1rem;
+    right: 3.4rem;
+    height: 0.45rem;
+    transform: translateY(-50%);
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--border) 55%, transparent);
+    overflow: hidden;
+}
+
+.admin-flow-share-bar::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: var(--share, 0%);
+    border-radius: inherit;
+    background: var(--chart-series-1);
+}
+
+.admin-flow-row--exit .admin-flow-share-bar::before {
+    background: #c9a227;
+}
+
+.admin-flow-share-value {
+    display: block;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.8125rem;
 }
 
 .admin-analytics-charts {

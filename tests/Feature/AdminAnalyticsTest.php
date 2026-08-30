@@ -259,7 +259,11 @@ class AdminAnalyticsTest extends TestCase
             ->assertSee('Entrance')
             ->assertSee('Home')
             ->assertSee('Checkout')
-            ->assertSee('Left the site');
+            ->assertSee('Left the site')
+            // Legend swatches and the table grouped by step transition.
+            ->assertSee('admin-flow-legend')
+            ->assertSee('Entrance → Step 2')
+            ->assertSee('admin-flow-row--exit');
 
         $flow = $response->viewData('flow');
         $this->assertSame(2, $flow['total']);
