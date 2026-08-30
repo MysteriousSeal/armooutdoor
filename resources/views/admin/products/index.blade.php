@@ -211,7 +211,6 @@
                                 $idSort = $sortLink('id');
                                 $nameSort = $sortLink('name');
                                 $stockSort = $sortLink('stock');
-                                $supplierSort = $sortLink('supplier');
                                 $priceSort = $sortLink('price');
                             @endphp
                             <th class="admin-table-id">
@@ -230,14 +229,6 @@
                                 </a>
                             </th>
                             <th>Category</th>
-                            <th>
-                                <a href="{{ $supplierSort['url'] }}" class="admin-sort-link {{ $supplierSort['state'] ? 'is-active' : '' }}">
-                                    Supplier
-                                    @if ($supplierSort['state'])
-                                        <span class="admin-sort-dir" aria-hidden="true">{{ $supplierSort['state'] === 'desc' ? '↓' : '↑' }}</span>
-                                    @endif
-                                </a>
-                            </th>
                             <th>
                                 <a href="{{ $priceSort['url'] }}" class="admin-sort-link {{ $priceSort['state'] ? 'is-active' : '' }}">
                                     Price
@@ -296,7 +287,6 @@
                                         —
                                     @endif
                                 </td>
-                                <td>{{ $product->supplier?->name ?? '—' }}</td>
                                 <td>{{ $product->formattedPrice() }}</td>
                                 <td>{{ $product->quantity }}</td>
                                 <td>
@@ -424,15 +414,28 @@
                                     @endif
                                 </td>
                                 <td>
+                                    {{-- Le même dessin que les pastilles GTIN et AI OK d'à
+                                         côté, mais celui-ci se clique : coche = actif,
+                                         croix = désactivé. --}}
                                     <form method="POST" action="{{ route('admin.products.status', $product) }}">
                                         @csrf
                                         @method('PATCH')
                                         <button
                                             type="submit"
-                                            class="badge badge-btn {{ $product->is_active ? 'badge-active' : 'badge-disabled' }}"
-                                            title="Click to {{ $product->is_active ? 'disable' : 'activate' }}"
+                                            class="gtin-flag gtin-flag--btn {{ $product->is_active ? 'is-set' : 'is-missing' }}"
+                                            title="{{ $product->is_active ? 'Active — click to disable' : 'Disabled — click to activate' }}"
                                         >
-                                            {{ $product->is_active ? 'Active' : 'Disabled' }}
+                                            @if ($product->is_active)
+                                                <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                                                    <path d="m5 13 4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
+                                                <span class="sr-only">Active</span>
+                                            @else
+                                                <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                                                    <path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                                                </svg>
+                                                <span class="sr-only">Disabled</span>
+                                            @endif
                                         </button>
                                     </form>
                                 </td>
@@ -452,7 +455,7 @@
                                         ->values();
                                 @endphp
                                 <tr class="admin-variant-row" id="variant-panel-{{ $product->id }}" hidden>
-                                    <td colspan="16">
+                                    <td colspan="14">
                                         <div class="admin-variant-panel">
                                             <table class="admin-variant-table">
                                                 <thead>

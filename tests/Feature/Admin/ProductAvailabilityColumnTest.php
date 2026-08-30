@@ -155,7 +155,9 @@ class ProductAvailabilityColumnTest extends TestCase
         $html = $this->actingAs($admin)->get('/admin/products')->assertOk()->getContent();
 
         preg_match('/<thead>.*?<\/thead>/s', $html, $head);
-        $columns = substr_count($head[0], '<th');
+        // « <th » seul compterait aussi la balise <thead> elle-même — c'est
+        // ce qui laissait passer un colspan d'une colonne trop large.
+        $columns = preg_match_all('/<th[\s>]/', $head[0]);
 
         $this->assertStringContainsString('colspan="'.$columns.'"', $html);
     }

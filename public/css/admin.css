@@ -3801,6 +3801,18 @@ a.admin-stat-card:hover {
     border-color: #e3c6c6;
 }
 
+/* La même pastille, mais en bouton : le statut du produit se bascule d'un
+   clic depuis la liste. */
+.gtin-flag--btn {
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.15s;
+}
+
+.gtin-flag--btn:hover {
+    border-color: currentColor;
+}
+
 [data-theme='dark'] .gtin-flag.is-set {
     color: #9dccab;
     background: color-mix(in srgb, #9dccab 12%, var(--surface));

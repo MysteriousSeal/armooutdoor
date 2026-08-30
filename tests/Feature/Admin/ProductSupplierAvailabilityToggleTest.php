@@ -107,6 +107,20 @@ class ProductSupplierAvailabilityToggleTest extends TestCase
         $this->assertStringContainsString('data-supplier-availability', $html);
     }
 
+    public function test_the_status_column_is_an_icon_toggle(): void
+    {
+        Product::factory()->create(['is_active' => true]);
+
+        $html = $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/products')
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('gtin-flag gtin-flag--btn is-set', $html);
+        $this->assertStringContainsString('Active — click to disable', $html);
+        $this->assertStringNotContainsString('badge-active', $html);
+    }
+
     public function test_guests_cannot_toggle(): void
     {
         $product = Product::factory()->create([
