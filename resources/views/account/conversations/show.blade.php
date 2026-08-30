@@ -35,10 +35,13 @@
 
         @include('account.nav')
 
-        @include('partials.conversation-thread', ['conversation' => $conversation, 'viewer' => 'customer'])
+        <div class="thread-card">
+            <div class="thread-card-body">
+                @include('partials.conversation-thread', ['conversation' => $conversation, 'viewer' => 'customer'])
+            </div>
 
         @if ($conversation->isClosed())
-            <div class="thread-panel thread-closed-note">
+            <div class="thread-card-foot thread-closed-note">
                 <p class="form-hint">{{ __('store.conversation_closed_note') }}</p>
                 <a href="{{ localized_route('contact.show') }}" class="btn btn-primary">{{ __('store.conversations_new') }}</a>
             </div>
@@ -47,7 +50,7 @@
                 id="conversation-reply-form"
                 method="POST"
                 action="{{ localized_route('account.conversations.reply', ['conversation' => $conversation]) }}"
-                class="thread-panel thread-composer"
+                class="thread-card-foot thread-composer"
                 data-thread-item-class="thread-item--customer"
                 data-required-message="{{ __('store.conversation_reply_required') }}"
                 novalidate
@@ -72,6 +75,7 @@
                 </div>
             </form>
         @endif
+        </div>
 
         <div class="conversation-list-actions">
             <a href="{{ localized_route('account.conversations.index') }}" class="btn btn-secondary">{{ __('store.conversation_back') }}</a>

@@ -10,27 +10,27 @@
 
 @section('content')
     <div class="container account-page guest-conversation-page">
-        <div class="guest-thread-card">
-            <header class="guest-thread-head">
+        <div class="thread-card">
+            <header class="thread-card-head">
                 <p class="guest-conversation-kicker">{{ __('store.guest_conversation_kicker') }}</p>
-                <h2 class="guest-thread-title">
+                <h2 class="thread-card-title">
                     {{ $conversation->subject }}
                     @if ($conversation->isClosed())
-                        <span class="guest-thread-chip">{{ __('store.conversations_status_closed') }}</span>
+                        <span class="thread-card-chip">{{ __('store.conversations_status_closed') }}</span>
                     @endif
                 </h2>
-                <p class="guest-thread-meta">
+                <p class="thread-card-meta">
                     {{ __('store.conversation_started', ['date' => $conversation->created_at->format('d/m/Y')]) }}
                     · {{ $conversation->name }}
                 </p>
             </header>
 
-            <div class="guest-thread-body">
+            <div class="thread-card-body">
                 @include('partials.conversation-thread', ['conversation' => $conversation, 'viewer' => 'customer'])
             </div>
 
             @if ($conversation->isClosed())
-                <div class="guest-thread-foot thread-closed-note">
+                <div class="thread-card-foot thread-closed-note">
                     <p class="form-hint">{{ __('store.conversation_closed_note') }}</p>
                     <a href="{{ localized_route('contact.show') }}" class="btn btn-primary">{{ __('store.conversations_new') }}</a>
                 </div>
@@ -39,7 +39,7 @@
                     id="conversation-reply-form"
                     method="POST"
                     action="{{ route('guest.conversations.reply', ['token' => $conversation->guest_token]) }}"
-                    class="guest-thread-foot thread-composer"
+                    class="thread-card-foot thread-composer"
                     data-thread-item-class="thread-item--customer"
                     data-required-message="{{ __('store.conversation_reply_required') }}"
                     novalidate

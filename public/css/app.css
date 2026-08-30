@@ -5034,19 +5034,20 @@ body.has-menu-open {
     padding-bottom: 3rem;
 }
 
-.guest-thread-card {
+.thread-card {
     background: var(--surface);
     border: 1px solid var(--border);
+    /* Un liseré discret aux couleurs de la boutique, pour que la carte ait
+       une tête et pas seulement des bords — porté par la carte elle-même,
+       car la page compte n'a pas d'en-tête interne. */
+    border-top: 3px solid var(--accent);
     box-shadow: var(--shadow);
     overflow: hidden;
 }
 
-.guest-thread-head {
+.thread-card-head {
     padding: 1.5rem 1.75rem 1.35rem;
     border-bottom: 1px solid var(--border);
-    /* Un liseré discret aux couleurs de la boutique, pour que la carte ait
-       une tête et pas seulement des bords. */
-    border-top: 3px solid var(--accent);
 }
 
 .guest-conversation-kicker {
@@ -5058,7 +5059,7 @@ body.has-menu-open {
     color: var(--accent);
 }
 
-.guest-thread-title {
+.thread-card-title {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
@@ -5069,7 +5070,7 @@ body.has-menu-open {
     letter-spacing: -0.01em;
 }
 
-.guest-thread-chip {
+.thread-card-chip {
     padding: 0.15rem 0.6rem;
     font-size: 0.72rem;
     font-weight: 600;
@@ -5080,7 +5081,7 @@ body.has-menu-open {
     border: 1px solid var(--border);
 }
 
-.guest-thread-meta {
+.thread-card-meta {
     margin: 0.45rem 0 0;
     font-size: 0.875rem;
     color: var(--text-muted);
@@ -5088,21 +5089,21 @@ body.has-menu-open {
 
 /* Le fil respire sur un fond légèrement en retrait de la carte, comme les
    bulles d'une messagerie. */
-.guest-thread-body {
+.thread-card-body {
     padding: 1.5rem 1.75rem 0.5rem;
     background: color-mix(in srgb, var(--bg) 55%, var(--surface));
 }
 
-.guest-thread-body .thread {
+.thread-card-body .thread {
     margin-bottom: 1rem;
 }
 
-.guest-thread-foot {
+.thread-card-foot {
     padding: 1.25rem 1.75rem 1.5rem;
     border-top: 1px solid var(--border);
 }
 
-.guest-thread-foot .form-control {
+.thread-card-foot .form-control {
     resize: vertical;
 }
 
@@ -5123,9 +5124,9 @@ body.has-menu-open {
 }
 
 @media (max-width: 640px) {
-    .guest-thread-head,
-    .guest-thread-body,
-    .guest-thread-foot {
+    .thread-card-head,
+    .thread-card-body,
+    .thread-card-foot {
         padding-left: 1.1rem;
         padding-right: 1.1rem;
     }
