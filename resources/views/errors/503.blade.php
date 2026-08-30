@@ -31,7 +31,7 @@
             <p class="error-page-code" aria-hidden="true">503</p>
             <h1 class="error-page-title">Le site fait peau neuve</h1>
             <p class="error-page-lede">
-                Une mise à jour est en cours. Ça ne prendra que quelques instants — revenez juste après.
+                Une mise à jour est en cours. Ça ne prendra que quelques instants, revenez juste après.
             </p>
 
             <div class="error-page-actions">

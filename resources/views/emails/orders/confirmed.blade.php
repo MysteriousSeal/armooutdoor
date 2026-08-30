@@ -15,7 +15,7 @@ Nous avons bien reçu votre commande **{{ $order->number }}**.
 | Article | Qté | Prix |
 |:--------|:---:|-----:|
 @foreach ($order->items as $item)
-| {{ $item->localizedName() }}@if ($item->variant_label) — {{ $item->variant_label }}@endif | {{ $item->quantity }} | {{ format_euros($item->line_cents) }} |
+| {{ $item->localizedName() }}@if ($item->variant_label) · {{ $item->variant_label }}@endif | {{ $item->quantity }} | {{ format_euros($item->line_cents) }} |
 @endforeach
 | **Sous-total** | | {{ format_euros($order->subtotal_cents) }} |
 @if ($order->discount_cents > 0)
@@ -25,7 +25,7 @@ Nous avons bien reçu votre commande **{{ $order->number }}**.
 | **Total** | | **{{ format_euros($order->total_cents) }}** |
 </x-mail::table>
 
-**Livraison** — {{ $order->carrierName() }}
+**Livraison** : {{ $order->carrierName() }}
 @if ($order->relay_snapshot)
 Point relais : {{ $order->relay_snapshot['name'] ?? '' }}, {{ $order->relay_snapshot['city'] ?? '' }}
 @else
