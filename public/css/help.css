@@ -161,3 +161,25 @@
         width: 100%;
     }
 }
+
+/* PayPal est annoncé, pas encore offert : le logo attend en retrait, avec
+   la même étiquette que sa carte au checkout. */
+.help-logo--soon img {
+    opacity: 0.45;
+}
+
+.help-logo--soon span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.help-logo-soon-chip {
+    padding: 0.1rem 0.35rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--accent-hover);
+    border: 1px solid var(--accent);
+}

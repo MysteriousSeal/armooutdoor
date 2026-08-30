@@ -8,7 +8,7 @@
             'items' => [
                 [
                     'q' => 'Quels sont les délais et frais de livraison ?',
-                    'a' => 'Les commandes sont préparées puis expédiées en France avec Colissimo, Chronopost, Mondial Relay ou Chronopost Shop2Shop, à domicile ou en point relais. Le délai et le prix exacts s\'affichent au moment du paiement, selon le transporteur choisi.'
+                    'a' => 'Les commandes sont préparées puis expédiées en France métropolitaine avec Colissimo, Chronopost, Mondial Relay ou Chronopost Shop2Shop, à domicile ou en point relais. Le délai et le prix exacts s\'affichent au moment du paiement, selon le transporteur choisi.'
                         .($freeShippingAmount ? ' La livraison est offerte dès '.$freeShippingAmount.' d\'achat.' : ''),
                 ],
                 [
@@ -28,7 +28,7 @@
             'items' => [
                 [
                     'q' => 'Quels moyens de paiement acceptez-vous ?',
-                    'a' => 'Le paiement se fait par carte bancaire ou par PayPal, au moment de la commande, via une connexion sécurisée.',
+                    'a' => 'Le paiement se fait par carte bancaire, au moment de la commande, via une connexion sécurisée. Le paiement par PayPal arrive bientôt.',
                 ],
                 [
                     'q' => 'Le paiement en plusieurs fois est-il possible ?',
@@ -65,8 +65,8 @@
                 ],
                 [
                     'q' => 'Comment vous contacter pour une autre question ?',
-                    'a' => 'Vous pouvez nous écrire directement, nos coordonnées figurent sur la page mentions légales.',
-                    'a_html' => 'Vous pouvez nous écrire directement, nos coordonnées figurent sur la page <a href="'.e(route('legal.notice')).'">mentions légales</a>.',
+                    'a' => 'Vous pouvez nous écrire directement depuis la page de contact ; nos coordonnées figurent aussi sur la page mentions légales.',
+                    'a_html' => 'Vous pouvez nous écrire directement depuis la <a href="'.e(localized_route('contact.show')).'">page de contact</a> ; nos coordonnées figurent aussi sur la page <a href="'.e(route('legal.notice')).'">mentions légales</a>.',
                 ],
             ],
         ],

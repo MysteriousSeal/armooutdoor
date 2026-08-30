@@ -49,16 +49,17 @@
             <section class="help-card" id="moyens-de-paiement" aria-labelledby="help-methods-title">
                 <h2 id="help-methods-title">Moyens de paiement</h2>
                 <p>
-                    Le paiement se fait par carte bancaire ou par PayPal, en une seule fois, au moment de la commande.
+                    Le paiement se fait par carte bancaire, en une seule fois, au moment de la commande.
+                    Le paiement par PayPal arrive bientôt.
                 </p>
                 <ul class="help-logos help-logos--two">
                     <li class="help-logo">
                         <img src="{{ asset('images/payments/cb.png') }}" alt="Carte bancaire" width="120" height="28">
                         <span>Carte bancaire</span>
                     </li>
-                    <li class="help-logo">
+                    <li class="help-logo help-logo--soon">
                         <img src="{{ asset('images/payments/paypal.png') }}" alt="PayPal" width="120" height="28">
-                        <span>PayPal</span>
+                        <span>PayPal <span class="help-logo-soon-chip">{{ __('store.payment_paypal_soon') }}</span></span>
                     </li>
                 </ul>
             </section>
@@ -66,8 +67,10 @@
             <section class="help-card" id="securite" aria-labelledby="help-security-title">
                 <h2 id="help-security-title">Sécurité de vos données</h2>
                 <p>
-                    Le paiement passe par une connexion chiffrée. Vos coordonnées bancaires ne transitent jamais par nos
-                    serveurs et ne sont ni stockées ni consultables par la boutique.
+                    Le paiement par carte est traité par Stripe, prestataire de paiement certifié, sur une connexion
+                    chiffrée, avec authentification 3-D Secure lorsque votre banque la demande. Vos coordonnées
+                    bancaires ne transitent jamais par nos serveurs et ne sont ni stockées ni consultables par la
+                    boutique.
                 </p>
             </section>
 

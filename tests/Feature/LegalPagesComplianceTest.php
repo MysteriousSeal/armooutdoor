@@ -60,4 +60,23 @@ class LegalPagesComplianceTest extends TestCase
         $this->get('/droit-de-retractation')->assertOk()
             ->assertSee('ou par un tiers qu');
     }
+
+    public function test_the_help_pages_stop_promising_paypal_and_name_stripe(): void
+    {
+        // PayPal est désactivé au checkout : partout ailleurs il est
+        // annoncé « bientôt », jamais offert.
+        $this->get('/faq')->assertOk()
+            ->assertSee('PayPal arrive bientôt')
+            ->assertDontSee('ou par PayPal');
+
+        $this->get('/paiement-securise')->assertOk()
+            ->assertSee('PayPal arrive bientôt')
+            ->assertSee('Stripe')
+            ->assertSee('3-D Secure')
+            ->assertSee('help-logo--soon');
+
+        $this->get('/')->assertOk()
+            ->assertDontSee('Carte bancaire, PayPal')
+            ->assertDontSee('Carte bancaire ou PayPal');
+    }
 }
