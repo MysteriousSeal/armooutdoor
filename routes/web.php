@@ -234,6 +234,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/discount-codes/create', [AdminDiscountCodeController::class, 'create'])->name('discount-codes.create');
         Route::post('/discount-codes', [AdminDiscountCodeController::class, 'store'])->name('discount-codes.store');
         Route::get('/discount-codes/{discountCode}/edit', [AdminDiscountCodeController::class, 'edit'])->name('discount-codes.edit');
+        Route::get('/discount-codes/{discountCode}/label', [AdminDiscountCodeController::class, 'label'])->name('discount-codes.label');
         Route::put('/discount-codes/{discountCode}', [AdminDiscountCodeController::class, 'update'])->name('discount-codes.update');
         Route::delete('/discount-codes/{discountCode}', [AdminDiscountCodeController::class, 'destroy'])->middleware('admin.owner')->name('discount-codes.destroy');
 

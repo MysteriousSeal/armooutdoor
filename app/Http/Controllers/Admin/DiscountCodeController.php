@@ -7,13 +7,33 @@ use App\Http\Requests\Admin\StoreDiscountCodeRequest;
 use App\Models\AdminActivityLog;
 use App\Models\DiscountCode;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class DiscountCodeController extends Controller
 {
+    /**
+     * Une carte de 70 × 50 mm ne portant que le code, à glisser dans un
+     * colis. Rien d'autre dessus, à la demande : pas d'enseigne, pas de
+     * montant — le code est le message.
+     */
+    public function label(DiscountCode $discountCode): Response
+    {
+        $pdf = Pdf::loadView('admin.discounts.code-pdf', [
+            'code' => $discountCode->code,
+        ])
+            // 70 × 50 mm en points PDF (1 mm = 72/25.4 pt), paysage par
+            // construction : la largeur est le grand côté.
+            ->setPaper([0, 0, 70 * 72 / 25.4, 50 * 72 / 25.4]);
+
+        return $pdf->download('code-'.Str::slug($discountCode->code).'.pdf');
+    }
+
     public function checkCode(Request $request): JsonResponse
     {
         $code = strtoupper(trim((string) $request->query('code')));

@@ -240,6 +240,7 @@
                                     <td>{{ $discountCode->hasMaxUsesPerCustomer() ? $discountCode->max_uses_per_customer : 'Unlimited' }}</td>
                                     <td>
                                         <div class="admin-table-actions">
+                                            <a href="{{ route('admin.discount-codes.label', $discountCode) }}" class="btn btn-sm btn-secondary" title="Download a 70×50 mm card carrying only the code">PDF</a>
                                             <a href="{{ route('admin.discount-codes.edit', $discountCode) }}" class="btn btn-sm btn-secondary">Edit</a>
                                             @if (auth()->user()->isOwner())
                                                 <button type="button" class="btn btn-sm btn-secondary" data-modal-open="discount-code-delete-{{ $discountCode->id }}">Remove</button>
