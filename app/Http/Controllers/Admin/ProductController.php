@@ -274,6 +274,44 @@ class ProductController extends Controller
             ->with('status', 'Product saved.');
     }
 
+    /**
+     * Flips « disponible fournisseur » depuis la liste, sans passer par le
+     * formulaire. Refusé pour un produit à déclinaisons — le drapeau y vit
+     * sur chaque taille — et sans fournisseur, où il ne commanderait rien.
+     */
+    public function toggleSupplierAvailability(Request $request, Product $product): RedirectResponse|JsonResponse
+    {
+        abort_if($product->hasVariants() || $product->supplier_id === null, 422);
+
+        $product->update(['available_at_supplier' => ! $product->available_at_supplier]);
+
+        AdminActivityLog::record(
+            'product.supplier_updated',
+            $product,
+            ($product->available_at_supplier ? 'Marked ' : 'Unmarked ').$product->localizedName().' as available at supplier'
+        );
+
+        if ($request->expectsJson()) {
+            $availability = $product->availabilityState();
+
+            return response()->json([
+                'available_at_supplier' => $product->available_at_supplier,
+                'availability' => $availability,
+                'availability_label' => [
+                    'in_stock' => 'In stock',
+                    'low_stock' => 'Last pieces',
+                    'restocking' => 'Restocking',
+                    'at_supplier' => 'At supplier',
+                    'out_of_stock' => 'Out of stock',
+                ][$availability],
+            ]);
+        }
+
+        return back()->with('status', $product->available_at_supplier
+            ? 'Marked as available at supplier.'
+            : 'No longer marked as available at supplier.');
+    }
+
     public function toggleStatus(Product $product): RedirectResponse
     {
         $product->update(['is_active' => ! $product->is_active]);

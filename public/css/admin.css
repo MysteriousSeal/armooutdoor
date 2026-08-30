@@ -1898,6 +1898,75 @@
     border-color: color-mix(in srgb, #d4a39d 32%, var(--border));
 }
 
+/* Même langage que les pastilles de disponibilité — point, teinte, petite
+   capitale — mais celle-ci se clique : le « Yes » reprend le bleu de
+   « At supplier » juste à côté, puisque c'est le même fait qu'elle pilote. */
+.supplier-availability-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    font-family: inherit;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    background: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.supplier-availability-chip::before {
+    content: '';
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+}
+
+button.supplier-availability-chip {
+    cursor: pointer;
+}
+
+button.supplier-availability-chip:hover {
+    border-color: currentColor;
+}
+
+.supplier-availability-chip.is-on {
+    color: #2f5d8a;
+    background: #eef3f8;
+    border-color: #c6d8e8;
+}
+
+.supplier-availability-chip.is-off {
+    color: #6f6a64;
+    background: #f2f0ed;
+    border-color: #e0dcd6;
+}
+
+.supplier-availability-chip.is-unavailable {
+    color: var(--text-muted);
+    background: none;
+    border: 1px dashed var(--border);
+    cursor: not-allowed;
+}
+
+.supplier-availability-chip.is-unavailable::before {
+    display: none;
+}
+
+[data-theme='dark'] .supplier-availability-chip.is-on {
+    color: #8ab4dd;
+    background: color-mix(in srgb, #8ab4dd 12%, var(--surface));
+    border-color: color-mix(in srgb, #8ab4dd 32%, var(--border));
+}
+
+[data-theme='dark'] .supplier-availability-chip.is-off {
+    color: #a49e96;
+    background: color-mix(in srgb, #a49e96 10%, var(--surface));
+    border-color: color-mix(in srgb, #a49e96 28%, var(--border));
+}
+
 /* Le formulaire de bon de commande. Une ligne par article, comme une
    facture : les libellés une seule fois en tête, les montants à droite en
    chiffres tabulaires, et le total qui suit la frappe. */

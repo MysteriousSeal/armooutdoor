@@ -198,6 +198,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/products/{product}/average-cost', [AdminProductController::class, 'averageCost'])->name('products.average-cost');
         Route::put('/products/{product}', [AdminProductController::class, 'update'])->name('products.update');
         Route::patch('/products/{product}/status', [AdminProductController::class, 'toggleStatus'])->name('products.status');
+        Route::patch('/products/{product}/supplier-availability', [AdminProductController::class, 'toggleSupplierAvailability'])->name('products.supplier-availability');
         Route::patch('/products/{product}/quantity', [AdminProductController::class, 'updateQuantity'])->name('products.quantity');
         Route::patch('/products/{product}/supplier', [AdminProductController::class, 'updateSupplier'])->name('products.supplier');
 

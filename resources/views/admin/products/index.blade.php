@@ -255,6 +255,7 @@
                                 </a>
                             </th>
                             <th>Availability</th>
+                            <th title="Supplier can still source it — click to toggle">At supplier</th>
                             <th>Variants</th>
                             <th>Weight</th>
                             <th>GTIN</th>
@@ -310,6 +311,33 @@
                                         ][$availability];
                                     @endphp
                                     <span class="admin-availability-chip is-{{ str_replace('_', '-', $availability) }}">{{ $availabilityLabel }}</span>
+                                </td>
+                                <td>
+                                    {{-- Le drapeau produit ne pilote rien sur un produit à
+                                         déclinaisons (chaque taille porte le sien) : un tiret
+                                         plutôt qu'un interrupteur qui ne commanderait rien. --}}
+                                    @if ($product->variants_count > 0)
+                                        —
+                                    @elseif ($product->supplier_id === null)
+                                        <span
+                                            class="supplier-availability-chip is-unavailable"
+                                            title="Assign a supplier first"
+                                        >No supplier</span>
+                                    @else
+                                        <form
+                                            method="POST"
+                                            action="{{ route('admin.products.supplier-availability', $product) }}"
+                                            data-supplier-availability
+                                        >
+                                            @csrf
+                                            @method('PATCH')
+                                            <button
+                                                type="submit"
+                                                class="supplier-availability-chip {{ $product->available_at_supplier ? 'is-on' : 'is-off' }}"
+                                                title="Click to {{ $product->available_at_supplier ? 'disable' : 'enable' }} supplier availability"
+                                            >{{ $product->available_at_supplier ? 'Yes' : 'No' }}</button>
+                                        </form>
+                                    @endif
                                 </td>
                                 <td>
                                     @if ($product->variants_count > 0)
@@ -424,7 +452,7 @@
                                         ->values();
                                 @endphp
                                 <tr class="admin-variant-row" id="variant-panel-{{ $product->id }}" hidden>
-                                    <td colspan="15">
+                                    <td colspan="16">
                                         <div class="admin-variant-panel">
                                             <table class="admin-variant-table">
                                                 <thead>
@@ -506,6 +534,7 @@
 @endsection
 
 @push('scripts')
+    <script src="{{ asset('js/admin-supplier-availability.js') }}" defer></script>
     <script>
         (function () {
             document.querySelectorAll('[data-variants-toggle]').forEach(function (trigger) {
