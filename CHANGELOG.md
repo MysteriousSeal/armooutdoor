@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-30 — v0.36.0 — build BSJ9T7
+
+### Admin
+
+- **Analytics tells when, and what.** The page had breakdowns and a raw log but no trend and no palmarès. A visits-over-time chart now leads — humans and bots stacked apart, bucketed by hour on 24 hours, by day on 7 and 30, by month on all time — drawn like the dashboard's revenue chart: colors from the theme, and a table twin rendered server-side so no value lives only in a tooltip. Top pages and top referrers get their panels, humans only, since a scraper inhaling the catalogue says nothing about what interests anyone; referrers keep external sites only. Everything is counted in the single pass the donut charts already made — the page runs no extra query for any of it.
+
+- **The visit log can hide the bots.** "Bot" on this page is a verdict — user-agent signatures plus the request-burst heuristic — not a database column, so the toggle excludes exactly the rows that verdict flagged rather than approximating it in SQL. The page also reads in order now — trend, palmarès, composition, journal — the two donuts that duplicated the stat tiles are gone, and the header keeps only its live visitor chip instead of restating every tile in one dense line.
+
 ## 2026-08-30 — v0.35.0 — build WI1B7V
 
 ### Admin
