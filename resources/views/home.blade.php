@@ -104,11 +104,17 @@
                             <div class="home-hero-overlay" aria-hidden="true"></div>
                             <div class="home-hero-copy">
                                 <p class="home-hero-kicker">{{ $slide['kicker'] }}</p>
-                                <h2 class="home-hero-title" @if ($index === 0) id="home-hero-title" @endif>
+                                @php
+                                    // Only the leading panel: four h1 elements
+                                    // would be no better than none, and the
+                                    // panels behind it are aria-hidden anyway.
+                                    $headingTag = $index === 0 ? 'h1' : 'h2';
+                                @endphp
+                                <{{ $headingTag }} class="home-hero-title" @if ($index === 0) id="home-hero-title" @endif>
                                     @foreach ($slide['lines'] as $line => $text)
                                         <span class="home-hero-title-line {{ $line === $slide['accent'] ? 'home-hero-title-accent' : '' }}">{{ $text }}</span>
                                     @endforeach
-                                </h2>
+                                </{{ $headingTag }}>
                                 <p class="home-hero-text">{{ $slide['text'] }}</p>
                                 @if ($slide['tags'])
                                     <ul class="home-hero-tags" aria-label="{{ __('store.home_hero_tags_label') }}">

@@ -128,7 +128,7 @@
                     </p>
                 @endif
 
-                <h2 class="product-detail-title">{{ $product->localizedName() }}</h2>
+                <h1 class="product-detail-title">{{ $product->localizedName() }}</h1>
                 <p class="product-detail-sku" id="product-detail-sku" @if (! $displaySku) hidden @endif>
                     <span class="product-detail-sku-label">{{ __('store.product_sku') }}</span>
                     <span class="product-detail-sku-value" id="product-detail-sku-value">{{ $displaySku }}</span>

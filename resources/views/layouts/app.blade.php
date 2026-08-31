@@ -35,13 +35,16 @@
     <header class="site-header">
         <div class="site-header-inner">
             <div class="site-header-main">
-                <h1 class="site-logo">
+                {{-- A paragraph, not a heading: the wordmark is the same on
+                     every page, so as an h1 it made 268 product pages share
+                     one heading that says the brand instead of the product. --}}
+                <p class="site-logo">
                     <a href="{{ localized_route('home') }}" class="site-logo-link">
                         <span class="site-logo-wordmark">
                             <span class="logo-primary">Armo</span><span class="logo-secondary">Outdoor</span>
                         </span>
                     </a>
-                </h1>
+                </p>
                 <p class="site-tagline">{{ __('store.tagline') }}</p>
             </div>
             <div class="site-header-actions">
