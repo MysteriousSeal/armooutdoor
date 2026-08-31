@@ -150,8 +150,8 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/admin-copy-code.js') }}" defer></script>
-    <script src="{{ asset('js/conversation-reply.js') }}" defer></script>
-    <script src="{{ asset('js/conversation-edit.js') }}" defer></script>
-    <script src="{{ asset('js/admin-conversation-page.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/admin-copy-code.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/conversation-reply.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/conversation-edit.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/admin-conversation-page.js') }}" defer></script>
 @endpush

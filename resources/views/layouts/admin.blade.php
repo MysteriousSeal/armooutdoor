@@ -220,13 +220,13 @@
         @yield('content')
     </main>
 
-    <script src="{{ asset('js/admin-nav-menu.js') }}" defer></script>
-    <script src="{{ asset('js/admin-toast.js') }}" defer></script>
-    <script src="{{ asset('js/pretty-select.js') }}" defer></script>
-    <script src="{{ asset('js/theme-toggle.js') }}" defer></script>
-    <script src="{{ asset('js/admin-modal.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/admin-nav-menu.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/admin-toast.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/pretty-select.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/theme-toggle.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/admin-modal.js') }}" defer></script>
     <script
-        src="{{ asset('js/admin-active-now.js') }}"
+        src="{{ versioned_asset('js/admin-active-now.js') }}"
         data-active-now-url="{{ route('admin.analytics.active-now') }}"
         defer
     ></script>

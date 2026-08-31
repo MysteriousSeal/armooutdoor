@@ -3,7 +3,7 @@
 @section('title', ($post->exists ? 'Edit post' : 'New post').' — Admin')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/vendor/quill.snow.css') }}">
+    <link rel="stylesheet" href="{{ versioned_asset('css/vendor/quill.snow.css') }}">
 @endpush
 
 @section('content')
@@ -218,7 +218,7 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/vendor/quill.js') }}"></script>
-    <script src="{{ asset('js/admin-description-editor.js') }}" defer></script>
-    <script src="{{ asset('js/admin-blog-form.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/vendor/quill.js') }}"></script>
+    <script src="{{ versioned_asset('js/admin-description-editor.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/admin-blog-form.js') }}" defer></script>
 @endpush

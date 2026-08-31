@@ -243,5 +243,5 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/admin-naturabuy-sync.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/admin-naturabuy-sync.js') }}" defer></script>
 @endpush

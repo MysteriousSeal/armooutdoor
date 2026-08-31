@@ -97,5 +97,5 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/admin-backups.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/admin-backups.js') }}" defer></script>
 @endpush

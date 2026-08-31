@@ -348,5 +348,5 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/carrier-price-tiers.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/carrier-price-tiers.js') }}" defer></script>
 @endpush

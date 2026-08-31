@@ -87,6 +87,6 @@
         </div>
     </div>
 
-    <script src="{{ asset('js/theme-toggle.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/theme-toggle.js') }}" defer></script>
 </body>
 </html>

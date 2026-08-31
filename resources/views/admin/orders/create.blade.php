@@ -537,7 +537,7 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/admin-search-select.js') }}"></script>
+    <script src="{{ versioned_asset('js/admin-search-select.js') }}"></script>
     <script>
         AdminSearchSelect.catalogs.customers = @json($customerOptions);
         AdminSearchSelect.catalogs.products = @json($productOptions);

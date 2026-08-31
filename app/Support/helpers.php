@@ -54,12 +54,25 @@ if (! function_exists('format_bytes')) {
 
 if (! function_exists('versioned_asset')) {
     /**
-     * Appends the site version as a cache-busting query string, so a version
-     * bump forces browsers to fetch fresh CSS instead of a stale cached copy.
+     * Appends a cache-busting query string, so a browser holding a stale copy
+     * of a stylesheet or a script is made to fetch the new one.
+     *
+     * The stamp is the file's own modification time rather than the site
+     * version: a deploy is a `git reset --hard`, which only touches the files
+     * that actually changed, so each asset busts on its own and the rest stay
+     * in the visitor's cache. It also means a fix shipped without a version
+     * bump still reaches everyone. Anything unreadable falls back to the site
+     * version, which is never worse than the old behaviour.
      */
     function versioned_asset(string $path): string
     {
-        return asset($path).'?v='.config('shop.version');
+        $file = public_path(ltrim($path, '/'));
+
+        $stamp = is_file($file)
+            ? filemtime($file)
+            : config('shop.version');
+
+        return asset($path).'?v='.$stamp;
     }
 }
 

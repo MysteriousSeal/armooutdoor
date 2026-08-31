@@ -537,7 +537,7 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/admin-supplier-availability.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/admin-supplier-availability.js') }}" defer></script>
     <script>
         (function () {
             document.querySelectorAll('[data-variants-toggle]').forEach(function (trigger) {

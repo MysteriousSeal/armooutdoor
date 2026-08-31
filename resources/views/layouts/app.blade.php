@@ -334,12 +334,12 @@
     @include('partials.add-to-cart-modal')
     @include('partials.cookie-banner')
 
-    <script src="{{ asset('js/cookie-banner.js') }}" defer></script>
-    <script src="{{ asset('js/pretty-select.js') }}" defer></script>
-    <script src="{{ asset('js/site-menu-toggle.js') }}" defer></script>
-    <script src="{{ asset('js/theme-toggle.js') }}" defer></script>
-    <script src="{{ asset('js/cart-modal.js') }}" defer></script>
-    <script src="{{ asset('js/cart-quantity-toast.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/cookie-banner.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/pretty-select.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/site-menu-toggle.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/theme-toggle.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/cart-modal.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/cart-quantity-toast.js') }}" defer></script>
     @stack('scripts')
 </body>
 </html>

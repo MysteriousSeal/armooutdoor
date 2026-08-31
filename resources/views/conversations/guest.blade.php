@@ -77,5 +77,5 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/conversation-reply.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/conversation-reply.js') }}" defer></script>
 @endpush

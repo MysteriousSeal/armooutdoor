@@ -18,5 +18,5 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/admin-accounting-entry.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/admin-accounting-entry.js') }}" defer></script>
 @endpush

@@ -45,5 +45,5 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/forgot-password.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/forgot-password.js') }}" defer></script>
 @endpush
