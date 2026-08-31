@@ -2,6 +2,28 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-31 — v1.0.2 — build VRRM6U
+
+### Storefront
+
+- **The homepage carousel stops repeating itself.** Its four panels shared one photograph: the words changed every six seconds, the picture behind them did not, and the slider read as stuck. Slides two to four have their own now — a delivery opened on a workbench, a crate of gear on a wall, a bag worn soft by use — each with its subject on the side the panel leaves free. Stacked on a telephone the panel turns portrait while the photographs stay wide, so every slide names the column its gear sits in and the crop keeps the gear instead of the mist; the copy card no longer covers the picture down to a thin strip.
+
+- **The photographs weigh half what they did.** The five homepage images are WebP, a megabyte down to six hundred kilobytes, at the same dimensions so nothing shifts as the page settles. The first panel's photograph is also announced in the page head: it is the largest thing the homepage paints, it arrives as a background image, and until now the browser could not learn of it until the stylesheet had been fetched and read.
+
+- **The category cards are counted, not carried.** Showing seven cards their product totals loaded two hundred and sixty-seven products, their variants and their suppliers on every visit — and the totals were rarely printed, since a card prefers its written blurb. The number is counted in the database now: two queries where there were six, and the page that comes out is byte for byte the one that came out before.
+
+- **A paragraph that had drifted right.** In the carousel panels whose text sits on the right, the description was nudged in from the edge every other element started at. The mirror moves the whole card; it has no business realigning what is inside it.
+
+### Admin
+
+- **Bounces stop crushing the user flow.** One-page sessions fed a "Left the site" node that owned the whole diagram and squeezed real journeys into slivers. They leave the flow entirely now — counted in the panel note and in a Bounce rate stat tile with its raw base — while nodes and ribbons gain a minimum height so rare paths stay visible on busy ranges. A range that is nothing but bounces says so plainly instead of drawing one absurd bar.
+
+### Behind the scenes
+
+- **Every script is versioned, not just the stylesheets.** Thirteen stylesheets carried a cache-busting marker; fifty-seven scripts carried nothing. A release rebuilt the CSS in every visitor's browser while the JavaScript beside it stayed as it was — the cookie banner, the checkout, the cart and the whole back office among them. All of them are marked now, and the marker is each file's own modification time rather than the site version, so a fix reaches everyone whether or not the version was bumped, and an unchanged file stays in the visitor's cache instead of being thrown out with the rest.
+
+**No migration.**
+
 ## 2026-08-30 — v1.0.1 — build 0E41U4
 
 ### Storefront
