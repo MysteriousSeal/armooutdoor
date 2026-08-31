@@ -20,9 +20,10 @@ class Category extends Model
         'stand-de-tir' => 'toolbox',
         'vetements' => 'shirt',
         'terrain' => 'campground',
-        'quotidien' => 'screwdriver-wrench',
+        'accessoires-de-l-arme' => 'screwdriver-wrench',
         'munitions' => 'box-open',
         'repliques-airsoft' => 'gun',
+        'optiques' => 'binoculars',
     ];
 
     protected function casts(): array
