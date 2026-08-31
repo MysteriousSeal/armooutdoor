@@ -71,11 +71,15 @@ class Category extends Model
 
     public function listingCount(): int
     {
+        // `products_count` is there when the caller counted in SQL; the loaded
+        // relation stays the fallback so a caller that did neither still works.
         if ($this->relationLoaded('children') && $this->children->isNotEmpty()) {
-            return $this->children->sum(fn (Category $child): int => $child->products->count());
+            return $this->children->sum(
+                fn (Category $child): int => $child->products_count ?? $child->products->count()
+            );
         }
 
-        return $this->products->count();
+        return $this->products_count ?? $this->products->count();
     }
 
     public function root(): self

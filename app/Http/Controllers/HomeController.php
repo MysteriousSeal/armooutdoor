@@ -19,13 +19,17 @@ class HomeController extends Controller
         $thresholdCents = ($shipping->free_shipping_carrier_ids ?? []) === []
             ? null
             : $shipping->free_shipping_threshold_cents;
+        // The cards need a name, an icon and a count — never a product. Loading
+        // the catalogue to call `count()` on it hydrated every active product
+        // with its variants and its suppliers on every visit to the homepage;
+        // counting in SQL asks the same question without the answer in memory.
         $categories = Category::query()
             ->whereNull('parent_id')
+            ->withCount(['products' => fn ($query) => $query->active()])
             ->with([
-                'products' => fn ($query) => $query->active(),
-                'products.variants.supplier',
-                'children.products' => fn ($query) => $query->active(),
-                'children.products.variants.supplier',
+                'children' => fn ($query) => $query->withCount([
+                    'products' => fn ($inner) => $inner->active(),
+                ]),
             ])
             ->orderBy('sort_order')
             ->get();
