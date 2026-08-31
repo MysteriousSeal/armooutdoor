@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-31 — v1.1.3 — build EKQ82A
+
+### Storefront
+
+- **The homepage category blurbs hold their line.** Two lines then an ellipsis: a category whose description runs long — the new Optiques, say — no longer stretches its card taller than its neighbours in « Achetez par catégorie ».
+
 ## 2026-08-31 — v1.1.2 — build OZAHMO
 
 ### Storefront
