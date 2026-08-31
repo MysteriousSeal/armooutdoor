@@ -34,6 +34,7 @@
             $slides = [
                 [
                     'image' => asset('images/hero.jpg'),
+                    'focus' => '78%',
                     'kicker' => __('store.home_hero_kicker'),
                     'lines' => ['Équipez-vous', 'pour le stand', 'et le terrain'],
                     'accent' => 1,
@@ -43,7 +44,8 @@
                     'ghost' => ['label' => __('store.home_browse'), 'url' => localized_route('products.new-arrivals')],
                 ],
                 [
-                    'image' => asset('images/hero.jpg'),
+                    'image' => asset('images/hero-2.jpg'),
+                    'focus' => '28%',
                     'kicker' => __('store.home_slide_new_kicker'),
                     'lines' => ['Les dernières', 'nouveautés', 'en rayon'],
                     'accent' => 1,
@@ -53,7 +55,8 @@
                     'ghost' => null,
                 ],
                 [
-                    'image' => asset('images/hero.jpg'),
+                    'image' => asset('images/hero-3.jpg'),
+                    'focus' => '75%',
                     'kicker' => __('store.home_slide_sale_kicker'),
                     'lines' => ['Des prix', 'en baisse', 'cette semaine'],
                     'accent' => 1,
@@ -63,7 +66,8 @@
                     'ghost' => null,
                 ],
                 [
-                    'image' => asset('images/hero.jpg'),
+                    'image' => asset('images/hero-4.jpg'),
+                    'focus' => '28%',
                     'kicker' => __('store.home_slide_best_kicker'),
                     'lines' => ['Ce que les', 'tireurs', 'achètent le plus'],
                     'accent' => 1,
@@ -90,7 +94,7 @@
                     @foreach ($slides as $index => $slide)
                         <article
                             class="home-hero home-carousel-panel {{ $index % 2 === 1 ? 'home-hero--mirrored' : '' }}"
-                            style="--hero-image: url('{{ $slide['image'] }}')"
+                            style="--hero-image: url('{{ $slide['image'] }}'); --hero-focus: {{ $slide['focus'] }}"
                             role="group"
                             aria-roledescription="{{ __('store.home_carousel_slide') }}"
                             aria-label="{{ $index + 1 }} / {{ count($slides) }}"

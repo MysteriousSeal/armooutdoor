@@ -267,11 +267,9 @@
     transform: scaleX(-1);
 }
 
-.home .home-hero--mirrored .home-hero-text {
-    /* Le texte est calé à droite : sa largeur maximale doit se mesurer
-       depuis ce bord, sinon la colonne se décroche du titre. */
-    margin-left: auto;
-}
+/* The mirrored panel moves the whole copy card, not the items inside it.
+   Kicker, title and buttons all start at the card's left edge, so the
+   paragraph does too — pushing it right left it the only stray element. */
 
 /* Empilé, le miroir n'a plus de sens : il ne ferait que déplacer le texte
    d'un bord à l'autre sans qu'aucune image ne l'accompagne. */
@@ -283,10 +281,6 @@
 
     .home .home-hero--mirrored .home-hero-overlay {
         transform: none;
-    }
-
-    .home .home-hero--mirrored .home-hero-text {
-        margin-left: 0;
     }
 }
 
@@ -1059,18 +1053,28 @@
     .home .home-hero {
         min-height: 0;
         margin-top: 0;
-        padding: 1.5rem 1.15rem 1.5rem;
-        background-position: center top;
+        /* The copy card is stacked below the photo rather than laid over it,
+           so the top padding is what reserves a band of image to look at.
+           Without it the card covers the panel and the photo is a rumour. */
+        padding: 11rem 1.15rem 1.5rem;
+        /* Stacked, the panel is portrait while the photo is 16:9: `cover`
+           throws away most of the width. Each slide names the column its
+           gear sits in so the crop keeps the subject instead of the mist. */
+        background-position: var(--hero-focus, 50%) top;
         background-size: cover;
         align-items: flex-end;
     }
 
     .home .home-hero-overlay {
+        /* The wash now has to clear the image band before it closes, or the
+           photo we just made room for reads as fog. It still lands on solid
+           surface behind the card, which carries the text either way. */
         background: linear-gradient(
             180deg,
-            color-mix(in srgb, var(--surface) 8%, transparent) 0%,
-            color-mix(in srgb, var(--surface) 55%, transparent) 42%,
-            var(--surface) 78%
+            color-mix(in srgb, var(--surface) 4%, transparent) 0%,
+            color-mix(in srgb, var(--surface) 10%, transparent) 30%,
+            color-mix(in srgb, var(--surface) 62%, transparent) 56%,
+            var(--surface) 76%
         );
     }
 
