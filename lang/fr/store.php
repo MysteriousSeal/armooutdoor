@@ -2,6 +2,11 @@
 
 return [
     'tagline' => 'Du matériel discret pour le stand et le terrain',
+    // The home page has no page name to build a title from, so it says one
+    // here. Kept short, because a search result truncates around sixty
+    // characters, and led by the aisles rather than the brand: people search
+    // for "cibles de tir" long before they search for "Armo Outdoor".
+    'meta_title_home' => 'Cibles, matériel de stand et kit terrain — Armo Outdoor',
     'meta_home' => 'Armo Outdoor, boutique en ligne de cibles, matériel de stand, vêtements et kit terrain. Livraison en France, à domicile ou en point relais.',
     'nav_home' => 'Accueil',
     'nav_categories' => 'Menu',

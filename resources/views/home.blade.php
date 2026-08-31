@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', config('app.name'))
+@section('title', __('store.meta_title_home'))
 @section('meta_description', __('store.meta_home'))
 @section('canonical', localized_route('home'))
 
