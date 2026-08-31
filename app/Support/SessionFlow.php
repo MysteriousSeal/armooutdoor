@@ -36,6 +36,10 @@ class SessionFlow
 
     private const NODE_GAP = 8;
 
+    private const MIN_NODE_HEIGHT = 8;
+
+    private const MIN_LINK_HEIGHT = 2;
+
     /**
      * The section of the site a path belongs to, coarse enough that a
      * flow diagram stays readable instead of one node per product.
@@ -92,11 +96,17 @@ class SessionFlow
 
     /**
      * @param  list<list<string>>  $sessions  Each a groupSequence() result.
-     * @return array{total: int, columns: list<array{title: string, x: float}>, nodes: list<array<string, mixed>>, links: list<array<string, mixed>>, table: list<array<string, mixed>>, legend: list<array{label: string, color: string}>}
+     * @return array{total: int, bounces: int, columns: list<array{title: string, x: float}>, nodes: list<array<string, mixed>>, links: list<array<string, mixed>>, table: list<array<string, mixed>>, legend: list<array{label: string, color: string}>}
      */
     public static function build(array $sessions, int $width = 1400, int $height = 420): array
     {
         $sessions = array_values(array_filter($sessions, fn (array $s) => $s !== []));
+
+        // Bounces would be one giant "Left the site" node crushing every
+        // real journey into slivers — they leave the diagram and are
+        // reported as a count instead.
+        $bounces = count(array_filter($sessions, fn (array $s) => count($s) === 1));
+        $sessions = array_values(array_filter($sessions, fn (array $s) => count($s) > 1));
         $total = count($sessions);
 
         $columnTitles = array_map(
@@ -105,7 +115,7 @@ class SessionFlow
         );
 
         if ($total === 0) {
-            return ['total' => 0, 'columns' => [], 'nodes' => [], 'links' => [], 'table' => [], 'legend' => []];
+            return ['total' => 0, 'bounces' => $bounces, 'columns' => [], 'nodes' => [], 'links' => [], 'table' => [], 'legend' => []];
         }
 
         $nodeCounts = array_fill(0, self::STEPS, []);
@@ -158,7 +168,9 @@ class SessionFlow
 
             foreach ($labels as $label) {
                 $count = $nodeCounts[$step][$label];
-                $nodeHeight = max(2, $count * $scale);
+                // A floor keeps rare paths visible and hoverable on busy
+                // ranges, at the price of slightly inflated proportions.
+                $nodeHeight = max(self::MIN_NODE_HEIGHT, $count * $scale);
 
                 $nodeInfo[$step][$label] = ['y0' => $y, 'y1' => $y + $nodeHeight, 'out' => $y, 'in' => $y];
 
@@ -198,13 +210,22 @@ class SessionFlow
 
             foreach ($entries as $entry) {
                 ['from' => $from, 'to' => $to, 'count' => $count] = $entry;
-                $segHeight = $count * $scale;
 
                 $sourceY0 = $nodeInfo[$layer][$from]['out'];
+                $targetY0 = $nodeInfo[$layer + 1][$to]['in'];
+
+                // A floor keeps single-session ribbons visible, clamped so
+                // an inflated segment never spills past either node.
+                $segHeight = max(self::MIN_LINK_HEIGHT, $count * $scale);
+                $segHeight = max(1, min(
+                    $segHeight,
+                    $nodeInfo[$layer][$from]['y1'] - $sourceY0,
+                    $nodeInfo[$layer + 1][$to]['y1'] - $targetY0,
+                ));
+
                 $sourceY1 = $sourceY0 + $segHeight;
                 $nodeInfo[$layer][$from]['out'] = $sourceY1;
 
-                $targetY0 = $nodeInfo[$layer + 1][$to]['in'];
                 $targetY1 = $targetY0 + $segHeight;
                 $nodeInfo[$layer + 1][$to]['in'] = $targetY1;
 
@@ -248,6 +269,7 @@ class SessionFlow
 
         return [
             'total' => $total,
+            'bounces' => $bounces,
             'width' => $width,
             'height' => $height,
             'columns' => array_map(

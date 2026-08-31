@@ -251,7 +251,8 @@ class AdminAnalyticsTest extends TestCase
             $visit->save();
         }
 
-        // A different visitor who only ever looks at the home page.
+        // A different visitor who only ever looks at the home page: a
+        // bounce, counted in the note but kept out of the diagram.
         $bounce = SiteVisit::create(['path' => '/', 'ip_address' => '203.0.113.81', 'user_agent' => $human]);
         $bounce->created_at = $base;
         $bounce->save();
@@ -262,17 +263,23 @@ class AdminAnalyticsTest extends TestCase
             ->assertSee('Home')
             ->assertSee('Checkout')
             ->assertSee('Left the site')
+            ->assertSee('1 single-page bounce excluded')
+            // The bounce rate tile: 1 bounce out of 2 reconstructed sessions.
+            ->assertSee('Bounce rate')
+            ->assertSee('50%')
+            ->assertSee('1 of 2 sessions')
             // Legend swatches and the table grouped by step transition.
             ->assertSee('admin-flow-legend')
             ->assertSee('Entrance → Step 2')
             ->assertSee('admin-flow-row--exit');
 
         $flow = $response->viewData('flow');
-        $this->assertSame(2, $flow['total']);
+        $this->assertSame(1, $flow['total']);
+        $this->assertSame(1, $flow['bounces']);
 
         $entrance = collect($flow['nodes'])->firstWhere('step', 0);
         $this->assertSame('Home', $entrance['label']);
-        $this->assertSame(2, $entrance['count']);
+        $this->assertSame(1, $entrance['count']);
     }
 
     public function test_the_flow_splits_by_real_session_id_even_behind_the_same_ip(): void
@@ -282,15 +289,17 @@ class AdminAnalyticsTest extends TestCase
 
         // Two different visitors sharing one IP (e.g. an office NAT) — the
         // session id, not the IP, is what should separate them.
-        foreach (['sess-aaa', 'sess-bbb'] as $sessionId) {
-            $visit = SiteVisit::create([
-                'path' => '/',
-                'session_id' => $sessionId,
-                'ip_address' => '203.0.113.90',
-                'user_agent' => $human,
-            ]);
-            $visit->created_at = $now;
-            $visit->save();
+        foreach (['sess-aaa', 'sess-bbb'] as $i => $sessionId) {
+            foreach (['/', '/products/tente'] as $j => $path) {
+                $visit = SiteVisit::create([
+                    'path' => $path,
+                    'session_id' => $sessionId,
+                    'ip_address' => '203.0.113.90',
+                    'user_agent' => $human,
+                ]);
+                $visit->created_at = $now->copy()->addMinutes($j);
+                $visit->save();
+            }
         }
 
         $flow = $this->actingAsAdmin()->get('/admin/analytics')->viewData('flow');

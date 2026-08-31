@@ -9474,6 +9474,15 @@ a.order-stepper-btn:focus-visible {
     line-height: 1.15;
 }
 
+/* Le détail sous le chiffre — « 100 of 105 sessions » sous le taux de
+   rebond : le pourcentage seul ne dit pas sur combien il repose. */
+.admin-analytics-stat-sub {
+    margin-top: -0.15rem;
+    font-size: 0.71875rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+}
+
 .admin-analytics-stat-live.is-live {
     border-color: color-mix(in srgb, #3a6b3a 35%, var(--border));
     background: color-mix(in srgb, #3a6b3a 8%, var(--surface));

@@ -80,15 +80,39 @@ class SessionFlowTest extends TestCase
 
     public function test_labels_hide_on_nodes_too_thin_to_carry_them(): void
     {
-        // 199 bounces on Home and a lone session through Browse: the Browse
-        // node is a sliver of the column and must not draw a label.
-        $sessions = array_fill(0, 199, ['Home']);
-        $sessions[] = ['Browse'];
+        // 199 sessions through Product and a lone one through Browse: the
+        // Browse node is a sliver of its column and must not draw a label.
+        $sessions = array_fill(0, 199, ['Home', 'Product']);
+        $sessions[] = ['Home', 'Browse'];
 
         $nodes = collect(SessionFlow::build($sessions)['nodes']);
 
         $this->assertTrue($nodes->firstWhere('label', 'Home')['labelVisible']);
         $this->assertFalse($nodes->firstWhere('label', 'Browse')['labelVisible']);
+    }
+
+    public function test_bounces_leave_the_diagram_but_are_counted(): void
+    {
+        $flow = SessionFlow::build([
+            ['Home'],
+            ['Home'],
+            ['Home', 'Product'],
+        ]);
+
+        $this->assertSame(1, $flow['total']);
+        $this->assertSame(2, $flow['bounces']);
+        // Shares are of the drawn sessions, not the bounces.
+        $this->assertSame(100.0, collect($flow['nodes'])->firstWhere('label', 'Home')['percent']);
+    }
+
+    public function test_rare_paths_keep_a_visible_floor_height(): void
+    {
+        $sessions = array_fill(0, 199, ['Home', 'Product']);
+        $sessions[] = ['Home', 'Browse'];
+
+        $browse = collect(SessionFlow::build($sessions)['nodes'])->firstWhere('label', 'Browse');
+
+        $this->assertGreaterThanOrEqual(8, $browse['height']);
     }
 
     public function test_build_returns_empty_shell_for_no_sessions(): void

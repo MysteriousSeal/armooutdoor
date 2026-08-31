@@ -56,6 +56,18 @@
                 <span class="admin-analytics-stat-label">Bots</span>
                 <span class="admin-analytics-stat-value">{{ number_format($rangeVisitors['bots']) }}</span>
             </div>
+            @php
+                $flowSessions = $flow['total'] + $flow['bounces'];
+            @endphp
+            <div class="admin-analytics-stat">
+                <span class="admin-analytics-stat-label">Bounce rate</span>
+                <span class="admin-analytics-stat-value">
+                    {{ $flowSessions > 0 ? round($flow['bounces'] / $flowSessions * 100, 1).'%' : '—' }}
+                </span>
+                @if ($flowSessions > 0)
+                    <span class="admin-analytics-stat-sub">{{ number_format($flow['bounces']) }} of {{ number_format($flowSessions) }} sessions</span>
+                @endif
+            </div>
             <div class="admin-analytics-stat admin-analytics-stat-live {{ $activeNow['total'] > 0 ? 'is-live' : '' }}">
                 <span class="admin-analytics-stat-label">Active now</span>
                 <span class="admin-analytics-stat-value">
@@ -219,15 +231,24 @@
                 </div>
             @endif
 
-            @if ($flow['total'] > 0)
+            @if ($flow['total'] > 0 || $flow['bounces'] > 0)
                 <section class="order-panel dash-chart-panel admin-analytics-section" aria-label="User flow for {{ $ranges[$range] }}">
                     <div class="dash-panel-head">
                         <h3 class="order-panel-title">User flow</h3>
                         <span class="dash-panel-note">
-                            {{ number_format($flow['total']) }} human {{ \Illuminate\Support\Str::plural('session', $flow['total']) }} · from entrance onward · {{ strtolower($ranges[$range]) }}
+                            {{ number_format($flow['total']) }} multi-page {{ \Illuminate\Support\Str::plural('session', $flow['total']) }}
+                            @if ($flow['bounces'] > 0)
+                                · {{ number_format($flow['bounces']) }} single-page {{ \Illuminate\Support\Str::plural('bounce', $flow['bounces']) }} excluded
+                            @endif
+                            · {{ strtolower($ranges[$range]) }}
                         </span>
                     </div>
 
+                    @if ($flow['total'] === 0)
+                        <p class="empty-state">
+                            Every session in this range viewed a single page and left — nothing to draw a path from yet.
+                        </p>
+                    @else
                     <div class="dash-legend admin-flow-legend" aria-hidden="true">
                         @foreach ($flow['legend'] as $entry)
                             <span class="dash-legend-item">
@@ -325,6 +346,7 @@
                             </table>
                         </div>
                     </details>
+                    @endif
                 </section>
             @endif
 
