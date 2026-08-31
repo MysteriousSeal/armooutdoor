@@ -5,6 +5,7 @@ use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\EnsureUserIsNotBanned;
 use App\Http\Middleware\EnsureUserIsOwner;
 use App\Http\Middleware\RecordSiteVisit;
+use App\Http\Middleware\RedirectWwwToApex;
 use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -19,6 +20,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // A page answered under www is a duplicate of the same page under the
+        // apex domain, so the request is turned around before the session,
+        // the CSRF check or the database ever see it. Appended rather than
+        // prepended so that TrustProxies has already settled the scheme:
+        // read too early, an HTTPS request behind a proxy would be sent back
+        // to its own http:// address.
+        $middleware->append(RedirectWwwToApex::class);
+
         $middleware->web(append: [
             EnsureUserIsNotBanned::class,
             SecurityHeaders::class,
