@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-31 — v1.1.0 — build LW4P6D
+
+### Under the hood
+
+- **The admin API learns to manage categories.** It could list them and nothing more; it now creates, edits and deletes them too. Creation derives the slug from the name and suffixes collisions rather than refusing; edits touch only the fields sent; deletion keeps the back-office rule — a category still holding products or subcategories is a 422, never an orphaning. The two-level tree holds (only roots can be parents, a parent with children can't become a child), the image is writable as a path string while file uploads stay the web admin's job, and the whole surface is documented beside the products endpoints.
+
 ## 2026-08-31 — v1.0.2 — build VRRM6U
 
 ### Storefront
