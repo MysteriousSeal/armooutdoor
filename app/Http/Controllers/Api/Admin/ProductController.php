@@ -125,7 +125,7 @@ class ProductController extends Controller
 
         $direct = [
             'slug', 'category_id', 'quantity', 'is_active', 'ai_validated', 'age_restricted', 'image_may_vary',
-            'featured', 'sort_order', 'sku', 'gtin', 'weight_grams', 'carrier_ids',
+            'featured', 'sort_order', 'sku', 'gtin', 'meta_title', 'meta_description', 'weight_grams', 'carrier_ids',
             'supplier_id', 'available_at_supplier', 'supplier_reference',
             'supplier_product_url', 'characteristics', 'filter_attributes', 'image',
         ];

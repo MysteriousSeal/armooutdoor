@@ -152,3 +152,42 @@ if (! function_exists('paginated_title')) {
         return $title.' — '.__('store.pagination_page', ['page' => $page]);
     }
 }
+
+if (! function_exists('meta_description')) {
+    /**
+     * A description that stops where a sentence does.
+     *
+     * The product pages cut their description at exactly 160 characters,
+     * which lands mid-word about as often as not — one shipped page ended
+     * « visible d'un coup d'œil depuis le pas... », breaking off before the
+     * phrase said anything. A search result is often the first sentence a
+     * customer reads about a product, and a severed one reads as neglect.
+     *
+     * So: the last complete sentence that fits, if enough of one fits to be
+     * worth reading, and a clean word boundary with an ellipsis otherwise.
+     */
+    function meta_description(?string $text, int $limit = 160): string
+    {
+        $text = trim((string) preg_replace('/\s+/u', ' ', (string) $text));
+
+        if ($text === '' || mb_strlen($text) <= $limit) {
+            return $text;
+        }
+
+        $window = mb_substr($text, 0, $limit);
+
+        // A sentence that ends before the limit is the best cut available: it
+        // needs no ellipsis, because nothing was interrupted.
+        if (preg_match('/^.*[.!?](?=\s|$)/us', $window, $matches) === 1
+            && mb_strlen($matches[0]) >= (int) ($limit * 0.45)) {
+            return trim($matches[0]);
+        }
+
+        // Otherwise cut at a space, leaving room for the ellipsis that says
+        // the sentence carries on.
+        $trimmed = mb_substr($text, 0, $limit - 1);
+        $lastSpace = mb_strrpos($trimmed, ' ');
+
+        return rtrim($lastSpace === false ? $trimmed : mb_substr($trimmed, 0, $lastSpace), ' ,;:').'…';
+    }
+}

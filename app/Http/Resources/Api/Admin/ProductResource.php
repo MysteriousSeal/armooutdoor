@@ -26,6 +26,8 @@ class ProductResource extends JsonResource
             'id' => $this->id,
             'slug' => $this->slug,
             'name' => $this->localizedName(),
+            'meta_title' => $this->meta_title,
+            'meta_description' => $this->meta_description,
             'description' => $this->localizedDescription(),
             'category_id' => $this->category_id,
             'category' => $this->whenLoaded('category', fn (): array => [

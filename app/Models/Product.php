@@ -37,6 +37,8 @@ use Illuminate\Support\Str;
     'age_restricted',
     'image_may_vary',
     'name',
+    'meta_title',
+    'meta_description',
     'description',
     'characteristics',
     'filter_attributes',
@@ -425,6 +427,37 @@ class Product extends Model
     public function localizedName(): string
     {
         return $this->localized('name');
+    }
+
+    /**
+     * The name as a search result should carry it.
+     *
+     * Product names here describe the article in full — format, count, size,
+     * colour, zones — and run past a hundred characters doing it. That is the
+     * right name on the page and too long for a result, which truncates around
+     * sixty. `meta_title` is where a shorter one is written for the products
+     * that need it; the rest keep the name they already have.
+     */
+    public function metaTitle(): string
+    {
+        $override = trim((string) $this->meta_title);
+
+        return $override !== '' ? $override : $this->localizedName();
+    }
+
+    /**
+     * The description as a search result should carry it.
+     *
+     * Derived from the page by default, cut at the last whole sentence that
+     * fits rather than at a fixed number of characters — which used to land
+     * mid-word. `meta_description` overrides that for a product whose opening
+     * sentences are not the ones worth showing.
+     */
+    public function metaDescription(): string
+    {
+        $override = trim((string) $this->meta_description);
+
+        return $override !== '' ? $override : meta_description($this->localizedDescriptionText());
     }
 
     public function localizedDescription(): string

@@ -239,6 +239,22 @@
 
                 <div class="order-main">
                     <section class="order-panel">
+                        <h3 class="order-panel-title">SEO</h3>
+                        <div class="form-group">
+                            <label for="meta_title">Meta title</label>
+                            <input type="text" id="meta_title" name="meta_title" class="form-control" value="{{ old('meta_title', $product->meta_title) }}" maxlength="70" placeholder="Falls back to the name">
+                            <p class="form-hint">Falls back to the name. A search result cuts off around 60 characters — worth setting when the name runs past that.</p>
+                            @error('meta_title') <p class="form-error">{{ $message }}</p> @enderror
+                        </div>
+                        <div class="form-group">
+                            <label for="meta_description">Meta description</label>
+                            <textarea id="meta_description" name="meta_description" class="form-control" rows="3" maxlength="160" placeholder="Falls back to the description">{{ old('meta_description', $product->meta_description) }}</textarea>
+                            <p class="form-hint">Falls back to the description, cut at its last whole sentence. 160 characters is what a result shows, so nothing written here is ever truncated.</p>
+                            @error('meta_description') <p class="form-error">{{ $message }}</p> @enderror
+                        </div>
+                    </section>
+
+                    <section class="order-panel">
                         <h3 class="order-panel-title">Description</h3>
                         <div class="form-group description-editor-group">
                             <label for="description" class="sr-only">Description</label>

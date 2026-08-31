@@ -743,6 +743,8 @@ class ProductController extends Controller
             'name' => [
                 'fr' => $request->string('name')->toString(),
             ],
+            'meta_title' => $request->filled('meta_title') ? $request->string('meta_title')->trim()->toString() : null,
+            'meta_description' => $request->filled('meta_description') ? $request->string('meta_description')->trim()->toString() : null,
             'description' => [
                 'fr' => HtmlSanitizer::clean($request->input('description')) ?? '',
             ],
