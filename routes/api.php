@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['throttle:admin-api', 'admin.api'])->prefix('admin')->name('api.admin.')->group(function () {
     // Categories
     Route::get('/categories', [ApiAdminCategoryController::class, 'index'])->name('categories.index');
+    Route::post('/categories', [ApiAdminCategoryController::class, 'store'])->name('categories.store');
+    Route::patch('/categories/{category}', [ApiAdminCategoryController::class, 'update'])->name('categories.update');
+    Route::delete('/categories/{category}', [ApiAdminCategoryController::class, 'destroy'])->name('categories.destroy');
 
     // Products
     Route::get('/products', [ApiAdminProductController::class, 'index'])->name('products.index');
