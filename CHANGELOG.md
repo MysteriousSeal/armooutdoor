@@ -2,6 +2,20 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-01 — v1.1.6 — build E9EEDP
+
+### Under the hood
+
+- **A shared link brings a card with it.** The shop published no `og:` tags at all, so a link posted to a forum, a group or a chat arrived as a bare URL — no title, no picture, nothing to say what waited on the other end. For a shop found through hunting and shooting communities rather than through advertising, that is how most people meet it first. The tags are assembled once in the head from the title, description and canonical every page already declares, and a view overrides only what is genuinely its own: a product its photograph, an article its hero, a category its shelf. The title suffix comes off, since `og:site_name` already carries the brand and a card would otherwise say "Armo Outdoor" twice; only `twitter:card` is written out, X falling back to the `og:` tags for the rest. The photographs are WebP — Facebook, X, Discord, Slack and Telegram render it, WhatsApp and LinkedIn are unreliable with it and would want a JPEG copy of the fallback picture.
+
+- **The category pages say what they hold.** They carried no structured data whatever — no trail, no list — while the category index and the nouveautés, promotions and meilleures ventes pages beside them had both. They are the pages that matter commercially and they were the ones left out. Each declares a breadcrumb trail and a collection now, the list holding the products of the page being read rather than of the whole category: naming products the visitor cannot see would describe a page that does not exist. Positions carry on across pages, so the twenty-first product of a category is the twenty-first.
+
+- **The business behind the catalogue is declared.** Products, categories, articles and the FAQ each said what they were; the company selling them never did, and nothing tied the shop to a business with an address, a contact and a registration number — what separates a shop from a page that happens to list prices. The home page carries one now, built from the same company settings the legal pages read, so the address in the mentions légales and the address published to search engines cannot drift apart. A field the company never filled in is left out rather than published: the settings hand back a bracketed placeholder so a human sees what is missing, and « [Numéro de TVA] » offered as a VAT number would state something untrue about the business.
+
+- **Every JSON-LD block is parsed before it ships.** A bare `@context` compiles as a Blade directive of its own and takes the key with it, leaving markup that reads correctly in the page source and that no search engine can make sense of — the kind of fault that ships unnoticed, since nothing on the page looks any different. The blocks on each kind of page are now decoded and checked for what they claim to be.
+
+**No migration.**
+
 ## 2026-09-01 — v1.1.5 — build 02TMCK
 
 ### Under the hood
