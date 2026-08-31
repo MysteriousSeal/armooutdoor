@@ -569,8 +569,8 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/product-gallery.js') }}" defer></script>
-    <script src="{{ asset('js/product-qty.js') }}" defer></script>
-    <script src="{{ asset('js/product-variant.js') }}" defer></script>
-    <script src="{{ asset('js/product-discount-countdown.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/product-gallery.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/product-qty.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/product-variant.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/product-discount-countdown.js') }}" defer></script>
 @endpush

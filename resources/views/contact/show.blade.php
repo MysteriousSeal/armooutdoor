@@ -12,7 +12,7 @@
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('js/contact-form.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/contact-form.js') }}" defer></script>
 @endpush
 
 @section('content')

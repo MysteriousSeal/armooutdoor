@@ -699,5 +699,5 @@
             });
         })();
     </script>
-    <script src="{{ asset('js/admin-bulk-select.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/admin-bulk-select.js') }}" defer></script>
 @endpush

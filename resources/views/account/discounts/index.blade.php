@@ -89,6 +89,6 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/account-discount-copy.js') }}" defer></script>
-    <script src="{{ asset('js/account-discount-countdown.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/account-discount-copy.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/account-discount-countdown.js') }}" defer></script>
 @endpush

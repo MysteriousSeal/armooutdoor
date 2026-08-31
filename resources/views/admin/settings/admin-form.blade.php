@@ -128,5 +128,5 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/admin-self-demote.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/admin-self-demote.js') }}" defer></script>
 @endpush

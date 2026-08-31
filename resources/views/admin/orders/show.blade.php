@@ -927,7 +927,7 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/admin-copy-code.js') }}" defer></script>
-    <script src="{{ asset('js/admin-order-status.js') }}" defer></script>
-    <script src="{{ asset('js/admin-draft-validate.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/admin-copy-code.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/admin-order-status.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/admin-draft-validate.js') }}" defer></script>
 @endpush

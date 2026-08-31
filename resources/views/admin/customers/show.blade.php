@@ -397,6 +397,6 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/admin-copy-code.js') }}" defer></script>
-    <script src="{{ asset('js/admin-customer-reset.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/admin-copy-code.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/admin-customer-reset.js') }}" defer></script>
 @endpush

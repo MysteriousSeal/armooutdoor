@@ -570,6 +570,6 @@
             selectedRelayPointId: @json($selectedRelayPointId),
         };
     </script>
-    <script src="{{ asset('js/checkout.js') }}" defer></script>
-    <script src="{{ asset('js/checkout-discount-code.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/checkout.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/checkout-discount-code.js') }}" defer></script>
 @endpush

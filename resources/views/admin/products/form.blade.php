@@ -769,16 +769,16 @@
 @endsection
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/vendor/quill.snow.css') }}">
+    <link rel="stylesheet" href="{{ versioned_asset('css/vendor/quill.snow.css') }}">
 @endpush
 
 
 @push('scripts')
-    <script src="{{ asset('js/vendor/quill.js') }}"></script>
-    <script src="{{ asset('js/admin-description-editor.js') }}" defer></script>
-    <script src="{{ asset('js/admin-gallery-upload.js') }}" defer></script>
-    <script src="{{ asset('js/admin-product-supplier-save.js') }}" defer></script>
-    <script src="{{ asset('js/admin-product-recommended-price.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/vendor/quill.js') }}"></script>
+    <script src="{{ versioned_asset('js/admin-description-editor.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/admin-gallery-upload.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/admin-product-supplier-save.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/admin-product-recommended-price.js') }}" defer></script>
     <script>
         (function () {
             var list = document.getElementById('characteristics-list');
