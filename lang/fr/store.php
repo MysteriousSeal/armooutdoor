@@ -6,6 +6,7 @@ return [
     'nav_home' => 'Accueil',
     'nav_categories' => 'Menu',
     'nav_see_more' => 'Voir plus',
+    'nav_more_subcategories' => '+ :count autre sous-catégorie|+ :count autres sous-catégories',
     'search_placeholder' => 'Rechercher dans la boutique…',
     'search_label' => 'Rechercher',
     'theme_toggle' => 'Activer le mode sombre',

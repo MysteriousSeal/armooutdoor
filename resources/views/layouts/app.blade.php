@@ -228,6 +228,9 @@
                                 <span class="site-cat-group-name">{{ $navCategory->localizedName() }}</span>
                             </span>
                         </a>
+                        @php
+                            $hiddenChildren = $visibleChildren->count() - 5;
+                        @endphp
                         @if ($visibleChildren->isNotEmpty())
                             <ul class="site-cat-group-links">
                                 @foreach ($visibleChildren->take(5) as $child)
@@ -243,11 +246,15 @@
                                 @endforeach
                             </ul>
                         @endif
+                        {{-- Tronquée, la liste s'annonce en chiffres plutôt qu'en
+                             « Voir plus » vague — même habit que le lien catégorie. --}}
                         <a
                             href="{{ localized_route('categories.show', ['category' => $navCategory->slug]) }}"
                             class="site-cat-group-more"
                         >
-                            {{ $visibleChildren->count() > 5 ? __('store.nav_see_more') : __('store.view_category') }}
+                            {{ $hiddenChildren > 0
+                                ? trans_choice('store.nav_more_subcategories', $hiddenChildren, ['count' => $hiddenChildren])
+                                : __('store.view_category') }}
                         </a>
                     </section>
                 @endforeach
