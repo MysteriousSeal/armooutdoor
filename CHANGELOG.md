@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-31 — v1.1.1 — build 4YMTCU
+
+### Storefront
+
+- **The category menu shows five subcategories, and owns up to the rest.** Four was one short now that Cibles counts five children. Past five, the link under the list stops saying a vague "Voir plus" and counts what's missing — « + 2 autres sous-catégories » — in the same dress as the "Voir la catégorie" link it replaces; nothing hidden, and it reads as before.
+
 ## 2026-08-31 — v1.1.0 — build LW4P6D
 
 ### Under the hood
