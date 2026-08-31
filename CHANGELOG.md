@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-01 — v1.1.5 — build 02TMCK
+
+### Under the hood
+
+- **The shop answers on one address.** `armooutdoor.fr` and `www.armooutdoor.fr` both served the whole catalogue, and every page under www named itself as its own canonical — Laravel builds absolute URLs from the request it was handed, not from `APP_URL`, so each duplicate calmly certified its own duplication. Search engines were shown two complete copies of the shop, some three hundred and thirty pages apiece, with neither copy pointing at the other and the standing of every page divided between them. A request arriving on www is now turned around before the session, the CSRF check or the database ever see it: reads get the 301 a search engine follows, anything else keeps its method through a 308. The redirect sits in the application rather than in nginx because the server configuration does not live in this repository — nginx would answer sooner and would make this a no-op, never a conflict.
+
+- **The homepage has a title.** It was "Armo Outdoor" — thirteen characters, not one of them a word anybody types into a search box, on the single page that carries the most weight. Every other page in the shop builds its title from its own name; the homepage had no name to build from, so it says one outright: « Cibles, matériel de stand et kit terrain — Armo Outdoor », inside the sixty characters a result truncates at, and leading with the aisles rather than the brand, since nobody searches for a shop they have not heard of yet.
+
+- **Page two of a category stops calling itself page one.** Every paginated listing named the first page as its canonical, which tells a search engine that everything past the first twenty products is a duplicate not worth indexing — most of a catalogue of 268 products spread across 53 categories. A page is its own canonical now, and gives its number in its title, since wearing page one's title would file the two as copies just the same. Sorting and filtering stay out of it: they reorder or narrow the same products rather than showing others, so those URLs still point back at the plain listing. A page number typed past the end keeps naming the page it actually served — the category controller already pulls it back inside the listing's bounds.
+
+**No migration.**
+
 ## 2026-08-31 — v1.1.4 — build D9R9OY
 
 ### Under the hood
