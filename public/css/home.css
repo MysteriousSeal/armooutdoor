@@ -990,6 +990,13 @@
     font-size: 0.8125rem;
     line-height: 1.45;
     color: var(--text-muted);
+    /* Deux lignes puis l'ellipse : une description ne doit pas déformer
+       sa carte face aux voisines. */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
 }
 
 .home .home-cat-arrow {
