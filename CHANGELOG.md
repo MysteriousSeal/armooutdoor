@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-31 — v1.1.2 — build OZAHMO
+
+### Storefront
+
+- **Two categories get their icon back.** *Accessoires de l'arme* is new and *Optiques* never had one, so both drew the generic box in the menu, on the homepage and on the category index — the icon map is keyed by the root category's slug and returns a plain default for anything it does not know, so nothing ever failed loudly enough to be noticed. *Accessoires de l'arme* takes the screwdriver-and-wrench freed by retiring *Quotidien*; *Optiques* takes a pair of binoculars, drawn from Font Awesome's own path data rather than by hand, so the licence note at the head of the icon registry still describes what is in it.
+
+**No migration.**
+
 ## 2026-08-31 — v1.1.1 — build 4YMTCU
 
 ### Storefront
