@@ -3,6 +3,8 @@
 @section('title', paginated_title($category->localizedName(), $products).' — '.config('app.name'))
 @section('meta_description', $category->localizedDescription())
 @section('canonical', paginated_canonical(localized_route('categories.show', ['category' => $category->slug]), $products))
+@section('og_image', $category->imageUrl() ?? '')
+@section('og_image_alt', $category->localizedName())
 
 @push('head')
     <link rel="stylesheet" href="{{ versioned_asset('css/categories.css') }}">

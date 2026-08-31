@@ -3,6 +3,9 @@
 @section('title', $post->metaTitle().' — '.config('app.name'))
 @section('meta_description', $post->metaDescription())
 @section('canonical', route('blog.show', $post->slug))
+@section('og_type', 'article')
+@section('og_image', $post->heroUrl())
+@section('og_image_alt', $post->localizedTitle())
 
 @push('head')
     <link rel="stylesheet" href="{{ versioned_asset('css/blog.css') }}">

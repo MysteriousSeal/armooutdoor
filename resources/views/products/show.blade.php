@@ -3,6 +3,9 @@
 @section('title', $product->localizedName().' — '.config('app.name'))
 @section('meta_description', \Illuminate\Support\Str::limit($product->localizedDescriptionText(), 160))
 @section('canonical', localized_route('products.show', ['product' => $product->slug]))
+@section('og_type', 'product')
+@section('og_image', $product->imageUrl())
+@section('og_image_alt', $product->localizedName())
 
 @push('head')
     @if ($product->blogPosts->isNotEmpty())
