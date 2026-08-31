@@ -98,6 +98,34 @@ class HomeCarouselTest extends TestCase
         $this->assertSame(4, substr_count($html, '--hero-image'));
     }
 
+    public function test_every_panel_has_its_own_image(): void
+    {
+        $html = $this->get('/')->assertOk()->getContent();
+
+        preg_match_all('/--hero-image:\s*url\(\W*([^\)\x27"]+)/', $html, $images);
+
+        // Four panels sharing one photo made the carousel look stuck: the
+        // copy changed, the picture behind it did not.
+        $this->assertCount(4, $images[1]);
+        $this->assertCount(4, array_unique($images[1]));
+    }
+
+    public function test_every_panel_names_where_its_subject_sits(): void
+    {
+        $html = $this->get('/')->assertOk()->getContent();
+
+        preg_match_all('/--hero-focus:\s*([0-9]+)%/', $html, $focus);
+
+        // Stacked, the panel is portrait and `cover` cuts most of the width
+        // away. Without a focal column the crop keeps the empty half.
+        $this->assertCount(4, $focus[1]);
+
+        foreach ($focus[1] as $index => $percent) {
+            $this->assertGreaterThan(0, (int) $percent, 'panneau '.($index + 1));
+            $this->assertLessThan(100, (int) $percent, 'panneau '.($index + 1));
+        }
+    }
+
     public function test_the_controls_start_hidden(): void
     {
         $html = $this->get('/')->assertOk()->getContent();
