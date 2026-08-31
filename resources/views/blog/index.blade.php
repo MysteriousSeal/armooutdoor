@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
-@section('title', ($activeCategory ? $activeCategory->localizedName().' — ' : '').__('store.blog_title').' — '.config('app.name'))
+@section('title', paginated_title(($activeCategory ? $activeCategory->localizedName().' — ' : '').__('store.blog_title'), $posts).' — '.config('app.name'))
 @section('meta_description', $activeCategory?->localizedDescription() ?: __('store.blog_intro'))
-@section('canonical', $activeCategory ? route('blog.category', $activeCategory->slug) : route('blog.index'))
+@section('canonical', paginated_canonical($activeCategory ? route('blog.category', $activeCategory->slug) : route('blog.index'), $posts))
 
 @push('head')
     <link rel="stylesheet" href="{{ versioned_asset('css/categories.css') }}">

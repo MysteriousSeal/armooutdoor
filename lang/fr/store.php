@@ -114,6 +114,7 @@ return [
     'home_cat_go' => 'Voir',
     'all_products' => 'Tous les produits',
     'shop_subcategories' => 'Sous-catégories',
+    'pagination_page' => 'Page :page',
     'pagination_label' => 'Pagination',
     'pagination_previous' => 'Précédent',
     'pagination_next' => 'Suivant',

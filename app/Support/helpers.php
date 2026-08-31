@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
@@ -103,5 +104,51 @@ if (! function_exists('admin_relative_date')) {
         }
 
         return Carbon::parse($date)->locale('en')->diffForHumans();
+    }
+}
+
+if (! function_exists('paginated_canonical')) {
+    /**
+     * The canonical URL of a listing page, page number included.
+     *
+     * Every page of a category used to name page one as its canonical, which
+     * told search engines that page two and beyond were not worth indexing.
+     * On a catalogue of 268 products spread over 53 categories that hides most
+     * of the shop: a paginated page is now the canonical version of itself.
+     *
+     * Sorting and filtering stay out of it. They reorder or narrow the same
+     * products rather than showing different ones, so their URLs still point
+     * back at the plain listing.
+     */
+    function paginated_canonical(string $url, LengthAwarePaginator $paginator): string
+    {
+        $page = $paginator->currentPage();
+
+        // A page number typed past the end holds nothing worth indexing, so it
+        // points back at the listing rather than at itself.
+        if ($page <= 1 || $page > $paginator->lastPage()) {
+            return $url;
+        }
+
+        return $url.(str_contains($url, '?') ? '&' : '?').'page='.$page;
+    }
+}
+
+if (! function_exists('paginated_title')) {
+    /**
+     * A listing title that names the page it is on.
+     *
+     * Now that page two stands on its own in the index, wearing page one's
+     * title would file the two as copies of each other.
+     */
+    function paginated_title(string $title, LengthAwarePaginator $paginator): string
+    {
+        $page = $paginator->currentPage();
+
+        if ($page <= 1 || $page > $paginator->lastPage()) {
+            return $title;
+        }
+
+        return $title.' — '.__('store.pagination_page', ['page' => $page]);
     }
 }

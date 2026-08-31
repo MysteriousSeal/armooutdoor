@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
-@section('title', $category->localizedName().' — '.config('app.name'))
+@section('title', paginated_title($category->localizedName(), $products).' — '.config('app.name'))
 @section('meta_description', $category->localizedDescription())
-@section('canonical', localized_route('categories.show', ['category' => $category->slug]))
+@section('canonical', paginated_canonical(localized_route('categories.show', ['category' => $category->slug]), $products))
 
 @push('head')
     <link rel="stylesheet" href="{{ versioned_asset('css/categories.css') }}">
