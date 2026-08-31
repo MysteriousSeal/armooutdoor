@@ -7,6 +7,7 @@ use App\Models\BlogPost;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Response;
+use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 
 class SitemapController extends Controller
@@ -114,7 +115,9 @@ class SitemapController extends Controller
             ->filter(fn (BlogCategory $category): bool => $category->posts_count > 0)
             ->map(fn (BlogCategory $category): array => [
                 'loc' => route('blog.category', $category->slug),
-                'lastmod' => $category->posts()->visible()->max('updated_at'),
+                // max() rend la chaîne brute de la base, pas un Carbon : sans
+                // reformatage W3C, Search Console rejette la date.
+                'lastmod' => self::atom($category->posts()->visible()->max('updated_at')),
                 'changefreq' => 'weekly',
                 'priority' => '0.6',
             ]);
@@ -128,12 +131,18 @@ class SitemapController extends Controller
 
         $urls = collect([[
             'loc' => route('blog.index'),
-            'lastmod' => BlogPost::query()->visible()->max('updated_at'),
+            'lastmod' => self::atom(BlogPost::query()->visible()->max('updated_at')),
             'changefreq' => 'weekly',
             'priority' => '0.7',
         ]])->concat($categories)->concat($posts)->all();
 
         return $this->xml('sitemap.urlset', compact('urls'));
+    }
+
+    /** La chaîne datetime de la base, au format W3C qu'exige le protocole. */
+    private static function atom(?string $datetime): ?string
+    {
+        return $datetime === null ? null : Carbon::parse($datetime)->toAtomString();
     }
 
     public function products(): Response
