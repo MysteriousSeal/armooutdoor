@@ -2,6 +2,12 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-08-31 — v1.1.4 — build D9R9OY
+
+### Under the hood
+
+- **The blog sitemap's dates pass Search Console again.** The blog index and category entries built their `lastmod` with `max('updated_at')`, which hands back the database's raw string — no Carbon, no W3C formatting — and Google rejected all five as invalid dates. They now go through the same Atom formatting as every other sitemap entry, pinned by a test that holds each `<lastmod>` to the strict format.
+
 ## 2026-08-31 — v1.1.3 — build EKQ82A
 
 ### Storefront
