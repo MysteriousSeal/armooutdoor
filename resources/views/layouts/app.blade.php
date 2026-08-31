@@ -230,7 +230,7 @@
                         </a>
                         @if ($visibleChildren->isNotEmpty())
                             <ul class="site-cat-group-links">
-                                @foreach ($visibleChildren->take(4) as $child)
+                                @foreach ($visibleChildren->take(5) as $child)
                                     <li>
                                         <a
                                             href="{{ localized_route('categories.show', ['category' => $child->slug]) }}"
@@ -247,7 +247,7 @@
                             href="{{ localized_route('categories.show', ['category' => $navCategory->slug]) }}"
                             class="site-cat-group-more"
                         >
-                            {{ $visibleChildren->count() > 4 ? __('store.nav_see_more') : __('store.view_category') }}
+                            {{ $visibleChildren->count() > 5 ? __('store.nav_see_more') : __('store.view_category') }}
                         </a>
                     </section>
                 @endforeach
