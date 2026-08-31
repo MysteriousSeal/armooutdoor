@@ -45,6 +45,37 @@ class HomeImagesTest extends TestCase
         }
     }
 
+    public function test_the_first_panel_photo_is_preloaded_at_high_priority(): void
+    {
+        $html = $this->get('/')->assertOk()->getContent();
+
+        preg_match('#<link[^>]*rel="preload"[^>]*as="image"[^>]*>#s', $html, $preload);
+
+        $this->assertNotEmpty($preload, 'la photo du premier panneau n\'est pas préchargée');
+        $this->assertStringContainsString('fetchpriority="high"', $preload[0]);
+    }
+
+    public function test_the_preload_matches_the_url_the_panel_paints(): void
+    {
+        $html = $this->get('/')->assertOk()->getContent();
+
+        preg_match('#<link[^>]*rel="preload"[^>]*as="image"[^>]*href="([^"]+)"#s', $html, $preload);
+        preg_match('#--hero-image:\s*url\(\W*([^\)\x27"]+)#', $html, $panel);
+
+        // A preload whose URL differs by so much as a query string fetches the
+        // photograph a second time: slower than not preloading at all.
+        $this->assertSame($panel[1], $preload[1]);
+    }
+
+    public function test_only_the_visible_panel_is_preloaded(): void
+    {
+        $html = $this->get('/')->assertOk()->getContent();
+
+        // The other three are off screen; preloading them would spend the
+        // visitor's bandwidth on pictures they may never reach.
+        $this->assertSame(1, preg_match_all('#rel="preload"[^>]*as="image"#', $html));
+    }
+
     public function test_the_four_panels_and_the_about_photo_are_all_there(): void
     {
         $paths = $this->imagePaths();

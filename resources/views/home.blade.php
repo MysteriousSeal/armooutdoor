@@ -366,6 +366,24 @@
 @endsection
 
 @push('head')
+    {{-- The first panel is the largest thing painted, and its photograph
+         arrives as a CSS background: the preload scanner cannot see it until
+         home.css has been fetched and parsed, so the browser learns about it
+         late and at no particular priority. Naming it here makes it
+         discoverable in the initial document instead.
+
+         Only the first panel: the other three are off screen, and preloading
+         them would spend the visitor's bandwidth on pictures they may never
+         reach. The URL is read from the slide rather than written out, since
+         a preload that does not match the URL the panel paints downloads the
+         photograph a second time. --}}
+    <link
+        rel="preload"
+        as="image"
+        href="{{ $slides[0]['image'] }}"
+        type="image/webp"
+        fetchpriority="high"
+    >
     <link rel="stylesheet" href="{{ versioned_asset('css/home.css') }}">
     <script src="{{ versioned_asset('js/home-carousel.js') }}" defer></script>
     <script type="application/ld+json">
