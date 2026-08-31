@@ -393,10 +393,22 @@
         {!! json_encode([
             '@@context' => 'https://schema.org',
             '@type' => 'WebSite',
+            '@id' => \App\Support\OrganizationSchema::websiteId(),
             'name' => config('app.name'),
             'url' => localized_route('home'),
             'inLanguage' => 'fr-FR',
             'description' => __('store.meta_home'),
+            // Named rather than restated: the site and the business that runs
+            // it are two things, and this is what joins them.
+            'publisher' => ['@id' => \App\Support\OrganizationSchema::id()],
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+    </script>
+    <script type="application/ld+json">
+        {{-- Google reads the business off the home page, so it is declared
+             here rather than on every page of the shop. --}}
+        {!! json_encode(
+            \App\Support\OrganizationSchema::for(\App\Models\CompanySetting::current()),
+            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+        ) !!}
     </script>
 @endpush
