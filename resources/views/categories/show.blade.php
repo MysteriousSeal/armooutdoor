@@ -6,6 +6,54 @@
 
 @push('head')
     <link rel="stylesheet" href="{{ versioned_asset('css/categories.css') }}">
+    <script type="application/ld+json">
+        {!! json_encode([
+            '@@context' => 'https://schema.org',
+            '@@type' => 'BreadcrumbList',
+            'itemListElement' => collect([
+                ['name' => __('store.breadcrumb_home'), 'item' => localized_route('home')],
+                $category->parent ? [
+                    'name' => $category->parent->localizedName(),
+                    'item' => localized_route('categories.show', ['category' => $category->parent->slug]),
+                ] : null,
+                [
+                    'name' => $category->localizedName(),
+                    'item' => localized_route('categories.show', ['category' => $category->slug]),
+                ],
+            ])->filter()->values()->map(fn (array $crumb, int $index): array => [
+                '@@type' => 'ListItem',
+                'position' => $index + 1,
+                'name' => $crumb['name'],
+                'item' => $crumb['item'],
+            ])->all(),
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+    </script>
+    <script type="application/ld+json">
+        {{-- The products of the page being read, not of the whole category:
+             a list that named products the visitor cannot see here would
+             describe a page that does not exist. Positions carry on across
+             pages so the twenty-first product is twenty-first. --}}
+        {!! json_encode([
+            '@@context' => 'https://schema.org',
+            '@@type' => 'CollectionPage',
+            'name' => $category->localizedName(),
+            'description' => $category->localizedDescription(),
+            'url' => paginated_canonical(localized_route('categories.show', ['category' => $category->slug]), $products),
+            'inLanguage' => 'fr-FR',
+            'isPartOf' => ['@@id' => \App\Support\OrganizationSchema::websiteId()],
+            'mainEntity' => [
+                '@@type' => 'ItemList',
+                'name' => $category->localizedName(),
+                'numberOfItems' => $products->total(),
+                'itemListElement' => $products->values()->map(fn ($product, $index): array => [
+                    '@@type' => 'ListItem',
+                    'position' => $products->firstItem() + $index,
+                    'name' => $product->localizedName(),
+                    'url' => localized_route('products.show', ['product' => $product->slug]),
+                ])->all(),
+            ],
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+    </script>
 @endpush
 
 @section('content')

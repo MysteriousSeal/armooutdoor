@@ -71,4 +71,22 @@ class OrganizationSchemaTest extends TestCase
             ->assertSee('"@type":"OnlineStore"', false)
             ->assertSee('"publisher":{"@id":"'.OrganizationSchema::id().'"}', false);
     }
+
+    public function test_a_category_lists_the_products_of_the_page_being_read(): void
+    {
+        $category = Category::factory()->create();
+        Product::factory()->count(25)->create([
+            'category_id' => $category->id,
+            'is_active' => true,
+        ]);
+
+        $page = $this->get('/categories/'.$category->slug.'?page=2')->assertOk();
+
+        $page->assertSee('"@type":"CollectionPage"', false);
+        $page->assertSee('"@type":"BreadcrumbList"', false);
+        // Twenty-five products, twenty to a page: five on page two, and the
+        // first of them is the twenty-first of the category.
+        $page->assertSee('"numberOfItems":25', false);
+        $page->assertSee('"position":21', false);
+    }
 }
