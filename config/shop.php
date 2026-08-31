@@ -12,5 +12,5 @@ return [
     // Prévenu à chaque commande devenue réelle — boutique comme manuelle.
     // Vide : personne n'est prévenu.
     'order_notification_email' => env('ORDER_NOTIFICATION_EMAIL'),
-    'version' => '1.1.6',
+    'version' => '1.1.7',
 ];

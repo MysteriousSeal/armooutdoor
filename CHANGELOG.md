@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-01 — v1.1.7 — build K078GQ
+
+### Under the hood
+
+- **Every page is headed by what the page is about.** The wordmark in the site header was an `h1`, and it is the same on every page, so all 268 product pages shared one heading that read "ArmoOutdoor" while the product's own name sat in an `h2` underneath — the clearest signal a page has of its subject, spent on the brand instead. The home page was the same; category and article pages carried two `h1` elements, their own title and the wordmark, which is the same fault in different clothes. The wordmark is a paragraph now, the product name and the leading carousel panel are the `h1`, and every page has exactly one. Only the leading panel: four would be no better than none, and the panels behind it are `aria-hidden` already. Nothing moves on screen — the styles involved are class-based over a universal margin reset, so no rule was reading the tag.
+
+- **A product's title and description are written for a search result.** A result shows about sixty characters of title and a hundred and sixty of description. Names here run to a hundred and twenty because they describe the article in full — format, count, size, colour, zones — which is the right name on the page and the wrong length for a result; the description was cut at exactly 160 characters, which landed mid-word about as often as not, one page offering « visible d'un coup d'œil depuis le pas... » and breaking off before the phrase said anything. The description is now cut at the last whole sentence that fits, falling back to a word boundary and a real ellipsis when no sentence ends in time — four of the first six products need no ellipsis at all under that rule. For the rest there are `meta_title` and `meta_description`, empty everywhere to begin with, since an empty field means "derive it" and a product whose description is edited keeps a description that matches. They are named for what the blog already calls them, sit under an SEO heading in the form as they do there, and go through the admin API, so a shorter title can be written for two hundred products by script rather than by hand.
+
+**Migration:** one, run with `php artisan migrate` — two nullable columns, `meta_title` and `meta_description`, on `products`. Both start empty on every existing product, which is the same behaviour as before: the name and the description are used.
+
 ## 2026-09-01 — v1.1.6 — build E9EEDP
 
 ### Under the hood
