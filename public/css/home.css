@@ -1251,11 +1251,14 @@
        out of the 100% before it is divided. */
     grid-auto-columns: calc((100% - 4 * 0.85rem) / 5);
     gap: 0.85rem;
-    /* Room above and below for the lift and shadow a card takes on hover,
-       which overflow-y: hidden would otherwise cut off; the margin gives back
-       what the padding takes so nothing moves. */
-    margin: 0.55rem 0 -0.4rem;
-    padding: 0.5rem 0 0.75rem;
+    /* Room for what hangs outside a card: the lift it takes on hover, and the
+       add-to-cart button, which sits below the bottom edge on purpose and
+       throws a shadow further still. overflow-y clips at the padding box, so
+       too little here cuts that shadow flat and the button reads as though it
+       had a different one. The margin gives back what the padding takes, so
+       nothing around the row moves. */
+    margin: 0.55rem 0 -1.65rem;
+    padding: 0.5rem 0 2rem;
     list-style: none;
     overflow-x: auto;
     /* Explicit, and not a tidy-up: overflow-x on its own computes to auto on
