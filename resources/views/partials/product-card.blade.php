@@ -21,8 +21,8 @@
             <img
                 src="{{ $product->thumbnailUrl() }}"
                 alt="{{ $product->localizedName() }}"
-                width="900"
-                height="1200"
+                width="{{ \App\Support\ImageThumbnailer::SIZE }}"
+                height="{{ \App\Support\ImageThumbnailer::SIZE }}"
                 loading="{{ $lazy ?? true ? 'lazy' : 'eager' }}"
             >
             @if ($product->hasDiscount())

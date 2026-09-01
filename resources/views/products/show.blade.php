@@ -77,8 +77,8 @@
                         id="product-detail-main-image"
                         src="{{ $product->imageUrl() }}"
                         alt="{{ $product->localizedName() }}"
-                        width="900"
-                        height="900"
+                        width="{{ \App\Support\ImageThumbnailer::MAIN_SIZE }}"
+                        height="{{ \App\Support\ImageThumbnailer::MAIN_SIZE }}"
                         fetchpriority="high"
                     >
                 </div>
