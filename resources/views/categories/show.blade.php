@@ -180,7 +180,12 @@
                                 <input type="hidden" name="sort" value="{{ $sort }}">
                             @endif
                             <div class="category-sidebar-head">
-                                <h2 class="category-sidebar-title" id="category-filters-title">{{ __('store.filters_title') }}</h2>
+                                <div class="category-sidebar-heading">
+                                    <h2 class="category-sidebar-title" id="category-filters-title">{{ __('store.filters_title') }}</h2>
+                                    @if (! empty($selectedFilters))
+                                        <span class="category-filters-applied">{{ count($selectedFilters) }}</span>
+                                    @endif
+                                </div>
                                 @if (! empty($selectedFilters))
                                     <a href="{{ localized_route('categories.show', ['category' => $category->slug, 'sort' => $sort]) }}" class="category-filters-reset">
                                         {{ __('store.filter_reset') }}

@@ -883,7 +883,7 @@ body.has-menu-open {
 .category-sidebar {
     position: sticky;
     top: 5.25rem;
-    padding: 1.25rem 1.2rem 1.35rem;
+    padding: 1.15rem 1.1rem 1.2rem;
     background: var(--surface);
     border: 1px solid var(--border);
     box-shadow: var(--shadow);
@@ -892,23 +892,46 @@ body.has-menu-open {
 .category-sidebar-head {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    margin-bottom: 0.2rem;
-    padding-bottom: 0.95rem;
+    align-items: flex-start;
+    gap: 0.95rem;
+    margin-bottom: 0.15rem;
+    padding-bottom: 0.9rem;
     border-bottom: 1px solid var(--border);
+}
+
+.category-sidebar-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    width: 100%;
 }
 
 /* The section titles' olive, and the little rule they carry: the
    panel speaks the same language as the aisles it filters. */
 .category-sidebar-title {
     margin: 0;
-    padding-bottom: 0.4rem;
+    padding-bottom: 0.35rem;
     font-size: 0.72rem;
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--accent-heading);
     background: linear-gradient(var(--accent-heading), var(--accent-heading)) left bottom / 2rem 2px no-repeat;
+}
+
+.category-filters-applied {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.2rem;
+    height: 1.2rem;
+    padding: 0 0.3rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--surface);
+    background: var(--accent-heading);
 }
 
 /* The fieldset itself carries no box at all: a border or padding on it
@@ -931,7 +954,10 @@ body.has-menu-open {
 }
 
 .category-filter-options {
-    padding: 0.1rem 0 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0 0 0.85rem;
 }
 
 .category-filter-group-toggle {
@@ -941,13 +967,13 @@ body.has-menu-open {
     width: 100%;
     /* The header owns the group's vertical rhythm — identical whether its
        group is first, bordered, open or collapsed. */
-    padding: 0.8rem 0;
+    padding: 0.75rem 0;
     border: 0;
     background: none;
     font: inherit;
-    font-size: 0.72rem;
-    font-weight: 800;
-    letter-spacing: 0.06em;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     text-align: left;
     color: var(--text);
@@ -963,12 +989,13 @@ body.has-menu-open {
 /* The active value, recalled in the header while the group is collapsed. */
 .category-filter-group-active {
     overflow: hidden;
+    max-width: 7.5rem;
     text-overflow: ellipsis;
     white-space: nowrap;
     font-weight: 600;
     letter-spacing: 0;
     text-transform: none;
-    color: var(--accent-hover);
+    color: var(--accent-heading);
 }
 
 .category-filter-group-chevron {
@@ -994,66 +1021,66 @@ body.has-menu-open {
 .category-filter-option {
     display: flex;
     align-items: center;
-    gap: 0.55rem;
-    min-height: 2.05rem;
-    margin: 0 -0.55rem;
-    padding: 0.15rem 0.55rem;
-    border-radius: 6px;
+    gap: 0.6rem;
+    min-height: 2.1rem;
+    padding: 0.2rem 0.55rem;
     font-size: 0.875rem;
     line-height: 1.3;
     color: var(--text);
     cursor: pointer;
-    transition: background-color 0.12s ease;
+    transition: background-color 0.12s ease, color 0.12s ease;
 }
 
 .category-filter-option:hover {
-    background: color-mix(in srgb, var(--accent) 10%, var(--bg));
+    background: color-mix(in srgb, var(--accent-heading) 8%, var(--bg));
 }
 
 .category-filter-option input {
-    width: 1rem;
-    height: 1rem;
+    appearance: none;
+    width: 0.85rem;
+    height: 0.85rem;
     margin: 0;
     flex-shrink: 0;
-    accent-color: var(--accent);
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    accent-color: var(--accent-heading);
+}
+
+.category-filter-option input:checked {
+    border-color: var(--accent-heading);
+    box-shadow: inset 0 0 0 0.16rem var(--bg);
+    background: var(--accent-heading);
 }
 
 .category-filter-option:has(input:checked) {
     font-weight: 600;
-    background: color-mix(in srgb, var(--accent) 8%, var(--bg));
+    background: color-mix(in srgb, var(--accent-heading) 9%, var(--surface));
 }
 
 .category-filter-count {
     margin-left: auto;
-    padding: 0.05rem 0.45rem;
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     font-variant-numeric: tabular-nums;
     color: var(--text-muted);
-    background: var(--bg);
 }
 
 .category-sidebar .category-filters-reset {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 2.25rem;
+    min-height: 2.15rem;
     padding: 0 0.85rem;
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-align: center;
-    text-transform: uppercase;
-    color: var(--text);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--accent-heading);
     background: var(--bg);
-    border: 1px solid var(--border);
+    border: 1px solid var(--accent-heading);
 }
 
 .category-sidebar .category-filters-reset:hover {
-    color: var(--accent-hover);
-    border-color: var(--accent);
-    background: var(--surface);
+    color: var(--surface);
+    background: var(--accent-heading);
 }
 
 /* --- Collapsed groups (desktop) and whole-block collapse (mobile) ----- */
@@ -1064,7 +1091,7 @@ body.has-menu-open {
     align-items: center;
     gap: 0.55rem;
     width: 100%;
-    padding: 0.35rem 0;
+    padding: 0.2rem 0;
     border: 0;
     background: none;
     font: inherit;
@@ -1072,7 +1099,7 @@ body.has-menu-open {
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--text);
+    color: var(--accent-heading);
     cursor: pointer;
 }
 
@@ -1080,14 +1107,13 @@ body.has-menu-open {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 1.25rem;
-    height: 1.25rem;
+    min-width: 1.2rem;
+    height: 1.2rem;
     padding: 0 0.3rem;
-    border-radius: 999px;
-    font-size: 0.7rem;
+    font-size: 0.6875rem;
     font-weight: 700;
     color: var(--surface);
-    background: var(--accent);
+    background: var(--accent-heading);
 }
 
 .category-filters-toggle-chevron {
@@ -1141,10 +1167,19 @@ body.has-menu-open {
         margin-top: 1.1rem;
     }
 
-    /* The toggle already says « Filtres »: the form's own title is not
-       going to repeat it right underneath. */
-    [data-js] .category-sidebar .category-sidebar-title {
+    /* The toggle already says « Filtres » and carries the count: the
+       form's own heading would say both a second time. Keep the head
+       only when there is a reset to show. */
+    [data-js] .category-sidebar .category-sidebar-heading {
         display: none;
+    }
+
+    [data-js] .category-sidebar .category-sidebar-head:not(:has(.category-filters-reset)) {
+        display: none;
+    }
+
+    [data-js] .category-sidebar .category-filters-reset {
+        width: 100%;
     }
 }
 
