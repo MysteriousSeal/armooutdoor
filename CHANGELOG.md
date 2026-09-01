@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-01 — v1.1.9 — build II22AN
+
+### Under the hood
+
+- **Search results stay out of the index.** A results page is assembled per visitor and worth nothing to anybody arriving cold on it: « cible » and « cibles » are two addresses holding the same products, and a search engine can invent as many more as it cares to type, none of which is a page of the shop. It asks not to be indexed now, and the layout gained the section it needed to say so. Follow stays on, so the products it links to are still reached through it. It is deliberately not disallowed in `robots.txt`: a page that is never fetched is a page whose noindex is never read, and the two directives would cancel each other out — leaving the address in the index with nothing behind it. A test holds that door open, since the fix looks like an omission.
+
+- **The sitemaps list the pages and the photographs they were leaving out.** « Nous contacter » is an ordinary page of the shop, and the HTML plan du site is a crawl hub — one page linking every category, product and article the XML enumerates — which made its own absence from that XML the odd one. The product entries now carry their photographs as well: a catalogue of gear is shopped by looking as much as by reading, and Google Images had no way of learning that a thousand pictures of it existed. The full photograph goes in rather than the four-hundred-pixel thumbnail, a crop of a picture not being the same picture. Every sitemap is now checked for well-formedness, the urlset having gained a second namespace to get any of it said.
+
+- **A product photograph declares the size it actually is.** The card said its picture was 900 by 1200; it is 400 by 400 — a three-by-four box reserved for a square image — and the detail view claimed 900 square for a photograph normalised to a thousand. Both numbers were written out by hand and had drifted from the thumbnailer that makes the files. Nothing was shifting on screen for it, since the stylesheet sets an explicit `aspect-ratio` on the card image and wins the argument; but the browser was being told one thing and handed another, and the next stylesheet to leave the ratio to the markup would have found out the hard way. Both read the thumbnailer's own constants now.
+
+**No migration.**
+
 ## 2026-09-01 — v1.1.8 — build YTVKJ3
 
 ### Under the hood
