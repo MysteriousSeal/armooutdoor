@@ -10,6 +10,9 @@
 @push('head')
     <link rel="stylesheet" href="{{ versioned_asset('css/blog.css') }}">
     <script type="application/ld+json">
+        {!! json_encode(\App\Support\ArticleSchema::for($post), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+    </script>
+    <script type="application/ld+json">
         {!! json_encode([
             '@@context' => 'https://schema.org',
             '@@type' => 'BreadcrumbList',

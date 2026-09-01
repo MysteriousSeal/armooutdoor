@@ -36,6 +36,26 @@ class OrganizationSchema
         return localized_route('home').'#website';
     }
 
+    /**
+     * The shop as another page refers to it.
+     *
+     * The full node lives on the home page, where Google looks for it. A page
+     * naming the shop as its publisher carries this instead: enough to stand
+     * on its own if read alone, and the same `@id`, so the two are understood
+     * as one business rather than two.
+     *
+     * @return array<string, string>
+     */
+    public static function reference(): array
+    {
+        return [
+            '@type' => 'Organization',
+            '@id' => self::id(),
+            'name' => config('app.name'),
+            'logo' => asset('favicon.svg'),
+        ];
+    }
+
     /** @return array<string, mixed> */
     public static function for(CompanySetting $company): array
     {

@@ -78,10 +78,13 @@ class StructuredDataParsesTest extends TestCase
         );
     }
 
-    public function test_an_article_declares_its_trail(): void
+    public function test_an_article_declares_itself_and_its_trail(): void
     {
         $post = BlogPost::factory()->create();
 
-        $this->assertContains('BreadcrumbList', $this->typesOn('/blog/'.$post->slug));
+        $this->assertEqualsCanonicalizing(
+            ['BlogPosting', 'BreadcrumbList'],
+            $this->typesOn('/blog/'.$post->slug),
+        );
     }
 }
