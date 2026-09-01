@@ -2,6 +2,20 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-01 — v1.1.11 — build 6YY1WU
+
+### Storefront
+
+- **The cookie banner asks a different question.** It used to offer measurement « par le site lui-même et sans aucun tiers ». PostHog is a third party, so the sentence would have become untrue the moment it loaded: it now names PostHog, says its servers are in the European Union, and says plainly that refusing means it is not loaded. The privacy policy gained a processor entry of its own, names PostHog among the recipients, and describes what is sent — pages viewed and four shop events, never anything a customer types.
+
+### Under the hood
+
+- **The shop measures its audience with PostHog, once asked.** It has counted its own visits for a while, but nothing told it what a visitor did — where a basket was abandoned, which page came before a sale. PostHog answers that from its European servers, so nothing leaves the Union and no transfer has to be justified to anyone. It loads only after the visitor says yes: not on refusal, and not while the banner is still unanswered, since a script already running cannot be un-run by a later click on « Refuser » — the gate sits before the fetch rather than inside it. Accepting loads it there and then, so somebody who agrees is counted from that click rather than from whatever page they open next. Autocapture is off, session recording is off and text is masked, because a shop handles addresses and card details and a tool that records every click by default has no business near either. Four events are sent, each a name and a few figures: a page view, a basket addition, a checkout reached, a sale. The site's own measurement carries on regardless of the answer, which is why the two will never report the same number.
+
+- **No key, no change.** Where `POSTHOG_KEY` is empty, no script is emitted and the Content-Security-Policy stays exactly as closed as it was. Where it is set, the policy opens for that one host on `script-src` and `connect-src` and for nothing else — no wildcard, and a test holds it to that.
+
+**No migration.** The key is set in the environment, not in the repository: production needs `POSTHOG_KEY` added to its own `.env`, and the config cache rebuilt for it to take effect.
+
 ## 2026-09-01 — v1.1.10 — build LF0786
 
 ### Admin
