@@ -1168,3 +1168,88 @@
         padding: 1rem 1.15rem;
     }
 }
+
+/*
+ * Les offres du moment.
+ *
+ * A strip, not a third catalogue. It sits between the promises under the hero
+ * and the aisles below, so it has to give a reason to stop without pushing
+ * « Achetez par catégorie » off the screen: one row of cards, scrolling
+ * sideways, costing a single card's height however many offers there are.
+ */
+.home-deals {
+    margin: 2.5rem 0 0;
+}
+
+.home-deals-row {
+    display: grid;
+    grid-auto-flow: column;
+    /* Five across the width, whatever the width is: the row shows one screenful
+       of offers and the rest scroll. Four gaps between five cards, so they come
+       out of the 100% before it is divided. */
+    grid-auto-columns: calc((100% - 4 * 0.85rem) / 5);
+    gap: 0.85rem;
+    /* Room above and below for the lift and shadow a card takes on hover,
+       which overflow-y: hidden would otherwise cut off; the margin gives back
+       what the padding takes so nothing moves. */
+    margin: 0.55rem 0 -0.4rem;
+    padding: 0.5rem 0 0.75rem;
+    list-style: none;
+    overflow-x: auto;
+    /* Explicit, and not a tidy-up: overflow-x on its own computes to auto on
+       both axes, so the row gained a vertical scroll of a few pixels that
+       nothing asked for and the cards drifted under the cursor. */
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    /* Each card comes to rest at the edge rather than half cut off. Proximity
+       rather than mandatory: the row advances itself, and a mandatory snap
+       fights a smooth scroll already in flight. */
+    scroll-snap-type: x proximity;
+    scroll-padding-left: 0;
+}
+
+.home-deals-row:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+}
+
+.home-deals-item {
+    scroll-snap-align: start;
+    min-width: 0;
+}
+
+/*
+ * No scrollbar. With five offers there is nothing to scroll and the bar drew a
+ * line under the row for no reason; past five, the partial card at the right
+ * edge says there is more, which a three-pixel track never said better.
+ */
+.home-deals-row {
+    scrollbar-width: none;
+}
+
+.home-deals-row::-webkit-scrollbar {
+    display: none;
+}
+
+/* Five is a row on a desktop and a smear on anything smaller, so the count
+   comes down with the width and the next card is left peeking, which is what
+   says the row scrolls. */
+@media (max-width: 64rem) {
+    .home-deals-row {
+        grid-auto-columns: calc((100% - 2 * 0.85rem) / 2.5);
+    }
+}
+
+@media (max-width: 40rem) {
+    .home-deals-row {
+        grid-auto-columns: calc((100% - 0.85rem) / 1.8);
+    }
+}
+
+/* The row moves itself, so a reader who would rather it did not can stop it
+   the way they stop everything else. */
+@media (prefers-reduced-motion: reduce) {
+    .home-deals-row {
+        scroll-behavior: auto;
+    }
+}

@@ -201,6 +201,40 @@
             </li>
         </ul>
 
+        @if ($onSale->isNotEmpty())
+            {{-- Between the promises and the aisles: a reason to stop, before
+                 being asked where to go. A row rather than a grid, so the
+                 categories stay within reach — and nothing at all when nothing
+                 is reduced, an offers heading over an empty row being worse
+                 than no heading. --}}
+            <section class="home-deals" id="deals" aria-labelledby="home-deals-title">
+                <header class="home-cats-header">
+                    <h2 class="home-cats-title" id="home-deals-title">{{ __('store.home_deals') }}</h2>
+                    <a href="{{ route('products.promotions') }}" class="home-cats-link">
+                        {{ __('store.home_deals_link') }} <span aria-hidden="true">→</span>
+                    </a>
+                </header>
+                {{-- aria-live off: the row moves on its own, and announcing each
+                     turn would talk over whatever else is being read. --}}
+                <ul
+                    class="home-deals-row"
+                    tabindex="0"
+                    aria-label="{{ __('store.home_deals') }}"
+                    aria-live="off"
+                    data-deals-row
+                >
+                    @foreach ($onSale as $product)
+                        <li class="home-deals-item">
+                            {{-- Five across, like the two grids below, so the stock
+                                 chip takes the short labels they take: the long
+                                 ones crowd a card this narrow. --}}
+                            @include('partials.product-card', ['product' => $product, 'lazy' => $loop->index > 2, 'fiveColumn' => true])
+                        </li>
+                    @endforeach
+                </ul>
+            </section>
+        @endif
+
         @if ($categories->isNotEmpty())
             <section class="home-cats-section" id="categories" aria-labelledby="home-categories-title">
                 <header class="home-cats-header">
@@ -391,6 +425,11 @@
         fetchpriority="high"
     >
     <link rel="stylesheet" href="{{ versioned_asset('css/home.css') }}">
+    @if ($onSale->isNotEmpty())
+        {{-- Only with the block: a script for a row that is not on the page
+             is bytes spent on nothing. --}}
+        <script src="{{ versioned_asset('js/home-deals.js') }}" defer></script>
+    @endif
     <script src="{{ versioned_asset('js/home-carousel.js') }}" defer></script>
     <script type="application/ld+json">
         {{-- The key is written @@context so Blade emits a literal "@context":

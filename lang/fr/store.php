@@ -57,6 +57,8 @@ return [
     'home_trust_pack_text' => 'Colis préparé, puis suivi jusqu’à la porte ou au relais.',
     'home_trust_help_title' => 'Une boutique à l’écoute',
     'home_trust_help_text' => 'Compte, adresses et suivi de commande au même endroit.',
+    'home_deals' => 'Les offres du moment',
+    'home_deals_link' => 'Voir toutes les promotions',
     'shop_by_category' => 'Achetez par catégorie',
     'see_all_categories' => 'Voir toutes les catégories',
     'home_cat_blurb_cibles' => 'Cibles rondes, carrées, planches, carton & métal',

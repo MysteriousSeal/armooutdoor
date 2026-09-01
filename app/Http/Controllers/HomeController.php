@@ -43,6 +43,10 @@ class HomeController extends Controller
                 : format_euros($thresholdCents);
         }
 
+        // The strip above the categories: only what is genuinely reduced, and
+        // nothing at all when nothing is.
+        $onSale = HomepageCatalog::onSale(10);
+
         $featured = HomepageCatalog::featured(10);
 
         // Only one product per root category is picked, so with 6 categories
@@ -62,6 +66,7 @@ class HomeController extends Controller
             'freeShippingAmount' => $freeShippingAmount,
             'firstCategory' => $firstCategory,
             'categories' => $categories,
+            'onSale' => $onSale,
             'featured' => $featured,
             'more' => $more,
         ]);

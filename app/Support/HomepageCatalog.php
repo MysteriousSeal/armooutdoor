@@ -18,6 +18,31 @@ class HomepageCatalog
      *
      * @return EloquentCollection<int, Product>
      */
+    /**
+     * The products actually on offer today.
+     *
+     * `whereHas('discount')` finds the ones that carry a discount row; whether
+     * it is running is decided in PHP, since a discount has a window and a row
+     * outside its dates is not an offer. The same pair of steps the promotions
+     * page takes, so the strip on the home page and the page it links to can
+     * never disagree about what is on sale.
+     *
+     * @return Collection<int, Product>
+     */
+    public static function onSale(int $limit = 10): Collection
+    {
+        return Product::query()
+            ->active()
+            ->whereHas('discount')
+            ->with('category', 'discount', 'variants.supplier')
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get()
+            ->filter(fn (Product $product): bool => $product->hasDiscount())
+            ->take($limit)
+            ->values();
+    }
+
     public static function featured(int $limit = 4): EloquentCollection
     {
         $roots = Category::query()
