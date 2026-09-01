@@ -448,8 +448,13 @@ class CheckoutController extends Controller
 
         // Outside the transaction: a confirmation should only ever describe
         // an order that actually committed.
-        $order->sendConfirmationEmail();
+        // The shop's notice first, the customer's second. Both are queued in
+        // the same terminating phase, so on a sender that limits messages per
+        // second the second one is the one refused — and losing the notice
+        // that a sale needs handling costs more than delaying a receipt the
+        // customer can also read in their account.
         $order->sendAdminNewOrderEmail();
+        $order->sendConfirmationEmail();
 
         return redirect(localized_route('orders.show', ['order' => $order->number]))
             ->with('status', __('store.order_placed'))

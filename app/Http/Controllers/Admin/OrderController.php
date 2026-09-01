@@ -358,8 +358,13 @@ class OrderController extends Controller
         // Once really placed, the order confirms itself to whoever the
         // policy on the model says is owed it — a draft isn't placed yet.
         if ($finalize) {
-            $savedOrder->sendConfirmationEmail();
+            // The shop's notice first, the customer's second. Both are queued in
+            // the same terminating phase, so on a sender that limits messages per
+            // second the second one is the one refused — and losing the notice
+            // that a sale needs handling costs more than delaying a receipt the
+            // customer can also read in their account.
             $savedOrder->sendAdminNewOrderEmail();
+            $savedOrder->sendConfirmationEmail();
         }
 
         return redirect()
@@ -1137,8 +1142,13 @@ class OrderController extends Controller
 
         AdminActivityLog::record('order.draft_validated', $order, 'Validated draft order '.$order->number);
 
-        $order->sendConfirmationEmail();
+        // The shop's notice first, the customer's second. Both are queued in
+        // the same terminating phase, so on a sender that limits messages per
+        // second the second one is the one refused — and losing the notice
+        // that a sale needs handling costs more than delaying a receipt the
+        // customer can also read in their account.
         $order->sendAdminNewOrderEmail();
+        $order->sendConfirmationEmail();
 
         return back()->with('status', 'Draft validated into an order.');
     }
