@@ -76,6 +76,10 @@ class SitemapController extends Controller
             ['loc' => route('products.new-arrivals'), 'changefreq' => 'daily', 'priority' => '0.7'],
             ['loc' => route('products.promotions'), 'changefreq' => 'daily', 'priority' => '0.7'],
             ['loc' => route('products.best-sellers'), 'changefreq' => 'weekly', 'priority' => '0.7'],
+            ['loc' => route('contact.show'), 'changefreq' => 'monthly', 'priority' => '0.5'],
+            // The HTML plan is a crawl hub: one page linking every category,
+            // product and article the XML lists.
+            ['loc' => route('sitemap.html'), 'changefreq' => 'weekly', 'priority' => '0.4'],
             ['loc' => route('faq'), 'changefreq' => 'monthly', 'priority' => '0.5'],
             ['loc' => route('help.shipping-returns'), 'changefreq' => 'monthly', 'priority' => '0.5'],
             ['loc' => route('help.secure-payment'), 'changefreq' => 'monthly', 'priority' => '0.5'],
@@ -147,11 +151,20 @@ class SitemapController extends Controller
 
     public function products(): Response
     {
-        $urls = Product::query()->active()->get()->map(fn (Product $product): array => [
+        $urls = Product::query()->active()->with('images')->get()->map(fn (Product $product): array => [
             'loc' => localized_route('products.show', ['product' => $product->slug], 'fr'),
             'lastmod' => $product->updated_at?->toAtomString(),
             'changefreq' => 'weekly',
             'priority' => '0.7',
+            // The full pictures, not the thumbnails: it is the photograph
+            // itself that belongs in an image index, and a 400px crop of it
+            // is not the same picture.
+            'images' => collect([$product->imageUrl()])
+                ->concat($product->images->map(fn ($image): string => $image->imageUrl()))
+                ->filter(fn (string $url): bool => $url !== '')
+                ->unique()
+                ->values()
+                ->all(),
         ])->all();
 
         return $this->xml('sitemap.urlset', compact('urls'));

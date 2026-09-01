@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\BlogPost;
+use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -40,5 +41,38 @@ class SitemapTest extends TestCase
             ->assertSee('Disallow: /cart')
             ->assertSee('Disallow: /checkout')
             ->assertSee('Sitemap: '.route('sitemap.index'));
+    }
+
+    public function test_the_contact_page_and_the_html_plan_are_listed(): void
+    {
+        $xml = $this->get('/sitemap-pages.xml')->assertOk()->getContent();
+
+        $this->assertStringContainsString('<loc>'.route('contact.show').'</loc>', $xml);
+        $this->assertStringContainsString('<loc>'.route('sitemap.html').'</loc>', $xml);
+    }
+
+    public function test_a_product_carries_its_photographs_into_the_sitemap(): void
+    {
+        $product = Product::factory()->create(['is_active' => true]);
+
+        $xml = $this->get('/sitemap-products.xml')->assertOk()->getContent();
+
+        $this->assertStringContainsString('xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"', $xml);
+        $this->assertStringContainsString('<image:loc>'.$product->imageUrl().'</image:loc>', $xml);
+    }
+
+    public function test_every_sitemap_is_well_formed_xml(): void
+    {
+        Product::factory()->create(['is_active' => true]);
+
+        foreach (['index', 'pages', 'categories', 'products', 'blog'] as $name) {
+            $url = $name === 'index' ? '/sitemap.xml' : '/sitemap-'.$name.'.xml';
+            $xml = $this->get($url)->assertOk()->getContent();
+
+            $this->assertNotFalse(
+                simplexml_load_string($xml),
+                $url.' is not well-formed XML.',
+            );
+        }
     }
 }
