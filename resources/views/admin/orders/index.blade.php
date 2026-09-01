@@ -291,6 +291,11 @@
                     <tbody>
                         @foreach ($orders as $order)
                             @php($missingInvoiceFields = array_filter([$order->tracking_carrier_id === null ? 'Tracking carrier' : null, blank($order->tracking_number) ? 'Tracking number' : null, $order->package_type_id === null ? 'Package type' : null]))
+                            {{-- Every restricted order carries it, dispatched or not:
+                                 this list doubles as the record of what went out
+                                 verified. Written inline, since a block @php after
+                                 the inline @php above is closed by the wrong tag. --}}
+                            @php($ageState = in_array($order->id, $ageRestrictedOrderIds, true) ? ($order->user?->identityStatus()['state'] ?? 'none') : null)
                             <tr data-bulk-row>
                                 <td class="admin-select-cell">
                                     <input
@@ -306,6 +311,29 @@
                                     </a>
                                     @if ($order->isTest())
                                         <span class="order-chip order-chip--test" title="Kept as a record of testing; left out of every figure">Test</span>
+                                    @endif
+                                    @if ($ageState)
+                                        {{-- The mark and one word: colour reads at a glance,
+                                             the word removes the doubt, and this decides
+                                             whether a parcel goes out. --}}
+                                        <span
+                                            class="order-chip order-chip--age order-chip--age-{{ $ageState }}"
+                                            title="{{ [
+                                                'verified' => 'Age verified — this order may be dispatched',
+                                                'pending' => 'A proof of age is waiting to be reviewed',
+                                                'expired' => 'The proof of age on file has expired',
+                                                'rejected' => 'The proof of age on file was rejected',
+                                            ][$ageState] ?? 'No proof of age on file for this customer' }}"
+                                        >
+                                            <span class="order-chip-age-mark" aria-hidden="true">-18</span>
+                                            @switch ($ageState)
+                                                @case ('verified') Verified @break
+                                                @case ('pending') Pending @break
+                                                @case ('expired') Expired @break
+                                                @case ('rejected') Rejected @break
+                                                @default Missing
+                                            @endswitch
+                                        </span>
                                     @endif
                                     <span class="admin-table-sub">{{ $order->created_at->format('d M Y · H:i') }}</span>
                                 </td>

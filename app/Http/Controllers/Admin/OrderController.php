@@ -47,7 +47,9 @@ class OrderController extends Controller
         $filters = $this->orderFilters($request);
 
         $orders = $this->filteredOrdersQuery($filters)
-            ->with('user', 'statusHistories', 'items')
+            // The customer's documents ride along, so identityStatus() reads a
+            // loaded relation instead of asking again for each of twenty rows.
+            ->with('user.identityDocuments', 'statusHistories', 'items')
             ->withCount('items')
             ->latest()
             // paginate() plutôt que simplePaginate() : il faut le nombre de
@@ -56,6 +58,16 @@ class OrderController extends Controller
             ->withQueryString();
 
         $this->backfillMissingPaymentFees($orders->getCollection());
+
+        // Which of the listed orders hold something reserved to adults. One
+        // query for the page: the alternative is loading every item's product
+        // on a list that never shows them.
+        $ageRestrictedOrderIds = OrderItem::query()
+            ->whereIn('order_id', $orders->getCollection()->pluck('id'))
+            ->whereIn('product_id', Product::query()->where('age_restricted', true)->select('id'))
+            ->distinct()
+            ->pluck('order_id')
+            ->all();
 
         // Une requête pour toute la page plutôt qu'une par commande : la
         // moyenne d'achat d'un produit ne change pas d'une ligne à l'autre.
@@ -89,6 +101,7 @@ class OrderController extends Controller
 
         return view('admin.orders.index', [
             'orders' => $orders,
+            'ageRestrictedOrderIds' => $ageRestrictedOrderIds,
             'productCostsByProductId' => $productCostsByProductId,
             'tab' => $filters['tab'],
             'kpis' => [

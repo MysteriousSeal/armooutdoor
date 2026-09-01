@@ -10592,3 +10592,58 @@ a.order-stepper-btn:focus-visible {
         width: 100%;
     }
 }
+
+/*
+ * La puce « -18 » de la liste des commandes.
+ *
+ * Same chip as the Test marker beside it, so the number cell reads as one
+ * strip. The -18 is boxed off from the word: the mark says which rule applies
+ * and the word says where this order stands under it, and they are not the
+ * same fact.
+ */
+.order-chip--age {
+    gap: 0.4rem;
+    padding-left: 0.3rem;
+    font-weight: 600;
+}
+
+.order-chip-age-mark {
+    padding: 0.05rem 0.3rem;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    /* Tinted from the chip's own colour rather than inverted: setting a colour
+       here and then asking for currentColor would paint the mark in the colour
+       it had just been given, which is no mark at all. */
+    background: color-mix(in srgb, currentColor 16%, transparent);
+    border-radius: 2px;
+}
+
+/* Cleared to send. */
+.order-chip--age-verified {
+    color: #3d6b4e;
+    background: #eef4ef;
+    border-color: #d5e4d8;
+}
+
+/* Being read; nothing for the shop to chase yet. */
+.order-chip--age-pending {
+    color: var(--accent-hover);
+    background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+    border-color: color-mix(in srgb, var(--accent) 32%, var(--border));
+}
+
+.order-chip--age-expired,
+.order-chip--age-rejected {
+    color: #8a6d1f;
+    background: #fbf3dc;
+    border-color: #ecd9a3;
+}
+
+/* Nobody has been asked: the loudest of the four, and the only one where the
+   shop still has to start the conversation. */
+.order-chip--age-none {
+    color: #8a4b42;
+    background: #f7eeec;
+    border-color: #e6d2ce;
+}
