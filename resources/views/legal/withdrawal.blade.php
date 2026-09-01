@@ -5,7 +5,11 @@
 
 @section('content')
     <div class="container legal-wrap">
-        @include('legal.partials.chrome', ['title' => __('store.legal_withdrawal_title')])
+        @include('legal.partials.chrome', [
+            'title' => __('store.legal_withdrawal_title'),
+            'lede' => "Quatorze jours pour changer d'avis : délai, démarche, retour et remboursement.",
+            'page' => 'withdrawal',
+        ])
 
         <div class="legal-layout">
             @include('legal.partials.nav')

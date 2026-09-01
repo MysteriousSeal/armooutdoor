@@ -4,8 +4,9 @@
     <span>{{ $title }}</span>
 </nav>
 
-<header class="page-header">
-    <p class="home-kicker">Aide</p>
-    <h1 class="page-title">{{ $title }}</h1>
-    <p class="page-lede">{{ $lede }}</p>
-</header>
+@include('partials.page-panel-header', [
+    'kicker' => 'Aide',
+    'title' => $title,
+    'lede' => $lede,
+    'meta' => null,
+])

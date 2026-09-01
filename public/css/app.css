@@ -4750,6 +4750,89 @@ body.has-menu-open {
 }
 
 /*
+ * The title block of the legal and help pages.
+ *
+ * It used to be bare text sitting above two bordered panels, which read as a
+ * heading that had wandered in from somewhere else. It takes the same surface
+ * and border as the index beside it and the document below it, so the three
+ * belong to one page.
+ *
+ * The accent rule down the left edge is the same mark the index uses for the
+ * page you are on: one idea, said twice, rather than two decorations.
+ */
+.panel-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 0.75rem 1.5rem;
+    margin-bottom: 1.5rem;
+    padding: 1.4rem 1.6rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+}
+
+.panel-header-copy {
+    min-width: 0;
+}
+
+.panel-header-kicker {
+    margin: 0 0 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.panel-header-title {
+    margin: 0;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+}
+
+.panel-header-lede {
+    margin: 0.6rem 0 0;
+    max-width: 46rem;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+}
+
+/* The revision date. A marker, not a sentence: small, quiet, and pushed to
+   the far edge so it never reads as part of the lede. */
+.panel-header-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+}
+
+.panel-header-meta-dot {
+    width: 0.4rem;
+    height: 0.4rem;
+    background: var(--accent);
+    border-radius: 50%;
+}
+
+@media (max-width: 40rem) {
+    .panel-header {
+        padding: 1.15rem 1.15rem 1.25rem;
+    }
+}
+
+/*
  * The legal pages sit on the same edges as the header, like every other page
  * of the shop. They used to stop at 48rem, which left them floating in the
  * middle of a container twice that wide and looking like a different site.
@@ -4763,10 +4846,6 @@ body.has-menu-open {
  */
 .legal-wrap {
     padding-bottom: 4rem;
-}
-
-.legal-header {
-    margin-bottom: 1.5rem;
 }
 
 .legal-layout {

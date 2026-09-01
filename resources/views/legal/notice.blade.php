@@ -5,7 +5,11 @@
 
 @section('content')
     <div class="container legal-wrap">
-        @include('legal.partials.chrome', ['title' => __('store.legal_notice_title')])
+        @include('legal.partials.chrome', [
+            'title' => __('store.legal_notice_title'),
+            'lede' => "Qui édite ce site, qui l'héberge, et comment nous joindre.",
+            'page' => 'notice',
+        ])
 
         <div class="legal-layout">
             @include('legal.partials.nav')

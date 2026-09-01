@@ -5,7 +5,11 @@
 
 @section('content')
     <div class="container legal-wrap">
-        @include('legal.partials.chrome', ['title' => __('store.legal_privacy_title')])
+        @include('legal.partials.chrome', [
+            'title' => __('store.legal_privacy_title'),
+            'lede' => "Les données que nous collectons, pourquoi, combien de temps, et les droits que vous gardez dessus.",
+            'page' => 'privacy',
+        ])
 
         <div class="legal-layout">
             @include('legal.partials.nav')

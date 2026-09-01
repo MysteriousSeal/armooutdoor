@@ -5,7 +5,11 @@
 
 @section('content')
     <div class="container legal-wrap">
-        @include('legal.partials.chrome', ['title' => __('store.legal_terms_title')])
+        @include('legal.partials.chrome', [
+            'title' => __('store.legal_terms_title'),
+            'lede' => "Les règles de vente de la boutique : commande, paiement, livraison, garanties et litiges.",
+            'page' => 'terms',
+        ])
 
         <div class="legal-layout">
             @include('legal.partials.nav')

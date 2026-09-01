@@ -4,8 +4,11 @@
     <span>{{ $title }}</span>
 </nav>
 
-<header class="page-header legal-header">
-    <p class="home-kicker">{{ __('store.legal_kicker') }}</p>
-    <h2 class="page-title">{{ $title }}</h2>
-    <p class="page-lede">{{ __('store.legal_updated', ['date' => now()->translatedFormat('d F Y')]) }}</p>
-</header>
+@include('partials.page-panel-header', [
+    'kicker' => __('store.legal_kicker'),
+    'title' => $title,
+    'lede' => $lede ?? null,
+    'meta' => __('store.legal_updated', [
+        'date' => \Illuminate\Support\Carbon::parse(config('shop.legal_updated.'.$page))->translatedFormat('d F Y'),
+    ]),
+])
