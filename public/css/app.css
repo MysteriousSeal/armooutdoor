@@ -1271,31 +1271,56 @@ body.has-menu-open {
 .subcat-nav {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.4rem;
     margin: -0.25rem 0 1.5rem;
 }
 
 .subcat-chip {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
-    height: 2.15rem;
-    padding: 0 0.85rem;
+    gap: 0.5rem;
+    height: 2.25rem;
+    padding: 0 0.9rem;
     font-size: 0.8125rem;
     font-weight: 500;
-    color: var(--text-muted);
+    color: var(--text);
     background: var(--surface);
     border: 1px solid var(--border);
+    transition: color 0.12s ease, border-color 0.12s ease, background-color 0.12s ease;
 }
 
-.subcat-chip span {
-    font-size: 0.75rem;
+.subcat-chip-count {
+    font-size: 0.72rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
     color: var(--text-muted);
 }
 
 .subcat-chip:hover {
-    color: var(--text);
-    border-color: var(--accent);
+    color: var(--accent-heading);
+    border-color: var(--accent-heading);
+    background: color-mix(in srgb, var(--accent-heading) 8%, var(--surface));
+}
+
+.subcat-chip:hover .subcat-chip-count {
+    color: var(--accent-heading);
+}
+
+.subcat-chip.is-active {
+    color: var(--accent-heading);
+    font-weight: 600;
+    background: color-mix(in srgb, var(--accent-heading) 10%, var(--surface));
+    border-color: var(--accent-heading);
+}
+
+.subcat-chip.is-active .subcat-chip-count {
+    color: var(--accent-heading);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .subcat-chip {
+        transition: none;
+    }
 }
 
 .breadcrumbs {

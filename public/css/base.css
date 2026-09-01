@@ -254,9 +254,10 @@ button.btn {
 }
 
 .subcat-chip.is-active {
-    color: var(--text);
-    background: var(--bg);
-    border-color: var(--accent);
+    color: var(--accent-heading);
+    font-weight: 600;
+    background: color-mix(in srgb, var(--accent-heading) 10%, var(--surface));
+    border-color: var(--accent-heading);
 }
 
 .product-grid--related {

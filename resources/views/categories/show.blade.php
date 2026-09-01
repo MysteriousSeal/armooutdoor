@@ -104,7 +104,7 @@
                                 class="subcat-chip"
                             >
                                 {{ $child->localizedName() }}
-                                <span>{{ $child->products->count() }}</span>
+                                <span class="subcat-chip-count">{{ $child->products->count() }}</span>
                             </a>
                         @endforeach
                     </nav>
@@ -123,7 +123,7 @@
                                 class="subcat-chip {{ $sibling->is($category) ? 'is-active' : '' }}"
                             >
                                 {{ $sibling->localizedName() }}
-                                <span>{{ $sibling->products->count() }}</span>
+                                <span class="subcat-chip-count">{{ $sibling->products->count() }}</span>
                             </a>
                         @endforeach
                     </nav>
