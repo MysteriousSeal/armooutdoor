@@ -159,8 +159,23 @@
         @else
             <div class="{{ $showSidebar ? 'category-layout' : '' }}">
                 @if ($showSidebar)
-                    <aside class="category-sidebar" aria-labelledby="category-filters-title">
-                        <form method="GET" action="{{ $categoryUrl }}" class="category-sidebar-form">
+                    <aside class="category-sidebar" aria-labelledby="category-filters-title" data-filters>
+                        {{-- On mobile the whole block folds behind this button; without
+                             JavaScript it never shows and everything stays open. --}}
+                        <button
+                            type="button"
+                            class="category-filters-toggle"
+                            data-filters-toggle
+                            aria-expanded="false"
+                            aria-controls="category-filters-form"
+                        >
+                            {{ __('store.filters_title') }}
+                            @if (! empty($selectedFilters))
+                                <span class="category-filters-toggle-count">{{ count($selectedFilters) }}</span>
+                            @endif
+                            <span class="category-filters-toggle-chevron" aria-hidden="true"></span>
+                        </button>
+                        <form method="GET" action="{{ $categoryUrl }}" class="category-sidebar-form" id="category-filters-form">
                             @if ($sort !== 'relevance')
                                 <input type="hidden" name="sort" value="{{ $sort }}">
                             @endif
@@ -174,31 +189,51 @@
                             </div>
 
                             @foreach ($filterGroups as $label => $values)
-                                <fieldset class="category-filter-group">
-                                    <legend>{{ $label }}</legend>
-                                    <label class="category-filter-option">
-                                        <input
-                                            type="radio"
-                                            name="filter[{{ $label }}]"
-                                            value=""
-                                            @checked(! array_key_exists($label, $selectedFilters))
-                                            onchange="this.form.submit()"
+                                @php
+                                    // A group whose filter is applied opens by default:
+                                    // the active choice must never be invisible.
+                                    $activeValue = $selectedFilters[$label] ?? null;
+                                @endphp
+                                <fieldset class="category-filter-group {{ $activeValue !== null ? 'is-open' : '' }}">
+                                    <legend class="category-filter-legend">
+                                        <button
+                                            type="button"
+                                            class="category-filter-group-toggle"
+                                            data-filter-group-toggle
+                                            aria-expanded="{{ $activeValue !== null ? 'true' : 'false' }}"
                                         >
-                                        <span>{{ __('store.filter_all') }}</span>
-                                    </label>
-                                    @foreach ($values as $option)
+                                            <span class="category-filter-group-name">{{ $label }}</span>
+                                            @if ($activeValue !== null)
+                                                <span class="category-filter-group-active">{{ $activeValue }}</span>
+                                            @endif
+                                            <span class="category-filter-group-chevron" aria-hidden="true"></span>
+                                        </button>
+                                    </legend>
+                                    <div class="category-filter-options">
                                         <label class="category-filter-option">
                                             <input
                                                 type="radio"
                                                 name="filter[{{ $label }}]"
-                                                value="{{ $option['value'] }}"
-                                                @checked(($selectedFilters[$label] ?? null) === $option['value'])
+                                                value=""
+                                                @checked($activeValue === null)
                                                 onchange="this.form.submit()"
                                             >
-                                            <span>{{ $option['value'] }}</span>
-                                            <span class="category-filter-count">{{ $option['count'] }}</span>
+                                            <span>{{ __('store.filter_all') }}</span>
                                         </label>
-                                    @endforeach
+                                        @foreach ($values as $option)
+                                            <label class="category-filter-option">
+                                                <input
+                                                    type="radio"
+                                                    name="filter[{{ $label }}]"
+                                                    value="{{ $option['value'] }}"
+                                                    @checked($activeValue === $option['value'])
+                                                    onchange="this.form.submit()"
+                                                >
+                                                <span>{{ $option['value'] }}</span>
+                                                <span class="category-filter-count">{{ $option['count'] }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
                                 </fieldset>
                             @endforeach
                         </form>
@@ -222,3 +257,7 @@
         @endif
     </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ versioned_asset('js/category-filters.js') }}" defer></script>
+@endpush

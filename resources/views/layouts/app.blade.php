@@ -14,6 +14,10 @@
             if (match) {
                 document.documentElement.setAttribute('data-theme', match[1]);
             }
+            // Set before first paint, unlike the deferred scripts: what should
+            // only collapse with JavaScript can be born collapsed instead of
+            // appearing open and then snapping shut.
+            document.documentElement.setAttribute('data-js', '');
         })();
     </script>
     <title>@yield('title', config('app.name'))</title>

@@ -261,6 +261,14 @@ without a reference still leaves someone searching the listing by hand.
 
 ### Identifiers
 
+**Never change an existing `sku` without being asked for that change explicitly.**
+The SKU is what matches a product to supplier orders and stock, and unlike a slug
+there is no redirect to soften a rename. Setting a SKU on a product that has none
+counts as a change: ask first. A new product created from scratch may be given one.
+
+It is normal and acceptable for a SKU to stop matching its product name after a
+rename. Report the mismatch; do not fix it.
+
 `sku` and `gtin` are unique across products *and* variants. A missing `gtin`
 matters for marketplace and shopping-feed listings; note it rather than
 inventing one.

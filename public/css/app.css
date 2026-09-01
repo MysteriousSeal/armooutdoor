@@ -885,41 +885,110 @@ body.has-menu-open {
     top: 5.25rem;
     padding: 1.25rem 1.2rem 1.35rem;
     background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
 }
 
 .category-sidebar-head {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    margin-bottom: 1.15rem;
+    margin-bottom: 0.2rem;
+    padding-bottom: 0.95rem;
+    border-bottom: 1px solid var(--border);
 }
 
+/* The section titles' olive, and the little rule they carry: the
+   panel speaks the same language as the aisles it filters. */
 .category-sidebar-title {
     margin: 0;
+    padding-bottom: 0.4rem;
     font-size: 0.72rem;
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
+    color: var(--accent-heading);
+    background: linear-gradient(var(--accent-heading), var(--accent-heading)) left bottom / 2rem 2px no-repeat;
 }
 
+/* The fieldset itself carries no box at all: a border or padding on it
+   lands in the legend's special border-area layout, renders unevenly and
+   swallows the hairline. Spacing and separators live on ordinary elements. */
 .category-filter-group {
-    margin: 0 0 1.15rem;
+    margin: 0;
     padding: 0;
     border: 0;
 }
 
-.category-filter-group + .category-filter-group {
-    padding-top: 1.1rem;
+.category-filter-group + .category-filter-group .category-filter-legend {
     border-top: 1px solid var(--border);
 }
 
-.category-filter-group legend {
+.category-filter-legend {
     padding: 0;
-    margin-bottom: 0.45rem;
+    margin: 0;
+    width: 100%;
+}
+
+.category-filter-options {
+    padding: 0.1rem 0 0.75rem;
+}
+
+.category-filter-group-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    /* The header owns the group's vertical rhythm — identical whether its
+       group is first, bordered, open or collapsed. */
+    padding: 0.8rem 0;
+    border: 0;
+    background: none;
+    font: inherit;
     font-size: 0.72rem;
     font-weight: 800;
     letter-spacing: 0.06em;
     text-transform: uppercase;
+    text-align: left;
+    color: var(--text);
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.category-filter-group-toggle:hover,
+.category-filter-group.is-open .category-filter-group-toggle {
+    color: var(--accent-heading);
+}
+
+/* The active value, recalled in the header while the group is collapsed. */
+.category-filter-group-active {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--accent-hover);
+}
+
+.category-filter-group-chevron {
+    flex-shrink: 0;
+    width: 0.4rem;
+    height: 0.4rem;
+    margin-left: auto;
+    border-right: 1.5px solid var(--text-muted);
+    border-bottom: 1.5px solid var(--text-muted);
+    transform: rotate(45deg);
+    transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.category-filter-group-toggle:hover .category-filter-group-chevron,
+.category-filter-group.is-open .category-filter-group-chevron {
+    border-color: currentColor;
+}
+
+.category-filter-group.is-open .category-filter-group-chevron {
+    transform: rotate(225deg);
 }
 
 .category-filter-option {
@@ -927,11 +996,18 @@ body.has-menu-open {
     align-items: center;
     gap: 0.55rem;
     min-height: 2.05rem;
-    padding: 0.15rem 0;
+    margin: 0 -0.55rem;
+    padding: 0.15rem 0.55rem;
+    border-radius: 6px;
     font-size: 0.875rem;
     line-height: 1.3;
     color: var(--text);
     cursor: pointer;
+    transition: background-color 0.12s ease;
+}
+
+.category-filter-option:hover {
+    background: color-mix(in srgb, var(--accent) 10%, var(--bg));
 }
 
 .category-filter-option input {
@@ -944,12 +1020,18 @@ body.has-menu-open {
 
 .category-filter-option:has(input:checked) {
     font-weight: 600;
+    background: color-mix(in srgb, var(--accent) 8%, var(--bg));
 }
 
 .category-filter-count {
     margin-left: auto;
-    font-size: 0.75rem;
+    padding: 0.05rem 0.45rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-variant-numeric: tabular-nums;
     color: var(--text-muted);
+    background: var(--bg);
 }
 
 .category-sidebar .category-filters-reset {
@@ -972,6 +1054,98 @@ body.has-menu-open {
     color: var(--accent-hover);
     border-color: var(--accent);
     background: var(--surface);
+}
+
+/* --- Collapsed groups (desktop) and whole-block collapse (mobile) ----- */
+
+/* The « Filtres » button folding the whole block away on mobile. */
+.category-filters-toggle {
+    display: none;
+    align-items: center;
+    gap: 0.55rem;
+    width: 100%;
+    padding: 0.35rem 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text);
+    cursor: pointer;
+}
+
+.category-filters-toggle-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    padding: 0 0.3rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--surface);
+    background: var(--accent);
+}
+
+.category-filters-toggle-chevron {
+    width: 0.4rem;
+    height: 0.4rem;
+    margin-left: auto;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg);
+    transition: transform 0.15s ease;
+}
+
+.category-sidebar.is-open .category-filters-toggle-chevron {
+    transform: rotate(225deg);
+}
+
+/* Desktop: each group is collapsed onto its header and opens whole on
+   a click. Without the head-set marker, everything stays visible and
+   the chevron has nothing to promise. */
+@media (min-width: 901px) {
+    [data-js] .category-sidebar .category-filter-group:not(.is-open) .category-filter-options {
+        display: none;
+    }
+}
+
+@media (max-width: 900px) {
+    /* On mobile every group stays open inside the unfolded block: the
+       accordion is a desktop affair, and so is its chevron. */
+    .category-filter-group-chevron {
+        display: none;
+    }
+
+    .category-filter-group-toggle {
+        cursor: default;
+    }
+}
+
+/* Mobile : le bloc entier se replie derrière « Filtres » — et une fois
+   ouvert, tous les choix sont là, sans coupe. */
+@media (max-width: 900px) {
+    [data-js] .category-sidebar .category-filters-toggle {
+        display: flex;
+    }
+
+    [data-js] .category-sidebar .category-sidebar-form {
+        display: none;
+    }
+
+    [data-js] .category-sidebar.is-open .category-sidebar-form {
+        display: block;
+        margin-top: 1.1rem;
+    }
+
+    /* The toggle already says « Filtres »: the form's own title is not
+       going to repeat it right underneath. */
+    [data-js] .category-sidebar .category-sidebar-title {
+        display: none;
+    }
 }
 
 .category-layout .product-grid {
