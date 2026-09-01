@@ -452,7 +452,10 @@ class CheckoutController extends Controller
         $order->sendAdminNewOrderEmail();
 
         return redirect(localized_route('orders.show', ['order' => $order->number]))
-            ->with('status', __('store.order_placed'));
+            ->with('status', __('store.order_placed'))
+            // Read once by the order page to count the sale. A flash, so a
+            // refresh of that page does not count it twice.
+            ->with('order_placed', true);
     }
 
     private function startStripeCheckout(
@@ -566,7 +569,10 @@ class CheckoutController extends Controller
         session()->forget(self::DISCOUNT_CODE_SESSION_KEY);
 
         return redirect(localized_route('orders.show', ['order' => $order->number]))
-            ->with('status', __('store.order_placed'));
+            ->with('status', __('store.order_placed'))
+            // Read once by the order page to count the sale. A flash, so a
+            // refresh of that page does not count it twice.
+            ->with('order_placed', true);
     }
 
     private function resolveAppliedDiscountCode(User $user): ?DiscountCode

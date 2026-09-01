@@ -3,6 +3,15 @@
 @section('title', __('store.checkout_title').' — '.config('app.name'))
 @section('canonical', localized_route('checkout.show'))
 
+@php
+    // Figures only: what the basket is worth and how many lines it holds.
+    // Nothing a customer typed goes anywhere near this.
+    $analyticsEvent = [
+        'name' => 'checkout_started',
+        'properties' => ['currency' => 'EUR', 'items' => count($lines), 'value' => round($subtotalCents / 100, 2)],
+    ];
+@endphp
+
 @section('content')
     <div class="container">
         <nav class="breadcrumbs" aria-label="breadcrumb">

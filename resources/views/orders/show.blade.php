@@ -2,6 +2,21 @@
 
 @section('title', __('store.order_title', ['number' => $order->number]).' — '.config('app.name'))
 
+@php
+    // Only on the redirect that follows payment, never on a later visit to
+    // the same order.
+    $analyticsEvent = session('order_placed')
+        ? [
+            'name' => 'order_placed',
+            'properties' => [
+                'currency' => 'EUR',
+                'value' => round($order->total_cents / 100, 2),
+                'items' => $order->items->count(),
+            ],
+        ]
+        : null;
+@endphp
+
 @section('content')
     <div class="container">
         <nav class="breadcrumbs" aria-label="breadcrumb">

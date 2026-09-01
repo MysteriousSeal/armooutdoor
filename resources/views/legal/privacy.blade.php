@@ -28,11 +28,16 @@
                 <li>Coordonnées : e-mail, téléphone, adresses de livraison et de facturation.</li>
                 <li>Données de commande : produits achetés, historique de commandes.</li>
                 <li>Données de connexion : identifiants de compte, mot de passe (stocké de façon chiffrée).</li>
-                <li>Données de fréquentation : pages consultées et adresse IP, mesurées par le site lui-même —
-                    sans transmission à un tiers. Si vous l'acceptez via le bandeau cookies, l'identifiant de
-                    session déjà nécessaire au fonctionnement du site (voir « Cookies » ci-dessous) sert aussi à
-                    regrouper les pages d'une même visite ; en cas de refus, la mesure se poursuit sans cet
-                    identifiant.</li>
+                <li>Données de fréquentation : pages consultées et adresse IP, mesurées par le site lui-même.
+                    Si vous l'acceptez via le bandeau cookies, l'identifiant de session déjà nécessaire au
+                    fonctionnement du site (voir « Cookies » ci-dessous) sert aussi à regrouper les pages d'une
+                    même visite ; en cas de refus, la mesure se poursuit sans cet identifiant.</li>
+                <li>Mesure d'audience externe : si, et seulement si, vous l'acceptez via le bandeau cookies, les
+                    pages consultées et quelques événements de la boutique (mise au panier, passage en caisse,
+                    commande validée) sont transmis à PostHog, notre sous-traitant de mesure d'audience, sur ses
+                    serveurs situés dans l'Union européenne. Aucune donnée que vous saisissez — nom, adresse,
+                    coordonnées bancaires — ne lui est transmise. En cas de refus, ou tant que vous n'avez pas
+                    répondu, aucun script PostHog n'est chargé et aucune donnée ne lui est envoyée.</li>
             </ul>
             <p>Aucune donnée bancaire n'est stockée par nos soins ; le paiement est traité par un prestataire tiers sécurisé.</p>
 
@@ -56,7 +61,8 @@
                 Les données sont destinées à {{ $company->value('company_name') }} et, le cas échéant, à ses prestataires techniques,
                 dans la stricte limite nécessaire à l'exécution de la commande : le prestataire de paiement (Stripe),
                 les transporteurs choisis à la commande (La Poste/Colissimo, Chronopost, Mondial Relay), le service
-                de points relais (Sendcloud) et l'hébergeur du site. Aucune donnée n'est vendue à des tiers.
+                de points relais (Sendcloud), la mesure d'audience (PostHog, si vous l'avez acceptée) et l'hébergeur du
+                site. Aucune donnée n'est vendue à des tiers.
             </p>
 
             <h2>Durée de conservation</h2>
@@ -83,9 +89,11 @@
                 préférence d'affichage clair/sombre). Ces cookies ne nécessitent pas de consentement préalable au titre
                 de la réglementation applicable. Si vous y consentez via le bandeau affiché à votre première visite,
                 le même identifiant de session sert aussi, en interne, à regrouper les pages consultées au cours d'une
-                même visite à des fins de mesure d'audience ; il n'est ni partagé ni utilisé à des fins de suivi
-                publicitaire ou de profilage. Vous pouvez revenir sur votre choix à tout moment via le lien
-                « Cookies » en pied de page.
+                même visite à des fins de mesure d'audience, et déclenche le chargement de PostHog, qui dépose
+                ses propres cookies de mesure d'audience sur des serveurs situés dans l'Union européenne. Aucun
+                de ces cookies n'est utilisé à des fins de suivi publicitaire ou de profilage. En l'absence de
+                consentement, PostHog n'est pas chargé du tout. Vous pouvez revenir sur votre choix à tout
+                moment via le lien « Cookies » en pied de page.
             </p>
 
             <h2>Sécurité</h2>

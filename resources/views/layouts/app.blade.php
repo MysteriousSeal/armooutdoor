@@ -349,6 +349,7 @@
     @include('partials.cookie-banner')
 
     <script src="{{ versioned_asset('js/cookie-banner.js') }}" defer></script>
+    @include('partials.analytics')
     <script src="{{ versioned_asset('js/pretty-select.js') }}" defer></script>
     <script src="{{ versioned_asset('js/site-menu-toggle.js') }}" defer></script>
     <script src="{{ versioned_asset('js/theme-toggle.js') }}" defer></script>

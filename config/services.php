@@ -60,4 +60,16 @@ return [
         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
     ],
 
+    /*
+     * PostHog, EU region: the data stays in Frankfurt, so no transfer outside
+     * the Union has to be justified to anybody.
+     *
+     * Without a key nothing is loaded and no header is widened — an
+     * environment that has not been given one behaves exactly as before.
+     */
+    'posthog' => [
+        'key' => env('POSTHOG_KEY'),
+        'host' => env('POSTHOG_HOST', 'https://eu.i.posthog.com'),
+    ],
+
 ];

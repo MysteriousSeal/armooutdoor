@@ -434,7 +434,7 @@ return [
     'footer_sitemap' => 'Plan du site',
     'footer_cookies' => 'Cookies',
     'cookie_banner_title' => 'Cookies',
-    'cookie_banner_text' => 'Ce site n\'utilise que des cookies essentiels (panier, connexion, préférence d\'affichage). Acceptez-vous que l\'identifiant de session serve aussi à la mesure d\'audience, par le site lui-même et sans aucun tiers ?',
+    'cookie_banner_text' => 'Ce site n\'utilise que des cookies essentiels (panier, connexion, préférence d\'affichage). Acceptez-vous la mesure d\'audience : l\'identifiant de session côté site, et PostHog, un outil hébergé dans l\'Union européenne ? En cas de refus, PostHog n\'est pas chargé.',
     'cookie_banner_accept' => 'Accepter',
     'cookie_banner_decline' => 'Refuser',
     'cookie_banner_more' => 'En savoir plus',
