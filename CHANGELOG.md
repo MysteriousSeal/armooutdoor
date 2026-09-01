@@ -2,6 +2,22 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-01 — v1.1.17 — build 3VETKQ
+
+### Storefront
+
+- **The category filters fold away instead of scrolling away.** Each group collapses onto its header and opens whole on a click — the group whose filter is applied opens by itself, and while collapsed its header recalls the chosen value, so an active choice is never invisible. On mobile the whole panel folds behind a « Filtres » button. Born collapsed, too: the marker gating the fold is set before first paint rather than by a deferred script, which had every filter flash open and snap shut. The panel is dressed for it — a carded sidebar speaking the section-title olive, hover-tinted rows, counts in pills, an olive reset — and the subcategory chips wear the same aisle olive. The spacing between collapsed groups came out uneven and the separators invisible: both were the fieldset laying its legend out in the border area, so the box moved to ordinary elements and every gap is identical.
+
+### Under the hood
+
+- **The private pages tell crawlers they are not theirs to index.** Google referenced pages gated behind the login. Account, orders, checkout, cart, wishlist and the token-bearing links now carry an X-Robots-Tag noindex — a header rides the guest's 302 redirect, which a meta tag in a page never rendered cannot — and robots.txt stops disallowing /cart and /checkout, a URL that cannot be fetched being a URL whose noindex is never read, left lingering as « indexed, though blocked ». The login and register doors stay indexable.
+
+- **Error responses get their security headers back.** A response rendered from an exception — that same guest redirect, any 404 — bypassed the middleware stack and shipped with no security headers at all, Content-Security-Policy included. The headers are applied from the exception handler as well now.
+
+- **New comments speak English.** The filter work arrived commented in French, matching the codebase's older habit; the rule is English, and they were rewritten. The make-products-ok guide also now spells out that an existing SKU is never changed unasked.
+
+**No migration.**
+
 ## 2026-09-01 — v1.1.16 — build JWEGN2
 
 ### Admin
