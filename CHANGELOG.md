@@ -2,6 +2,34 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-01 — v1.1.14 — build B1998L
+
+### Storefront
+
+- **« Mes documents », pour prouver sa majorité.** The CGV reserve the right to ask for a proof of age before shipping a restricted article, and there was nowhere to send one. The account now takes a carte d'identité, a passeport or a permis de conduire. The file is encrypted before it is written, so the plaintext never reaches the disk even for an instant and a stolen backup is a file of noise; it is stored outside anything the web server serves, under a name nobody can guess. The customer can withdraw or replace one at any moment, and sees how long the proof lasts — or, once it does not, that it has lapsed and what to do about it.
+
+- **The basket says what will be asked, before it is asked.** A restricted article said so on its own page and nowhere else, so a customer could fill a basket, pay, and first learn a proof was wanted when the parcel did not move. The basket now says it and says where they stand: nothing sent, being looked at, verified until a date, lapsed, refused. A guest gets the requirement and somewhere to go, having no status to have. **Nothing is ever barred** — every wording says the order goes through, the proof being wanted before dispatch and not before payment. The notice keeps up when a line is removed without a reload, the entry going with the article and the wording following the count.
+
+- **An order says the same, in the tense of an order.** « Votre commande partira une fois la vérification faite » rather than « vous pouvez commander ». It stops once the parcel has gone: asking then is describing a door that already closed. The list of orders marks the ones concerned in two forms — amber for a proof the customer must send, grey for one already being read, since a warning nobody can clear only makes the ones that matter harder to see.
+
+- **Both confirmation e-mails carry it.** The customer's names the articles and where they stand, with a link to « Mes documents » only when something is wanted: inviting a verified customer to send a second passport puts one more file on disk for nobody. The shop's says whether the parcel may go. Both add that the status is as at the moment of sending, an e-mail being read days later.
+
+### Admin
+
+- **A document is read once, by one person, and then destroyed.** Identity documents are readable by owners alone, opened in a tab and never as a download, and every look is written to the activity log. Recording a verdict deletes the file in the same breath: the shop keeps proof that it checked somebody's age and does not keep a copy of their passport. A verification carries the expiry date read off the document itself — required to verify, meaningless to reject — and is compared when asked rather than written down by a nightly job, so a proof that lapsed at midnight has lapsed whether or not anything ran.
+
+- **Where a restricted order stands, wherever it is met.** A check above the items of an order, a chip on the order list and on the customer's own orders, a verdict on the customer record, and a count in the menu for what is waiting. The menu badge is owner-only: pointing an admin at a door that answers 403 is worse than no badge. Twenty rows cost a fixed number of queries, not forty.
+
+- **« Mark as being prepared » is held until the proof is good.** Disabled rather than hidden, so the reason is legible, and the route refuses the same request: a control that lives only in the markup is one form submission away from not existing. This is the one place the shop blocks — the customer is never stopped from ordering.
+
+- **The shop hears about a new order before the customer does.** Both e-mails are handed to the sender in the same terminating phase, so a sender that limits messages per second refuses the second one. It was the shop's notice, every time. Losing the message that says a sale needs handling costs more than delaying a receipt the customer can also read in their account.
+
+### Under the hood
+
+- **The privacy policy accounts for all of it.** Five places rather than one: what is collected and that handing it over is optional, why, the legal basis it rests on, that this is the one category of data reaching no processor at all, and — the sentence the CNIL reads first — that a document is deleted as soon as it has been verified, only the verdict and its dates surviving.
+
+**Migration:** two, run with `php artisan migrate` — an `identity_documents` table, and the expiry date on it. Nothing existing changes: a shop whose customers have sent nothing behaves exactly as before.
+
 ## 2026-09-01 — v1.1.13 — build Q5IF8K
 
 ### Under the hood
