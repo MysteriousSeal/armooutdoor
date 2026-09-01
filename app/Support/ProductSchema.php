@@ -23,6 +23,17 @@ class ProductSchema
     /** Les avis cités dans la fiche. Le reste vit sur la page. */
     private const MAX_REVIEWS = 5;
 
+    /** The characteristic a product's maker is recorded under, where one is. */
+    private const BRAND_LABEL = 'Marque';
+
+    /**
+     * The statutory French withdrawal period, in days.
+     *
+     * Also written into the droit de rétractation page, which is the text that
+     * governs; this is the same figure said in a form a search engine reads.
+     */
+    private const RETURN_DAYS = 14;
+
     /** @return array<string, mixed> */
     public static function for(Product $product): array
     {
@@ -34,6 +45,7 @@ class ProductSchema
             'sku' => $product->sku,
             'gtin' => $product->gtin,
             'category' => $product->category?->localizedName(),
+            'brand' => self::brand($product),
             'image' => self::images($product),
             'offers' => self::offers($product),
         ], fn ($value): bool => $value !== null && $value !== '' && $value !== []);
@@ -57,6 +69,65 @@ class ProductSchema
         }
 
         return $schema;
+    }
+
+    /**
+     * The maker, where the catalogue records one.
+     *
+     * Thirty-eight products carry a « Marque » characteristic — Umarex,
+     * Mechanix, Specna Arms — and the rest carry none. Those publish no brand
+     * at all rather than the shop's own name: Armo Outdoor did not make the
+     * Mechanix gloves it sells, and a brand is one of the fields Google reads
+     * back against merchant feeds. A gap it forgives; a wrong answer it does
+     * not.
+     *
+     * @return array<string, string>|null
+     */
+    private static function brand(Product $product): ?array
+    {
+        $sources = array_merge(
+            $product->characteristics ?? [],
+            $product->filter_attributes ?? [],
+        );
+
+        foreach ($sources as $entry) {
+            if (($entry['label'] ?? '') !== self::BRAND_LABEL) {
+                continue;
+            }
+
+            $name = trim((string) ($entry['value'] ?? ''));
+
+            if ($name !== '') {
+                return ['@type' => 'Brand', 'name' => $name];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * The right to change one's mind, said where a search result can show it.
+     *
+     * Fourteen days from delivery, return by post, return postage at the
+     * customer's charge — the terms of the droit de rétractation page, which
+     * is where they are actually promised. Google prints the window beside
+     * free listings, and a shop that says nothing is read as a shop with no
+     * returns.
+     *
+     * @return array<string, mixed>
+     */
+    private static function returnPolicy(): array
+    {
+        return [
+            '@type' => 'MerchantReturnPolicy',
+            'applicableCountry' => 'FR',
+            'returnPolicyCategory' => 'https://schema.org/MerchantReturnFiniteReturnWindow',
+            'merchantReturnDays' => self::RETURN_DAYS,
+            'returnMethod' => 'https://schema.org/ReturnByMail',
+            // The customer bears the postage, so the amount is theirs and not
+            // ours to state: this says who pays without inventing a figure.
+            'returnFees' => 'https://schema.org/ReturnFeesCustomerResponsibility',
+        ];
     }
 
     /** @return array<int, string> */
@@ -86,6 +157,7 @@ class ProductSchema
             'availability' => self::availability($product),
             'itemCondition' => 'https://schema.org/NewCondition',
             'url' => localized_route('products.show', ['product' => $product->slug]),
+            'hasMerchantReturnPolicy' => self::returnPolicy(),
         ];
 
         $variantPrices = $product->hasVariants()
