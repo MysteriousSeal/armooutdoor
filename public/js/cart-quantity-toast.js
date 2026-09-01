@@ -28,11 +28,54 @@
         });
     }
 
+    /**
+     * Keeps the « réservé aux majeurs » notice honest after a line goes.
+     *
+     * The warning outlived the article it was about: the line disappeared and
+     * the notice stayed, telling the customer their basket held something it
+     * no longer did. The entry goes with the line, the notice goes with the
+     * last entry, and the wording follows the count.
+     */
+    function syncAgeNotice(productId) {
+        var notice = document.querySelector('[data-cart-age]');
+
+        if (!notice) {
+            return;
+        }
+
+        var entry = notice.querySelector('li[data-product-id="' + productId + '"]');
+
+        if (entry) {
+            entry.remove();
+        }
+
+        var remaining = notice.querySelectorAll('li[data-product-id]').length;
+
+        if (remaining === 0) {
+            notice.remove();
+            return;
+        }
+
+        var title = notice.querySelector('.cart-age-title');
+        var label = notice.querySelector('.cart-age-items-label');
+        var suffix = remaining === 1 ? 'one' : 'many';
+
+        if (title) {
+            title.textContent = notice.getAttribute('data-title-' + suffix);
+            notice.setAttribute('aria-label', notice.getAttribute('data-title-' + suffix));
+        }
+
+        if (label) {
+            label.textContent = notice.getAttribute('data-label-' + suffix);
+        }
+    }
+
     function applyUpdate(form, input, data) {
         var line = form.closest('.cart-line');
 
         if (data.removed) {
             if (line) {
+                syncAgeNotice(line.getAttribute('data-product-id'));
                 line.remove();
             }
         } else if (line) {

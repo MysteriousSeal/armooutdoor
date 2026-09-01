@@ -26,6 +26,11 @@ class CartController extends Controller
 
         return view('cart.show', [
             'lines' => $lines,
+            // Whether the basket holds anything reserved to adults, and where
+            // the customer stands on proving they are one. It never blocks
+            // the order: it says what will be asked before it is asked.
+            'ageRestrictedLines' => $lines->filter(fn ($line): bool => (bool) $line->product->age_restricted)->values(),
+            'identityStatus' => auth()->user()?->identityStatus(),
             'total' => $cart->formattedTotal(),
             'itemCount' => $cart->quantity(),
             'freeShippingUnlocked' => $freeShippingUnlocked,

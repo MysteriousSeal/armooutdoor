@@ -24,6 +24,13 @@
                 <a href="{{ localized_route('home') }}" class="btn btn-primary">{{ __('store.cart_empty_cta') }}</a>
             </div>
         @else
+            @if ($ageRestrictedLines->isNotEmpty())
+                {{-- Above the basket, not beside the total: it is a condition of
+                     the order rather than a line of it, and it never blocks
+                     anything. --}}
+                @include('partials.cart-age-notice', ['ageRestrictedNames' => $ageRestrictedLines->mapWithKeys(fn ($line) => [$line->product->id => $line->product->localizedName()])])
+            @endif
+
             @if ($estimatedShippingDate)
                 <p class="cart-shipping-estimate">
                     <span class="cart-shipping-estimate-icon" aria-hidden="true">
@@ -46,7 +53,7 @@
             <div class="cart-layout">
                 <ul class="cart-list">
                     @foreach ($lines as $line)
-                        <li class="cart-line">
+                        <li class="cart-line" data-product-id="{{ $line->product->id }}">
                             <div class="cart-line-media-slot">
                                 <a href="{{ localized_route('products.show', ['product' => $line->product->slug]) }}" class="cart-line-media">
                                     <img

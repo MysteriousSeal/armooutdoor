@@ -41,6 +41,13 @@
             <span>{{ __('store.order_title', ['number' => $order->number]) }}</span>
         </nav>
 
+        @if ($ageRestrictedNames->isNotEmpty())
+            {{-- The order is placed and cannot be unplaced: this says what is
+                 still wanted before it can leave, and never that anything is
+                 wrong with the order. --}}
+            @include('partials.cart-age-notice', ['ageContext' => 'order'])
+        @endif
+
         <header class="order-hero">
             <p class="home-kicker">{{ __('store.order_confirmed') }}</p>
             <h2 class="page-title">{{ $order->number }}</h2>

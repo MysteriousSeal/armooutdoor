@@ -32,6 +32,16 @@
                                 <span class="order-status is-{{ $order->status }}">
                                     {{ __('store.order_status_'.$order->status) }}
                                 </span>
+                                @if ($ageMark && $ordersNeedingProof->contains($order->id))
+                                    {{-- Two marks, not one: « à fournir » is something the
+                                         customer must act on, « en cours » is something
+                                         already being seen to. A warning they cannot clear
+                                         only makes the real ones harder to spot. --}}
+                                    <span class="order-age-mark order-age-mark--{{ $ageMark }}">
+                                        <span class="order-age-mark-dot" aria-hidden="true"></span>
+                                        {{ $ageMark === 'pending' ? __('store.orders_age_pending') : __('store.orders_age_action') }}
+                                    </span>
+                                @endif
                             </div>
                             <p class="order-list-meta">
                                 {{ $order->created_at->translatedFormat('d F Y') }}
