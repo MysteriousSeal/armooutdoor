@@ -72,6 +72,26 @@ class ProductVariant extends Model
         return $this->price_cents ?? $this->product->effectivePriceCents();
     }
 
+    /**
+     * Whether this variant is sold at a reduction.
+     *
+     * A variant carrying its own price is sold at it, discount or none: the
+     * reduction belongs to the product's price, and a variant that overrides
+     * that price has stepped outside it.
+     */
+    public function isDiscounted(): bool
+    {
+        return $this->price_cents === null && $this->product?->hasDiscount() === true;
+    }
+
+    /**
+     * What it costs before any reduction: its own price, or the product's.
+     */
+    public function formattedOriginalPrice(): string
+    {
+        return format_euros($this->price_cents ?? $this->product?->price_cents ?? 0);
+    }
+
     public function formattedPrice(): string
     {
         return format_euros($this->effectivePriceCents());

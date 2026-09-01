@@ -287,7 +287,19 @@
                                         —
                                     @endif
                                 </td>
-                                <td>{{ $product->formattedPrice() }}</td>
+                                <td>
+                                    {{-- The catalogue price first: it is the figure being
+                                         managed. The reduction sits under it, with how deep
+                                         it goes, since the amount alone leaves the reader
+                                         doing the arithmetic. --}}
+                                    <span class="admin-price">{{ $product->formattedOriginalPrice() }}</span>
+                                    @if ($product->hasDiscount())
+                                        <span class="admin-price-cut">
+                                            <span class="admin-price-cut-label">{{ $product->discount->label() }}</span>
+                                            {{ $product->formattedPrice() }}
+                                        </span>
+                                    @endif
+                                </td>
                                 <td>{{ $product->quantity }}</td>
                                 <td>
                                     @php
@@ -508,7 +520,15 @@
                                                             <td><span class="admin-variant-code">{{ $variant->gtin ?: '—' }}</span></td>
                                                             <td>{{ $variant->supplier?->name ?? '—' }}</td>
                                                             <td>{{ $variant->supplier_reference ?: '—' }}</td>
-                                                            <td class="admin-table-num">{{ $variant->formattedPrice() }}</td>
+                                                            <td class="admin-table-num">
+                                                                <span class="admin-price">{{ $variant->formattedOriginalPrice() }}</span>
+                                                                @if ($variant->isDiscounted())
+                                                                    <span class="admin-price-cut">
+                                                                        <span class="admin-price-cut-label">{{ $product->discount->label() }}</span>
+                                                                        {{ $variant->formattedPrice() }}
+                                                                    </span>
+                                                                @endif
+                                                            </td>
                                                             <td class="admin-table-num">
                                                                 @if (! $variant->inStock())
                                                                     <span class="admin-stock-chip is-out">Out</span>

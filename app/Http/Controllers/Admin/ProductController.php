@@ -57,7 +57,9 @@ class ProductController extends Controller
             : (in_array($request->cookie(self::SORT_COOKIE), self::SORTS, true) ? $request->cookie(self::SORT_COOKIE) : self::DEFAULT_SORT);
 
         $products = $this->filteredProductsQuery($search, $categorySlug, $tab, $supplierId)
-            ->with('category', 'supplier', 'variants.supplier')
+            // The discount rides along: the list prints it on every row that
+            // has one, and asking per row is twenty queries a page.
+            ->with('category', 'supplier', 'discount', 'variants.supplier')
             ->withCount('variants')
             ->tap(fn ($query) => $this->applyProductSort($query, $sort))
             ->paginate(24)

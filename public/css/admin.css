@@ -10676,3 +10676,38 @@ a.order-stepper-btn:focus-visible {
     background: #f7eeec;
     border-color: #e6d2ce;
 }
+
+/*
+ * Le prix dans la liste des produits.
+ *
+ * The catalogue price on top, because that is the figure being managed; the
+ * reduction under it, quieter, and carrying how deep it goes — the amount on
+ * its own leaves the reader subtracting one from the other to find out.
+ */
+.admin-price {
+    display: block;
+    font-variant-numeric: tabular-nums;
+}
+
+.admin-price-cut {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 0.15rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: #8a6d1f;
+}
+
+.admin-table-num .admin-price-cut {
+    justify-content: flex-end;
+}
+
+.admin-price-cut-label {
+    padding: 0.05rem 0.28rem;
+    font-size: 0.625rem;
+    letter-spacing: 0.01em;
+    background: color-mix(in srgb, currentColor 14%, transparent);
+    border-radius: 2px;
+}
