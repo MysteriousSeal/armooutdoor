@@ -35,8 +35,8 @@
                 <li>Mesure d'audience externe : si, et seulement si, vous l'acceptez via le bandeau cookies, les
                     pages consultées et quelques événements de la boutique (mise au panier, passage en caisse,
                     commande validée) sont transmis à PostHog, notre sous-traitant de mesure d'audience, sur ses
-                    serveurs situés dans l'Union européenne. Aucune donnée que vous saisissez — nom, adresse,
-                    coordonnées bancaires — ne lui est transmise. En cas de refus, ou tant que vous n'avez pas
+                    serveurs situés dans l'Union européenne. Aucune donnée que vous saisissez (nom, adresse,
+                    coordonnées bancaires) ne lui est transmise. En cas de refus, ou tant que vous n'avez pas
                     répondu, aucun script PostHog n'est chargé et aucune donnée ne lui est envoyée.</li>
             </ul>
             <p>Aucune donnée bancaire n'est stockée par nos soins ; le paiement est traité par un prestataire tiers sécurisé.</p>
@@ -80,7 +80,8 @@
             </p>
             <p>
                 Vous disposez également du droit d'introduire une réclamation auprès de la Commission Nationale de
-                l'Informatique et des Libertés (CNIL) — <a href="https://www.cnil.fr" rel="noopener noreferrer">www.cnil.fr</a>.
+                l'Informatique et des Libertés (CNIL), à l'adresse
+                <a href="https://www.cnil.fr" rel="noopener noreferrer">www.cnil.fr</a>.
             </p>
 
             <h2>Cookies</h2>
