@@ -1557,9 +1557,16 @@ button.admin-table-icon-btn:hover {
     }
 }
 
-.legal-nav a:hover,
+.legal-nav a:hover {
+    color: var(--text);
+    background: var(--bg);
+}
+
+/* The page you are on: named by the accent rule down its edge rather than by
+   a filled box, so the column reads as a list and not as four buttons. */
 .legal-nav a.is-active {
     color: var(--text);
-    border-color: var(--accent);
+    font-weight: 600;
     background: var(--bg);
+    border-left-color: var(--accent);
 }

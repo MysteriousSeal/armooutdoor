@@ -7,7 +7,10 @@
     <div class="container legal-wrap">
         @include('legal.partials.chrome', ['title' => __('store.legal_notice_title')])
 
-        <article class="legal-doc">
+        <div class="legal-layout">
+            @include('legal.partials.nav')
+
+            <article class="legal-doc">
             @unless ($company->isComplete())
                 <p class="legal-notice">
                     Certaines informations de cette page sont encore des espaces réservés. Complétez-les dans
@@ -88,5 +91,6 @@
                 tribunaux français seront seuls compétents.
             </p>
         </article>
+        </div>
     </div>
 @endsection

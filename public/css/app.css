@@ -4749,33 +4749,99 @@ body.has-menu-open {
     margin-bottom: 0;
 }
 
+/*
+ * The legal pages sit on the same edges as the header, like every other page
+ * of the shop. They used to stop at 48rem, which left them floating in the
+ * middle of a container twice that wide and looking like a different site.
+ *
+ * The width is not spent on the prose, though. A line of 1200 pixels is past
+ * anything readable, and a contract is the worst text to ask somebody to read
+ * badly. It goes to the four pages themselves, which used to be a row of pills
+ * above the document and are now a column beside it: the document keeps a
+ * measure it can be read at, and a reader who came to the CGV looking for the
+ * return policy can see where it lives without scrolling to find out.
+ */
 .legal-wrap {
-    max-width: 48rem;
-    margin: 0 auto;
     padding-bottom: 4rem;
 }
 
 .legal-header {
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.legal-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+    align-items: start;
+    gap: 1.5rem;
+}
+
+.legal-aside {
+    /* Follows the reader down a document that runs to thirteen articles. */
+    position: sticky;
+    top: 1.5rem;
 }
 
 .legal-nav {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    margin: 0 0 1.5rem;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.85rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.legal-nav-title {
+    margin: 0 0 0.5rem;
+    padding: 0 0.6rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
 }
 
 .legal-nav a {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    height: 2.25rem;
-    padding: 0 0.85rem;
+    padding: 0.55rem 0.6rem;
     font-size: 0.8125rem;
     font-weight: 500;
+    line-height: 1.3;
     color: var(--text-muted);
-    background: var(--surface);
-    border: 1px solid var(--border);
+    border-left: 2px solid transparent;
+    transition: color 0.15s, background-color 0.15s, border-color 0.15s;
+}
+
+@media (max-width: 60rem) {
+    .legal-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .legal-aside {
+        position: static;
+    }
+
+    .legal-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+    }
+
+    .legal-nav-title {
+        flex-basis: 100%;
+        padding: 0;
+    }
+
+    .legal-nav a {
+        border-left: 0;
+        border-bottom: 2px solid transparent;
+    }
+
+    .legal-nav a.is-active {
+        border-left: 0;
+        border-bottom-color: var(--accent);
+    }
 }
 
 .legal-doc {
