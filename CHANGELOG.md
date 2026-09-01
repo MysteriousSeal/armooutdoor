@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-01 — v1.1.8 — build YTVKJ3
+
+### Under the hood
+
+- **A product says who made it and how it can be sent back.** Two of the three things a listing is judged on beyond its price were missing. Google prints the return window beside a free listing, and a shop that declares none is read as a shop that gives none — the opposite of what the droit de rétractation page promises. That page is now said in a form a search engine reads as well: fourteen days, return by post, postage at the customer's charge, with who pays stated and no figure invented, since the terms name none and the amount is the customer's rather than ours. The brand comes from the « Marque » characteristic — read from the filters too — which thirty-eight products carry: Umarex, Mechanix, Specna Arms, ASG. The other two hundred and twenty-nine publish no brand at all rather than the shop's own name, because Armo Outdoor did not make the gloves it resells and brand is one of the fields Google reads back against merchant feeds; a gap it forgives, a wrong answer it does not. Filling in a Marque now improves the listing and the filters at once.
+
+- **An article says when it was written and who wrote it.** The blog declared a breadcrumb trail and nothing else — seven pieces of three thousand words apiece, each written to be found, none of them saying when it was published, who published it or what it is, which is less about themselves than a category listing manages. Each is a `BlogPosting` now: headline, description, picture, section, and the two dates a reader judges advice by. No article carries a byline, so the shop stands behind its own writing rather than a name invented to sign it, and the modified date falls back to publication — an article nobody has touched was last correct on the day it went up. The publisher is written out rather than pointed at: the whole organisation lives on the home page where Google looks for it, and an article carries a short form under the same identifier, so the page stands on its own if read alone while the two still resolve to one business.
+
+**Shipping stays out of it.** What a parcel costs depends on its weight tier, its carrier and the cart total — delivery is free above forty-nine euros on the order, not on the product — and collapsing that into a single per-product figure would publish a delivery price that is not the one charged.
+
+**No migration.**
+
 ## 2026-09-01 — v1.1.7 — build K078GQ
 
 ### Under the hood
