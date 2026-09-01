@@ -3,6 +3,21 @@
 @section('title', __('store.legal_withdrawal_title').' — '.config('app.name'))
 @section('canonical', route('legal.withdrawal'))
 
+@push('head')
+    {{-- The section itself has no page, so it is not a step a trail can
+         name: Google wants an address for every element but the last. --}}
+    <script type="application/ld+json">
+        {!! json_encode([
+            '@@context' => 'https://schema.org',
+            '@@type' => 'BreadcrumbList',
+            'itemListElement' => [
+                ['@@type' => 'ListItem', 'position' => 1, 'name' => __('store.breadcrumb_home'), 'item' => route('home')],
+                ['@@type' => 'ListItem', 'position' => 2, 'name' => __('store.legal_withdrawal_title'), 'item' => route('legal.withdrawal')],
+            ],
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+    </script>
+@endpush
+
 @section('content')
     <div class="container legal-wrap">
         @include('legal.partials.chrome', [

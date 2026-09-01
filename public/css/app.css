@@ -4749,6 +4749,12 @@ body.has-menu-open {
     margin-bottom: 0;
 }
 
+/* A breadcrumb step that names a section without being one: it has no page
+   to point at, so it is set apart from the links rather than dressed as one. */
+.breadcrumbs-section {
+    color: var(--text-muted);
+}
+
 /*
  * The title block of the legal and help pages.
  *
