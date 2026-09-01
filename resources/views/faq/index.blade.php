@@ -78,6 +78,9 @@
 @section('canonical', route('faq'))
 
 @push('head')
+    {{-- The FAQ is the landing page of the help section and wears its
+         layout, so it needs the section's stylesheet as well as its own. --}}
+    <link rel="stylesheet" href="{{ versioned_asset('css/help.css') }}">
     <link rel="stylesheet" href="{{ versioned_asset('css/faq.css') }}">
     <script type="application/ld+json">
         {!! json_encode([
@@ -110,7 +113,9 @@
                 [
                     '@@type' => 'ListItem',
                     'position' => 2,
-                    'name' => 'FAQ',
+                    // The same step the sibling pages point at, under the same
+                    // name: this page is the section, not a page inside it.
+                    'name' => 'Aide',
                     'item' => route('faq'),
                 ],
             ],
@@ -119,18 +124,26 @@
 @endpush
 
 @section('content')
-    <div class="container faq-wrap">
+    <div class="container faq-wrap help-wrap">
         <nav class="breadcrumbs" aria-label="breadcrumb">
             <a href="{{ localized_route('home') }}">{{ __('store.breadcrumb_home') }}</a>
             <span class="breadcrumbs-sep" aria-hidden="true">/</span>
-            <span>FAQ</span>
+            {{-- This page is Aide. The siblings link their section crumb here;
+                 on the section's own page it is where you already are. --}}
+            <span class="breadcrumbs-section">Aide</span>
         </nav>
 
-        <header class="page-header">
-            <p class="home-kicker">Aide</p>
-            <h1 class="page-title">Foire aux questions</h1>
-            <p class="page-lede">Les réponses aux questions les plus fréquentes sur la livraison, le paiement, les retours et votre compte.</p>
-        </header>
+        @include('partials.page-panel-header', [
+            'kicker' => 'Aide',
+            'title' => 'Foire aux questions',
+            'lede' => 'Les réponses aux questions les plus fréquentes sur la livraison, le paiement, les retours et votre compte.',
+            'meta' => null,
+        ])
+
+        <div class="help-layout">
+            @include('help.partials.nav')
+
+            <div class="help-main">
 
         <nav class="faq-nav" aria-label="Rubriques de la FAQ">
             @foreach ($faqs as $group)
@@ -163,5 +176,7 @@
             </div>
             <a href="{{ route('legal.notice') }}" class="btn btn-primary faq-contact-cta">Mentions légales</a>
         </aside>
+            </div>
+        </div>
     </div>
 @endsection

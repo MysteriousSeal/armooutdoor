@@ -1,6 +1,6 @@
+/* Width and padding come from .help-wrap now: the FAQ is the landing page of
+   the help section and sits on the same edges as the rest of it. */
 .faq-wrap {
-    max-width: 52rem;
-    margin: 0 auto;
     padding-bottom: 4rem;
 }
 

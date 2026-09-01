@@ -75,4 +75,23 @@ class SitemapTest extends TestCase
             );
         }
     }
+
+    public function test_every_listed_page_still_answers(): void
+    {
+        // The six help and legal pages were restructured; a sitemap is the one
+        // place a broken route is announced to Google rather than noticed.
+        preg_match_all(
+            '#<loc>([^<]+)</loc>#',
+            $this->get('/sitemap-pages.xml')->assertOk()->getContent(),
+            $matches,
+        );
+
+        $this->assertNotEmpty($matches[1]);
+
+        foreach ($matches[1] as $url) {
+            $path = parse_url($url, PHP_URL_PATH) ?: '/';
+
+            $this->get($path)->assertOk();
+        }
+    }
 }

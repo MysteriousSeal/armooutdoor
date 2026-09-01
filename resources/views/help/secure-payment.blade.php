@@ -30,6 +30,12 @@
                 [
                     '@@type' => 'ListItem',
                     'position' => 2,
+                    'name' => 'Aide',
+                    'item' => route('faq'),
+                ],
+                [
+                    '@@type' => 'ListItem',
+                    'position' => 3,
                     'name' => 'Paiement sécurisé',
                     'item' => route('help.secure-payment'),
                 ],

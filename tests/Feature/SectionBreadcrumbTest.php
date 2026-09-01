@@ -23,8 +23,6 @@ class SectionBreadcrumbTest extends TestCase
             'mentions' => ['/mentions-legales', 'Informations légales'],
             'confidentialite' => ['/confidentialite', 'Informations légales'],
             'retractation' => ['/droit-de-retractation', 'Informations légales'],
-            'livraison' => ['/livraison-et-retours', 'Aide'],
-            'paiement' => ['/paiement-securise', 'Aide'],
         ];
     }
 
@@ -39,8 +37,8 @@ class SectionBreadcrumbTest extends TestCase
     #[DataProvider('pages')]
     public function test_the_section_is_named_and_never_linked(string $url): void
     {
-        // It has no page of its own; a crumb pointing at a sibling would be
-        // worse than one pointing nowhere.
+        // The legal group has no page of its own; a crumb pointing at a
+        // sibling would be worse than one pointing nowhere.
         preg_match(
             '#<nav class="breadcrumbs".*?</nav>#s',
             $this->get($url)->assertOk()->getContent(),
@@ -61,5 +59,6 @@ class SectionBreadcrumbTest extends TestCase
 
         $this->assertStringContainsString('"@type":"BreadcrumbList"', $html);
         $this->assertStringNotContainsString('"name":"Informations légales","item":null', $html);
+        $this->assertStringNotContainsString('"name":"Informations légales"', $html);
     }
 }

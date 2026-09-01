@@ -30,6 +30,12 @@
                 [
                     '@@type' => 'ListItem',
                     'position' => 2,
+                    'name' => 'Aide',
+                    'item' => route('faq'),
+                ],
+                [
+                    '@@type' => 'ListItem',
+                    'position' => 3,
                     'name' => 'Livraison & Retours',
                     'item' => route('help.shipping-returns'),
                 ],
