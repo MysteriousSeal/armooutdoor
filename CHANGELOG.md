@@ -2,6 +2,30 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-01 — v1.1.12 — build KVCAQG
+
+### Storefront
+
+- **The six help and legal pages sit on the same edges as the shop.** They stopped at 48 and 52 rem inside a container twice that wide, so they floated in the middle of the page looking like a different site. The width is not spent on the prose, which stays at a length it can be read at: it goes to the pages themselves. What was a row of pills above the document is now a column beside it, sticky, so a reader who came to the CGV looking for the return policy can see where it lives without scrolling the CGV to find out. Under sixty rem it lies back down as a wrapped row, a sidebar the width of a telephone being a lid.
+
+- **Each of them is headed by its own title, once.** The four legal pages had no `h1` at all — their title was an `h2`, which passed unnoticed while the wordmark in the site header was still a heading. The title block was bare text sitting above two bordered panels and read like a heading that had wandered in from another page; it takes the same surface and border as the index beside it and the document below, with the accent rule down its edge that the index already uses to mark where you are. One idea said twice rather than two decorations.
+
+- **The legal pages stop claiming they were rewritten today.** The revision line printed the current date, so the CGV announced a revision on whatever day somebody happened to read them — the one thing that line exists to say, said wrong every time. Each page takes its date from configuration now, bumped when the text actually changes, and shows it as a quiet marker at the far edge instead of in the sentence slot. That frees the line it was occupying, so every legal page finally says what it is for.
+
+- **A page's trail names the section it belongs to.** Accueil, then Aide or Informations légales, then the page. « Aide » is a link: rather than write an index page holding four links and nothing else, the FAQ takes the title it had already earned with thirteen hundred words and ten questions, and wears the section's header and index. « Informations légales » is named and not linked, that group having no page of its own and a crumb landing you on a sibling being worse than one that goes nowhere.
+
+- **PayPal's « Bientôt disponible » badge reads as a badge.** It had markup and no rules behind it, so it inherited the tile label's uppercase and weight and came out as one run of capitals, indistinguishable from a method you could pay with today. The tile now says it twice: the logo drained of most of its colour and the label lightened, so the difference reads before anything is read, and a neutral pill underneath confirming it.
+
+- **The em dashes are gone from the legal pages.** The shop dropped them from its prose a while back, keeping them only as tab-title separators; the four legal pages never got the same pass. Thirteen article headings and four sentences take colons and parentheses instead.
+
+### Under the hood
+
+- **The legal pages declare their trail.** They carried no `BreadcrumbList` where the help pages beside them did. They have one now, of two steps while the visible trail shows three: Google wants an address for every element but the last, the legal section has none, and a name without one is not markup it accepts.
+
+- **Two faults of the same shape, and a test for each.** The FAQ was given the help layout and kept only its own stylesheet, so a correct grid and sidebar rendered as unstyled stacked blocks; the payment badge named two classes that were never written. Both are markup pointing at rules that do not exist, and nothing anywhere fails when that happens. A test now holds each page to the stylesheets its layout lives in, and another walks the pages sitemap to check every address in it still answers.
+
+**No migration.**
+
 ## 2026-09-01 — v1.1.11 — build 6YY1WU
 
 ### Storefront
