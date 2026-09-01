@@ -566,6 +566,32 @@ textarea.form-control {
     color: var(--text-muted);
 }
 
+/* A live count under a field — grey while still short, green inside the
+   advised range, red once past it. A warning, never a wall. */
+.form-char-counter {
+    margin: 0.3rem 0 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+}
+
+.form-char-counter.is-good {
+    color: #3a6b3a;
+}
+
+.form-char-counter.is-over {
+    color: #c44;
+}
+
+[data-theme='dark'] .form-char-counter.is-good {
+    color: #9ec5a0;
+}
+
+[data-theme='dark'] .form-char-counter.is-over {
+    color: #e08a8a;
+}
+
 .account-nav a:hover,
 .account-nav a.is-active {
     color: var(--text);

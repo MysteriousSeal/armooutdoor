@@ -129,7 +129,10 @@
                         <h3 class="order-panel-title">Product</h3>
                         <div class="form-group">
                             <label for="name">Name</label>
-                            <input type="text" id="name" name="name" class="form-control" value="{{ old('name', $product->name['fr'] ?? '') }}" required maxlength="120">
+                            <input type="text" id="name" name="name" class="form-control" value="{{ old('name', $product->name['fr'] ?? '') }}" required maxlength="120" data-char-counter="name-counter" data-char-limit="60" data-char-min="20">
+                            {{-- A warning, not a wall: a search result truncates the
+                                 title around 60 characters, but a longer name stays valid. --}}
+                            <p class="form-char-counter" id="name-counter" aria-live="polite" hidden></p>
                             @error('name') <p class="form-error">{{ $message }}</p> @enderror
                         </div>
                         <div class="form-group">
@@ -802,6 +805,7 @@
 
 @push('scripts')
     <script src="{{ versioned_asset('js/vendor/quill.js') }}"></script>
+    <script src="{{ versioned_asset('js/admin-char-counter.js') }}" defer></script>
     <script src="{{ versioned_asset('js/admin-description-editor.js') }}" defer></script>
     <script src="{{ versioned_asset('js/admin-gallery-upload.js') }}" defer></script>
     <script src="{{ versioned_asset('js/admin-product-supplier-save.js') }}" defer></script>
