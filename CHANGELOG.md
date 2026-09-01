@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-01 — v1.2.2 — build M2WG09
+
+### Admin
+
+- **The product name counts itself against a search result.** A live counter under the Name field: grey and « a bit short » under twenty characters, green and « reads well » up to sixty, red and « longer than a search result shows » past that — sixty being where a result truncates a title, the number the SEO pass already wrote into the meta fields. Advisory only: the field keeps the column's hard limit of 120 and nothing is ever blocked. The counter is generic, ready to sit under the meta title or a blog headline when wanted.
+
+**No migration.**
+
 ## 2026-09-01 — v1.2.1 — build Y2IWUR
 
 ### Under the hood
