@@ -36,7 +36,18 @@ class PagePanelHeaderTest extends TestCase
         ];
     }
 
-    #[DataProvider('allPages')]
+    /**
+     * The same pages, addresses only.
+     *
+     * PHPUnit warns when a data set passes more arguments than the test
+     * accepts, so a method that only needs the URL is fed only the URL.
+     */
+    public static function urls(): array
+    {
+        return array_map(fn (array $row): array => [$row[0]], self::allPages());
+    }
+
+    #[DataProvider('urls')]
     public function test_each_page_is_headed_once_by_its_own_title(string $url): void
     {
         $html = $this->get($url)->assertOk()->getContent();
@@ -45,7 +56,7 @@ class PagePanelHeaderTest extends TestCase
         $this->assertStringContainsString('<h1 class="panel-header-title">', $html);
     }
 
-    #[DataProvider('allPages')]
+    #[DataProvider('urls')]
     public function test_each_page_says_what_it_is_for(string $url): void
     {
         $this->get($url)->assertOk()->assertSee('class="panel-header-lede"', false);

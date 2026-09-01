@@ -26,6 +26,17 @@ class SectionBreadcrumbTest extends TestCase
         ];
     }
 
+    /**
+     * The same pages, addresses only.
+     *
+     * PHPUnit warns when a data set passes more arguments than the test
+     * accepts, so a method that only needs the URL is fed only the URL.
+     */
+    public static function urls(): array
+    {
+        return array_map(fn (array $row): array => [$row[0]], self::pages());
+    }
+
     #[DataProvider('pages')]
     public function test_each_page_names_its_section(string $url, string $section): void
     {
@@ -34,7 +45,7 @@ class SectionBreadcrumbTest extends TestCase
             ->assertSee('<span class="breadcrumbs-section">'.$section.'</span>', false);
     }
 
-    #[DataProvider('pages')]
+    #[DataProvider('urls')]
     public function test_the_section_is_named_and_never_linked(string $url): void
     {
         // The legal group has no page of its own; a crumb pointing at a
@@ -50,7 +61,7 @@ class SectionBreadcrumbTest extends TestCase
         $this->assertSame(1, substr_count($crumbs[0], '<a '));
     }
 
-    #[DataProvider('pages')]
+    #[DataProvider('urls')]
     public function test_the_trail_declares_itself_without_the_sectionless_step(string $url): void
     {
         // Google wants an address for every element but the last, and the

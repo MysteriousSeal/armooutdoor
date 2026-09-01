@@ -25,7 +25,18 @@ class HelpLayoutTest extends TestCase
         ];
     }
 
-    #[DataProvider('pages')]
+    /**
+     * The same pages, addresses only.
+     *
+     * PHPUnit warns when a data set passes more arguments than the test
+     * accepts, so a method that only needs the URL is fed only the URL.
+     */
+    public static function urls(): array
+    {
+        return array_map(fn (array $row): array => [$row[0]], self::pages());
+    }
+
+    #[DataProvider('urls')]
     public function test_each_page_sets_its_content_beside_the_index(string $url): void
     {
         $this->get($url)
@@ -51,7 +62,7 @@ class HelpLayoutTest extends TestCase
         );
     }
 
-    #[DataProvider('pages')]
+    #[DataProvider('urls')]
     public function test_the_markup_still_closes_everything_it_opens(string $url): void
     {
         // Two wrappers were added around an existing body; a stray </div>
