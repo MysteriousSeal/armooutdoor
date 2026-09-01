@@ -23,9 +23,6 @@ class ProductSchema
     /** Les avis cités dans la fiche. Le reste vit sur la page. */
     private const MAX_REVIEWS = 5;
 
-    /** The characteristic a product's maker is recorded under, where one is. */
-    private const BRAND_LABEL = 'Marque';
-
     /**
      * The statutory French withdrawal period, in days.
      *
@@ -74,9 +71,9 @@ class ProductSchema
     /**
      * The maker, where the catalogue records one.
      *
-     * Thirty-eight products carry a « Marque » characteristic — Umarex,
-     * Mechanix, Specna Arms — and the rest carry none. Those publish no brand
-     * at all rather than the shop's own name: Armo Outdoor did not make the
+     * Read from the product's own field, or from the « Marque » characteristic
+     * it lived in before that. A product with neither publishes no brand at
+     * all rather than the shop's own name: Armo Outdoor did not make the
      * Mechanix gloves it sells, and a brand is one of the fields Google reads
      * back against merchant feeds. A gap it forgives; a wrong answer it does
      * not.
@@ -85,24 +82,9 @@ class ProductSchema
      */
     private static function brand(Product $product): ?array
     {
-        $sources = array_merge(
-            $product->characteristics ?? [],
-            $product->filter_attributes ?? [],
-        );
+        $name = $product->brandName();
 
-        foreach ($sources as $entry) {
-            if (($entry['label'] ?? '') !== self::BRAND_LABEL) {
-                continue;
-            }
-
-            $name = trim((string) ($entry['value'] ?? ''));
-
-            if ($name !== '') {
-                return ['@type' => 'Brand', 'name' => $name];
-            }
-        }
-
-        return null;
+        return $name === null ? null : ['@type' => 'Brand', 'name' => $name];
     }
 
     /**

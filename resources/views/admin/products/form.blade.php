@@ -133,6 +133,17 @@
                             @error('name') <p class="form-error">{{ $message }}</p> @enderror
                         </div>
                         <div class="form-group">
+                            <label for="brand">Brand</label>
+                            <input type="text" id="brand" name="brand" class="form-control brand-input" list="known-brands" value="{{ old('brand', $product->brand) }}" maxlength="80" placeholder="Umarex, Mechanix, Specna Arms…" autocomplete="off">
+                            <datalist id="known-brands">
+                                @foreach (\App\Models\Product::knownBrands() as $knownBrand)
+                                    <option value="{{ $knownBrand }}"></option>
+                                @endforeach
+                            </datalist>
+                            <p class="form-hint">Who made it, not who sells it. Leave empty for unbranded stock — search engines forgive a gap and not a wrong answer.</p>
+                            @error('brand') <p class="form-error">{{ $message }}</p> @enderror
+                        </div>
+                        <div class="form-group">
                             <label for="category_id">Category</label>
                             <select id="category_id" name="category_id" class="form-control" required>
                                 <option value="">Choose a category</option>

@@ -39,6 +39,7 @@ use Illuminate\Support\Str;
     'name',
     'meta_title',
     'meta_description',
+    'brand',
     'description',
     'characteristics',
     'filter_attributes',
@@ -443,6 +444,54 @@ class Product extends Model
         $override = trim((string) $this->meta_title);
 
         return $override !== '' ? $override : $this->localizedName();
+    }
+
+    /**
+     * The maker, from its own column or from where it used to live.
+     *
+     * Brand was a « Marque » characteristic before it was a field. The old
+     * entries were copied across and left in place, since the category
+     * filters are built from them, so the column is read first and the
+     * characteristic remains the fallback for anything not yet migrated.
+     */
+    public function brandName(): ?string
+    {
+        $brand = trim((string) $this->brand);
+
+        if ($brand !== '') {
+            return $brand;
+        }
+
+        foreach (array_merge($this->characteristics ?? [], $this->filter_attributes ?? []) as $entry) {
+            if (($entry['label'] ?? '') === 'Marque') {
+                $value = trim((string) ($entry['value'] ?? ''));
+
+                if ($value !== '') {
+                    return $value;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Every brand the catalogue already uses, for the admin form to suggest.
+     *
+     * Keeps "ASG" and "ASG (Blaster)" from drifting further apart without
+     * refusing a brand that has not been sold before.
+     *
+     * @return list<string>
+     */
+    public static function knownBrands(): array
+    {
+        return static::query()
+            ->whereNotNull('brand')
+            ->where('brand', '!=', '')
+            ->distinct()
+            ->orderBy('brand')
+            ->pluck('brand')
+            ->all();
     }
 
     /**

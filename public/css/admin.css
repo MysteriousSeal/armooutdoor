@@ -10250,3 +10250,29 @@ a.order-stepper-btn:focus-visible {
     color: var(--accent-hover);
     border-color: var(--accent);
 }
+
+/*
+ * The brand field.
+ *
+ * A suggestion list is invisible: nothing about a text input says it offers
+ * one. A small chevron says so, without pretending to be a select — the field
+ * stays free text, and a brand never sold before is typed in like any other.
+ */
+.brand-input {
+    padding-right: 2.25rem;
+    background-image: linear-gradient(45deg, transparent 50%, var(--text-muted) 50%),
+        linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
+    background-position: calc(100% - 1.05rem) calc(50% + 1px), calc(100% - 0.8rem) calc(50% + 1px);
+    background-size: 0.3rem 0.3rem, 0.3rem 0.3rem;
+    background-repeat: no-repeat;
+}
+
+.brand-input:focus {
+    background-image: linear-gradient(45deg, transparent 50%, var(--accent) 50%),
+        linear-gradient(135deg, var(--accent) 50%, transparent 50%);
+}
+
+/* Chrome's own picker button would double the chevron drawn above. */
+.brand-input::-webkit-calendar-picker-indicator {
+    display: none !important;
+}

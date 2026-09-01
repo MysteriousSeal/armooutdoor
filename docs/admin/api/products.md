@@ -87,6 +87,7 @@ Every endpoint wraps its payload in `data`.
   "description": "<p>…</p>",
   "meta_title": null,
   "meta_description": null,
+  "brand": null,
   "category_id": 59,
   "category": { "id": 59, "slug": "gants", "name": "Gants" },
   "price_cents": 3999,
@@ -219,7 +220,7 @@ The server assigns:
 
 Partial update. **Only the keys you send are touched** — omitted fields keep their values.
 
-Sending `null` clears a field only where the column allows it: `meta_title`, `meta_description`, `sku`, `gtin`, `weight_grams`, `supplier_id`, `supplier_reference`, `supplier_product_url`, `supplier_price`, `markup_percent`. Sending `null` for `carrier_ids` is a `422` — send `[]` instead. Sending `null` or `""` for `image` clears it to an empty string.
+Sending `null` clears a field only where the column allows it: `meta_title`, `meta_description`, `brand`, `sku`, `gtin`, `weight_grams`, `supplier_id`, `supplier_reference`, `supplier_product_url`, `supplier_price`, `markup_percent`. Sending `null` for `carrier_ids` is a `422` — send `[]` instead. Sending `null` or `""` for `image` clears it to an empty string.
 
 ```bash
 curl -s -X PATCH \
@@ -246,6 +247,7 @@ Same set for `POST` and `PATCH`.
 | `quantity` | int | 0–99 999. **MUST NOT** be sent for a product with variants |
 | `meta_title` | string\|null | ≤ 70. The title a search result shows. Empty or omitted: the product's `name` is used. Worth setting when the name runs past ~60 characters, which a result truncates |
 | `meta_description` | string\|null | ≤ 160. The description a search result shows. Empty or omitted: the product's `description` is used, cut at its last whole sentence. 160 is what a result shows, so nothing sent here is truncated |
+| `brand` | string\|null | ≤ 80. Who made the product, not who sells it. Empty or omitted: no brand is published, which is correct for unbranded stock |
 | `sku` | string\|null | ≤ 64, unique across products **and** variants |
 | `gtin` | string\|null | 8, 12, 13 or 14 digits; unique across products **and** variants |
 | `weight_grams` | int\|null | 0–99 999 |

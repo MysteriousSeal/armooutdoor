@@ -745,6 +745,7 @@ class ProductController extends Controller
             ],
             'meta_title' => $request->filled('meta_title') ? $request->string('meta_title')->trim()->toString() : null,
             'meta_description' => $request->filled('meta_description') ? $request->string('meta_description')->trim()->toString() : null,
+            'brand' => $request->filled('brand') ? $request->string('brand')->trim()->toString() : null,
             'description' => [
                 'fr' => HtmlSanitizer::clean($request->input('description')) ?? '',
             ],

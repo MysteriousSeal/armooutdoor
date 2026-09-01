@@ -49,6 +49,7 @@ abstract class ProductPayloadRequest extends FormRequest
             'name' => [$required, 'string', 'max:120'],
             'meta_title' => ['sometimes', 'nullable', 'string', 'max:70'],
             'meta_description' => ['sometimes', 'nullable', 'string', 'max:160'],
+            'brand' => ['sometimes', 'nullable', 'string', 'max:80'],
             'description' => [$required, 'string', 'max:50000'],
             'category_id' => [$required, 'integer', 'exists:categories,id'],
             'price' => [$required, 'numeric', 'min:0', 'max:99999.99'],
