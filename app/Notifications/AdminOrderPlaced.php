@@ -37,7 +37,9 @@ class AdminOrderPlaced extends Notification
         return (new MailMessage)
             ->subject('New order '.$this->order->number.' — '.format_euros($this->order->total_cents))
             ->markdown('emails.orders.admin-placed', [
-                'order' => $this->order->loadMissing('items', 'user', 'marketplace'),
+                'order' => $this->order->loadMissing('items.product', 'user.identityDocuments', 'marketplace'),
+                // The proof, resolved once here rather than by the template.
+                'ageProof' => $this->order->ageProofSummary(),
                 'channel' => $this->channel(),
             ]);
     }

@@ -28,7 +28,9 @@ class OrderConfirmed extends Notification
         return (new MailMessage)
             ->subject(__('store.order_confirmed_subject', ['number' => $this->order->number]))
             ->markdown('emails.orders.confirmed', [
-                'order' => $this->order->loadMissing('items'),
+                'order' => $this->order->loadMissing('items.product', 'user.identityDocuments'),
+                // The proof, resolved once here rather than by the template.
+                'ageProof' => $this->order->ageProofSummary(),
             ]);
     }
 }

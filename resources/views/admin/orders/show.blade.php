@@ -173,7 +173,7 @@
                                 @endif
                             </p>
                             <p class="order-age-check-items">
-                                {{ $ageRestrictedItems->pluck('name')->join(' · ') }}
+                                {{ $ageRestrictedItems->map->localizedName()->join(' · ') }}
                             </p>
                         </div>
 

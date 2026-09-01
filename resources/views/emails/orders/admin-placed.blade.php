@@ -3,6 +3,26 @@
 
 **{{ $channel }}** — {{ trim(($order->address_snapshot['first_name'] ?? '').' '.($order->address_snapshot['last_name'] ?? '')) }}@if ($order->user?->email && ! $order->user->external) ({{ $order->user->email }})@endif
 
+@if ($ageProof)
+@php
+    $identity = $order->user?->identityStatus();
+    $ageLine = match ($ageProof['state']) {
+        'verified' => $identity['until']
+            ? 'Age verified, covered until '.$identity['until']->format('d/m/Y').'. This order may be dispatched.'
+            : 'Age verified. This order may be dispatched.',
+        'pending' => 'A proof of age is waiting to be reviewed. Do not dispatch until it is.',
+        'expired' => 'The proof of age on file expired on '.$identity['at']?->format('d/m/Y').'. A new one is needed before dispatch.',
+        'rejected' => 'The proof of age on file was rejected. A new one is needed before dispatch.',
+        default => 'No proof of age on file for this customer. Ask for one before dispatch.',
+    };
+@endphp
+<x-mail::panel>
+**Reserved to adults** — {{ $ageProof['items']->map->localizedName()->join(', ') }}
+
+{{ $ageLine }} *Status as at the time of sending.*
+</x-mail::panel>
+@endif
+
 <x-mail::table>
 | Item | Qty | Price |
 |:-----|:---:|------:|

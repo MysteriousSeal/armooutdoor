@@ -40,7 +40,9 @@ class AdminOrderAgeCheckTest extends TestCase
         $order->items()->create([
             'product_id' => $product->id,
             'product_slug' => $product->slug,
-            'name' => $product->localizedName(),
+            // The checkout stores the translated array, not a string: a fixture
+            // that stores a string hides every bug in how the name is read.
+            'name' => $product->name,
             'image' => '',
             'unit_price_cents' => 1000, 'quantity' => 1, 'line_cents' => 1000,
         ]);
@@ -80,7 +82,9 @@ class AdminOrderAgeCheckTest extends TestCase
         $this->page($order)
             ->assertSee('order-age-check--none', false)
             ->assertSee('No proof of age on file', false)
-            ->assertSee($order->items->first()->name, false);
+            // localizedName(), not the raw column: the name is a translated
+            // array on an order line and renders as nothing when plucked.
+            ->assertSee($order->items->first()->localizedName(), false);
     }
 
     public function test_a_verified_order_says_it_may_go(): void

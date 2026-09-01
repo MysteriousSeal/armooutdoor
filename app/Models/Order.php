@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Notification as NotificationFacade;
 use Illuminate\Support\Str;
@@ -446,6 +447,30 @@ class Order extends Model
     public function adminInvoiceIsAvailable(): bool
     {
         return ! in_array($this->status, ['placed', 'draft'], true);
+    }
+
+    /**
+     * The proof of age this order needs, and where it stands, or null.
+     *
+     * Read at the moment it is asked for. An email carries the answer as it
+     * was when sent, which is why both of them say so.
+     *
+     * @return array{state: string, items: Collection<int, mixed>}|null
+     */
+    public function ageProofSummary(): ?array
+    {
+        $items = $this->items->filter(
+            fn ($item): bool => (bool) $item->product?->age_restricted,
+        )->values();
+
+        if ($items->isEmpty()) {
+            return null;
+        }
+
+        return [
+            'state' => $this->user?->identityStatus()['state'] ?? 'none',
+            'items' => $items,
+        ];
     }
 
     /**

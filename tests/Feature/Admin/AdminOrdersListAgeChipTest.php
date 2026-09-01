@@ -40,7 +40,9 @@ class AdminOrdersListAgeChipTest extends TestCase
         $order->items()->create([
             'product_id' => $product->id,
             'product_slug' => $product->slug,
-            'name' => $product->localizedName(),
+            // The checkout stores the translated array, not a string: a fixture
+            // that stores a string hides every bug in how the name is read.
+            'name' => $product->name,
             'image' => '',
             'unit_price_cents' => 1000, 'quantity' => 1, 'line_cents' => 1000,
         ]);

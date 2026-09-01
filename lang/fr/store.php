@@ -147,6 +147,16 @@ return [
     'cart_age_rejected' => 'La pièce déposée n\'a pas pu être acceptée. Vous pouvez commander : une nouvelle pièce sera demandée avant l\'expédition.',
     // La même chose sur une commande : elle est déjà passée, seule
     // l'expédition attend encore.
+    // Le bloc « majeurs » des e-mails de confirmation.
+    'email_age_title' => 'Article réservé aux majeurs',
+    'email_age_asof' => 'à la date de cet e-mail',
+    'email_age_none' => 'Aucune pièce d\'identité n\'est enregistrée à votre nom. Une preuve de majorité est nécessaire avant l\'expédition.',
+    'email_age_pending' => 'Votre pièce d\'identité est en cours de vérification. Votre commande partira une fois la vérification faite.',
+    'email_age_verified' => 'Votre majorité est vérifiée. Rien de plus à faire.',
+    'email_age_verified_until' => 'Votre majorité est vérifiée jusqu\'au :date. Rien de plus à faire.',
+    'email_age_expired' => 'Votre preuve de majorité a expiré le :date. Une nouvelle pièce est nécessaire avant l\'expédition.',
+    'email_age_rejected' => 'La pièce déposée n\'a pas pu être acceptée. Une nouvelle pièce est nécessaire avant l\'expédition.',
+    'email_age_cta' => 'Déposer une pièce d\'identité',
     'orders_age_action' => 'Preuve de majorité à fournir',
     'orders_age_pending' => 'Preuve en cours de vérification',
     'order_age_title' => 'Un article de votre commande est réservé aux majeurs|Plusieurs articles de votre commande sont réservés aux majeurs',
