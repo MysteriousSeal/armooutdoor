@@ -155,6 +155,7 @@
     justify-content: center;
     gap: 0.5rem;
     min-height: 5.25rem;
+    text-align: center;
     padding: 0.85rem 0.55rem;
     background: var(--bg);
 }
@@ -171,6 +172,44 @@
     letter-spacing: 0.03em;
     text-align: center;
     text-transform: uppercase;
+}
+
+/*
+ * A payment method the shop does not take yet.
+ *
+ * The badge had markup and no rules at all, so it inherited the label's own
+ * style and came out as one run of shouting capitals: PAYPAL BIENTOT
+ * DISPONIBLE, indistinguishable from a method you can actually use.
+ *
+ * The tile now says it twice over. The logo is drained of most of its colour
+ * and the label lightened, so the difference reads before anything is read;
+ * the badge underneath confirms it rather than carrying the whole message on
+ * its own.
+ */
+.help-logo--soon {
+    background: color-mix(in srgb, var(--bg) 70%, var(--surface));
+}
+
+.help-logo--soon img {
+    filter: grayscale(0.85);
+    opacity: 0.65;
+}
+
+.help-logo--soon > span:not(.badge) {
+    color: var(--text-muted);
+}
+
+.help-logo-soon {
+    /* Room on all four sides: at 1.15rem tall with 0.45rem of side padding the
+       text sat against the pill's own edge. */
+    height: auto;
+    padding: 0.28rem 0.7rem;
+    font-size: 0.5625rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    background: var(--surface);
+    border-radius: 999px;
 }
 
 .help-next {

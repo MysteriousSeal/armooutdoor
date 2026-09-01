@@ -69,7 +69,10 @@
                     </li>
                     <li class="help-logo help-logo--soon">
                         <img src="{{ asset('images/payments/paypal.png') }}" alt="PayPal" width="120" height="28">
-                        <span>PayPal <span class="help-logo-soon-chip">{{ __('store.payment_paypal_soon') }}</span></span>
+                        <span>PayPal</span>
+                        {{-- Its own line: the tile is a narrow centred column,
+                             and the badge beside the name wrapped mid-phrase. --}}
+                        <span class="badge help-logo-soon">{{ __('store.payment_paypal_soon') }}</span>
                     </li>
                 </ul>
             </section>
