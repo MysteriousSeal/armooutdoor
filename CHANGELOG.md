@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-01 — v1.2.0 — build 2DLAOR
+
+### Admin
+
+- **The low-stock threshold is a setting, not a scattered 2.** At or below it, a product or a size reads « Derniers stocks disponibles » rather than « En stock ». The number was hardcoded in five places — the product, its variant branch, the variants themselves, and the dashboard's low-stock count and alert list — so changing what "last pieces" means meant a deploy. A new Products section under Settings drives them all through one row, memoized per request so a listing of twenty cards does not ask twenty times. Default 2: nothing moves until the number is edited.
+
+**Migration:** one, run with `php artisan migrate` — a `product_settings` table holding its single row.
+
 ## 2026-09-01 — v1.1.17 — build 3VETKQ
 
 ### Storefront
