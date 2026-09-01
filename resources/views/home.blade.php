@@ -209,7 +209,10 @@
                  than no heading. --}}
             <section class="home-deals" id="deals" aria-labelledby="home-deals-title">
                 <header class="home-cats-header">
-                    <h2 class="home-cats-title" id="home-deals-title">{{ __('store.home_deals') }}</h2>
+                    <div class="home-cats-heading">
+                        <p class="home-cats-kicker">{{ __('store.home_kicker_deals') }}</p>
+                        <h2 class="home-cats-title" id="home-deals-title">{{ __('store.home_deals') }}</h2>
+                    </div>
                     <a href="{{ route('products.promotions') }}" class="home-cats-link">
                         {{ __('store.home_deals_link') }} <span aria-hidden="true">→</span>
                     </a>
@@ -238,7 +241,10 @@
         @if ($categories->isNotEmpty())
             <section class="home-cats-section" id="categories" aria-labelledby="home-categories-title">
                 <header class="home-cats-header">
-                    <h2 class="home-cats-title" id="home-categories-title">{{ __('store.shop_by_category') }}</h2>
+                    <div class="home-cats-heading">
+                        <p class="home-cats-kicker">{{ __('store.home_kicker_categories') }}</p>
+                        <h2 class="home-cats-title" id="home-categories-title">{{ __('store.shop_by_category') }}</h2>
+                    </div>
                     <a href="{{ route('categories.index') }}" class="home-cats-link">
                         {{ __('store.see_all_categories') }} <span aria-hidden="true">→</span>
                     </a>
@@ -271,7 +277,10 @@
         @if ($featured->isNotEmpty())
             <section class="home-featured" id="featured" aria-labelledby="home-featured-title">
                 <header class="home-cats-header">
-                    <h2 class="home-cats-title" id="home-featured-title">{{ __('store.featured') }}</h2>
+                    <div class="home-cats-heading">
+                        <p class="home-cats-kicker">{{ __('store.home_kicker_featured') }}</p>
+                        <h2 class="home-cats-title" id="home-featured-title">{{ __('store.featured') }}</h2>
+                    </div>
                     <a href="{{ $shopUrl }}" class="home-cats-link">
                         {{ __('store.see_all_products') }} <span aria-hidden="true">→</span>
                     </a>
@@ -306,7 +315,10 @@
         @if ($more->isNotEmpty())
             <section class="home-more" id="more" aria-labelledby="home-more-title">
                 <header class="home-cats-header">
-                    <h2 class="home-cats-title" id="home-more-title">{{ __('store.home_more') }}</h2>
+                    <div class="home-cats-heading">
+                        <p class="home-cats-kicker">{{ __('store.home_kicker_more') }}</p>
+                        <h2 class="home-cats-title" id="home-more-title">{{ __('store.home_more') }}</h2>
+                    </div>
                     <a href="{{ $shopUrl }}" class="home-cats-link">
                         {{ __('store.see_all_products') }} <span aria-hidden="true">→</span>
                     </a>

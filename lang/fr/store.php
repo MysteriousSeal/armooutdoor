@@ -57,6 +57,12 @@ return [
     'home_trust_pack_text' => 'Colis préparé, puis suivi jusqu’à la porte ou au relais.',
     'home_trust_help_title' => 'Une boutique à l’écoute',
     'home_trust_help_text' => 'Compte, adresses et suivi de commande au même endroit.',
+    // Le petit intitulé au-dessus de chaque titre de section : il nomme le
+    // rayon, le titre dit ce qu'on y trouve.
+    'home_kicker_deals' => 'Promotions',
+    'home_kicker_categories' => 'Le catalogue',
+    'home_kicker_featured' => 'Notre choix',
+    'home_kicker_more' => 'Le reste du rayon',
     'home_deals' => 'Les offres du moment',
     'home_deals_link' => 'Voir toutes les promotions',
     'shop_by_category' => 'Achetez par catégorie',

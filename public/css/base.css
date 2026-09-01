@@ -31,6 +31,14 @@
     --border: #e8e6e3;
     --accent: #8b7e74;
     --accent-hover: #6f635a;
+    /*
+     * The olive the category hero gives its headings, and the shop has used
+     * raw in a dozen other places. Named here so a heading can ask for it
+     * without copying the number, and so it can have a dark value at all: the
+     * literal is dark olive on a dark ground, which is where the copies stop
+     * working and this does not.
+     */
+    --accent-heading: #5b5c3b;
     --shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
     --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.08);
     --radius: 0;
@@ -46,6 +54,7 @@
     --border: #3a3734;
     --accent: #b0a396;
     --accent-hover: #c8bdb0;
+    --accent-heading: #a9ab77;
     --shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
     --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.35);
 }
