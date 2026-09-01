@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-01 — v1.1.16 — build JWEGN2
+
+### Admin
+
+- **The product list says what a product costs before it was reduced.** It printed the discounted figure alone, so a reduced product showed a price that was not its catalogue price with nothing saying why. The catalogue price leads now, being the figure that is managed, and the reduction sits under it carrying how deep it goes — the amount on its own leaves the reader subtracting one from the other to find out. The variants inside an expanded row get the same, on a rule of their own rather than the parent's: a variant carrying its own price is sold at it, discount or none, the reduction belonging to the product's price and a variant that overrides that price having stepped outside it. Shown as the parent's, it would have announced a reduction on variants that are not reduced.
+
+### Under the hood
+
+- **The discount rides along with the page.** It was not loaded with the products, so asking each row whether it had one cost a query apiece — twenty a page, to print a figure. A test holds twelve reduced products to a fixed budget, which an N+1 would pass on the first row.
+
+**No migration.**
+
 ## 2026-09-01 — v1.1.15 — build J10QRJ
 
 ### Storefront

@@ -26,5 +26,5 @@ return [
         'privacy' => '2026-09-01',
         'withdrawal' => '2026-09-01',
     ],
-    'version' => '1.1.15',
+    'version' => '1.1.16',
 ];
