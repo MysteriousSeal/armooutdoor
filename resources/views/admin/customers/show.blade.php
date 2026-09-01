@@ -110,13 +110,44 @@
                                             @endif
                                         </span>
                                     </div>
-                                    @if ($order->isArchived())
-                                        <span class="badge badge-disabled" title="Archived, and still counted in the total spent">Archived</span>
-                                    @endif
-                                    @if ($order->isTest())
-                                        <span class="badge badge-test" title="Left out of the total spent">Test</span>
-                                    @endif
-                                    <span class="badge badge-{{ $order->status }}">{{ $order->statusLabel() }}</span>
+                                    {{-- Gathered into one cell so the status keeps the far
+                                         right whether or not the optional badges are
+                                         there: as four grid columns it sat wherever the
+                                         count of badges happened to leave it. --}}
+                                    <div class="admin-customer-order-marks">
+                                        @if (in_array($order->id, $ageRestrictedOrderIds, true))
+                                            {{-- The same chip the order list uses, so an
+                                                 order reads the same wherever it is met.
+                                                 The panel above says it once for the
+                                                 customer; this says which orders it was
+                                                 the answer to. --}}
+                                            <span
+                                                class="order-chip order-chip--age order-chip--age-{{ $identityStatus['state'] }}"
+                                                title="{{ [
+                                                    'verified' => 'Age verified for this customer',
+                                                    'pending' => 'A proof of age is waiting to be reviewed',
+                                                    'expired' => 'The proof of age on file has expired',
+                                                    'rejected' => 'The proof of age on file was rejected',
+                                                ][$identityStatus['state']] ?? 'No proof of age on file' }}"
+                                            >
+                                                <span class="order-chip-age-mark" aria-hidden="true">-18</span>
+                                                @switch ($identityStatus['state'])
+                                                    @case ('verified') Verified @break
+                                                    @case ('pending') Pending @break
+                                                    @case ('expired') Expired @break
+                                                    @case ('rejected') Rejected @break
+                                                    @default Missing
+                                                @endswitch
+                                            </span>
+                                        @endif
+                                        @if ($order->isArchived())
+                                            <span class="badge badge-disabled" title="Archived, and still counted in the total spent">Archived</span>
+                                        @endif
+                                        @if ($order->isTest())
+                                            <span class="badge badge-test" title="Left out of the total spent">Test</span>
+                                        @endif
+                                        <span class="badge badge-{{ $order->status }}">{{ $order->statusLabel() }}</span>
+                                    </div>
                                 </li>
                             @endforeach
                         </ul>

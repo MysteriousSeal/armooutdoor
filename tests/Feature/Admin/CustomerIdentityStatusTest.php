@@ -3,6 +3,8 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\IdentityDocument;
+use App\Models\Order;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\TestResponse;
@@ -127,5 +129,145 @@ class CustomerIdentityStatusTest extends TestCase
         $this->page($customer)
             ->assertSee('Expired', false)
             ->assertDontSee('Covered until', false);
+    }
+
+    public function test_an_order_row_ends_with_its_status(): void
+    {
+        // The badges are optional and the status is not, so they share one
+        // right-hand cell rather than a column each: as columns, the status
+        // sat wherever the number of badges happened to leave it.
+        $customer = User::factory()->create();
+
+        Order::query()->create([
+            'number' => Order::generateNumber(),
+            'user_id' => $customer->id,
+            'status' => 'placed',
+            'address_snapshot' => ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'x', 'postal_code' => '75000', 'city' => 'Paris', 'country' => 'FR'],
+            'billing_address_snapshot' => ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'x', 'postal_code' => '75000', 'city' => 'Paris', 'country' => 'FR'],
+            'carrier_method' => 'home',
+            'carrier_snapshot' => ['name' => ['fr' => 'Colissimo']],
+            'subtotal_cents' => 1000, 'shipping_cents' => 0, 'discount_cents' => 0, 'total_cents' => 1000,
+            'payment_method' => 'card',
+        ]);
+
+        $html = $this->page($customer)->getContent();
+
+        $this->assertStringContainsString('admin-customer-order-marks', $html);
+
+        // The status badge is the last thing inside that cell.
+        preg_match('#<div class="admin-customer-order-marks">(.*?)</div>#s', $html, $marks);
+        $this->assertNotEmpty($marks);
+        $this->assertStringEndsWith('</span>', trim($marks[1]));
+        $this->assertStringContainsString('badge-placed', $marks[1]);
+    }
+
+    private function orderFor(User $customer, bool $restricted): Order
+    {
+        $product = Product::factory()->create(['is_active' => true, 'age_restricted' => $restricted]);
+
+        $order = Order::query()->create([
+            'number' => Order::generateNumber(),
+            'user_id' => $customer->id,
+            'status' => 'placed',
+            'address_snapshot' => ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'x', 'postal_code' => '75000', 'city' => 'Paris', 'country' => 'FR'],
+            'billing_address_snapshot' => ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'x', 'postal_code' => '75000', 'city' => 'Paris', 'country' => 'FR'],
+            'carrier_method' => 'home',
+            'carrier_snapshot' => ['name' => ['fr' => 'Colissimo']],
+            'subtotal_cents' => 1000, 'shipping_cents' => 0, 'discount_cents' => 0, 'total_cents' => 1000,
+            'payment_method' => 'card',
+        ]);
+
+        $order->items()->create([
+            'product_id' => $product->id,
+            'product_slug' => $product->slug,
+            'name' => $product->localizedName(),
+            'image' => '',
+            'unit_price_cents' => 1000, 'quantity' => 1, 'line_cents' => 1000,
+        ]);
+
+        return $order;
+    }
+
+    public function test_a_restricted_order_row_carries_the_chip(): void
+    {
+        $customer = User::factory()->create();
+        $this->orderFor($customer, true);
+
+        $this->page($customer)
+            ->assertSee('order-chip--age-none', false)
+            ->assertSee('<span class="order-chip-age-mark" aria-hidden="true">-18</span>', false)
+            ->assertSee('Missing', false);
+    }
+
+    public function test_an_ordinary_order_row_carries_none(): void
+    {
+        $customer = User::factory()->create();
+        $this->orderFor($customer, false);
+
+        $this->page($customer)->assertDontSee('order-chip--age', false);
+    }
+
+    public function test_the_chip_follows_the_customer_verdict(): void
+    {
+        $customer = User::factory()->create();
+        $this->document($customer, 'verified')->forceFill([
+            'expires_at' => now()->addYear(),
+            'reviewed_at' => now(),
+        ])->save();
+        $this->orderFor($customer, true);
+
+        $this->page($customer)->assertSee('order-chip--age-verified', false);
+    }
+
+    public function test_only_the_restricted_orders_are_chipped(): void
+    {
+        $customer = User::factory()->create();
+        $this->orderFor($customer, true);
+        $this->orderFor($customer, false);
+        $this->orderFor($customer, false);
+
+        $html = $this->page($customer)->getContent();
+
+        // Counted on the mark, not the class: « order-chip--age » is a
+        // substring of « order-chip--age-none » and so appears twice per chip.
+        $this->assertSame(1, substr_count($html, 'order-chip-age-mark'));
+    }
+
+    public function test_the_status_still_ends_the_row(): void
+    {
+        // The chip joins the same cell and must not take the last place: the
+        // order's own status keeps it.
+        $customer = User::factory()->create();
+        $this->orderFor($customer, true);
+
+        preg_match(
+            '#<div class="admin-customer-order-marks">(.*?)</div>#s',
+            $this->page($customer)->getContent(),
+            $marks,
+        );
+
+        $this->assertStringContainsString('order-chip--age', $marks[1]);
+        $this->assertStringContainsString('badge-placed', $marks[1]);
+        $this->assertLessThan(
+            strpos($marks[1], 'badge-placed'),
+            strpos($marks[1], 'order-chip--age'),
+            'The -18 chip should come before the order status, not after it.',
+        );
+    }
+
+    public function test_the_marks_in_a_row_share_one_height(): void
+    {
+        // .badge is fixed at 1.5rem and .order-chip is sized by its padding,
+        // so the status sat visibly shorter than the -18 chip beside it.
+        $css = file_get_contents(public_path('css/admin.css'));
+
+        $this->assertMatchesRegularExpression(
+            '/\.admin-customer-order-marks \.badge,\s*\.admin-customer-order-marks \.order-chip \{[^}]*height:/s',
+            $css,
+        );
+
+        // Scoped to this cell: the order list builds every mark from
+        // .order-chip already, and its marketplace chip pads around a logo.
+        $this->assertStringNotContainsString('.admin-orders-table .order-chip {', $css);
     }
 }

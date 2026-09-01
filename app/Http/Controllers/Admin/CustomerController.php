@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AdminActivityLog;
 use App\Models\Conversation;
+use App\Models\OrderItem;
+use App\Models\Product;
 use App\Models\ProductReview;
 use App\Models\User;
 use App\Support\Csv;
@@ -156,6 +158,14 @@ class CustomerController extends Controller
             // The verdict only. Opening a document happens on one screen, and
             // this is not it.
             'identityStatus' => $customer->identityStatus(),
+            // Which of this customer's orders needed a proof. One query for
+            // the panel rather than loading every item's product to ask.
+            'ageRestrictedOrderIds' => OrderItem::query()
+                ->whereIn('order_id', $orders->pluck('id'))
+                ->whereIn('product_id', Product::query()->where('age_restricted', true)->select('id'))
+                ->distinct()
+                ->pluck('order_id')
+                ->all(),
             'orders' => $orders,
             'spentCents' => $spentCents,
             // The list below shows test orders and the total does not, so the

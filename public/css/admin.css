@@ -87,11 +87,40 @@
 
 .admin-customer-orders li {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto auto;
+    /* Two columns, not four: the badges are optional, and as separate columns
+       the status ended up wherever their count left it instead of the end. */
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
     gap: 0.75rem 1rem;
     padding: 0.85rem 0;
     border-bottom: 1px solid var(--border);
+}
+
+/* The status last, and last of all: the optional marks queue to its left. */
+.admin-customer-order-marks {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.35rem;
+}
+
+/*
+ * One height where the two meet.
+ *
+ * .badge is fixed at 1.5rem and .order-chip is sized by its padding, so the
+ * status came out visibly shorter than the -18 chip beside it. Both are
+ * inline-flex and centre their contents already; they only needed to agree on
+ * a number. Scoped to this cell alone: the order list already builds every
+ * mark from .order-chip, including its status, so it was never mismatched —
+ * and normalising it there would have squashed the marketplace chip, which
+ * pads around a logo rather than around text.
+ */
+.admin-customer-order-marks .badge,
+.admin-customer-order-marks .order-chip {
+    height: 1.65rem;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 .admin-customer-orders li:first-child {
