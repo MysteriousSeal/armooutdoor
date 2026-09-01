@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-01 — v1.2.1 — build Y2IWUR
+
+### Under the hood
+
+- **The threshold memo stops evicting itself as it forms.** The dashboard's flat-query-count test caught the new setting reading through `firstOrCreate`: the insert fired `saved()`, whose cache flush emptied the very memo being written, so the first render paid a query the second did not. The threshold now reads with a plain lookup falling back to 2 — the row only comes to exist when the settings page saves it, and that save still flushes the memo.
+
+**No migration.**
+
 ## 2026-09-01 — v1.2.0 — build 2DLAOR
 
 ### Admin
