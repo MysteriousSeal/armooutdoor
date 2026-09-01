@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-01 — v1.1.10 — build LF0786
+
+### Admin
+
+- **A product's brand has a field of its own.** The maker was a « Marque » row in the free-form characteristics list — the place for describing an article, not for a fact search engines read back against merchant feeds — and thirty-eight products carried one, only because somebody remembered to type the label exactly right. It is a proper field now, sitting above the category on the product form, and it suggests the brands already in use as you type: free text rather than a list to choose from, so « ASG » and « ASG (Blaster) » stop drifting apart without a brand never sold before becoming impossible to enter. A suggestion list shows nothing of itself, so the field draws a small chevron to say it has one, tinted to the accent colour while the field is focused, with Chrome's own button hidden so there are never two. The field goes through the admin API as well, which is how two hundred products get a brand without two hundred visits to the form.
+
+### Under the hood
+
+- **The brands already recorded were carried across.** The migration reads both the characteristics and the filters and fills the new column from either: forty-nine products, fourteen brands. The old entries are left exactly where they were, because the category filters are built generically from `filter_attributes` and removing them would have taken the brand filter down too. The column is read first and the characteristic stays as the fallback, so a product the migration did not reach still declares its maker.
+
+**Migration:** one, run with `php artisan migrate` — a nullable `brand` column on `products`, backfilled in the same pass. Products with no recorded brand stay null and publish none, which is what they did before.
+
 ## 2026-09-01 — v1.1.9 — build II22AN
 
 ### Under the hood
