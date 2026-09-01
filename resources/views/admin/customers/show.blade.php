@@ -241,6 +241,43 @@
             </div>
 
             <aside class="order-facts">
+                {{-- The verdict, and nothing else. Whether this customer has
+                     proved their age is what somebody packing a restricted
+                     order needs; the document itself is opened on the
+                     Identity documents screen, by an owner. --}}
+                <section class="order-fact">
+                    <h3 class="order-fact-title">Proof of age</h3>
+                    <p class="doc-state doc-state--{{ $identityStatus['state'] }}">
+                        <span class="doc-state-dot" aria-hidden="true"></span>
+                        <span class="doc-state-label">
+                            @switch ($identityStatus['state'])
+                                @case ('verified') Verified @break
+                                @case ('pending') Pending verification @break
+                                @case ('expired') Expired @break
+                                @case ('rejected') Rejected @break
+                                @default No document
+                            @endswitch
+                        </span>
+                    </p>
+                    @if ($identityStatus['at'])
+                        <p class="doc-state-meta">
+                            {{ $identityStatus['state'] === 'expired' ? 'Lapsed on ' : '' }}{{ $identityStatus['at']->format('d/m/Y') }}
+                        </p>
+                    @else
+                        <p class="doc-state-meta">Nothing sent in.</p>
+                    @endif
+
+                    @if ($identityStatus['until'] && $identityStatus['state'] !== 'expired')
+                        {{-- The furthest date any of their documents carries: the day this
+                             customer stops being covered, whatever else they have sent in.
+                             Redundant while expired, where the lapse date says it already. --}}
+                        <p class="doc-state-until">
+                            <span class="doc-state-until-label">Covered until</span>
+                            <span class="doc-state-until-date">{{ $identityStatus['until']->format('d/m/Y') }}</span>
+                        </p>
+                    @endif
+                </section>
+
                 <section class="order-fact">
                     <h3 class="order-fact-title">Account</h3>
                     <form method="POST" action="{{ route('admin.customers.update', $customer) }}" class="admin-customer-account-form">

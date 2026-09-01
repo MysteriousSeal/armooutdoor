@@ -122,6 +122,24 @@
                     </span>
                 </span>
             </a>
+
+            <a href="{{ localized_route('account.documents.index') }}" class="account-hub-card">
+                <span class="account-hub-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="22" height="22">
+                        <path d="M6 3h8l4 4v14H6z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                        <path d="M14 3v4h4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                        <path d="M9 13h6M9 16.5h4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                </span>
+                <span class="account-hub-body">
+                    <span class="home-kicker">07</span>
+                    <h3>{{ __('store.documents_title') }}</h3>
+                    <p>{{ __('store.documents_hub') }}</p>
+                    <span class="account-hub-meta">
+                        {{ trans_choice('store.documents_count', $documentCount ?? 0, ['count' => $documentCount ?? 0]) }}
+                    </span>
+                </span>
+            </a>
         </div>
 
         <div class="account-hub-logout">

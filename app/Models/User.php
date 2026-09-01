@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 
 #[Fillable(['first_name', 'last_name', 'email', 'password', 'role', 'external', 'notes'])]
 #[Hidden(['password', 'remember_token'])]
@@ -47,6 +48,66 @@ class User extends Authenticatable
     public function cartItems(): HasMany
     {
         return $this->hasMany(CartItem::class);
+    }
+
+    /**
+     * Proofs of age this customer has sent in.
+     *
+     * @return HasMany<IdentityDocument, $this>
+     */
+    public function identityDocuments(): HasMany
+    {
+        return $this->hasMany(IdentityDocument::class);
+    }
+
+    /**
+     * Where this customer stands on proving their age.
+     *
+     * A verified document settles it even if a later one is still waiting, and
+     * a rejection only stands while nothing better has arrived. A verification
+     * lasts until the date on the document it was read from, after which it
+     * counts for nothing and the customer is asked again. The answer is the
+     * verdict alone: the document itself is opened on one screen and this is
+     * not it.
+     *
+     * @return array{state: string, at: ?Carbon, until: ?Carbon}
+     */
+    public function identityStatus(): array
+    {
+        $documents = $this->relationLoaded('identityDocuments')
+            ? $this->identityDocuments
+            : $this->identityDocuments()->get();
+
+        // The furthest expiry any document carries: the day this customer
+        // stops being covered, whatever else they have sent in. Only a
+        // verification records one, so it is also the last date anybody
+        // approved them to.
+        $until = $documents->pluck('expires_at')->filter()->sortDesc()->first();
+
+        // Expired ranks below pending: a lapsed proof and a new document
+        // waiting means the answer is "waiting", not "lapsed". It ranks above
+        // rejected, since having complied once and run out is not the same as
+        // having been refused.
+        foreach (['verified', 'pending', 'expired', 'rejected'] as $state) {
+            $match = $documents
+                ->filter(fn ($document): bool => $document->effectiveStatus() === $state)
+                ->sortByDesc(fn ($document) => $document->reviewed_at ?? $document->created_at)
+                ->first();
+
+            if ($match !== null) {
+                return [
+                    'state' => $state,
+                    // An expired proof is dated by the day it lapsed, not by
+                    // the day somebody approved it.
+                    'at' => $state === 'expired'
+                        ? $match->expires_at
+                        : ($match->reviewed_at ?? $match->created_at),
+                    'until' => $until,
+                ];
+            }
+        }
+
+        return ['state' => 'none', 'at' => null, 'until' => null];
     }
 
     public function addresses(): HasMany

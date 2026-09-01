@@ -10,6 +10,7 @@ use App\Models\Conversation;
 use App\Models\ConversationMessage;
 use App\Models\Discount;
 use App\Models\DiscountCode;
+use App\Models\IdentityDocument;
 use App\Models\Marketplace;
 use App\Models\Order;
 use App\Models\PackageType;
@@ -113,6 +114,16 @@ class AdminAuthorizationTest extends TestCase
             'payment_method' => 'bank_wire',
         ]);
 
+        $identityDocument = IdentityDocument::query()->create([
+            'user_id' => $customer->id,
+            'kind' => 'passport',
+            'original_name' => 'passport.pdf',
+            'mime' => 'application/pdf',
+            'size_bytes' => 10,
+            'path' => 'identity-documents/audit.enc',
+            'status' => 'pending',
+        ]);
+
         $bindings = [
             'category' => $category->id,
             'product' => $product->id,
@@ -138,6 +149,7 @@ class AdminAuthorizationTest extends TestCase
             'month' => AccountingPeriods::FIRST,
             'section' => 'sales',
             'entry' => $accountingEntry->id,
+            'document' => $identityDocument->id,
         ];
 
         $nonAdmin = User::factory()->create();

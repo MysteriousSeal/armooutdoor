@@ -79,7 +79,7 @@
             @php
                 // Le badge d'un groupe additionne ceux de ses entrées : replié,
                 // il doit encore dire qu'il y a quelque chose à traiter dedans.
-                $salesBadge = $ordersAwaitingStartCount + $unviewedCustomerCount + $unreadMessageCount;
+                $salesBadge = $ordersAwaitingStartCount + $unviewedCustomerCount + $unreadMessageCount + $identityDocumentsAwaitingReviewCount;
                 $salesActive = request()->routeIs('admin.orders.*', 'admin.carts.*', 'admin.customers.*', 'admin.conversations.*', 'admin.discounts.*', 'admin.discount-codes.*');
                 $catalogueActive = request()->routeIs('admin.products.*', 'admin.categories.*', 'admin.labels.*', 'admin.reviews.*', 'admin.purchase-orders.*', 'admin.marketplaces.*');
                 $systemActive = request()->routeIs('admin.settings.*', 'admin.stripe.*', 'admin.activity', 'admin.changelog', 'admin.backups.*');
@@ -115,6 +115,15 @@
                             <span class="admin-nav-badge" title="{{ $unviewedCustomerCount }} not looked at yet">{{ $unviewedCustomerCount }}</span>
                         @endif
                     </a>
+                    @if (auth()->user()?->isOwner())
+                        {{-- Owners only, as the route itself insists. --}}
+                        <a href="{{ route('admin.documents.index') }}" class="admin-nav-menu-item {{ request()->routeIs('admin.documents.*') ? 'active' : '' }}">
+                            Identity documents
+                            @if ($identityDocumentsAwaitingReviewCount > 0)
+                                <span class="admin-nav-badge" title="{{ $identityDocumentsAwaitingReviewCount }} awaiting review">{{ $identityDocumentsAwaitingReviewCount }}</span>
+                            @endif
+                        </a>
+                    @endif
                     <a href="{{ route('admin.carts.index') }}" class="admin-nav-menu-item {{ request()->routeIs('admin.carts.*') ? 'active' : '' }}">Carts</a>
                     <a href="{{ route('admin.conversations.index') }}" class="admin-nav-menu-item {{ request()->routeIs('admin.conversations.*') ? 'active' : '' }}">
                         Messages

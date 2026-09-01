@@ -153,6 +153,9 @@ class CustomerController extends Controller
 
         return view('admin.customers.show', [
             'customer' => $customer,
+            // The verdict only. Opening a document happens on one screen, and
+            // this is not it.
+            'identityStatus' => $customer->identityStatus(),
             'orders' => $orders,
             'spentCents' => $spentCents,
             // The list below shows test orders and the total does not, so the

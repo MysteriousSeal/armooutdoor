@@ -5,8 +5,9 @@ use App\Http\Controllers\Account\AccountController;
 use App\Http\Controllers\Account\AddressController;
 use App\Http\Controllers\Account\ConversationController as AccountConversationController;
 use App\Http\Controllers\Account\DiscountCodeController as AccountDiscountCodeController;
-use App\Http\Controllers\Account\ProfileController;
+use App\Http\Controllers\Account\IdentityDocumentController as AccountIdentityDocumentController;
 // Admin (back office)
+use App\Http\Controllers\Account\ProfileController;
 use App\Http\Controllers\Admin\AccountingController as AdminAccountingController;
 use App\Http\Controllers\Admin\ActivityController as AdminActivityController;
 use App\Http\Controllers\Admin\AdminUserController;
@@ -24,6 +25,7 @@ use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\DiscountCodeController as AdminDiscountCodeController;
 use App\Http\Controllers\Admin\DiscountController as AdminDiscountController;
+use App\Http\Controllers\Admin\IdentityDocumentController as AdminIdentityDocumentController;
 use App\Http\Controllers\Admin\InvoiceSettingController as AdminInvoiceSettingController;
 use App\Http\Controllers\Admin\LabelController as AdminLabelController;
 use App\Http\Controllers\Admin\MarketplaceController as AdminMarketplaceController;
@@ -50,8 +52,8 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ContactController;
-use App\Http\Controllers\GuestConversationController;
 use App\Http\Controllers\FaqController;
+use App\Http\Controllers\GuestConversationController;
 use App\Http\Controllers\HelpController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NewArrivalsController;
@@ -112,6 +114,14 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         Route::get('/analytics/active-now', [AdminAnalyticsController::class, 'activeNow'])->name('analytics.active-now');
         // Owner only, like the rest of what touches money: these pages will
         // carry revenue and costs.
+        // Identity documents are readable by owners alone, and every look is
+        // written to the activity log.
+        Route::middleware('admin.owner')->group(function (): void {
+            Route::get('/documents', [AdminIdentityDocumentController::class, 'index'])->name('documents.index');
+            Route::get('/documents/{document}', [AdminIdentityDocumentController::class, 'show'])->name('documents.show');
+            Route::patch('/documents/{document}', [AdminIdentityDocumentController::class, 'review'])->name('documents.review');
+        });
+
         Route::middleware('admin.owner')->group(function (): void {
             Route::get('/accounting/sales', [AdminAccountingController::class, 'sales'])->name('accounting.sales');
             Route::get('/accounting/sales/{month}', [AdminAccountingController::class, 'salesMonth'])
@@ -463,6 +473,9 @@ Route::middleware('auth')->group(function () {
     Route::put('/account/addresses/{address}', [AddressController::class, 'update'])->name('account.addresses.update');
     Route::delete('/account/addresses/{address}', [AddressController::class, 'destroy'])->name('account.addresses.destroy');
     Route::patch('/account/addresses/{address}/default', [AddressController::class, 'makeDefault'])->name('account.addresses.default');
+    Route::get('/account/documents', [AccountIdentityDocumentController::class, 'index'])->name('account.documents.index');
+    Route::post('/account/documents', [AccountIdentityDocumentController::class, 'store'])->name('account.documents.store');
+    Route::delete('/account/documents/{document}', [AccountIdentityDocumentController::class, 'destroy'])->name('account.documents.destroy');
     Route::get('/account/reductions', [AccountDiscountCodeController::class, 'index'])->name('account.discounts.index');
     Route::get('/account/messages', [AccountConversationController::class, 'index'])->name('account.conversations.index');
     Route::get('/account/messages/{conversation}', [AccountConversationController::class, 'show'])->name('account.conversations.show');

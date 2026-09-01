@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Category;
 use App\Models\CompanySetting;
 use App\Models\Conversation;
+use App\Models\IdentityDocument;
 use App\Models\Order;
 use App\Models\PurchaseOrder;
 use App\Models\User;
@@ -100,6 +101,11 @@ class AppServiceProvider extends ServiceProvider
                     : 0,
                 'purchaseOrdersAwaitingReceiptCount' => $isAdmin
                     ? PurchaseOrder::query()->awaitingReceipt()->count()
+                    : 0,
+                // Owners only: the badge would otherwise tell an admin there
+                // is work waiting behind a door they cannot open.
+                'identityDocumentsAwaitingReviewCount' => $isAdmin && Auth::guard('web')->user()->isOwner()
+                    ? IdentityDocument::query()->where('status', 'pending')->count()
                     : 0,
             ]);
         });

@@ -1,0 +1,200 @@
+/*
+ * Mes documents.
+ *
+ * A page where somebody is asked to hand over a passport should not look like
+ * a file field bolted onto a form. The upload panel and the list sit side by
+ * side, both on the same surface as the rest of the account, and every row
+ * says plainly what became of the document: waiting, read and kept, read and
+ * refused.
+ */
+.doc-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+    align-items: start;
+    gap: 1.5rem;
+}
+
+.doc-form {
+    padding: 1.35rem 1.4rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+}
+
+.doc-form .form-group {
+    margin-bottom: 1rem;
+}
+
+.doc-file {
+    padding: 0.5rem;
+    font-size: 0.8125rem;
+}
+
+.doc-file::file-selector-button {
+    margin-right: 0.7rem;
+    padding: 0.4rem 0.8rem;
+    font: inherit;
+    font-weight: 500;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+}
+
+.doc-file::file-selector-button:hover {
+    border-color: var(--accent);
+}
+
+.doc-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.doc-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem 1rem;
+    padding: 0.9rem 1.1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    /* The state, said in the edge before it is read in the label. */
+    border-left: 3px solid var(--border);
+}
+
+.doc-item--pending {
+    border-left-color: var(--accent);
+}
+
+.doc-item--verified {
+    border-left-color: #6f9a7d;
+}
+
+.doc-item--rejected {
+    border-left-color: #b4736a;
+}
+
+.doc-item-copy {
+    min-width: 0;
+}
+
+.doc-item-kind {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+}
+
+.doc-item-meta {
+    margin: 0.2rem 0 0;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.doc-item-sep {
+    margin: 0 0.35rem;
+}
+
+.doc-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.28rem 0.7rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+}
+
+.doc-status--verified {
+    color: #3d6b4e;
+    background: #eef4ef;
+    border-color: #d5e4d8;
+}
+
+.doc-status--rejected {
+    color: #8a4b42;
+    background: #f7eeec;
+    border-color: #e6d2ce;
+}
+
+.doc-item-delete {
+    padding: 0;
+    font-size: 0.75rem;
+    font-family: inherit;
+    color: var(--text-muted);
+    background: none;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+.doc-item-delete:hover {
+    color: var(--text);
+    border-bottom-color: currentColor;
+}
+
+.doc-empty,
+.doc-flash {
+    margin: 0;
+    padding: 0.9rem 1.1rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.doc-flash {
+    margin-bottom: 1.25rem;
+    color: #3d6b4e;
+    background: #eef4ef;
+    border-color: #d5e4d8;
+}
+
+@media (max-width: 60rem) {
+    .doc-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/*
+ * The validity of a proof, on the customer's own page.
+ *
+ * A date that still holds is a quiet reassurance; one that has passed is the
+ * reason the customer counts as unverified again, so it changes colour and
+ * says what to do next rather than leaving them to work it out.
+ */
+.doc-item--expired {
+    border-left-color: #c08a3e;
+}
+
+.doc-status--expired {
+    color: #8a5c1f;
+    background: #f8f1e4;
+    border-color: #e8dcc4;
+}
+
+.doc-item-validity {
+    margin: 0.35rem 0 0;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.doc-item-validity.is-lapsed {
+    color: #8a5c1f;
+    font-weight: 600;
+}
+
+.doc-item-validity-hint {
+    display: block;
+    margin-top: 0.15rem;
+    font-weight: 400;
+    color: var(--text-muted);
+}

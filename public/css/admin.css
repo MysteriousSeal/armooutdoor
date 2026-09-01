@@ -10276,3 +10276,209 @@ a.order-stepper-btn:focus-visible {
 .brand-input::-webkit-calendar-picker-indicator {
     display: none !important;
 }
+
+/*
+ * Identity documents.
+ *
+ * A screen that shows somebody's passport should make the two things that
+ * matter obvious: whether the file is still there, and what was decided. The
+ * review controls sit together so that verifying is one glance and one click.
+ */
+.doc-admin-sub {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.doc-admin-open {
+    display: inline-block;
+    margin-top: 0.2rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--accent-hover);
+    border-bottom: 1px solid var(--border);
+}
+
+.doc-admin-open:hover {
+    border-bottom-color: currentColor;
+}
+
+.doc-admin-review {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+/*
+ * The controls are a row of equals.
+ *
+ * The date sat in a flex column of its own, which had no height to give it,
+ * so the input stretched to whatever the tallest cell in the row happened to
+ * be and the whole table grew around it. Every control is sized here instead,
+ * and none of them stretches.
+ */
+.doc-admin-review .form-control,
+.doc-admin-review .btn {
+    height: 2rem;
+    min-height: 2rem;
+    flex: 0 0 auto;
+    padding-top: 0;
+    padding-bottom: 0;
+    font-size: 0.75rem;
+    line-height: 1;
+}
+
+.doc-admin-date {
+    width: 8.5rem;
+}
+
+/* The one control that takes the slack, and never below a usable width. */
+.doc-admin-note {
+    flex: 1 1 7rem;
+    min-width: 6rem;
+}
+
+/*
+ * Proof of age, on the customer page.
+ *
+ * Four states and only one of them is good news, so the dot carries the
+ * answer before the words are read: the colour is the verdict, the label
+ * confirms it, and the date says when it was settled.
+ */
+.doc-state {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.doc-state-dot {
+    flex-shrink: 0;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--border);
+}
+
+.doc-state--verified .doc-state-dot {
+    background: #6f9a7d;
+    box-shadow: 0 0 0 3px color-mix(in srgb, #6f9a7d 18%, transparent);
+}
+
+.doc-state--pending .doc-state-dot {
+    background: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.doc-state--rejected .doc-state-dot {
+    background: #b4736a;
+    box-shadow: 0 0 0 3px color-mix(in srgb, #b4736a 18%, transparent);
+}
+
+.doc-state--none .doc-state-label {
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.doc-state-meta {
+    margin: 0.3rem 0 0;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* A date that has passed is not a detail: it is the reason the customer
+   counts as unverified again, so it says so rather than sitting quietly. */
+.doc-admin-valid {
+    font-variant-numeric: tabular-nums;
+}
+
+.doc-admin-valid.is-lapsed {
+    color: #8a4b42;
+    font-weight: 600;
+}
+
+
+.doc-admin-error {
+    flex-basis: 100%;
+    font-size: 0.75rem;
+    color: #8a4b42;
+}
+
+/* A lapse reads as its own thing: neither a refusal nor a blank. */
+.doc-state--expired .doc-state-dot {
+    background: #c08a3e;
+    box-shadow: 0 0 0 3px color-mix(in srgb, #c08a3e 18%, transparent);
+}
+
+/*
+ * Fixed column widths.
+ *
+ * With the review controls in the last column the browser was handing it most
+ * of the table and squeezing the customer and the verdict into what was left.
+ * The widths are declared, so a row with controls and a row without line up.
+ */
+.admin-documents-table {
+    table-layout: fixed;
+}
+
+.admin-documents-table th:nth-child(1),
+.admin-documents-table td:nth-child(1) {
+    width: 21%;
+}
+
+.admin-documents-table th:nth-child(2),
+.admin-documents-table td:nth-child(2) {
+    width: 13%;
+}
+
+.admin-documents-table th:nth-child(3),
+.admin-documents-table td:nth-child(3),
+.admin-documents-table th:nth-child(4),
+.admin-documents-table td:nth-child(4) {
+    width: 11%;
+    white-space: nowrap;
+}
+
+.admin-documents-table th:nth-child(5),
+.admin-documents-table td:nth-child(5) {
+    width: 14%;
+}
+
+.admin-documents-table td {
+    vertical-align: top;
+}
+
+.admin-documents-table td:nth-child(6) {
+    vertical-align: middle;
+}
+
+/* Long addresses break rather than widen the column past its share. */
+.admin-documents-table .doc-admin-sub {
+    overflow-wrap: anywhere;
+}
+
+/* The day the cover runs out, set apart from the verdict above it: a fact
+   about the future rather than a record of what was decided. */
+.doc-state-until {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin: 0.6rem 0 0;
+    padding-top: 0.6rem;
+    font-size: 0.75rem;
+    border-top: 1px solid var(--border);
+}
+
+.doc-state-until-label {
+    color: var(--text-muted);
+}
+
+.doc-state-until-date {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
