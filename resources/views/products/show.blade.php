@@ -258,7 +258,14 @@
                 @endif
 
                 @if ($product->isPurchasable() || $product->hasVariants())
-                    <form method="POST" action="{{ localized_route('cart.add') }}" class="add-to-cart-form">
+                    <form
+                        method="POST"
+                        action="{{ localized_route('cart.add') }}"
+                        class="add-to-cart-form"
+                        {{-- Google wants the product, not its id: name, price
+                             and category cannot be looked up in the browser. --}}
+                        data-analytics-item="{{ json_encode(\App\Support\AnalyticsItems::forProduct($product), JSON_UNESCAPED_UNICODE) }}"
+                    >
                         @csrf
                         <input type="hidden" name="product_id" value="{{ $product->id }}">
 

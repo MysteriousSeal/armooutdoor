@@ -72,4 +72,16 @@ return [
         'host' => env('POSTHOG_HOST', 'https://eu.i.posthog.com'),
     ],
 
+    /*
+     * Google Analytics 4.
+     *
+     * Same rule as PostHog: no measurement id, nothing loaded and no header
+     * widened. Google is a United States processor, so it is named separately
+     * in the banner and the privacy policy rather than folded in with the one
+     * hosted in the Union.
+     */
+    'google_analytics' => [
+        'id' => env('GA_MEASUREMENT_ID'),
+    ],
+
 ];

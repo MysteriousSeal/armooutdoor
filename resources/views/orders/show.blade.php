@@ -13,6 +13,18 @@
                 'value' => round($order->total_cents / 100, 2),
                 'items' => $order->items->count(),
             ],
+            'ga' => [
+                'name' => 'purchase',
+                'properties' => [
+                    // Google deduplicates on this: without it a reload of the
+                    // confirmation page books the sale a second time.
+                    'transaction_id' => $order->number,
+                    'currency' => 'EUR',
+                    'value' => round($order->total_cents / 100, 2),
+                    'shipping' => round(($order->shipping_cents ?? 0) / 100, 2),
+                    'items' => \App\Support\AnalyticsItems::forOrder($order),
+                ],
+            ],
         ]
         : null;
 @endphp

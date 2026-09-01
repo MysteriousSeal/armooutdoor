@@ -25,15 +25,38 @@ class SecurityHeaders
      */
     private static function policy(): string
     {
-        $host = config('services.posthog.key') ? config('services.posthog.host') : null;
+        $scripts = [];
+        $connects = [];
 
-        if (! is_string($host) || $host === '') {
+        if (config('services.posthog.key')) {
+            $host = (string) config('services.posthog.host');
+            $scripts[] = $host;
+            $connects[] = $host;
+        }
+
+        if (config('services.google_analytics.id')) {
+            $scripts[] = 'https://www.googletagmanager.com';
+            // The tag is fetched from one host and reports to several: the
+            // regional collectors are named by wildcard because Google picks
+            // among them by where the visitor is.
+            $connects = array_merge($connects, [
+                'https://www.google-analytics.com',
+                'https://*.google-analytics.com',
+                'https://*.analytics.google.com',
+                'https://www.googletagmanager.com',
+            ]);
+        }
+
+        if ($scripts === []) {
             return self::CSP;
         }
 
         return str_replace(
             ["script-src 'self' 'unsafe-inline'", "default-src 'self'"],
-            ["script-src 'self' 'unsafe-inline' {$host}", "default-src 'self'; connect-src 'self' {$host}"],
+            [
+                "script-src 'self' 'unsafe-inline' ".implode(' ', $scripts),
+                "default-src 'self'; connect-src 'self' ".implode(' ', $connects),
+            ],
             self::CSP,
         );
     }

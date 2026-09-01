@@ -56,10 +56,15 @@
                     même visite ; en cas de refus, la mesure se poursuit sans cet identifiant.</li>
                 <li>Mesure d'audience externe : si, et seulement si, vous l'acceptez via le bandeau cookies, les
                     pages consultées et quelques événements de la boutique (mise au panier, passage en caisse,
-                    commande validée) sont transmis à PostHog, notre sous-traitant de mesure d'audience, sur ses
-                    serveurs situés dans l'Union européenne. Aucune donnée que vous saisissez (nom, adresse,
-                    coordonnées bancaires) ne lui est transmise. En cas de refus, ou tant que vous n'avez pas
-                    répondu, aucun script PostHog n'est chargé et aucune donnée ne lui est envoyée.</li>
+                    commande validée) sont transmis à deux sous-traitants de mesure d'audience : PostHog, sur ses
+                    serveurs situés dans l'Union européenne, et Google Analytics (Google LLC), aux États-Unis.
+                    Le transfert vers Google repose sur la décision d'adéquation de la Commission européenne du
+                    10 juillet 2023 relative au cadre de protection des données UE–États-Unis. L'adresse IP est
+                    anonymisée avant transmission à Google, et les signaux publicitaires ainsi que la
+                    personnalisation des annonces sont désactivés. Aucune donnée que vous saisissez (nom,
+                    adresse, coordonnées bancaires) n'est transmise à l'un ou à l'autre. En cas de refus, ou
+                    tant que vous n'avez pas répondu, aucun de ces scripts n'est chargé et aucune donnée ne
+                    leur est envoyée.</li>
             </ul>
             <p>Aucune donnée bancaire n'est stockée par nos soins ; le paiement est traité par un prestataire tiers sécurisé.</p>
 
@@ -83,7 +88,7 @@
                 Les données sont destinées à {{ $company->value('company_name') }} et, le cas échéant, à ses prestataires techniques,
                 dans la stricte limite nécessaire à l'exécution de la commande : le prestataire de paiement (Stripe),
                 les transporteurs choisis à la commande (La Poste/Colissimo, Chronopost, Mondial Relay), le service
-                de points relais (Sendcloud), la mesure d'audience (PostHog, si vous l'avez acceptée) et l'hébergeur du
+                de points relais (Sendcloud), la mesure d'audience (PostHog et Google Analytics, si vous l'avez acceptée) et l'hébergeur du
                 site. Aucune donnée n'est vendue à des tiers.
             </p>
 
@@ -112,10 +117,10 @@
                 préférence d'affichage clair/sombre). Ces cookies ne nécessitent pas de consentement préalable au titre
                 de la réglementation applicable. Si vous y consentez via le bandeau affiché à votre première visite,
                 le même identifiant de session sert aussi, en interne, à regrouper les pages consultées au cours d'une
-                même visite à des fins de mesure d'audience, et déclenche le chargement de PostHog, qui dépose
-                ses propres cookies de mesure d'audience sur des serveurs situés dans l'Union européenne. Aucun
-                de ces cookies n'est utilisé à des fins de suivi publicitaire ou de profilage. En l'absence de
-                consentement, PostHog n'est pas chargé du tout. Vous pouvez revenir sur votre choix à tout
+                même visite à des fins de mesure d'audience, et déclenche le chargement de PostHog et de Google
+                Analytics, qui déposent leurs propres cookies de mesure d'audience, respectivement dans l'Union
+                européenne et aux États-Unis. Aucun de ces cookies n'est utilisé à des fins de suivi
+                publicitaire ou de profilage. En l'absence de consentement, aucun des deux n'est chargé. Vous pouvez revenir sur votre choix à tout
                 moment via le lien « Cookies » en pied de page.
             </p>
 

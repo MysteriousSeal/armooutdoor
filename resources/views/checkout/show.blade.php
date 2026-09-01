@@ -9,6 +9,16 @@
     $analyticsEvent = [
         'name' => 'checkout_started',
         'properties' => ['currency' => 'EUR', 'items' => count($lines), 'value' => round($subtotalCents / 100, 2)],
+        // What Google reads instead: its own name, and items as products
+        // rather than as a number.
+        'ga' => [
+            'name' => 'begin_checkout',
+            'properties' => [
+                'currency' => 'EUR',
+                'value' => round($subtotalCents / 100, 2),
+                'items' => \App\Support\AnalyticsItems::forCart($lines),
+            ],
+        ],
     ];
 @endphp
 
