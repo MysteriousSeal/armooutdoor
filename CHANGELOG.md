@@ -2,6 +2,22 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-01 — v1.1.15 — build J10QRJ
+
+### Storefront
+
+- **« Les offres du moment », entre les promesses et les rayons.** The home page said what the shop guarantees, then asked where the visitor wanted to go, with nothing in between to make them want to stay. A row of five sits there now, whatever the width, and the rest scroll. Only what is genuinely reduced, and nothing at all when nothing is — an offers heading over an empty row is worse than no heading. The query is the promotions page's own, both asking `hasDiscount()` after `whereHas()`, since a discount row outside its dates is not an offer and the strip must not disagree with the page it links to. It advances a card every four seconds and glides back to the first, on the rhythm the hero carousel already keeps, and stops for a pointer, a tab, a finger, a hidden tab, and for anybody who has asked their system for less motion — it never starts at all then.
+
+- **The section titles are dressed rather than shouted.** Four headings set in uppercase at weight 800, which sits oddly under a tagline promising discretion. The uppercase note moves to a small accent label above — the kicker the hero and the legal pages already use — and the title comes down to sentence case: the label names the aisle, the title says what is in it. They take the olive the category hero gives its own, text and the highlighter band under it alike, and a hairline runs from the title to the link, dropped on a narrow screen where the link sits under the title and a line would only separate them from each other.
+
+### Under the hood
+
+- **The legal notice's cookie section catches up with the policy.** It said no audience-measurement cookie is dropped without consent, which is true and stops one sentence short: it was written when the shop had no third party at all and never learnt what happens once consent is given. It names PostHog and Google Analytics now, says where each is hosted and that neither is loaded on a refusal, and links to the policy for the detail rather than repeating it — repeating it is how the two drifted apart. A test holds the two pages to the same tools.
+
+- **The heading olive is a variable, not a seventeenth copy.** The literal the shop has used raw in sixteen other places has no dark value, so on a dark ground it stays dark olive on dark. This one is lightened for that theme the way the taupe accent already is. The sixteen are left as they are, being a sweep of their own.
+
+**No migration.**
+
 ## 2026-09-01 — v1.1.14 — build B1998L
 
 ### Storefront
