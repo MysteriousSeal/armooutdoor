@@ -6,6 +6,7 @@ use App\Models\Conversation;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\ProductSetting;
 use App\Models\PurchaseOrder;
 use App\Models\StockMovement;
 use App\Models\User;
@@ -308,7 +309,7 @@ class DashboardMetrics
         $overduePurchaseOrders = PurchaseOrder::query()->awaitingReceipt()
             ->whereNotNull('expected_at')->whereDate('expected_at', '<', now())->count();
         $outOfStock = Product::query()->active()->where('quantity', '<=', 0)->count();
-        $lowStock = Product::query()->active()->where('quantity', '>', 0)->where('quantity', '<=', 2)->count();
+        $lowStock = Product::query()->active()->where('quantity', '>', 0)->where('quantity', '<=', ProductSetting::lowStockThreshold())->count();
 
         return collect([
             [
@@ -423,7 +424,7 @@ class DashboardMetrics
     {
         return Product::query()
             ->active()
-            ->where('quantity', '<=', 2)
+            ->where('quantity', '<=', ProductSetting::lowStockThreshold())
             ->orderBy('quantity')
             ->orderBy('id')
             ->limit($limit)

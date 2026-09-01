@@ -184,7 +184,7 @@ class ProductVariant extends Model
 
     public function lowStock(): bool
     {
-        return $this->quantity > 0 && $this->quantity <= 2;
+        return $this->quantity > 0 && $this->quantity <= ProductSetting::lowStockThreshold();
     }
 
     public function imageUrl(): string

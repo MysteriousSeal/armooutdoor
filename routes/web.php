@@ -27,6 +27,7 @@ use App\Http\Controllers\Admin\DiscountCodeController as AdminDiscountCodeContro
 use App\Http\Controllers\Admin\DiscountController as AdminDiscountController;
 use App\Http\Controllers\Admin\IdentityDocumentController as AdminIdentityDocumentController;
 use App\Http\Controllers\Admin\InvoiceSettingController as AdminInvoiceSettingController;
+use App\Http\Controllers\Admin\ProductSettingController as AdminProductSettingController;
 use App\Http\Controllers\Admin\LabelController as AdminLabelController;
 use App\Http\Controllers\Admin\MarketplaceController as AdminMarketplaceController;
 use App\Http\Controllers\Admin\MarketplaceListingController as AdminMarketplaceListingController;
@@ -328,6 +329,8 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         Route::get('/settings/invoice', [AdminInvoiceSettingController::class, 'edit'])->name('settings.invoice.edit');
         Route::put('/settings/invoice', [AdminInvoiceSettingController::class, 'update'])->name('settings.invoice.update');
         Route::put('/settings/carriers/{carrier}/price-tiers', [AdminCarrierPriceTierController::class, 'update'])->name('settings.carriers.price-tiers.update');
+        Route::get('/settings/products', [AdminProductSettingController::class, 'edit'])->name('settings.products.edit');
+        Route::put('/settings/products', [AdminProductSettingController::class, 'update'])->name('settings.products.update');
         Route::get('/settings/orders', [AdminSettingsController::class, 'orders'])->name('settings.orders.edit');
         Route::get('/settings/email', [AdminSettingsController::class, 'email'])->middleware('admin.owner')->name('settings.email');
         Route::post('/settings/email/test', [AdminSettingsController::class, 'sendTestEmail'])->middleware('admin.owner')->name('settings.email.test');

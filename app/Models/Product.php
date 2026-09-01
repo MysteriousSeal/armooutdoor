@@ -671,7 +671,7 @@ class Product extends Model
             $active = $this->variants->filter(fn (ProductVariant $variant): bool => $variant->is_active);
 
             return match (true) {
-                $active->contains(fn (ProductVariant $variant): bool => $variant->quantity > 2) => 'in_stock',
+                $active->contains(fn (ProductVariant $variant): bool => $variant->quantity > ProductSetting::lowStockThreshold()) => 'in_stock',
                 $active->contains(fn (ProductVariant $variant): bool => $variant->inStock()) => 'low_stock',
                 // Le réassort passe devant « dispo fournisseur » : une taille
                 // déjà commandée ne se recommande pas chez le fournisseur.
@@ -692,7 +692,7 @@ class Product extends Model
 
     public function lowStock(): bool
     {
-        return $this->quantity > 0 && $this->quantity <= 2;
+        return $this->quantity > 0 && $this->quantity <= ProductSetting::lowStockThreshold();
     }
 
     /**
