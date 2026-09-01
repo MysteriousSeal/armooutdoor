@@ -45,7 +45,11 @@
             'lede' => 'Moyens de paiement acceptés et sécurité de vos données.',
         ])
 
-        <article>
+        <div class="help-layout">
+            @include('help.partials.nav')
+
+            <div class="help-main">
+            <article>
             <section class="help-card" id="moyens-de-paiement" aria-labelledby="help-methods-title">
                 <h2 id="help-methods-title">Moyens de paiement</h2>
                 <p>
@@ -98,5 +102,7 @@
             </div>
             <a href="{{ route('faq') }}" class="btn btn-primary help-next-cta">Voir la FAQ</a>
         </aside>
+            </div>
+        </div>
     </div>
 @endsection

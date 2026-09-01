@@ -45,7 +45,11 @@
             'lede' => 'Transporteurs, délais et procédure de retour, en un seul endroit.',
         ])
 
-        <article>
+        <div class="help-layout">
+            @include('help.partials.nav')
+
+            <div class="help-main">
+            <article>
             <section class="help-card" id="transporteurs" aria-labelledby="help-carriers-title">
                 <h2 id="help-carriers-title">Transporteurs</h2>
                 <p>
@@ -116,5 +120,7 @@
             </div>
             <a href="{{ route('faq') }}" class="btn btn-primary help-next-cta">Voir la FAQ</a>
         </aside>
+            </div>
+        </div>
     </div>
 @endsection

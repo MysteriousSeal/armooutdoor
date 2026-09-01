@@ -1,36 +1,104 @@
+/*
+ * Same edges as the header, like every other page of the shop. These stopped
+ * at 52rem inside a container twice that wide, which left them adrift in the
+ * middle of the page.
+ *
+ * The width does not go to the prose: a line of 1200 pixels is past reading.
+ * It goes to the help pages themselves, which were a row of pills above the
+ * text and are now a column beside it, so somebody reading about delivery can
+ * see that a payment page exists without first reaching the end of this one.
+ */
 .help-wrap {
-    max-width: 52rem;
-    margin: 0 auto;
     padding-bottom: 4rem;
+}
+
+.help-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+    align-items: start;
+    gap: 1.5rem;
+}
+
+.help-aside {
+    /* Follows the reader down a page that runs to several sections. */
+    position: sticky;
+    top: 1.5rem;
 }
 
 .help-nav {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin: 0 0 1.5rem;
-}
-
-.help-nav a {
-    display: inline-flex;
-    align-items: center;
-    min-height: 2.25rem;
-    padding: 0 0.85rem;
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: var(--text);
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.85rem;
     background: var(--surface);
     border: 1px solid var(--border);
 }
 
-.help-nav a:hover,
-.help-nav a.is-active {
-    border-color: var(--accent);
+.help-nav-title {
+    margin: 0 0 0.5rem;
+    padding: 0 0.6rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
 }
 
+.help-nav a {
+    display: flex;
+    align-items: center;
+    padding: 0.55rem 0.6rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.3;
+    color: var(--text-muted);
+    border-left: 2px solid transparent;
+    transition: color 0.15s, background-color 0.15s, border-color 0.15s;
+}
+
+.help-nav a:hover {
+    color: var(--text);
+    background: var(--bg);
+}
+
+/* The page you are on: an accent rule down the edge rather than a filled box,
+   so the column reads as a list and not as four buttons. */
 .help-nav a.is-active {
-    color: var(--accent-hover);
-    background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+    color: var(--text);
+    font-weight: 600;
+    background: var(--bg);
+    border-left-color: var(--accent);
+}
+
+@media (max-width: 60rem) {
+    .help-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .help-aside {
+        position: static;
+    }
+
+    .help-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+    }
+
+    .help-nav-title {
+        flex-basis: 100%;
+        padding: 0;
+    }
+
+    .help-nav a {
+        border-left: 0;
+        border-bottom: 2px solid transparent;
+    }
+
+    .help-nav a.is-active {
+        border-left: 0;
+        border-bottom-color: var(--accent);
+    }
 }
 
 .help-card {
