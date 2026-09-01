@@ -54,6 +54,11 @@
                     Si vous l'acceptez via le bandeau cookies, l'identifiant de session déjà nécessaire au
                     fonctionnement du site (voir « Cookies » ci-dessous) sert aussi à regrouper les pages d'une
                     même visite ; en cas de refus, la mesure se poursuit sans cet identifiant.</li>
+                <li>Pièce d'identité : uniquement si vous en déposez une depuis « Mes documents », pour prouver
+                    votre majorité lorsque votre commande contient un article qui y est réservé. Le fichier est
+                    chiffré dès sa réception, conservé hors de toute zone accessible depuis le site, et supprimé
+                    dès qu'il a été vérifié. Le dépôt est facultatif : sans lui, seule la vente des articles
+                    réservés aux majeurs est impossible.</li>
                 <li>Mesure d'audience externe : si, et seulement si, vous l'acceptez via le bandeau cookies, les
                     pages consultées et quelques événements de la boutique (mise au panier, passage en caisse,
                     commande validée) sont transmis à deux sous-traitants de mesure d'audience : PostHog, sur ses
@@ -73,6 +78,8 @@
                 <li>Traitement et suivi des commandes, livraison, facturation.</li>
                 <li>Gestion du compte client (adresses, liste de souhaits, historique).</li>
                 <li>Réponse aux demandes de contact et service après-vente.</li>
+                <li>Vérification de la majorité du Client avant l'expédition d'un article qui y est réservé,
+                    lorsqu'une pièce d'identité a été déposée.</li>
                 <li>Respect de nos obligations légales et comptables.</li>
                 <li>Mesure d'audience du site, sur la base de notre intérêt légitime à connaître sa fréquentation.</li>
             </ul>
@@ -80,7 +87,8 @@
             <h2>Base légale</h2>
             <p>
                 Les traitements reposent sur l'exécution du contrat de vente (commande, livraison), le respect
-                d'obligations légales (facturation, garanties) et, le cas échéant, le consentement du Client.
+                d'obligations légales (facturation, garanties, interdiction de vente de certains articles aux
+                mineurs) et, le cas échéant, le consentement du Client.
             </p>
 
             <h2>Destinataires des données</h2>
@@ -91,12 +99,23 @@
                 de points relais (Sendcloud), la mesure d'audience (PostHog et Google Analytics, si vous l'avez acceptée) et l'hébergeur du
                 site. Aucune donnée n'est vendue à des tiers.
             </p>
+            <p>
+                Les pièces d'identité font exception : elles ne sont transmises à aucun prestataire. Elles sont
+                lisibles par les seuls responsables de la boutique, depuis une page qui leur est réservée, et
+                chaque consultation est enregistrée dans un journal interne.
+            </p>
 
             <h2>Durée de conservation</h2>
             <p>
                 Les données liées à un compte client sont conservées pendant la durée de vie du compte. Les données
                 liées à une commande sont conservées pendant la durée nécessaire au respect des obligations légales
                 et comptables (jusqu'à 10 ans pour les documents comptables).
+            </p>
+            <p>
+                Une pièce d'identité est supprimée dès qu'elle a été vérifiée, sans attendre : seuls subsistent le
+                résultat de la vérification, sa date et, le cas échéant, la date de validité lue sur le document.
+                Vous pouvez également supprimer une pièce déposée à tout moment depuis « Mes documents », y compris
+                avant sa vérification.
             </p>
 
             <h2>Vos droits</h2>
@@ -127,7 +146,14 @@
             <h2>Sécurité</h2>
             <p>
                 Nous mettons en œuvre les mesures techniques et organisationnelles appropriées pour protéger vos
-                données contre tout accès non autorisé, perte ou divulgation.
+                données contre tout accès non autorisé, perte ou divulgation. Le site est servi exclusivement en
+                HTTPS et les mots de passe sont stockés sous forme chiffrée.
+            </p>
+            <p>
+                Les pièces d'identité bénéficient de mesures renforcées : le fichier est chiffré avant d'être écrit,
+                stocké hors de toute zone accessible depuis le site et sous un nom qui ne peut être deviné, son accès
+                est limité aux seuls responsables de la boutique, chaque consultation est journalisée, et le fichier
+                est détruit dès la vérification faite.
             </p>
         </article>
         </div>

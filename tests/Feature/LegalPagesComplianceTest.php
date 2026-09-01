@@ -79,4 +79,30 @@ class LegalPagesComplianceTest extends TestCase
             ->assertDontSee('Carte bancaire, PayPal')
             ->assertDontSee('Carte bancaire ou PayPal');
     }
+
+    public function test_the_privacy_policy_accounts_for_identity_documents(): void
+    {
+        // The shop collects passports now. A page listing what it collects
+        // that does not mention them is the gap a complaint is made of.
+        $page = $this->get('/confidentialite')->assertOk();
+
+        // Collected, and why.
+        $page->assertSee('Pièce d\'identité', false);
+        $page->assertSee('Mes documents', false);
+        $page->assertSee('majorité', false);
+        // How long, which is the part CNIL sanctions when it is wrong.
+        $page->assertSee('supprimée dès qu\'elle a été vérifiée', false);
+        // Who sees it: nobody outside the shop.
+        $page->assertSee('ne sont transmises à aucun prestataire', false);
+        // How it is held.
+        $page->assertSee('chiffré avant d\'être écrit', false);
+        $page->assertSee('journalisée', false);
+    }
+
+    public function test_the_policy_says_handing_one_over_is_optional(): void
+    {
+        $this->get('/confidentialite')
+            ->assertOk()
+            ->assertSee('Le dépôt est facultatif', false);
+    }
 }
