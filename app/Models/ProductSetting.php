@@ -40,9 +40,13 @@ class ProductSetting extends Model
      * At or below this quantity, a product shows « Derniers stocks
      * disponibles ». Memoized: the threshold is read once per product on
      * a listing, and twenty cards must not mean twenty queries.
+     *
+     * Read without creating: firstOrCreate() would fire saved(), whose
+     * Once::flush() evicts this very memo as it forms. The row only comes
+     * to exist when the settings page saves it.
      */
     public static function lowStockThreshold(): int
     {
-        return once(fn (): int => self::current()->low_stock_threshold);
+        return once(fn (): int => static::query()->value('low_stock_threshold') ?? 2);
     }
 }

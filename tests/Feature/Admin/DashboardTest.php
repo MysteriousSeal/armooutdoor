@@ -5,6 +5,7 @@ namespace Tests\Feature\Admin;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\ProductSetting;
 use App\Models\User;
 use App\Services\DashboardPeriod;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -203,6 +204,11 @@ class DashboardTest extends TestCase
                 ]);
             }
         };
+
+        // Warm the low-stock threshold: once() memoizes it for the process,
+        // so the first render would pay its firstOrCreate and the second
+        // would not — a difference that is not the dashboard's own work.
+        ProductSetting::lowStockThreshold();
 
         $seed(5);
         $small = $measure();
