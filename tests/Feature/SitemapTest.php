@@ -38,8 +38,10 @@ class SitemapTest extends TestCase
         $response->assertOk()
             ->assertHeader('Content-Type', 'text/plain; charset=UTF-8')
             ->assertSee('Disallow: /admin')
-            ->assertSee('Disallow: /cart')
-            ->assertSee('Disallow: /checkout')
+            // Deliberately crawlable: their noindex header must be readable,
+            // and a Disallow would leave the bare URLs stuck in the index.
+            ->assertDontSee('Disallow: /cart')
+            ->assertDontSee('Disallow: /checkout')
             ->assertSee('Sitemap: '.route('sitemap.index'));
     }
 

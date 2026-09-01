@@ -28,4 +28,27 @@ class SecurityHeadersTest extends TestCase
 
         $response->assertHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
     }
+
+    public function test_private_pages_tell_crawlers_noindex_even_on_the_guest_redirect(): void
+    {
+        // The gated pages answer a guest with a 302 — the header must ride
+        // that redirect, a crawler never seeing the page behind it.
+        $this->get('/account')->assertRedirect()
+            ->assertHeader('X-Robots-Tag', 'noindex, nofollow');
+        $this->get('/checkout')->assertRedirect()
+            ->assertHeader('X-Robots-Tag', 'noindex, nofollow');
+        $this->get('/orders')->assertRedirect()
+            ->assertHeader('X-Robots-Tag', 'noindex, nofollow');
+
+        // The cart is public but personal: rendered, and still noindexed.
+        $this->get('/cart')->assertOk()
+            ->assertHeader('X-Robots-Tag', 'noindex, nofollow');
+    }
+
+    public function test_public_doors_and_the_shop_itself_stay_indexable(): void
+    {
+        $this->get('/')->assertOk()->assertHeaderMissing('X-Robots-Tag');
+        $this->get('/login')->assertOk()->assertHeaderMissing('X-Robots-Tag');
+        $this->get('/register')->assertOk()->assertHeaderMissing('X-Robots-Tag');
+    }
 }

@@ -16,6 +16,21 @@ class SecurityHeaders
     private const CSP = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'self'; frame-ancestors 'self'";
 
     /**
+     * Paths whose pages are private — gated behind a login, personal to a
+     * visitor, or reachable only through a secret token. /login and
+     * /register themselves stay indexable, being public doors.
+     */
+    private const PRIVATE_PATHS = [
+        'account', 'account/*',
+        'orders', 'orders/*',
+        'checkout', 'checkout/*',
+        'cart', 'cart/*',
+        'wishlist', 'wishlist/*',
+        'reset-password/*',
+        'messages/*',
+    ];
+
+    /**
      * The policy, with room for the audience measurement if there is any.
      *
      * The host is named rather than the whole web opened: the script may be
@@ -63,8 +78,17 @@ class SecurityHeaders
 
     public function handle(Request $request, Closure $next): Response
     {
-        $response = $next($request);
+        return self::apply($request, $next($request));
+    }
 
+    /**
+     * Also called from the exception handler in bootstrap/app.php: a
+     * response rendered from an exception — a guest's login redirect, a
+     * 404 — never travels back through the middleware stack, and would
+     * otherwise ship with no security headers at all.
+     */
+    public static function apply(Request $request, Response $response): Response
+    {
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
@@ -76,6 +100,14 @@ class SecurityHeaders
         $adminPath = config('shop.admin_path');
 
         if ($request->is($adminPath) || $request->is($adminPath.'/*')) {
+            $response->headers->set('X-Robots-Tag', 'noindex, nofollow');
+        }
+
+        // Pages behind a login, the cart, and token-bearing links have no
+        // business in a search index. The header rides the guest's 302
+        // redirect too, which a meta tag in a page never rendered cannot —
+        // and unlike a robots.txt Disallow, the crawler gets to read it.
+        if ($request->is(...self::PRIVATE_PATHS)) {
             $response->headers->set('X-Robots-Tag', 'noindex, nofollow');
         }
 

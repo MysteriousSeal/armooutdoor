@@ -44,11 +44,13 @@ class SitemapController extends Controller
         // renommé pour être introuvable ne va pas s'imprimer dans le fichier
         // que tout le monde lit en premier. Un en-tête noindex couvre ses
         // pages quoi qu'il arrive.
+        // /cart and /checkout are deliberately NOT disallowed: a page that
+        // cannot be fetched cannot be read saying noindex, and Google keeps
+        // the bare URL in its index ("indexed, though blocked"). They carry
+        // an X-Robots-Tag noindex instead, which requires being crawlable.
         $lines = array_values(array_filter([
             'User-agent: *',
             config('shop.admin_path') === 'admin' ? 'Disallow: /admin' : null,
-            'Disallow: /cart',
-            'Disallow: /checkout',
             '',
             'Sitemap: '.route('sitemap.index'),
         ], fn ($line) => $line !== null));
