@@ -105,4 +105,26 @@ class LegalPagesComplianceTest extends TestCase
             ->assertOk()
             ->assertSee('Le dépôt est facultatif', false);
     }
+
+    public function test_the_legal_notice_names_the_same_tools_as_the_privacy_policy(): void
+    {
+        // The two pages had drifted: the policy named PostHog and Google
+        // Analytics while the notice still said only that nothing is dropped
+        // without consent, which is true and stops one sentence short.
+        $notice = $this->get('/mentions-legales')->assertOk();
+
+        $notice->assertSee('PostHog', false);
+        $notice->assertSee('Google Analytics', false);
+        $notice->assertSee('Union européenne', false);
+        $notice->assertSee('États-Unis', false);
+        $notice->assertSee(route('legal.privacy'), false);
+    }
+
+    public function test_both_pages_still_say_nothing_is_dropped_without_consent(): void
+    {
+        $this->get('/mentions-legales')
+            ->assertOk()
+            ->assertSee('sans consentement préalable', false)
+            ->assertSee('aucun des deux n\'est chargé', false);
+    }
 }

@@ -102,6 +102,11 @@
             <p>
                 Le site utilise des cookies strictement nécessaires à son fonctionnement (panier, session, préférence
                 d'affichage). Aucun cookie de mesure d'audience ou publicitaire n'est déposé sans consentement préalable.
+                Si vous y consentez via le bandeau affiché à votre première visite, deux outils de mesure d'audience
+                sont chargés et déposent leurs propres cookies : PostHog, hébergé dans l'Union européenne, et Google
+                Analytics (Google LLC), aux États-Unis. En cas de refus, aucun des deux n'est chargé. Le détail de ces
+                traitements figure dans notre
+                <a href="{{ route('legal.privacy') }}">{{ __('store.legal_privacy_title') }}</a>.
             </p>
 
             <h2>Droit applicable et litiges</h2>
