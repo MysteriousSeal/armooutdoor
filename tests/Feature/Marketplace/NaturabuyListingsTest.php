@@ -265,7 +265,11 @@ class NaturabuyListingsTest extends TestCase
         $queries = count(\DB::getQueryLog());
         \DB::disableQueryLog();
 
-        $this->assertLessThan(20, $queries, "Expected a handful of queries, ran {$queries}");
+        // Twelve rows: the guard is that matching them costs a fixed number of
+        // queries and not one apiece. The budget went from twenty to
+        // twenty-one when the admin nav gained a fifth badge, each of which
+        // counts once per page for an owner — a constant, not a per-row cost.
+        $this->assertLessThan(21, $queries, "Expected a handful of queries, ran {$queries}");
     }
 
     public function test_the_catalogue_tabs_split_the_listings(): void

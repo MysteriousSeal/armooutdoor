@@ -75,7 +75,15 @@
                         <a href="{{ route('admin.orders.edit', $order) }}" class="btn btn-secondary">Edit draft</a>
                     @else
                         @if ($order->status === 'placed')
-                            <button type="button" class="btn btn-primary" data-modal-open="prepare-confirm-modal">Mark as being prepared</button>
+                            @if ($order->awaitsAgeProof())
+                                {{-- Held rather than hidden: the button says why it
+                                     cannot be pressed, and the check above says what
+                                     to do about it. The route refuses too — a
+                                     disabled button is a courtesy, not a control. --}}
+                                <button type="button" class="btn btn-primary" disabled title="A proof of age is needed before this order can be prepared">Mark as being prepared</button>
+                            @else
+                                <button type="button" class="btn btn-primary" data-modal-open="prepare-confirm-modal">Mark as being prepared</button>
+                            @endif
                         @elseif ($order->status === 'preparing')
                             <button type="button" class="btn btn-primary" data-modal-open="ship-confirm-modal">Mark as shipped</button>
                         @elseif ($order->status === 'shipped')
@@ -130,6 +138,53 @@
 
         <div class="admin-order-layout">
             <div class="order-main">
+                @if ($ageRestrictedItems->isNotEmpty())
+                    @php
+                        $ageState = $identityStatus['state'] ?? 'none';
+                        $ageOk = $ageState === 'verified';
+                    @endphp
+                    {{-- Above the items, because it is a condition of sending them.
+                         It stays after dispatch: this page is the record of what was
+                         checked, and that question is asked afterwards. --}}
+                    <aside class="order-age-check order-age-check--{{ $ageState }}">
+                        <span class="order-age-check-mark" aria-hidden="true">{{ $ageOk ? '✓' : '-18' }}</span>
+
+                        <div class="order-age-check-copy">
+                            <p class="order-age-check-title">
+                                @switch ($ageState)
+                                    @case ('verified') Age verified @break
+                                    @case ('pending') Proof of age awaiting review @break
+                                    @case ('expired') Proof of age has expired @break
+                                    @case ('rejected') Proof of age was rejected @break
+                                    @default No proof of age on file
+                                @endswitch
+                            </p>
+                            <p class="order-age-check-detail">
+                                @if ($ageOk)
+                                    {{ $identityStatus['until']
+                                        ? 'Covered until '.$identityStatus['until']->format('d/m/Y').'. This order may be dispatched.'
+                                        : 'This order may be dispatched.' }}
+                                @elseif ($ageState === 'pending')
+                                    A document is waiting to be reviewed. Do not dispatch until it is.
+                                @elseif ($ageState === 'expired')
+                                    Lapsed on {{ $identityStatus['at']?->format('d/m/Y') }}. A new document is needed before dispatch.
+                                @else
+                                    This order contains an item reserved to adults. Ask the customer for a document before dispatch.
+                                @endif
+                            </p>
+                            <p class="order-age-check-items">
+                                {{ $ageRestrictedItems->pluck('name')->join(' · ') }}
+                            </p>
+                        </div>
+
+                        @if (! $ageOk && auth()->user()?->isOwner())
+                            {{-- Owners only: the screen behind this answers 403 to
+                                 anybody else, so an admin gets the verdict alone. --}}
+                            <a href="{{ route('admin.documents.index') }}" class="btn btn-sm btn-secondary order-age-check-cta">Documents</a>
+                        @endif
+                    </aside>
+                @endif
+
                 <section class="order-panel">
                     <h3 class="order-panel-title">Items</h3>
                     <ul class="order-items">

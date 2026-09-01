@@ -10482,3 +10482,113 @@ a.order-stepper-btn:focus-visible {
     font-weight: 600;
     font-variant-numeric: tabular-nums;
 }
+
+/*
+ * The age check, above the items of an order.
+ *
+ * It is the one thing on this page that can stop a parcel going out, so it
+ * sits above what it governs and states the answer rather than hinting at it.
+ * Verified is a tick and a green edge — permission to send; everything else
+ * is the -18 mark and a colour that says the parcel waits.
+ */
+.order-age-check {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.85rem 1.15rem;
+    margin-bottom: 0.85rem;
+    padding: 1rem 1.15rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--text-muted);
+}
+
+.order-age-check-mark {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    color: var(--surface);
+    background: var(--text-muted);
+    border-radius: 50%;
+}
+
+.order-age-check-copy {
+    flex: 1 1 20rem;
+    min-width: 0;
+}
+
+.order-age-check-title {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+}
+
+.order-age-check-detail {
+    margin: 0.25rem 0 0;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: var(--text-muted);
+}
+
+/* The articles that put the order here, quiet enough not to compete with the
+   verdict but present, since « which item? » is the next question. */
+.order-age-check-items {
+    margin: 0.4rem 0 0;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    overflow-wrap: anywhere;
+}
+
+.order-age-check-cta {
+    flex-shrink: 0;
+}
+
+/* Cleared to send. The tick sits a little larger than the -18 it replaces. */
+.order-age-check--verified {
+    border-left-color: #6f9a7d;
+}
+
+.order-age-check--verified .order-age-check-mark {
+    font-size: 1rem;
+    background: #6f9a7d;
+}
+
+.order-age-check--pending {
+    border-left-color: var(--accent);
+}
+
+.order-age-check--pending .order-age-check-mark {
+    background: var(--accent);
+}
+
+.order-age-check--expired,
+.order-age-check--rejected {
+    border-left-color: #c08a3e;
+}
+
+.order-age-check--expired .order-age-check-mark,
+.order-age-check--rejected .order-age-check-mark {
+    background: #c08a3e;
+}
+
+/* Nothing at all on file: the strongest of the four, since it is the one
+   where nobody has even been asked. */
+.order-age-check--none {
+    border-left-color: #b4736a;
+}
+
+.order-age-check--none .order-age-check-mark {
+    background: #b4736a;
+}
+
+@media (max-width: 40rem) {
+    .order-age-check-cta {
+        width: 100%;
+    }
+}

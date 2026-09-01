@@ -611,8 +611,19 @@ class OrderController extends Controller
 
         $this->backfillMissingPaymentFees(collect([$order]));
 
+        // Whether this order needed a proof of age, and whether one was held.
+        // Shown after dispatch too: the back office is the record, and « was
+        // this one verified before it went » is asked afterwards.
+        $ageRestrictedItems = $order->items->filter(
+            fn ($item): bool => (bool) $item->product?->age_restricted,
+        )->values();
+
         return [
             'order' => $order,
+            'ageRestrictedItems' => $ageRestrictedItems,
+            'identityStatus' => $ageRestrictedItems->isNotEmpty()
+                ? $order->user?->identityStatus()
+                : null,
             'previousOrder' => $this->neighbourOrder($order, newer: true),
             'nextOrder' => $this->neighbourOrder($order, newer: false),
             'carriers' => Carrier::query()->orderBy('sort_order')->get(),
@@ -645,6 +656,16 @@ class OrderController extends Controller
     {
         abort_if($order->isDraft(), 404);
 
+        // The same rule the button obeys, enforced where it counts. A control
+        // that lives only in the markup is one form submission away from not
+        // existing at all.
+        if ($order->awaitsAgeProof()) {
+            return $this->statusChangeRefusal(
+                $request,
+                'This order contains an item reserved to adults and the customer has no valid proof of age.',
+            );
+        }
+
         // Emailed only on the actual move into preparation: marking an
         // already-preparing order again must not write the customer twice.
         $wasPreparing = $order->status === 'preparing';
@@ -657,6 +678,18 @@ class OrderController extends Controller
         }
 
         return $this->statusChangeResponse($request, $order, 'Order marked as being prepared.');
+    }
+
+    /**
+     * Turns a status change away, in whichever form it was asked.
+     */
+    private function statusChangeRefusal(Request $request, string $message): RedirectResponse|JsonResponse
+    {
+        if ($request->expectsJson()) {
+            return response()->json(['message' => $message], 422);
+        }
+
+        return back()->withErrors(['status' => $message]);
     }
 
     public function deliver(Request $request, Order $order): RedirectResponse|JsonResponse

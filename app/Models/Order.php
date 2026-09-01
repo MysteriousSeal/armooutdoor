@@ -448,6 +448,27 @@ class Order extends Model
         return ! in_array($this->status, ['placed', 'draft'], true);
     }
 
+    /**
+     * Whether this order holds something reserved to adults that nobody has
+     * yet been cleared to receive.
+     *
+     * The customer is never stopped from ordering — the proof is wanted before
+     * dispatch, not before payment. This is that moment: the parcel waits here
+     * rather than at the checkout.
+     */
+    public function awaitsAgeProof(): bool
+    {
+        $restricted = $this->items->contains(
+            fn ($item): bool => (bool) $item->product?->age_restricted,
+        );
+
+        if (! $restricted) {
+            return false;
+        }
+
+        return ($this->user?->identityStatus()['state'] ?? 'none') !== 'verified';
+    }
+
     public function isDraft(): bool
     {
         return $this->status === 'draft';
