@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'À propos — '.config('app.name'))
-@section('meta_description', 'Armo Outdoor, boutique française à taille humaine : cibles, matériel de stand, vêtements et kit terrain, choisis pour servir. Qui nous sommes et ce que nous vendons.')
+@section('meta_description', 'Armo Outdoor, boutique française à taille humaine : cibles, matériel de stand, vêtements et kit terrain. Qui nous sommes, et pourquoi la boutique existe.')
 @section('canonical', route('about'))
 
 @push('head')
@@ -33,7 +33,7 @@
 @section('content')
     <div class="container help-wrap">
         @include('help.partials.chrome', [
-            'title' => 'À propos',
+            'title' => "À propos d'Armo Outdoor",
             'lede' => 'Une boutique française à taille humaine, pour le stand et le terrain.',
         ])
 
@@ -51,7 +51,7 @@
                     saison, et les prix sont affichés TTC : on sait ce que l'on paie avant d'ouvrir le panier.
                 </p>
                 <p>
-                    Les rayons : cibles réactives et planches, entretien et accessoires de stand, vêtements de
+                    <a href="{{ route('categories.index') }}">Les rayons</a> : cibles réactives et planches, entretien et accessoires de stand, vêtements de
                     terrain, kit outdoor, petit matériel du quotidien, munitions et consommables, optiques
                     d'observation.
                 </p>
