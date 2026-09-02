@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Notifications\AdminStripeOrphanedPayment;
 use App\Services\StripeCheckoutFinalizer;
+use App\Support\AdminMail;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
@@ -59,6 +61,14 @@ class StripeWebhookController extends Controller
                 'session_id' => $session->id,
                 'error' => $exception->getMessage(),
             ]);
+
+            // Money taken, no order to ship: the one failure that must not
+            // wait for somebody to think of opening the orphans page.
+            AdminMail::notify(
+                new AdminStripeOrphanedPayment($session->id, $exception->getMessage()),
+                'Could not email the orphaned-payment notice.',
+                ['session_id' => $session->id],
+            );
 
             return response('Could not finalize', 200);
         }

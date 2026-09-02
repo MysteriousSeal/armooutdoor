@@ -49,7 +49,7 @@ class ConversationNotificationTest extends TestCase
         Notification::assertSentTo($customer, ConversationReplied::class);
     }
 
-    public function test_a_customer_reply_notifies_nobody(): void
+    public function test_a_customer_reply_notifies_the_shop_and_never_the_customer(): void
     {
         Notification::fake();
 
@@ -60,7 +60,10 @@ class ConversationNotificationTest extends TestCase
             'body' => 'Merci',
         ]);
 
-        Notification::assertNothingSent();
+        // The shop hears a thread turned unread; the customer hears nothing
+        // about their own message.
+        Notification::assertNotSentTo($customer, ConversationReplied::class);
+        Notification::assertSentTimes(\App\Notifications\AdminConversationReceived::class, 1);
     }
 
     public function test_a_guest_thread_notifies_the_guest_at_their_own_address(): void
@@ -162,6 +165,10 @@ class ConversationNotificationTest extends TestCase
     public function test_a_mail_failure_does_not_break_the_reply(): void
     {
         Log::spy();
+
+        // Only the customer's mail is at stake here — the shop's own
+        // new-message notice would add a second failure log of its own.
+        config(['shop.admin_notification_email' => '']);
 
         // A transport that always throws, standing in for an SMTP outage.
         Mail::shouldReceive('mailer')->andThrow(new \RuntimeException('smtp down'));

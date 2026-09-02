@@ -12,6 +12,10 @@ return [
     // Prévenu à chaque commande devenue réelle — boutique comme manuelle.
     // Vide : personne n'est prévenu.
     'order_notification_email' => env('ORDER_NOTIFICATION_EMAIL'),
+    // Prévenu de ce qui attend une action : un message client, une pièce
+    // d'identité à vérifier, un paiement Stripe sans commande. Retombe sur
+    // l'adresse des commandes ; vide, personne n'est prévenu.
+    'admin_notification_email' => env('ADMIN_NOTIFICATION_EMAIL', env('ORDER_NOTIFICATION_EMAIL')),
     /*
      * When each legal page was last actually changed.
      *

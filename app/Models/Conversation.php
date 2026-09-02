@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Notifications\AdminConversationReceived;
+use App\Support\AdminMail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -119,6 +121,10 @@ class Conversation extends Model
      */
     public function postMessage(string $body, string $authorType, ?User $author = null): ConversationMessage
     {
+        // Judged before this message lands: only the read-to-unread
+        // transition emails the shop, so a burst of follow-ups is one mail.
+        $wasUnreadForAdmin = $this->hasUnreadForAdmin();
+
         $message = $this->messages()->create([
             'user_id' => $author?->id,
             'author_type' => $authorType,
@@ -136,6 +142,14 @@ class Conversation extends Model
         }
 
         $this->save();
+
+        if ($authorType !== ConversationMessage::AUTHOR_ADMIN && ! $wasUnreadForAdmin) {
+            AdminMail::notify(
+                new AdminConversationReceived($this),
+                'Could not email the new-message notice.',
+                ['conversation_id' => $this->id],
+            );
+        }
 
         return $message;
     }

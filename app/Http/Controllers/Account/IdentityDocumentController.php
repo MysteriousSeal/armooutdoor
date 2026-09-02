@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Account;
 
 use App\Http\Controllers\Controller;
 use App\Models\IdentityDocument;
+use App\Notifications\AdminIdentityDocumentSubmitted;
+use App\Support\AdminMail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -42,7 +44,7 @@ class IdentityDocumentController extends Controller
             Crypt::encryptString($file->get()),
         );
 
-        $request->user()->identityDocuments()->create([
+        $document = $request->user()->identityDocuments()->create([
             'kind' => $validated['kind'],
             // The name the customer's own file had, kept only so they can tell
             // one upload from another on this page.
@@ -52,6 +54,14 @@ class IdentityDocumentController extends Controller
             'path' => $path,
             'status' => 'pending',
         ]);
+
+        // A restricted order may be held on this review — the shop hears
+        // about the upload rather than finding it at the next login.
+        AdminMail::notify(
+            new AdminIdentityDocumentSubmitted($document),
+            'Could not email the identity-document notice.',
+            ['document_id' => $document->id],
+        );
 
         return back()->with('status', __('store.documents_uploaded'));
     }

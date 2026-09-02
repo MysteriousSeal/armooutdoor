@@ -7,6 +7,7 @@ use App\Enums\PaymentMethod;
 use App\Notifications\AdminOrderPlaced;
 use App\Notifications\OrderConfirmed;
 use App\Notifications\OrderPreparing;
+use App\Support\AdminMail;
 use App\Support\DeferredMail;
 use App\Support\ShippingEstimate;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -18,7 +19,6 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Lang;
-use Illuminate\Support\Facades\Notification as NotificationFacade;
 use Illuminate\Support\Str;
 
 #[Fillable([
@@ -649,14 +649,14 @@ class Order extends Model
      */
     public function sendAdminNewOrderEmail(): void
     {
-        $address = (string) config('shop.order_notification_email');
-
-        if ($address === '') {
-            return;
-        }
-
-        DeferredMail::send('Could not email the new-order notice.', ['order_id' => $this->id],
-            fn () => NotificationFacade::route('mail', $address)->notify(new AdminOrderPlaced($this)));
+        AdminMail::notify(
+            new AdminOrderPlaced($this),
+            'Could not email the new-order notice.',
+            ['order_id' => $this->id],
+            // The orders keep their own address knob — a shop can point the
+            // operational notices elsewhere without moving its order mail.
+            address: (string) config('shop.order_notification_email'),
+        );
     }
 
     /**
