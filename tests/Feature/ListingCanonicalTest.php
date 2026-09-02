@@ -81,12 +81,14 @@ class ListingCanonicalTest extends TestCase
             ->assertSee('<title>'.$category->localizedName().' — Page 2 — '.config('app.name').'</title>', false);
     }
 
-    public function test_the_home_page_title_names_what_the_shop_sells(): void
+    public function test_the_home_page_title_leads_with_the_brand(): void
     {
+        // Brand first, then the tagline: a title ending with the name is the
+        // one Google swaps for the bare brand on the homepage result.
         $title = $this->get('/')->assertOk()->getContent();
 
         $this->assertStringContainsString(
-            '<title>Cibles, matériel de stand et kit terrain — Armo Outdoor</title>',
+            '<title>Armo Outdoor : du matériel discret pour le stand et le terrain</title>',
             $title,
         );
     }
