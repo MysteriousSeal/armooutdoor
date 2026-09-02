@@ -47,6 +47,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 // Storefront (shop, cart, checkout, orders, etc.)
+use App\Http\Controllers\AllProductsController;
 use App\Http\Controllers\BestSellersController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CartController;
@@ -366,6 +367,7 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
 
 Route::get('/', HomeController::class)->name('home');
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+Route::get('/produits', [AllProductsController::class, 'index'])->name('products.all');
 Route::get('/nouveautes', [NewArrivalsController::class, 'index'])->name('products.new-arrivals');
 Route::get('/promotions', [PromotionsController::class, 'index'])->name('products.promotions');
 Route::get('/meilleures-ventes', [BestSellersController::class, 'index'])->name('products.best-sellers');

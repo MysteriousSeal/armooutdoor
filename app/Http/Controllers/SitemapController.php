@@ -75,6 +75,7 @@ class SitemapController extends Controller
         $urls = [
             ['loc' => localized_route('home', [], 'fr'), 'changefreq' => 'daily', 'priority' => '1.0'],
             ['loc' => route('categories.index'), 'changefreq' => 'weekly', 'priority' => '0.7'],
+            ['loc' => route('products.all'), 'changefreq' => 'daily', 'priority' => '0.7'],
             ['loc' => route('products.new-arrivals'), 'changefreq' => 'daily', 'priority' => '0.7'],
             ['loc' => route('products.promotions'), 'changefreq' => 'daily', 'priority' => '0.7'],
             ['loc' => route('products.best-sellers'), 'changefreq' => 'weekly', 'priority' => '0.7'],

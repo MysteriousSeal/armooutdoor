@@ -22,9 +22,9 @@
 
 @section('content')
     @php
-        $shopUrl = $firstCategory
-            ? localized_route('categories.show', ['category' => $firstCategory->slug])
-            : localized_route('search');
+        // « Voir tous les produits » goes to the page that actually holds
+        // them all — not, as before, to whichever category happens first.
+        $shopUrl = localized_route('products.all');
     @endphp
 
     <div class="container home">

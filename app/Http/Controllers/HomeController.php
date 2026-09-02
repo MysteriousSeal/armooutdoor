@@ -33,7 +33,6 @@ class HomeController extends Controller
             ])
             ->orderBy('sort_order')
             ->get();
-        $firstCategory = $categories->first();
 
         $freeShippingAmount = null;
         if ($thresholdCents !== null && $thresholdCents > 0) {
@@ -64,7 +63,6 @@ class HomeController extends Controller
 
         return view('home', [
             'freeShippingAmount' => $freeShippingAmount,
-            'firstCategory' => $firstCategory,
             'categories' => $categories,
             'onSale' => $onSale,
             'featured' => $featured,
