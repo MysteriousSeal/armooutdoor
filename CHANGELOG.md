@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-02 — v1.6.1 — build VQIJEB
+
+### Storefront
+
+- **The auth pages grow up.** Their card titles become the h1 each page lacked. Every password field gains a show/hide eye — built at runtime, so no dead button ships without JavaScript — and the email inputs stop mobile keyboards « correcting » addresses. The register form says its password rule before it fails, and the legal line becomes what it should have been: an unchecked box to tick. The form goes novalidate and a script warns field by field in the shop's own words — the first fault takes focus, each warning clears as it is fixed — while the server refuses the same things in the same words for whoever has no script.
+
+**No migration.**
+
 ## 2026-09-02 — v1.6.0 — build OLI8MP
 
 ### Storefront
