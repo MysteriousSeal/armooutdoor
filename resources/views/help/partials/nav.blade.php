@@ -8,6 +8,7 @@
             'faq' => 'FAQ',
             'help.shipping-returns' => 'Livraison & Retours',
             'help.secure-payment' => 'Paiement sécurisé',
+            'about' => 'À propos',
             'contact.show' => 'Nous contacter',
         ] as $route => $label)
             <a

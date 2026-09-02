@@ -290,3 +290,62 @@
     color: var(--accent-hover);
     border: 1px solid var(--accent);
 }
+
+/* --- Engagement points (À propos) -------------------------------------- */
+
+/* The home page's about-points, spoken in the help section's shell: a
+   grid of quiet cards, each led by the olive check. */
+.help-points {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.help-point {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.9rem 1rem;
+    background: color-mix(in srgb, var(--bg) 72%, var(--surface));
+    border: 1px solid var(--border);
+}
+
+.help-point-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.85rem;
+    height: 1.85rem;
+    flex-shrink: 0;
+    color: var(--accent-heading);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+}
+
+.help-point-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.help-point-copy strong {
+    font-size: 0.9rem;
+    letter-spacing: 0.01em;
+}
+
+.help-point-copy span {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+@media (max-width: 640px) {
+    .help-points {
+        grid-template-columns: 1fr;
+    }
+}

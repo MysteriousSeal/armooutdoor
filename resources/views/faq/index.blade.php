@@ -8,7 +8,7 @@
             'items' => [
                 [
                     'q' => 'Quels sont les délais et frais de livraison ?',
-                    'a' => 'Les commandes sont préparées puis expédiées en France métropolitaine avec Colissimo, Chronopost, Mondial Relay ou Chronopost Shop2Shop, à domicile ou en point relais. Le délai et le prix exacts s\'affichent au moment du paiement, selon le transporteur choisi.'
+                    'a' => 'Les commandes sont préparées puis expédiées en France métropolitaine avec Colissimo, Chronopost, Mondial Relay, Chronopost Shop2Shop ou, pour les articles petits et légers, en Lettre suivie, à domicile ou en point relais. Le délai et le prix exacts s\'affichent au moment du paiement, selon le transporteur choisi.'
                         .($freeShippingAmount ? ' La livraison est offerte dès '.$freeShippingAmount.' d\'achat.' : ''),
                 ],
                 [

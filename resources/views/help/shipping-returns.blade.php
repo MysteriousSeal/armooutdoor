@@ -60,7 +60,8 @@
                 <h2 id="help-carriers-title">Transporteurs</h2>
                 <p>
                     Les commandes sont expédiées en France métropolitaine avec Colissimo, Chronopost, Mondial Relay ou
-                    Chronopost Shop2Shop, au choix, à domicile ou en point relais.
+                    Chronopost Shop2Shop, au choix, à domicile ou en point relais. Les articles petits et
+                    légers peuvent aussi partir en Lettre suivie, directement dans la boîte aux lettres.
                 </p>
                 <ul class="help-logos">
                     <li class="help-logo">
@@ -78,6 +79,10 @@
                     <li class="help-logo">
                         <img src="{{ asset('images/carriers/chronopost.png') }}" alt="Chronopost Shop2Shop" width="120" height="28">
                         <span>Shop2Shop</span>
+                    </li>
+                    <li class="help-logo">
+                        <img src="{{ asset('images/carriers/poste.png') }}" alt="Lettre suivie" width="120" height="28">
+                        <span>Lettre suivie</span>
                     </li>
                 </ul>
             </section>

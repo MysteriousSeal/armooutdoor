@@ -7,6 +7,13 @@ use Illuminate\View\View;
 
 class HelpController extends Controller
 {
+    public function about(): View
+    {
+        return view('help.about', [
+            'company' => \App\Models\CompanySetting::current(),
+        ]);
+    }
+
     public function shippingReturns(): View
     {
         $thresholdCents = ShippingSetting::current()->free_shipping_threshold_cents;

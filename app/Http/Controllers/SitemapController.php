@@ -84,6 +84,7 @@ class SitemapController extends Controller
             // product and article the XML lists.
             ['loc' => route('sitemap.html'), 'changefreq' => 'weekly', 'priority' => '0.4'],
             ['loc' => route('faq'), 'changefreq' => 'monthly', 'priority' => '0.5'],
+            ['loc' => route('about'), 'changefreq' => 'monthly', 'priority' => '0.5'],
             ['loc' => route('help.shipping-returns'), 'changefreq' => 'monthly', 'priority' => '0.5'],
             ['loc' => route('help.secure-payment'), 'changefreq' => 'monthly', 'priority' => '0.5'],
             ['loc' => route('legal.terms'), 'changefreq' => 'yearly', 'priority' => '0.3'],

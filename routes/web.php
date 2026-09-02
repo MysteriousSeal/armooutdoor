@@ -407,6 +407,7 @@ Route::post('/messages/{token}/reply', [GuestConversationController::class, 'rep
     ->middleware('throttle:10,1')
     ->name('guest.conversations.reply');
 Route::get('/livraison-et-retours', [HelpController::class, 'shippingReturns'])->name('help.shipping-returns');
+Route::get('/a-propos', [HelpController::class, 'about'])->name('about');
 Route::get('/paiement-securise', [HelpController::class, 'securePayment'])->name('help.secure-payment');
 
 /*

@@ -409,7 +409,9 @@
                         <span>{{ __('store.home_about_goal') }}</span>
                     </li>
                 </ul>
-                <a href="{{ $shopUrl }}" class="btn btn-primary home-about-cta">
+                {{-- « En savoir plus » about the shop goes to the page about
+                     the shop, not to a product listing. --}}
+                <a href="{{ route('about') }}" class="btn btn-primary home-about-cta">
                     {{ __('store.home_about_cta') }}
                 </a>
             </div>
