@@ -251,6 +251,7 @@ return [
     'login_intro' => 'Connectez-vous pour garder votre panier et reprendre où vous vous étiez arrêté.',
     'register_title' => 'Créer un compte',
     'register_intro' => 'Un petit compte pour une petite boutique. Votre panier vous attendra.',
+    'password_min_hint' => '8 caractères minimum.',
     'login_cta' => 'Se connecter',
     'register_cta' => 'Créer le compte',
     'no_account' => 'Pas encore de compte ?',

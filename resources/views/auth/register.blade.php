@@ -8,10 +8,10 @@
     <div class="container">
         <div class="auth-page">
             <div class="auth-card">
-                <h2>{{ __('store.register_title') }}</h2>
+                <h1>{{ __('store.register_title') }}</h1>
                 <p class="auth-card-intro">{{ __('store.register_intro') }}</p>
 
-                <form method="POST" action="{{ localized_route('register.store') }}" class="auth-form">
+                <form method="POST" action="{{ localized_route('register.store') }}" class="auth-form" novalidate data-register-form>
                     @csrf
 
                     <div class="form-row">
@@ -61,6 +61,8 @@
                             value="{{ old('email') }}"
                             required
                             autocomplete="email"
+                            autocapitalize="none"
+                            spellcheck="false"
                         >
                         @error('email')
                             <p class="form-error">{{ $message }}</p>
@@ -76,7 +78,9 @@
                             class="form-control"
                             required
                             autocomplete="new-password"
+                            minlength="8"
                         >
+                        <p class="form-hint">{{ __('store.password_min_hint') }}</p>
                         @error('password')
                             <p class="form-error">{{ $message }}</p>
                         @enderror
@@ -94,6 +98,23 @@
                         >
                     </div>
 
+                    <div class="form-group">
+                        <label class="form-check auth-legal-note">
+                            <input type="checkbox" name="terms" value="1" data-terms @checked(old('terms'))>
+                            <span>
+                                En créant un compte, vous acceptez les
+                                <a href="{{ route('legal.terms') }}">conditions générales de vente</a> et la
+                                <a href="{{ route('legal.privacy') }}">politique de confidentialité</a>.
+                            </span>
+                        </label>
+                        {{-- Filled by the script on a submit without the box checked;
+                             the server refuses just the same without JavaScript. --}}
+                        <p class="form-error" data-terms-warning hidden>Vous devez accepter les conditions pour créer un compte.</p>
+                        @error('terms')
+                            <p class="form-error">{{ $message }}</p>
+                        @enderror
+                    </div>
+
                     <button type="submit" class="btn btn-primary btn-block">{{ __('store.register_cta') }}</button>
                 </form>
 
@@ -105,3 +126,8 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ versioned_asset('js/password-toggle.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/register-validate.js') }}" defer></script>
+@endpush

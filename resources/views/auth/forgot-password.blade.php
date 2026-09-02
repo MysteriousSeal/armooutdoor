@@ -7,7 +7,7 @@
     <div class="container">
         <div class="auth-page">
             <div class="auth-card">
-                <h2>{{ __('store.forgot_password_title') }}</h2>
+                <h1>{{ __('store.forgot_password_title') }}</h1>
                 <p class="auth-card-intro">{{ __('store.forgot_password_intro') }}</p>
 
                 <form method="POST" action="{{ localized_route('password.email') }}" class="auth-form" id="forgot-password-form" data-throttle-message="{{ __('store.password_reset_throttled') }}">
@@ -24,6 +24,8 @@
                             required
                             autofocus
                             autocomplete="email"
+                            autocapitalize="none"
+                            spellcheck="false"
                         >
                         @error('email')
                             <p class="form-error">{{ $message }}</p>

@@ -21,6 +21,7 @@ class WelcomeEmailTest extends TestCase
             'last_name' => 'Martin',
             'email' => 'jean.martin@example.com',
             'password' => 'motdepasse-solide',
+            'terms' => '1',
             'password_confirmation' => 'motdepasse-solide',
         ]);
 

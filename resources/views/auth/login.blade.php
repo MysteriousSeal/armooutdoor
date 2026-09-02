@@ -8,7 +8,7 @@
     <div class="container">
         <div class="auth-page">
             <div class="auth-card">
-                <h2>{{ __('store.login_title') }}</h2>
+                <h1>{{ __('store.login_title') }}</h1>
                 <p class="auth-card-intro">{{ __('store.login_intro') }}</p>
 
                 <form method="POST" action="{{ localized_route('login.store') }}" class="auth-form">
@@ -25,6 +25,8 @@
                             required
                             autofocus
                             autocomplete="email"
+                            autocapitalize="none"
+                            spellcheck="false"
                         >
                         @error('email')
                             <p class="form-error">{{ $message }}</p>
@@ -65,3 +67,7 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ versioned_asset('js/password-toggle.js') }}" defer></script>
+@endpush

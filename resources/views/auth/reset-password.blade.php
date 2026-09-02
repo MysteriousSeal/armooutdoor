@@ -6,7 +6,7 @@
     <div class="container">
         <div class="auth-page">
             <div class="auth-card">
-                <h2>{{ __('store.reset_password_title') }}</h2>
+                <h1>{{ __('store.reset_password_title') }}</h1>
                 <p class="auth-card-intro">{{ __('store.reset_password_intro') }}</p>
 
                 <form method="POST" action="{{ localized_route('password.update') }}" class="auth-form">
@@ -52,3 +52,7 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ versioned_asset('js/password-toggle.js') }}" defer></script>
+@endpush

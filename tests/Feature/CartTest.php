@@ -78,6 +78,7 @@ class CartTest extends TestCase
             'last_name' => 'Client',
             'email' => 'jean@example.com',
             'password' => 'secret-pass',
+            'terms' => '1',
             'password_confirmation' => 'secret-pass',
         ])->assertRedirect('/');
 

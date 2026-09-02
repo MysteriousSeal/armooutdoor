@@ -30,7 +30,14 @@ class RegisterController extends Controller
             'last_name' => ['required', 'string', 'max:80'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', Password::min(8)],
+            // The form's own script warns first; without JavaScript the
+            // refusal happens here, saying the same thing.
+            'terms' => ['accepted'],
+        ], [
+            'terms.accepted' => 'Vous devez accepter les conditions pour créer un compte.',
         ]);
+
+        unset($validated['terms']);
 
         $user = User::query()->create($validated);
 

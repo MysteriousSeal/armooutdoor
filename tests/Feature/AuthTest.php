@@ -40,7 +40,8 @@ class AuthTest extends TestCase
                 'last_name' => 'Test',
                 'email' => 'jean@example.com',
                 'password' => 'secret-pass',
-                'password_confirmation' => 'secret-pass',
+                'terms' => '1',
+            'password_confirmation' => 'secret-pass',
             ])
             ->assertRedirect('/')
             ->assertSessionHas('status');
@@ -61,7 +62,8 @@ class AuthTest extends TestCase
                 'last_name' => 'Test',
                 'email' => 'jean@example.com',
                 'password' => 'secret-pass',
-                'password_confirmation' => 'different',
+                'terms' => '1',
+            'password_confirmation' => 'different',
             ])
             ->assertRedirect('/register')
             ->assertSessionHasErrors('password');

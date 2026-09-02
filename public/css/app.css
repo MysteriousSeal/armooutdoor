@@ -2876,7 +2876,7 @@ body.has-menu-open {
     box-shadow: var(--shadow);
 }
 
-.auth-card h2 {
+.auth-card h1 {
     font-size: 1.375rem;
     font-weight: 500;
 }
@@ -5917,4 +5917,65 @@ body.lightbox-open {
     .lightbox-image {
         max-width: 94vw;
     }
+}
+
+/* --- Password visibility toggle (auth forms) --------------------------- */
+
+.password-field {
+    position: relative;
+    display: block;
+}
+
+.password-field input {
+    /* Room for the eye, so a long password never hides under it. */
+    padding-right: 2.6rem;
+    width: 100%;
+}
+
+.password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 0.35rem;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.password-toggle:hover,
+.password-toggle:focus-visible {
+    color: var(--text);
+}
+
+/* The acceptance checkbox above the register button: quiet, but a
+   choice made rather than a line skimmed. */
+.auth-legal-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+    font-size: 0.75rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+}
+
+.auth-legal-note input {
+    margin-top: 0.15rem;
+    flex-shrink: 0;
+    accent-color: var(--accent);
+}
+
+.auth-legal-note a {
+    color: inherit;
+    text-decoration: underline;
+}
+
+.auth-legal-note a:hover {
+    color: var(--accent-hover);
 }
