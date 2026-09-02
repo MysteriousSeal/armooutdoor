@@ -2,6 +2,22 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-02 — v1.6.0 — build OLI8MP
+
+### Storefront
+
+- **« Pertinence » means something now.** It sorted category pages by creation date, « Nouveautés » wearing a different label. With no search query to be relevant to, relevance is business sense: what can be bought leads, then what sold over the last year — revenue only, a refunded sale recommends nothing — then what gets looked at per the site's own analytics, then the hand-ranking as the stable tiebreak. A sold-out best seller sinks below anything buyable.
+
+- **« Voir tous les produits » finally has a page holding them all.** The home page's shop links landed on whichever category sorted first. /produits lists the whole catalogue, paginated and ordered by that same relevance — the scoring shared so the two cannot drift — with paginated titles and canonicals, collection markup, and a sitemap entry. All four home links moved there.
+
+- **« En savoir plus » got an À propos worth the label.** A real page at /a-propos in the help section's shell: who the shop is, why it was created — a small team fifteen-plus years into sport shooting, come up through airsoft, airguns and the range, .22LR to .308 and the traditional 9mm — its engagements as check-led cards, delivery and payment in brief, a paragraph for the hunters checked item by item against the catalogue, and the company identity pointing at the mentions légales. AboutPage markup resolves to the Organization; the footer links it too.
+
+- **The FAQ catches up with the shop.** Ten questions become fifteen: stock that is really stock, ordering from the supplier's shelf, discount codes, the invoice available from dispatch, reviews written only by buyers. The adults answer tells the real flow — the order goes through, the proof is asked before dispatch and the document deleted once verified — payment names Stripe and 3-D Secure and notes possible installments by eligibility, the title stops saying FAQ twice, and the closing banner writes to the contact form instead of the mentions légales.
+
+- **Lettre suivie joins the carrier lists, said as what it is** — for small and light articles, straight into the letterbox — across the home page, the FAQ, the help pages and À propos. On Livraison & Retours the five carriers sit on one line and each card opens its carrier's own tracking page, derived from the same templates the order pages use. The FAQ and help section titles wear the aisle olive with its short highlighter rule, like the home sections and the filters before them.
+
+**No migration.**
+
 ## 2026-09-02 — v1.5.2 — build WO80U9
 
 ### Storefront
