@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-02 — v1.5.0 — build U70HML
+
+### Admin
+
+- **The shop is emailed the three silences that cost orders.** Beside the new-order notice it already had, three things waited for somebody to think of logging in. A conversation turning unread now emails once per transition — judged before the message lands, so a burst of follow-ups is a single notice, and reading the thread re-arms it. A proof of age arriving emails at once, a paid restricted order possibly sitting held on that review. And a Stripe session paid whose order could not be created emails from the webhook's own failure — money taken, nothing to ship, the one silence that must not wait. All four notices now ride one sending path with the house rules — deferred past the response, an outage logs and never breaks the action, empty address skips — behind a new `ADMIN_NOTIFICATION_EMAIL` that falls back to the orders address, so production changes nothing to start hearing about all of it; the order notices keep their own knob for the day the two should part.
+
+**No migration.** `ADMIN_NOTIFICATION_EMAIL` is optional — unset, everything goes where the order notices already go.
+
 ## 2026-09-02 — v1.4.2 — build Z0N5NN
 
 ### Under the hood
