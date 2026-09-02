@@ -5979,3 +5979,148 @@ body.lightbox-open {
 .auth-legal-note a:hover {
     color: var(--accent-hover);
 }
+
+/* --- Auth pages: the shop on the left, the form on the right ----------- */
+
+.auth-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 28rem);
+    gap: 2rem;
+    align-items: stretch;
+    width: 100%;
+    /* Flush with the header's left edge, the panel taking the width the
+       form does not need. */
+}
+
+/* The brand panel speaks the aisle language: kicker, olive title, then
+   the pitch. The wordmark already lives in the header. */
+.auth-brand {
+    display: flex;
+    flex-direction: column;
+    padding: 2.4rem 2.35rem 2.1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.auth-brand-kicker {
+    margin: 0 0 0.75rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent-heading);
+}
+
+/* The home sections' title voice, not the hero's: the form's own h1 keeps
+   the loudest word on the page. */
+.auth-brand-title {
+    margin: 0;
+    font-size: clamp(1.35rem, 2vw, 1.75rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+}
+
+/* The highlighter band painted as a background on the text itself, the way
+   the home titles do it, so it follows every line if the title ever wraps. */
+.auth-brand-title-accent {
+    color: var(--accent-heading);
+    background-image: linear-gradient(
+        color-mix(in srgb, var(--accent-heading) 22%, transparent),
+        color-mix(in srgb, var(--accent-heading) 22%, transparent)
+    );
+    background-repeat: no-repeat;
+    background-size: 100% 0.18em;
+    background-position: 0 calc(100% - 0.08em);
+}
+
+.auth-brand-pitch {
+    margin: 1.05rem 0 0;
+    max-width: 28rem;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+}
+
+.auth-brand-points {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 1.35rem 0 1.5rem;
+    padding: 0;
+    list-style: none;
+    font-size: 0.875rem;
+    color: var(--text);
+}
+
+.auth-brand-points li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    padding: 0.7rem 0;
+    border-top: 1px solid var(--border);
+}
+
+.auth-brand-points li:last-child {
+    padding-bottom: 0;
+}
+
+.auth-brand-point-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.1rem;
+    height: 1.1rem;
+    margin-top: 0.18rem;
+    flex-shrink: 0;
+    color: var(--accent-heading);
+    border: 1.5px solid var(--accent-heading);
+}
+
+.auth-brand-point-mark::after {
+    content: '';
+    width: 0.22rem;
+    height: 0.42rem;
+    margin-top: -0.14rem;
+    border-right: 1.6px solid currentColor;
+    border-bottom: 1.6px solid currentColor;
+    transform: rotate(40deg);
+}
+
+/* A quiet exit, not a second call to action: the login button stays the
+   only button on the page. Dressed like the home sections' 'voir tout' link. */
+.auth-brand-more {
+    align-self: flex-start;
+    margin-top: auto;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--text-muted);
+    border-bottom: 1px solid transparent;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.auth-brand-more:hover {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+}
+
+/* The card keeps its width; the grid places it on the right. */
+.auth-layout .auth-card {
+    max-width: none;
+}
+
+@media (max-width: 900px) {
+    /* The visitor came for the form: the pitch stays on the pages it
+       belongs to. */
+    .auth-brand {
+        display: none;
+    }
+
+    .auth-layout {
+        grid-template-columns: minmax(0, 1fr);
+        max-width: 28rem;
+        margin: 0 auto;
+    }
+}

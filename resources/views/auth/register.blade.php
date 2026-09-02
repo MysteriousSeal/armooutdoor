@@ -7,7 +7,9 @@
 @section('content')
     <div class="container">
         <div class="auth-page">
-            <div class="auth-card">
+            <div class="auth-layout">
+                @include('auth.partials.brand-panel')
+                <div class="auth-card">
                 <h1>{{ __('store.register_title') }}</h1>
                 <p class="auth-card-intro">{{ __('store.register_intro') }}</p>
 
@@ -122,6 +124,7 @@
                     {{ __('store.has_account') }}
                     <a href="{{ localized_route('login') }}">{{ __('store.login') }}</a>
                 </p>
+            </div>
             </div>
         </div>
     </div>

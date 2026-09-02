@@ -60,6 +60,16 @@ class AuthPagesTest extends TestCase
         $this->get('/forgot-password')->assertOk()->assertDontSee('js/password-toggle.js');
     }
 
+    public function test_both_pages_carry_the_brand_panel_beside_the_form(): void
+    {
+        foreach (['/login', '/register'] as $path) {
+            $this->get($path)->assertOk()
+                ->assertSee('auth-brand', false)
+                ->assertSee('tenue par des passionnés de tir sportif')
+                ->assertSee(route('about'));
+        }
+    }
+
     public function test_the_email_inputs_refuse_mobile_autocorrections(): void
     {
         $this->get('/login')->assertOk()->assertSee('autocapitalize="none"', false);
