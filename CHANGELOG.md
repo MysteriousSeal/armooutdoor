@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-02 — v1.4.2 — build Z0N5NN
+
+### Under the hood
+
+- **The stylesheets ship minified, the sources stay readable.** PageSpeed counted nine kibioctets left on the table. The shop has no bundler and gains none: the deploy now compacts the served copies in place on the server, after the reset that restores readable sources for the next one, cache-busted by the mtime stamp the assets already carry. The minifier is deliberately conservative — comments go via a character walk, since a regex would read « l'olive » in a French comment as an opening quote; quoted strings pass through verbatim; and nothing inside parentheses is reshaped, calc() dying without its operator spaces. Twenty-nine percent off the main sheet.
+
+**No migration.** The gain lands on the next `deploy.sh` run.
+
 ## 2026-09-02 — v1.4.1 — build LL2K1K
 
 ### Under the hood
