@@ -9,7 +9,11 @@
                 [
                     'q' => 'Quels sont les délais et frais de livraison ?',
                     'a' => 'Les commandes sont préparées puis expédiées en France métropolitaine avec Colissimo, Chronopost, Mondial Relay, Chronopost Shop2Shop ou, pour les articles petits et légers, en Lettre suivie, à domicile ou en point relais. Le délai et le prix exacts s\'affichent au moment du paiement, selon le transporteur choisi.'
-                        .($freeShippingAmount ? ' La livraison est offerte dès '.$freeShippingAmount.' d\'achat.' : ''),
+                        .($freeShippingAmount ? ' La livraison est offerte dès '.$freeShippingAmount.' d\'achat.' : '')
+                        .' Le détail vit sur la page Livraison & Retours.',
+                    'a_html' => 'Les commandes sont préparées puis expédiées en France métropolitaine avec Colissimo, Chronopost, Mondial Relay, Chronopost Shop2Shop ou, pour les articles petits et légers, en Lettre suivie, à domicile ou en point relais. Le délai et le prix exacts s\'affichent au moment du paiement, selon le transporteur choisi.'
+                        .($freeShippingAmount ? ' La livraison est offerte dès '.$freeShippingAmount.' d\'achat.' : '')
+                        .' Le détail vit sur la page <a href="'.e(route('help.shipping-returns')).'">Livraison &amp; Retours</a>.',
                 ],
                 [
                     'q' => 'Livrez-vous en dehors de la France métropolitaine ?',
@@ -20,6 +24,14 @@
                     'a' => 'Dès l\'expédition, un numéro de suivi est ajouté à votre commande et reste consultable depuis "Mes commandes" dans votre compte.',
                     'a_html' => 'Dès l\'expédition, un numéro de suivi est ajouté à votre commande et reste consultable depuis « <a href="'.e(route('orders.index')).'">Mes commandes</a> » dans votre compte.',
                 ],
+                [
+                    'q' => 'Vos produits marqués « en stock » le sont-ils vraiment ?',
+                    'a' => 'Oui. Tous les produits marqués en stock le sont réellement, et sont expédiés dans la journée.',
+                ],
+                [
+                    'q' => 'Un produit « disponible chez le fournisseur » : puis-je le commander ?',
+                    'a' => 'Oui. Nous ne l\'avons pas en stock, mais notre fournisseur en dispose : nous le commandons pour vous. Le délai d\'expédition estimé s\'affiche sur la fiche produit, puis sur votre commande.',
+                ],
             ],
         ],
         [
@@ -28,11 +40,21 @@
             'items' => [
                 [
                     'q' => 'Quels moyens de paiement acceptez-vous ?',
-                    'a' => 'Le paiement se fait par carte bancaire, au moment de la commande, via une connexion sécurisée. Le paiement par PayPal arrive bientôt.',
+                    'a' => 'Le paiement se fait par carte bancaire au moment de la commande, traité par Stripe avec 3-D Secure via une connexion sécurisée. Le paiement par PayPal arrive bientôt. Plus de détails sur la page Paiement sécurisé.',
+                    'a_html' => 'Le paiement se fait par carte bancaire au moment de la commande, traité par Stripe avec 3-D Secure via une connexion sécurisée. Le paiement par PayPal arrive bientôt. Plus de détails sur la page <a href="'.e(route('help.secure-payment')).'">Paiement sécurisé</a>.',
                 ],
                 [
                     'q' => 'Le paiement en plusieurs fois est-il possible ?',
-                    'a' => 'Non, seul le paiement en une fois est proposé actuellement.',
+                    'a' => 'La boutique ne le propose pas elle-même : le paiement se règle en une fois. Selon votre éligibilité, Stripe peut toutefois proposer un paiement échelonné au moment du règlement.',
+                ],
+                [
+                    'q' => 'Comment utiliser un code de réduction ?',
+                    'a' => 'Le code se saisit à l\'étape de paiement, avant de valider la commande. Les codes qui vous sont réservés apparaissent dans « Mes réductions » dans votre compte.',
+                ],
+                [
+                    'q' => 'Où trouver ma facture ?',
+                    'a' => 'Chaque commande a sa facture PDF, téléchargeable depuis "Mes commandes" dans votre compte dès l\'expédition.',
+                    'a_html' => 'Chaque commande a sa facture PDF, téléchargeable depuis « <a href="'.e(route('orders.index')).'">Mes commandes</a> » dans votre compte dès l\'expédition.',
                 ],
             ],
         ],
@@ -61,7 +83,12 @@
                 ],
                 [
                     'q' => 'Certains produits sont-ils réservés aux adultes ?',
-                    'a' => 'Oui, certains produits sont en vente libre réservée aux plus de 18 ans ; une preuve de majorité peut être demandée au passage de la commande.',
+                    'a' => 'Oui, certains articles sont réservés aux plus de 18 ans. La commande se passe normalement ; avant l\'expédition, une preuve de majorité (carte d\'identité, passeport ou permis de conduire) peut être demandée, à envoyer depuis "Mes documents" dans votre compte. Le document est vérifié puis immédiatement supprimé : seule la vérification est conservée.',
+                    'a_html' => 'Oui, certains articles sont réservés aux plus de 18 ans. La commande se passe normalement ; avant l\'expédition, une preuve de majorité (carte d\'identité, passeport ou permis de conduire) peut être demandée, à envoyer depuis « <a href="'.e(route('account.documents.index')).'">Mes documents</a> » dans votre compte. Le document est vérifié puis immédiatement supprimé : seule la vérification est conservée.',
+                ],
+                [
+                    'q' => 'Qui peut laisser un avis sur un produit ?',
+                    'a' => 'Seuls les clients ayant reçu le produit peuvent laisser un avis : chaque avis publié correspond à un achat réel.',
                 ],
                 [
                     'q' => 'Comment vous contacter pour une autre question ?',
