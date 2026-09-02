@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-02 — v1.5.1 — build L58EZF
+
+### Admin
+
+- **The shop's own notices speak French.** All four admin mails — the new order with its age-proof panel, the message turning a thread unread, the proof of age received, the Stripe payment without an order — arrive in the language their reader answers customers in. The channels say « Site » and « Commande manuelle » ; the marketplaces keep their own names.
+
+- **And a fifth: a customer created an account.** Informational rather than actionable — it waits on nobody — but a small shop likes to know who walked in. One line with the name, a button to the customer record, on the same sending path as the rest.
+
+**No migration.**
+
 ## 2026-09-02 — v1.5.0 — build U70HML
 
 ### Admin
