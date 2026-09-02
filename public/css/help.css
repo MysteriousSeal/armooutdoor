@@ -137,7 +137,8 @@
 
 .help-logos {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    /* Five carriers, one line — the payment page overrides with --two. */
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 0.65rem;
     margin: 1.05rem 0 0;
     padding: 0;
