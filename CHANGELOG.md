@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-02 — v1.6.2 — build PUYUUO
+
+### Storefront
+
+- **The shop stands beside its own forms.** Login and register gain a brand panel on the left, starting where the header does: the shop's kicker, the name under its highlighter band, the pitch, four checked promises, and a quiet link to the À propos. It speaks in the home sections' title voice rather than the hero's, so « Connexion » keeps the loudest word and the form keeps the only button on the page. On mobile it steps aside — the visitor came for the form.
+
+- **The home title leads with the brand.** Google was swapping the aisles-first title for the bare name on the homepage result. Now it reads « Armo Outdoor : du matériel discret pour le stand et le terrain » — the name first so Google keeps what follows, the aisles staying in the meta description where they already were.
+
+**No migration.**
+
 ## 2026-09-02 — v1.6.1 — build VQIJEB
 
 ### Storefront
