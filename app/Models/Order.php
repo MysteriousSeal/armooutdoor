@@ -8,7 +8,7 @@ use App\Notifications\AdminOrderPlaced;
 use App\Notifications\OrderConfirmed;
 use App\Notifications\OrderPreparing;
 use App\Support\AdminMail;
-use App\Support\DeferredMail;
+use App\Support\CustomerMail;
 use App\Support\ShippingEstimate;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -638,8 +638,8 @@ class Order extends Model
             return;
         }
 
-        DeferredMail::send('Could not email an order confirmation.', ['order_id' => $this->id],
-            fn () => $this->user->notify(new OrderConfirmed($this)));
+        CustomerMail::notify($this->user, new OrderConfirmed($this),
+            'Could not email an order confirmation.', ['order_id' => $this->id]);
     }
 
     /**
@@ -669,8 +669,8 @@ class Order extends Model
             return;
         }
 
-        DeferredMail::send('Could not email an order preparation notice.', ['order_id' => $this->id],
-            fn () => $this->user->notify(new OrderPreparing($this)));
+        CustomerMail::notify($this->user, new OrderPreparing($this),
+            'Could not email an order preparation notice.', ['order_id' => $this->id]);
     }
 
     public function carrierName(): string

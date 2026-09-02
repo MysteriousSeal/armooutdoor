@@ -265,6 +265,7 @@ return [
     'logged_in' => 'Vous êtes connecté.',
     'logged_out' => 'Vous êtes déconnecté.',
     'registered' => 'Bienvenue. Votre compte est prêt.',
+    'welcome_subject' => 'Bienvenue chez Armo Outdoor',
     'forgot_password' => 'Mot de passe oublié ?',
     'forgot_password_title' => 'Mot de passe oublié',
     'forgot_password_intro' => 'Indiquez votre e-mail, nous vous enverrons un lien pour réinitialiser votre mot de passe.',

@@ -9,12 +9,11 @@ use App\Models\Conversation;
 use App\Models\ConversationMessage;
 use App\Models\User;
 use App\Notifications\ConversationReplied;
-use App\Support\DeferredMail;
+use App\Support\CustomerMail;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\View\View;
 
 class ConversationController extends Controller
@@ -150,10 +149,12 @@ class ConversationController extends Controller
      */
     private function notifyCustomer(Conversation $conversation): void
     {
-        DeferredMail::send('Could not email a conversation reply notification.', ['conversation_id' => $conversation->id],
-            fn () => $conversation->isGuest()
-                ? Notification::route('mail', $conversation->email)->notify(new ConversationReplied($conversation))
-                : $conversation->user->notify(new ConversationReplied($conversation)));
+        CustomerMail::notify(
+            $conversation->isGuest() ? $conversation->email : $conversation->user,
+            new ConversationReplied($conversation),
+            'Could not email a conversation reply notification.',
+            ['conversation_id' => $conversation->id],
+        );
     }
 
     public function close(Request $request, Conversation $conversation): RedirectResponse|JsonResponse

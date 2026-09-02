@@ -7,10 +7,9 @@ use App\Models\CompanySetting;
 use App\Models\Conversation;
 use App\Models\ConversationMessage;
 use App\Notifications\GuestConversationStarted;
-use App\Support\DeferredMail;
+use App\Support\CustomerMail;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\View\View;
 
 class ContactController extends Controller
@@ -53,8 +52,8 @@ class ContactController extends Controller
         if ($user === null) {
             $conversation->ensureGuestToken();
 
-            DeferredMail::send('Could not email a guest conversation link.', ['conversation_id' => $conversation->id],
-                fn () => Notification::route('mail', $conversation->email)->notify(new GuestConversationStarted($conversation)));
+            CustomerMail::notify($conversation->email, new GuestConversationStarted($conversation),
+                'Could not email a guest conversation link.', ['conversation_id' => $conversation->id]);
         }
 
         if ($request->wantsJson()) {

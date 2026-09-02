@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Notifications\AdminCustomerRegistered;
+use App\Notifications\Welcome;
 use App\Support\AdminMail;
 use App\Support\Cart;
+use App\Support\CustomerMail;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -41,6 +43,9 @@ class RegisterController extends Controller
             'Could not email the new-customer notice.',
             ['user_id' => $user->id],
         );
+
+        CustomerMail::notify($user, new Welcome($user),
+            'Could not email the welcome.', ['user_id' => $user->id]);
 
         return redirect(localized_route('home'))
             ->with('status', __('store.registered'));
