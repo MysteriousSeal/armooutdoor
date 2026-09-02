@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-02 — v1.6.3 — build MDTFU4
+
+### Admin
+
+- **The purchase order PDFs speak the shop's language.** The bon de commande and the receipt sheet both led each line with the supplier's reference, falling back to the SKU. Reversed outright: the lines carry the shop's own SKU and nothing else — the code the shelves are labelled with — on both documents, and the tests now refuse a supplier reference on either.
+
+**No migration.**
+
 ## 2026-09-02 — v1.6.2 — build PUYUUO
 
 ### Storefront
