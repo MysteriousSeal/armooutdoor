@@ -110,6 +110,23 @@ class AdminNotificationsTest extends TestCase
         Notification::assertSentTimes(AdminIdentityDocumentSubmitted::class, 1);
     }
 
+    public function test_a_new_customer_account_emails_the_shop(): void
+    {
+        $this->post('/register', [
+            'first_name' => 'Jean',
+            'last_name' => 'Martin',
+            'email' => 'jean.martin@example.com',
+            'password' => 'motdepasse-solide',
+            'password_confirmation' => 'motdepasse-solide',
+        ]);
+
+        Notification::assertSentTo(
+            new AnonymousNotifiable,
+            \App\Notifications\AdminCustomerRegistered::class,
+            fn ($notification, $channels, $notifiable) => $notifiable->routes['mail'] === 'shop@armooutdoor.test',
+        );
+    }
+
     public function test_an_empty_address_means_nobody_is_emailed(): void
     {
         config(['shop.admin_notification_email' => '']);

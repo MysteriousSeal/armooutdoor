@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Notifications\AdminCustomerRegistered;
+use App\Support\AdminMail;
 use App\Support\Cart;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -33,6 +35,12 @@ class RegisterController extends Controller
         event(new Registered($user));
         Auth::login($user);
         $cart->claimFor($user);
+
+        AdminMail::notify(
+            new AdminCustomerRegistered($user),
+            'Could not email the new-customer notice.',
+            ['user_id' => $user->id],
+        );
 
         return redirect(localized_route('home'))
             ->with('status', __('store.registered'));
