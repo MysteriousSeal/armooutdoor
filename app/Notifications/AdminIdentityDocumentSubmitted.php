@@ -33,10 +33,10 @@ class AdminIdentityDocumentSubmitted extends Notification
         $user = $this->document->user;
 
         return (new MailMessage)
-            ->subject('Proof of age received — '.$user->name)
-            ->line('**'.$user->name.'** ('.$user->email.') submitted a '.(self::KIND_LABELS[$this->document->kind] ?? $this->document->kind).'.')
-            ->line('A restricted order may be waiting on this review; the document is deleted the moment a verdict is recorded.')
-            ->action('Review the document', route('admin.documents.index'))
-            ->line('Reviewing requires an owner account.');
+            ->subject('Preuve de majorité reçue — '.$user->name)
+            ->line('**'.$user->name.'** ('.$user->email.') a envoyé : '.(self::KIND_LABELS[$this->document->kind] ?? $this->document->kind).'.')
+            ->line("Une commande réservée aux majeurs attend peut-être cette vérification ; le document est supprimé dès que le verdict est enregistré.")
+            ->action('Vérifier le document', route('admin.documents.index'))
+            ->line('La vérification demande un compte propriétaire.');
     }
 }

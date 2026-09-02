@@ -29,10 +29,10 @@ class AdminConversationReceived extends Notification
         $lastMessage = $this->conversation->messages()->latest('id')->first();
 
         return (new MailMessage)
-            ->subject('New message from '.$this->conversation->name.' — '.$this->conversation->subject)
-            ->line('**'.$this->conversation->name.'** ('.$this->conversation->email.') wrote:')
+            ->subject('Nouveau message de '.$this->conversation->name.' — '.$this->conversation->subject)
+            ->line('**'.$this->conversation->name.'** ('.$this->conversation->email.') écrit :')
             ->line('« '.Str::limit(trim((string) $lastMessage?->body), 300).' »')
-            ->action('Open the conversation', route('admin.conversations.show', $this->conversation))
-            ->line('Replying from the admin marks it read; further messages on this thread will not email again until it is.');
+            ->action('Ouvrir la conversation', route('admin.conversations.show', $this->conversation))
+            ->line("Répondre depuis l'admin la marque lue ; les messages suivants sur ce fil n'enverront pas d'autre e-mail tant qu'elle ne l'est pas.");
     }
 }

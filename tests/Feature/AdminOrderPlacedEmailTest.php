@@ -61,7 +61,7 @@ class AdminOrderPlacedEmailTest extends TestCase
 
             return $notifiable->routes['mail'] === 'store.swift.shelf@gmail.com'
                 && str_contains($html, $order->number)
-                && str_contains($html, 'Website')
+                && str_contains($html, 'Site')
                 && str_contains($html, 'Poêle en fonte')
                 && str_contains($html, route('admin.orders.show', $order));
         });
@@ -93,7 +93,7 @@ class AdminOrderPlacedEmailTest extends TestCase
         $this->assertNotNull(Order::query()->where('status', '!=', 'draft')->first());
 
         Notification::assertSentOnDemand(AdminOrderPlaced::class, function (AdminOrderPlaced $notification, array $channels, AnonymousNotifiable $notifiable): bool {
-            return str_contains((string) $notification->toMail($notifiable)->render(), 'Manual order');
+            return str_contains((string) $notification->toMail($notifiable)->render(), 'Commande manuelle');
         });
     }
 

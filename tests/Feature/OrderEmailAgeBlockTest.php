@@ -77,7 +77,7 @@ class OrderEmailAgeBlockTest extends TestCase
         $order = $this->order(User::factory()->create(), false);
 
         $this->assertStringNotContainsString('réservé aux majeurs', $this->customerMail($order));
-        $this->assertStringNotContainsString('Reserved to adults', $this->adminMail($order));
+        $this->assertStringNotContainsString('Réservé aux majeurs', $this->adminMail($order));
     }
 
     public function test_the_customer_is_told_a_proof_is_missing_and_where_to_send_it(): void
@@ -143,15 +143,15 @@ class OrderEmailAgeBlockTest extends TestCase
 
         $mail = $this->adminMail($order);
 
-        $this->assertStringContainsString('Reserved to adults', $mail);
+        $this->assertStringContainsString('Réservé aux majeurs', $mail);
         // The item name is a translated array on the order line, so it has to
         // go through localizedName(): plucked raw it renders as nothing.
         $this->assertMatchesRegularExpression(
-            '/Reserved to adults[^\n]*Réplique Umarex/u',
+            '/Réservé aux majeurs[^\n]*Réplique Umarex/u',
             strip_tags($mail),
         );
-        $this->assertStringContainsString('No proof of age on file', $mail);
-        $this->assertStringContainsString('as at the time of sending', $mail);
+        $this->assertStringContainsString('Aucune preuve de majorité au dossier', $mail);
+        $this->assertStringContainsString("Statut à la date d'envoi", $mail);
     }
 
     public function test_the_admin_email_clears_a_verified_order(): void
@@ -160,6 +160,6 @@ class OrderEmailAgeBlockTest extends TestCase
         $this->proof($customer, 'verified', now()->addYear()->toDateString());
         $order = $this->order($customer, true);
 
-        $this->assertStringContainsString('may be dispatched', $this->adminMail($order));
+        $this->assertStringContainsString('peut partir', $this->adminMail($order));
     }
 }

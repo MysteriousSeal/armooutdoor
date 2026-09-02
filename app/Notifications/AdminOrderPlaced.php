@@ -27,15 +27,15 @@ class AdminOrderPlaced extends Notification
     {
         return match (true) {
             $this->order->marketplace !== null => $this->order->marketplace->name,
-            (bool) $this->order->is_manual => 'Manual order',
-            default => 'Website',
+            (bool) $this->order->is_manual => 'Commande manuelle',
+            default => 'Site',
         };
     }
 
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('New order '.$this->order->number.' — '.format_euros($this->order->total_cents))
+            ->subject('Nouvelle commande '.$this->order->number.' — '.format_euros($this->order->total_cents))
             ->markdown('emails.orders.admin-placed', [
                 'order' => $this->order->loadMissing('items.product', 'user.identityDocuments', 'marketplace'),
                 // The proof, resolved once here rather than by the template.

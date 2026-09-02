@@ -28,10 +28,10 @@ class AdminStripeOrphanedPayment extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Stripe payment without an order — action needed')
-            ->line('A checkout session was **paid** but its order could not be created:')
+            ->subject('Paiement Stripe sans commande — action requise')
+            ->line("Une session de paiement a été **payée** mais sa commande n'a pas pu être créée :")
             ->line('Session `'.$this->sessionId.'` — '.$this->error)
-            ->action('Open the orphaned payments', route('admin.stripe.orphaned-payments.index'))
-            ->line('The session can be finalized into its order from that page (owner account required).');
+            ->action('Ouvrir les paiements orphelins', route('admin.stripe.orphaned-payments.index'))
+            ->line('La session peut être finalisée en commande depuis cette page (compte propriétaire requis).');
     }
 }
