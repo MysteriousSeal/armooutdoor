@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-02 — v1.3.0 — build PXHGHG
+
+### Admin
+
+- **The product list judges each page's SEO lengths.** A new SEO column after GTIN, wearing the check-or-cross pill of its neighbours: title between 20 and 60 characters — meta title first, the name as fallback — and meta description between 80 and 160. The fallback is measured strictly, so a product whose meta description was never written reads as a cross: the column doubles as a to-do list for the SEO fields, and the cross's tooltip names exactly what fails. A Missing SEO tab after Missing weight gathers the failing products under a count, the verdict resolved in PHP since it lives on the model — meta fields first, HTML stripped — where SQL cannot ask it.
+
+- **The meta description counts itself like the name does.** The SEO textarea gains the same live counter: grey and « a bit short » under 80 characters, green to 160. No red state — the field keeps its hard cap of 160, the length a result shows, backed by validation and by the promise that nothing written there is ever truncated. The make-products-ok guide gains the matching requirements: title 20–60, meta description 80–160, and when a meta title earns its keep.
+
+- **Each product row sheds what it did not need.** The Edit button goes — the thumbnail and the name already open the form — View becomes an eye icon in a column slimmed to match, and the AI OK header sheds its OK.
+
+**No migration.**
+
 ## 2026-09-01 — v1.2.2 — build M2WG09
 
 ### Admin
