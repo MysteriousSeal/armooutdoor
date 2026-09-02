@@ -57,6 +57,34 @@
                 </p>
             </section>
 
+            <section class="help-card" id="pourquoi" aria-labelledby="about-why-title">
+                <h2 id="about-why-title">Pourquoi avoir créé Armo Outdoor</h2>
+                <p>
+                    Armo Outdoor est née d'une petite équipe passionnée de tir sportif depuis plus de
+                    quinze ans. Le parcours classique, fait dans l'ordre : les répliques d'airsoft
+                    d'abord, puis les airguns à billes d'acier et à plombs diabolo, puis les armes à feu
+                    au stand, du .22LR au .308, sans oublier le traditionnel 9mm. Quinze ans de pas de tir, c'est aussi quinze ans de petit matériel : des
+                    cibles qui se décollent, des pastilles introuvables au bon format, des accessoires
+                    commandés sur des places de marché sans visage et reçus sans garantie qu'ils servent.
+                </p>
+                <p>
+                    La boutique est la réponse : réunir au même endroit le petit matériel qui fait la
+                    différence au stand comme sur le terrain. Les cibles bien sûr, mais aussi l'entretien
+                    des armes (cordes, kits et accessoires de nettoyage) et tout ce qui gravite autour de
+                    l'arme et du pas de tir : étuis, boîtes de rangement, accessoires de stand. Le tout
+                    choisi par des gens qui pratiquent, testé avant d'entrer au catalogue, et vendu par une
+                    équipe en France qui lit chaque message. Ce qui ne sert pas sur la ligne ou sur le
+                    chemin n'entre pas au catalogue.
+                </p>
+                <p>
+                    Sans oublier nos amis chasseurs : casquettes, bonnets et chapeaux boonie, cagoules et
+                    cache-cou dans tous les camouflages (forêt, désert, multicam), gants, ceintures et
+                    t-shirts assortis, ruban camo pour habiller l'équipement, et le nécessaire de l'affût
+                    au chemin : sac à dos, boussole, allume-feu, jusqu'aux télémètres et longues-vues pour
+                    lire le terrain à longue distance.
+                </p>
+            </section>
+
             <section class="help-card" id="engagements" aria-labelledby="about-values-title">
                 <h2 id="about-values-title">Nos engagements</h2>
                 <ul class="help-points">

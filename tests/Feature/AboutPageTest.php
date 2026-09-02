@@ -15,6 +15,7 @@ class AboutPageTest extends TestCase
         $this->get('/a-propos')->assertOk()
             ->assertSee('À propos')
             ->assertSee('La boutique')
+            ->assertSee('Pourquoi avoir créé Armo Outdoor')
             ->assertSee('Nos engagements')
             ->assertSee('mentions légales')
             ->assertSee('css/help.css');
