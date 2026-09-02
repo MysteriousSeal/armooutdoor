@@ -34,12 +34,17 @@
     scroll-margin-top: 1.25rem;
 }
 
+/* The section titles' olive and its short highlighter rule — the same
+   dress the category filters and the home sections wear. */
 .faq-heading {
-    margin: 0 0 0.35rem;
-    font-size: 0.72rem;
+    margin: 0 0 0.85rem;
+    padding-bottom: 0.45rem;
+    font-size: 0.8rem;
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
+    color: var(--accent-heading);
+    background: linear-gradient(var(--accent-heading), var(--accent-heading)) left bottom / 2rem 2px no-repeat;
 }
 
 .faq-list {
