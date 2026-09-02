@@ -80,6 +80,9 @@
             <a href="{{ route('admin.products.index', $tabQuery('no-weight')) }}" class="{{ $tab === 'no-weight' ? 'active' : '' }}">
                 Missing weight <span class="admin-tab-count">{{ number_format($noWeightCount) }}</span>
             </a>
+            <a href="{{ route('admin.products.index', $tabQuery('no-seo')) }}" class="{{ $tab === 'no-seo' ? 'active' : '' }}">
+                Missing SEO <span class="admin-tab-count">{{ number_format($noSeoCount) }}</span>
+            </a>
             <a href="{{ route('admin.products.index', $tabQuery('disabled')) }}" class="sits-apart {{ $tab === 'disabled' ? 'active' : '' }}">
                 Disabled <span class="admin-tab-count">{{ number_format($disabledCount) }}</span>
             </a>
@@ -188,6 +191,9 @@
                                 @break
                             @case('no-weight')
                                 No products missing a weight.
+                                @break
+                            @case('no-seo')
+                                Every product's SEO lengths sit in their good ranges.
                                 @break
                             @default
                                 No products found.

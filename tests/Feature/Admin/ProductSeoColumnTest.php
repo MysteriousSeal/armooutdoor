@@ -52,6 +52,27 @@ class ProductSeoColumnTest extends TestCase
             ->assertSee('Title and meta description sit in their good ranges');
     }
 
+    public function test_the_missing_seo_tab_lists_only_the_failing_products(): void
+    {
+        $good = Product::factory()->create([
+            'name' => ['fr' => Str::repeat('a', 40)],
+            'meta_description' => Str::repeat('d', 120),
+        ]);
+        $bad = Product::factory()->create([
+            'name' => ['fr' => Str::repeat('b', 40)],
+            'description' => ['fr' => '<p>'.Str::repeat('c', 500).'</p>'],
+        ]);
+
+        $response = $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/products?tab=no-seo')->assertOk()
+            ->assertSee('Missing SEO');
+
+        $ids = $response->viewData('products')->pluck('id');
+        $this->assertTrue($ids->contains($bad->id));
+        $this->assertFalse($ids->contains($good->id));
+        $this->assertSame(1, $response->viewData('noSeoCount'));
+    }
+
     public function test_the_cross_names_what_fails(): void
     {
         Product::factory()->create([

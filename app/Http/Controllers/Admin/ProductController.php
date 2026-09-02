@@ -39,6 +39,9 @@ class ProductController extends Controller
 
     private const DEFAULT_SORT = 'id-desc';
 
+    /** @var list<int>|null Memo for seoFailingIds() — asked twice per request (count, then tab). */
+    private ?array $seoFailingIds = null;
+
     private const SORT_COOKIE = 'admin_products_sort_v2';
 
     public function index(Request $request): Response
@@ -46,7 +49,7 @@ class ProductController extends Controller
         $search = trim((string) $request->query('search', ''));
         $categorySlug = (string) $request->query('category', '');
         $supplierId = $request->filled('supplier') ? (int) $request->query('supplier') : null;
-        $tab = in_array($request->query('tab'), ['active', 'disabled', 'in-stock', 'restocking', 'at-supplier', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight'], true)
+        $tab = in_array($request->query('tab'), ['active', 'disabled', 'in-stock', 'restocking', 'at-supplier', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight', 'no-seo'], true)
             ? (string) $request->query('tab')
             : 'active';
 
@@ -79,6 +82,7 @@ class ProductController extends Controller
             'noSkuCount' => Product::query()->tap(fn ($query) => $this->missingSku($query))->count(),
             'noGtinCount' => Product::query()->where('is_active', true)->where(fn ($query) => $query->whereNull('gtin')->orWhere('gtin', ''))->count(),
             'noWeightCount' => Product::query()->where('is_active', true)->where(fn ($query) => $query->whereNull('weight_grams')->orWhere('weight_grams', 0))->count(),
+            'noSeoCount' => count($this->seoFailingIds()),
             'categories' => $this->categoryOptions(),
             'suppliers' => Supplier::query()->orderBy('name')->get(),
             'search' => $search,
@@ -92,7 +96,7 @@ class ProductController extends Controller
         $search = trim((string) $request->query('search', ''));
         $categorySlug = (string) $request->query('category', '');
         $supplierId = $request->filled('supplier') ? (int) $request->query('supplier') : null;
-        $tab = in_array($request->query('tab'), ['active', 'disabled', 'in-stock', 'at-supplier', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight'], true)
+        $tab = in_array($request->query('tab'), ['active', 'disabled', 'in-stock', 'at-supplier', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight', 'no-seo'], true)
             ? (string) $request->query('tab')
             : 'active';
 
@@ -676,6 +680,25 @@ class ProductController extends Controller
             });
     }
 
+
+    /**
+     * Ids of active products whose SEO lengths fail. The verdict lives on
+     * the model — meta fields first, HTML stripped from the fallback — so
+     * SQL cannot ask the question; the catalogue is small enough to ask in
+     * PHP, once per request.
+     *
+     * @return list<int>
+     */
+    private function seoFailingIds(): array
+    {
+        return $this->seoFailingIds ??= Product::query()
+            ->where('is_active', true)
+            ->get(['id', 'name', 'description', 'meta_title', 'meta_description'])
+            ->reject(fn (Product $product): bool => $product->seoContentOk())
+            ->pluck('id')
+            ->all();
+    }
+
     private function applyProductTab(Builder $query, string $tab): void
     {
         match ($tab) {
@@ -687,6 +710,7 @@ class ProductController extends Controller
             'no-sku' => $this->missingSku($query),
             'no-gtin' => $query->where('is_active', true)->where(fn (Builder $query) => $query->whereNull('gtin')->orWhere('gtin', '')),
             'no-weight' => $query->where('is_active', true)->where(fn (Builder $query) => $query->whereNull('weight_grams')->orWhere('weight_grams', 0)),
+            'no-seo' => $query->whereIn('id', $this->seoFailingIds()),
             default => $query->where('is_active', true),
         };
     }
