@@ -20,6 +20,9 @@ php artisan view:clear
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
+# In place on the server only — the reset above restores readable sources
+# on the next deploy, and versioned_asset() stamps by mtime.
+php artisan css:minify
 
 sudo systemctl reload php8.5-fpm
 
