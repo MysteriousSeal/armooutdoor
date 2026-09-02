@@ -262,7 +262,8 @@
                         </div>
                         <div class="form-group">
                             <label for="meta_description">Meta description</label>
-                            <textarea id="meta_description" name="meta_description" class="form-control" rows="3" maxlength="160" placeholder="Falls back to the description">{{ old('meta_description', $product->meta_description) }}</textarea>
+                            <textarea id="meta_description" name="meta_description" class="form-control" rows="3" maxlength="160" placeholder="Falls back to the description" data-char-counter="meta-description-counter" data-char-limit="160" data-char-min="80">{{ old('meta_description', $product->meta_description) }}</textarea>
+                            <p class="form-char-counter" id="meta-description-counter" aria-live="polite" hidden></p>
                             <p class="form-hint">Falls back to the description, cut at its last whole sentence. 160 characters is what a result shows, so nothing written here is ever truncated.</p>
                             @error('meta_description') <p class="form-error">{{ $message }}</p> @enderror
                         </div>

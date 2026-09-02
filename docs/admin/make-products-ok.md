@@ -20,17 +20,19 @@ not finished, and `ai_validated` stays `false`.
 
 | # | Requirement | Field |
 |---|---|---|
-| 1 | 4–5 paragraph French description, roughly 1 000–1 300 characters | `description` |
-| 2 | 13+ specification rows, last row is the package weight | `characteristics` |
-| 3 | 6–7 filter rows, labels reused verbatim across the category | `filter_attributes` |
-| 4 | A shipping weight is set | `weight_grams` |
-| 5 | Carriers set to the house default | `carrier_ids` |
-| 6 | Slug is readable French, not machine-generated | `slug` |
-| 7 | Supplier is tagged | `supplier_id` |
-| 8 | Main image plus at least one gallery image, all files present | `image`, `images` |
-| 9 | The page renders and every claim on it matches the artwork | — |
+| 1 | Title between 20 and 60 characters where the product allows it | `name` |
+| 2 | Meta description between 80 and 160 characters | `meta_description` |
+| 3 | 4–5 paragraph French description, roughly 1 000–1 300 characters | `description` |
+| 4 | 13+ specification rows, last row is the package weight | `characteristics` |
+| 5 | 6–7 filter rows, labels reused verbatim across the category | `filter_attributes` |
+| 6 | A shipping weight is set | `weight_grams` |
+| 7 | Carriers set to the house default | `carrier_ids` |
+| 8 | Slug is readable French, not machine-generated | `slug` |
+| 9 | Supplier is tagged | `supplier_id` |
+| 10 | Main image plus at least one gallery image, all files present | `image`, `images` |
+| 11 | The page renders and every claim on it matches the artwork | — |
 
-A page that is merely *complete* is not automatically OK. Requirement 9 is the
+A page that is merely *complete* is not automatically OK. Requirement 11 is the
 one that takes judgement: a full spec table describing a product that looks
 nothing like its photographs is worse than an empty one.
 
@@ -144,6 +146,55 @@ the question — see [Escalate, don't guess](#escalate-dont-guess).
 ---
 
 ## Step 3 — Write the content
+
+### Title
+
+**Aim for 20 to 60 characters.** Under 20 the title is too thin to say what the
+product is or which variant it is; over 60 it gets truncated in listings, search
+results and marketplace feeds, so the distinguishing word falls off the end. The
+server accepts up to 120, but that is a hard limit, not a target.
+
+Treat it as a target rather than a rule. Some products genuinely need more: a
+title carrying a quantity, a dimension and a defining attribute can run past 60
+without a wasted word. Go over only when every word is doing work, and never
+pad a short one to reach 20.
+
+Put the distinguishing word early. Within a category most titles share a long
+common stem, so what separates one product from its neighbours should appear
+before the part that gets cut. Keep the pattern of the category's existing
+titles: a shared stem plus one qualifier, on the same axis for every product.
+
+The title must describe what the photographs show. A name claiming a pattern,
+material or mechanism the artwork does not support is the same defect as a false
+spec row, and is fixed the same way — see [Step 2](#step-2--look-at-the-product-before-writing-about-it).
+
+### Meta description
+
+**Between 80 and 160 characters.** This is the text a search result shows under
+the link. The server caps it at 160, which is also roughly what a result
+displays, so nothing you write within the limit gets truncated. Under 80 the
+snippet is too thin to earn a click and search engines tend to replace it with
+whatever text they pick off the page.
+
+Left empty, the product's `description` is used instead, cut at its last whole
+sentence. That is a workable fallback but a poor one: the first sentence of a
+description is written to open a paragraph, not to stand alone in a result.
+
+Write one sentence, occasionally two, that names the product and gives the single
+reason to click. It should read as a complete thought out of context, carry the
+words a buyer would actually search, and not repeat the title verbatim, since the
+result already shows the title directly above it.
+
+**Companion field:** `meta_title` replaces the product name in a search result.
+Set it whenever the name runs past about 60 characters, so the distinguishing
+word is not the part that gets cut. Where the name already fits, leave it empty
+and the name is used.
+
+**Target 60 characters; 70 is the hard limit.** The server accepts 70, but a
+search result truncates around 60, so a 70-character meta title gets cut by the
+very mechanism the field exists to avoid. Treat 70 as storage headroom, not as
+something to fill. This is the same 60 the `name` target uses, and for the same
+reason.
 
 ### Description
 
