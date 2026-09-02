@@ -108,6 +108,18 @@ class Carrier extends Model
     ];
 
     /**
+     * The carrier's tracking page with no number filled in — where the
+     * help page can send a visitor who has their number in hand. Null for
+     * a slug with no known tracking tool.
+     */
+    public static function trackingHomeUrl(string $slug): ?string
+    {
+        $template = self::TRACKING_URLS[$slug] ?? null;
+
+        return $template === null ? null : strtok($template, '?');
+    }
+
+    /**
      * Null quand ce transporteur n'a pas de page de suivi connue : le numéro
      * reste alors affiché en clair plutôt que de renvoyer nulle part.
      *

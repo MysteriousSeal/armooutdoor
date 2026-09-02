@@ -167,6 +167,31 @@
     object-fit: contain;
 }
 
+/* A card that goes somewhere: hairline that inks up, a slight lift. */
+.help-logo--link {
+    height: 100%;
+    border: 1px solid var(--border);
+    color: var(--text);
+    transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.help-logo--link:hover,
+.help-logo--link:focus-visible {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+}
+
+/* Scoped under .help-card to outweigh the generic .help-card p rule,
+   which was quietly winning the font-size and margin back. */
+.help-card .help-logos-note {
+    margin: 1.25rem 0 0;
+    font-size: 0.72rem;
+    font-style: italic;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
 .help-logo span {
     font-size: 0.72rem;
     font-weight: 700;

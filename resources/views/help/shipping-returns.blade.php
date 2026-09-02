@@ -63,28 +63,33 @@
                     Chronopost Shop2Shop, au choix, à domicile ou en point relais. Les articles petits et
                     légers peuvent aussi partir en Lettre suivie, directement dans la boîte aux lettres.
                 </p>
+                {{-- Each card opens the carrier's own tracking page: a
+                     visitor holding a number goes straight to the tool. --}}
                 <ul class="help-logos">
-                    <li class="help-logo">
-                        <img src="{{ asset('images/carriers/colissimo.png') }}" alt="Colissimo" width="120" height="28">
-                        <span>Colissimo</span>
-                    </li>
-                    <li class="help-logo">
-                        <img src="{{ asset('images/carriers/chronopost.png') }}" alt="Chronopost" width="120" height="28">
-                        <span>Chronopost</span>
-                    </li>
-                    <li class="help-logo">
-                        <img src="{{ asset('images/carriers/mondialrelay.png') }}" alt="Mondial Relay" width="120" height="28">
-                        <span>Mondial Relay</span>
-                    </li>
-                    <li class="help-logo">
-                        <img src="{{ asset('images/carriers/chronopost.png') }}" alt="Chronopost Shop2Shop" width="120" height="28">
-                        <span>Shop2Shop</span>
-                    </li>
-                    <li class="help-logo">
-                        <img src="{{ asset('images/carriers/poste.png') }}" alt="Lettre suivie" width="120" height="28">
-                        <span>Lettre suivie</span>
-                    </li>
+                    @foreach ([
+                        ['colissimo-home', 'colissimo.png', 'Colissimo'],
+                        ['chronopost-home', 'chronopost.png', 'Chronopost'],
+                        ['mondial-relay', 'mondialrelay.png', 'Mondial Relay'],
+                        ['relais-pickup', 'chronopost.png', 'Shop2Shop'],
+                        ['lettre-suivie', 'poste.png', 'Lettre suivie'],
+                    ] as [$carrierSlug, $logo, $label])
+                        <li>
+                            <a
+                                href="{{ \App\Models\Carrier::trackingHomeUrl($carrierSlug) }}"
+                                class="help-logo help-logo--link"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title="Suivre un envoi {{ $label }}"
+                            >
+                                <img src="{{ asset('images/carriers/'.$logo) }}" alt="{{ $label }}" width="120" height="28">
+                                <span>{{ $label }}</span>
+                            </a>
+                        </li>
+                    @endforeach
                 </ul>
+                <p class="help-logos-note">
+                    Cliquez sur un transporteur pour ouvrir sa page de suivi et y saisir votre numéro.
+                </p>
             </section>
 
             <section class="help-card" id="delais-frais" aria-labelledby="help-fees-title">
