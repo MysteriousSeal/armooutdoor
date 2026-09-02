@@ -73,7 +73,7 @@
     ];
 @endphp
 
-@section('title', 'FAQ — Questions fréquentes — '.config('app.name'))
+@section('title', 'Questions fréquentes — '.config('app.name'))
 @section('meta_description', 'Livraison, paiement, retours, compte : retrouvez les réponses aux questions les plus fréquentes sur la boutique Armo Outdoor.')
 @section('canonical', route('faq'))
 
@@ -87,7 +87,7 @@
             '@@context' => 'https://schema.org',
             '@@type' => 'FAQPage',
             'inLanguage' => 'fr-FR',
-            'name' => 'FAQ — Questions fréquentes',
+            'name' => 'Questions fréquentes',
             'url' => route('faq'),
             'mainEntity' => collect($faqs)->flatMap(fn ($group) => $group['items'])->map(fn ($item) => [
                 '@@type' => 'Question',
