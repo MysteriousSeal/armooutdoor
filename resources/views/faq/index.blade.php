@@ -199,9 +199,9 @@
         <aside class="faq-contact">
             <div class="faq-contact-copy">
                 <p class="faq-contact-title">Une autre question ?</p>
-                <p class="faq-contact-text">Écrivez-nous, nos coordonnées sont sur la page mentions légales.</p>
+                <p class="faq-contact-text">Écrivez-nous depuis la page de contact : on vous répond au plus vite.</p>
             </div>
-            <a href="{{ route('legal.notice') }}" class="btn btn-primary faq-contact-cta">Mentions légales</a>
+            <a href="{{ localized_route('contact.show') }}" class="btn btn-primary faq-contact-cta">Nous contacter</a>
         </aside>
             </div>
         </div>
