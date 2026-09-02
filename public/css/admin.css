@@ -4718,6 +4718,21 @@ input[type="date"].form-control {
     min-width: 8.25rem;
 }
 
+/* A cell holding a lone icon button has no use for the reserved width. */
+.admin-table-actions--slim {
+    min-width: 0;
+}
+
+/* An icon-only button: square, the icon optically centered. */
+.btn-icon {
+    padding-left: 0.55rem;
+    padding-right: 0.55rem;
+}
+
+.btn-icon svg {
+    display: block;
+}
+
 .admin-actions-menu {
     position: relative;
     display: inline-flex;

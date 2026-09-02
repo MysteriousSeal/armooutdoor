@@ -250,7 +250,8 @@
                             <th>Variants</th>
                             <th>Weight</th>
                             <th>GTIN</th>
-                            <th title="Product page reviewed and passed">AI OK</th>
+                            <th title="Title 20–60 and meta description 80–160 characters">SEO</th>
+                            <th title="Product page reviewed and passed">AI</th>
                             <th>Status</th>
                             <th></th>
                         </tr>
@@ -406,6 +407,31 @@
                                     @endif
                                 </td>
                                 <td>
+                                    {{-- Same pill as GTIN beside it. The tooltip names what
+                                         fails, so the cross says what to go fix. --}}
+                                    @php
+                                        $seoFailures = array_keys(array_filter([
+                                            'title outside 20–60' => ! $product->seoTitleOk(),
+                                            'meta description outside 80–160' => ! $product->seoDescriptionOk(),
+                                        ]));
+                                    @endphp
+                                    @if ($seoFailures === [])
+                                        <span class="gtin-flag is-set" title="Title and meta description sit in their good ranges">
+                                            <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                                                <path d="m5 13 4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                            <span class="sr-only">SEO lengths OK</span>
+                                        </span>
+                                    @else
+                                        <span class="gtin-flag is-missing" title="{{ ucfirst(implode(', ', $seoFailures)) }}">
+                                            <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                                                <path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                                            </svg>
+                                            <span class="sr-only">SEO lengths off</span>
+                                        </span>
+                                    @endif
+                                </td>
+                                <td>
                                     {{-- Même pastille que le GTIN à côté : c'est la même question,
                                          renseigné ou non, et deux dessins pour la même chose se
                                          liraient plus lentement que deux fois le même. --}}
@@ -452,9 +478,22 @@
                                     </form>
                                 </td>
                                 <td>
-                                    <div class="admin-table-actions">
-                                        <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-sm btn-primary">Edit</a>
-                                        <a href="{{ localized_route('products.show', ['product' => $product->slug], 'fr') }}" class="btn btn-sm btn-secondary" target="_blank" rel="noopener noreferrer">View</a>
+                                    <div class="admin-table-actions admin-table-actions--slim">
+                                        {{-- No Edit button: the thumbnail and the name already open
+                                             the form. An eye is enough for the storefront page. --}}
+                                        <a
+                                            href="{{ localized_route('products.show', ['product' => $product->slug], 'fr') }}"
+                                            class="btn btn-sm btn-secondary btn-icon"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            title="View on the storefront"
+                                        >
+                                            <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+                                                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
+                                                <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.75"/>
+                                            </svg>
+                                            <span class="sr-only">View on the storefront</span>
+                                        </a>
                                     </div>
                                 </td>
                             </tr>
@@ -467,7 +506,7 @@
                                         ->values();
                                 @endphp
                                 <tr class="admin-variant-row" id="variant-panel-{{ $product->id }}" hidden>
-                                    <td colspan="14">
+                                    <td colspan="15">
                                         <div class="admin-variant-panel">
                                             <table class="admin-variant-table">
                                                 <thead>

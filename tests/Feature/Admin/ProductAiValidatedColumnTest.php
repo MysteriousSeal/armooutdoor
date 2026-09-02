@@ -7,7 +7,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-/** La colonne « AI OK » de la liste des produits. */
+/** La colonne « AI » de la liste des produits. */
 class ProductAiValidatedColumnTest extends TestCase
 {
     use RefreshDatabase;
@@ -26,7 +26,7 @@ class ProductAiValidatedColumnTest extends TestCase
 
         $html = $this->list();
 
-        $this->assertStringContainsString('AI OK', $html);
+        $this->assertStringContainsString('>AI</th>', $html);
         $this->assertStringContainsString('Page reviewed and passed', $html);
         $this->assertStringNotContainsString('Page not reviewed yet', $html);
     }

@@ -509,6 +509,37 @@ class Product extends Model
         return $override !== '' ? $override : meta_description($this->localizedDescriptionText());
     }
 
+    /**
+     * Whether the title a search result shows sits in its good range:
+     * meta_title when one is written, the name otherwise, 20–60 characters —
+     * the same bounds the form's counter advises.
+     */
+    public function seoTitleOk(): bool
+    {
+        $length = mb_strlen(trim((string) $this->meta_title) ?: $this->localizedName());
+
+        return $length >= 20 && $length <= 60;
+    }
+
+    /**
+     * Same question for the description, 80–160. Deliberately strict on the
+     * fallback: without a meta_description the raw description is measured,
+     * which practically never fits — the column reads as a to-do list for
+     * filling the SEO fields, which is what was asked of it.
+     */
+    public function seoDescriptionOk(): bool
+    {
+        $override = trim((string) $this->meta_description);
+        $length = mb_strlen($override !== '' ? $override : $this->localizedDescriptionText());
+
+        return $length >= 80 && $length <= 160;
+    }
+
+    public function seoContentOk(): bool
+    {
+        return $this->seoTitleOk() && $this->seoDescriptionOk();
+    }
+
     public function localizedDescription(): string
     {
         return HtmlSanitizer::forDisplay($this->localized('description'));
