@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-02 — v1.5.2 — build WO80U9
+
+### Storefront
+
+- **A new account is welcomed.** The first email a customer receives says what their account actually does — adresses gardées, panier retrouvé d'une visite à l'autre, suivi des commandes — points the contact form for questions, and offers one button to the shop. Warm and practical, no promise the shop does not make elsewhere, and no discount machinery to walk back later.
+
+### Under the hood
+
+- **Customer mail gets its own door.** The counterpart of the admin notices' AdminMail: a CustomerMail that takes an account holder or a bare guest address, defers past the response, and logs an outage without breaking the action that earned the email. The five existing customer sends move onto it — the conversation reply's guest-or-account ternary collapsing into the recipient argument — so every email in the application now leaves through one of two doors, each naming its audience, and nothing outside them touches the deferral machinery.
+
+**No migration.**
+
 ## 2026-09-02 — v1.5.1 — build L58EZF
 
 ### Admin
