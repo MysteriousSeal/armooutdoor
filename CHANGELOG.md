@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-02 — v1.4.1 — build LL2K1K
+
+### Under the hood
+
+- **The lightbox is held to what it promises.** It lives entirely in the script, so the tests pin what can be pinned: the page ships the hooks the script reads and none of the lightbox itself — the no-JavaScript guarantee — the script keeps every exit path and the accessibility contract, and the stylesheet knows each class the script writes, the markup-pointing-at-nothing fault that once shipped the FAQ unstyled.
+
+**No migration.**
+
 ## 2026-09-02 — v1.4.0 — build ZPQF2S
 
 ### Storefront
