@@ -273,7 +273,9 @@
                         @php
                             $details = array_filter([
                                 $item->variant?->label(),
-                                $item->supplier_reference ?: $item->sku,
+                                // The shop's own SKU, never the supplier's reference: the
+                                // supplier reads the designation, the shop reads the code.
+                                $item->sku,
                             ]);
                         @endphp
                         @if ($details !== [])

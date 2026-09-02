@@ -83,7 +83,9 @@ class PurchaseOrderPdfTest extends TestCase
         $this->assertStringContainsString('Bon de commande', $html);
         $this->assertStringContainsString('BC-20260823-LQMA', $html);
         $this->assertStringContainsString('DM Diffusion', $html);
-        $this->assertStringContainsString('DM-4471', $html);
+        // The shop's own SKU on the line, never the supplier's reference.
+        $this->assertStringContainsString('MECH-MPACT-WOOD', $html);
+        $this->assertStringNotContainsString('DM-4471', $html);
         $this->assertStringContainsString('Gants M-Pact Woodland', $html);
         // 6 × 22,18 € = 133,08 € HT, port 9 €, TVA 20 % : 170,52 € TTC.
         // La TVA se calcule par ligne, comme partout ailleurs sur le bon.
@@ -149,7 +151,7 @@ class PurchaseOrderPdfTest extends TestCase
         $this->assertStringNotContainsString('col-variant', $html);
         $this->assertStringNotContainsString('col-sku', $html);
         $this->assertStringContainsString('line-detail', $html);
-        $this->assertStringContainsString('DM-4471', $html);
+        $this->assertStringContainsString('MECH-MPACT-WOOD', $html);
     }
 
     public function test_the_sender_block_holds_two_columns(): void

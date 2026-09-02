@@ -287,7 +287,9 @@
                         @php
                             $details = array_filter([
                                 $item->variant?->label(),
-                                $item->supplier_reference ?: $item->sku,
+                                // The shop's own SKU, never the supplier's reference: the sheet
+                                // is read next to the shop's shelves, not the supplier's.
+                                $item->sku,
                             ]);
                         @endphp
                         @if ($details !== [])

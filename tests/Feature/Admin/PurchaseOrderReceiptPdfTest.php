@@ -113,7 +113,9 @@ class PurchaseOrderReceiptPdfTest extends TestCase
         $html = $this->render($this->purchaseOrder());
 
         $this->assertStringContainsString('Gants M-Pact Woodland', $html);
-        $this->assertStringContainsString('DM-4471', $html);
+        // The shop's own SKU: the sheet is read next to the shop's shelves.
+        $this->assertStringContainsString('MECH-MPACT-WOOD', $html);
+        $this->assertStringNotContainsString('DM-4471', $html);
         $this->assertStringContainsString('>6<', str_replace([' ', "\n"], '', $html));
     }
 
