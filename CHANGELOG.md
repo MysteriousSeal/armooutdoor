@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-02 — v1.4.0 — build ZPQF2S
+
+### Storefront
+
+- **The product photographs open in a lightbox.** A catalogue of gear is shopped by looking, and the photographs were capped at the size of their column. Clicking the main photo — or reaching it by keyboard, the stage having become a real stop — opens the gallery over a darkened page: chevrons hugging the image rather than the screen edges, arrow keys, a swipe on touch screens, a live « 2 / 5 » counter and a thumbnail strip for direct jumps. Escape, the backdrop or the cross leave it, focus returning exactly where it was. The whole thing is built by the script at runtime: a visitor without JavaScript ships no dead controls, and the page's markup does not change at all.
+
+**No migration.**
+
 ## 2026-09-02 — v1.3.0 — build PXHGHG
 
 ### Admin
