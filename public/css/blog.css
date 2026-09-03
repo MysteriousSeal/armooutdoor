@@ -148,6 +148,9 @@
 }
 
 .blog-card-title {
+    /* An h2 since the outline fix: strip the heading's own margin so the
+       card's gap keeps doing the spacing. */
+    margin: 0;
     font-size: 1.12rem;
     font-weight: 600;
     line-height: 1.3;

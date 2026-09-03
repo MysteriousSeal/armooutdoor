@@ -1,12 +1,37 @@
 @extends('layouts.app')
 
-@section('title', paginated_title(($activeCategory ? $activeCategory->localizedName().' — ' : '').__('store.blog_title'), $posts).' — '.config('app.name'))
-@section('meta_description', $activeCategory?->localizedDescription() ?: __('store.blog_intro'))
+@section('title', paginated_title($activeCategory ? $activeCategory->localizedName().' — '.__('store.blog_title') : __('store.blog_meta_title'), $posts).' — '.config('app.name'))
+@section('meta_description', $activeCategory?->localizedDescription() ?: __('store.blog_meta_description'))
 @section('canonical', paginated_canonical($activeCategory ? route('blog.category', $activeCategory->slug) : route('blog.index'), $posts))
 
 @push('head')
     <link rel="stylesheet" href="{{ versioned_asset('css/categories.css') }}">
     <link rel="stylesheet" href="{{ versioned_asset('css/blog.css') }}">
+    {{-- The posts each declare themselves; this is the shelf they sit on,
+         belonging to the same site node as every other listing page. --}}
+    <script type="application/ld+json">
+        {!! json_encode([
+            '@@context' => 'https://schema.org',
+            '@@type' => 'Blog',
+            'name' => $activeCategory ? $activeCategory->localizedName().' — '.__('store.blog_title') : __('store.blog_title'),
+            'url' => $activeCategory ? route('blog.category', $activeCategory->slug) : route('blog.index'),
+            'description' => $activeCategory?->localizedDescription() ?: __('store.blog_meta_description'),
+            'inLanguage' => 'fr-FR',
+            'isPartOf' => ['@@id' => \App\Support\OrganizationSchema::websiteId()],
+            'publisher' => \App\Support\OrganizationSchema::reference(),
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+    </script>
+    <script type="application/ld+json">
+        {!! json_encode([
+            '@@context' => 'https://schema.org',
+            '@@type' => 'BreadcrumbList',
+            'itemListElement' => array_values(array_filter([
+                ['@@type' => 'ListItem', 'position' => 1, 'name' => __('store.breadcrumb_home'), 'item' => localized_route('home')],
+                ['@@type' => 'ListItem', 'position' => 2, 'name' => __('store.blog_title'), 'item' => route('blog.index')],
+                $activeCategory ? ['@@type' => 'ListItem', 'position' => 3, 'name' => $activeCategory->localizedName(), 'item' => route('blog.category', $activeCategory->slug)] : null,
+            ])),
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+    </script>
 @endpush
 
 @section('content')

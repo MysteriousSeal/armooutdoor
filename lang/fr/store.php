@@ -416,6 +416,10 @@ return [
     'nav_blog' => 'Blog',
     'blog_title' => 'Le blog',
     'blog_intro' => 'Conseils, essais, actualités et réglementation, écrits par la boutique.',
+    // The search result's version of the two lines above: the title names
+    // the themes, the description says what the guides actually teach.
+    'blog_meta_title' => 'Le blog : conseils tir, airsoft et réglementation',
+    'blog_meta_description' => 'Conseils, essais, actualités et réglementation, écrits par la boutique. Bien choisir ses cibles, entretenir son arme, débuter en airsoft : les guides d\'Armo Outdoor.',
     'blog_posts_count' => ':count article|:count articles',
     'blog_read' => "Lire l'article",
     'blog_all' => 'Tous les articles',
