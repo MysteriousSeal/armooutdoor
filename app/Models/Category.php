@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['parent_id', 'slug', 'name', 'description', 'image', 'sort_order', 'google_feed'])]
+#[Fillable(['parent_id', 'slug', 'name', 'description', 'guide', 'image', 'sort_order', 'google_feed'])]
 class Category extends Model
 {
     /** @use HasFactory<CategoryFactory> */
@@ -31,6 +31,7 @@ class Category extends Model
         return [
             'name' => 'array',
             'description' => 'array',
+            'guide' => 'array',
             'sort_order' => 'integer',
             'google_feed' => 'boolean',
         ];
@@ -92,6 +93,15 @@ class Category extends Model
     public function localizedName(): string
     {
         return $this->localized('name');
+    }
+
+    /**
+     * The buying guide, already sanitised on save and cleaned once more on
+     * the way out, the same double door the product descriptions use.
+     */
+    public function localizedGuide(): string
+    {
+        return \App\Support\HtmlSanitizer::forDisplay($this->localized('guide'));
     }
 
     public function localizedDescription(): string

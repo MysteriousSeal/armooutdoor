@@ -257,6 +257,18 @@
 
                         @include('partials.pager', ['paginator' => $products])
                     @endif
+
+                    @if ($category->localizedGuide() !== '' && $products->currentPage() === 1)
+                        {{-- The buying guide: the page's editorial substance,
+                             under the grid so shoppers reach the products
+                             first and search engines still read the prose.
+                             Page one only — page two repeating it would be
+                             duplicated text on a thinner page. --}}
+                        <section class="category-guide">
+                            <h2 class="category-guide-title">{{ __('store.category_guide_title', ['category' => $category->localizedName()]) }}</h2>
+                            <div class="category-guide-body">{!! $category->localizedGuide() !!}</div>
+                        </section>
+                    @endif
                 </div>
             </div>
         @endif

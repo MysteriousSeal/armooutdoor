@@ -39,6 +39,13 @@
             </div>
 
             <div class="form-group">
+                <label for="guide">Buying guide</label>
+                <textarea id="guide" name="guide" class="form-control" rows="14" maxlength="30000" placeholder="<h2>Bien choisir ...</h2>&#10;<p>...</p>">{{ old('guide', $category->guide['fr'] ?? '') }}</textarea>
+                <p class="form-hint">Optional editorial block shown under the category's product grid — the page's SEO substance. HTML allowed: h2, h3, p, ul/ol, li, strong, em, a. Scripts and styles are stripped.</p>
+                @error('guide') <p class="form-error">{{ $message }}</p> @enderror
+            </div>
+
+            <div class="form-group">
                 <label for="image">Hero image</label>
                 @if ($category->imageUrl())
                     <p class="form-hint">

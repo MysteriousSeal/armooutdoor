@@ -22,6 +22,7 @@ class StoreCategoryRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:120'],
             'description' => ['required', 'string', 'max:2000'],
+            'guide' => ['nullable', 'string', 'max:30000'],
             'parent_id' => [
                 'nullable',
                 Rule::exists('categories', 'id')->where('parent_id', null),

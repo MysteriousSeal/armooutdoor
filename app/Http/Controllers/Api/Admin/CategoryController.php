@@ -71,6 +71,7 @@ class CategoryController extends Controller
             'slug' => $category->slug,
             'name' => $category->localizedName(),
             'description' => $category->localizedDescription(),
+            'guide' => $category->guide['fr'] ?? null,
             'parent_id' => $category->parent_id,
             'sort_order' => $category->sort_order,
             'image' => $category->image,
@@ -94,6 +95,14 @@ class CategoryController extends Controller
 
         if ($request->has('description')) {
             $payload['description'] = ['fr' => $request->string('description')->toString()];
+        }
+
+        if ($request->has('guide')) {
+            // Sanitised on the way in, like the back-office form: what the
+            // database holds is already displayable. Null clears it.
+            $payload['guide'] = filled($request->input('guide'))
+                ? ['fr' => \App\Support\HtmlSanitizer::clean($request->input('guide')) ?? '']
+                : null;
         }
 
         if ($request->has('parent_id')) {

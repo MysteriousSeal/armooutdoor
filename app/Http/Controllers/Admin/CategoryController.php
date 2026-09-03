@@ -194,6 +194,11 @@ class CategoryController extends Controller
             'description' => [
                 'fr' => $request->string('description')->toString(),
             ],
+            // Sanitised on the way in, like the product descriptions: what
+            // the database holds is already displayable.
+            'guide' => filled($request->input('guide'))
+                ? ['fr' => \App\Support\HtmlSanitizer::clean($request->input('guide')) ?? '']
+                : null,
             'sort_order' => $request->integer('sort_order'),
         ];
     }

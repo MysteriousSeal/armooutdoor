@@ -334,3 +334,66 @@
         padding-right: 1.1rem;
     }
 }
+
+/* The buying guide under the grid: the page's editorial substance,
+   dressed in the section-title voice the rest of the site speaks. */
+.category-guide {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+}
+
+.category-guide-title {
+    display: inline-block;
+    margin: 0 0 1.1rem;
+    font-size: clamp(1.35rem, 2vw, 1.75rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    color: var(--accent-heading);
+    background-image: linear-gradient(
+        color-mix(in srgb, var(--accent-heading) 22%, transparent),
+        color-mix(in srgb, var(--accent-heading) 22%, transparent)
+    );
+    background-repeat: no-repeat;
+    background-size: 100% 0.18em;
+    background-position: 0 calc(100% - 0.08em);
+}
+
+/* Reading measure: the grid wants width, prose wants a line one can
+   follow. */
+.category-guide-body {
+    max-width: 46rem;
+    font-size: 0.9375rem;
+    line-height: 1.65;
+    color: var(--text);
+}
+
+.category-guide-body h2,
+.category-guide-body h3 {
+    margin: 1.6rem 0 0.5rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--accent-heading);
+}
+
+.category-guide-body p {
+    margin: 0 0 0.85rem;
+}
+
+.category-guide-body ul,
+.category-guide-body ol {
+    margin: 0 0 0.85rem;
+    padding-left: 1.25rem;
+}
+
+.category-guide-body li {
+    margin-bottom: 0.35rem;
+}
+
+.category-guide-body a {
+    color: var(--accent-heading);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}

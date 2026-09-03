@@ -82,6 +82,26 @@ class AdminCategoryApiTest extends TestCase
             ->assertJsonValidationErrors(['parent_id']);
     }
 
+    public function test_the_buying_guide_is_writable_sanitised_and_clearable(): void
+    {
+        $category = Category::factory()->create();
+
+        $this->patchJson('/api/admin/categories/'.$category->id, [
+            'guide' => '<h2>Bien choisir</h2><script>alert(1)</script><p>Texte.</p>',
+        ], $this->headers())->assertOk()
+            ->assertJsonPath('data.guide', '<h2>Bien choisir</h2><p>Texte.</p>');
+
+        $this->assertStringNotContainsString('<script', $category->fresh()->guide['fr']);
+
+        // Null clears it, and an untouched PATCH leaves it alone.
+        $this->patchJson('/api/admin/categories/'.$category->id, ['sort_order' => 3], $this->headers())->assertOk();
+        $this->assertNotNull($category->fresh()->guide);
+
+        $this->patchJson('/api/admin/categories/'.$category->id, ['guide' => null], $this->headers())->assertOk()
+            ->assertJsonPath('data.guide', null);
+        $this->assertNull($category->fresh()->guide);
+    }
+
     public function test_a_category_can_be_edited_field_by_field(): void
     {
         $category = Category::factory()->create(['sort_order' => 3]);

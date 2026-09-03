@@ -36,6 +36,7 @@ abstract class CategoryPayloadRequest extends FormRequest
         return [
             'name' => [$this->presence(), 'string', 'max:120'],
             'description' => [$this->presence(), 'string', 'max:2000'],
+            'guide' => ['sometimes', 'nullable', 'string', 'max:30000'],
             // Seules les catégories racines peuvent être parentes — pas
             // d'imbrication au-delà de deux niveaux, comme au back-office.
             'parent_id' => [
