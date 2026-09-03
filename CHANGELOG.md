@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-03 — v1.9.0 — build ELWHUX
+
+### Admin
+
+- **A category can step out of the Google feed.** A GMC column on the categories list, wearing the product list's own clickable pill: check = its products feed Google, cross = kept home, one click flips it and the activity log remembers who changed what. A parent switched out takes its subcategories' products along — the switch exists for Google's per-aisle policy refusals, and those come by aisle. Everything starts checked, so the feed changes only where an admin says so.
+
+- **The feed states the parcel's weight.** Merchant Center asks for `shipping_weight` when shipping is priced by weight; each weighed product now says its grams, and a product that has not been weighed says nothing rather than 0 g.
+
+**One migration**: a `google_feed` flag on categories, on by default.
+
 ## 2026-09-03 — v1.8.0 — build YJT0DO
 
 ### Storefront
