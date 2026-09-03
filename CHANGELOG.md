@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-03 — v1.9.1 — build F1I16L
+
+### Admin
+
+- **The GMC pill flips in place.** One click, no page reload: the switch follows the supplier toggle's own pattern — the form intercepted, the server answering JSON, the pill swapping its state class while a toast says what happened. Both drawings live in the markup and CSS picks one, a browser without the script keeps the ordinary redirect, and any error falls back to a full submit so the refusal is shown whole.
+
+**No migration.**
+
 ## 2026-09-03 — v1.9.0 — build ELWHUX
 
 ### Admin
