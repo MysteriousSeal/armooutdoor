@@ -673,6 +673,15 @@ class Order extends Model
             'Could not email an order preparation notice.', ['order_id' => $this->id]);
     }
 
+    /**
+     * A letter, not a parcel: the one carrier whose envelope is addressed
+     * by hand — or by the 70 × 50 mm label the admin order page offers.
+     */
+    public function shipsByLettreSuivie(): bool
+    {
+        return ($this->carrier_snapshot['slug'] ?? null) === 'lettre-suivie';
+    }
+
     public function carrierName(): string
     {
         $name = $this->carrier_snapshot['name'] ?? [];

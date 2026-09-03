@@ -1010,6 +1010,26 @@ class OrderController extends Controller
     }
 
     /**
+     * A 70 × 50 mm address label for a Lettre suivie envelope, cut from the
+     * same card stock as the discount codes: recipient only, nothing else —
+     * the letter has no room for a delivery slip, so the label is the one
+     * document that travels on it.
+     */
+    public function addressLabel(Order $order): Response
+    {
+        abort_if($order->isDraft() || ! $order->shipsByLettreSuivie(), 404);
+
+        $pdf = Pdf::loadView('admin.orders.address-label-pdf', [
+            'order' => $order,
+        ])
+            // 70 × 50 mm in PDF points (1 mm = 72/25.4 pt), landscape by
+            // construction: address lines want the long side.
+            ->setPaper([0, 0, 70 * 72 / 25.4, 50 * 72 / 25.4]);
+
+        return $pdf->download('adresse-'.$order->number.'.pdf');
+    }
+
+    /**
      * Offre un code de remerciement depuis la commande : 10 %, un seul
      * usage, pour n'importe quel client, valable trois mois après la date
      * de la commande. Un par commande — le second clic n'a rien à créer.

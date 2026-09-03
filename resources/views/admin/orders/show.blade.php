@@ -358,6 +358,11 @@
                         @if (! $order->isDraft())
                             <a href="{{ route('admin.orders.delivery-slip', $order) }}" class="btn btn-secondary">Download delivery slip</a>
                         @endif
+                        @if (! $order->isDraft() && $order->shipsByLettreSuivie())
+                            {{-- A letter has no parcel to slip a document into: the
+                                 address label is what travels on the envelope. --}}
+                            <a href="{{ route('admin.orders.address-label', $order) }}" class="btn btn-secondary">Download address label</a>
+                        @endif
                         @if ($order->adminInvoiceIsAvailable())
                             <a
                                 href="{{ route('admin.orders.invoice', $order) }}"
