@@ -37,6 +37,17 @@ class MerchantFeedTest extends TestCase
         $this->assertStringNotContainsString('identifier_exists', $xml);
     }
 
+    public function test_a_weighed_product_states_its_shipping_weight(): void
+    {
+        Product::factory()->create(['is_active' => true, 'quantity' => 5, 'sku' => 'HEAVY', 'weight_grams' => 250]);
+        Product::factory()->create(['is_active' => true, 'quantity' => 5, 'sku' => 'UNWEIGHED', 'weight_grams' => null]);
+
+        $xml = $this->get('/feed/google.xml')->getContent();
+
+        $this->assertMatchesRegularExpression('#<g:id>HEAVY</g:id>.*?<g:shipping_weight>250 g</g:shipping_weight>#s', $xml);
+        $this->assertMatchesRegularExpression('#<g:id>UNWEIGHED</g:id>(?:(?!shipping_weight).)*?</item>#s', $xml);
+    }
+
     public function test_an_inactive_product_stays_out(): void
     {
         Product::factory()->create(['is_active' => false, 'sku' => 'HIDDEN-SKU']);

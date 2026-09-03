@@ -53,6 +53,9 @@ class MerchantFeedController extends Controller
             'g:condition' => 'new',
             'g:brand' => filled($product->brand) ? $product->brand : null,
             'g:gtin' => filled($product->gtin) ? $product->gtin : null,
+            // Grams as the catalogue stores them; a product that has not
+            // been weighed says nothing rather than 0 g.
+            'g:shipping_weight' => $product->weight_grams > 0 ? $product->weight_grams.' g' : null,
         ];
 
         // Google refuses an item that stays silent about missing codes; an
