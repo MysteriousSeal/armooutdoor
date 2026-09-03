@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-03 — v1.7.2 — build 51061K
+
+### Storefront
+
+- **The blog dresses for the search results.** The posts each declared themselves; the shelf they sit on said nothing. The index now carries a Blog node tied to the site's own identity, plus the breadcrumb trail its page already drew, and the card titles become real headings so the outline lists the posts instead of jumping from « Le blog » to the footer. The unfiltered page gets a title that names its themes — conseils tir, airsoft, réglementation — and a description that says what the guides actually teach.
+
+- **A post's outline belongs to the post.** The article page borrowed the storefront's product card, h2 included, so seven product names could sit level with the post's own sections. The card's heading level is now a parameter — h2 on listing pages as before, one level down inside an article — and the post hands social previews the article dates its JSON-LD already carried.
+
+**No migration.**
+
 ## 2026-09-03 — v1.7.1 — build 2PAMPI
 
 ### Admin
