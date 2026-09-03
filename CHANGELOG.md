@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-03 — v1.7.0 — build IUMLFQ
+
+### Admin
+
+- **A Lettre suivie envelope gets its address label.** A letter has no parcel to slip a delivery slip into, so the admin order page now offers a 70 × 50 mm label cut from the discount codes' card stock: the recipient in bold, the street, postal code and city, and the country below them — France included — and nothing else. No order number, no phone, no price. The font follows the longest line down to a floor of 11 pt, past which a long street name wraps onto a second line rather than shrinking the label into small print, and the block keeps a clear margin off the card's edges. The button sits beside the delivery slip's, appears only once the order is real, and only when the order actually ships by letter — any other carrier answers with a 404.
+
+**No migration.**
+
 ## 2026-09-02 — v1.6.3 — build MDTFU4
 
 ### Admin
