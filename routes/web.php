@@ -58,6 +58,7 @@ use App\Http\Controllers\FaqController;
 use App\Http\Controllers\GuestConversationController;
 use App\Http\Controllers\HelpController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MerchantFeedController;
 use App\Http\Controllers\NewArrivalsController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PreferenceController;
@@ -80,6 +81,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
+Route::get('/feed/google.xml', [MerchantFeedController::class, 'google'])->name('feeds.google');
 Route::get('/sitemap-pages.xml', [SitemapController::class, 'pages'])->name('sitemap.pages');
 Route::get('/sitemap-categories.xml', [SitemapController::class, 'categories'])->name('sitemap.categories');
 Route::get('/sitemap-products.xml', [SitemapController::class, 'products'])->name('sitemap.products');

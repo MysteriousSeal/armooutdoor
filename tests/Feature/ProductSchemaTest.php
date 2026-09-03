@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Discount;
+use App\Models\Carrier;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductReview;
@@ -176,5 +177,54 @@ class ProductSchemaTest extends TestCase
             'is_active' => true,
             'sort_order' => 1,
         ]);
+    }
+
+    public function test_the_offer_ships_at_the_cheapest_allowed_carrier_rate(): void
+    {
+        Carrier::query()->create(['slug' => 'colissimo-home', 'name' => ['fr' => 'Colissimo'], 'description' => ['fr' => ''], 'eta' => ['fr' => '2–4 jours'], 'method' => 'home', 'price_cents' => 690, 'active' => true]);
+        Carrier::query()->create(['slug' => 'lettre-suivie', 'name' => ['fr' => 'Lettre suivie'], 'description' => ['fr' => ''], 'eta' => ['fr' => '2–3 jours'], 'method' => 'home', 'price_cents' => 350, 'active' => true]);
+
+        $shipping = $this->schema($this->product())['offers']['shippingDetails'];
+
+        $this->assertSame('OfferShippingDetails', $shipping['@type']);
+        $this->assertSame('3.50', $shipping['shippingRate']['value']);
+        $this->assertSame('FR', $shipping['shippingDestination']['addressCountry']);
+        // Transit days read off the carrier's own eta figures.
+        $this->assertSame(2, $shipping['deliveryTime']['transitTime']['minValue']);
+        $this->assertSame(3, $shipping['deliveryTime']['transitTime']['maxValue']);
+    }
+
+    public function test_the_shipping_rate_respects_the_products_own_carrier_rules(): void
+    {
+        $cheap = Carrier::query()->create(['slug' => 'lettre-suivie', 'name' => ['fr' => 'Lettre suivie'], 'description' => ['fr' => ''], 'eta' => ['fr' => '2–3 jours'], 'method' => 'home', 'price_cents' => 350, 'active' => true]);
+        $allowed = Carrier::query()->create(['slug' => 'colissimo-home', 'name' => ['fr' => 'Colissimo'], 'description' => ['fr' => ''], 'eta' => ['fr' => '2–4 jours'], 'method' => 'home', 'price_cents' => 690, 'active' => true]);
+
+        // The product refuses the cheapest carrier: the rate must follow.
+        $product = $this->product(['carrier_ids' => [$allowed->id]]);
+
+        $this->assertSame('6.90', $this->schema($product)['offers']['shippingDetails']['shippingRate']['value']);
+        $this->assertTrue($cheap->exists);
+    }
+
+    public function test_shipping_is_free_once_the_product_alone_crosses_the_threshold(): void
+    {
+        $carrier = Carrier::query()->create(['slug' => 'mondial-relay', 'name' => ['fr' => 'Mondial Relay'], 'description' => ['fr' => ''], 'eta' => ['fr' => '3–5 jours'], 'method' => 'relay', 'price_cents' => 390, 'active' => true]);
+        \App\Models\ShippingSetting::current()->update([
+            'free_shipping_threshold_cents' => 4900,
+            'free_shipping_carrier_ids' => [$carrier->id],
+        ]);
+
+        // 176,49 € on its own is past the 49 € bar: the page must not
+        // promise a 3,90 € postage the cart would never charge.
+        $rich = $this->schema($this->product(['price_cents' => 17649]));
+        $cheap = $this->schema($this->product(['price_cents' => 990]));
+
+        $this->assertSame('0.00', $rich['offers']['shippingDetails']['shippingRate']['value']);
+        $this->assertSame('3.90', $cheap['offers']['shippingDetails']['shippingRate']['value']);
+    }
+
+    public function test_no_carrier_means_no_shipping_details(): void
+    {
+        $this->assertArrayNotHasKey('shippingDetails', $this->schema($this->product())['offers']);
     }
 }

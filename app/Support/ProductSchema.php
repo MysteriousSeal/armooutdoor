@@ -2,9 +2,11 @@
 
 namespace App\Support;
 
+use App\Models\Carrier;
 use App\Models\Product;
 use App\Models\ProductReview;
 use App\Models\ProductVariant;
+use App\Models\ShippingSetting;
 use Illuminate\Support\Str;
 
 /**
@@ -142,6 +144,10 @@ class ProductSchema
             'hasMerchantReturnPolicy' => self::returnPolicy(),
         ];
 
+        if (($shipping = self::shippingDetails($product)) !== null) {
+            $common['shippingDetails'] = $shipping;
+        }
+
         $variantPrices = $product->hasVariants()
             ? $product->variants
                 ->filter(fn (ProductVariant $variant): bool => (bool) $variant->is_active)
@@ -168,6 +174,74 @@ class ProductSchema
                 ? $product->discount->ends_at?->toDateString()
                 : null,
         ], fn ($value): bool => $value !== null);
+    }
+
+    /**
+     * The cheapest way this product actually ships to France.
+     *
+     * Google shows delivery cost and time straight in the result, and reads
+     * them from here or not at all. Each eligible carrier is priced the way
+     * the cart would price it for this product bought alone — weight tiers
+     * applied, and free once the product's own price crosses the free
+     * shipping threshold — and the cheapest wins. The transit days are read
+     * off that carrier's own eta figures; an eta that names no number writes
+     * nothing rather than a guess.
+     *
+     * @return array<string, mixed>|null
+     */
+    private static function shippingDetails(Product $product): ?array
+    {
+        $subtotalCents = $product->hasVariants()
+            ? $product->variants
+                ->filter(fn (ProductVariant $variant): bool => (bool) $variant->is_active)
+                ->map(fn (ProductVariant $variant): int => $variant->effectivePriceCents())
+                ->min() ?? $product->effectivePriceCents()
+            : $product->effectivePriceCents();
+
+        $setting = ShippingSetting::current();
+        $weight = (int) $product->weight_grams;
+
+        // Queried per render, not memoised: a static here would outlive the
+        // request in tests and queue workers, and it is one small query on a
+        // page that already made several.
+        $carrier = Carrier::query()->where('active', true)->get()
+            ->filter(fn (Carrier $carrier): bool => $product->isCarrierAllowed($carrier)
+                && $carrier->carriesWeight($weight))
+            ->sortBy(fn (Carrier $carrier): int => $setting->effectivePriceCents($carrier, $subtotalCents, $weight))
+            ->first();
+
+        if ($carrier === null) {
+            return null;
+        }
+
+        $details = [
+            '@type' => 'OfferShippingDetails',
+            'shippingRate' => [
+                '@type' => 'MonetaryAmount',
+                'value' => self::amount($setting->effectivePriceCents($carrier, $subtotalCents, $weight)),
+                'currency' => 'EUR',
+            ],
+            'shippingDestination' => [
+                '@type' => 'DefinedRegion',
+                'addressCountry' => 'FR',
+            ],
+        ];
+
+        preg_match_all('/\d+/', $carrier->eta['fr'] ?? '', $days);
+
+        if ($days[0] !== []) {
+            $details['deliveryTime'] = [
+                '@type' => 'ShippingDeliveryTime',
+                'transitTime' => [
+                    '@type' => 'QuantitativeValue',
+                    'minValue' => (int) $days[0][0],
+                    'maxValue' => (int) end($days[0]),
+                    'unitCode' => 'DAY',
+                ],
+            ];
+        }
+
+        return $details;
     }
 
     /**
