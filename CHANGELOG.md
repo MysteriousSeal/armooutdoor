@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-03 — v1.7.3 — build LHG1NZ
+
+### Storefront
+
+- **Marketplace reviews say where they were verified.** A review copied in by hand from a marketplace carried no badge at all, sitting unmarked beside the shop's own « Achat vérifié ». It now wears the same green chip with the honest wording — « Achat vérifié via NaturaBuy » when the review remembers its marketplace, « Achat vérifié via Marketplace externe » when it does not — and its hover text says the purchase happened over there and was copied in by the shop.
+
+**No migration.**
+
 ## 2026-09-03 — v1.7.2 — build 51061K
 
 ### Storefront
