@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['parent_id', 'slug', 'name', 'description', 'image', 'sort_order'])]
+#[Fillable(['parent_id', 'slug', 'name', 'description', 'image', 'sort_order', 'google_feed'])]
 class Category extends Model
 {
     /** @use HasFactory<CategoryFactory> */
@@ -32,6 +32,7 @@ class Category extends Model
             'name' => 'array',
             'description' => 'array',
             'sort_order' => 'integer',
+            'google_feed' => 'boolean',
         ];
     }
 

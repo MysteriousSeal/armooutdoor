@@ -87,6 +87,43 @@ class MerchantFeedTest extends TestCase
         $this->assertMatchesRegularExpression('#<g:id>AT-SUPPLIER</g:id>.*?<g:availability>backorder</g:availability>#s', $xml);
     }
 
+    public function test_a_category_switched_out_keeps_its_products_home(): void
+    {
+        $out = \App\Models\Category::factory()->create(['google_feed' => false]);
+        Product::factory()->create(['is_active' => true, 'quantity' => 5, 'sku' => 'KEPT-HOME', 'category_id' => $out->id]);
+        Product::factory()->create(['is_active' => true, 'quantity' => 5, 'sku' => 'STILL-FED']);
+
+        $xml = $this->get('/feed/google.xml')->getContent();
+
+        $this->assertStringNotContainsString('KEPT-HOME', $xml);
+        $this->assertStringContainsString('STILL-FED', $xml);
+    }
+
+    public function test_a_parent_switched_out_takes_its_subcategories_along(): void
+    {
+        $parent = \App\Models\Category::factory()->create(['google_feed' => false]);
+        $child = \App\Models\Category::factory()->create(['google_feed' => true, 'parent_id' => $parent->id]);
+        Product::factory()->create(['is_active' => true, 'quantity' => 5, 'sku' => 'CHILD-SKU', 'category_id' => $child->id]);
+
+        $this->assertStringNotContainsString('CHILD-SKU', $this->get('/feed/google.xml')->getContent());
+    }
+
+    public function test_an_admin_flips_the_switch_from_the_categories_page(): void
+    {
+        $category = \App\Models\Category::factory()->create();
+        $admin = \App\Models\User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->patch(route('admin.categories.google-feed', $category))
+            ->assertRedirect();
+
+        $this->assertFalse($category->fresh()->google_feed);
+
+        $this->actingAs($admin)->patch(route('admin.categories.google-feed', $category));
+
+        $this->assertTrue($category->fresh()->google_feed);
+    }
+
     public function test_the_xml_survives_an_ampersand_in_a_name(): void
     {
         Product::factory()->create([

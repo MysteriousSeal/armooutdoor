@@ -28,6 +28,7 @@
                             <th>Name</th>
                             <th>Slug</th>
                             <th>Products</th>
+                            <th>GMC</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -41,6 +42,7 @@
                                 </td>
                                 <td>{{ $category->slug }}</td>
                                 <td>{{ $category->products_count }}</td>
+                                <td>@include('admin.categories.partials.gmc-toggle', ['category' => $category])</td>
                                 <td>
                                     <div class="admin-table-actions">
                                         <a href="{{ route('admin.categories.edit', $category) }}" class="btn btn-sm btn-secondary">Edit</a>
@@ -53,6 +55,7 @@
                                     <td class="admin-table-indent">— {{ $child->name['fr'] ?? $child->localizedName() }}</td>
                                     <td>{{ $child->slug }}</td>
                                     <td>{{ $child->products_count }}</td>
+                                    <td>@include('admin.categories.partials.gmc-toggle', ['category' => $child])</td>
                                     <td>
                                         <div class="admin-table-actions">
                                             <a href="{{ route('admin.categories.edit', $child) }}" class="btn btn-sm btn-secondary">Edit</a>

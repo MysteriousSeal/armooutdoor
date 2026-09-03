@@ -14,6 +14,24 @@ use Illuminate\View\View;
 
 class CategoryController extends Controller
 {
+    /**
+     * One click on the GMC column: in the Google feed, or out of it. A
+     * parent taken out takes its subcategories' products with it — the
+     * switch exists for Google's policy refusals, and those come by aisle.
+     */
+    public function toggleGoogleFeed(Category $category): \Illuminate\Http\RedirectResponse
+    {
+        $category->update(['google_feed' => ! $category->google_feed]);
+
+        AdminActivityLog::record(
+            'category.google_feed',
+            null,
+            ($category->google_feed ? 'Included ' : 'Excluded ').($category->name['fr'] ?? $category->slug).($category->google_feed ? ' in' : ' from').' the Google feed',
+        );
+
+        return back();
+    }
+
     public function index(): View
     {
         $categories = Category::query()

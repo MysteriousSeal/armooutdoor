@@ -22,6 +22,14 @@ class MerchantFeedController extends Controller
     {
         $products = Product::query()
             ->where('is_active', true)
+            // A category switched out of the feed keeps its products home,
+            // and a parent switched out takes its subcategories along: the
+            // switch exists for Google's per-aisle policy refusals.
+            ->whereHas('category', fn ($category) => $category
+                ->where('google_feed', true)
+                ->where(fn ($query) => $query
+                    ->whereNull('parent_id')
+                    ->orWhereHas('parent', fn ($parent) => $parent->where('google_feed', true))))
             ->with(['discount', 'variants'])
             ->orderBy('id')
             ->get();

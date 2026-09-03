@@ -260,6 +260,7 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         Route::get('/categories/{category}/edit', [AdminCategoryController::class, 'edit'])->name('categories.edit');
         Route::put('/categories/{category}', [AdminCategoryController::class, 'update'])->name('categories.update');
         Route::delete('/categories/{category}', [AdminCategoryController::class, 'destroy'])->name('categories.destroy');
+        Route::patch('/categories/{category}/google-feed', [AdminCategoryController::class, 'toggleGoogleFeed'])->name('categories.google-feed');
 
         // Orders
         Route::get('/purchase-orders', [AdminPurchaseOrderController::class, 'index'])->name('purchase-orders.index');
