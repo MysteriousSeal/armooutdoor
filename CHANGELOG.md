@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-03 — v1.8.0 — build YJT0DO
+
+### Storefront
+
+- **The catalogue learns to speak Merchant Center.** A feed at /feed/google.xml says every active product in the g: vocabulary Google's free listings ingest: the SKU as the stable id, the price the page actually charges (a product sold in declinations leads with its cheapest buyable one), availability in Google's three words — with « dispo fournisseur » said as a backorder, not a shortage — and the GTIN or brand when the product knows them. A product that knows neither declares identifier_exists: no, which is what spares it a disapproval. Submitting the feed and claiming the domain happen in Merchant Center; the shop's side is ready.
+
+- **The product schema says what delivery really costs.** Offers gain OfferShippingDetails, priced the way the cart would price them for the product bought alone: every eligible carrier — the product's own carrier rules and weight limits respected — through the weight tiers and the free-shipping threshold, cheapest wins. A 176 € réplique announces free delivery, not the 3,90 € the cart would never charge, and the transit days are read off the winning carrier's own eta rather than guessed.
+
+**No migration.**
+
 ## 2026-09-03 — v1.7.3 — build LHG1NZ
 
 ### Storefront
