@@ -19,7 +19,7 @@ class CategoryController extends Controller
      * parent taken out takes its subcategories' products with it — the
      * switch exists for Google's policy refusals, and those come by aisle.
      */
-    public function toggleGoogleFeed(Category $category): \Illuminate\Http\RedirectResponse
+    public function toggleGoogleFeed(\Illuminate\Http\Request $request, Category $category): \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
     {
         $category->update(['google_feed' => ! $category->google_feed]);
 
@@ -28,6 +28,12 @@ class CategoryController extends Controller
             null,
             ($category->google_feed ? 'Included ' : 'Excluded ').($category->name['fr'] ?? $category->slug).($category->google_feed ? ' in' : ' from').' the Google feed',
         );
+
+        // The pill flips in place; a browser without the script falls back
+        // to the ordinary redirect, same as the supplier toggle.
+        if ($request->expectsJson()) {
+            return response()->json(['google_feed' => $category->google_feed]);
+        }
 
         return back();
     }

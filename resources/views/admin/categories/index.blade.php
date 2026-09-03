@@ -71,3 +71,7 @@
         @endif
     </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ versioned_asset('js/admin-gmc-toggle.js') }}" defer></script>
+@endpush

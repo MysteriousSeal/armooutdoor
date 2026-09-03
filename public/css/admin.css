@@ -10727,3 +10727,10 @@ a.order-stepper-btn:focus-visible {
     border-radius: 2px;
 }
 
+
+/* The GMC pill carries both drawings; its state class shows one, so the
+   toggle script flips classes instead of rebuilding SVG. */
+.gtin-flag.is-set .gmc-icon-off,
+.gtin-flag.is-missing .gmc-icon-on {
+    display: none;
+}

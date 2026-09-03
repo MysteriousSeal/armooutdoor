@@ -124,6 +124,16 @@ class MerchantFeedTest extends TestCase
         $this->assertTrue($category->fresh()->google_feed);
     }
 
+    public function test_the_switch_answers_json_for_the_reloadless_pill(): void
+    {
+        $category = \App\Models\Category::factory()->create();
+
+        $this->actingAs(\App\Models\User::factory()->admin()->create())
+            ->patchJson(route('admin.categories.google-feed', $category))
+            ->assertOk()
+            ->assertExactJson(['google_feed' => false]);
+    }
+
     public function test_the_xml_survives_an_ampersand_in_a_name(): void
     {
         Product::factory()->create([
