@@ -42,6 +42,38 @@ class DiscountCodeLabelTest extends TestCase
         $this->assertStringNotContainsString('Outdoor', $html);
     }
 
+    public function test_the_amount_leads_then_the_phrase_then_the_date(): void
+    {
+        $code = DiscountCode::query()->create([
+            'code' => 'NOEL2026', 'type' => 'percentage', 'value' => 10,
+            'ends_at' => '2026-11-30 23:59:00',
+        ]);
+
+        $html = view('admin.discounts.code-pdf', [
+            'code' => $code->code, 'amount' => $code->customerLabel(), 'endsAt' => $code->ends_at,
+        ])->render();
+
+        // Three lines under the code, in this order: the amount first,
+        // then the phrase, then the date in French day-first order.
+        $amount = strpos($html, '-10%');
+        $phrase = strpos($html, "Valable jusqu'au");
+        $date = strpos($html, '30/11/2026');
+        $this->assertNotFalse($amount);
+        $this->assertNotFalse($phrase);
+        $this->assertNotFalse($date);
+        $this->assertTrue($amount < $phrase && $phrase < $date);
+    }
+
+    public function test_a_code_without_deadline_keeps_its_amount_but_no_date(): void
+    {
+        $html = view('admin.discounts.code-pdf', [
+            'code' => 'NOEL2026', 'amount' => '-10%', 'endsAt' => null,
+        ])->render();
+
+        $this->assertStringContainsString('-10%', $html);
+        $this->assertStringNotContainsString('Valable', $html);
+    }
+
     public function test_the_size_follows_the_length_and_always_fits_the_card(): void
     {
         $short = view('admin.discounts.code-pdf', ['code' => 'NOEL'])->render();

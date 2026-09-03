@@ -26,6 +26,8 @@ class DiscountCodeController extends Controller
     {
         $pdf = Pdf::loadView('admin.discounts.code-pdf', [
             'code' => $discountCode->code,
+            'amount' => $discountCode->customerLabel(),
+            'endsAt' => $discountCode->ends_at,
         ])
             // 70 × 50 mm en points PDF (1 mm = 72/25.4 pt), paysage par
             // construction : la largeur est le grand côté.

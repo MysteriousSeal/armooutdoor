@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 {{--
     Une carte de 70 × 50 mm, paysage, ne portant que le code — rien
-    d'autre, à la demande. La taille de police descend avec la longueur
+    d'autre, à la demande — et dessous, ce que le code vaut et, s'il
+    expire, sa date limite : offrir un code déjà mort est pire que ne
+    rien offrir. La taille de police descend avec la longueur
     du code pour qu'il tienne sur une seule ligne, et l'interlettrage
     suit le même mouvement : large sur un code court, resserré sur un
     long.
@@ -42,6 +44,26 @@
             letter-spacing: {{ $spacing }}pt;
             white-space: nowrap;
         }
+
+        .deadline {
+            margin-top: 5pt;
+            font-size: 10pt;
+            letter-spacing: 0.5pt;
+            color: #555555;
+        }
+
+        .amount {
+            margin-top: 6pt;
+            font-size: 13pt;
+            font-weight: bold;
+            color: #1a1a1a;
+        }
+
+        .date {
+            margin-top: 2pt;
+            font-size: 11pt;
+            color: #1a1a1a;
+        }
     </style>
 </head>
 <body>
@@ -49,6 +71,13 @@
         <tr>
             <td class="card">
                 <span class="code">{{ $code }}</span>
+                @if (($amount ?? null) !== null)
+                    <div class="amount">{{ $amount }}</div>
+                @endif
+                @if (($endsAt ?? null) !== null)
+                    <div class="deadline">Valable jusqu'au</div>
+                    <div class="date">{{ $endsAt->format('d/m/Y') }}</div>
+                @endif
             </td>
         </tr>
     </table>
