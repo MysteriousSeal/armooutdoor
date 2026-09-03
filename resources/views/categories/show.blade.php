@@ -265,7 +265,12 @@
                              Page one only — page two repeating it would be
                              duplicated text on a thinner page. --}}
                         <section class="category-guide">
-                            <h2 class="category-guide-title">{{ __('store.category_guide_title', ['category' => $category->localizedName()]) }}</h2>
+                            <header class="category-guide-head">
+                                <p class="category-guide-kicker">{{ __('store.category_guide_kicker') }}</p>
+                                <h2 class="category-guide-title">
+                                    <span class="category-guide-title-accent">{{ __('store.category_guide_title', ['category' => $category->localizedName()]) }}</span>
+                                </h2>
+                            </header>
                             <div class="category-guide-body">{!! $category->localizedGuide() !!}</div>
                         </section>
                     @endif
