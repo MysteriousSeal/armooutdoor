@@ -538,6 +538,15 @@
                                         </svg>
                                         {{ __('store.review_verified') }}
                                     </span>
+                                @elseif ($review->isManual())
+                                    {{-- Typed in from a marketplace: verified there, not here,
+                                         and the badge says which kind of there. --}}
+                                    <span class="review-verified" title="{{ __('store.review_verified_external_hint') }}">
+                                        <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">
+                                            <path d="m5 13 4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                        {{ __('store.review_verified_external', ['source' => $review->source ?: __('store.review_verified_external_fallback')]) }}
+                                    </span>
                                 @endif
                                 <span class="review-item-date">{{ $review->created_at->translatedFormat('d F Y') }}</span>
                             </div>

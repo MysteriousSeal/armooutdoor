@@ -480,6 +480,11 @@ return [
     'reviews_see_all' => 'Voir les avis',
     'review_verified' => 'Achat vérifié',
     'review_verified_hint' => 'Avis laissé par un client qui a commandé ce produit.',
+    // :source is the marketplace's own name when the review remembers it,
+    // and the generic « Marketplace externe » when it does not.
+    'review_verified_external' => 'Achat vérifié via :source',
+    'review_verified_external_fallback' => 'Marketplace externe',
+    'review_verified_external_hint' => 'Avis laissé après un achat sur une place de marché externe, recopié par la boutique.',
     'review_form_title' => 'Laisser un avis',
     'review_form_title_first' => 'Soyez le premier à donner votre avis',
     'review_form_intro_first' => 'Vous avez reçu ce produit : votre avis aidera les prochains acheteurs à se décider.',

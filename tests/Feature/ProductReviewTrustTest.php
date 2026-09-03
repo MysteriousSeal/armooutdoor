@@ -139,6 +139,38 @@ class ProductReviewTrustTest extends TestCase
         $this->assertStringContainsString('Achat vérifié', $html);
     }
 
+    public function test_a_manual_marketplace_review_wears_the_external_badge(): void
+    {
+        $product = Product::factory()->create(['is_active' => true, 'quantity' => 5]);
+        ProductReview::query()->create([
+            'product_id' => $product->id,
+            'author_name' => 'Jean D.',
+            'source' => 'NaturaBuy',
+            'rating' => 5,
+            'comment' => 'Très bon produit.',
+        ]);
+
+        $html = $this->page($product);
+
+        // Verified there, not here — and « there » has a name when the
+        // review remembers it.
+        $this->assertStringContainsString('Achat vérifié via NaturaBuy', $html);
+        $this->assertStringNotContainsString('>Achat vérifié</', $html);
+    }
+
+    public function test_a_manual_review_without_source_stays_generic(): void
+    {
+        $product = Product::factory()->create(['is_active' => true, 'quantity' => 5]);
+        ProductReview::query()->create([
+            'product_id' => $product->id,
+            'author_name' => 'Jean D.',
+            'rating' => 4,
+            'comment' => 'Bien.',
+        ]);
+
+        $this->assertStringContainsString('Achat vérifié via Marketplace externe', $this->page($product));
+    }
+
     public function test_the_form_offers_its_stars_from_one_to_five(): void
     {
         $product = $this->reviewedProduct();
