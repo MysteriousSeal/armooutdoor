@@ -129,6 +129,27 @@ class BlogStorefrontTest extends TestCase
             ->assertSee($product->localizedName(), false);
     }
 
+    public function test_an_embedded_product_card_ranks_below_the_posts_own_sections(): void
+    {
+        $post = BlogPost::factory()->create();
+        $product = Product::factory()->create(['is_active' => true]);
+        $post->products()->attach($product->id, ['sort_order' => 0]);
+
+        // h3, not the listing pages' h2: the article's outline keeps its
+        // own sections above the product names.
+        $this->get('/blog/'.$post->slug)->assertOk()
+            ->assertSee('<h3>'.e($product->localizedName()).'</h3>', false);
+    }
+
+    public function test_the_post_tells_social_previews_its_dates(): void
+    {
+        $post = BlogPost::factory()->create();
+
+        $this->get('/blog/'.$post->slug)->assertOk()
+            ->assertSee('property="article:published_time"', false)
+            ->assertSee($post->published_at->toAtomString(), false);
+    }
+
     public function test_the_products_block_is_absent_when_nothing_is_attached(): void
     {
         $post = BlogPost::factory()->create();

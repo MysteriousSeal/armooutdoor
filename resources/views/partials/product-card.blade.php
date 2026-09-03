@@ -33,7 +33,10 @@
             @endif
         </div>
         <div class="card-caption">
-            <h2>{{ $product->localizedName() }}</h2>
+            {{-- h2 on listing pages; a page embedding cards under its own
+                 sections passes h3 so its outline keeps the hierarchy. --}}
+            @php($heading = $headingLevel ?? 'h2')
+            <{{ $heading }}>{{ $product->localizedName() }}</{{ $heading }}>
             <div class="card-caption-meta">
                 <p class="card-price">
                     @if ($product->hasDiscount())

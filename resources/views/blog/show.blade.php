@@ -4,6 +4,13 @@
 @section('meta_description', $post->metaDescription())
 @section('canonical', route('blog.show', $post->slug))
 @section('og_type', 'article')
+
+@push('head')
+    {{-- The og counterparts of the JSON-LD dates: search reads the schema,
+         the social previews read these. --}}
+    <meta property="article:published_time" content="{{ $post->published_at?->toAtomString() }}">
+    <meta property="article:modified_time" content="{{ ($post->updated_at ?? $post->published_at)?->toAtomString() }}">
+@endpush
 @section('og_image', $post->heroUrl())
 @section('og_image_alt', $post->localizedTitle())
 
@@ -108,7 +115,7 @@
                     </header>
                     <div class="product-grid">
                         @foreach ($post->products as $product)
-                            @include('partials.product-card', ['product' => $product, 'lazy' => true])
+                            @include('partials.product-card', ['product' => $product, 'lazy' => true, 'headingLevel' => 'h3'])
                         @endforeach
                     </div>
                 </section>

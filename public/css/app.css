@@ -1429,6 +1429,7 @@ body.has-menu-open {
 }
 
 .card-caption h2,
+.card-caption h3,
 .category-card-body h3 {
     font-size: 0.875rem;
     font-weight: 500;
@@ -1438,7 +1439,8 @@ body.has-menu-open {
     overflow: hidden;
 }
 
-.product-card .card-caption h2 {
+.product-card .card-caption h2,
+.product-card .card-caption h3 {
     font-weight: 600;
     line-height: 1.35;
 }
