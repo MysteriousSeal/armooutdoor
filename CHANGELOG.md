@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-03 — v1.7.1 — build 2PAMPI
+
+### Admin
+
+- **The discount card says what it gives.** The 70 × 50 mm code card carried the code alone; whoever received one had to type it in to learn what it was worth, or whether it still was. Under the code now: the amount in bold — « -10% », « -5,00 € », the storefront's own wording for a free relay delivery — and, for a code that expires, « Valable jusqu'au » over its date, day first. A code without a deadline keeps just its amount, and a card printed before this keeps being a card.
+
+**No migration.**
+
 ## 2026-09-03 — v1.7.0 — build IUMLFQ
 
 ### Admin
