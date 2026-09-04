@@ -91,6 +91,7 @@ Route::get('/plan-du-site', [SitemapController::class, 'html'])->name('sitemap.h
 // The buying guides: an index linked from the footer, one page per guide.
 Route::view('/guides', 'guides.index')->name('guides.index');
 Route::view('/guides/bien-choisir-sa-cible', 'guides.cibles')->name('guides.cibles');
+Route::view('/guides/entretenir-son-arme', 'guides.entretien')->name('guides.entretien');
 
 /*
 |--------------------------------------------------------------------------

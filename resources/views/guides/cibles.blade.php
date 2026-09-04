@@ -5,7 +5,7 @@
 @section('canonical', route('guides.cibles'))
 
 @push('head')
-    <link rel="stylesheet" href="{{ versioned_asset('css/guide-cibles.css') }}">
+    <link rel="stylesheet" href="{{ versioned_asset('css/guides/guides.css') }}">
     <script type="application/ld+json">
         {!! json_encode([
             '@@context' => 'https://schema.org',
@@ -306,5 +306,5 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ versioned_asset('js/guide-cibles.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/guides/cibles.js') }}" defer></script>
 @endpush

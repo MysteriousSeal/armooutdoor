@@ -69,6 +69,25 @@ class GuideCiblesPageTest extends TestCase
             ->assertSee(route('categories.show', 'cibles-carton-metal'));
     }
 
+    public function test_the_entretien_guide_renders_published_and_declared(): void
+    {
+        $this->get('/guides/entretenir-son-arme')->assertOk()
+            ->assertSee('Entretenir')
+            ->assertSee('couronnement')
+            ->assertSee('FAQPage')
+            ->assertSee('BreadcrumbList')
+            ->assertDontSee('noindex')
+            // The default recommendation is server-rendered and crawlable.
+            ->assertSee(route('products.show', 'corde-nettoyage-canon-22-223-5-56mm-bore-rope'))
+            ->assertSee(route('categories.show', 'entretien-arme'));
+
+        $this->get('/guides')->assertOk()->assertSee(route('guides.entretien'));
+        $this->get('/sitemap-pages.xml')->assertOk()->assertSee(route('guides.entretien'));
+
+        $html = $this->get('/guides/entretenir-son-arme')->getContent();
+        $this->assertSame(1, preg_match_all('/<h1[\s>]/', $html));
+    }
+
     public function test_the_page_has_exactly_one_h1(): void
     {
         $html = $this->get('/guides/bien-choisir-sa-cible')->assertOk()->getContent();

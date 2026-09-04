@@ -22,7 +22,9 @@ class MinifyCss extends Command
         $before = 0;
         $after = 0;
 
-        foreach (glob(public_path('css/*.css')) as $path) {
+        // One level of subfolders too: sections keep their stylesheets in
+        // folders of their own (css/guides/), and those ship minified alike.
+        foreach ([...glob(public_path('css/*.css')), ...glob(public_path('css/*/*.css'))] as $path) {
             $source = file_get_contents($path);
             $minified = CssMinifier::minify($source);
 

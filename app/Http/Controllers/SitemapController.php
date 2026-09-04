@@ -86,6 +86,7 @@ class SitemapController extends Controller
             ['loc' => route('faq'), 'changefreq' => 'monthly', 'priority' => '0.5'],
             ['loc' => route('guides.index'), 'changefreq' => 'monthly', 'priority' => '0.5'],
             ['loc' => route('guides.cibles'), 'changefreq' => 'monthly', 'priority' => '0.5'],
+            ['loc' => route('guides.entretien'), 'changefreq' => 'monthly', 'priority' => '0.5'],
             ['loc' => route('about'), 'changefreq' => 'monthly', 'priority' => '0.5'],
             ['loc' => route('help.shipping-returns'), 'changefreq' => 'monthly', 'priority' => '0.5'],
             ['loc' => route('help.secure-payment'), 'changefreq' => 'monthly', 'priority' => '0.5'],

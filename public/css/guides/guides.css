@@ -1,5 +1,5 @@
 /*
- * The standalone buying-guide page for the Cibles shelf: selector,
+ * The guides section: the index and every guide page - selector,
  * overview table, editorial sections and FAQ, in the site's own tokens.
  */
 
@@ -78,6 +78,13 @@
     color: var(--text);
     background: color-mix(in srgb, var(--accent-heading) 10%, var(--surface));
     border-left: 3px solid var(--accent-heading);
+}
+
+/* A warning standing at page level (the entretien guide's safety strip)
+   breathes before the first panel; inside a panel the top margin the
+   base rule gives it is enough. */
+.glab > .glab-warning {
+    margin: 0 0 1.5rem;
 }
 
 .glab-ctas {

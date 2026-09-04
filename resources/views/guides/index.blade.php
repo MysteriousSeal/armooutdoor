@@ -14,11 +14,17 @@
             'title' => 'Bien choisir sa cible',
             'text' => 'Réactives autocollantes, planches, carton ou métal basculant : quel format pour quelle distance, ce qu\'on lit après le tir, et combien de feuilles prévoir.',
         ],
+        [
+            'route' => route('guides.entretien'),
+            'kicker' => 'Entretien',
+            'title' => 'Entretenir son arme',
+            'text' => 'Corde de nettoyage ou kit à tiges : quel matériel pour quel calibre, du 4,5 mm au calibre 12, dans quel sens nettoyer et à quelle fréquence.',
+        ],
     ];
 @endphp
 
 @push('head')
-    <link rel="stylesheet" href="{{ versioned_asset('css/guide-cibles.css') }}">
+    <link rel="stylesheet" href="{{ versioned_asset('css/guides/guides.css') }}">
     <script type="application/ld+json">
         {!! json_encode([
             '@@context' => 'https://schema.org',
