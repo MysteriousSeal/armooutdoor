@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-04 — v1.10.1 — build BWH1NJ
+
+### Admin
+
+- **The buying guide's heading convention is said where guides get written.** Sections in h3, because the panel's own « Bien choisir » title is the page's h2 — the first two guides shipped as sibling h2s before the rule was written anywhere. The category form's hint and the API docs now state it, and the docs also warn that the categories tree does not return the guide: only the create and update responses carry it.
+
+**No migration.**
+
 ## 2026-09-04 — v1.10.0 — build AB47YH
 
 ### Storefront
