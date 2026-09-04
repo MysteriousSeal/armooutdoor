@@ -52,6 +52,23 @@ class GuideCiblesPageTest extends TestCase
             ->assertSee(route('guides.cibles'));
     }
 
+    public function test_both_pages_declare_their_structured_data(): void
+    {
+        $this->get('/guides')->assertOk()
+            ->assertSee('CollectionPage')
+            ->assertSee('BreadcrumbList');
+
+        // The default recommendation is server-rendered: crawlable links,
+        // and a real block without JavaScript.
+        $this->get('/guides/bien-choisir-sa-cible')->assertOk()
+            ->assertSee('"Article"', false)
+            ->assertSee('FAQPage')
+            ->assertSee('BreadcrumbList')
+            ->assertSee(route('categories.show', 'cibles-rondes'))
+            ->assertSee(route('categories.show', 'cibles-carrees'))
+            ->assertSee(route('categories.show', 'cibles-carton-metal'));
+    }
+
     public function test_the_page_has_exactly_one_h1(): void
     {
         $html = $this->get('/guides/bien-choisir-sa-cible')->assertOk()->getContent();

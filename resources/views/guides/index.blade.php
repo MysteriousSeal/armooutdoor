@@ -4,8 +4,41 @@
 @section('meta_description', 'Les guides d\'achat de la boutique : bien choisir sa cible, régler son matériel, comparer les familles de produits avant de commander.')
 @section('canonical', route('guides.index'))
 
+@php
+    // One card per guide; the next guide is one entry here, and the
+    // JSON-LD below reads the same list.
+    $guides = [
+        [
+            'route' => route('guides.cibles'),
+            'kicker' => 'Cibles',
+            'title' => 'Bien choisir sa cible',
+            'text' => 'Réactives autocollantes, planches, carton ou métal basculant : quel format pour quelle distance, ce qu\'on lit après le tir, et combien de feuilles prévoir.',
+        ],
+    ];
+@endphp
+
 @push('head')
     <link rel="stylesheet" href="{{ versioned_asset('css/guide-cibles.css') }}">
+    <script type="application/ld+json">
+        {!! json_encode([
+            '@@context' => 'https://schema.org',
+            '@@type' => 'CollectionPage',
+            'name' => 'Guides d\'achat',
+            'url' => route('guides.index'),
+            'inLanguage' => 'fr-FR',
+            'isPartOf' => ['@@id' => \App\Support\OrganizationSchema::websiteId()],
+            'mainEntity' => [
+                '@@type' => 'ItemList',
+                'numberOfItems' => count($guides),
+                'itemListElement' => collect($guides)->values()->map(fn (array $guide, int $index): array => [
+                    '@@type' => 'ListItem',
+                    'position' => $index + 1,
+                    'name' => $guide['title'],
+                    'url' => $guide['route'],
+                ])->all(),
+            ],
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+    </script>
     <script type="application/ld+json">
         {!! json_encode([
             '@@context' => 'https://schema.org',
@@ -34,18 +67,6 @@
                 rayon par rayon, écrit par la boutique d'après ce qu'elle vend vraiment.
             </p>
         </header>
-
-        @php
-            // One card per guide; the next guide is one entry here.
-            $guides = [
-                [
-                    'route' => route('guides.cibles'),
-                    'kicker' => 'Cibles',
-                    'title' => 'Bien choisir sa cible',
-                    'text' => 'Réactives autocollantes, planches, carton ou métal basculant : quel format pour quelle distance, ce qu\'on lit après le tir, et combien de feuilles prévoir.',
-                ],
-            ];
-        @endphp
 
         <div class="glab-index-grid">
             @foreach ($guides as $guide)

@@ -402,6 +402,28 @@
     }
 }
 
+.glab-prose a,
+.glab-more-reading a {
+    color: var(--accent-heading);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--accent-heading) 45%, transparent);
+    text-underline-offset: 2px;
+}
+
+.glab-prose a:hover,
+.glab-more-reading a:hover {
+    text-decoration-color: var(--accent-heading);
+}
+
+.glab-more-reading {
+    max-width: 46rem;
+    margin: 1.4rem 0 0;
+    font-size: 0.875rem;
+    font-style: italic;
+    color: var(--text-muted);
+}
+
 /* ============ the guides index ============ */
 
 .glab-index-grid {

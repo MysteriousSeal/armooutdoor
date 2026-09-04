@@ -6,6 +6,45 @@
 
 @push('head')
     <link rel="stylesheet" href="{{ versioned_asset('css/guide-cibles.css') }}">
+    <script type="application/ld+json">
+        {!! json_encode([
+            '@@context' => 'https://schema.org',
+            '@@type' => 'Article',
+            'headline' => 'Bien choisir sa cible de tir',
+            'description' => 'Réactives autocollantes, planches, carton ou métal basculant : quel format pour quelle distance, ce qu\'on lit après le tir, et combien de feuilles prévoir.',
+            'mainEntityOfPage' => route('guides.cibles'),
+            'inLanguage' => 'fr-FR',
+            'author' => \App\Support\OrganizationSchema::reference(),
+            'publisher' => \App\Support\OrganizationSchema::reference(),
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+    </script>
+    <script type="application/ld+json">
+        {!! json_encode([
+            '@@context' => 'https://schema.org',
+            '@@type' => 'FAQPage',
+            'mainEntity' => collect([
+                ['Quel diamètre pour quelle distance ?', '76 mm : le format d\'entraînement de référence, à 10 ou 25 mètres, en lots de 100 à 250. 10 cm : distances plus longues, calibres plus remuants, débutants. Carrées à grille : pour régler une optique, la correction se lit en clics.'],
+                ['Sur quoi coller une cible réactive ?', 'Sur n\'importe quel support qui tient : un carton usé, une vieille planche, le dos d\'une cible finie. On recharge la ligne sans racheter de porte-cible.'],
+                ['Le métal convient-il à mon calibre ?', 'Notre cible basculante est prévue pour les airguns et le 22 LR : vérifiez les calibres admis par la plaque, respectez la distance minimale du fabricant et portez une protection oculaire.'],
+                ['Combien de feuilles prévoir par séance ?', 'Une feuille par série de 10 à 20 impacts pour garder un score lisible. Un lot de 100 couvre une saison hebdomadaire ; les lots de 200 à 250 baissent le prix à l\'unité.'],
+            ])->map(fn (array $qa): array => [
+                '@@type' => 'Question',
+                'name' => $qa[0],
+                'acceptedAnswer' => ['@@type' => 'Answer', 'text' => $qa[1]],
+            ])->all(),
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+    </script>
+    <script type="application/ld+json">
+        {!! json_encode([
+            '@@context' => 'https://schema.org',
+            '@@type' => 'BreadcrumbList',
+            'itemListElement' => [
+                ['@@type' => 'ListItem', 'position' => 1, 'name' => __('store.breadcrumb_home'), 'item' => localized_route('home')],
+                ['@@type' => 'ListItem', 'position' => 2, 'name' => 'Guides d\'achat', 'item' => route('guides.index')],
+                ['@@type' => 'ListItem', 'position' => 3, 'name' => 'Bien choisir sa cible', 'item' => route('guides.cibles')],
+            ],
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+    </script>
 @endpush
 
 @section('content')
@@ -71,9 +110,37 @@
             <div class="glab-reco">
                 <p class="glab-reco-label">Notre recommandation</p>
                 <p class="glab-reco-resume" data-glab-resume>Pour lire vos impacts à 25 mètres :</p>
+                {{-- The default answer (25 m, voir mes impacts) rendered
+                     server-side: crawlable links, and a real block without
+                     JavaScript. The script re-renders it on interaction. --}}
                 <ol class="glab-reco-list" data-glab-results>
-                    {{-- Filled by the script; without JavaScript the guide
-                         below answers the same questions in prose. --}}
+                    <li>
+                        <span class="glab-reco-rank">01</span>
+                        <div class="glab-reco-head">
+                            <h4>Cibles réactives autocollantes</h4>
+                            <span class="glab-reco-meta">Ø 76 mm · lots de 100 à 250</span>
+                        </div>
+                        <p>Chaque impact fait éclater un anneau fluo, visible à la lunette comme à l'œil nu. Se collent sur un carton usé ou une vieille planche.</p>
+                        <a href="{{ route('categories.show', 'cibles-rondes') }}">Voir les rondes</a>
+                    </li>
+                    <li>
+                        <span class="glab-reco-rank">02</span>
+                        <div class="glab-reco-head">
+                            <h4>Réactives Ø 10 cm</h4>
+                            <span class="glab-reco-meta">Ø 100 mm · lots de 100</span>
+                        </div>
+                        <p>Plus tolérantes : distances longues, calibres remuants, ou premiers tirs d'un débutant qui a besoin de voir ses réussites.</p>
+                        <a href="{{ route('categories.show', 'cibles-rondes') }}">Voir les rondes</a>
+                    </li>
+                    <li>
+                        <span class="glab-reco-rank">03</span>
+                        <div class="glab-reco-head">
+                            <h4>Planches multi-cibles</h4>
+                            <span class="glab-reco-meta">Jusqu'à 42 cibles · 20 x 20 cm</span>
+                        </div>
+                        <p>Des dizaines de pastilles neuves sur une feuille, certaines avec grille de réglage en clics : un agrafage couvre la séance entière.</p>
+                        <a href="{{ route('categories.show', 'planches-cibles') }}">Voir les planches</a>
+                    </li>
                 </ol>
                 <p class="glab-warning">
                     Le métal ne se tire qu'avec protection oculaire, à la distance minimale du
@@ -138,7 +205,7 @@
             <div class="glab-prose">
                 <h3>Réactives autocollantes : lire ses impacts sans quitter la ligne</h3>
                 <p>
-                    Sur une cible réactive dite « splatter », chaque impact fait éclater un anneau
+                    Sur une <a href="{{ route('categories.show', 'cibles-rondes') }}">cible réactive</a> dite « splatter », chaque impact fait éclater un anneau
                     fluorescent, jaune, orange, vert ou rose, visible à la lunette comme à l'œil nu.
                     On corrige son groupement sans faire d'aller-retour ni attendre un cessez-le-feu.
                     Elles se collent sur n'importe quel support : un carton usé, une vieille planche,
@@ -157,7 +224,7 @@
                     </div>
                     <div>
                         <dt>Grille <em>carrées</em></dt>
-                        <dd>Elles servent à régler une optique : la grille donne la correction en clics, ligne par ligne, colonne par colonne. C'est la cible du zérotage, pas celle du score.</dd>
+                        <dd>Elles servent à régler une optique : la grille donne la correction en clics, ligne par ligne, colonne par colonne. C'est <a href="{{ route('categories.show', 'cibles-carrees') }}">la cible du zérotage</a>, pas celle du score.</dd>
                     </div>
                 </dl>
 
@@ -171,7 +238,7 @@
 
                 <h3>Carton : blasons et zones de score</h3>
                 <p>
-                    Le carton reste le support du tir compté : huit blasons ou zones de score sur une
+                    Le carton reste le support du tir compté : <a href="{{ route('categories.show', 'cibles-carton-metal') }}">huit blasons ou zones de score</a> sur une
                     feuille d'environ 23 x 18 cm, vendue par lots de 20. On note, on archive, on
                     compare d'une séance à l'autre, et la feuille s'agrafe sur n'importe quel
                     porte-cible.
@@ -179,8 +246,8 @@
 
                 <h3>Métal basculant : le retour immédiat</h3>
                 <p>
-                    Le métal ne se lit pas, il s'entend : notre cible basculante à réarmement
-                    automatique sonne à chaque plaque touchée et se relève seule, cinq plaques
+                    Le métal ne se lit pas, il s'entend : notre <a href="{{ route('products.show', 'cible-basculantes-rearmement-automatique-5-plaques') }}">cible basculante à réarmement
+                    automatique</a> sonne à chaque plaque touchée et se relève seule, cinq plaques
                     d'affilée. Aucun consommable, un retour instantané, idéale pour le tir ludique
                     aux airguns et au 22 LR.
                 </p>
@@ -223,6 +290,12 @@
                     </div>
                 </details>
             </div>
+
+            <p class="glab-more-reading">
+                Pour aller plus loin, notre article
+                <a href="{{ route('blog.show', 'bien-choisir-ses-cibles-carton-autocollantes-ou-metal') }}">Bien choisir ses cibles : carton, autocollantes ou métal</a>
+                compare les trois familles en détail.
+            </p>
 
             <p class="glab-ctas">
                 <a href="{{ route('categories.show', 'cibles') }}" class="btn btn-primary">Voir toutes les cibles</a>
