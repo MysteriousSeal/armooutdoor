@@ -2,6 +2,20 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-04 — v1.10.0 — build AB47YH
+
+### Storefront
+
+- **The shop opens a guides section.** A /guides index in the footer's Aide & Infos column — its head a card of its own, big uppercase title on the olive band, numbered cards washing olive on hover — fronting two guides written against what the shelves actually hold. « Bien choisir sa cible » : a distance-and-purpose selector, the four families in one table, the rayon in detail, the FAQ. « Entretenir son arme » : the safety strip first, a calibre-and-place selector whose bench answer offers the rod kit only for the bores it actually reaches, rope versus rods, the six cordes calibre by calibre. Both speak schema — Article with its dates, FAQPage, the breadcrumb trail — the selectors' default answers are server-rendered so their links exist without JavaScript, the prose links every subcategory it names, and each guide closes by sending the reader to its sibling.
+
+- **Each category can carry a buying guide.** A guide column on categories, written from the back office or over the admin API through the product descriptions' own sanitising door, rendered under the product grid on page one only — dressed as a panel in the site's about-section voice, kicker, highlighter band and olive markers included. Empty stays invisible, page two never repeats it, and the API docs say the contract. The Cibles guide is written and awaiting its push to production.
+
+### Under the hood
+
+- **The guides get their own asset folders.** The section's CSS and JS live under css/guides/ and js/guides/, and the deploy minifier learns to look one folder deep so stylesheets in subfolders still ship compacted.
+
+**One migration**: a `guide` column on categories.
+
 ## 2026-09-03 — v1.9.1 — build F1I16L
 
 ### Admin
