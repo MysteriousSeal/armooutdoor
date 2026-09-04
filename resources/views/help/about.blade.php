@@ -89,7 +89,7 @@
                 <h2 id="about-values-title">Nos engagements</h2>
                 <ul class="help-points">
                     @foreach ([
-                        ['Des produits utiles et discrets', 'Du matériel choisi pour sa qualité et son utilité sur le terrain.'],
+                        ['Des produits utiles', 'Du matériel choisi pour sa qualité et son utilité sur le terrain.'],
                         ['Des prix justes toute l\'année', 'Pas de fausses promotions.'],
                         ['Une expédition rapide et suivie', 'Colis préparé avec soin, puis suivi jusqu\'à la porte ou au relais.'],
                         ['Un support réactif', 'Une équipe basée en France, à votre écoute.'],

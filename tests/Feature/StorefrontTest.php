@@ -30,7 +30,7 @@ class StorefrontTest extends TestCase
             ->assertOk()
             ->assertSee('Armo')
             ->assertSee('Outdoor')
-            ->assertSee('Du matériel discret pour le stand et le terrain');
+            ->assertSee('Du matériel pour le stand et le terrain');
     }
 
     public function test_category_page_lists_products(): void

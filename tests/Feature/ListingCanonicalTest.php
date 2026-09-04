@@ -88,7 +88,7 @@ class ListingCanonicalTest extends TestCase
         $title = $this->get('/')->assertOk()->getContent();
 
         $this->assertStringContainsString(
-            '<title>Armo Outdoor : du matériel discret pour le stand et le terrain</title>',
+            '<title>Armo Outdoor : du matériel pour le stand et le terrain</title>',
             $title,
         );
     }

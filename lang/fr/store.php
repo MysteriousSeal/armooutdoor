@@ -1,12 +1,12 @@
 <?php
 
 return [
-    'tagline' => 'Du matériel discret pour le stand et le terrain',
+    'tagline' => 'Du matériel pour le stand et le terrain',
     // The home page has no page name to build a title from, so it says one
     // here. Brand first, then the tagline: Google keeps a title that leads
     // with the name, and swaps one that ends with it for the bare brand on
     // the homepage result. The aisles stay in meta_home below.
-    'meta_title_home' => 'Armo Outdoor : du matériel discret pour le stand et le terrain',
+    'meta_title_home' => 'Armo Outdoor : du matériel pour le stand et le terrain',
     'meta_home' => 'Armo Outdoor, boutique en ligne de cibles, matériel de stand, vêtements et kit terrain. Livraison en France, à domicile ou en point relais.',
     'nav_home' => 'Accueil',
     'nav_categories' => 'Menu',
@@ -102,8 +102,8 @@ return [
     'home_more_lede' => 'D’autres pièces parmi les cibles, le stand, les vêtements et le terrain.',
     'home_why_kicker' => 'Nos engagements',
     'home_why_title' => 'Pourquoi choisir Armo Outdoor ?',
-    'home_why_text' => 'Une sélection rigoureuse de matériel utile, fiable et discret. Des produits testés, approuvés et choisis par des passionnés pour des passionnés.',
-    'home_why_useful_title' => 'Produits utiles et discrets',
+    'home_why_text' => 'Une sélection rigoureuse de matériel utile et fiable. Des produits testés, approuvés et choisis par des passionnés pour des passionnés.',
+    'home_why_useful_title' => 'Produits utiles',
     'home_why_useful_text' => 'Du matériel choisi pour sa qualité et son utilité sur le terrain.',
     'home_why_price_title' => 'Prix justes toute l’année',
     'home_why_price_text' => 'Pas de fausses promotions, des prix honnêtes au quotidien.',
