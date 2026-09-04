@@ -2,6 +2,7 @@
 
 @section('title', 'Bien choisir sa cible de tir — Armo Outdoor')
 @section('meta_description', 'Réactives autocollantes, planches, carton ou métal basculant : quel format pour quelle distance, ce qu\'on lit après le tir, et combien de feuilles prévoir.')
+@section('og_type', 'article')
 @section('canonical', route('guides.cibles'))
 
 @push('head')
@@ -14,6 +15,8 @@
             'description' => 'Réactives autocollantes, planches, carton ou métal basculant : quel format pour quelle distance, ce qu\'on lit après le tir, et combien de feuilles prévoir.',
             'mainEntityOfPage' => route('guides.cibles'),
             'inLanguage' => 'fr-FR',
+            'datePublished' => '2026-09-04',
+            'dateModified' => '2026-09-04',
             'author' => \App\Support\OrganizationSchema::reference(),
             'publisher' => \App\Support\OrganizationSchema::reference(),
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
@@ -117,7 +120,7 @@
                     <li>
                         <span class="glab-reco-rank">01</span>
                         <div class="glab-reco-head">
-                            <h4>Cibles réactives autocollantes</h4>
+                            <h3>Cibles réactives autocollantes</h3>
                             <span class="glab-reco-meta">Ø 76 mm · lots de 100 à 250</span>
                         </div>
                         <p>Chaque impact fait éclater un anneau fluo, visible à la lunette comme à l'œil nu. Se collent sur un carton usé ou une vieille planche.</p>
@@ -126,7 +129,7 @@
                     <li>
                         <span class="glab-reco-rank">02</span>
                         <div class="glab-reco-head">
-                            <h4>Réactives Ø 10 cm</h4>
+                            <h3>Réactives Ø 10 cm</h3>
                             <span class="glab-reco-meta">Ø 100 mm · lots de 100</span>
                         </div>
                         <p>Plus tolérantes : distances longues, calibres remuants, ou premiers tirs d'un débutant qui a besoin de voir ses réussites.</p>
@@ -135,7 +138,7 @@
                     <li>
                         <span class="glab-reco-rank">03</span>
                         <div class="glab-reco-head">
-                            <h4>Planches multi-cibles</h4>
+                            <h3>Planches multi-cibles</h3>
                             <span class="glab-reco-meta">Jusqu'à 42 cibles · 20 x 20 cm</span>
                         </div>
                         <p>Des dizaines de pastilles neuves sur une feuille, certaines avec grille de réglage en clics : un agrafage couvre la séance entière.</p>
@@ -295,6 +298,11 @@
                 Pour aller plus loin, notre article
                 <a href="{{ route('blog.show', 'bien-choisir-ses-cibles-carton-autocollantes-ou-metal') }}">Bien choisir ses cibles : carton, autocollantes ou métal</a>
                 compare les trois familles en détail.
+            </p>
+
+            <p class="glab-more-reading">
+                Et après la séance, votre canon mérite le même soin :
+                <a href="{{ route('guides.entretien') }}">Entretenir son arme</a>.
             </p>
 
             <p class="glab-ctas">

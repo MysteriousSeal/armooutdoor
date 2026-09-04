@@ -96,7 +96,7 @@
             var head = document.createElement('div');
             head.className = 'glab-reco-head';
 
-            var title = document.createElement('h4');
+            var title = document.createElement('h3');
             title.textContent = entry.title;
 
             var meta = document.createElement('span');

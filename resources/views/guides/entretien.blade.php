@@ -2,6 +2,7 @@
 
 @section('title', 'Entretenir son arme : corde ou kit à tiges — Armo Outdoor')
 @section('meta_description', 'Corde de nettoyage ou kit à tiges : quel matériel pour quel calibre, du 4,5 mm au calibre 12, dans quel sens nettoyer son canon et à quelle fréquence.')
+@section('og_type', 'article')
 @section('canonical', route('guides.entretien'))
 
 @push('head')
@@ -14,6 +15,8 @@
             'description' => 'Corde de nettoyage ou kit à tiges : quel matériel pour quel calibre, du 4,5 mm au calibre 12, dans quel sens nettoyer son canon et à quelle fréquence.',
             'mainEntityOfPage' => route('guides.entretien'),
             'inLanguage' => 'fr-FR',
+            'datePublished' => '2026-09-04',
+            'dateModified' => '2026-09-04',
             'author' => \App\Support\OrganizationSchema::reference(),
             'publisher' => \App\Support\OrganizationSchema::reference(),
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
@@ -117,7 +120,7 @@
                     <li>
                         <span class="glab-reco-rank">01</span>
                         <div class="glab-reco-head">
-                            <h4>Corde de nettoyage .22 · .223 · 5,56</h4>
+                            <h3>Corde de nettoyage .22 · .223 · 5,56</h3>
                             <span class="glab-reco-meta">Bore rope · lavable</span>
                         </div>
                         <p>Brosse laiton et tissu en un seul passage, de la chambre vers la bouche. Tient dans une poche de sac de stand.</p>
@@ -126,7 +129,7 @@
                     <li>
                         <span class="glab-reco-rank">02</span>
                         <div class="glab-reco-head">
-                            <h4>Étiquettes chambre vide</h4>
+                            <h3>Étiquettes chambre vide</h3>
                             <span class="glab-reco-meta">Lot de 2 · universelles</span>
                         </div>
                         <p>Le drapeau qui rend l'arme visiblement sûre, avant l'entretien comme sur la ligne.</p>
@@ -135,7 +138,7 @@
                     <li>
                         <span class="glab-reco-rank">03</span>
                         <div class="glab-reco-head">
-                            <h4>Récupérateur de douilles</h4>
+                            <h3>Récupérateur de douilles</h3>
                             <span class="glab-reco-meta">Filet rail ou sac</span>
                         </div>
                         <p>La ligne reste propre et le laiton rentre à la maison au lieu de finir au sol.</p>
@@ -287,6 +290,11 @@
                     </div>
                 </details>
             </div>
+
+            <p class="glab-more-reading">
+                Et pour la prochaine séance, de quoi occuper la ligne :
+                <a href="{{ route('guides.cibles') }}">Bien choisir sa cible</a>.
+            </p>
 
             <p class="glab-ctas">
                 <a href="{{ route('categories.show', 'entretien-arme') }}" class="btn btn-primary">Voir le rayon entretien</a>
