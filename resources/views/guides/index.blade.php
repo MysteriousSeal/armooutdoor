@@ -58,7 +58,7 @@
 @endpush
 
 @section('content')
-    <div class="container glab">
+    <div class="container glab glab-index">
         <nav class="breadcrumbs" aria-label="breadcrumb">
             <a href="{{ localized_route('home') }}">{{ __('store.breadcrumb_home') }}</a>
             <span class="breadcrumbs-sep" aria-hidden="true">/</span>
@@ -67,7 +67,7 @@
 
         <header class="glab-head">
             <p class="glab-head-kicker">La boutique conseille</p>
-            <h1 class="glab-head-title">Guides <span class="glab-title-accent">d'achat</span></h1>
+            <h1 class="glab-head-title"><span class="glab-title-accent">Guides d'achat</span></h1>
             <p class="glab-head-lede">
                 Avant d'ouvrir le panier : ce qu'il faut savoir pour choisir le bon matériel,
                 rayon par rayon, écrit par la boutique d'après ce qu'elle vend vraiment.
@@ -77,7 +77,10 @@
         <div class="glab-index-grid">
             @foreach ($guides as $guide)
                 <a href="{{ $guide['route'] }}" class="glab-index-card">
-                    <span class="glab-index-kicker">{{ $guide['kicker'] }}</span>
+                    <span class="glab-index-card-top">
+                        <span class="glab-index-num">{{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                        <span class="glab-index-kicker">{{ $guide['kicker'] }}</span>
+                    </span>
                     <h2>{{ $guide['title'] }}</h2>
                     <p>{{ $guide['text'] }}</p>
                     <span class="glab-index-more">Lire le guide</span>

@@ -433,56 +433,145 @@
 
 /* ============ the guides index ============ */
 
+.glab-index .glab-head {
+    margin: 0 0 1.75rem;
+    padding: 2.4rem 2.35rem 2.15rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.glab-index .glab-head-kicker {
+    margin: 0 0 0.75rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--accent-heading);
+}
+
+.glab-index .glab-head-title {
+    position: relative;
+    z-index: 0;
+    font-size: clamp(1.85rem, 3.6vw, 2.7rem);
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    line-height: 1.02;
+    text-transform: uppercase;
+}
+
+.glab-index .glab-title-accent {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+    color: var(--accent-heading);
+    background-image: none;
+}
+
+.glab-index .glab-title-accent::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0.06em;
+    height: 0.18em;
+    background: color-mix(in srgb, var(--accent-heading) 22%, transparent);
+    z-index: -1;
+}
+
+.glab-index .glab-head-lede {
+    margin: 1rem 0 0;
+    max-width: 36rem;
+    font-size: 1.02rem;
+    line-height: 1.6;
+}
+
 .glab-index-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
-    gap: 1rem;
+    gap: 1.15rem;
 }
 
 .glab-index-card {
     display: flex;
     flex-direction: column;
-    gap: 0.45rem;
-    padding: 1.4rem 1.5rem 1.5rem;
+    gap: 0.5rem;
+    padding: 1.5rem 1.55rem 1.45rem;
     color: var(--text);
-    background: color-mix(in srgb, var(--accent-heading) 6%, var(--surface));
-    border: 1px solid color-mix(in srgb, var(--accent-heading) 18%, var(--border));
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
 .glab-index-card:hover {
     border-color: var(--accent-heading);
-    box-shadow: var(--shadow);
+    background: color-mix(in srgb, var(--accent-heading) 6%, var(--surface));
+}
+
+.glab-index-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.glab-index-num {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent-heading);
 }
 
 .glab-index-kicker {
-    font-size: 0.6875rem;
-    font-weight: 600;
-    letter-spacing: 0.14em;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--accent);
+    color: var(--accent-heading);
 }
 
 .glab-index-card h2 {
-    margin: 0;
-    font-size: 1.15rem;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    color: var(--accent-heading);
+    margin: 0.15rem 0 0;
+    font-size: 1.28rem;
+    font-weight: 750;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    color: var(--text);
 }
 
 .glab-index-card p {
     flex: 1;
-    margin: 0;
-    font-size: 0.875rem;
+    margin: 0.15rem 0 0;
+    font-size: 0.9rem;
     line-height: 1.55;
     color: var(--text-muted);
 }
 
 .glab-index-more {
-    font-size: 0.8125rem;
-    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    align-self: flex-start;
+    min-height: 2.15rem;
+    margin-top: 0.65rem;
+    padding: 0 0.9rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     color: var(--accent-heading);
-    text-decoration: underline;
-    text-underline-offset: 2px;
+    background: var(--bg);
+    border: 1px solid var(--accent-heading);
+}
+
+.glab-index-card:hover .glab-index-more {
+    color: var(--surface);
+    background: var(--accent-heading);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .glab-index-card {
+        transition: none;
+    }
 }
