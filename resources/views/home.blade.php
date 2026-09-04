@@ -454,6 +454,10 @@
             '@type' => 'WebSite',
             '@id' => \App\Support\OrganizationSchema::websiteId(),
             'name' => config('app.name'),
+            // The wordmark's one-word spelling and the bare domain, declared
+            // as the same site so Google folds them onto the brand. The
+            // display name stays `name`; these are recognition, not label.
+            'alternateName' => ['ArmoOutdoor', 'armooutdoor'],
             'url' => localized_route('home'),
             'inLanguage' => 'fr-FR',
             'description' => __('store.meta_home'),
