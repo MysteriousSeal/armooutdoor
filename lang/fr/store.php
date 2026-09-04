@@ -414,6 +414,7 @@ return [
     'order_status_note_delivered' => 'Votre colis a été livré à l’adresse indiquée.',
     'order_status_note_refunded' => 'Le remboursement de cette commande a été effectué.',
     'nav_blog' => 'Blog',
+    'footer_help_guides' => 'Guides d\'achat',
     'category_guide_kicker' => 'Guide d\'achat',
     'category_guide_title' => 'Bien choisir : :category',
     'blog_title' => 'Le blog',

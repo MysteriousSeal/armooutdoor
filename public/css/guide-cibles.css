@@ -1,0 +1,459 @@
+/*
+ * The standalone buying-guide page for the Cibles shelf: selector,
+ * overview table, editorial sections and FAQ, in the site's own tokens.
+ */
+
+.glab {
+    padding-bottom: 4rem;
+}
+
+.glab-head {
+    margin: 1.5rem 0 2.5rem;
+}
+
+.glab-head-kicker {
+    margin: 0 0 0.35rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.glab-head-title {
+    margin: 0;
+    font-size: clamp(1.5rem, 2.4vw, 2rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.glab-head-lede {
+    margin: 0.5rem 0 0;
+    color: var(--text-muted);
+}
+
+/* Each section of the guide lives in the olive panel the category
+   guides wear. */
+.glab-panel {
+    margin-bottom: 1.5rem;
+    padding: 2rem 2.4rem 2.4rem;
+    background: color-mix(in srgb, var(--accent-heading) 6%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 18%, var(--border));
+}
+
+
+.glab-title {
+    margin: 0 0 0.8rem;
+    font-size: clamp(1.35rem, 2vw, 1.75rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+}
+
+.glab-title-accent {
+    color: var(--accent-heading);
+    background-image: linear-gradient(
+        color-mix(in srgb, var(--accent-heading) 22%, transparent),
+        color-mix(in srgb, var(--accent-heading) 22%, transparent)
+    );
+    background-repeat: no-repeat;
+    background-size: 100% 0.18em;
+    background-position: 0 calc(100% - 0.08em);
+}
+
+.glab-lede {
+    max-width: 46rem;
+    margin: 0 0 1.6rem;
+    font-size: 1.02rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+}
+
+.glab-warning {
+    max-width: 46rem;
+    margin: 1rem 0 0;
+    padding: 0.7rem 0.9rem;
+    font-size: 0.8125rem;
+    line-height: 1.55;
+    color: var(--text);
+    background: color-mix(in srgb, var(--accent-heading) 10%, var(--surface));
+    border-left: 3px solid var(--accent-heading);
+}
+
+.glab-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin: 1.6rem 0 0;
+}
+
+/* ============ editorial prose ============ */
+
+.glab-prose {
+    max-width: 46rem;
+    font-size: 0.9375rem;
+    line-height: 1.65;
+}
+
+.glab-prose h3 {
+    margin: 1.8rem 0 0.55rem;
+    padding-bottom: 0.4rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--accent-heading);
+    background: linear-gradient(var(--accent-heading), var(--accent-heading)) left bottom / 2rem 2px no-repeat;
+}
+
+.glab-prose h3:first-child {
+    margin-top: 0;
+}
+
+.glab-prose p {
+    margin: 0 0 0.85rem;
+}
+
+/* The diameter cards: a definition list worn as three tiles. */
+.glab-specs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.8rem;
+    margin: 0 0 0.85rem;
+}
+
+.glab-specs > div {
+    padding: 0.9rem 1rem;
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 16%, var(--border));
+}
+
+.glab-specs dt {
+    margin: 0 0 0.35rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent-heading);
+}
+
+.glab-specs dt em {
+    margin-left: 0.3rem;
+    font-size: 0.75rem;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.glab-specs dd {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.55;
+}
+
+/* ============ 1b - table + FAQ ============ */
+
+.glab-table-wrap {
+    overflow-x: auto;
+    margin: 0 0 1.8rem;
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 16%, var(--border));
+}
+
+.glab-table {
+    width: 100%;
+    min-width: 44rem;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.glab-table th {
+    padding: 0.7rem 1rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: left;
+    color: var(--accent-heading);
+    background: color-mix(in srgb, var(--accent-heading) 10%, var(--surface));
+}
+
+.glab-table td {
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.5;
+}
+
+.glab-table td:first-child {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.glab-faq-label {
+    margin: 0 0 0.7rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--accent-heading);
+}
+
+.glab-faq details {
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 16%, var(--border));
+    border-bottom: none;
+}
+
+.glab-faq details:last-child {
+    border-bottom: 1px solid color-mix(in srgb, var(--accent-heading) 16%, var(--border));
+}
+
+.glab-faq summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem 1.1rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+}
+
+.glab-faq summary::-webkit-details-marker {
+    display: none;
+}
+
+.glab-faq summary::after {
+    content: '+';
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--accent-heading);
+    transition: transform 0.15s ease;
+}
+
+.glab-faq details[open] summary::after {
+    transform: rotate(45deg);
+}
+
+.glab-faq details > div {
+    padding: 0 1.1rem 1rem;
+    max-width: 46rem;
+    font-size: 0.875rem;
+    line-height: 1.6;
+}
+
+.glab-faq details > div p {
+    margin: 0 0 0.6rem;
+}
+
+/* ============ 1c - selector ============ */
+
+.glab-steps {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+    gap: 1.5rem;
+    margin: 0 0 1.8rem;
+}
+
+.glab-step {
+    margin: 0;
+    padding: 1rem 1.1rem 1.2rem;
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 16%, var(--border));
+}
+
+.glab-step legend {
+    padding: 0 0.4rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.glab-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.glab-chips--stacked {
+    flex-direction: column;
+}
+
+.glab-chips button {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.1rem;
+    padding: 0.55rem 0.95rem;
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-align: left;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.glab-chips button small {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.glab-chips button:hover {
+    border-color: var(--accent-heading);
+}
+
+.glab-chips button.is-active {
+    color: var(--accent-heading);
+    background: color-mix(in srgb, var(--accent-heading) 10%, var(--surface));
+    border-color: var(--accent-heading);
+}
+
+.glab-reco {
+    padding: 1.4rem 1.5rem 1.6rem;
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 20%, var(--border));
+}
+
+.glab-reco-label {
+    margin: 0 0 0.2rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.glab-reco-resume {
+    margin: 0 0 1rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--accent-heading);
+}
+
+.glab-reco-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.8rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.glab-reco-list li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.95rem 1rem;
+    background: color-mix(in srgb, var(--accent-heading) 5%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 16%, var(--border));
+}
+
+.glab-reco-rank {
+    font-variant-numeric: tabular-nums;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent-heading);
+}
+
+.glab-reco-head h4 {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 700;
+}
+
+.glab-reco-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.glab-reco-list p {
+    flex: 1;
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.55;
+}
+
+.glab-reco-list a {
+    align-self: flex-start;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--accent-heading);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+@media (max-width: 900px) {
+    .glab-panel {
+        padding: 1.5rem 1.25rem 1.6rem;
+    }
+
+    .glab-steps {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .glab-specs,
+    .glab-reco-list {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* ============ the guides index ============ */
+
+.glab-index-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+    gap: 1rem;
+}
+
+.glab-index-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding: 1.4rem 1.5rem 1.5rem;
+    color: var(--text);
+    background: color-mix(in srgb, var(--accent-heading) 6%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 18%, var(--border));
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.glab-index-card:hover {
+    border-color: var(--accent-heading);
+    box-shadow: var(--shadow);
+}
+
+.glab-index-kicker {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.glab-index-card h2 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--accent-heading);
+}
+
+.glab-index-card p {
+    flex: 1;
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+}
+
+.glab-index-more {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--accent-heading);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
