@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-04 — v1.10.2 — build U3KOWF
+
+### Storefront
+
+- **« Discret » leaves the brand voice.** The shop is not black ops: the tagline under the logo, the home page's title, the « Pourquoi choisir » intro and both engagement cards drop the adjective rather than replace it — « Du matériel pour le stand et le terrain », plainly. The /produits line « du plus pertinent au plus discret » stays, a pun about the relevance sort rather than a brand claim, and the product and blog copy keep their own senses of the word.
+
+- **The site tells Google its other spellings.** alternateName on the WebSite node: « ArmoOutdoor » as the logo writes it, « armooutdoor » as the address bar does — recognition, not label, the display name staying « Armo Outdoor ».
+
+**No migration.**
+
 ## 2026-09-04 — v1.10.1 — build BWH1NJ
 
 ### Admin
