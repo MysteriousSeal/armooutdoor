@@ -78,6 +78,17 @@ class BlogCommentsTest extends TestCase
         ])->assertNotFound();
     }
 
+    public function test_the_blog_cards_wear_the_comment_count(): void
+    {
+        $post = BlogPost::factory()->create();
+        BlogComment::query()->create(['blog_post_id' => $post->id, 'author_name' => 'A', 'body' => 'Premier.']);
+        BlogComment::query()->create(['blog_post_id' => $post->id, 'author_name' => 'B', 'body' => 'Second.']);
+
+        $this->get('/blog')->assertOk()
+            ->assertSee('has-comments', false)
+            ->assertSee('2 commentaires');
+    }
+
     public function test_the_shop_replies_one_level_with_its_badge(): void
     {
         $post = BlogPost::factory()->create();

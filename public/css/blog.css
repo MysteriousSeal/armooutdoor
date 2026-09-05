@@ -879,13 +879,58 @@
     border-radius: 2px;
 }
 
+/* The head rows pass through as two stacked lines everywhere - except
+   on the index's featured card, where the wrapper turns into a real row
+   and the chips go back to the right of the category and date. */
+.blog-card-headrow {
+    display: contents;
+}
+
+.blog-grid--index > .blog-card:first-child .blog-card-headrow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+}
+
+/* The chips' own row, always under the category and the date. */
+.blog-card-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: -0.1rem;
+}
+
+/* The comment count: the read time's sibling chip, hollow while the
+   thread is empty and filled olive once someone has written - the
+   commented articles stand out in the grid. */
+.blog-card-comments {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.12rem 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    color: var(--text-muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.blog-card-comments.has-comments {
+    color: var(--surface);
+    background: var(--accent-heading);
+    border-color: var(--accent-heading);
+}
+
 /* The read time rides the card's meta row as a small olive chip with a
    clock, pushed to the row's far edge so it reads at a glance. */
 .blog-card-read-time {
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    margin-left: auto;
     padding: 0.12rem 0.5rem;
     font-size: 0.6875rem;
     font-weight: 600;
@@ -894,7 +939,6 @@
     color: var(--accent-heading);
     background: color-mix(in srgb, var(--accent-heading) 9%, var(--surface));
     border: 1px solid color-mix(in srgb, var(--accent-heading) 22%, var(--border));
-    border-radius: 999px;
 }
 
 /* The comment thread: a white card of its own, the full width of the

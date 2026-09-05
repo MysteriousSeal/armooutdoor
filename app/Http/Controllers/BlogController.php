@@ -42,6 +42,7 @@ class BlogController extends Controller
         $posts = BlogPost::query()
             ->visible()
             ->with('category')
+            ->withCount('comments')
             ->when($activeCategory, fn ($query) => $query->where('blog_category_id', $activeCategory->id))
             ->orderByDesc('published_at')
             ->orderByDesc('id')

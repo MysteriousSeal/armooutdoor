@@ -419,6 +419,7 @@ return [
     'category_guide_title' => 'Bien choisir : :category',
     'blog_sources' => 'Sources',
     'blog_comments' => 'Commentaires',
+    'blog_comments_count' => ':count commentaire|:count commentaires',
     'blog_comments_empty' => 'Aucun commentaire pour le moment. Lancez la discussion !',
     'blog_comment_write' => 'Laisser un commentaire',
     'blog_comment_pseudo' => 'Votre pseudonyme',
