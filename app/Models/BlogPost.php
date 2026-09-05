@@ -49,12 +49,15 @@ class BlogPost extends Model
     {
         return collect($this->sources ?? [])
             ->filter(fn ($source): bool => is_array($source) && filled($source['url'] ?? null))
-            ->map(fn (array $source): array => [
-                'url' => $source['url'],
-                'label' => filled($source['label'] ?? null)
-                    ? $source['label']
-                    : (parse_url($source['url'], PHP_URL_HOST) ?: $source['url']),
-            ])
+            ->map(function (array $source): array {
+                $host = preg_replace('/^www\./', '', (string) (parse_url($source['url'], PHP_URL_HOST) ?: $source['url']));
+
+                return [
+                    'url' => $source['url'],
+                    'host' => $host,
+                    'label' => filled($source['label'] ?? null) ? $source['label'] : $host,
+                ];
+            })
             ->values()
             ->all();
     }

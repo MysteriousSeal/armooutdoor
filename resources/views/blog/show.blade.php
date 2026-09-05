@@ -101,13 +101,25 @@
             </div>
 
             @if ($post->sourcesList() !== [])
-                {{-- The receipts: where the article's claims come from. --}}
+                {{-- The receipts: where the article's claims come from,
+                     dressed like the post's other sections. --}}
                 <aside class="blog-article-sources" aria-label="Sources">
-                    <h2 class="blog-sources-title">{{ __('store.blog_sources') }}</h2>
-                    <ul>
+                    <header class="blog-article-section-head">
+                        <h2 class="blog-section-title">{{ __('store.blog_sources') }}</h2>
+                    </header>
+                    <ul class="blog-sources-grid">
                         @foreach ($post->sourcesList() as $source)
                             <li>
-                                <a href="{{ $source['url'] }}" target="_blank" rel="noopener">{{ $source['label'] }}</a>
+                                <a href="{{ $source['url'] }}" target="_blank" rel="noopener" class="blog-source-card">
+                                    <span class="blog-source-num">{{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                                    <span class="blog-source-copy">
+                                        <span class="blog-source-label">{{ $source['label'] }}</span>
+                                        <span class="blog-source-host">{{ $source['host'] }}</span>
+                                    </span>
+                                    <svg class="blog-source-arrow" viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                                        <path d="M7 17 17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </a>
                             </li>
                         @endforeach
                     </ul>

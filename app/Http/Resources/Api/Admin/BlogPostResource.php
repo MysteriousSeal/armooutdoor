@@ -38,6 +38,7 @@ class BlogPostResource extends JsonResource
             'is_scheduled' => $this->isScheduled(),
             'meta_title' => $this->meta_title,
             'meta_description' => $this->meta_description,
+            'sources' => $this->sources,
             'image' => $this->image,
             'image_credit' => $this->image_credit,
             'url' => $this->isVisible() ? route('blog.show', $this->slug) : null,

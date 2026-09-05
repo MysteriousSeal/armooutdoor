@@ -186,6 +186,28 @@ class AdminBlogApiTest extends TestCase
             ->assertJsonPath('data.slug', 'un-titre-original');
     }
 
+    public function test_sources_are_writable_readable_and_clearable_over_the_api(): void
+    {
+        $post = BlogPost::factory()->create();
+
+        $this->patchJson('/api/admin/blog/posts/'.$post->id, [
+            'sources' => [
+                ['label' => 'Legifrance', 'url' => 'https://www.legifrance.gouv.fr/dossier'],
+                ['label' => 'Sans lien', 'url' => ''],
+            ],
+        ], $this->headers())->assertOk()
+            ->assertJsonPath('data.sources.0.label', 'Legifrance')
+            ->assertJsonCount(1, 'data.sources');
+
+        // An untouched PATCH leaves them alone; null clears them.
+        $this->patchJson('/api/admin/blog/posts/'.$post->id, ['excerpt' => 'x'], $this->headers())->assertOk();
+        $this->assertNotNull($post->fresh()->sources);
+
+        $this->patchJson('/api/admin/blog/posts/'.$post->id, ['sources' => null], $this->headers())->assertOk()
+            ->assertJsonPath('data.sources', null);
+        $this->assertNull($post->fresh()->sources);
+    }
+
     public function test_a_post_can_be_deleted(): void
     {
         $post = BlogPost::factory()->create();

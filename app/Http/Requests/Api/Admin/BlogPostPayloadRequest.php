@@ -44,6 +44,9 @@ abstract class BlogPostPayloadRequest extends FormRequest
             'published_at' => ['sometimes', 'nullable', 'date'],
             'meta_title' => ['sometimes', 'nullable', 'string', 'max:180'],
             'meta_description' => ['sometimes', 'nullable', 'string', 'max:300'],
+            'sources' => ['sometimes', 'nullable', 'array', 'max:10'],
+            'sources.*.label' => ['nullable', 'string', 'max:200'],
+            'sources.*.url' => ['nullable', 'url', 'max:500'],
             'image' => ['sometimes', 'nullable', 'string', 'max:2048'],
             'image_credit' => ['sometimes', 'nullable', 'string', 'max:180'],
 

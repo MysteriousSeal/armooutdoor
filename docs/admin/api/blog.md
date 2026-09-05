@@ -60,6 +60,7 @@ Lists add Laravel's pagination blocks: `data`, `links`, and `meta` holding `curr
   "is_scheduled": false,
   "meta_title": null,
   "meta_description": null,
+  "sources": [{"label": "Legifrance", "url": "https://www.legifrance.gouv.fr/dossier"}],
   "image": "blog/guide-abc123.webp",
   "url": "https://armooutdoor.fr/blog/comment-choisir-sa-premiere-replique",
   "products": [
@@ -187,6 +188,7 @@ Same set for `POST` and `PATCH`.
 | `published_at` | date\|null | Any parseable date. A future value means scheduled |
 | `meta_title` | string\|null | ≤ 180. Falls back to `title` |
 | `meta_description` | string\|null | ≤ 300. Falls back to `excerpt` |
+| `sources` | array\|null | ≤ 10 rows of `{label, url}`. Shown at the foot of the article and cited in its schema; `label` optional (≤ 200, the link's domain stands in), `url` must be a valid URL (≤ 500). Rows without a URL are dropped; send `null` or an empty array to clear. |
 | `image` | string\|null | ≤ 2048, path relative to `public/images/` |
 | `image_credit` | string\|null | ≤ 180 chars, the name alone. A typed `Photo ©` or `©` prefix is stripped on save. Cleared with the cover when the web admin removes it |
 | `product_ids` | int[] | Each must exist. **Order is kept** as the display order |

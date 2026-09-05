@@ -782,44 +782,73 @@
     color: var(--text-muted);
 }
 
-/* The article's sources: quiet references under the prose, before the
-   contact banner. */
+/* The article's sources: the receipts, dressed like the post's other
+   sections - numbered cards that wash olive on hover, the external
+   arrow saying where the link goes. */
 .blog-article-sources {
-    max-width: 46rem;
-    margin: 2rem auto 0;
-    padding-top: 1.1rem;
-    border-top: 1px solid var(--border);
+    margin-top: 2.5rem;
 }
 
-.blog-sources-title {
-    margin: 0 0 0.5rem;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--accent);
-}
-
-.blog-article-sources ul {
+.blog-sources-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 0.75rem;
     margin: 0;
-    padding-left: 1.1rem;
-    font-size: 0.8125rem;
-    line-height: 1.7;
-    color: var(--text-muted);
+    padding: 0;
+    list-style: none;
 }
 
-.blog-article-sources li::marker {
+.blog-source-card {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    height: 100%;
+    padding: 0.85rem 1rem;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.blog-source-card:hover {
+    border-color: var(--accent-heading);
+    background: color-mix(in srgb, var(--accent-heading) 6%, var(--surface));
+}
+
+.blog-source-num {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    font-variant-numeric: tabular-nums;
     color: var(--accent-heading);
 }
 
-.blog-article-sources a {
-    color: var(--text-muted);
-    text-decoration: underline;
-    text-decoration-color: color-mix(in srgb, var(--accent-heading) 40%, transparent);
-    text-underline-offset: 2px;
+.blog-source-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+    flex: 1;
 }
 
-.blog-article-sources a:hover {
+.blog-source-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.blog-source-host {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.blog-source-arrow {
+    flex-shrink: 0;
     color: var(--accent-heading);
-    text-decoration-color: var(--accent-heading);
 }

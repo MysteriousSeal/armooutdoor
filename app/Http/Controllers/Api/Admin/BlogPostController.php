@@ -153,6 +153,19 @@ class BlogPostController extends Controller
             $payload['body'] = ['fr' => HtmlSanitizer::clean($validated['body'], allowImages: true) ?? ''];
         }
 
+        // Same shape as the back-office form: only rows with a URL survive,
+        // and an emptied list stores null.
+        if (array_key_exists('sources', $validated)) {
+            $payload['sources'] = collect($validated['sources'] ?? [])
+                ->filter(fn ($source): bool => filled($source['url'] ?? null))
+                ->map(fn (array $source): array => [
+                    'label' => trim((string) ($source['label'] ?? '')),
+                    'url' => trim($source['url']),
+                ])
+                ->values()
+                ->all() ?: null;
+        }
+
         if ($post === null) {
             $payload['status'] ??= 'draft';
             $payload['slug'] = $this->uniqueSlug($validated['title']);
