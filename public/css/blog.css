@@ -786,7 +786,8 @@
    sections - numbered cards that wash olive on hover, the external
    arrow saying where the link goes. */
 .blog-article-sources {
-    margin-top: 2.5rem;
+    /* Off the prose above, and off the contact banner below. */
+    margin: 2.5rem 0;
 }
 
 .blog-sources-grid {
