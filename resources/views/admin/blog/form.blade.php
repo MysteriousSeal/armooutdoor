@@ -27,6 +27,15 @@
                 <div class="admin-list-hero-actions">
                     <a href="{{ route('admin.blog.index') }}" class="btn btn-secondary">Back to blog</a>
                     @if ($post->exists)
+                        @if ($post->isVisible())
+                            <a href="{{ route('blog.show', $post->slug) }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">View</a>
+                        @else
+                            {{-- Admin-only address: the middleware, not a token,
+                                 is what keeps a draft private. --}}
+                            <a href="{{ route('blog.preview', $post) }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Preview</a>
+                        @endif
+                    @endif
+                    @if ($post->exists)
                         <button type="button" class="btn btn-secondary" data-modal-open="delete-post-modal">Delete</button>
                     @endif
                 </div>

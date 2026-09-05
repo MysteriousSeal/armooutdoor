@@ -853,3 +853,28 @@
     flex-shrink: 0;
     color: var(--accent-heading);
 }
+
+/* The preview strip: unmistakably not the published page. */
+.blog-preview-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    padding: 0.55rem 1rem;
+    font-size: 0.8125rem;
+    color: var(--text);
+    background: color-mix(in srgb, var(--accent-heading) 10%, var(--surface));
+    border-bottom: 1px solid color-mix(in srgb, var(--accent-heading) 25%, var(--border));
+}
+
+.blog-preview-banner-badge {
+    padding: 0.1rem 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--surface);
+    background: var(--accent-heading);
+    border-radius: 2px;
+}

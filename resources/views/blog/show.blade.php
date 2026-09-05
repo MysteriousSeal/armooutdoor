@@ -5,6 +5,10 @@
 @section('canonical', route('blog.show', $post->slug))
 @section('og_type', 'article')
 
+@if (! empty($preview))
+    @section('robots', 'noindex, nofollow')
+@endif
+
 @push('head')
     {{-- The og counterparts of the JSON-LD dates: search reads the schema,
          the social previews read these. --}}
@@ -33,6 +37,14 @@
 @endpush
 
 @section('content')
+    @if (! empty($preview))
+        {{-- Said before the page starts pretending: this is the draft. --}}
+        <div class="blog-preview-banner" role="status">
+            <span class="blog-preview-banner-badge">Aperçu</span>
+            <span>Brouillon non publié, visible uniquement connecté à l'administration.</span>
+        </div>
+    @endif
+
     <div class="container blog-article-page">
         <nav class="breadcrumbs" aria-label="breadcrumb">
             <a href="{{ localized_route('home') }}">{{ __('store.breadcrumb_home') }}</a>

@@ -72,4 +72,28 @@ class BlogController extends Controller
 
         return view('blog.show', compact('post', 'related'));
     }
+
+    /**
+     * A draft, seen as the page it will become.
+     *
+     * The address is unreferenced and admin-only: whoever opens it must be
+     * signed into the back office, and the page wears a banner and a
+     * noindex so it can neither be mistaken for the published article nor
+     * picked up by a crawler.
+     */
+    public function preview(BlogPost $post): View
+    {
+        $post->load(['category', 'products' => fn ($query) => $query->active()->with('discount', 'variants.supplier')]);
+
+        $related = BlogPost::query()
+            ->visible()
+            ->with('category')
+            ->where('blog_category_id', $post->blog_category_id)
+            ->whereKeyNot($post->id)
+            ->orderByDesc('published_at')
+            ->limit(3)
+            ->get();
+
+        return view('blog.show', ['post' => $post, 'related' => $related, 'preview' => true]);
+    }
 }

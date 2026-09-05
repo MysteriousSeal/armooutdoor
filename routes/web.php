@@ -388,6 +388,11 @@ Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{category}', [BlogController::class, 'category'])
     ->where('category', BlogCategory::routeSlugPattern())
     ->name('blog.category');
+// Two segments, so it never shadows a slug. Admin-only: a draft is
+// private, and its preview travels no further than a back-office login.
+Route::get('/blog/apercu/{post}', [BlogController::class, 'preview'])
+    ->middleware('admin')
+    ->name('blog.preview');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
 Route::get('/products/{product:slug}', [ProductController::class, 'show'])
