@@ -6810,8 +6810,14 @@ input[type="date"].form-control {
 /* ------------------------------------------------------------------ blog */
 
 /* Compose : une colonne d'écriture, un rail de publication collé. */
+/* Full width: the prose editor takes every column the screen gives,
+   while the side column below keeps its fixed measure. */
 .admin-blog-compose {
-    max-width: 74rem;
+    max-width: none;
+}
+
+.admin-blog-compose .admin-form-grid {
+    grid-template-columns: minmax(0, 1fr) 20.5rem;
 }
 
 .admin-form-grid {
@@ -7248,7 +7254,9 @@ input[type="date"].form-control {
 }
 
 @media (max-width: 960px) {
+    /* The compose scope named too, to outweigh its fixed side column. */
     .admin-form-grid,
+    .admin-blog-compose .admin-form-grid,
     .blog-seo-grid {
         grid-template-columns: 1fr;
     }
