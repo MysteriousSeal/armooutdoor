@@ -1,7 +1,8 @@
 {{-- One comment: who, when, what — the shop's answers wear the badge.
      Pruning happens in the back office, never on the page. --}}
 <article class="blog-comment-card {{ $comment->is_admin ? 'blog-comment-card--shop' : '' }}">
-    <span class="blog-comment-avatar {{ $comment->is_admin ? 'is-shop' : '' }}" aria-hidden="true">{{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($comment->authorLabel(), 0, 1)) }}</span>
+    {{-- The shop signs its monogram; everyone else their initial. --}}
+    <span class="blog-comment-avatar {{ $comment->is_admin ? 'is-shop' : '' }}" aria-hidden="true">{{ $comment->is_admin ? 'AO' : \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($comment->authorLabel(), 0, 1)) }}</span>
     <div class="blog-comment-main">
         <header class="blog-comment-head">
             <span class="blog-comment-author">{{ $comment->authorLabel() }}</span>
