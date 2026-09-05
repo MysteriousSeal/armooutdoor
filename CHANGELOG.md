@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-05 — v1.12.1 — build AF5LA8
+
+### Admin
+
+- **The blog list opens its posts.** Each row carries the edit page's own pair: « View » on a published post, the admin-only « Preview » on a draft or a scheduled one — the article one click away without passing through its edit form.
+
+**No migration.**
+
 ## 2026-09-05 — v1.12.0 — build AFPPAA
 
 ### Admin
