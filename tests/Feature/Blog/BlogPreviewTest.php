@@ -63,6 +63,18 @@ class BlogPreviewTest extends TestCase
             ->assertOk()->assertDontSee('blog/apercu/')->assertSee('>View</a>', false);
     }
 
+    public function test_the_list_offers_view_or_preview_per_row(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $draft = $this->draft();
+        $published = BlogPost::factory()->create();
+
+        $html = $this->actingAs($admin)->get(route('admin.blog.index'))->assertOk()->getContent();
+
+        $this->assertStringContainsString('blog/apercu/'.$draft->id, $html);
+        $this->assertStringContainsString(route('blog.show', $published->slug), $html);
+    }
+
     public function test_a_published_post_shows_no_preview_banner(): void
     {
         $post = BlogPost::factory()->create();

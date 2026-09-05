@@ -60,6 +60,7 @@
                             <th>Status</th>
                             <th>Published</th>
                             <th>Products</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -80,6 +81,18 @@
                                 </td>
                                 <td>{{ $post->published_at?->format('d/m/Y H:i') ?? '—' }}</td>
                                 <td>{{ $post->products()->count() }}</td>
+                                <td>
+                                    <div class="admin-table-actions">
+                                        {{-- The same pair as the edit page's hero: the
+                                             live page when it exists, the admin-only
+                                             preview while it does not. --}}
+                                        @if ($post->isVisible())
+                                            <a href="{{ route('blog.show', $post->slug) }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-secondary">View</a>
+                                        @else
+                                            <a href="{{ route('blog.preview', $post) }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-secondary">Preview</a>
+                                        @endif
+                                    </div>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
