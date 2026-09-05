@@ -63,6 +63,7 @@
                             <th>Status</th>
                             <th>Published</th>
                             <th title="Human visits: last 30 days, then lifetime total">Views <span class="admin-table-th-note">30 d / total</span></th>
+                            <th>Comments</th>
                             <th>Products</th>
                             <th>Sources</th>
                             <th></th>
@@ -89,6 +90,7 @@
                                     {{ number_format($viewCounts['/blog/'.$post->slug] ?? 0, 0, ',', ' ') }}
                                     <span class="admin-table-th-note">/ {{ number_format($viewTotals['/blog/'.$post->slug] ?? 0, 0, ',', ' ') }}</span>
                                 </td>
+                                <td>{{ number_format($post->comments_count) }}</td>
                                 <td>{{ $post->products()->count() }}</td>
                                 <td>{{ count($post->sourcesList()) }}</td>
                                 <td>

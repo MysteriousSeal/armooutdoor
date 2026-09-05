@@ -178,4 +178,34 @@ class BlogCommentsTest extends TestCase
 
         $this->assertSame(0, BlogComment::query()->count());
     }
+
+    public function test_the_admin_list_shows_each_posts_comment_count(): void
+    {
+        $post = BlogPost::factory()->create();
+        $other = BlogPost::factory()->create();
+        $comment = BlogComment::query()->create([
+            'blog_post_id' => $post->id, 'author_name' => 'A', 'body' => 'Premier.',
+        ]);
+        BlogComment::query()->create([
+            'blog_post_id' => $post->id, 'parent_id' => $comment->id, 'author_name' => 'Shop', 'body' => 'Réponse.',
+        ]);
+        BlogComment::query()->create([
+            'blog_post_id' => $post->id, 'author_name' => 'B', 'body' => 'Second.',
+        ]);
+
+        $html = $this->actingAs(User::factory()->admin()->create())
+            ->get(route('admin.blog.index'))
+            ->assertOk()
+            ->assertSee('Comments')
+            ->getContent();
+
+        $this->assertMatchesRegularExpression(
+            '#'.preg_quote($post->localizedTitle(), '#').'.*?'.preg_quote('>3</td>', '#').'#s',
+            $html,
+        );
+        $this->assertMatchesRegularExpression(
+            '#'.preg_quote($other->localizedTitle(), '#').'.*?'.preg_quote('>0</td>', '#').'#s',
+            $html,
+        );
+    }
 }

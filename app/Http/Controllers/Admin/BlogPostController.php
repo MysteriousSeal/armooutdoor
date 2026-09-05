@@ -30,6 +30,7 @@ class BlogPostController extends Controller
 
         $posts = BlogPost::query()
             ->with('category')
+            ->withCount('comments')
             ->when($search !== '', fn (Builder $query) => $query->where('title', 'like', '%'.$search.'%'))
             ->when($tab === 'draft', fn (Builder $query) => $query->where('status', 'draft'))
             ->when($tab === 'published', fn (Builder $query) => $query->visible())

@@ -8,8 +8,8 @@
             @if ($comment->is_admin)
                 <span class="blog-comment-badge">Boutique</span>
             @endif
-            <time class="blog-comment-date" datetime="{{ $comment->created_at->toDateString() }}">
-                {{ $comment->created_at->translatedFormat('j F Y') }}
+            <time class="blog-comment-date" datetime="{{ $comment->created_at->toIso8601String() }}">
+                {{ $comment->created_at->translatedFormat('j F Y') }} à {{ $comment->created_at->format('H:i') }}
             </time>
         </header>
         <p class="blog-comment-body">{!! nl2br(e($comment->body)) !!}</p>
