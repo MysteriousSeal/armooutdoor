@@ -10734,3 +10734,16 @@ a.order-stepper-btn:focus-visible {
 .gtin-flag.is-missing .gmc-icon-on {
     display: none;
 }
+
+/* The blog form's sources: label, URL, and a small way out per row. */
+.blog-source-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr) auto;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    align-items: center;
+}
+
+.blog-sources-actions {
+    margin: 0.25rem 0 0;
+}

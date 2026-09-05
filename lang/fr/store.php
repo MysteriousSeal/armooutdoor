@@ -417,6 +417,7 @@ return [
     'footer_help_guides' => 'Guides d\'achat',
     'category_guide_kicker' => 'Guide d\'achat',
     'category_guide_title' => 'Bien choisir : :category',
+    'blog_sources' => 'Sources',
     'blog_title' => 'Le blog',
     'blog_intro' => 'Conseils, essais, actualités et réglementation, écrits par la boutique.',
     // The search result's version of the two lines above: the title names

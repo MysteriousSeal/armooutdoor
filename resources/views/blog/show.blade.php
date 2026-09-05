@@ -100,6 +100,20 @@
                 </div>
             </div>
 
+            @if ($post->sourcesList() !== [])
+                {{-- The receipts: where the article's claims come from. --}}
+                <aside class="blog-article-sources" aria-label="Sources">
+                    <h2 class="blog-sources-title">{{ __('store.blog_sources') }}</h2>
+                    <ul>
+                        @foreach ($post->sourcesList() as $source)
+                            <li>
+                                <a href="{{ $source['url'] }}" target="_blank" rel="noopener">{{ $source['label'] }}</a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </aside>
+            @endif
+
             <aside class="blog-article-ask">
                 <div class="blog-article-ask-copy">
                     <p class="blog-article-ask-kicker">{{ __('store.blog_title') }}</p>

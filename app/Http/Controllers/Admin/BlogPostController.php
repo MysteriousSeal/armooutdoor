@@ -161,6 +161,15 @@ class BlogPostController extends Controller
             // Le préfixe est ajouté à l'affichage : on ne range que le nom,
             // même si l'auteur a retapé « Photo © » devant.
             'image_credit' => $this->normalizeCredit($validated['image_credit'] ?? null),
+            // Only rows with a URL survive; an emptied block stores null.
+            'sources' => collect($validated['sources'] ?? [])
+                ->filter(fn ($source): bool => filled($source['url'] ?? null))
+                ->map(fn (array $source): array => [
+                    'label' => trim((string) ($source['label'] ?? '')),
+                    'url' => trim($source['url']),
+                ])
+                ->values()
+                ->all() ?: null,
         ];
 
         // Le slug se fige à la création : le changer casserait l'adresse d'un

@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
     'published_at',
     'meta_title',
     'meta_description',
+    'sources',
 ])]
 class BlogPost extends Model
 {
@@ -34,7 +35,28 @@ class BlogPost extends Model
             'excerpt' => 'array',
             'body' => 'array',
             'published_at' => 'datetime',
+            'sources' => 'array',
         ];
+    }
+
+    /**
+     * The sources worth showing: rows with a real URL, label falling back
+     * to the link's host so an unlabelled source still reads as something.
+     *
+     * @return array<int, array{label: string, url: string}>
+     */
+    public function sourcesList(): array
+    {
+        return collect($this->sources ?? [])
+            ->filter(fn ($source): bool => is_array($source) && filled($source['url'] ?? null))
+            ->map(fn (array $source): array => [
+                'url' => $source['url'],
+                'label' => filled($source['label'] ?? null)
+                    ? $source['label']
+                    : (parse_url($source['url'], PHP_URL_HOST) ?: $source['url']),
+            ])
+            ->values()
+            ->all();
     }
 
     /**

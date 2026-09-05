@@ -28,6 +28,11 @@ class StoreBlogPostRequest extends FormRequest
             'published_at' => ['nullable', 'date'],
             'meta_title' => ['nullable', 'string', 'max:180'],
             'meta_description' => ['nullable', 'string', 'max:300'],
+            'sources' => ['nullable', 'array', 'max:10'],
+            'sources.*.label' => ['nullable', 'string', 'max:200'],
+            // A row may arrive all blank (the spare input): the payload
+            // drops it rather than the validator refusing the save.
+            'sources.*.url' => ['nullable', 'url', 'max:500'],
             'image_file' => ['nullable', 'image', 'max:8192'],
             'image_credit' => ['nullable', 'string', 'max:180'],
             'remove_image' => ['sometimes', 'boolean'],

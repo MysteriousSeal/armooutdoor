@@ -112,6 +112,33 @@
                             </div>
                         </div>
                     </section>
+
+                    <section class="admin-card">
+                        <h3 class="admin-card-title">Sources</h3>
+                        <p class="form-hint">Shown at the foot of the article and cited in its schema. Label optional — the link's domain stands in.</p>
+                        @php
+                            // Existing rows plus one spare; the script adds
+                            // more on demand and the save drops blank rows.
+                            $sourceRows = collect(old('sources', $post->sources ?? []))->values()->all();
+                            $sourceRows[] = ['label' => '', 'url' => ''];
+                        @endphp
+                        <div class="blog-sources" data-blog-sources>
+                            @foreach ($sourceRows as $index => $source)
+                                <div class="blog-source-row" data-blog-source-row>
+                                    <input type="text" name="sources[{{ $index }}][label]" class="form-control" maxlength="200"
+                                           placeholder="Libellé (optionnel)" value="{{ $source['label'] ?? '' }}" aria-label="Source label">
+                                    <input type="url" name="sources[{{ $index }}][url]" class="form-control" maxlength="500"
+                                           placeholder="https://…" value="{{ $source['url'] ?? '' }}" aria-label="Source URL">
+                                    <button type="button" class="btn btn-sm btn-secondary" data-blog-source-remove title="Remove this source">&times;</button>
+                                </div>
+                            @endforeach
+                        </div>
+                        <p class="blog-sources-actions">
+                            <button type="button" class="btn btn-sm btn-secondary" data-blog-source-add>Add a source</button>
+                        </p>
+                        @error('sources') <p class="form-error">{{ $message }}</p> @enderror
+                        @error('sources.*.url') <p class="form-error">{{ $message }}</p> @enderror
+                    </section>
                 </div>
 
                 <aside class="admin-form-side">
@@ -218,6 +245,44 @@
 @endsection
 
 @push('scripts')
+    <script>
+        (function () {
+            var wrap = document.querySelector('[data-blog-sources]');
+
+            if (!wrap) {
+                return;
+            }
+
+            document.querySelector('[data-blog-source-add]').addEventListener('click', function () {
+                var rows = wrap.querySelectorAll('[data-blog-source-row]');
+                var row = rows[rows.length - 1].cloneNode(true);
+                var index = rows.length;
+
+                row.querySelectorAll('input').forEach(function (input) {
+                    input.value = '';
+                    input.name = input.name.replace(/\d+/, index);
+                });
+                wrap.appendChild(row);
+            });
+
+            // One listener for every row, present and future.
+            wrap.addEventListener('click', function (event) {
+                var button = event.target.closest('[data-blog-source-remove]');
+
+                if (!button) {
+                    return;
+                }
+
+                if (wrap.querySelectorAll('[data-blog-source-row]').length > 1) {
+                    button.closest('[data-blog-source-row]').remove();
+                } else {
+                    button.closest('[data-blog-source-row]').querySelectorAll('input').forEach(function (input) {
+                        input.value = '';
+                    });
+                }
+            });
+        })();
+    </script>
     <script src="{{ versioned_asset('js/vendor/quill.js') }}"></script>
     <script src="{{ versioned_asset('js/admin-description-editor.js') }}" defer></script>
     <script src="{{ versioned_asset('js/admin-blog-form.js') }}" defer></script>
