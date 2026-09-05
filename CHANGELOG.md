@@ -2,6 +2,24 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-06 — v1.13.0 — build TPLUEF
+
+### Storefront
+
+- **The blog learns to converse.** A comment thread under each article, in a white card the article's full width: a guest signs with a pseudonym, an account with its first name and last initial — the reviews' privacy rule — and the shop answers one level deep under its badge and its AO monogram. Everything publishes at once, so every comment mails the shop and the inbox is the moderation queue; an off-screen honeypot and a throttle keep the bots out. Comments come lettered — an initial avatar each — timestamped to the hour, and drafts accept none.
+
+- **Each article says its weight before the click.** A reading time from the body's own word count — 200 words a minute, never below one — as a clock chip on the cards and a cell in the byline. Beside it on the cards, a speech-bubble chip that fills olive once someone has written; under the title, the article's pulse: human views and the thread's count, linking down to it. The schema says the same engagement — commentCount, the first five comments as nodes, the reading time as a duration, the views as a ReadAction counter.
+
+- **The footer opens a reading column.** « Conseils », right of Aide & Infos — Les guides, Le blog — taking the Guides d'achat link with it, and the footer's top row learns to use its whole container, the leftover space spread between columns.
+
+### Admin
+
+- **The comments get their own tab, and a curtain.** Every comment newest first in the blog admin — author chipped as shop or guest, the article a click away — where pruning lives now: the article page keeps only the reply form. Between keeping and deleting hangs Hide: a hidden comment leaves the thread, the counts, the chips and the schema, but keeps its row and its way back. Each comment carries a ten-character reference only admins see on the page, salted unique and indexed, that the tab's search takes however it was pasted. Both directions of the curtain write to the activity trail.
+
+- **The blog list reads like a dashboard.** Human views — the 30-day pulse over the lifetime total, counted through the PHP bot verdict SQL cannot run — then comments, products and sources, each post's numbers on its row. And the compose page takes the whole screen, its side column pinned at its old measure.
+
+**Three migrations**, all on blog comments: the table itself, the searchable reference, the hidden_at curtain.
+
 ## 2026-09-05 — v1.12.1 — build AF5LA8
 
 ### Admin
