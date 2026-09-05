@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-05 — v1.11.0 — build W7D52W
+
+### Storefront
+
+- **An article can show its sources.** A Sources card under the blog form's SEO block — label and URL per row, a spare row always ready, blank rows dropped at save — and the same shape over the admin API, rows without a URL dropped, null to clear, the docs saying the contract. At the foot of the article the sources wear the post's own section voice: numbered cards in a grid, the label over its cleaned domain, an external arrow saying where the link goes, olive wash on hover. The links are followed rather than nofollowed — citing real references is the honest posture — and the Article schema cites the same sources as named works, label and URL together. A shop that shows its sources reads as a shop that checked them.
+
+**One migration**: a `sources` column on blog posts.
+
 ## 2026-09-04 — v1.10.2 — build U3KOWF
 
 ### Storefront
