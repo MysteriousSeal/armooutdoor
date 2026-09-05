@@ -40,6 +40,18 @@ class BlogPost extends Model
     }
 
     /**
+     * Reading time in minutes, from the body's word count at the ~200
+     * words a minute of unhurried French prose. Never below one: a short
+     * note still takes a minute to open and read.
+     */
+    public function readingMinutes(): int
+    {
+        preg_match_all('/\S+/u', strip_tags($this->localizedBody()), $words);
+
+        return max(1, (int) ceil(count($words[0]) / 200));
+    }
+
+    /**
      * The sources worth showing: rows with a real URL, label falling back
      * to the link's host so an unlabelled source still reads as something.
      *

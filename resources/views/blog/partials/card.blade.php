@@ -19,6 +19,13 @@
                 <time class="blog-card-date" datetime="{{ $post->published_at?->toDateString() }}">
                     {{ $post->published_at?->translatedFormat('j F Y') }}
                 </time>
+                <span class="blog-card-read-time">
+                    <svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
+                        <path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    {{ __('store.blog_read_time', ['min' => $post->readingMinutes()]) }}
+                </span>
             </span>
             {{-- A heading, not a span: the index's outline should list its
                  posts, not jump from the h1 to the footer columns. --}}

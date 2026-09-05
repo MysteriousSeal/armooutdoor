@@ -878,3 +878,21 @@
     background: var(--accent-heading);
     border-radius: 2px;
 }
+
+/* The read time rides the card's meta row as a small olive chip with a
+   clock, pushed to the row's far edge so it reads at a glance. */
+.blog-card-read-time {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-left: auto;
+    padding: 0.12rem 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    color: var(--accent-heading);
+    background: color-mix(in srgb, var(--accent-heading) 9%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 22%, var(--border));
+    border-radius: 999px;
+}

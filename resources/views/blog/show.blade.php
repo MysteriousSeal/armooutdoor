@@ -95,6 +95,10 @@
                                     </dd>
                                 </div>
                             @endif
+                            <div class="blog-article-byline-cell">
+                                <dt>{{ __('store.blog_read_time_label') }}</dt>
+                                <dd>{{ __('store.blog_read_time', ['min' => $post->readingMinutes()]) }}</dd>
+                            </div>
                         </dl>
                     @endif
                     <h1 class="blog-article-title">

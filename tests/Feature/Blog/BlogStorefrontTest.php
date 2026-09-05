@@ -150,6 +150,24 @@ class BlogStorefrontTest extends TestCase
             ->assertSee($post->published_at->toAtomString(), false);
     }
 
+    public function test_every_card_and_article_says_its_reading_time(): void
+    {
+        // 450 words at ~200 a minute: three minutes, ceiling taken.
+        $post = BlogPost::factory()->create([
+            'body' => ['fr' => '<p>'.implode(' ', array_fill(0, 450, 'mot')).'</p>'],
+        ]);
+        $short = BlogPost::factory()->create(['body' => ['fr' => '<p>Trois mots seulement.</p>']]);
+
+        $this->assertSame(3, $post->readingMinutes());
+        // A short note never says zero.
+        $this->assertSame(1, $short->readingMinutes());
+
+        $this->get('/blog')->assertOk()->assertSee('3 min de lecture');
+        $this->get('/blog/'.$post->slug)->assertOk()
+            ->assertSee('Lecture')
+            ->assertSee('3 min de lecture');
+    }
+
     public function test_the_products_block_is_absent_when_nothing_is_attached(): void
     {
         $post = BlogPost::factory()->create();
