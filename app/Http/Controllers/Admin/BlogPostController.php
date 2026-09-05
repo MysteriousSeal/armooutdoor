@@ -45,8 +45,24 @@ class BlogPostController extends Controller
             ->paginate(25)
             ->withQueryString();
 
+        // Readers per article, humans only: the rows are fetched thin and
+        // the bot verdict runs in PHP, where the user-agent parser lives.
+        // One fetch feeds both figures - the 30-day pulse and the lifetime
+        // total - and a page of 25 posts keeps it cheap.
+        $humanVisits = \App\Models\SiteVisit::query()
+            ->whereIn('path', $posts->map(fn (BlogPost $post): string => '/blog/'.$post->slug))
+            ->get(['path', 'user_agent', 'created_at'])
+            ->reject(fn (\App\Models\SiteVisit $visit): bool => $visit->is_bot);
+
+        $viewCounts = $humanVisits
+            ->filter(fn (\App\Models\SiteVisit $visit): bool => $visit->created_at->gte(now()->subDays(30)))
+            ->countBy('path');
+        $viewTotals = $humanVisits->countBy('path');
+
         return view('admin.blog.index', [
             'posts' => $posts,
+            'viewCounts' => $viewCounts,
+            'viewTotals' => $viewTotals,
             'tab' => $tab,
             'search' => $search,
             'allCount' => BlogPost::query()->count(),
