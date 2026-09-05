@@ -183,6 +183,23 @@ class BlogPostController extends Controller
         ]);
     }
 
+    /**
+     * The curtain, both directions: a hidden comment leaves the public
+     * thread but keeps its row, its reference and its way back.
+     */
+    public function toggleCommentHidden(\App\Models\BlogComment $comment): \Illuminate\Http\RedirectResponse
+    {
+        $comment->forceFill(['hidden_at' => $comment->isHidden() ? null : now()])->save();
+
+        AdminActivityLog::record(
+            'blog.comment_'.($comment->isHidden() ? 'hidden' : 'unhidden'),
+            null,
+            ($comment->isHidden() ? 'Hid' : 'Unhid').' a comment by '.$comment->authorLabel().' on '.$comment->post->localizedTitle(),
+        );
+
+        return back()->with('status', $comment->isHidden() ? 'Comment hidden.' : 'Comment visible again.');
+    }
+
     public function destroyComment(\App\Models\BlogComment $comment): \Illuminate\Http\RedirectResponse
     {
         AdminActivityLog::record(

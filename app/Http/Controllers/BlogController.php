@@ -42,7 +42,7 @@ class BlogController extends Controller
         $posts = BlogPost::query()
             ->visible()
             ->with('category')
-            ->withCount('comments')
+            ->withCount(['comments' => fn ($query) => $query->visible()])
             ->when($activeCategory, fn ($query) => $query->where('blog_category_id', $activeCategory->id))
             ->orderByDesc('published_at')
             ->orderByDesc('id')
@@ -59,7 +59,9 @@ class BlogController extends Controller
         $post = BlogPost::query()
             ->visible()
             ->with(['category', 'products' => fn ($query) => $query->active()->with('discount', 'variants.supplier')])
-            ->with(['comments' => fn ($query) => $query->whereNull('parent_id')->with('replies.user', 'user')->orderBy('created_at')])
+            ->with(['comments' => fn ($query) => $query->visible()->whereNull('parent_id')
+                ->with(['replies' => fn ($replies) => $replies->visible()->with('user'), 'user'])
+                ->orderBy('created_at')])
             ->where('slug', $slug)
             ->firstOrFail();
 

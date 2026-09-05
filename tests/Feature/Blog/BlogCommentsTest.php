@@ -209,6 +209,29 @@ class BlogCommentsTest extends TestCase
             ->assertDontSee('Pas celui-là.');
     }
 
+    public function test_a_hidden_comment_leaves_the_thread_but_not_the_back_office(): void
+    {
+        $post = BlogPost::factory()->create();
+        $comment = BlogComment::query()->create([
+            'blog_post_id' => $post->id, 'author_name' => 'Indiscret', 'body' => 'À voiler.',
+        ]);
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)->patch(route('admin.blog.comments.hide', $comment))->assertRedirect();
+
+        // Gone from the page, the count and the chips - but not from the row.
+        $this->get('/blog/'.$post->slug)->assertOk()->assertDontSee('À voiler.')->assertSee('0 commentaire');
+        $this->get('/blog')->assertOk()->assertDontSee('has-comments');
+        $this->actingAs($admin)->get(route('admin.blog.comments.index'))->assertOk()
+            ->assertSee('À voiler.')
+            ->assertSee('Hidden')
+            ->assertSee('Unhide');
+
+        // And the curtain lifts.
+        $this->actingAs($admin)->patch(route('admin.blog.comments.hide', $comment))->assertRedirect();
+        $this->get('/blog/'.$post->slug)->assertOk()->assertSee('À voiler.');
+    }
+
     public function test_the_admin_list_shows_each_posts_comment_count(): void
     {
         $post = BlogPost::factory()->create();

@@ -48,7 +48,19 @@ class BlogComment extends Model
     {
         return [
             'is_admin' => 'boolean',
+            'hidden_at' => 'datetime',
         ];
+    }
+
+    /** What the public thread shows; the back office reads everything. */
+    public function scopeVisible(\Illuminate\Database\Eloquent\Builder $query): void
+    {
+        $query->whereNull('hidden_at');
+    }
+
+    public function isHidden(): bool
+    {
+        return $this->hidden_at !== null;
     }
 
     public function post(): BelongsTo

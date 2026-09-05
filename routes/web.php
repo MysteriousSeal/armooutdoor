@@ -230,6 +230,7 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         // Blog
         Route::get('/blog', [AdminBlogPostController::class, 'index'])->name('blog.index');
         Route::get('/blog/comments', [AdminBlogPostController::class, 'comments'])->name('blog.comments.index');
+        Route::patch('/blog/comments/{comment}/hide', [AdminBlogPostController::class, 'toggleCommentHidden'])->name('blog.comments.hide');
         Route::delete('/blog/comments/{comment}', [AdminBlogPostController::class, 'destroyComment'])->name('blog.comments.destroy');
         Route::get('/blog/create', [AdminBlogPostController::class, 'create'])->name('blog.create');
         Route::post('/blog', [AdminBlogPostController::class, 'store'])->name('blog.store');

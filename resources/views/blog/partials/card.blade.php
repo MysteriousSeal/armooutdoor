@@ -25,7 +25,7 @@
                 @php
                     // Counted by the listing; counted here for the card's
                     // other hosts (related posts, product pages).
-                    $commentCount = $post->comments_count ?? $post->comments()->count();
+                    $commentCount = $post->comments_count ?? $post->comments()->visible()->count();
                 @endphp
                 <span class="blog-card-comments {{ $commentCount > 0 ? 'has-comments' : '' }}"
                       title="{{ trans_choice('store.blog_comments_count', $commentCount, ['count' => $commentCount]) }}">

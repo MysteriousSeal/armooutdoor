@@ -71,6 +71,9 @@
                                     @elseif ($comment->user_id === null)
                                         <span class="order-chip order-chip--draft">Guest</span>
                                     @endif
+                                    @if ($comment->isHidden())
+                                        <span class="order-chip order-chip--preparing">Hidden</span>
+                                    @endif
                                 </td>
                                 <td>{{ \Illuminate\Support\Str::limit($comment->body, 120) }}</td>
                                 <td>
@@ -81,6 +84,11 @@
                                 <td>{{ $comment->created_at->format('d/m/Y H:i') }}</td>
                                 <td>
                                     <div class="admin-table-actions">
+                                        <form method="POST" action="{{ route('admin.blog.comments.hide', $comment) }}">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="btn btn-sm btn-secondary">{{ $comment->isHidden() ? 'Unhide' : 'Hide' }}</button>
+                                        </form>
                                         <form method="POST" action="{{ route('admin.blog.comments.destroy', $comment) }}">
                                             @csrf
                                             @method('DELETE')
