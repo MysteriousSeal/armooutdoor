@@ -223,6 +223,26 @@ The column is cast to a datetime and stored in the application timezone, which i
 **6. Drafts appear in this API.**
 `GET /blog/posts` is the admin list. If you are mirroring the public blog, filter with `?status=visible`, otherwise you will publish drafts somewhere else.
 
+### Citation markers in the body
+
+`sources` renders a numbered card per source at the foot of the article, `01`, `02`, `03`. To point a specific sentence at one of them, put a **Unicode superscript digit** in the body: `¹`, `²`, `³`, and so on.
+
+Use the characters themselves, not markup. `<sup>` is not an allowed tag and is stripped, and the styling route is closed too: `id` is not an allowed attribute at all, and every `class` that does not start with `ql-` is removed on save. A marker written as a styled span or a footnote link therefore cannot survive. The Unicode character needs neither, renders raised on its own, and passes through the sanitizer untouched.
+
+```html
+<p>Le niveau F encaisse environ 0,87 joule. Le niveau A atteint 15,52 joules².</p>
+```
+
+Rules of the pattern:
+
+- **The digit matches the position of the source in the `sources` array**, 1-based. Reordering `sources` silently invalidates every marker in the body, so change the two together.
+- **Place the marker before the sentence's final period**, per French note-call convention: `… en niveau B ou A².` not `… en niveau B ou A.²`
+- **Mark claims, not paragraphs.** A factual assertion a reader might check: a date, a figure, a named requirement. Eight to ten markers across a 2 000 word article is a reasonable density.
+- **The marker is not a link.** It carries no anchor, so it does not scroll anywhere. It tells the reader which card at the foot of the page backs the sentence.
+- **Precomposed superscripts exist for 1, 2 and 3 only** (`¹` `²` `³`). From 4 up you need `⁴` `⁵` `⁶` `⁷` `⁸` `⁹`, which render less consistently across fonts. With the ten-source cap this is rarely a problem, but prefer few, well chosen sources.
+
+A marker with no matching row in `sources` is not an error the API will catch. Nothing validates the two against each other; that consistency is yours to keep.
+
 ### Images in the body
 
 `body` is cleaned server-side. Allowed tags: `p`, `br`, `strong`, `b`, `em`, `i`, `u`, `s`, `strike`, `a`, `ul`, `ol`, `li`, `h2`, `h3`, `h4`, `blockquote`, `span`, `div`, `pre`, `code`, plus `img`, `figure` and `figcaption`.
