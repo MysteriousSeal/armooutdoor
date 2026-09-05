@@ -95,6 +95,9 @@ class AdminAuthorizationTest extends TestCase
         ]);
 
         $blogPost = BlogPost::factory()->create();
+        $blogComment = \App\Models\BlogComment::query()->create([
+            'blog_post_id' => $blogPost->id, 'author_name' => 'Sweep', 'body' => 'Fixture.',
+        ]);
 
         // A manual review needs no account and no order, the cheapest kind
         // to stand in for the {review} parameter.
@@ -142,6 +145,7 @@ class AdminAuthorizationTest extends TestCase
             'conversation' => $conversation->id,
             'message' => $conversationMessage->id,
             'post' => $blogPost->id,
+            'comment' => $blogComment->id,
             'review' => $review->id,
             // A month inside the accounting period: outside it the route
             // does not even match, and this sweep would read a 404 as an
