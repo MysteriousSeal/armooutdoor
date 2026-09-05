@@ -229,6 +229,8 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
 
         // Blog
         Route::get('/blog', [AdminBlogPostController::class, 'index'])->name('blog.index');
+        Route::get('/blog/comments', [AdminBlogPostController::class, 'comments'])->name('blog.comments.index');
+        Route::delete('/blog/comments/{comment}', [AdminBlogPostController::class, 'destroyComment'])->name('blog.comments.destroy');
         Route::get('/blog/create', [AdminBlogPostController::class, 'create'])->name('blog.create');
         Route::post('/blog', [AdminBlogPostController::class, 'store'])->name('blog.store');
         Route::post('/blog/images', [AdminBlogPostController::class, 'uploadBodyImage'])->name('blog.images');
@@ -397,13 +399,11 @@ Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 Route::post('/blog/{slug}/commentaires', [\App\Http\Controllers\BlogCommentController::class, 'store'])
     ->middleware('throttle:5,1')
     ->name('blog.comments.store');
-// The shop's side of the thread lives on the article page, admin-gated.
+// The shop's replies live on the article page, admin-gated; deleting
+// happens only in the back office.
 Route::post('/blog/commentaires/{comment}/reponse', [\App\Http\Controllers\BlogCommentController::class, 'reply'])
     ->middleware('admin')
     ->name('blog.comments.reply');
-Route::delete('/blog/commentaires/{comment}', [\App\Http\Controllers\BlogCommentController::class, 'destroy'])
-    ->middleware('admin')
-    ->name('blog.comments.destroy');
 Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
 Route::get('/products/{product:slug}', [ProductController::class, 'show'])
     // Un slug inconnu n'est pas forcément une erreur : c'est peut-être une

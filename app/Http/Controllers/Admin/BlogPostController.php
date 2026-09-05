@@ -66,6 +66,7 @@ class BlogPostController extends Controller
             'tab' => $tab,
             'search' => $search,
             'allCount' => BlogPost::query()->count(),
+            'commentCount' => \App\Models\BlogComment::query()->count(),
             'draftCount' => BlogPost::query()->where('status', 'draft')->count(),
             'publishedCount' => BlogPost::query()->visible()->count(),
             'scheduledCount' => BlogPost::query()
@@ -156,6 +157,30 @@ class BlogPostController extends Controller
         $path = $this->storeUploadedImage($request->file('file'), 'blog-body', landscape: false);
 
         return response()->json(['url' => '/images/'.$path]);
+    }
+
+    /** The moderation queue: every comment, newest first, deletable. */
+    public function comments(): View
+    {
+        return view('admin.blog.comments', [
+            'comments' => \App\Models\BlogComment::query()
+                ->with(['post', 'user'])
+                ->orderByDesc('created_at')
+                ->paginate(50),
+            'commentCount' => \App\Models\BlogComment::query()->count(),
+        ]);
+    }
+
+    public function destroyComment(\App\Models\BlogComment $comment): \Illuminate\Http\RedirectResponse
+    {
+        AdminActivityLog::record(
+            'blog.comment_deleted',
+            null,
+            'Removed a comment by '.$comment->authorLabel().' on '.$comment->post->localizedTitle(),
+        );
+        $comment->delete();
+
+        return back()->with('status', 'Comment deleted.');
     }
 
     /** @return array<string, mixed> */

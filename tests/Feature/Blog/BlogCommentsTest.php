@@ -142,19 +142,39 @@ class BlogCommentsTest extends TestCase
             ->assertStatus(422);
     }
 
-    public function test_only_an_admin_replies_or_deletes(): void
+    public function test_only_an_admin_replies(): void
+    {
+        $post = BlogPost::factory()->create();
+        $comment = BlogComment::query()->create([
+            'blog_post_id' => $post->id, 'author_name' => 'Client', 'body' => 'Question.',
+        ]);
+
+        $this->post(route('blog.comments.reply', $comment), ['body' => 'x'])->assertRedirect(route('admin.login'));
+    }
+
+    public function test_deleting_lives_in_the_back_office_not_on_the_post(): void
     {
         $post = BlogPost::factory()->create();
         $comment = BlogComment::query()->create([
             'blog_post_id' => $post->id, 'author_name' => 'Client', 'body' => 'À supprimer.',
         ]);
+        $admin = User::factory()->admin()->create();
 
-        $this->post(route('blog.comments.reply', $comment), ['body' => 'x'])->assertRedirect(route('admin.login'));
-        $this->delete(route('blog.comments.destroy', $comment))->assertRedirect(route('admin.login'));
+        // A guest is turned away - checked before actingAs, which sticks
+        // to the test's session for every later request.
+        $this->delete(route('admin.blog.comments.destroy', $comment))->assertRedirect(route('admin.login'));
 
-        $this->actingAs(User::factory()->admin()->create())
-            ->delete(route('blog.comments.destroy', $comment))
-            ->assertRedirect();
+        // The article page offers no delete, even to an admin.
+        $this->actingAs($admin)->get('/blog/'.$post->slug)->assertOk()
+            ->assertDontSee('blog.comments.destroy')
+            ->assertDontSee('blog-comment-delete');
+
+        // The back-office comments tab lists it and deletes it.
+        $this->actingAs($admin)->get(route('admin.blog.comments.index'))->assertOk()
+            ->assertSee('À supprimer.')
+            ->assertSee($post->localizedTitle());
+
+        $this->actingAs($admin)->delete(route('admin.blog.comments.destroy', $comment))->assertRedirect();
 
         $this->assertSame(0, BlogComment::query()->count());
     }

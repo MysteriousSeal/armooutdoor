@@ -33,6 +33,9 @@
             <a href="{{ route('admin.blog.index', ['tab' => 'draft']) }}" class="sits-apart {{ $tab === 'draft' ? 'active' : '' }}">
                 Drafts <span class="admin-tab-count">{{ number_format($draftCount) }}</span>
             </a>
+            <a href="{{ route('admin.blog.comments.index') }}">
+                Comments <span class="admin-tab-count">{{ number_format($commentCount ?? 0) }}</span>
+            </a>
         </nav>
 
         <form method="GET" action="{{ route('admin.blog.index') }}" class="admin-filter-bar">

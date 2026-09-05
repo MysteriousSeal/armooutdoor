@@ -65,12 +65,4 @@ class BlogCommentController extends Controller
 
         return redirect()->to(route('blog.show', $comment->post->slug).'#commentaires');
     }
-
-    public function destroy(BlogComment $comment): RedirectResponse
-    {
-        $slug = $comment->post->slug;
-        $comment->delete();
-
-        return redirect()->to(route('blog.show', $slug).'#commentaires');
-    }
 }
