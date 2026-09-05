@@ -36,8 +36,13 @@ class ArticleSchema
             // publication rather than to nothing: an article that has never
             // been touched was last correct on the day it went up.
             'dateModified' => ($post->updated_at ?? $post->published_at)?->toAtomString(),
-            // The sources shown at the article's foot, said in schema too.
-            'citation' => array_column($post->sourcesList(), 'url') ?: null,
+            // The sources shown at the article's foot, said in schema too -
+            // as works with a name, not bare URLs, so the label travels.
+            'citation' => collect($post->sourcesList())->map(fn (array $source): array => [
+                '@type' => 'CreativeWork',
+                'name' => $source['label'],
+                'url' => $source['url'],
+            ])->all() ?: null,
             // No article here carries a byline, so the shop stands behind its
             // own writing rather than inventing a name to sign it.
             'author' => OrganizationSchema::reference(),

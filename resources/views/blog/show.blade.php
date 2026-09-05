@@ -103,9 +103,9 @@
             @if ($post->sourcesList() !== [])
                 {{-- The receipts: where the article's claims come from,
                      dressed like the post's other sections. --}}
-                <aside class="blog-article-sources" aria-label="Sources">
+                <section class="blog-article-sources" aria-labelledby="blog-sources-title">
                     <header class="blog-article-section-head">
-                        <h2 class="blog-section-title">{{ __('store.blog_sources') }}</h2>
+                        <h2 class="blog-section-title" id="blog-sources-title">{{ __('store.blog_sources') }}</h2>
                     </header>
                     <ul class="blog-sources-grid">
                         @foreach ($post->sourcesList() as $source)
@@ -123,7 +123,7 @@
                             </li>
                         @endforeach
                     </ul>
-                </aside>
+                </section>
             @endif
 
             <aside class="blog-article-ask">
