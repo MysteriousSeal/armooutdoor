@@ -429,6 +429,8 @@ return [
     'blog_comment_send' => 'Publier le commentaire',
     'blog_read_time' => ':min min de lecture',
     'blog_read_time_label' => 'Lecture',
+    'blog_views_label' => 'Vues',
+    'blog_views_count' => ':count vue|:count vues',
     'blog_title' => 'Le blog',
     'blog_intro' => 'Conseils, essais, actualités et réglementation, écrits par la boutique.',
     // The search result's version of the two lines above: the title names

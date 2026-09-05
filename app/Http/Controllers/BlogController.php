@@ -72,7 +72,25 @@ class BlogController extends Controller
             ->limit(3)
             ->get();
 
-        return view('blog.show', compact('post', 'related'));
+        return view('blog.show', [
+            'post' => $post,
+            'related' => $related,
+            'viewCount' => $this->viewCount($post),
+        ]);
+    }
+
+    /**
+     * Lifetime human views, the admin list's verdict made public: the
+     * rows come thin, the bot check runs in PHP, and ten minutes of cache
+     * keep a popular article from re-counting on every read.
+     */
+    private function viewCount(BlogPost $post): int
+    {
+        return (int) cache()->remember('blog-views:'.$post->id, 600, fn (): int => \App\Models\SiteVisit::query()
+            ->where('path', '/blog/'.$post->slug)
+            ->get(['user_agent'])
+            ->reject(fn (\App\Models\SiteVisit $visit): bool => $visit->is_bot)
+            ->count());
     }
 
     /**
@@ -96,6 +114,11 @@ class BlogController extends Controller
             ->limit(3)
             ->get();
 
-        return view('blog.show', ['post' => $post, 'related' => $related, 'preview' => true]);
+        return view('blog.show', [
+            'post' => $post,
+            'related' => $related,
+            'preview' => true,
+            'viewCount' => $this->viewCount($post),
+        ]);
     }
 }

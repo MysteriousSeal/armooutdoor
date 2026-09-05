@@ -99,6 +99,7 @@
                                 <dt>{{ __('store.blog_read_time_label') }}</dt>
                                 <dd>{{ __('store.blog_read_time', ['min' => $post->readingMinutes()]) }}</dd>
                             </div>
+
                         </dl>
                     @endif
                     <h1 class="blog-article-title">
@@ -107,6 +108,24 @@
                     @if ($post->localizedExcerpt() !== '')
                         <p class="blog-article-lede">{{ $post->localizedExcerpt() }}</p>
                     @endif
+                    @php
+                        $commentTotal = $post->comments->count() + $post->comments->sum(fn ($comment) => $comment->replies->count());
+                    @endphp
+                    <p class="blog-article-stats">
+                        <span class="blog-article-stat">
+                            <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                                <path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                                <circle cx="12" cy="12" r="2.6" fill="none" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            {{ trans_choice('store.blog_views_count', $viewCount ?? 0, ['count' => number_format($viewCount ?? 0, 0, ',', ' ')]) }}
+                        </span>
+                        <a href="#commentaires" class="blog-article-stat">
+                            <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                                <path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                            </svg>
+                            {{ trans_choice('store.blog_comments_count', $commentTotal, ['count' => $commentTotal]) }}
+                        </a>
+                    </p>
                 </div>
             </header>
 

@@ -1087,3 +1087,38 @@
         padding: 1.25rem 1rem 1.4rem;
     }
 }
+
+/* The article's pulse, under the title and lede: views and comments as
+   two quiet figures with their olive glyphs. */
+.blog-article-stats {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.1rem;
+    margin: 0.9rem 0 0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.blog-article-stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--text-muted);
+}
+
+.blog-article-stat svg {
+    color: var(--accent-heading);
+}
+
+a.blog-article-stat {
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--accent-heading) 40%, transparent);
+    text-underline-offset: 2px;
+}
+
+a.blog-article-stat:hover {
+    color: var(--accent-heading);
+    text-decoration-color: var(--accent-heading);
+}

@@ -78,6 +78,23 @@ class BlogCommentsTest extends TestCase
         ])->assertNotFound();
     }
 
+    public function test_the_hero_says_views_and_comments(): void
+    {
+        $post = BlogPost::factory()->create();
+        BlogComment::query()->create(['blog_post_id' => $post->id, 'author_name' => 'A', 'body' => 'Un.']);
+        \App\Models\SiteVisit::query()->create(['path' => '/blog/'.$post->slug, 'ip_address' => '10.0.0.1']);
+        // A crawler's visit counts nowhere.
+        \App\Models\SiteVisit::query()->create([
+            'path' => '/blog/'.$post->slug, 'ip_address' => '10.0.0.2',
+            'user_agent' => 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+        ]);
+
+        $this->get('/blog/'.$post->slug)->assertOk()
+            ->assertSee('blog-article-stats', false)
+            ->assertSee('1 vue')
+            ->assertSee('1 commentaire');
+    }
+
     public function test_the_blog_cards_wear_the_comment_count(): void
     {
         $post = BlogPost::factory()->create();
