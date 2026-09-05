@@ -37,9 +37,13 @@ class GuideCiblesPageTest extends TestCase
             ->assertSee(route('guides.cibles'));
     }
 
-    public function test_the_footer_links_the_guides_from_every_page(): void
+    public function test_the_footer_reading_column_links_guides_and_blog(): void
     {
-        $this->get('/')->assertOk()->assertSee(route('guides.index'));
+        $this->get('/')->assertOk()
+            ->assertSee('Conseils')
+            ->assertSee('Les guides')
+            ->assertSee('Le blog')
+            ->assertSee(route('guides.index'));
     }
 
     public function test_both_pages_are_published(): void

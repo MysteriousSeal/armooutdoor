@@ -414,7 +414,10 @@ return [
     'order_status_note_delivered' => 'Votre colis a été livré à l’adresse indiquée.',
     'order_status_note_refunded' => 'Le remboursement de cette commande a été effectué.',
     'nav_blog' => 'Blog',
-    'footer_help_guides' => 'Guides d\'achat',
+    // The reading column: the shop's editorial, right of Aide & Infos.
+    'footer_reading' => 'Conseils',
+    'footer_reading_guides' => 'Les guides',
+    'footer_reading_blog' => 'Le blog',
     'category_guide_kicker' => 'Guide d\'achat',
     'category_guide_title' => 'Bien choisir : :category',
     'blog_sources' => 'Sources',
