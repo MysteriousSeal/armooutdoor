@@ -18,7 +18,9 @@ class BlogViewCounterTest extends TestCase
 
     public function test_the_list_counts_each_articles_visits(): void
     {
-        $post = BlogPost::factory()->create();
+        $post = BlogPost::factory()->create([
+            'sources' => [['label' => 'Legifrance', 'url' => 'https://www.legifrance.gouv.fr/x']],
+        ]);
         $other = BlogPost::factory()->create();
 
         foreach (range(1, 3) as $i) {
@@ -38,6 +40,7 @@ class BlogViewCounterTest extends TestCase
             ->get(route('admin.blog.index'))
             ->assertOk()
             ->assertSee('Views')
+            ->assertSee('Sources')
             ->getContent();
 
         // 3 in the window, 4 lifetime (the 45-day-old visit counts there;

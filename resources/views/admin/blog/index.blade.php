@@ -61,6 +61,7 @@
                             <th>Published</th>
                             <th title="Human visits: last 30 days, then lifetime total">Views <span class="admin-table-th-note">30 d / total</span></th>
                             <th>Products</th>
+                            <th>Sources</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -86,6 +87,7 @@
                                     <span class="admin-table-th-note">/ {{ number_format($viewTotals['/blog/'.$post->slug] ?? 0, 0, ',', ' ') }}</span>
                                 </td>
                                 <td>{{ $post->products()->count() }}</td>
+                                <td>{{ count($post->sourcesList()) }}</td>
                                 <td>
                                     <div class="admin-table-actions">
                                         {{-- The same pair as the edit page's hero: the
