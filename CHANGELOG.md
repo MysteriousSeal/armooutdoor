@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-05 — v1.12.0 — build AFPPAA
+
+### Admin
+
+- **A draft can be seen as the page it will become.** An unreferenced address behind the back-office login renders the exact frontend page — products and related posts included — wearing an « Aperçu » banner and a noindex so it can be mistaken for nothing and picked up by no crawler. The public slug stays a 404, guests and customers are sent to the admin login, and the edit page's hero grows the matching button: Preview on a draft, View on a published post.
+
+- **The citation-marker convention is written down.** The API docs explain the Unicode superscript digits that point body sentences at the numbered source cards: the characters survive the sanitizer where sup tags and styled spans do not, the digit follows the source's position, and keeping the two consistent is the author's job.
+
+**No migration.**
+
 ## 2026-09-05 — v1.11.0 — build W7D52W
 
 ### Storefront
