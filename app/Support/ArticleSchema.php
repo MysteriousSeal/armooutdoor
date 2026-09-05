@@ -22,9 +22,17 @@ class ArticleSchema
      */
     private const MAX_HEADLINE = 110;
 
+    /** The comments cited in the schema; the rest live on the page. */
+    private const MAX_COMMENTS = 5;
+
     /** @return array<string, mixed> */
-    public static function for(BlogPost $post): array
+    public static function for(BlogPost $post, ?int $viewCount = null): array
     {
+        // The page eager-loads top-level comments with their replies; the
+        // count says the whole thread, like the figure under the title.
+        $comments = $post->comments->whereNull('parent_id');
+        $commentCount = $comments->count() + $comments->sum(fn ($comment): int => $comment->replies->count());
+
         return array_filter([
             '@context' => 'https://schema.org',
             '@type' => 'BlogPosting',
@@ -50,6 +58,21 @@ class ArticleSchema
             'mainEntityOfPage' => route('blog.show', $post->slug),
             'articleSection' => $post->category?->localizedName(),
             'inLanguage' => 'fr-FR',
+            // Engagement, said in schema: none of it draws a rich result
+            // today, but all of it is proper vocabulary Google parses.
+            'timeRequired' => 'PT'.$post->readingMinutes().'M',
+            'commentCount' => $commentCount > 0 ? $commentCount : null,
+            'comment' => $comments->take(self::MAX_COMMENTS)->map(fn ($comment): array => [
+                '@type' => 'Comment',
+                'author' => ['@type' => 'Person', 'name' => $comment->authorLabel()],
+                'dateCreated' => $comment->created_at->toAtomString(),
+                'text' => Str::limit($comment->body, 500),
+            ])->values()->all() ?: null,
+            'interactionStatistic' => $viewCount !== null && $viewCount > 0 ? [
+                '@type' => 'InteractionCounter',
+                'interactionType' => 'https://schema.org/ReadAction',
+                'userInteractionCount' => $viewCount,
+            ] : null,
         ], fn ($value): bool => $value !== null && $value !== '' && $value !== []);
     }
 }

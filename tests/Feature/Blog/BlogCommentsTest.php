@@ -95,6 +95,21 @@ class BlogCommentsTest extends TestCase
             ->assertSee('1 commentaire');
     }
 
+    public function test_the_schema_says_the_engagement(): void
+    {
+        $post = BlogPost::factory()->create();
+        BlogComment::query()->create(['blog_post_id' => $post->id, 'author_name' => 'Lecteur', 'body' => 'Bien vu.']);
+        \App\Models\SiteVisit::query()->create(['path' => '/blog/'.$post->slug, 'ip_address' => '10.0.0.1']);
+
+        $this->get('/blog/'.$post->slug)->assertOk()
+            ->assertSee('"commentCount":1', false)
+            ->assertSee('"timeRequired":"PT1M"', false)
+            ->assertSee('"interactionType":"https://schema.org/ReadAction"', false)
+            ->assertSee('"userInteractionCount":1', false)
+            ->assertSee('"@type":"Comment"', false)
+            ->assertSee('Lecteur');
+    }
+
     public function test_the_blog_cards_wear_the_comment_count(): void
     {
         $post = BlogPost::factory()->create();
