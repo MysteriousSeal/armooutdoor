@@ -179,6 +179,36 @@ class BlogCommentsTest extends TestCase
         $this->assertSame(0, BlogComment::query()->count());
     }
 
+    public function test_a_comment_earns_a_reference_only_admins_see(): void
+    {
+        $post = BlogPost::factory()->create();
+
+        $this->post(route('blog.comments.store', $post->slug), [
+            'author_name' => 'Visiteur', 'body' => 'Référencé.',
+        ]);
+
+        $comment = BlogComment::query()->firstOrFail();
+        $this->assertMatchesRegularExpression('/^[0-9A-F]{10}$/', $comment->reference);
+
+        // The visitor never sees the handle; the admin reads it off the page.
+        $this->get('/blog/'.$post->slug)->assertOk()->assertDontSee($comment->reference);
+        $this->actingAs(User::factory()->admin()->create())
+            ->get('/blog/'.$post->slug)->assertOk()->assertSee($comment->reference);
+    }
+
+    public function test_the_back_office_search_takes_the_reference(): void
+    {
+        $post = BlogPost::factory()->create();
+        $wanted = BlogComment::query()->create(['blog_post_id' => $post->id, 'author_name' => 'A', 'body' => 'Celui-ci.']);
+        BlogComment::query()->create(['blog_post_id' => $post->id, 'author_name' => 'B', 'body' => 'Pas celui-là.']);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->get(route('admin.blog.comments.index', ['search' => strtolower($wanted->fresh()->reference)]))
+            ->assertOk()
+            ->assertSee('Celui-ci.')
+            ->assertDontSee('Pas celui-là.');
+    }
+
     public function test_the_admin_list_shows_each_posts_comment_count(): void
     {
         $post = BlogPost::factory()->create();

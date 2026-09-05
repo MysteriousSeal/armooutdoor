@@ -12,6 +12,10 @@
             <time class="blog-comment-date" datetime="{{ $comment->created_at->toIso8601String() }}">
                 {{ $comment->created_at->translatedFormat('j F Y') }} à {{ $comment->created_at->format('H:i') }}
             </time>
+            @if (auth()->user()?->isAdmin() && $comment->reference)
+                {{-- Admin eyes only: the handle the back-office search takes. --}}
+                <code class="blog-comment-ref" title="Référence pour la recherche admin">{{ $comment->reference }}</code>
+            @endif
         </header>
         <p class="blog-comment-body">{!! nl2br(e($comment->body)) !!}</p>
     </div>

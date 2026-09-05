@@ -24,19 +24,35 @@
             </a>
         </nav>
 
+        <form method="GET" action="{{ route('admin.blog.comments.index') }}" class="admin-filter-bar">
+            <div class="admin-filter-row">
+                <div class="admin-filter-field admin-filter-field--search">
+                    <label class="admin-field-label" for="comment-search">Search</label>
+                    <input id="comment-search" type="search" name="search" class="form-control admin-toolbar-search" placeholder="Reference, text or pseudonym…" value="{{ $search }}">
+                </div>
+                <div class="admin-filter-actions">
+                    <button type="submit" class="btn btn-secondary">Filter</button>
+                    @if ($search !== '')
+                        <a href="{{ route('admin.blog.comments.index') }}" class="btn btn-secondary">Reset</a>
+                    @endif
+                </div>
+            </div>
+        </form>
+
         @if (session('status'))
             <p class="admin-flash">{{ session('status') }}</p>
         @endif
 
         @if ($comments->isEmpty())
             <div class="empty-state">
-                <p>No comments yet.</p>
+                <p>{{ $search !== '' ? 'Nothing matches this search.' : 'No comments yet.' }}</p>
             </div>
         @else
             <div class="admin-table-wrap">
                 <table class="admin-table">
                     <thead>
                         <tr>
+                            <th>Ref</th>
                             <th>Author</th>
                             <th>Comment</th>
                             <th>Article</th>
@@ -47,6 +63,7 @@
                     <tbody>
                         @foreach ($comments as $comment)
                             <tr>
+                                <td><code>{{ $comment->reference }}</code></td>
                                 <td>
                                     {{ $comment->authorLabel() }}
                                     @if ($comment->is_admin)

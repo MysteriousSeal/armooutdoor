@@ -1223,3 +1223,16 @@ a.blog-article-stat:hover {
     color: var(--accent-heading);
     text-decoration-color: var(--accent-heading);
 }
+
+/* The admin-only handle on a comment: mono, quiet, copyable. */
+.blog-comment-ref {
+    margin-left: auto;
+    padding: 0.08rem 0.4rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.6875rem;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    background: color-mix(in srgb, var(--accent-heading) 7%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 18%, var(--border));
+    user-select: all;
+}

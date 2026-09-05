@@ -161,14 +161,25 @@ class BlogPostController extends Controller
     }
 
     /** The moderation queue: every comment, newest first, deletable. */
-    public function comments(): View
+    public function comments(Request $request): View
     {
+        $search = trim((string) $request->query('search', ''));
+
         return view('admin.blog.comments', [
             'comments' => \App\Models\BlogComment::query()
                 ->with(['post', 'user'])
+                // The reference matches exactly, however it was pasted; the
+                // body and pseudonym match loosely.
+                ->when($search !== '', fn ($query) => $query
+                    ->where(fn ($inner) => $inner
+                        ->where('reference', strtoupper($search))
+                        ->orWhere('body', 'like', '%'.$search.'%')
+                        ->orWhere('author_name', 'like', '%'.$search.'%')))
                 ->orderByDesc('created_at')
-                ->paginate(50),
+                ->paginate(50)
+                ->withQueryString(),
             'commentCount' => \App\Models\BlogComment::query()->count(),
+            'search' => $search,
         ]);
     }
 

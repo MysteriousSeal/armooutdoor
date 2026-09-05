@@ -17,6 +17,33 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class BlogComment extends Model
 {
+    /**
+     * Ten uppercase hex characters an admin reads off the page and pastes
+     * into the back-office search. Stamped after creation - the id it
+     * hashes does not exist any earlier - and salted upward until unique:
+     * a collision at 16^10 is theory, but the loop makes it impossible.
+     */
+    protected static function booted(): void
+    {
+        static::created(function (self $comment): void {
+            $comment->forceFill([
+                'reference' => self::uniqueReference($comment->id.'|'.$comment->created_at),
+            ])->saveQuietly();
+        });
+    }
+
+    public static function uniqueReference(string $seed): string
+    {
+        $salt = 0;
+
+        do {
+            $reference = strtoupper(substr(sha1($seed.($salt > 0 ? '|'.$salt : '')), 0, 10));
+            $salt++;
+        } while (static::query()->where('reference', $reference)->exists());
+
+        return $reference;
+    }
+
     protected function casts(): array
     {
         return [
