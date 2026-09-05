@@ -394,6 +394,16 @@ Route::get('/blog/apercu/{post}', [BlogController::class, 'preview'])
     ->middleware('admin')
     ->name('blog.preview');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
+Route::post('/blog/{slug}/commentaires', [\App\Http\Controllers\BlogCommentController::class, 'store'])
+    ->middleware('throttle:5,1')
+    ->name('blog.comments.store');
+// The shop's side of the thread lives on the article page, admin-gated.
+Route::post('/blog/commentaires/{comment}/reponse', [\App\Http\Controllers\BlogCommentController::class, 'reply'])
+    ->middleware('admin')
+    ->name('blog.comments.reply');
+Route::delete('/blog/commentaires/{comment}', [\App\Http\Controllers\BlogCommentController::class, 'destroy'])
+    ->middleware('admin')
+    ->name('blog.comments.destroy');
 Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
 Route::get('/products/{product:slug}', [ProductController::class, 'show'])
     // Un slug inconnu n'est pas forcément une erreur : c'est peut-être une

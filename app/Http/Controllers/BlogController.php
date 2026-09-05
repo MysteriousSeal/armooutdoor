@@ -58,6 +58,7 @@ class BlogController extends Controller
         $post = BlogPost::query()
             ->visible()
             ->with(['category', 'products' => fn ($query) => $query->active()->with('discount', 'variants.supplier')])
+            ->with(['comments' => fn ($query) => $query->whereNull('parent_id')->with('replies.user', 'user')->orderBy('created_at')])
             ->where('slug', $slug)
             ->firstOrFail();
 

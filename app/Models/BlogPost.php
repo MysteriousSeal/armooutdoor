@@ -39,6 +39,11 @@ class BlogPost extends Model
         ];
     }
 
+    public function comments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(BlogComment::class);
+    }
+
     /**
      * Reading time in minutes, from the body's word count at the ~200
      * words a minute of unhurried French prose. Never below one: a short

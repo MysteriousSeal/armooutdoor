@@ -176,6 +176,72 @@
                 </section>
             @endif
 
+            <section class="blog-comments" id="commentaires" aria-labelledby="blog-comments-title">
+                <header class="blog-article-section-head">
+                    <h2 class="blog-section-title" id="blog-comments-title">
+                        {{ __('store.blog_comments') }}
+                        <span class="blog-comments-count">{{ $post->comments->count() + $post->comments->sum(fn ($comment) => $comment->replies->count()) }}</span>
+                    </h2>
+                </header>
+
+                @if (session('comment_status'))
+                    <p class="blog-comments-flash" role="status">{{ session('comment_status') }}</p>
+                @endif
+
+                @if ($post->comments->isEmpty())
+                    <p class="blog-comments-empty">{{ __('store.blog_comments_empty') }}</p>
+                @else
+                    <ul class="blog-comments-list">
+                        @foreach ($post->comments as $comment)
+                            <li class="blog-comment">
+                                @include('blog.partials.comment', ['comment' => $comment])
+                                @foreach ($comment->replies as $reply)
+                                    <div class="blog-comment-reply">
+                                        @include('blog.partials.comment', ['comment' => $reply])
+                                    </div>
+                                @endforeach
+                                @if (auth()->user()?->isAdmin() && $comment->parent_id === null)
+                                    {{-- The shop's side of the thread, on the page itself. --}}
+                                    <details class="blog-comment-admin-reply">
+                                        <summary>Répondre en tant que boutique</summary>
+                                        <form method="POST" action="{{ route('blog.comments.reply', $comment) }}">
+                                            @csrf
+                                            <textarea name="body" class="form-control" rows="3" required maxlength="2000"></textarea>
+                                            <button type="submit" class="btn btn-sm btn-primary">Répondre</button>
+                                        </form>
+                                    </details>
+                                @endif
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+
+                <form method="POST" action="{{ route('blog.comments.store', $post->slug) }}" class="blog-comment-form">
+                    @csrf
+                    <h3>{{ __('store.blog_comment_write') }}</h3>
+                    @guest
+                        <div class="form-group">
+                            <label for="comment-author">{{ __('store.blog_comment_pseudo') }}</label>
+                            <input type="text" id="comment-author" name="author_name" class="form-control" maxlength="40" required value="{{ old('author_name') }}">
+                            @error('author_name') <p class="form-error">{{ $message }}</p> @enderror
+                        </div>
+                    @else
+                        <p class="blog-comment-as">{{ __('store.blog_comment_signed_as', ['name' => (new \App\Models\BlogComment(['user_id' => auth()->id()]))->setRelation('user', auth()->user())->authorLabel()]) }}</p>
+                    @endguest
+                    {{-- The honeypot: no human sees it, so a filled one is a bot. --}}
+                    <div class="blog-comment-trap" aria-hidden="true">
+                        <label for="comment-website">Site web</label>
+                        <input type="text" id="comment-website" name="website" tabindex="-1" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="comment-body" class="sr-only">{{ __('store.blog_comment_write') }}</label>
+                        <textarea id="comment-body" name="body" class="form-control" rows="4" required maxlength="2000" placeholder="{{ __('store.blog_comment_placeholder') }}">{{ old('body') }}</textarea>
+                        @error('body') <p class="form-error">{{ $message }}</p> @enderror
+                    </div>
+                    <button type="submit" class="btn btn-primary">{{ __('store.blog_comment_send') }}</button>
+                </form>
+            </section>
+
             <p class="blog-article-back">
                 <a href="{{ route('blog.index') }}">← {{ __('store.blog_back_to_list') }}</a>
             </p>
