@@ -33,6 +33,7 @@ class HomepageCatalog
     {
         return Product::query()
             ->active()
+            ->notOutOfStock()
             ->whereHas('discount')
             ->with('category', 'discount', 'variants.supplier')
             ->orderBy('sort_order')
@@ -48,9 +49,9 @@ class HomepageCatalog
         $roots = Category::query()
             ->whereNull('parent_id')
             ->with([
-                'products' => fn ($query) => $query->active(),
+                'products' => fn ($query) => $query->active()->notOutOfStock(),
                 'products.variants.supplier',
-                'children.products' => fn ($query) => $query->active(),
+                'children.products' => fn ($query) => $query->active()->notOutOfStock(),
                 'children.products.variants.supplier',
             ])
             ->orderBy('sort_order')
@@ -90,6 +91,7 @@ class HomepageCatalog
     {
         return Product::query()
             ->active()
+            ->notOutOfStock()
             ->with('category', 'variants.supplier')
             // pluck() plutôt que modelKeys() : une catégorie racine sans
             // produit fait renvoyer null au map() de featured(), ce qui

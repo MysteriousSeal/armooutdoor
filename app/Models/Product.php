@@ -169,6 +169,32 @@ class Product extends Model
         $query->where('is_active', true);
     }
 
+    /**
+     * Products that would not wear the « Rupture de stock » chip.
+     *
+     * In stock, low stock, restocking, or still fetchable from the supplier
+     * — anything the home page can reasonably put in a featured strip.
+     */
+    public function scopeNotOutOfStock(Builder $query): void
+    {
+        $openRestock = fn (Builder $item) => $item
+            ->whereColumn('quantity_received', '<', 'quantity_ordered')
+            ->whereHas('purchaseOrder', fn (Builder $po) => $po->open());
+
+        $query->where(function (Builder $query) use ($openRestock): void {
+            $query->where('quantity', '>', 0)
+                ->orWhereHas('purchaseOrderItems', $openRestock)
+                ->orWhereHas('variants.purchaseOrderItems', $openRestock)
+                ->orWhere(fn (Builder $query) => $query->doesntHave('variants')
+                    ->whereNotNull('supplier_id')
+                    ->where('available_at_supplier', true))
+                ->orWhereHas('variants', fn (Builder $query) => $query
+                    ->where('is_active', true)
+                    ->whereNotNull('supplier_id')
+                    ->where('available_at_supplier', true));
+        });
+    }
+
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class)->orderBy('sort_order');
