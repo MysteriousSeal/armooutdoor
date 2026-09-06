@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-07 — v1.20.1 — build LSL68W
+
+### Storefront
+
+- **Les limites de terrain se nomment sur l'axe du guide joules et FPS.** Les trois repères n'avaient qu'une infobulle, et le texte plus bas ne disait jamais que ces traits étaient les limites qu'il décrivait : trois griffures illisibles. Ils tiennent dans sept pour cent de l'axe, donc une seule accolade les nomme tous les trois plutôt que trois étiquettes se disputant le même bout de règle.
+
+**No migration.**
+
 ## 2026-09-07 — v1.20.0 — build UDEJZF
 
 ### Storefront
