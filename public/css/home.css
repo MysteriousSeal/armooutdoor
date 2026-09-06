@@ -1394,9 +1394,19 @@
 }
 
 .home-voice-stars {
-    font-size: 0.8125rem;
-    letter-spacing: 0.12em;
+    font-size: 1.05rem;
+    line-height: 1;
+    letter-spacing: 0.1em;
     color: var(--accent-heading);
+}
+
+/* The picture faces the sentence it earned, both starting at the same
+   line. The row takes the card's spare height so the foot stays put. */
+.home-voice-quote {
+    display: flex;
+    flex: 1;
+    align-items: flex-start;
+    gap: 0.65rem;
 }
 
 .home-voice-body {
@@ -1423,9 +1433,11 @@
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    /* No height of its own: it is as tall as the name and the product
-       stacked beside it, and square on that. */
-    aspect-ratio: 1;
+    /* A definite width, and the height taken from the row: the box is as
+       tall as the name and the product stacked beside it. Deriving the
+       width from that height instead would ask the picture how wide it
+       is, and the picture would answer in its own full pixels. */
+    flex-basis: 2.75rem;
     font-size: 0.8rem;
     font-weight: 700;
     letter-spacing: 0.02em;
@@ -1436,6 +1448,7 @@
 
 .home-voice-byline {
     display: flex;
+    flex: 1;
     flex-direction: column;
     gap: 0.15rem;
     /* Without this the product name refuses to shorten and pushes the
@@ -1445,6 +1458,29 @@
 
 .home-voice-author {
     font-weight: 700;
+}
+
+/* What was reviewed, squared off against the same two lines as the
+   monogram facing it across the card. */
+/* The same square as the monogram in the foot, sized in both directions
+   rather than asking the picture how wide it is. */
+.home-voice-thumb {
+    display: block;
+    flex: 0 0 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--border);
+    background: var(--bg);
+}
+
+.home-voice-thumb img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.home-voice-thumb:hover {
+    border-color: var(--accent-heading);
 }
 
 .home-voice-product {

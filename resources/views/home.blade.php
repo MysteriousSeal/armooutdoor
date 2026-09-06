@@ -347,7 +347,24 @@
                         <li class="home-voice">
                             <span class="home-voice-stars" aria-hidden="true">★★★★★</span>
                             <span class="sr-only">{{ trans_choice('store.review_rating_value', 5, ['count' => 5]) }}</span>
-                            <p class="home-voice-body">{{ $review->comment }}</p>
+                            <div class="home-voice-quote">
+                                @if ($review->product->thumbnailUrl() !== '')
+                                    {{-- What was reviewed, facing what was said about it. It
+                                         leads to the same page as the product's name in the
+                                         foot, so it is hidden from assistive tech and skipped
+                                         by the keyboard rather than read out and tabbed
+                                         through twice. --}}
+                                    <a
+                                        href="{{ localized_route('products.show', ['product' => $review->product->slug]) }}"
+                                        class="home-voice-thumb"
+                                        aria-hidden="true"
+                                        tabindex="-1"
+                                    >
+                                        <img src="{{ $review->product->thumbnailUrl() }}" alt="" width="44" height="44" loading="lazy">
+                                    </a>
+                                @endif
+                                <p class="home-voice-body">{{ $review->comment }}</p>
+                            </div>
                             <div class="home-voice-foot">
                                 {{-- The reviewer's monogram, as the blog comments sign theirs. --}}
                                 <span class="home-voice-avatar" aria-hidden="true">{{ $review->reviewerInitials() }}</span>
