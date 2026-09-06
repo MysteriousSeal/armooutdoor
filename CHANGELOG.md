@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-07 — v1.18.0 — build NDM589
+
+### Storefront
+
+- **The home page says what a catalogue cannot say about itself.** Two strips before the engagements: what customers wrote, five stars only and each still linking the product it judged — an untraceable testimonial reads as invented — and what the shop wrote, the two guides and the latest article. The editorial hung off one footer column until now, with the body linking none of it. The h1 stops shouting an imperative and names the aisles instead, and a reviewer's initial is upper-cased on the way out, so a name typed in lower case still signs properly.
+
+- **The hero gives back a quarter of its height.** Its longest title line did not fit the card and wrapped, so the heading cost a whole extra row: the type is sized to that line now and the card widened to hold it. The panel loses seven rem of minimum height and a rem of padding, the copy block tightens its rhythm, and the stacked layout gives back part of its photo band — the products sit nearer the top of the first screen.
+
+**No migration.**
+
 ## 2026-09-06 — v1.17.0 — build HPKV56
 
 ### Under the hood
