@@ -2,6 +2,24 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-07 — v1.21.0 — build DPXHUP
+
+### Storefront
+
+- **Un cinquième guide : le glossaire.** Quarante mots du rayon, définis un par un : AEG, hop-up, MED, diabolo, QD, M-LOK, MOLLE, paracorde, keffieh, grille graduée, témoin de chambre vide, et les sigles de camouflage que portent quatre-vingt-cinq produits sans que le site ait jamais dit ce que « CP » voulait dire. Ce n'est pas un dictionnaire mais une légende du catalogue : chaque entrée dit où le mot se rencontre dans la boutique et y mène. Neuf d'entre elles tombent sur un rayon déjà filtré, avec le nombre de produits qui répondent aujourd'hui à ce filtre ; les autres sur un rayon, un guide ou un article. Un filtre qui ne trouve rien, ou un rayon que la boutique ne porte pas, garde sa définition et perd son lien plutôt que de mener à une étagère vide.
+
+- **Le glossaire se lit comme une fiche d'inventaire.** Le mot et sa définition à gauche, l'endroit où il vit à droite, dans une colonne de même largeur d'un bout à l'autre : les nombres s'alignent au lieu de traîner derrière quarante paragraphes. Chaque destination porte la couleur de ce qu'elle est, le stock qu'on peut filtrer, une étagère, ou ce que la boutique a écrit, dans la palette que le catalogue emploie déjà pour dire quelque chose. La lettre suit son groupe comme l'onglet d'un dictionnaire, et l'index montre tout l'alphabet, lettres mortes comprises : un index qui saute discrètement le G se lit comme cassé. Le champ de recherche ignore les accents et connaît les synonymes, mais il ne s'affiche que si la page a du JavaScript ; la liste et l'index, eux, fonctionnent sans.
+
+- **Un lien déjà cassé en production est réparé.** Le rayon des pastilles avait été renommé, et le glossaire pointait sur l'ancienne adresse. Les vingt-deux rayons cités ont été vérifiés un par un.
+
+### Under the hood
+
+- **Un test échouait une fois sur cent, sans rien de cassé.** Il cherchait « 1a » dans la page entière du guide des cibles, or le jeton CSRF de l'en-tête est fait de quarante lettres et chiffres tirés au hasard : mesuré sur deux cent mille tirages, un tel jeton porte « 1a » 0,99 % du temps. Le test lit désormais le guide plutôt que la page autour de lui.
+
+- **Le plan de site des guides suit l'étagère.** Le glossaire y entre sans que personne ait à l'y inscrire.
+
+**No migration.**
+
 ## 2026-09-07 — v1.20.1 — build LSL68W
 
 ### Storefront
