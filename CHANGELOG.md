@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-06 — v1.14.1 — build DOTBDA
+
+### Storefront
+
+- **The cart draws the road to free shipping.** Under the shipping estimate, a sentence in euros over a slim olive bar: « Encore 51,00 € pour la livraison gratuite », warming whole once the basket crosses the line. The bar reads the same threshold the cart's prices do, follows every quantity change without a reload, and where no threshold is configured it simply does not exist.
+
+**No migration.**
+
 ## 2026-09-06 — v1.14.0 — build Z7AQ6T
 
 ### Storefront
