@@ -101,9 +101,25 @@ class ProductSchemaTest extends TestCase
         $this->assertSame($discount->ends_at->toDateString(), $offers['priceValidUntil']);
     }
 
-    public function test_a_price_without_an_end_writes_no_empty_key(): void
+    public function test_a_price_without_an_end_rolls_its_horizon_forward(): void
     {
-        $this->assertArrayNotHasKey('priceValidUntil', $this->schema($this->product())['offers']);
+        // No discount, so no real end: a year out, recomputed on every
+        // render, which is what keeps the date out of the past.
+        $this->assertSame(
+            now()->addYear()->toDateString(),
+            $this->schema($this->product())['offers']['priceValidUntil'],
+        );
+    }
+
+    public function test_the_product_names_its_node_its_page_and_its_seller(): void
+    {
+        $product = $this->product();
+        $schema = $this->schema($product);
+        $url = route('products.show', $product->slug);
+
+        $this->assertSame($url.'#product', $schema['@id']);
+        $this->assertSame($url, $schema['url']);
+        $this->assertSame(\App\Support\OrganizationSchema::id(), $schema['offers']['seller']['@id']);
     }
 
     public function test_an_empty_stock_is_declared_as_such(): void

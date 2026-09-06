@@ -39,6 +39,10 @@ class ProductSchema
         $schema = array_filter([
             '@context' => 'https://schema.org',
             '@type' => 'Product',
+            // The node's own address, so another block can point at this
+            // product instead of describing it a second time.
+            '@id' => self::id($product),
+            'url' => localized_route('products.show', ['product' => $product->slug]),
             'name' => $product->localizedName(),
             'description' => Str::limit($product->localizedDescriptionText(), self::MAX_DESCRIPTION),
             'sku' => $product->sku,
@@ -68,6 +72,15 @@ class ProductSchema
         }
 
         return $schema;
+    }
+
+    /**
+     * The product as another node refers to it: its page, plus a fragment
+     * so the product and the page it lives on stay two things.
+     */
+    public static function id(Product $product): string
+    {
+        return localized_route('products.show', ['product' => $product->slug]).'#product';
     }
 
     /**
@@ -141,6 +154,16 @@ class ProductSchema
             'availability' => self::availability($product),
             'itemCondition' => 'https://schema.org/NewCondition',
             'url' => localized_route('products.show', ['product' => $product->slug]),
+            // Who is selling: the same business node the home page declares,
+            // named again rather than described a second time.
+            'seller' => OrganizationSchema::reference(),
+            // A discount says when its price stops being true; an ordinary
+            // price has no end, so the horizon rolls. The page is rendered
+            // on every visit, so the date never falls into the past - which
+            // is the only thing a stale one costs.
+            'priceValidUntil' => $product->hasDiscount() && $product->discount->ends_at !== null
+                ? $product->discount->ends_at->toDateString()
+                : now()->addYear()->toDateString(),
             'hasMerchantReturnPolicy' => self::returnPolicy(),
         ];
 
@@ -164,16 +187,10 @@ class ProductSchema
             ];
         }
 
-        return array_filter($common + [
+        return $common + [
             '@type' => 'Offer',
             'price' => self::amount($variantPrices->min() ?? $product->effectivePriceCents()),
-            // Une remise a une fin : passée cette date, le prix annoncé
-            // n'est plus celui de la page. Une remise sans fin n'écrit rien
-            // plutôt qu'une clé vide.
-            'priceValidUntil' => $product->hasDiscount()
-                ? $product->discount->ends_at?->toDateString()
-                : null,
-        ], fn ($value): bool => $value !== null);
+        ];
     }
 
     /**
