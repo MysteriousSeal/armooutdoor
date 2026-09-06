@@ -241,9 +241,11 @@
     isolation: isolate;
     display: flex;
     align-items: center;
-    min-height: 28rem;
+    /* Tall enough to hold the photo and the card, short enough that the
+       first row of products is reachable without a scroll. */
+    min-height: 19rem;
     margin-top: 1.25rem;
-    padding: 3.5rem 3rem 3.1rem;
+    padding: 2.4rem 2.6rem 2.3rem;
     overflow: hidden;
     background-color: var(--surface);
     background-image: var(--hero-image);
@@ -311,14 +313,16 @@
 .home .home-hero-copy {
     position: relative;
     z-index: 1;
-    max-width: 28rem;
-    padding: 1.65rem 1.7rem 1.75rem;
+    /* Wide enough for the longest title line to stay one line: a title
+       that wraps costs a whole row of hero height. */
+    max-width: 33rem;
+    padding: 1.35rem 1.5rem 1.45rem;
     background: color-mix(in srgb, var(--surface) 92%, transparent);
     backdrop-filter: blur(6px);
 }
 
 .home .home-hero-kicker {
-    margin: 0 0 0.85rem;
+    margin: 0 0 0.6rem;
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.1em;
@@ -331,10 +335,12 @@
     flex-direction: column;
     gap: 0.12em;
     margin: 0;
-    font-size: clamp(2.2rem, 4.4vw, 3.45rem);
+    /* Sized so the longest line of the title still fits the card on one
+       line: a title that wraps costs a whole row of hero height. */
+    font-size: clamp(1.5rem, 2.4vw, 1.95rem);
     font-weight: 800;
     letter-spacing: -0.045em;
-    line-height: 0.94;
+    line-height: 1;
     text-transform: uppercase;
 }
 
@@ -361,8 +367,8 @@
 }
 
 .home .home-hero-text {
-    margin-top: 1.1rem;
-    max-width: 23rem;
+    margin-top: 0.85rem;
+    max-width: 25rem;
     font-size: 0.98rem;
     line-height: 1.55;
     color: var(--text-muted);
@@ -372,7 +378,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.45rem;
-    margin: 1.15rem 0 0;
+    margin: 0.9rem 0 0;
     padding: 0;
     list-style: none;
 }
@@ -392,7 +398,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.7rem;
-    margin-top: 1.45rem;
+    margin-top: 1.1rem;
 }
 
 .home .home-hero-actions .btn {
@@ -1125,7 +1131,7 @@
         /* The copy card is stacked below the photo rather than laid over it,
            so the top padding is what reserves a band of image to look at.
            Without it the card covers the panel and the photo is a rumour. */
-        padding: 11rem 1.15rem 1.5rem;
+        padding: 8.5rem 1.15rem 1.4rem;
         /* Stacked, the panel is portrait while the photo is 16:9: `cover`
            throws away most of the width. Each slide names the column its
            gear sits in so the crop keeps the subject instead of the mist. */
@@ -1208,7 +1214,7 @@
     }
 
     .home .home-hero-title {
-        font-size: 2rem;
+        font-size: 1.7rem;
     }
 
     .home .home-cats {
