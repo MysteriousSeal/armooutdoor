@@ -225,8 +225,8 @@ class DashboardTest extends TestCase
     public function test_the_catalogue_strip_counts_references_and_shelf_stock(): void
     {
         // One plain active product, one with two declinations, one inactive
-        // plain product: 3 references for sale, 12 units on the shelves -
-        // the inactive product's 10 count nowhere.
+        // plain product, two active but empty ones: 5 references for sale,
+        // 12 units on the shelves - the inactive product's 10 count nowhere.
         Product::factory()->create(['is_active' => true, 'quantity' => 5]);
         $sized = Product::factory()->create(['is_active' => true, 'quantity' => 0]);
         foreach ([['M', 3], ['L', 4]] as [$size, $quantity]) {
@@ -240,6 +240,10 @@ class DashboardTest extends TestCase
             ]);
         }
         $sleeping = Product::factory()->create(['is_active' => false, 'quantity' => 10]);
+        // Active but empty, with or without the supplier's shelf behind it:
+        // still for sale, still a reference - the stock says the rest.
+        Product::factory()->create(['is_active' => true, 'quantity' => 0, 'available_at_supplier' => false]);
+        Product::factory()->create(['is_active' => true, 'quantity' => 0, 'available_at_supplier' => true]);
 
         // An open purchase order: 6 still awaited for the active plain
         // product (7 ordered, 1 in), 20 for the sleeping one, which counts
@@ -267,8 +271,8 @@ class DashboardTest extends TestCase
         $this->assertMatchesRegularExpression('#References to receive</span>\s*<span class="dash-tile-value">1</span>#', $html);
         $this->assertMatchesRegularExpression('#Stock to receive</span>\s*<span class="dash-tile-value">6</span>#', $html);
 
-        $this->assertMatchesRegularExpression('#References for sale</span>\s*<span class="dash-tile-value">3</span>#', $html);
-        $this->assertStringContainsString('2 products · 2 variants', $html);
+        $this->assertMatchesRegularExpression('#References for sale</span>\s*<span class="dash-tile-value">5</span>#', $html);
+        $this->assertStringContainsString('4 products · 2 variants', $html);
         $this->assertMatchesRegularExpression('#Stock in the warehouse</span>\s*<span class="dash-tile-value">12</span>#', $html);
     }
 }
