@@ -2,6 +2,20 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-06 — v1.17.0 — build HPKV56
+
+### Under the hood
+
+- **The database is archived every five minutes.** The images and the private files are what make a full archive heavy, and they change rarely: taking the database alone is what makes that rhythm affordable, about 860 KB an archive. The scheduled ones are named apart from the archives taken by hand, pruned to a day of history, and the pruning never touches what somebody deliberately made. A failure is logged at error level, and an archive that caught nothing now says so rather than reporting success over a file that was never written. A docs page carries the rest: the cron entry the server still owes, and the rclone procedure that copies the archives to Drive behind a crypt remote, so what leaves the machine is bytes Google cannot read.
+
+### Storefront
+
+- **The product node gains an address, a seller and a price horizon.** It now names itself and its page, every offer names the same business node the home page declares rather than describing it again, and a price without a discount carries a rolling year instead of nothing — the page is rendered on every visit, so the date never falls into the past.
+
+- **The delivery estimate says how long the shop keeps a parcel.** Search Console asked for handlingTime; the shop already had the answer. Nought or one business day, the ten o'clock rule either way, plus the supplier's lead time for a product that must be ordered first — the same figure the cart quotes. The cutoff and the business days join it, the offset following Paris rather than frozen at one season.
+
+**No migration.**
+
 ## 2026-09-06 — v1.16.1 — build 1NKZB5
 
 ### Storefront
