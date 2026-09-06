@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Classer son arme : catégories D, C et A — Armo Outdoor')
-@section('meta_description', 'Sous 2 joules, de 2 à 20, dès 20 : ce que la loi française range en catégories D, C et A, ce qu\'il faut pour acheter, transporter, et le piège du chargeur.')
+@section('title', 'Classer son arme : catégories D, C, B et A — Armo Outdoor')
+@section('meta_description', 'Sous 2 joules, de 2 à 20, dès 20, puis l\'autorisation : ce que la loi française range en D, C, B et A, ce qu\'il faut pour acheter, et le piège du chargeur.')
 @section('og_type', 'article')
 @section('canonical', route('guides.classification'))
 
@@ -11,8 +11,8 @@
         {!! json_encode([
             '@@context' => 'https://schema.org',
             '@@type' => 'Article',
-            'headline' => 'Classer son arme : catégories D, C et A',
-            'description' => 'Sous 2 joules, de 2 à 20, dès 20 : ce que la loi française range en catégories D, C et A, ce qu\'il faut pour acheter, transporter, et le piège du chargeur.',
+            'headline' => 'Classer son arme : catégories D, C, B et A',
+            'description' => 'Sous 2 joules, de 2 à 20, dès 20, puis l\'autorisation : ce que la loi française range en D, C, B et A, ce qu\'il faut pour acheter, et le piège du chargeur.',
             'mainEntityOfPage' => route('guides.classification'),
             'inLanguage' => 'fr-FR',
             'datePublished' => '2026-09-06',
@@ -29,6 +29,7 @@
                 ['À 20 joules exactement, catégorie D ou C ?', 'Catégorie C. Le texte dit « supérieure ou égale à 20 joules ». Un modèle annoncé 20 J n\'est plus en vente libre : c\'est la première arme soumise à déclaration. Les fabricants qui visent le marché français calibrent à 19,9 J.'],
                 ['Une réplique d\'airsoft, c\'est quelle catégorie ?', 'Aucune. Sous 2 joules, l\'objet n\'est pas juridiquement une arme. Les répliques du commerce français sont conçues pour rester sous cette barre. La vente aux mineurs est interdite dès 0,08 J.'],
                 ['Vente libre, donc transport libre ?', 'Non. En catégorie D, l\'achat est libre pour un majeur ; le port et le transport exigent un motif légitime. Sans ce motif : un an et 15 000 euros. En catégorie C : deux ans et 30 000 euros, sans amende forfaitaire.'],
+                ['Comment obtenir une autorisation de catégorie B ?', 'Par le tir sportif, sur le compte SIA : licence FFT, avis fédéral lié à une pratique régulière, extrait d\'acte de naissance de moins de trois mois. Un titre unique, collé à la personne, vaut cinq ans. Six armes la première fois, quinze au renouvellement. Trois mois sans réponse, c\'est un refus.'],
                 ['Un chargeur peut-il changer la catégorie ?', 'Oui. Une carabine semi-automatique à percussion centrale est en B avec un chargeur de 10 cartouches, en A1 dès qu\'un chargeur de plus de 10 y est inséré. Le chargeur lui-même peut déjà être classé en A1.'],
             ])->map(fn (array $qa): array => [
                 '@@type' => 'Question',
@@ -64,9 +65,9 @@
             <p class="glab-head-kicker">Réglementation</p>
             <h1 class="glab-head-title">Classer <span class="glab-title-accent">son arme</span></h1>
             <p class="glab-head-lede">
-                Sous 2 joules, de 2 à 20, dès 20 : trois seuils, trois régimes. Ce guide relie
-                ce que la boutique a écrit sur les catégories D, C et A, pour savoir où se
-                situe la vôtre avant d'ouvrir le panier.
+                Sous 2 joules, de 2 à 20, dès 20, puis l'autorisation : quatre régimes. Ce
+                guide relie ce que la boutique a écrit sur les catégories D, C, B et A, pour
+                savoir où se situe la vôtre avant d'ouvrir le panier.
             </p>
         </header>
 
@@ -79,7 +80,7 @@
         <section class="glab-panel" data-glab-selector aria-labelledby="glab-selector-title">
             <h2 class="glab-title" id="glab-selector-title">Deux réponses, <span class="glab-title-accent">votre régime</span></h2>
             <p class="glab-lede">
-                Répondez et les trois articles se réduisent à l'essentiel.
+                Répondez et les quatre articles se réduisent à l'essentiel.
             </p>
 
             <div class="glab-steps">
@@ -100,7 +101,7 @@
                         </button>
                         <button type="button" data-glab-value="b">
                             Semi-auto, poing, chargeur
-                            <small>catégories B et A</small>
+                            <small>autorisation, catégorie B</small>
                         </button>
                     </div>
                 </fieldset>
@@ -192,9 +193,9 @@
                         </tr>
                         <tr>
                             <td>B</td>
-                            <td>Autorisation (poing, certains semi-auto)</td>
-                            <td>Autorisation préfectorale</td>
-                            <td>Un chargeur de trop la fait basculer en A</td>
+                            <td>Poing, certains semi-auto, armes courtes</td>
+                            <td>Autorisation SIA, 6 puis 15</td>
+                            <td>Stand agréé ; sans titre 5 ans / 75 000 €</td>
                         </tr>
                         <tr>
                             <td>A</td>
@@ -278,6 +279,28 @@
                     pour les anciens licenciés sans compte.
                 </p>
 
+                <h3>Catégorie B : on demande d'abord</h3>
+                <p>
+                    Ici, on ne déclare plus après coup. On demande, on attend, on n'achète que
+                    si le préfet a dit oui : pistolets, revolvers, certaines carabines
+                    semi-automatiques, armes courtes, fusils à pompe. Depuis février 2024, un
+                    seul titre, collé à la personne et non plus à chaque arme, vaut cinq ans
+                    et couvre le quota. Six armes pour un primo-demandeur, quinze au
+                    renouvellement. Dix chargeurs par arme, trois mille cartouches par arme et
+                    par an. Trois mois sans réponse, c'est un refus.
+                </p>
+                <p>
+                    Le rangement est plus étroit qu'en C : coffre-fort ou armoire forte, ou
+                    pièce forte à porte blindée. Pas le démontage d'un élément conservé à
+                    part. Ces armes ne s'utilisent que dans les stands d'associations agréées.
+                    Sans titre, c'est le même délit qu'en A : cinq ans et 75 000 euros.
+                </p>
+                <p>
+                    <a href="{{ route('blog.show', 'categorie-b-les-armes-soumises-a-autorisation-et-comment-on-y-entre') }}">Catégorie B : les armes soumises à autorisation</a>
+                    dit la liste, le dossier SIA, et ce qui tombe quand la licence n'est pas
+                    renouvelée.
+                </p>
+
                 <h3>Catégorie A : l'interdiction, et le chargeur qui bascule</h3>
                 <p>
                     L'A2 (matériels de guerre, armes automatiques, munitions perforantes,
@@ -289,11 +312,10 @@
                     déjà classé A1.
                 </p>
                 <p>
-                    Le tireur licencié à la FFT a une porte : autorisation, avis fédéral,
-                    coffre-fort, usage au stand. Hors de ce cadre, acquérir ou détenir du A ou
-                    du B sans titre : cinq ans et 75 000 euros. Le décret du 5 septembre 2025
-                    a fait passer certains couteaux à lame fixe et les coups de poing américains
-                    postérieurs à 1900 de la D à l'A1, avec trois mois pour s'en défaire.
+                    Hors stand et titre, acquérir ou détenir du A ou du B sans autorisation :
+                    cinq ans et 75 000 euros. Le décret du 5 septembre 2025 a fait passer
+                    certains couteaux à lame fixe et les coups de poing américains postérieurs
+                    à 1900 de la D à l'A1, avec trois mois pour s'en défaire.
                 </p>
                 <p>
                     <a href="{{ route('blog.show', 'categorie-a-ce-qui-est-interdit-a-qui-et-comment-une-arme-b-y-bascule-dun-chargeur') }}">Catégorie A : ce qui est interdit, et comment une arme B y bascule</a>
@@ -335,6 +357,12 @@
                     </div>
                 </details>
                 <details>
+                    <summary>Comment obtenir une autorisation de catégorie B ?</summary>
+                    <div>
+                        <p>Par le tir sportif, sur le compte SIA : licence FFT, avis fédéral lié à une pratique régulière, extrait d'acte de naissance de moins de trois mois. Un titre unique, collé à la personne, vaut cinq ans. Six armes la première fois, quinze au renouvellement. Trois mois sans réponse, c'est un refus.</p>
+                    </div>
+                </details>
+                <details>
                     <summary>Un chargeur peut-il changer la catégorie ?</summary>
                     <div>
                         <p>Oui. Une carabine semi-automatique à percussion centrale est en B avec un chargeur de 10 cartouches, en A1 dès qu'un chargeur de plus de 10 y est inséré. Le chargeur lui-même peut déjà être classé en A1.</p>
@@ -343,9 +371,10 @@
             </div>
 
             <p class="glab-more-reading">
-                Les trois articles, dans l'ordre des seuils :
+                Les quatre articles, dans l'ordre des seuils :
                 <a href="{{ route('blog.show', 'categorie-d-ce-que-la-loi-francaise-range-vraiment-dedans-et-ce-que-ca-change-pour-vous') }}">Catégorie D</a>,
                 <a href="{{ route('blog.show', 'categorie-c-les-armes-soumises-a-declaration-et-tout-ce-qui-va-avec') }}">Catégorie C</a>,
+                <a href="{{ route('blog.show', 'categorie-b-les-armes-soumises-a-autorisation-et-comment-on-y-entre') }}">Catégorie B</a>,
                 <a href="{{ route('blog.show', 'categorie-a-ce-qui-est-interdit-a-qui-et-comment-une-arme-b-y-bascule-dun-chargeur') }}">Catégorie A</a>.
             </p>
 

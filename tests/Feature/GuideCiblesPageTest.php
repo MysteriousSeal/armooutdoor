@@ -104,6 +104,7 @@ class GuideCiblesPageTest extends TestCase
             ->assertDontSee('noindex')
             ->assertSee(route('blog.show', 'categorie-d-ce-que-la-loi-francaise-range-vraiment-dedans-et-ce-que-ca-change-pour-vous'))
             ->assertSee(route('blog.show', 'categorie-c-les-armes-soumises-a-declaration-et-tout-ce-qui-va-avec'))
+            ->assertSee(route('blog.show', 'categorie-b-les-armes-soumises-a-autorisation-et-comment-on-y-entre'))
             ->assertSee(route('blog.show', 'categorie-a-ce-qui-est-interdit-a-qui-et-comment-une-arme-b-y-bascule-dun-chargeur'))
             ->assertSee(route('categories.show', 'repliques-airsoft'));
 

@@ -1,6 +1,6 @@
 /*
  * The classification guide's selector: an energy band and a question,
- * three doors into the shop's own articles on categories D, C and A.
+ * four doors into the shop's own articles on categories D, C, B and A.
  */
 (function () {
     var root = document.querySelector('[data-glab-selector]');
@@ -31,6 +31,13 @@
             href: '/blog/categorie-c-les-armes-soumises-a-declaration-et-tout-ce-qui-va-avec',
             cta: 'Lire la catégorie C',
         },
+        b: {
+            title: 'Catégorie B : autorisation préalable',
+            meta: 'Titre unique · 6 puis 15',
+            body: "Pistolets, revolvers, certaines carabines semi-automatiques : on demande d'abord. Un titre collé à la personne, cinq ans, six armes la première fois. Trois mois de silence valent refus.",
+            href: '/blog/categorie-b-les-armes-soumises-a-autorisation-et-comment-on-y-entre',
+            cta: 'Lire la catégorie B',
+        },
         a: {
             title: 'Catégorie A : interdit, sauf exception',
             meta: 'Chargeur · matériels de guerre',
@@ -54,12 +61,12 @@
         'd:acheter': ['d', 'c', 'airsoft'],
         'd:transporter': ['d', 'c', 'airsoft'],
         'd:risque': ['d', 'c', 'a'],
-        'c:acheter': ['c', 'd', 'a'],
-        'c:transporter': ['c', 'd', 'a'],
-        'c:risque': ['c', 'a', 'd'],
-        'b:acheter': ['a', 'c', 'd'],
-        'b:transporter': ['a', 'c', 'd'],
-        'b:risque': ['a', 'c', 'd'],
+        'c:acheter': ['c', 'b', 'd'],
+        'c:transporter': ['c', 'd', 'b'],
+        'c:risque': ['c', 'b', 'a'],
+        'b:acheter': ['b', 'a', 'c'],
+        'b:transporter': ['b', 'a', 'c'],
+        'b:risque': ['b', 'a', 'c'],
     };
 
     var ARME_LABELS = {
