@@ -16,7 +16,7 @@
     }
 
     function loadGoogle() {
-        if (window.gtag || !config.ga || !accepted()) {
+        if (window.gtag || (!config.ga && !config.aw) || !accepted()) {
             return;
         }
 
@@ -25,19 +25,29 @@
             window.dataLayer.push(arguments);
         };
 
+        // One loader serves both properties; either id fetches the same tag.
         var tag = document.createElement('script');
-        tag.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(config.ga);
+        tag.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(config.ga || config.aw);
         tag.async = true;
         document.head.appendChild(tag);
 
         window.gtag('js', new Date());
-        window.gtag('config', config.ga, {
-            // The visitor already answered the question on the banner; asking
-            // again in Google's own terms could only contradict them.
-            anonymize_ip: true,
-            allow_google_signals: false,
-            allow_ad_personalization_signals: false,
-        });
+
+        if (config.ga) {
+            window.gtag('config', config.ga, {
+                // The visitor already answered the question on the banner;
+                // asking again in Google's own terms could only contradict
+                // them.
+                anonymize_ip: true,
+                allow_google_signals: false,
+                allow_ad_personalization_signals: false,
+            });
+        }
+
+        if (config.aw) {
+            // The Ads side: conversion measurement, behind the same consent.
+            window.gtag('config', config.aw);
+        }
     }
 
     // One call site, two vocabularies. PostHog takes the shop's own names and
@@ -144,6 +154,12 @@
     if (config.event) {
         var fire = function () {
             capture(config.event.name, config.event.properties || {}, config.event.ga || null);
+
+            // The Ads conversion is its own reserved event, deduplicated by
+            // Google on the transaction id it carries.
+            if (window.gtag && config.aw && config.event.aw) {
+                window.gtag('event', 'conversion', config.event.aw);
+            }
         };
 
         // The page may load before consent is given; the event waits for the

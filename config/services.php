@@ -84,4 +84,14 @@ return [
         'id' => env('GA_MEASUREMENT_ID'),
     ],
 
+    /*
+     * Google Ads conversion tracking: the AW account id and the label of
+     * the purchase conversion action. Both empty means no Ads tag is
+     * loaded and no CSP door is opened for it.
+     */
+    'google_ads' => [
+        'id' => env('GOOGLE_ADS_ID'),
+        'conversion_label' => env('GOOGLE_ADS_CONVERSION_LABEL'),
+    ],
+
 ];

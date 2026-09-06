@@ -14,6 +14,15 @@ use Tests\TestCase;
  */
 class AnalyticsTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // The Ads knobs live in .env; the older expectations here assume
+        // them absent, so each test opts in explicitly.
+        config(['services.google_ads.id' => null, 'services.google_ads.conversion_label' => null]);
+    }
+
     use RefreshDatabase;
 
     private function csp(): string
@@ -76,7 +85,7 @@ class AnalyticsTest extends TestCase
         $this->assertStringContainsString('cookie_consent=all', $js);
         // Both loaders ask the same question before fetching anything.
         $this->assertStringContainsString('!config.key || !accepted()', $js);
-        $this->assertStringContainsString('!config.ga || !accepted()', $js);
+        $this->assertStringContainsString('(!config.ga && !config.aw) || !accepted()', $js);
     }
 
     public function test_it_never_records_what_a_customer_types(): void
@@ -149,7 +158,7 @@ class AnalyticsTest extends TestCase
     {
         $js = file_get_contents(public_path('js/analytics.js'));
 
-        $this->assertStringContainsString('!config.ga || !accepted()', $js);
+        $this->assertStringContainsString('(!config.ga && !config.aw) || !accepted()', $js);
         $this->assertStringContainsString('allow_ad_personalization_signals: false', $js);
         $this->assertStringContainsString('anonymize_ip: true', $js);
     }
@@ -176,5 +185,45 @@ class AnalyticsTest extends TestCase
             ->assertOk()
             ->assertSee('Google Analytics', false)
             ->assertSee('adéquation', false);
+    }
+
+    public function test_the_ads_tag_and_conversion_ride_the_same_consent_gate(): void
+    {
+        config([
+            'services.google_ads.id' => 'AW-18433527411',
+            'services.google_ads.conversion_label' => 'TESTLABEL123',
+        ]);
+
+        // The config block carries the AW id for the loader.
+        $this->get('/')->assertOk()->assertSee('"aw":"AW-18433527411"', false);
+
+        // And the confirmation page hands the conversion payload, dedupe
+        // key included.
+        $user = \App\Models\User::factory()->create();
+        $order = \App\Models\Order::query()->create([
+            'number' => \App\Models\Order::generateNumber(),
+            'user_id' => $user->id,
+            'status' => 'paid',
+            'address_snapshot' => ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'x', 'postal_code' => '75000', 'city' => 'Paris', 'country' => 'FR'],
+            'billing_address_snapshot' => ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'x', 'postal_code' => '75000', 'city' => 'Paris', 'country' => 'FR'],
+            'carrier_method' => 'home',
+            'carrier_snapshot' => ['name' => ['fr' => 'Colissimo']],
+            'subtotal_cents' => 1000, 'shipping_cents' => 0, 'discount_cents' => 0,
+            'total_cents' => 1000, 'payment_method' => 'card',
+        ]);
+
+        $this->actingAs($user)
+            ->withSession(['order_placed' => true])
+            ->get(route('orders.show', $order))
+            ->assertOk()
+            ->assertSee('"send_to":"AW-18433527411/TESTLABEL123"', false)
+            ->assertSee($order->number);
+
+        // The CSP opens the Ads doors only when the id is configured.
+        $this->get('/')->assertHeader('Content-Security-Policy');
+        $this->assertStringContainsString(
+            'googleadservices.com',
+            $this->get('/')->headers->get('Content-Security-Policy'),
+        );
     }
 }

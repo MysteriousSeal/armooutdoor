@@ -70,6 +70,12 @@
                     adresse, coordonnées bancaires) n'est transmise à l'un ou à l'autre. En cas de refus, ou
                     tant que vous n'avez pas répondu, aucun de ces scripts n'est chargé et aucune donnée ne
                     leur est envoyée.</li>
+                <li>Mesure des conversions publicitaires : si, et seulement si, vous l'acceptez via le même
+                    bandeau, une commande validée est signalée à Google Ads (Google LLC, États-Unis) afin de
+                    mesurer l'efficacité de nos annonces. Seuls sont transmis le numéro de commande, le montant
+                    et la devise : ni votre nom, ni votre adresse, ni aucun article de la commande. Ce transfert
+                    repose sur la même décision d'adéquation que ci-dessus. En cas de refus, rien n'est signalé
+                    et aucune commande n'est rattachée à une annonce.</li>
             </ul>
             <p>Aucune donnée bancaire n'est stockée par nos soins ; le paiement est traité par un prestataire tiers sécurisé.</p>
 
@@ -136,10 +142,12 @@
                 préférence d'affichage clair/sombre). Ces cookies ne nécessitent pas de consentement préalable au titre
                 de la réglementation applicable. Si vous y consentez via le bandeau affiché à votre première visite,
                 le même identifiant de session sert aussi, en interne, à regrouper les pages consultées au cours d'une
-                même visite à des fins de mesure d'audience, et déclenche le chargement de PostHog et de Google
-                Analytics, qui déposent leurs propres cookies de mesure d'audience, respectivement dans l'Union
-                européenne et aux États-Unis. Aucun de ces cookies n'est utilisé à des fins de suivi
-                publicitaire ou de profilage. En l'absence de consentement, aucun des deux n'est chargé. Vous pouvez revenir sur votre choix à tout
+                même visite à des fins de mesure d'audience, et déclenche le chargement de PostHog, de Google
+                Analytics et du suivi des conversions Google Ads, qui déposent leurs propres cookies,
+                respectivement dans l'Union européenne et aux États-Unis. Le cookie Google Ads sert uniquement
+                à rattacher une commande à une annonce de la boutique ; aucun de ces cookies n'est utilisé à
+                des fins de personnalisation publicitaire ou de profilage. En l'absence de consentement, aucun
+                des trois n'est chargé. Vous pouvez revenir sur votre choix à tout
                 moment via le lien « Cookies » en pied de page.
             </p>
 

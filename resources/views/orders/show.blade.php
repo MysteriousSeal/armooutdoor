@@ -25,6 +25,16 @@
                     'items' => \App\Support\AnalyticsItems::forOrder($order),
                 ],
             ],
+            // The Ads conversion, same dedupe key, fired only when the
+            // account and its purchase label are both configured.
+            'aw' => config('services.google_ads.id') && config('services.google_ads.conversion_label')
+                ? [
+                    'send_to' => config('services.google_ads.id').'/'.config('services.google_ads.conversion_label'),
+                    'transaction_id' => $order->number,
+                    'currency' => 'EUR',
+                    'value' => round($order->total_cents / 100, 2),
+                ]
+                : null,
         ]
         : null;
 @endphp

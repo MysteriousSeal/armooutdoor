@@ -7,6 +7,15 @@ use Tests\TestCase;
 
 class SecurityHeadersTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // The Ads knobs live in .env; the older expectations here assume
+        // them absent, so each test opts in explicitly.
+        config(['services.google_ads.id' => null, 'services.google_ads.conversion_label' => null]);
+    }
+
     use RefreshDatabase;
 
     public function test_web_responses_carry_security_headers(): void

@@ -62,15 +62,31 @@ class SecurityHeaders
             ]);
         }
 
+        $images = [];
+
+        if (config('services.google_ads.id')) {
+            // The Ads conversion rides the same gtag loader but reports to
+            // its own hosts, by fetch and by tracking pixel alike.
+            $scripts[] = 'https://www.googletagmanager.com';
+            $adsHosts = [
+                'https://www.googleadservices.com',
+                'https://googleads.g.doubleclick.net',
+                'https://www.google.com',
+            ];
+            $connects = array_merge($connects, $adsHosts);
+            $images = $adsHosts;
+        }
+
         if ($scripts === []) {
             return self::CSP;
         }
 
         return str_replace(
-            ["script-src 'self' 'unsafe-inline'", "default-src 'self'"],
+            ["script-src 'self' 'unsafe-inline'", "img-src 'self' data:", "default-src 'self'"],
             [
-                "script-src 'self' 'unsafe-inline' ".implode(' ', $scripts),
-                "default-src 'self'; connect-src 'self' ".implode(' ', $connects),
+                "script-src 'self' 'unsafe-inline' ".implode(' ', array_unique($scripts)),
+                trim("img-src 'self' data: ".implode(' ', $images)),
+                "default-src 'self'; connect-src 'self' ".implode(' ', array_unique($connects)),
             ],
             self::CSP,
         );
