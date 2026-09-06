@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductReview;
 use App\Models\User;
+use App\Support\Guides;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -60,17 +61,21 @@ class HomeVoicesAndReadingsTest extends TestCase
             ->assertDontSee('Correct sans plus.');
     }
 
-    public function test_the_home_links_the_guides_and_the_latest_article(): void
+    public function test_the_home_links_the_days_guides_and_the_latest_article(): void
     {
         $post = BlogPost::factory()->create();
-
-        $this->get('/')->assertOk()
+        $response = $this->get('/')->assertOk()
             ->assertSee('À lire avant de commander')
-            ->assertSee(route('guides.cibles'))
-            ->assertSee(route('guides.entretien'))
             ->assertSee(route('guides.index'))
             ->assertSee(route('blog.show', $post->slug))
             ->assertSee($post->localizedTitle());
+
+        // Which two guides is the day's business; that there are two of them
+        // and that they are real ones is not.
+        $shown = collect(Guides::all())
+            ->filter(fn (array $guide): bool => str_contains($response->getContent(), $guide['url']));
+
+        $this->assertCount(2, $shown);
     }
 
     public function test_each_card_says_what_it_is_and_which_rayon_it_advises_on(): void
@@ -82,9 +87,12 @@ class HomeVoicesAndReadingsTest extends TestCase
 
         // « Guide » alone did not say which shelf, and « Conseils » alone did
         // not say the article came from the blog.
-        $this->assertStringContainsString('<span class="home-reading-kind">Guide</span>', $html);
-        $this->assertStringContainsString('<span class="home-reading-topic">Cibles</span>', $html);
-        $this->assertStringContainsString('<span class="home-reading-topic">Entretien</span>', $html);
+        $this->assertSame(2, substr_count($html, '<span class="home-reading-kind">Guide</span>'));
+
+        foreach (Guides::ofTheDay() as $guide) {
+            $this->assertStringContainsString('<span class="home-reading-topic">'.$guide['topic'].'</span>', $html);
+        }
+
         $this->assertStringContainsString('<span class="home-reading-kind">Blog</span>', $html);
         $this->assertStringContainsString('<span class="home-reading-topic">Conseils</span>', $html);
     }

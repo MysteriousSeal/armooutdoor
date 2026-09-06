@@ -5,28 +5,10 @@
 @section('canonical', route('guides.index'))
 
 @php
-    // One card per guide; the next guide is one entry here, and the
-    // JSON-LD below reads the same list.
-    $guides = [
-        [
-            'route' => route('guides.classification'),
-            'kicker' => 'Réglementation',
-            'title' => 'Classer son arme',
-            'text' => 'Sous 2 joules, de 2 à 20, dès 20, puis l\'autorisation : ce que la loi range en D, C, B et A, et le piège du chargeur.',
-        ],
-        [
-            'route' => route('guides.cibles'),
-            'kicker' => 'Cibles',
-            'title' => 'Bien choisir sa cible',
-            'text' => 'Réactives autocollantes, planches, carton ou métal basculant : quel format pour quelle distance, ce qu\'on lit après le tir, et combien de feuilles prévoir.',
-        ],
-        [
-            'route' => route('guides.entretien'),
-            'kicker' => 'Entretien',
-            'title' => 'Entretenir son arme',
-            'text' => 'Corde de nettoyage ou kit à tiges : quel matériel pour quel calibre, du 4,5 mm au calibre 12, dans quel sens nettoyer et à quelle fréquence.',
-        ],
-    ];
+    // One card per guide, read off the shop's own shelf: the next guide is
+    // one entry in App\Support\Guides, and the JSON-LD below reads the same
+    // list rather than a second copy of it.
+    $guides = \App\Support\Guides::all();
 @endphp
 
 @push('head')
@@ -46,7 +28,7 @@
                     '@@type' => 'ListItem',
                     'position' => $index + 1,
                     'name' => $guide['title'],
-                    'url' => $guide['route'],
+                    'url' => $guide['url'],
                 ])->all(),
             ],
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
@@ -82,13 +64,13 @@
 
         <div class="glab-index-grid">
             @foreach ($guides as $guide)
-                <a href="{{ $guide['route'] }}" class="glab-index-card">
+                <a href="{{ $guide['url'] }}" class="glab-index-card">
                     <span class="glab-index-card-top">
                         <span class="glab-index-num">{{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
-                        <span class="glab-index-kicker">{{ $guide['kicker'] }}</span>
+                        <span class="glab-index-kicker">{{ $guide['topic'] }}</span>
                     </span>
                     <h2>{{ $guide['title'] }}</h2>
-                    <p>{{ $guide['text'] }}</p>
+                    <p>{{ $guide['summary'] }}</p>
                     <span class="glab-index-more">Lire le guide</span>
                 </a>
             @endforeach

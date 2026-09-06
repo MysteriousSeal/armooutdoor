@@ -6,6 +6,7 @@ use App\Models\BlogPost;
 use App\Models\Category;
 use App\Models\ProductReview;
 use App\Models\ShippingSetting;
+use App\Support\Guides;
 use App\Support\HomepageCatalog;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
@@ -104,6 +105,10 @@ class HomeController extends Controller
      * visits: two guides and the latest article. Until this, the whole
      * editorial cluster hung off one footer column.
      *
+     * Which two guides is the day's business, not this method's: the shelf
+     * holds more than the strip can show, and a guide that never comes up
+     * is a guide nobody reads.
+     *
      * Each card says what it is before saying what it is about: the kind of
      * writing, then the rayon it belongs to. « Guide » alone did not say
      * which shelf it advised on, and an article labelled « Conseils » alone
@@ -113,24 +118,16 @@ class HomeController extends Controller
      */
     private function readings(): array
     {
-        $readings = [
-            [
+        $readings = Guides::ofTheDay()
+            ->map(fn (array $guide): array => [
                 'kind' => 'Guide',
-                'topic' => 'Cibles',
-                'title' => 'Bien choisir sa cible',
-                'text' => 'Réactives, planches, carton ou métal : quel format pour quelle distance, et ce qu\'on lit après le tir.',
-                'url' => route('guides.cibles'),
+                'topic' => $guide['topic'],
+                'title' => $guide['title'],
+                'text' => $guide['teaser'],
+                'url' => $guide['url'],
                 'cta' => 'Lire le guide',
-            ],
-            [
-                'kind' => 'Guide',
-                'topic' => 'Entretien',
-                'title' => 'Entretenir son arme',
-                'text' => 'Corde ou kit à tiges, calibre par calibre, dans quel sens nettoyer et à quelle fréquence.',
-                'url' => route('guides.entretien'),
-                'cta' => 'Lire le guide',
-            ],
-        ];
+            ])
+            ->all();
 
         $post = BlogPost::query()->visible()->with('category')->orderByDesc('published_at')->first();
 
