@@ -130,26 +130,14 @@
                 @endif
 
                 @if ($showSort)
-                    <form method="GET" class="sort-form" action="{{ $categoryUrl }}">
-                        @foreach ($selectedFilters as $label => $value)
-                            <input type="hidden" name="filter[{{ $label }}]" value="{{ $value }}">
-                        @endforeach
-                        <div class="sort-field">
-                            <label for="category-sort">{{ __('store.sort_label') }}</label>
-                            <div class="sort-select-wrap">
-                                <select id="category-sort" name="sort" class="sort-select" onchange="this.form.submit()">
-                                    <option value="relevance" @selected($sort === 'relevance')>{{ __('store.sort_relevance') }}</option>
-                                    <option value="name" @selected($sort === 'name')>{{ __('store.sort_name') }}</option>
-                                    <option value="price-asc" @selected($sort === 'price-asc')>{{ __('store.sort_price_asc') }}</option>
-                                    <option value="price-desc" @selected($sort === 'price-desc')>{{ __('store.sort_price_desc') }}</option>
-                                    <option value="newest" @selected($sort === 'newest')>{{ __('store.sort_newest') }}</option>
-                                </select>
-                            </div>
-                        </div>
-                        <noscript>
-                            <button type="submit" class="btn btn-sm btn-secondary">{{ __('store.sort_label') }}</button>
-                        </noscript>
-                    </form>
+                    @include('partials.sort-form', [
+                        'action' => $categoryUrl,
+                        'sort' => $sort,
+                        'id' => 'category-sort',
+                        'hidden' => collect($selectedFilters)->mapWithKeys(
+                            fn ($value, $label) => ['filter['.$label.']' => $value]
+                        )->all(),
+                    ])
                 @endif
             </div>
         @endif

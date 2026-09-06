@@ -61,9 +61,19 @@
         @include('partials.page-hero', [
             'kicker' => __('store.hero_kicker'),
             'title' => __('store.all_products'),
-            'description' => 'Tout le catalogue, du plus pertinent au plus discret.',
+            'description' => 'Tout le catalogue sur une page, dans l\'ordre que vous choisissez.',
             'tags' => [trans_choice('store.products_count', $products->total(), ['count' => $products->total()])],
         ])
+
+        @if ($products->isNotEmpty())
+            <div class="category-toolbar">
+                @include('partials.sort-form', [
+                    'action' => localized_route('products.all'),
+                    'sort' => $sort,
+                    'id' => 'catalogue-sort',
+                ])
+            </div>
+        @endif
 
         @if ($products->isEmpty())
             <p class="empty-state">{{ __('store.search_empty') }}</p>

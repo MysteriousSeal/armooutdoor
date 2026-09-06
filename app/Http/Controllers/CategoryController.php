@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Product;
 use App\Support\ProductRelevance;
+use App\Support\ProductSort;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -16,7 +17,8 @@ class CategoryController extends Controller
     /** Produits par page sur une fiche catégorie. */
     private const PER_PAGE = 20;
 
-    public const SORTS = ['relevance', 'name', 'price-asc', 'price-desc', 'newest'];
+    /** Kept as the name the rest of the app knows; the list lives once. */
+    public const SORTS = ProductSort::OPTIONS;
 
     public function index(): View
     {
@@ -65,11 +67,7 @@ class CategoryController extends Controller
             'children.products.variants.supplier',
         ]);
 
-        $sort = $request->query('sort', 'relevance');
-
-        if (! in_array($sort, self::SORTS, true)) {
-            $sort = 'relevance';
-        }
+        $sort = ProductSort::resolve($request->query('sort'));
 
         $listingProducts = $category->listingProducts();
         $availableFilterValues = $this->availableFilterValues($listingProducts);
@@ -244,16 +242,7 @@ class CategoryController extends Controller
      */
     private function sortedProducts(Collection $products, string $sort): Collection
     {
-        return match ($sort) {
-            'name' => $products
-                ->sortBy(fn (Product $product): string => mb_strtolower($product->localizedName()), SORT_NATURAL)
-                ->values(),
-            'price-asc' => $products->sortBy('price_cents')->values(),
-            'price-desc' => $products->sortByDesc('price_cents')->values(),
-            'newest' => $products->sortByDesc('created_at')->values(),
-            'relevance' => ProductRelevance::sort($products),
-            default => $products->values(),
-        };
+        return ProductSort::apply($products, $sort);
     }
 
 }
