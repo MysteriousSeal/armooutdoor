@@ -86,12 +86,14 @@ Route::get('/sitemap-pages.xml', [SitemapController::class, 'pages'])->name('sit
 Route::get('/sitemap-categories.xml', [SitemapController::class, 'categories'])->name('sitemap.categories');
 Route::get('/sitemap-products.xml', [SitemapController::class, 'products'])->name('sitemap.products');
 Route::get('/sitemap-blog.xml', [SitemapController::class, 'blog'])->name('sitemap.blog');
+Route::get('/sitemap-guides.xml', [SitemapController::class, 'guides'])->name('sitemap.guides');
 Route::get('/plan-du-site', [SitemapController::class, 'html'])->name('sitemap.html');
 
 // The buying guides: an index linked from the footer, one page per guide.
 Route::view('/guides', 'guides.index')->name('guides.index');
 Route::view('/guides/bien-choisir-sa-cible', 'guides.cibles')->name('guides.cibles');
 Route::view('/guides/entretenir-son-arme', 'guides.entretien')->name('guides.entretien');
+Route::view('/guides/classer-son-arme', 'guides.classification')->name('guides.classification');
 
 /*
 |--------------------------------------------------------------------------

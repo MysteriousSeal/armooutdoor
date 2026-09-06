@@ -36,6 +36,18 @@
             </ul>
         </nav>
 
+        <section class="sitemap-section" aria-labelledby="sitemap-guides-heading">
+            <nav class="sitemap-panel" aria-labelledby="sitemap-guides-heading">
+                <h2 class="sitemap-heading" id="sitemap-guides-heading">{{ __('store.sitemap_guides') }}</h2>
+                <ul class="sitemap-pages">
+                    <li><a href="{{ route('guides.index') }}">{{ __('store.footer_reading_guides') }}</a></li>
+                    <li><a href="{{ route('guides.classification') }}">Classer son arme</a></li>
+                    <li><a href="{{ route('guides.cibles') }}">Bien choisir sa cible</a></li>
+                    <li><a href="{{ route('guides.entretien') }}">Entretenir son arme</a></li>
+                </ul>
+            </nav>
+        </section>
+
         <section class="sitemap-section" aria-labelledby="sitemap-categories-heading">
             <h2 class="sitemap-heading" id="sitemap-categories-heading">{{ __('store.footer_shop') }}</h2>
             <div class="sitemap-cats">

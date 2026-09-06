@@ -1,13 +1,19 @@
 @extends('layouts.app')
 
 @section('title', 'Guides d\'achat — Armo Outdoor')
-@section('meta_description', 'Les guides d\'achat de la boutique : bien choisir sa cible, régler son matériel, comparer les familles de produits avant de commander.')
+@section('meta_description', 'Les guides d\'achat de la boutique : classer son arme, bien choisir sa cible, entretenir son matériel, d\'après ce que le rayon vend vraiment.')
 @section('canonical', route('guides.index'))
 
 @php
     // One card per guide; the next guide is one entry here, and the
     // JSON-LD below reads the same list.
     $guides = [
+        [
+            'route' => route('guides.classification'),
+            'kicker' => 'Réglementation',
+            'title' => 'Classer son arme',
+            'text' => 'Sous 2 joules, de 2 à 20, dès 20 : ce que la loi range en D, C et A, ce qu\'il faut pour acheter, et le piège du chargeur.',
+        ],
         [
             'route' => route('guides.cibles'),
             'kicker' => 'Cibles',

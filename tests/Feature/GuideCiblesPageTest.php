@@ -7,7 +7,7 @@ use Tests\TestCase;
 
 /**
  * The buying guides: an index linked from the footer, and the Cibles
- * guide it lists - both indexable, both in the pages sitemap.
+ * guide it lists - both indexable, both in the guides sitemap.
  */
 class GuideCiblesPageTest extends TestCase
 {
@@ -51,9 +51,11 @@ class GuideCiblesPageTest extends TestCase
         $this->get('/guides')->assertOk()->assertDontSee('noindex');
         $this->get('/guides/bien-choisir-sa-cible')->assertOk()->assertDontSee('noindex');
 
-        $this->get('/sitemap-pages.xml')->assertOk()
+        $this->get('/sitemap-guides.xml')->assertOk()
             ->assertSee(route('guides.index'))
             ->assertSee(route('guides.cibles'));
+        $this->get('/sitemap.xml')->assertOk()->assertSee('sitemap-guides.xml', false);
+        $this->get('/sitemap-pages.xml')->assertOk()->assertDontSee(route('guides.index'));
     }
 
     public function test_both_pages_declare_their_structured_data(): void
@@ -86,9 +88,31 @@ class GuideCiblesPageTest extends TestCase
             ->assertSee(route('categories.show', 'entretien-arme'));
 
         $this->get('/guides')->assertOk()->assertSee(route('guides.entretien'));
-        $this->get('/sitemap-pages.xml')->assertOk()->assertSee(route('guides.entretien'));
+        $this->get('/sitemap-guides.xml')->assertOk()->assertSee(route('guides.entretien'));
 
         $html = $this->get('/guides/entretenir-son-arme')->getContent();
+        $this->assertSame(1, preg_match_all('/<h1[\s>]/', $html));
+    }
+
+    public function test_the_classification_guide_renders_published_and_declared(): void
+    {
+        $this->get('/guides/classer-son-arme')->assertOk()
+            ->assertSee('Classer')
+            ->assertSee('20 joules')
+            ->assertSee('FAQPage')
+            ->assertSee('BreadcrumbList')
+            ->assertDontSee('noindex')
+            ->assertSee(route('blog.show', 'categorie-d-ce-que-la-loi-francaise-range-vraiment-dedans-et-ce-que-ca-change-pour-vous'))
+            ->assertSee(route('blog.show', 'categorie-c-les-armes-soumises-a-declaration-et-tout-ce-qui-va-avec'))
+            ->assertSee(route('blog.show', 'categorie-a-ce-qui-est-interdit-a-qui-et-comment-une-arme-b-y-bascule-dun-chargeur'))
+            ->assertSee(route('categories.show', 'repliques-airsoft'));
+
+        $this->get('/guides')->assertOk()
+            ->assertSee('Classer son arme')
+            ->assertSee(route('guides.classification'));
+        $this->get('/sitemap-guides.xml')->assertOk()->assertSee(route('guides.classification'));
+
+        $html = $this->get('/guides/classer-son-arme')->getContent();
         $this->assertSame(1, preg_match_all('/<h1[\s>]/', $html));
     }
 

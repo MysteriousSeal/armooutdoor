@@ -65,6 +65,7 @@ class SitemapController extends Controller
             ['url' => route('sitemap.categories')],
             ['url' => route('sitemap.products')],
             ['url' => route('sitemap.blog')],
+            ['url' => route('sitemap.guides')],
         ];
 
         return $this->xml('sitemap.index', compact('sitemaps'));
@@ -84,9 +85,6 @@ class SitemapController extends Controller
             // product and article the XML lists.
             ['loc' => route('sitemap.html'), 'changefreq' => 'weekly', 'priority' => '0.4'],
             ['loc' => route('faq'), 'changefreq' => 'monthly', 'priority' => '0.5'],
-            ['loc' => route('guides.index'), 'changefreq' => 'monthly', 'priority' => '0.5'],
-            ['loc' => route('guides.cibles'), 'changefreq' => 'monthly', 'priority' => '0.5'],
-            ['loc' => route('guides.entretien'), 'changefreq' => 'monthly', 'priority' => '0.5'],
             ['loc' => route('about'), 'changefreq' => 'monthly', 'priority' => '0.5'],
             ['loc' => route('help.shipping-returns'), 'changefreq' => 'monthly', 'priority' => '0.5'],
             ['loc' => route('help.secure-payment'), 'changefreq' => 'monthly', 'priority' => '0.5'],
@@ -94,6 +92,18 @@ class SitemapController extends Controller
             ['loc' => route('legal.notice'), 'changefreq' => 'yearly', 'priority' => '0.3'],
             ['loc' => route('legal.privacy'), 'changefreq' => 'yearly', 'priority' => '0.3'],
             ['loc' => route('legal.withdrawal'), 'changefreq' => 'yearly', 'priority' => '0.3'],
+        ];
+
+        return $this->xml('sitemap.urlset', compact('urls'));
+    }
+
+    public function guides(): Response
+    {
+        $urls = [
+            ['loc' => route('guides.index'), 'changefreq' => 'monthly', 'priority' => '0.5'],
+            ['loc' => route('guides.cibles'), 'changefreq' => 'monthly', 'priority' => '0.5'],
+            ['loc' => route('guides.entretien'), 'changefreq' => 'monthly', 'priority' => '0.5'],
+            ['loc' => route('guides.classification'), 'changefreq' => 'monthly', 'priority' => '0.5'],
         ];
 
         return $this->xml('sitemap.urlset', compact('urls'));

@@ -45,6 +45,31 @@ class SitemapTest extends TestCase
             ->assertSee('Sitemap: '.route('sitemap.index'));
     }
 
+    public function test_the_guides_have_their_own_sitemap(): void
+    {
+        $this->get('/sitemap.xml')->assertOk()->assertSee('sitemap-guides.xml', false);
+
+        $xml = $this->get('/sitemap-guides.xml')->assertOk()->getContent();
+
+        foreach ([
+            route('guides.index'),
+            route('guides.cibles'),
+            route('guides.entretien'),
+            route('guides.classification'),
+        ] as $url) {
+            $this->assertStringContainsString('<loc>'.$url.'</loc>', $xml);
+        }
+
+        $this->get('/sitemap-pages.xml')->assertOk()
+            ->assertDontSee(route('guides.index'));
+
+        $this->get('/plan-du-site')->assertOk()
+            ->assertSee('id="sitemap-guides-heading"', false)
+            ->assertSee('id="sitemap-pages-heading"', false)
+            ->assertSee(__('store.sitemap_guides'))
+            ->assertSee('Classer son arme');
+    }
+
     public function test_the_contact_page_and_the_html_plan_are_listed(): void
     {
         $xml = $this->get('/sitemap-pages.xml')->assertOk()->getContent();
@@ -67,7 +92,7 @@ class SitemapTest extends TestCase
     {
         Product::factory()->create(['is_active' => true]);
 
-        foreach (['index', 'pages', 'categories', 'products', 'blog'] as $name) {
+        foreach (['index', 'pages', 'categories', 'products', 'blog', 'guides'] as $name) {
             $url = $name === 'index' ? '/sitemap.xml' : '/sitemap-'.$name.'.xml';
             $xml = $this->get($url)->assertOk()->getContent();
 

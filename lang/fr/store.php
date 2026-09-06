@@ -543,6 +543,7 @@ return [
     'sitemap_kicker' => 'Boutique',
     'sitemap_lede' => 'Toutes les pages, catégories et produits d’Armo Outdoor, au même endroit.',
     'sitemap_pages' => 'Pages',
+    'sitemap_guides' => 'Guides d\'achat',
     'sitemap_products' => 'Produits',
     'sitemap_xml' => 'Sitemap XML',
     'sitemap_xml_text' => 'Fichier destiné aux moteurs de recherche.',
