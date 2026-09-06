@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-07 — v1.18.1 — build YQDWSB
+
+### Storefront
+
+- **The free-shipping strip reads like a postal marking.** The threshold becomes a ticket stub in olive on the strip's own wash, the truck sits in a bordered square, and the qualifier below it stops competing with the sentence it qualifies.
+
+### Under the hood
+
+- **A killed backup can no longer hold a day hostage.** The schedule's lock had no expiry, so a run cut short mid-zip — a deploy, a reboot — would keep its mutex for twenty-four hours and silently stop every backup behind it. Ten minutes now. The backup doc stops handing out cron lines that send their output to nowhere, gives `php` its absolute path, and gains the checklist for the day nothing runs: the PATH cron actually has, who owns the crontab, who owns the storage directory.
+
+**No migration.**
+
 ## 2026-09-07 — v1.18.0 — build NDM589
 
 ### Storefront
