@@ -24,6 +24,7 @@ class GuideCiblesPageTest extends TestCase
             'entretien' => ['/guides/entretenir-son-arme', 'Entretenir son arme', 'Guide'],
             'classification' => ['/guides/classer-son-arme', 'Classer son arme', 'Réglementation'],
             'joules' => ['/guides/joules-et-fps', 'Joules et FPS', 'Énergie'],
+            'glossaire' => ['/guides/glossaire', 'Le glossaire', 'Vocabulaire'],
         ];
     }
 

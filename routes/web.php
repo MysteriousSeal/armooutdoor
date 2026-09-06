@@ -96,6 +96,7 @@ Route::view('/guides/bien-choisir-sa-cible', 'guides.cibles')->name('guides.cibl
 Route::view('/guides/entretenir-son-arme', 'guides.entretien')->name('guides.entretien');
 Route::view('/guides/classer-son-arme', 'guides.classification')->name('guides.classification');
 Route::view('/guides/joules-et-fps', 'guides.joules')->name('guides.joules');
+Route::view('/guides/glossaire', 'guides.glossaire')->name('guides.glossaire');
 
 /*
 |--------------------------------------------------------------------------

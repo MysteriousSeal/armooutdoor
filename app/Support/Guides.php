@@ -31,6 +31,13 @@ class Guides
                 'summary' => 'Sous 2 joules, de 2 à 20, dès 20, puis l\'autorisation : ce que la loi range en D, C, B et A, et le piège du chargeur.',
             ],
             [
+                'topic' => 'Vocabulaire',
+                'title' => 'Le glossaire',
+                'url' => route('guides.glossaire'),
+                'teaser' => 'AEG, hop-up, diabolo, MED : les mots du rayon, et où chacun se rencontre.',
+                'summary' => 'AEG, hop-up, joule, MED, diabolo, grille graduée, témoin de chambre vide : les mots que portent les fiches et les filtres, définis un par un, chacun menant au rayon ou au guide où on le rencontre.',
+            ],
+            [
                 'topic' => 'Énergie',
                 'title' => 'Joules et FPS',
                 'url' => route('guides.joules'),
