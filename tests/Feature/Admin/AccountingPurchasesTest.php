@@ -85,6 +85,26 @@ class AccountingPurchasesTest extends TestCase
             ->assertSee('20%');
     }
 
+    public function test_card_leads_the_payment_list_and_a_balance_deduction_is_offered(): void
+    {
+        $html = $this->page()->getContent();
+
+        // Card first and preselected; the balance deduction last.
+        $this->assertMatchesRegularExpression(
+            '#<select id="entry-payment"[^>]*>\s*<option value="card" selected>Card</option>#',
+            $html,
+        );
+        // Unselected options keep the space @selected leaves before the >.
+        $this->assertMatchesRegularExpression('#<option value="balance"\s*>Deducted from balance</option>#', $html);
+        $this->assertLessThan(strpos($html, 'value="bank_wire"'), strpos($html, 'value="card"'));
+
+        // And it books like any other way the money moves.
+        $this->submit($this->payload(['payment_method' => 'balance']));
+
+        $this->page()->assertSee('Deducted from balance');
+        $this->assertSame('balance', AccountingEntry::query()->firstOrFail()->payment_method);
+    }
+
     public function test_the_three_amounts_are_worked_back_from_the_invoice(): void
     {
         $entry = AccountingEntry::query()->create([

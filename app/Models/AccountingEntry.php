@@ -47,19 +47,25 @@ class AccountingEntry extends Model
         'other' => 'Autre',
     ];
 
-    /** How the money lands. A bank wire, until proven otherwise. */
+    /**
+     * How the money moves, card first - the way most purchases are paid.
+     * The last one is no payment at all: a supplier deducting the amount
+     * from a balance the shop already holds with them.
+     */
     public const PAYMENT_METHODS = [
-        'bank_wire' => 'Bank wire',
         'card' => 'Card',
+        'bank_wire' => 'Bank wire',
         'cash' => 'Cash',
         'cheque' => 'Cheque',
+        'balance' => 'Deducted from balance',
     ];
 
     public const PAYMENT_METHODS_FR = [
-        'bank_wire' => 'Virement',
         'card' => 'Carte',
+        'bank_wire' => 'Virement',
         'cash' => 'Espèces',
         'cheque' => 'Chèque',
+        'balance' => 'Déduit du solde',
     ];
 
     /** @return array<string, string> */

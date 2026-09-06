@@ -84,7 +84,7 @@
                 <label for="entry-payment">Payment</label>
                 <select id="entry-payment" name="payment_method" class="form-control" required>
                     @foreach ($paymentMethods as $value => $label)
-                        <option value="{{ $value }}" @selected(old('payment_method', 'bank_wire') === $value)>{{ $label }}</option>
+                        <option value="{{ $value }}" @selected(old('payment_method', 'card') === $value)>{{ $label }}</option>
                     @endforeach
                 </select>
                 @error('payment_method') <p class="form-error">{{ $message }}</p> @enderror
