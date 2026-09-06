@@ -116,6 +116,25 @@ class GuideGlossairePageTest extends TestCase
         $this->assertNotNull(Glossary::resolved()->firstWhere('term', 'Holster')['url']);
     }
 
+    public function test_every_letter_of_the_alphabet_opens_something(): void
+    {
+        // An index with holes in it invites the reader to wonder what is
+        // missing rather than what is there.
+        $this->assertSame(range('A', 'Z'), Glossary::initials()->sort()->values()->all());
+    }
+
+    public function test_an_accented_word_files_under_its_plain_letter(): void
+    {
+        $letters = Glossary::resolved()
+            ->filter(fn (array $entry): bool => str_starts_with($entry['term'], 'É'))
+            ->pluck('initial')
+            ->unique();
+
+        // « Élévation » belongs in E, not in a letter of its own after Z.
+        $this->assertNotEmpty($letters);
+        $this->assertSame(['E'], $letters->values()->all());
+    }
+
     public function test_the_page_indexes_itself_by_letter(): void
     {
         $html = $this->get('/guides/glossaire')->assertOk()->getContent();

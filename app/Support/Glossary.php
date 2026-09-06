@@ -159,6 +159,60 @@ class Glossary
                 'link' => ['kind' => 'Guide', 'label' => 'Joules et FPS', 'route' => 'guides.joules'],
             ],
             [
+                'term' => 'Écouvillon',
+                'aliases' => ['brosse', 'tige', 'nettoyage'],
+                'definition' => 'La brosse montée en bout de tige qui frotte l\'âme du canon. En bronze pour décoller les dépôts, en nylon pour les résidus tendres, jamais en acier sur un canon rayé. Il travaille toujours dans le sens de la balle, de la chambre vers la bouche.',
+                'link' => ['kind' => 'Rayon', 'label' => 'Entretien de l\'arme', 'category' => 'entretien-arme'],
+            ],
+            [
+                'term' => 'Élévation',
+                'aliases' => ['hausse', 'réglage vertical', 'elevation'],
+                'definition' => 'Le réglage vertical de la visée, ce que la dérive fait horizontalement. On monte en élévation pour relever le point d\'impact, et il en faut d\'autant plus que la distance grandit, la balle tombant tout du long.',
+                'field' => 'Visée',
+            ],
+            [
+                'term' => 'Impact',
+                'aliases' => ['point d\'impact', 'PIM'],
+                'definition' => 'L\'endroit que le projectile a touché, par opposition au point visé. Le point d\'impact moyen d\'une série, son centre géométrique, est ce qu\'on corrige : un impact isolé ne dit rien, cinq disent où l\'arme tire.',
+                'field' => 'Technique',
+            ],
+            [
+                'term' => 'Nomenclature',
+                'aliases' => ['éclaté', 'pièces détachées'],
+                'definition' => 'La liste numérotée des pièces d\'une arme, renvoyant à un dessin éclaté. C\'est le document qu\'on cite pour commander une pièce ou décrire une panne, et le vocabulaire commun entre un tireur et un armurier.',
+                'field' => 'Arme',
+            ],
+            [
+                'term' => 'Objectif',
+                'aliases' => ['lentille frontale', 'diamètre'],
+                'definition' => 'La lentille avant d\'une optique, celle qui regarde la cible, et le second nombre de sa désignation : dans 25-75x60, soixante millimètres. Plus il est large, plus il récolte de lumière, et plus l\'ensemble devient lourd et encombrant.',
+                'link' => ['kind' => 'Rayon', 'label' => 'Optiques', 'category' => 'optiques'],
+            ],
+            [
+                'term' => 'Ultrasons',
+                'aliases' => ['bac', 'cuve', 'nettoyage'],
+                'definition' => 'Le bac dont le liquide vibre à haute fréquence pour décoller les résidus au fond des pièces démontées. Il fait en un quart d\'heure ce qu\'une brosse ne fait pas du tout, mais il faut sécher et huiler derrière lui, sans quoi l\'acier rouille.',
+                'field' => 'Entretien',
+            ],
+            [
+                'term' => 'Windage',
+                'aliases' => ['dérive', 'réglage latéral'],
+                'definition' => 'Le mot anglais pour la dérive, gravé sur la tourelle latérale de presque toutes les optiques. La tourelle du dessus, elle, porte « elevation ». Les deux se lisent en clics, dont la valeur est indiquée sur l\'appareil.',
+                'field' => 'Visée',
+            ],
+            [
+                'term' => 'X (dix intérieur)',
+                'aliases' => ['dix intérieur', 'x-ring', 'mouche'],
+                'definition' => 'Le cercle le plus petit au centre d\'une cible de compétition, à l\'intérieur du dix. Il ne rapporte pas de point de plus : il départage deux tireurs à égalité, à celui qui en compte le plus.',
+                'field' => 'Compétition',
+            ],
+            [
+                'term' => 'Yard',
+                'aliases' => ['yd', 'distance', 'anglo-saxon'],
+                'definition' => 'L\'unité de distance anglo-saxonne, 0,9144 mètre. Les cibles et les optiques importées comptent en yards : cent yards font quatre-vingt-onze mètres, ce qui suffit à décaler un zéro si on prend l\'un pour l\'autre.',
+                'field' => 'Mesure',
+            ],
+            [
                 'term' => 'Zérotage',
                 'aliases' => ['réglage', 'mise à zéro'],
                 'definition' => 'Régler la visée pour que le point d\'impact rejoigne le point visé à une distance choisie. Un zéro n\'existe qu\'à cette distance : plus près et plus loin, le projectile passe ailleurs, ce que la trajectoire explique.',
@@ -416,7 +470,9 @@ class Glossary
 
         return collect(self::entries())
             ->map(function (array $entry) use ($products, $slugs): array {
-                $entry['initial'] = mb_strtoupper(mb_substr($entry['term'], 0, 1));
+                // Folded like the sort key: « Élévation » files under E,
+                // rather than opening a letter of its own after Z.
+                $entry['initial'] = mb_strtoupper(mb_substr(self::sortKey($entry['term']), 0, 1));
                 $entry['source'] = null;
                 $entry['kind'] = null;
                 $entry['url'] = null;
