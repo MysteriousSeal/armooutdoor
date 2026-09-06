@@ -1368,8 +1368,9 @@
 
 /* ============ what customers said ============ */
 
-/* Three quiet cards, each still pointing at the product it judged: a
-   testimonial nobody can trace reads as an invention. */
+/* Three range tickets, each still pointing at the product it judged: a
+   testimonial nobody can trace reads as an invention. The olive stub is
+   the same mark the shipping strip uses — they ordered, they said this. */
 .home .home-voices {
     margin-top: 3rem;
 }
@@ -1377,7 +1378,7 @@
 .home-voices-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
-    gap: 1rem;
+    gap: 1.1rem;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -1386,61 +1387,75 @@
 .home-voice {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    padding: 1.15rem 1.3rem;
+    gap: 0.85rem;
+    min-width: 0;
+    padding: 1.2rem 1.3rem 1.15rem;
     background: var(--surface);
     border: 1px solid var(--border);
-    box-shadow: var(--shadow);
+    border-top: 2px solid var(--accent-heading);
 }
 
 .home-voice-stars {
-    font-size: 1.05rem;
-    line-height: 1;
-    letter-spacing: 0.1em;
-    color: var(--accent-heading);
+    display: flex;
+    align-items: center;
+    gap: 0.28rem;
+    height: 1.05rem;
 }
 
-/* The picture faces the sentence it earned, both starting at the same
-   line. The row takes the card's spare height so the foot stays put. */
+.home-voice-stars span {
+    flex-shrink: 0;
+    width: 1.05rem;
+    height: 1.05rem;
+    background: var(--accent-heading);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 2.2l2.65 5.7 6.25.7-4.7 4.25 1.3 6.15L12 16.3 6.5 19l1.3-6.15L3.1 8.6l6.25-.7z'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 2.2l2.65 5.7 6.25.7-4.7 4.25 1.3 6.15L12 16.3 6.5 19l1.3-6.15L3.1 8.6l6.25-.7z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* A logbook rule after the score, so the stars are a rating and not a
+   row of decoration floating above the quote. */
+.home-voice-stars::after {
+    content: '';
+    flex: 1 1 auto;
+    height: 1px;
+    margin-left: 0.35rem;
+    background: color-mix(in srgb, var(--accent-heading) 28%, var(--border));
+}
+
 .home-voice-quote {
-    display: flex;
     flex: 1;
-    align-items: flex-start;
-    gap: 0.65rem;
+    min-width: 0;
 }
 
 .home-voice-body {
-    flex: 1;
     margin: 0;
     font-size: 0.9375rem;
-    line-height: 1.55;
+    line-height: 1.62;
+    overflow-wrap: break-word;
     color: var(--text);
 }
 
 .home-voice-foot {
     display: flex;
-    align-items: stretch;
-    gap: 0.65rem;
+    align-items: center;
+    gap: 0.7rem;
     margin: 0;
-    padding-top: 0.6rem;
-    border-top: 1px solid var(--border);
+    padding-top: 0.85rem;
+    border-top: 1px solid color-mix(in srgb, var(--accent-heading) 18%, var(--border));
     font-size: 0.8125rem;
 }
 
-/* The reviewer's initial, cut from the same cloth as the blog comments'. */
+/* The reviewer's initial, cut from the same cloth as the blog comments'.
+   A square stamp, not a tile stretched to the byline. */
 .home-voice-avatar {
     display: inline-flex;
-    flex-shrink: 0;
+    flex: 0 0 2.15rem;
+    width: 2.15rem;
+    height: 2.15rem;
     align-items: center;
     justify-content: center;
-    /* A definite width, and the height taken from the row: the box is as
-       tall as the name and the product stacked beside it. Deriving the
-       width from that height instead would ask the picture how wide it
-       is, and the picture would answer in its own full pixels. */
-    flex-basis: 2.75rem;
-    font-size: 0.8rem;
+    font-size: 0.72rem;
     font-weight: 700;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.04em;
     color: var(--accent-heading);
     background: color-mix(in srgb, var(--accent-heading) 10%, var(--surface));
     border: 1px solid color-mix(in srgb, var(--accent-heading) 28%, var(--border));
@@ -1450,7 +1465,7 @@
     display: flex;
     flex: 1;
     flex-direction: column;
-    gap: 0.15rem;
+    gap: 0.12rem;
     /* Without this the product name refuses to shorten and pushes the
        card wider than its column. */
     min-width: 0;
@@ -1458,36 +1473,11 @@
 
 .home-voice-author {
     font-weight: 700;
-}
-
-/* What was reviewed, squared off against the same two lines as the
-   monogram facing it across the card. */
-/* The same square as the monogram in the foot, sized in both directions
-   rather than asking the picture how wide it is. */
-.home-voice-thumb {
-    display: block;
-    flex: 0 0 2.75rem;
-    height: 2.75rem;
-    border: 1px solid var(--border);
-    background: var(--bg);
-}
-
-.home-voice-thumb img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.home-voice-thumb:hover {
-    border-color: var(--accent-heading);
+    letter-spacing: 0.01em;
 }
 
 .home-voice-product {
     color: var(--text-muted);
-    text-decoration: underline;
-    text-decoration-color: color-mix(in srgb, var(--accent-heading) 40%, transparent);
-    text-underline-offset: 2px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1495,7 +1485,10 @@
 
 .home-voice-product:hover {
     color: var(--accent-heading);
-    text-decoration-color: var(--accent-heading);
+}
+
+[data-theme='dark'] .home-voice {
+    background: color-mix(in srgb, var(--accent-heading) 6%, var(--surface));
 }
 
 /* ============ what the shop wrote ============ */

@@ -339,30 +339,19 @@
                  judged: a testimonial nobody can trace reads as invented. --}}
             <section class="home-voices" aria-labelledby="home-voices-title">
                 <header class="home-cats-header">
-                    <p class="home-cats-kicker">{{ __('store.home_voices_kicker') }}</p>
-                    <h2 class="home-cats-title" id="home-voices-title">{{ __('store.home_voices_title') }}</h2>
+                    <div class="home-cats-heading">
+                        <p class="home-cats-kicker">{{ __('store.home_voices_kicker') }}</p>
+                        <h2 class="home-cats-title" id="home-voices-title">{{ __('store.home_voices_title') }}</h2>
+                    </div>
                 </header>
                 <ul class="home-voices-list">
                     @foreach ($testimonials as $review)
                         <li class="home-voice">
-                            <span class="home-voice-stars" aria-hidden="true">★★★★★</span>
+                            <span class="home-voice-stars" aria-hidden="true">
+                                <span></span><span></span><span></span><span></span><span></span>
+                            </span>
                             <span class="sr-only">{{ trans_choice('store.review_rating_value', 5, ['count' => 5]) }}</span>
                             <div class="home-voice-quote">
-                                @if ($review->product->thumbnailUrl() !== '')
-                                    {{-- What was reviewed, facing what was said about it. It
-                                         leads to the same page as the product's name in the
-                                         foot, so it is hidden from assistive tech and skipped
-                                         by the keyboard rather than read out and tabbed
-                                         through twice. --}}
-                                    <a
-                                        href="{{ localized_route('products.show', ['product' => $review->product->slug]) }}"
-                                        class="home-voice-thumb"
-                                        aria-hidden="true"
-                                        tabindex="-1"
-                                    >
-                                        <img src="{{ $review->product->thumbnailUrl() }}" alt="" width="44" height="44" loading="lazy">
-                                    </a>
-                                @endif
                                 <p class="home-voice-body">{{ $review->comment }}</p>
                             </div>
                             <div class="home-voice-foot">

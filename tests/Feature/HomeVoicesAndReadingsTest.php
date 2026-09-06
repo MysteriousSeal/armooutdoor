@@ -58,11 +58,7 @@ class HomeVoicesAndReadingsTest extends TestCase
             ->assertSee('Jean M.')
             // The same name again as a monogram, in the avatar beside it.
             ->assertSee('<span class="home-voice-avatar" aria-hidden="true">JM</span>', false)
-            // What was reviewed, pictured beside the quote rather than in
-            // the foot. It repeats the product link, so it is hidden from
-            // assistive tech rather than read out twice.
-            ->assertSee($product->thumbnailUrl(), false)
-            ->assertSee('tabindex="-1"', false)
+            // The product is named in the foot, not pictured beside the quote.
             ->assertSee($product->localizedName())
             // A middling review is not a testimonial.
             ->assertDontSee('Correct sans plus.');
@@ -113,7 +109,7 @@ class HomeVoicesAndReadingsTest extends TestCase
         $this->assertStringNotContainsString('>Blog</span>', $html);
     }
 
-    public function test_the_thumbnail_faces_the_quote_and_not_the_signature(): void
+    public function test_the_product_is_named_in_the_signature_not_pictured(): void
     {
         $product = Product::factory()->create(['is_active' => true, 'quantity' => 5]);
         $this->review($product, 5, 'Cibles parfaites.');
@@ -123,8 +119,9 @@ class HomeVoicesAndReadingsTest extends TestCase
         preg_match('/<div class="home-voice-quote">.*?<\/div>/s', $html, $quote);
         preg_match('/<div class="home-voice-foot">.*?<\/div>/s', $html, $foot);
 
-        $this->assertStringContainsString('home-voice-thumb', $quote[0] ?? '');
-        $this->assertStringNotContainsString('home-voice-thumb', $foot[0] ?? '');
+        $this->assertStringNotContainsString('home-voice-thumb', $html);
+        $this->assertStringContainsString($product->localizedName(), $foot[0] ?? '');
+        $this->assertStringNotContainsString($product->localizedName(), $quote[0] ?? '');
         // The monogram stays with the name it belongs to.
         $this->assertStringContainsString('home-voice-avatar', $foot[0] ?? '');
     }
