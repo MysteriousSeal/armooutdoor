@@ -31,6 +31,13 @@ class Guides
                 'summary' => 'Sous 2 joules, de 2 à 20, dès 20, puis l\'autorisation : ce que la loi range en D, C, B et A, et le piège du chargeur.',
             ],
             [
+                'topic' => 'Énergie',
+                'title' => 'Joules et FPS',
+                'url' => route('guides.joules'),
+                'teaser' => 'La conversion, la calculette, et pourquoi la même réplique ne chrone pas deux fois pareil.',
+                'summary' => 'Le magasin annonce des FPS, la loi compte en joules et le terrain aussi : la formule, une calculette, le tableau bille par bille, et pourquoi la même réplique ne chrone pas deux fois pareil.',
+            ],
+            [
                 'topic' => 'Cibles',
                 'title' => 'Bien choisir sa cible',
                 'url' => route('guides.cibles'),

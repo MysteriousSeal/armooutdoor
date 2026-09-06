@@ -27,13 +27,13 @@ use App\Http\Controllers\Admin\DiscountCodeController as AdminDiscountCodeContro
 use App\Http\Controllers\Admin\DiscountController as AdminDiscountController;
 use App\Http\Controllers\Admin\IdentityDocumentController as AdminIdentityDocumentController;
 use App\Http\Controllers\Admin\InvoiceSettingController as AdminInvoiceSettingController;
-use App\Http\Controllers\Admin\ProductSettingController as AdminProductSettingController;
 use App\Http\Controllers\Admin\LabelController as AdminLabelController;
 use App\Http\Controllers\Admin\MarketplaceController as AdminMarketplaceController;
 use App\Http\Controllers\Admin\MarketplaceListingController as AdminMarketplaceListingController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PackageTypeController as AdminPackageTypeController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\ProductSettingController as AdminProductSettingController;
 use App\Http\Controllers\Admin\PurchaseOrderController as AdminPurchaseOrderController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Admin\SearchController as AdminSearchController;
@@ -42,13 +42,14 @@ use App\Http\Controllers\Admin\ShippingSettingController as AdminShippingSetting
 use App\Http\Controllers\Admin\StripePaymentController as AdminStripePaymentController;
 use App\Http\Controllers\Admin\SupplierController as AdminSupplierController;
 // Auth (customer-facing login/register/password reset)
+use App\Http\Controllers\AllProductsController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\Auth\ResetPasswordController;
 // Storefront (shop, cart, checkout, orders, etc.)
-use App\Http\Controllers\AllProductsController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\BestSellersController;
+use App\Http\Controllers\BlogCommentController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
@@ -94,6 +95,7 @@ Route::view('/guides', 'guides.index')->name('guides.index');
 Route::view('/guides/bien-choisir-sa-cible', 'guides.cibles')->name('guides.cibles');
 Route::view('/guides/entretenir-son-arme', 'guides.entretien')->name('guides.entretien');
 Route::view('/guides/classer-son-arme', 'guides.classification')->name('guides.classification');
+Route::view('/guides/joules-et-fps', 'guides.joules')->name('guides.joules');
 
 /*
 |--------------------------------------------------------------------------
@@ -399,12 +401,12 @@ Route::get('/blog/apercu/{post}', [BlogController::class, 'preview'])
     ->middleware('admin')
     ->name('blog.preview');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
-Route::post('/blog/{slug}/commentaires', [\App\Http\Controllers\BlogCommentController::class, 'store'])
+Route::post('/blog/{slug}/commentaires', [BlogCommentController::class, 'store'])
     ->middleware('throttle:5,1')
     ->name('blog.comments.store');
 // The shop's replies live on the article page, admin-gated; deleting
 // happens only in the back office.
-Route::post('/blog/commentaires/{comment}/reponse', [\App\Http\Controllers\BlogCommentController::class, 'reply'])
+Route::post('/blog/commentaires/{comment}/reponse', [BlogCommentController::class, 'reply'])
     ->middleware('admin')
     ->name('blog.comments.reply');
 Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');

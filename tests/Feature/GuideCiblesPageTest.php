@@ -7,8 +7,8 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
- * The guides: an index linked from the footer, and the three guides it
- * lists — both indexable, both in the guides sitemap.
+ * The guides: an index linked from the footer, and every guide it lists.
+ * All indexable, all in the guides sitemap.
  */
 class GuideCiblesPageTest extends TestCase
 {
@@ -23,6 +23,7 @@ class GuideCiblesPageTest extends TestCase
             'cibles' => ['/guides/bien-choisir-sa-cible', 'Bien choisir sa cible', 'Guide'],
             'entretien' => ['/guides/entretenir-son-arme', 'Entretenir son arme', 'Guide'],
             'classification' => ['/guides/classer-son-arme', 'Classer son arme', 'Réglementation'],
+            'joules' => ['/guides/joules-et-fps', 'Joules et FPS', 'Énergie'],
         ];
     }
 

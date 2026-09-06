@@ -6,6 +6,7 @@ use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use App\Models\Category;
 use App\Models\Product;
+use App\Support\Guides;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\View\View;
@@ -99,12 +100,15 @@ class SitemapController extends Controller
 
     public function guides(): Response
     {
-        $urls = [
-            ['loc' => route('guides.index'), 'changefreq' => 'monthly', 'priority' => '0.5'],
-            ['loc' => route('guides.cibles'), 'changefreq' => 'monthly', 'priority' => '0.5'],
-            ['loc' => route('guides.entretien'), 'changefreq' => 'monthly', 'priority' => '0.5'],
-            ['loc' => route('guides.classification'), 'changefreq' => 'monthly', 'priority' => '0.5'],
-        ];
+        // Read off the same shelf the index and the home page read, so a new
+        // guide is listed here without anyone remembering to list it.
+        $urls = collect([['loc' => route('guides.index'), 'changefreq' => 'monthly', 'priority' => '0.5']])
+            ->concat(collect(Guides::all())->map(fn (array $guide): array => [
+                'loc' => $guide['url'],
+                'changefreq' => 'monthly',
+                'priority' => '0.5',
+            ]))
+            ->all();
 
         return $this->xml('sitemap.urlset', compact('urls'));
     }
