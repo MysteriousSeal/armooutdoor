@@ -31,13 +31,14 @@ return [
     | How many scheduled database archives to keep
     |--------------------------------------------------------------------------
     |
-    | The quarter-hourly job prunes its own trail: ninety-six archives is a
-    | full day of history. Archives taken by hand are never pruned - nothing
-    | automatic should throw away what somebody deliberately made.
+    | The five-minute job prunes its own trail: two hundred and eighty-eight
+    | archives is a full day of history. Archives taken by hand are never
+    | pruned - nothing automatic should throw away what somebody
+    | deliberately made.
     |
     */
 
-    'database_keep' => (int) env('BACKUP_DATABASE_KEEP', 96),
+    'database_keep' => (int) env('BACKUP_DATABASE_KEEP', 288),
 
     'sources' => [
         'public/images' => 'images',

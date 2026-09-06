@@ -9,13 +9,13 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 /*
- * The database, every quarter hour.
+ * The database, every five minutes.
  *
  * withoutOverlapping so a slow run is never doubled, runInBackground so the
  * minute's other work does not wait on the zip, and the trail pruned by the
  * command itself to a day of history.
  */
 Schedule::command('backup:database')
-    ->everyFifteenMinutes()
+    ->everyFiveMinutes()
     ->withoutOverlapping()
     ->runInBackground();

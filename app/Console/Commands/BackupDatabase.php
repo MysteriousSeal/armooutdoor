@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 /**
- * The scheduled archive: the database alone, taken every quarter hour and
+ * The scheduled archive: the database alone, taken every five minutes and
  * pruned to a day of history. The full archive, images and private files
  * included, stays a deliberate act in the back office.
  */

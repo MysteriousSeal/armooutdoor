@@ -54,7 +54,7 @@ class SiteBackup
      *
      * Orders and stock move by the minute; the images and the private files
      * move rarely and weigh most of a full archive. Taking the database on
-     * its own is what makes a quarter-hourly rhythm affordable, and the
+     * its own is what makes a five-minute rhythm affordable, and the
      * name says which kind it is so the two never get confused.
      */
     public static function createDatabase(): string

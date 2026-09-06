@@ -10793,8 +10793,8 @@ a.order-stepper-btn:focus-visible {
     color: var(--text-muted);
 }
 
-/* Which kind of archive a row holds: the quarter-hourly database one, or
-   the full one somebody took by hand. */
+/* Which kind of archive a row holds: the scheduled database one, or the
+   full one somebody took by hand. */
 .backup-kind {
     padding: 0.05rem 0.4rem;
     font-size: 0.65rem;
