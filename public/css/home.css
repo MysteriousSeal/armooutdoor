@@ -1,11 +1,11 @@
 /*
  * The free-shipping strip. It sits above the site header on the homepage
- * only, so it has to earn its place in one line: quiet ground, one figure
- * carrying the weight, and no button pretending there is more to do.
+ * only, so it has to earn its place in one line: olive wash, the threshold
+ * as a ticket stub, and no button pretending there is more to do.
  */
 .ship-strip {
-    background: color-mix(in srgb, var(--accent) 10%, var(--surface));
-    border-bottom: 1px solid color-mix(in srgb, var(--accent) 22%, var(--border));
+    background: color-mix(in srgb, var(--accent-heading) 14%, var(--bg));
+    border-bottom: 1px solid var(--accent-heading);
 }
 
 .ship-strip-inner {
@@ -13,52 +13,76 @@
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.5rem 0.7rem;
     max-width: 1280px;
     margin: 0 auto;
-    padding: 0.55rem 1.5rem;
+    padding: 0.58rem 1.5rem;
     font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.015em;
     line-height: 1.4;
     text-align: center;
-    color: var(--accent-hover);
+    color: var(--accent-heading);
 }
 
 .ship-strip-icon {
     display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.55rem;
+    height: 1.55rem;
     flex-shrink: 0;
-    color: var(--accent);
+    color: var(--accent-heading);
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 42%, var(--border));
+}
+
+.ship-strip-copy {
+    min-width: 0;
 }
 
 .ship-strip-amount {
+    display: inline-block;
+    padding: 0.07em 0.48em 0.09em;
+    margin: 0 0.08em;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
-    letter-spacing: -0.01em;
-    color: var(--text);
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+    vertical-align: 0.05em;
+    color: var(--bg);
+    background: var(--accent-heading);
 }
 
-/* A qualifier, not a second message. */
+/* A postal marking, not a second message. */
 .ship-strip-note {
     position: relative;
-    padding-left: 0.85rem;
-    color: var(--text-muted);
+    padding-left: 0.95rem;
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--accent-heading) 78%, var(--text-muted));
 }
 
 .ship-strip-note::before {
     content: '';
     position: absolute;
-    left: 0.35rem;
+    left: 0.4rem;
     top: 50%;
-    width: 3px;
-    height: 3px;
-    margin-top: -1.5px;
-    background: currentColor;
-    border-radius: 50%;
-    opacity: 0.6;
+    width: 1px;
+    height: 0.75em;
+    margin-top: -0.375em;
+    background: color-mix(in srgb, var(--accent-heading) 45%, var(--border));
 }
 
-/* Stacked, the divider dot reads as a bullet on a list of one. */
-@media (max-width: 480px) {
+@media (max-width: 640px) {
+    .ship-strip-inner {
+        padding: 0.5rem 1rem 0.55rem;
+        gap: 0.35rem 0.55rem;
+    }
+
     .ship-strip-note {
+        flex-basis: 100%;
         padding-left: 0;
     }
 
@@ -68,8 +92,8 @@
 }
 
 [data-theme='dark'] .ship-strip {
-    background: color-mix(in srgb, var(--accent) 16%, var(--surface));
-    border-bottom-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+    background: color-mix(in srgb, var(--accent-heading) 16%, var(--surface));
+    border-bottom-color: var(--accent-heading);
 }
 
 /*

@@ -25,16 +25,32 @@ An archive that catches nothing throws rather than reporting success, because `Z
 Nothing fires until the scheduler is registered. Either give Laravel its minute, which is where future jobs will live too:
 
 ```
-* * * * * cd /var/www/armooutdoor.fr && php artisan schedule:run >> /dev/null 2>&1
+* * * * * cd /var/www/armooutdoor.fr && /usr/bin/php artisan schedule:run >> /var/log/armo-schedule.log 2>&1
 ```
+
+Two details decide whether this works at all. **Give `php` its absolute path**: cron runs with a `PATH` of `/usr/bin:/bin` and nothing else, so a PHP installed anywhere else is simply not found — and **keep the output**, because `>> /dev/null 2>&1` is what makes that failure invisible. Check the path with `which php` and use what it prints.
 
 or call the command directly if you would rather not run a minute-cron for one job:
 
 ```
-*/5 * * * * cd /var/www/armooutdoor.fr && php artisan backup:database >> /dev/null 2>&1
+*/5 * * * * cd /var/www/armooutdoor.fr && /usr/bin/php artisan backup:database >> /var/log/armo-backup.log 2>&1
 ```
 
 `deploy.sh` runs `config:cache`, so a change to `BACKUP_DATABASE_KEEP` only takes effect after a deploy.
+
+### When nothing runs
+
+In order, because the first two causes account for nearly all of it:
+
+1. **Run the command by hand**, as the user cron uses: `cd /var/www/armooutdoor.fr && php artisan backup:database`. If this fails, cron is innocent and the error is on screen.
+2. **Check `php` resolves in cron's `PATH`**, which holds only `/usr/bin:/bin`. `which php` tells you where it really is; use that absolute path in the crontab.
+3. **Stop discarding the output.** A line ending in `>> /dev/null 2>&1` cannot tell you anything. Point it at a file and read it after the next tick.
+4. **Confirm cron itself is running and owns those lines**: `systemctl status cron` and `crontab -l` as the intended user. A crontab written as one user does not run as another.
+5. **Check the lock**, if a run was once killed mid-zip: `withoutOverlapping` keeps a cache mutex, and until this was given a ten-minute expiry a dead run could hold it for a full day. `php artisan cache:clear` releases it.
+6. **Check the app is not in maintenance mode**: scheduled tasks do not run while `php artisan down` is in force.
+7. **Check who owns `storage/app/private/backups`.** The cron user has to be able to write there, and archives written as root are a problem of their own the day the web user needs them.
+
+`storage/logs/laravel.log` carries anything the command itself reported: a failed backup is logged at error level.
 
 ---
 

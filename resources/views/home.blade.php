@@ -11,9 +11,9 @@
         <aside class="ship-strip" aria-label="{{ __('store.home_ship_banner_title', ['amount' => $freeShippingAmount]) }}">
             <p class="ship-strip-inner">
                 <span class="ship-strip-icon" aria-hidden="true">
-                    @include('partials.icon', ['name' => 'truck-fast', 'size' => 15])
+                    @include('partials.icon', ['name' => 'truck-fast', 'size' => 13])
                 </span>
-                <span>{!! __('store.home_ship_strip', ['amount' => '<b class="ship-strip-amount">'.e($freeShippingAmount).'</b>']) !!}</span>
+                <span class="ship-strip-copy">{!! __('store.home_ship_strip', ['amount' => '<b class="ship-strip-amount">'.e($freeShippingAmount).'</b>']) !!}</span>
                 <span class="ship-strip-note">{{ __('store.home_ship_strip_note') }}</span>
             </p>
         </aside>
