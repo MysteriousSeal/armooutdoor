@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-06 — v1.14.0 — build Z7AQ6T
+
+### Storefront
+
+- **Google Ads learns when an ad becomes an order.** The conversion tag from Merchant Center rides the existing gtag loader, behind the same consent as everything else: nothing loads on refusal or silence. The purchase conversion fires once, on the redirect that follows payment, carrying the order number as Google's dedupe key with the amount and currency — never a name, an address or an item — and the Content-Security-Policy opens the Ads hosts only where the id is configured.
+
+- **The cookie banner slims to the CNIL's first layer.** Purposes, actors, the right to change one's mind — the details keep living behind « En savoir plus », and the exempt cookies no longer take up room in a consent request they never needed. The privacy policy and the mentions légales both name the third tool, say exactly what travels, and the old no-ad-tracking claim narrows to the precise truth: no personalisation, no profiling.
+
+**No migration** — but the production `.env` needs `GOOGLE_ADS_ID` and `GOOGLE_ADS_CONVERSION_LABEL` for the tag to load.
+
 ## 2026-09-06 — v1.13.0 — build TPLUEF
 
 ### Storefront
