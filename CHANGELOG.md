@@ -2,6 +2,20 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-07 — v1.22.0 — build T3AU9K
+
+### Storefront
+
+- **Le glossaire passe de quarante à soixante et onze mots, et l'alphabet n'a plus de trou.** Trente et un termes du tir sportif rejoignent le vocabulaire du catalogue : la ligne de mire et ses deux organes, la dérive et l'élévation, le groupement, la détente et son lâcher, le zérotage et la trajectoire qui explique pourquoi un zéro n'existe qu'à une distance, la portée utile qu'il ne faut pas confondre avec la maximale, les quatre règles, le pas de tir, le cessez-le-feu, le bench rest et le plinking, le canon rayé, le carnet de tir, l'écouvillon, le bac à ultrasons, le windage gravé sur la tourelle, le dix intérieur qui ne rapporte aucun point et départage les égalités, et le yard qui suffit à décaler un zéro quand on le prend pour un mètre. Les vingt-six lettres ouvrent désormais quelque chose : un index qui saute une lettre fait chercher ce qui manque plutôt que ce qui est là.
+
+- **Un mot peut désormais valoir sa définition sans que la boutique vende quoi que ce soit pour lui.** Une entrée n'existait qu'accrochée à un rayon ou à un filtre. Vingt-cinq d'entre elles n'ont plus rien à vendre et disent à la place de quelle partie du sport elles relèvent, la visée, la technique, la sécurité, la balistique, la compétition, en gardant la forme de la colonne dans les gris de la page plutôt qu'en dépensant une couleur qu'elles n'ont pas gagnée.
+
+### Under the hood
+
+- **La lettre d'un mot accentué suit désormais sa lettre simple.** La clé de tri repliait les accents, pas l'initiale : « Élévation » aurait ouvert un groupe É après le Z en laissant le E vide, soit exactement le contraire de ce qu'un index doit faire.
+
+**No migration.**
+
 ## 2026-09-07 — v1.21.0 — build DPXHUP
 
 ### Storefront
