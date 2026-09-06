@@ -59,6 +59,23 @@ class GuideGlossairePageTest extends TestCase
         $this->assertSame('Voir les répliques électriques', $aeg['label']);
     }
 
+    public function test_a_word_the_shop_sells_nothing_for_still_earns_its_place(): void
+    {
+        $notions = Glossary::resolved()->where('kind', 'notion');
+
+        // At least a fifth of the glossary is vocabulary the catalogue has
+        // no shelf for: the sport's own words, not the shop's stock list.
+        $this->assertGreaterThanOrEqual(15, $notions->count());
+
+        foreach ($notions as $entry) {
+            $this->assertNull($entry['url']);
+            $this->assertNull($entry['count']);
+            // It says which part of the sport it belongs to, and stops.
+            $this->assertNotSame('', $entry['source']);
+            $this->assertStringNotContainsString('·', $entry['source']);
+        }
+    }
+
     public function test_every_link_says_what_it_does(): void
     {
         foreach (Glossary::resolved() as $entry) {
@@ -134,9 +151,9 @@ class GuideGlossairePageTest extends TestCase
     {
         $kinds = Glossary::resolved()->groupBy('kind');
 
-        // Three destinations, three colours: stock you can filter, a shelf,
-        // and the shop's own writing.
-        $this->assertEqualsCanonicalizing(['filtre', 'rayon', 'lecture'], $kinds->keys()->all());
+        // Four kinds, four colours: stock you can filter, a shelf, the
+        // shop's own writing, and a word it sells nothing for.
+        $this->assertEqualsCanonicalizing(['filtre', 'rayon', 'lecture', 'notion'], $kinds->keys()->all());
 
         $html = $this->get('/guides/glossaire')->assertOk()->getContent();
 

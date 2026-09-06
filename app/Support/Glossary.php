@@ -33,6 +33,138 @@ class Glossary
                 'filter' => ['category' => 'repliques-airsoft', 'label' => 'Propulsion', 'value' => 'Électrique (AEG)', 'see' => 'les répliques électriques'],
             ],
             [
+                'term' => 'Bench rest',
+                'aliases' => ['tir au repos', 'appui'],
+                'definition' => 'Discipline où la carabine repose sur des appuis avant et arrière, le tireur ne servant qu\'à déclencher. En retirant l\'homme de l\'équation, on mesure ce que valent l\'arme et la munition, et rien d\'autre.',
+                'field' => 'Discipline',
+            ],
+            [
+                'term' => 'Canon rayé',
+                'aliases' => ['rayures', 'pas de rayure', 'âme'],
+                'definition' => 'Un canon dont l\'âme porte des rainures hélicoïdales qui font tourner le projectile sur lui-même. Cette rotation le stabilise en vol. Le pas, exprimé en pouces, dit la longueur qu\'il faut au projectile pour faire un tour complet.',
+                'field' => 'Arme',
+            ],
+            [
+                'term' => 'Carnet de tir',
+                'aliases' => ['licence', 'FFTir', 'contrôle'],
+                'definition' => 'Le registre que tient un tireur licencié : chaque séance en club y est datée et visée. C\'est lui qui prouve la pratique régulière exigée pour obtenir puis renouveler une autorisation de catégorie B.',
+                'field' => 'Pratique',
+            ],
+            [
+                'term' => 'Cessez-le-feu',
+                'aliases' => ['stop', 'commandement'],
+                'definition' => 'Le commandement qui arrête tout tir sur le pas. Il ne se discute pas et n\'attend pas la fin d\'une série : on repose l\'arme, on ouvre la culasse, on recule. N\'importe qui sur la ligne peut le donner.',
+                'field' => 'Sécurité',
+            ],
+            [
+                'term' => 'Cran de mire',
+                'aliases' => ['hausse', 'organe arrière'],
+                'definition' => 'L\'organe de visée arrière, l\'encoche ou l\'œilleton par lequel l\'œil regarde. Avec le guidon, il forme la ligne de mire. C\'est lui qu\'on déplace pour corriger, jamais le guidon en premier.',
+                'field' => 'Visée',
+            ],
+            [
+                'term' => 'Dérive',
+                'aliases' => ['windage', 'réglage latéral'],
+                'definition' => 'Le réglage horizontal de la visée, et par extension l\'écart latéral que le vent impose au projectile. Corriger en dérive, c\'est déplacer le point d\'impact à gauche ou à droite sans toucher à la hauteur.',
+                'field' => 'Visée',
+            ],
+            [
+                'term' => 'Détente',
+                'aliases' => ['pré-course', 'poids de départ', 'lâcher'],
+                'definition' => 'La pièce que l\'index actionne, et tout ce qu\'elle fait sentir : la pré-course avant la résistance, le poids qu\'il faut atteindre, puis le départ. Un bon lâcher surprend le tireur ; un lâcher anticipé tire l\'arme avec lui.',
+                'field' => 'Technique',
+            ],
+            [
+                'term' => 'Dioptre',
+                'aliases' => ['œilleton', 'visée ouverte'],
+                'definition' => 'Organe de visée arrière percé d\'un trou, au travers duquel l\'œil centre naturellement le guidon. Plus précis qu\'un cran de mire, il équipe les carabines de 10 mètres et la plupart des armes de match.',
+                'link' => ['kind' => 'Rayon', 'label' => 'Optiques', 'category' => 'optiques'],
+            ],
+            [
+                'term' => 'Groupement',
+                'aliases' => ['grouper', 'dispersion'],
+                'definition' => 'L\'ensemble des impacts d\'une même série, et la mesure de leur écartement. Un groupement serré mais décentré est une bonne nouvelle : l\'arme et le tireur sont réguliers, il ne reste qu\'à corriger la visée.',
+                'field' => 'Technique',
+            ],
+            [
+                'term' => 'Guidon',
+                'aliases' => ['organe avant', 'front sight'],
+                'definition' => 'L\'organe de visée avant, celui qu\'on pose sur la cible. Sa largeur compte : un guidon fin découvre la cible et convient au papier, un guidon large se retrouve vite et convient au tir rapide.',
+                'field' => 'Visée',
+            ],
+            [
+                'term' => 'Ligne de mire',
+                'aliases' => ['alignement', 'prise de visée'],
+                'definition' => 'La droite qui passe par l\'œil, le cran de mire et le guidon. Elle doit être alignée avant que la cible n\'entre en jeu : c\'est sur les organes que l\'œil fait le point, pas sur la cible, qui reste volontairement floue.',
+                'field' => 'Visée',
+            ],
+            [
+                'term' => 'Parallaxe',
+                'aliases' => ['défaut de parallaxe', 'réglage AO'],
+                'definition' => 'Le décalage apparent entre le réticule et la cible quand l\'œil bouge derrière la lunette. Il naît d\'une mise au point faite à une autre distance que celle du tir, et se corrige par la bague prévue pour cela.',
+                'link' => ['kind' => 'Rayon', 'label' => 'Optiques', 'category' => 'optiques'],
+            ],
+            [
+                'term' => 'Pas de tir',
+                'aliases' => ['ligne de tir', 'poste'],
+                'definition' => 'L\'emplacement d\'où l\'on tire, matérialisé au sol. On n\'y manipule une arme que dirigée vers les cibles, et on ne le franchit qu\'après le cessez-le-feu.',
+                'field' => 'Sécurité',
+            ],
+            [
+                'term' => 'Plinking',
+                'aliases' => ['tir de loisir', 'canettes'],
+                'definition' => 'Le tir de loisir sur cibles improvisées, boîtes de conserve et gongs de fortune, sans notation ni règlement. C\'est ce que la plupart des carabines à plombs font le plus souvent, et ce qui use le plus de cibles réactives.',
+                'field' => 'Discipline',
+            ],
+            [
+                'term' => 'Point rouge',
+                'aliases' => ['red dot', 'holographique'],
+                'definition' => 'Viseur qui projette un point lumineux dans un verre, sans grossissement. Les deux yeux restent ouverts, le point se pose sur la cible, et la position de la tête cesse d\'être critique. Rapide de près, pauvre en précision au-delà.',
+                'link' => ['kind' => 'Rayon', 'label' => 'Optiques', 'category' => 'optiques'],
+            ],
+            [
+                'term' => 'Portée utile',
+                'aliases' => ['portée pratique', 'portée maximale'],
+                'definition' => 'La distance jusqu\'à laquelle le tir reste régulier et lisible, à distinguer de la portée maximale, qui est celle où le projectile finit par retomber. Seule la seconde compte pour la sécurité, seule la première pour le résultat.',
+                'field' => 'Balistique',
+            ],
+            [
+                'term' => 'Quatre règles',
+                'aliases' => ['sécurité', 'manipulation'],
+                'definition' => 'Toute arme est considérée comme chargée. Le canon ne pointe jamais ce qu\'on n\'accepte pas de détruire. L\'index reste hors de la détente tant que la visée n\'est pas prise. On identifie la cible et ce qui se trouve derrière.',
+                'field' => 'Sécurité',
+            ],
+            [
+                'term' => 'Réticule',
+                'aliases' => ['croisillon', 'mildot'],
+                'definition' => 'Le dessin gravé ou projeté dans une optique : croix simple, échelle graduée, points de compensation. Un réticule dans le premier plan focal grandit avec l\'image et garde ses mesures justes à tout grossissement.',
+                'link' => ['kind' => 'Rayon', 'label' => 'Optiques', 'category' => 'optiques'],
+            ],
+            [
+                'term' => 'Silhouette métallique',
+                'aliases' => ['gong', 'plaque basculante'],
+                'definition' => 'Cible d\'acier découpée qui tombe ou sonne quand elle est touchée. Elle rend le résultat audible et se réarme d\'un geste, mais impose une distance minimale et un acier prévu pour l\'énergie qu\'il reçoit.',
+                'link' => ['kind' => 'Rayon', 'label' => 'Cibles carton & métal', 'category' => 'cibles-carton-metal'],
+            ],
+            [
+                'term' => 'Trajectoire',
+                'aliases' => ['cloche', 'chute'],
+                'definition' => 'Le chemin courbe que suit le projectile, qui tombe dès la sortie du canon. La visée est donc pointée légèrement vers le haut, et la trajectoire croise deux fois la ligne de mire : d\'où le second zéro, plus loin que le premier.',
+                'field' => 'Balistique',
+            ],
+            [
+                'term' => 'V0',
+                'aliases' => ['vitesse initiale', 'vitesse à la bouche'],
+                'definition' => 'La vitesse du projectile à l\'instant où il quitte le canon, avant que l\'air ne la mange. C\'est elle que mesure un chronographe, et c\'est d\'elle et de la masse que se déduit l\'énergie.',
+                'link' => ['kind' => 'Guide', 'label' => 'Joules et FPS', 'route' => 'guides.joules'],
+            ],
+            [
+                'term' => 'Zérotage',
+                'aliases' => ['réglage', 'mise à zéro'],
+                'definition' => 'Régler la visée pour que le point d\'impact rejoigne le point visé à une distance choisie. Un zéro n\'existe qu\'à cette distance : plus près et plus loin, le projectile passe ailleurs, ce que la trajectoire explique.',
+                'field' => 'Technique',
+            ],
+            [
                 'term' => 'Allume-feu à magnésium',
                 'aliases' => ['pierre à feu', 'firesteel', 'bushcraft'],
                 'definition' => 'Barreau de magnésium et tige d\'alliage ferreux : on gratte le premier pour faire des copeaux, on frappe le second pour les enflammer. Il fonctionne mouillé, ne s\'épuise pas comme un briquet, et demande de l\'entraînement avant d\'en dépendre.',
@@ -305,6 +437,16 @@ class Glossary
                         $entry['url'] = localized_route('categories.show', ['category' => $filter['category']])
                             .'?'.http_build_query(['filter' => [$filter['label'] => $filter['value']]]);
                     }
+
+                    return $entry;
+                }
+
+                // A word can be worth defining without the shop selling
+                // anything for it. It says which part of the sport it
+                // belongs to, and stops there.
+                if (! isset($entry['link'])) {
+                    $entry['kind'] = 'notion';
+                    $entry['source'] = $entry['field'];
 
                     return $entry;
                 }

@@ -1327,6 +1327,14 @@
     --gk-line: #c6d8e8;
 }
 
+/* A word the shop sells nothing for: no colour to spend, so it keeps the
+   column's shape in the page's own greys. */
+.gloss-where.is-notion {
+    --gk-ink: #5f5c56;
+    --gk-wash: #f2f1ee;
+    --gk-line: #e0ded9;
+}
+
 [data-theme='dark'] .gloss-where.is-filtre {
     --gk-ink: #8fc9a5;
     --gk-wash: #23312a;
@@ -1343,6 +1351,12 @@
     --gk-ink: #86b6e0;
     --gk-wash: #212f3b;
     --gk-line: #3a5570;
+}
+
+[data-theme='dark'] .gloss-where.is-notion {
+    --gk-ink: #b6b1a9;
+    --gk-wash: #2a2825;
+    --gk-line: #423f3a;
 }
 
 /* Where the word is met: the thing a dictionary cannot say. */
