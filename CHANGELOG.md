@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-06 — v1.15.0 — build 3KTFPE
+
+### Admin
+
+- **The dashboard opens on the catalogue's standing.** Four tiles outside the period, above the alerts: the references a customer can pick — an active product without declinations, or each active declination of an active product, an empty shelf counting like a full one — and the units on those shelves, active only on both counts. Then what the open purchase orders still owe, split the same way: references not yet for sale waiting on their first delivery, and the units the shelves of what is on sale will gain. The incoming pair wears a dashed stroke: promised, not shelved.
+
+**No migration.**
+
 ## 2026-09-06 — v1.14.1 — build DOTBDA
 
 ### Storefront
