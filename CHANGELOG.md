@@ -2,6 +2,22 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-07 — v1.19.0 — build RT5Q4J
+
+### Storefront
+
+- **The catalogue page chooses its order.** The five orders the category pages offer lived where only a category page could reach them, which is why the page listing every product had no sort at all. Named once now, both listings read the same list and neither can drift from the other. Asking for the order the page was already in goes back to the bare address instead of standing beside it as a second one, and a reordered listing stops claiming a page number that belongs to another order: page two of the cheapest-first does not hold what page two of the default holds.
+
+- **The catalogue stops leading only back into itself.** Fourteen pages listing every product, and nothing in the body pointed at the categories — the pages a search engine has the best reason to rank. The rayons now sit in the toolbar with their counts, a rayon holding nothing for sale is not offered, and a line below the grid hands the reader over to the guides. Each product in the page's own schema is named as well as linked, so the list says what it contains without being crawled first.
+
+- **The home page's guides turn over every morning.** The strip had room for two and the shelf held three, so the two that showed were the two that had been typed into the page: the third was advertised nowhere but the footer. The window slides by one guide a day, read off the date so a day looks the same to everyone, and it turns at French midnight rather than UTC's. The shelf itself is written once and read by the guides index too, so a fourth guide is one entry in one file and joins the rotation on its own.
+
+- **Each reading card says what it is and which rayon it advises on.** « Guide » alone did not say which shelf, and an article labelled « Conseils » alone did not say it came from the blog.
+
+- **The testimonials read like a range ticket.** An olive stub across the top marks the card the way the shipping strip is marked, the score is drawn rather than typed, and a logbook rule runs from the last star to the edge so the row reads as a rating and not decoration. The reviewer signs with their monogram, cut from the same cloth as the blog comments' avatars, and dark mode warms the card with a little of the same olive.
+
+**No migration.**
+
 ## 2026-09-07 — v1.18.1 — build YQDWSB
 
 ### Storefront
