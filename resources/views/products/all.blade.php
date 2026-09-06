@@ -2,7 +2,7 @@
 
 @section('title', paginated_title('Tous les produits', $products).' — '.config('app.name'))
 @section('meta_description', 'Tout le catalogue Armo Outdoor sur une page : cibles, matériel de stand, vêtements, terrain, quotidien, munitions et optiques.')
-@section('canonical', paginated_canonical(localized_route('products.all'), $products))
+@section('canonical', listing_canonical(localized_route('products.all'), $products, $sort))
 
 @push('head')
     <link rel="stylesheet" href="{{ versioned_asset('css/categories.css') }}">
@@ -34,7 +34,7 @@
             '@@type' => 'CollectionPage',
             'name' => 'Tous les produits',
             'description' => 'Tout le catalogue Armo Outdoor sur une page.',
-            'url' => paginated_canonical(localized_route('products.all'), $products),
+            'url' => listing_canonical(localized_route('products.all'), $products, $sort),
             'inLanguage' => 'fr-FR',
             'mainEntity' => [
                 '@@type' => 'ItemList',
@@ -43,6 +43,7 @@
                 'itemListElement' => $products->values()->map(fn ($product, $index) => [
                     '@@type' => 'ListItem',
                     'position' => $products->firstItem() + $index,
+                    'name' => $product->localizedName(),
                     'url' => localized_route('products.show', ['product' => $product->slug]),
                 ])->all(),
             ],
@@ -67,6 +68,21 @@
 
         @if ($products->isNotEmpty())
             <div class="category-toolbar">
+                {{-- The rayons, so the page that lists every product also leads
+                     somewhere other than back into itself. --}}
+                <nav class="subcat-nav" aria-label="{{ __('store.shop_categories') }}">
+                    <span class="subcat-chip is-active">{{ __('store.all_products') }}</span>
+                    @foreach ($categories as $rail)
+                        <a
+                            href="{{ localized_route('categories.show', ['category' => $rail->slug]) }}"
+                            class="subcat-chip"
+                        >
+                            {{ $rail->localizedName() }}
+                            <span class="subcat-chip-count">{{ $rail->listingCount() }}</span>
+                        </a>
+                    @endforeach
+                </nav>
+
                 @include('partials.sort-form', [
                     'action' => localized_route('products.all'),
                     'sort' => $sort,
@@ -85,6 +101,14 @@
             </div>
 
             @include('partials.pager', ['paginator' => $products])
+
+            <p class="listing-note">
+                Vous ne savez pas par où commencer ? La boutique écrit
+                <a href="{{ route('guides.index') }}">ses guides d'achat</a>
+                d'après ce que le rayon vend vraiment : quelle cible pour quelle
+                distance, quel entretien pour quel calibre, et ce que la loi
+                range en catégorie D, C, B ou A.
+            </p>
         @endif
     </div>
 @endsection

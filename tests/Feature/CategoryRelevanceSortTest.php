@@ -72,7 +72,7 @@ class CategoryRelevanceSortTest extends TestCase
         $this->sell($soldOut, 99); // Best seller, but nothing to buy.
         $this->recordViews($seen, 5);
 
-        $names = $this->get('/categories/'.$category->slug.'?sort=relevance')
+        $names = $this->get('/categories/'.$category->slug)
             ->assertOk()
             ->viewData('products')
             ->map(fn (Product $product) => $product->localizedName())
@@ -93,7 +93,7 @@ class CategoryRelevanceSortTest extends TestCase
         $this->sell($refunded, 10);
         Order::query()->latest('id')->first()->update(['status' => 'refunded']);
 
-        $names = $this->get('/categories/'.$category->slug.'?sort=relevance')
+        $names = $this->get('/categories/'.$category->slug)
             ->assertOk()
             ->viewData('products')
             ->map(fn (Product $product) => $product->localizedName())

@@ -2,7 +2,7 @@
 
 @section('title', paginated_title($category->localizedName(), $products).' — '.config('app.name'))
 @section('meta_description', $category->localizedDescription())
-@section('canonical', paginated_canonical(localized_route('categories.show', ['category' => $category->slug]), $products))
+@section('canonical', listing_canonical(localized_route('categories.show', ['category' => $category->slug]), $products, $sort))
 @section('og_image', $category->imageUrl() ?? '')
 @section('og_image_alt', $category->localizedName())
 
@@ -40,7 +40,7 @@
             '@@type' => 'CollectionPage',
             'name' => $category->localizedName(),
             'description' => $category->localizedDescription(),
-            'url' => paginated_canonical(localized_route('categories.show', ['category' => $category->slug]), $products),
+            'url' => listing_canonical(localized_route('categories.show', ['category' => $category->slug]), $products, $sort),
             'inLanguage' => 'fr-FR',
             'isPartOf' => ['@@id' => \App\Support\OrganizationSchema::websiteId()],
             'mainEntity' => [

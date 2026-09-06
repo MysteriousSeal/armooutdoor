@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\Product;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
 /**
@@ -24,6 +25,29 @@ class ProductSort
     public static function resolve(mixed $requested): string
     {
         return in_array($requested, self::OPTIONS, true) ? (string) $requested : self::DEFAULT;
+    }
+
+    /**
+     * Where a listing should send a visitor who asked for the order it was
+     * already in.
+     *
+     * The selector is a plain form, so choosing « Pertinence » submits it like
+     * any other value and lands on a second address holding the first one's
+     * page. Rather than let both be crawled and rely on the canonical to sort
+     * them out afterwards, the default order goes back to the bare listing and
+     * keeps whatever else the URL was carrying.
+     *
+     * @return string|null null when the address is already the right one
+     */
+    public static function redirectUrl(Request $request): ?string
+    {
+        if ($request->query('sort') !== self::DEFAULT) {
+            return null;
+        }
+
+        $query = $request->except('sort');
+
+        return $request->url().($query === [] ? '' : '?'.http_build_query($query));
     }
 
     /**

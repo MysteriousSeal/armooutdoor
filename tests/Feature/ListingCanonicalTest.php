@@ -48,14 +48,39 @@ class ListingCanonicalTest extends TestCase
             ->assertSee('<link rel="canonical" href="'.url('/categories/'.$category->slug).'">', false);
     }
 
-    public function test_sorting_and_filtering_stay_out_of_the_canonical(): void
+    public function test_a_reordered_page_names_the_listing_and_not_a_page_number(): void
     {
         $category = $this->categoryWith(45);
 
-        // Sorting reorders the same products, so every order shares one address.
+        // Page two of the cheapest-first order holds different products than
+        // page two of the default one, so it cannot claim that address. The
+        // whole reordered listing answers to the listing's own.
+        $this->get('/categories/'.$category->slug.'?sort=price-asc&page=2')
+            ->assertOk()
+            ->assertSee('<link rel="canonical" href="'.url('/categories/'.$category->slug).'">', false);
+    }
+
+    public function test_an_unknown_sort_is_the_default_order_and_keeps_its_page(): void
+    {
+        $category = $this->categoryWith(45);
+
+        // Nothing was reordered, so page two is page two.
         $this->get('/categories/'.$category->slug.'?sort=price_asc&page=2')
             ->assertOk()
             ->assertSee('<link rel="canonical" href="'.url('/categories/'.$category->slug).'?page=2">', false);
+    }
+
+    public function test_the_catalogue_page_follows_the_same_rules(): void
+    {
+        $this->categoryWith(45);
+
+        $this->get('/produits?sort=price-desc&page=2')
+            ->assertOk()
+            ->assertSee('<link rel="canonical" href="'.url('/produits').'">', false);
+
+        $this->get('/produits?page=2')
+            ->assertOk()
+            ->assertSee('<link rel="canonical" href="'.url('/produits').'?page=2">', false);
     }
 
     public function test_a_page_number_past_the_end_names_the_page_it_actually_served(): void

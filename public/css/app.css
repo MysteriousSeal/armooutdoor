@@ -869,6 +869,29 @@ body.has-menu-open {
     margin: 0 0 0 auto;
 }
 
+/* The line that hands the catalogue's readers over to the guides. */
+.listing-note {
+    max-width: 46rem;
+    margin: 2.25rem auto 0;
+    padding-top: 1.4rem;
+    font-size: 0.9rem;
+    line-height: 1.65;
+    text-align: center;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+}
+
+.listing-note a {
+    font-weight: 600;
+    color: var(--accent-heading);
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+}
+
+.listing-note a:hover {
+    color: var(--accent-hover);
+}
+
 .category-filters {
     display: flex;
     flex-wrap: wrap;

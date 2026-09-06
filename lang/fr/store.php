@@ -126,6 +126,7 @@ return [
     'view_category' => 'Voir la catégorie',
     'home_cat_go' => 'Voir',
     'all_products' => 'Tous les produits',
+    'shop_categories' => 'Catégories',
     'shop_subcategories' => 'Sous-catégories',
     // Mes documents.
     'documents_title' => 'Mes documents',

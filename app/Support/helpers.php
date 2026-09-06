@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\ProductSort;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Number;
@@ -131,6 +132,27 @@ if (! function_exists('paginated_canonical')) {
         }
 
         return $url.(str_contains($url, '?') ? '&' : '?').'page='.$page;
+    }
+}
+
+if (! function_exists('listing_canonical')) {
+    /**
+     * The canonical URL of a listing that can be reordered.
+     *
+     * Page two of the cheapest-first order holds different products than page
+     * two of the default order, so pointing one at the other would name a page
+     * that does not contain them. A reordered listing is a reshuffle of the
+     * whole collection rather than a page of it: whatever page it is on, it
+     * answers to the listing's own address, and only the default order counts
+     * its pages.
+     */
+    function listing_canonical(string $url, LengthAwarePaginator $paginator, string $sort): string
+    {
+        if ($sort !== ProductSort::DEFAULT) {
+            return $url;
+        }
+
+        return paginated_canonical($url, $paginator);
     }
 }
 

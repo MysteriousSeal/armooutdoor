@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Product;
-use App\Support\ProductRelevance;
 use App\Support\ProductSort;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -50,6 +49,12 @@ class CategoryController extends Controller
             }
 
             abort(404);
+        }
+
+        // Placed after the slug is known to be a real one, so a URL that is
+        // both stale and needlessly sorted still travels a single hop.
+        if (($url = ProductSort::redirectUrl($request)) !== null) {
+            return redirect($url, 301);
         }
 
         // Other code (e.g. the nav) reads request()->route('category')
@@ -244,5 +249,4 @@ class CategoryController extends Controller
     {
         return ProductSort::apply($products, $sort);
     }
-
 }
