@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-07 — v1.20.0 — build UDEJZF
+
+### Storefront
+
+- **Un quatrième guide : joules et FPS.** Le magasin annonce des FPS, la loi compte en joules et les terrains aussi, et rien sur le site ne reliait les deux. Le guide porte la formule, une calculette qui prend une bille et une vitesse dans les deux unités, un tableau de quarante-neuf conversions calculé plutôt que recopié, les raisons pour lesquelles une même réplique ne chrone pas deux fois pareil, et cinq questions. Toute la page tient sur un axe de 0,08 à 20 joules, logarithmique parce qu'un axe linéaire écraserait dans ses deux premiers pour cent tout ce qui intéresse un joueur d'airsoft : la calculette y promène une aiguille, et les limites de terrain s'y alignent juste avant la barre légale, là où elles se trouvent réellement. Le tableau fonce à mesure qu'il approche des 2 joules et signale les cases qui les ont franchis. Sans JavaScript, la calculette ne s'affiche pas du tout et le tableau répond à sa place.
+
+### Under the hood
+
+- **Le plan de site lit l'étagère au lieu de la recopier.** Les guides y étaient énumérés à la main : un guide de plus et il manquait au sitemap sans que rien ne le signale. Il parcourt désormais la même liste que la page d'index et la page d'accueil.
+
+**No migration.**
+
 ## 2026-09-07 — v1.19.0 — build RT5Q4J
 
 ### Storefront
