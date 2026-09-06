@@ -23,7 +23,18 @@
     ];
 @endphp
 
-<figure class="glab-scale" data-glab-scale @isset($at) style="--glab-scale-at: {{ round($position($at), 2) }}%" @endisset>
+@php
+    // The brace under the terrain caps: one label for the three of them,
+    // because they fall within seven per cent of each other and three
+    // labels would collide. Their crowding is the thing worth saying.
+    $capPositions = collect($caps ?? [])->map(fn (float $cap): float => $position($cap));
+@endphp
+
+<figure
+    class="glab-scale"
+    data-glab-scale
+    @isset($at) style="--glab-scale-at: {{ round($position($at), 2) }}%" @endisset
+>
     <div class="glab-scale-marks" aria-hidden="true">
         <span style="--glab-mark-at: 0%">0,08 J</span>
         <span style="--glab-mark-at: {{ round($position(2.0), 2) }}%">2 J</span>
@@ -49,6 +60,16 @@
             <span class="glab-scale-needle" data-glab-needle></span>
         @endisset
     </div>
+
+    @if ($capPositions->isNotEmpty())
+        <div
+            class="glab-scale-caps"
+            style="--glab-caps-from: {{ round($capPositions->min(), 2) }}%; --glab-caps-to: {{ round($capPositions->max(), 2) }}%; --glab-caps-mid: {{ round(($capPositions->min() + $capPositions->max()) / 2, 2) }}%"
+        >
+            <span class="glab-scale-caps-brace" aria-hidden="true"></span>
+            <span class="glab-scale-caps-label">Limites de terrain</span>
+        </div>
+    @endif
 
     <figcaption class="glab-scale-legend">
         @foreach ($zones as $zone)

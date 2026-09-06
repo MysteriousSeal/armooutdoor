@@ -75,8 +75,13 @@ class GuideJoulesPageTest extends TestCase
         $this->assertSame(2, substr_count($html, 'data-glab-scale'));
         $this->assertSame(1, substr_count($html, 'glab-scale-needle'));
 
-        // The three field caps, ticked on the calculator's scale alone.
-        $this->assertSame(3, substr_count($html, 'glab-scale-cap'));
+        // The three field caps, ticked on the calculator's scale alone, and
+        // braced under a single label: they fall within seven per cent of
+        // each other, so three labels would collide and three bare ticks
+        // would say nothing.
+        $this->assertSame(3, substr_count($html, 'class="glab-scale-cap"'));
+        $this->assertSame(1, substr_count($html, 'glab-scale-caps-brace'));
+        $this->assertStringContainsString('Limites de terrain', $html);
 
         foreach (['Hors catégorie', 'Catégorie D', 'Catégorie C'] as $zone) {
             $this->assertStringContainsString('>'.$zone.'</span>', $html);

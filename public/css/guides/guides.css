@@ -773,6 +773,8 @@
     background: color-mix(in srgb, var(--text) 55%, transparent);
 }
 
+/* The needle runs through the axis, its head above it: a reading taken on
+   the line rather than a marker resting near it. */
 .glab-scale-needle {
     position: absolute;
     top: -0.3rem;
@@ -795,6 +797,41 @@
     border-left: 0.32rem solid transparent;
     border-right: 0.32rem solid transparent;
     border-top: 0.36rem solid var(--text);
+}
+
+/* ============ the terrain caps ============ */
+
+/* One brace for the three of them: they sit within seven per cent of each
+   other, so three labels would collide, and unlabelled ticks are three
+   scratches nobody can read. */
+.glab-scale-caps {
+    position: relative;
+    height: 1.5rem;
+    /* Clear of the needle's tail, which hangs below the track. */
+    margin-top: 0.55rem;
+}
+
+.glab-scale-caps-brace {
+    position: absolute;
+    top: 0;
+    left: var(--glab-caps-from);
+    width: calc(var(--glab-caps-to) - var(--glab-caps-from));
+    height: 0.32rem;
+    border: 1px solid color-mix(in srgb, var(--text) 40%, transparent);
+    border-top: 0;
+}
+
+.glab-scale-caps-label {
+    position: absolute;
+    top: 0.5rem;
+    left: var(--glab-caps-mid);
+    transform: translateX(-50%);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--text-muted);
 }
 
 .glab-scale-legend {
