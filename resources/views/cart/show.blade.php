@@ -179,6 +179,26 @@
                             {{ ($freeShippingUnlocked || $cheapestShippingCents === 0) ? __('store.shipping_free') : __('store.shipping_from_amount', ['price' => format_euros($cheapestShippingCents ?? 0)]) }}
                         </span>
                     </div>
+                    @if ($freeShippingThresholdCents !== null && $freeShippingThresholdCents > 0)
+                        @php
+                            $freeShippingProgress = min(100, (int) round($cartSubtotalCents / $freeShippingThresholdCents * 100));
+                            $freeShippingRemaining = max(0, $freeShippingThresholdCents - $cartSubtotalCents);
+                        @endphp
+                        {{-- The road to free shipping: how far along, said in
+                             euros and drawn as a bar. --}}
+                        <div class="cart-free-shipping {{ $freeShippingRemaining === 0 ? 'is-reached' : '' }}">
+                            <p class="cart-free-shipping-text">
+                                @if ($freeShippingRemaining === 0)
+                                    {{ __('store.cart_free_shipping_unlocked') }}
+                                @else
+                                    {{ __('store.cart_free_shipping_progress', ['amount' => format_euros($freeShippingRemaining)]) }}
+                                @endif
+                            </p>
+                            <div class="cart-free-shipping-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $freeShippingProgress }}" aria-label="{{ __('store.cart_free_shipping_label') }}">
+                                <div class="cart-free-shipping-fill" style="width: {{ $freeShippingProgress }}%"></div>
+                            </div>
+                        </div>
+                    @endif
                     <ul class="cart-summary-hints">
                         <li>
                             <span class="cart-summary-hints-label">{{ __('store.shipping') }}</span>

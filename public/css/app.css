@@ -3712,6 +3712,36 @@ body.has-menu-open {
     font-variant-numeric: tabular-nums;
 }
 
+/* The road to free shipping: a sentence in euros over a slim olive
+   bar, turning whole and warm once the basket crosses the line. */
+.cart-free-shipping {
+    margin: 0.85rem 0 0.35rem;
+}
+
+.cart-free-shipping-text {
+    margin: 0 0 0.4rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.cart-free-shipping.is-reached .cart-free-shipping-text {
+    color: var(--accent-heading);
+}
+
+.cart-free-shipping-track {
+    height: 0.45rem;
+    background: color-mix(in srgb, var(--accent-heading) 12%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 20%, var(--border));
+    overflow: hidden;
+}
+
+.cart-free-shipping-fill {
+    height: 100%;
+    background: var(--accent-heading);
+    transition: width 0.3s ease;
+}
+
 .cart-summary-shipping {
     display: flex;
     align-items: baseline;

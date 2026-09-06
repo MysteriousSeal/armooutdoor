@@ -152,6 +152,24 @@
             }
         }
 
+        // The road to free shipping follows every quantity change.
+        var freeBar = document.querySelector('.cart-free-shipping');
+        if (freeBar && data.freeShippingBar) {
+            freeBar.classList.toggle('is-reached', !!data.freeShippingBar.reached);
+            var freeText = freeBar.querySelector('.cart-free-shipping-text');
+            if (freeText) {
+                freeText.textContent = data.freeShippingBar.text;
+            }
+            var freeTrack = freeBar.querySelector('.cart-free-shipping-track');
+            var freeFill = freeBar.querySelector('.cart-free-shipping-fill');
+            if (freeTrack) {
+                freeTrack.setAttribute('aria-valuenow', data.freeShippingBar.progress);
+            }
+            if (freeFill) {
+                freeFill.style.width = data.freeShippingBar.progress + '%';
+            }
+        }
+
         updateCartBadges(data.itemCount);
         showToast(data.message);
     }

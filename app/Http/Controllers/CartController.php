@@ -35,8 +35,42 @@ class CartController extends Controller
             'itemCount' => $cart->quantity(),
             'freeShippingUnlocked' => $freeShippingUnlocked,
             'cheapestShippingCents' => $cheapestShippingCents,
+            // The free-shipping goal, for the progress bar: null when no
+            // threshold is set or no carrier grants it, and the bar with it.
+            'freeShippingThresholdCents' => (ShippingSetting::current()->free_shipping_carrier_ids ?? []) !== []
+                ? ShippingSetting::current()->free_shipping_threshold_cents
+                : null,
+            'cartSubtotalCents' => $cart->totalCents(),
             'estimatedShippingDate' => $this->estimatedShippingDate($lines),
         ]);
+    }
+
+    /**
+     * The progress bar's whole state, or null where no threshold applies:
+     * the same figures the page renders, refreshed for the JSON updates.
+     *
+     * @return array{reached: bool, text: string, progress: int}|null
+     */
+    private function freeShippingBar(Cart $cart): ?array
+    {
+        $setting = ShippingSetting::current();
+        $threshold = ($setting->free_shipping_carrier_ids ?? []) !== []
+            ? $setting->free_shipping_threshold_cents
+            : null;
+
+        if ($threshold === null || $threshold <= 0) {
+            return null;
+        }
+
+        $remaining = max(0, $threshold - $cart->totalCents());
+
+        return [
+            'reached' => $remaining === 0,
+            'text' => $remaining === 0
+                ? __('store.cart_free_shipping_unlocked')
+                : __('store.cart_free_shipping_progress', ['amount' => format_euros($remaining)]),
+            'progress' => min(100, (int) round($cart->totalCents() / $threshold * 100)),
+        ];
     }
 
     /**
@@ -198,6 +232,7 @@ class CartController extends Controller
                     : ($cheapestShippingCents !== null ? __('store.shipping_from_amount', ['price' => format_euros($cheapestShippingCents)]) : null),
                 'estimatedShippingDate' => $estimatedShippingDate?->toDateString(),
                 'estimatedShippingDateText' => $estimatedShippingDate?->translatedFormat('d F Y'),
+                'freeShippingBar' => $this->freeShippingBar($cart),
                 'message' => $status,
             ]);
         }
@@ -240,6 +275,7 @@ class CartController extends Controller
                     : ($cheapestShippingCents !== null ? __('store.shipping_from_amount', ['price' => format_euros($cheapestShippingCents)]) : null),
                 'estimatedShippingDate' => $estimatedShippingDate?->toDateString(),
                 'estimatedShippingDateText' => $estimatedShippingDate?->translatedFormat('d F Y'),
+                'freeShippingBar' => $this->freeShippingBar($cart),
                 'message' => $message,
             ]);
         }
