@@ -38,18 +38,24 @@ class GuideCiblesPageTest extends TestCase
 
     public function test_the_guide_page_renders_for_the_end_user(): void
     {
-        $this->get('/guides/bien-choisir-sa-cible')->assertOk()
-            ->assertSee('Bien choisir')
-            ->assertSee('Quatre familles,')
-            ->assertSee('Deux réponses,')
-            ->assertSee('Questions')
-            // One h1, and none of the lab's own vocabulary.
-            ->assertDontSee('Essais internes')
-            ->assertDontSee('1a')
-            // The facts stay the shop's: its one metal target, no invented gongs.
-            ->assertSee('réarmement')
-            ->assertDontSee('popper')
-            ->assertDontSee('AR500');
+        $html = $this->get('/guides/bien-choisir-sa-cible')->assertOk()->getContent();
+
+        // Read the guide itself, not the page around it. « 1a » was matched
+        // against the whole document, and the CSRF token in the head is
+        // forty random letters and digits: it carries « 1a » about one run
+        // in a hundred, which is a test that fails for no reason.
+        preg_match('/<main.*?<\/main>/s', $html, $main);
+        $guide = $main[0] ?? '';
+
+        foreach (['Bien choisir', 'Quatre familles,', 'Deux réponses,', 'Questions', 'réarmement'] as $expected) {
+            $this->assertStringContainsString($expected, $guide);
+        }
+
+        // None of the lab's own vocabulary, and the facts stay the shop's:
+        // its one metal target, no invented gongs.
+        foreach (['Essais internes', 'Cible 1a', 'popper', 'AR500'] as $unwanted) {
+            $this->assertStringNotContainsString($unwanted, $guide);
+        }
     }
 
     public function test_the_guides_index_lists_the_cibles_guide(): void
