@@ -46,13 +46,31 @@ class SiteBackup
      */
     public static function create(): string
     {
+        return self::write(withFiles: true);
+    }
+
+    /**
+     * The database alone, for the archive taken on a schedule.
+     *
+     * Orders and stock move by the minute; the images and the private files
+     * move rarely and weigh most of a full archive. Taking the database on
+     * its own is what makes a quarter-hourly rhythm affordable, and the
+     * name says which kind it is so the two never get confused.
+     */
+    public static function createDatabase(): string
+    {
+        return self::write(withFiles: false);
+    }
+
+    private static function write(bool $withFiles): string
+    {
         $directory = self::directory();
 
         if (! is_dir($directory)) {
             mkdir($directory, 0755, true);
         }
 
-        $name = 'armooutdoor-'.CarbonImmutable::now()->format('Y-m-d-His').'.zip';
+        $name = 'armooutdoor-'.($withFiles ? '' : 'db-').CarbonImmutable::now()->format('Y-m-d-His').'.zip';
         $path = $directory.'/'.$name;
 
         $zip = new ZipArchive;
@@ -63,8 +81,19 @@ class SiteBackup
 
         self::addDatabase($zip);
 
-        foreach (self::sources() as $source => $folder) {
-            self::addDirectory($zip, base_path($source), $folder);
+        if ($withFiles) {
+            foreach (self::sources() as $source => $folder) {
+                self::addDirectory($zip, base_path($source), $folder);
+            }
+        }
+
+        // An archive that caught nothing is worse than none: ZipArchive
+        // writes no file at all, and a schedule nobody watches would report
+        // success forever.
+        if ($zip->numFiles === 0) {
+            $zip->close();
+
+            throw new RuntimeException('Nothing was found to archive.');
         }
 
         $zip->close();
@@ -73,9 +102,31 @@ class SiteBackup
     }
 
     /**
+     * Drops the oldest scheduled archives past the retention window.
+     *
+     * Only the database-only ones: a full archive is taken by hand, and
+     * nothing automatic should be allowed to throw away what somebody
+     * deliberately made.
+     */
+    public static function pruneDatabaseArchives(?int $keep = null): int
+    {
+        $keep = $keep ?? (int) config('backup.database_keep', 96);
+
+        $doomed = self::all()
+            ->filter(fn (array $backup): bool => $backup['kind'] === 'database')
+            ->slice($keep);
+
+        foreach ($doomed as $backup) {
+            self::delete($backup['name']);
+        }
+
+        return $doomed->count();
+    }
+
+    /**
      * The archives already taken, newest first.
      *
-     * @return Collection<int, array{name: string, size: int, taken_at: CarbonImmutable}>
+     * @return Collection<int, array{name: string, size: int, kind: string, taken_at: CarbonImmutable}>
      */
     public static function all(): Collection
     {
@@ -89,6 +140,7 @@ class SiteBackup
             ->map(fn (string $path): array => [
                 'name' => basename($path),
                 'size' => (int) filesize($path),
+                'kind' => str_starts_with(basename($path), 'armooutdoor-db-') ? 'database' : 'full',
                 'taken_at' => CarbonImmutable::createFromTimestamp(filemtime($path)),
             ])
             ->sortByDesc('taken_at')
@@ -103,7 +155,7 @@ class SiteBackup
      */
     public static function path(string $name): ?string
     {
-        if (preg_match('/^armooutdoor-\d{4}-\d{2}-\d{2}-\d{6}\.zip$/', $name) !== 1) {
+        if (preg_match('/^armooutdoor-(?:db-)?\d{4}-\d{2}-\d{2}-\d{6}\.zip$/', $name) !== 1) {
             return null;
         }
 

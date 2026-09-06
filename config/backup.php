@@ -26,6 +26,19 @@ return [
     |
     */
 
+    /*
+    |--------------------------------------------------------------------------
+    | How many scheduled database archives to keep
+    |--------------------------------------------------------------------------
+    |
+    | The quarter-hourly job prunes its own trail: ninety-six archives is a
+    | full day of history. Archives taken by hand are never pruned - nothing
+    | automatic should throw away what somebody deliberately made.
+    |
+    */
+
+    'database_keep' => (int) env('BACKUP_DATABASE_KEEP', 96),
+
     'sources' => [
         'public/images' => 'images',
         'storage/app/private' => 'private',

@@ -10792,3 +10792,25 @@ a.order-stepper-btn:focus-visible {
     letter-spacing: 0.04em;
     color: var(--text-muted);
 }
+
+/* Which kind of archive a row holds: the quarter-hourly database one, or
+   the full one somebody took by hand. */
+.backup-kind {
+    padding: 0.05rem 0.4rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.backup-kind.is-database {
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.backup-kind.is-full {
+    color: var(--surface);
+    background: var(--accent-heading);
+    border: 1px solid var(--accent-heading);
+}

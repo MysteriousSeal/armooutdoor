@@ -54,6 +54,11 @@
                                 <span class="backup-item-when">{{ $backup['taken_at']->format('j M Y') }} at {{ $backup['taken_at']->format('H:i') }}</span>
                                 <span class="backup-item-ago">{{ admin_relative_date($backup['taken_at']) }}</span>
                                 <span class="backup-name">{{ $backup['name'] }}</span>
+                                {{-- Which kind: the scheduled database archive,
+                                     or the full one taken by hand. --}}
+                                <span class="backup-kind is-{{ $backup['kind'] }}">
+                                    {{ $backup['kind'] === 'database' ? 'Database' : 'Full' }}
+                                </span>
                             </div>
                             <span class="backup-item-size">{{ format_bytes($backup['size']) }}</span>
                             <div class="backup-actions">
