@@ -125,6 +125,6 @@ class LegalPagesComplianceTest extends TestCase
         $this->get('/mentions-legales')
             ->assertOk()
             ->assertSee('sans consentement préalable', false)
-            ->assertSee('aucun des deux n\'est chargé', false);
+            ->assertSee('aucun des trois n\'est chargé', false);
     }
 }

@@ -171,12 +171,21 @@ class AnalyticsTest extends TestCase
         $this->assertStringContainsString("window.gtag('event', google.name", $js);
     }
 
-    public function test_the_banner_names_google_and_where_it_is(): void
+    public function test_the_banner_holds_the_first_layer_and_the_policy_the_rest(): void
     {
+        // The CNIL's first layer: purposes, actors, the right to change
+        // one's mind. The where and the what live in the second layer.
         $text = __('store.cookie_banner_text');
 
-        $this->assertStringContainsString('Google Analytics', $text);
-        $this->assertStringContainsString('États-Unis', $text);
+        $this->assertStringContainsString('audience', $text);
+        $this->assertStringContainsString('annonces', $text);
+        $this->assertStringContainsString('Google', $text);
+        $this->assertStringContainsString('PostHog', $text);
+        $this->assertStringContainsString('changer d\'avis', $text);
+
+        $this->get('/confidentialite')->assertOk()
+            ->assertSee('Google Analytics')
+            ->assertSee('États-Unis');
     }
 
     public function test_the_privacy_policy_states_the_transfer_basis(): void
