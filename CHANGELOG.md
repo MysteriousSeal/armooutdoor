@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-06 — v1.16.1 — build 1NKZB5
+
+### Storefront
+
+- **The guides wear the shop hero, and call themselves Guides.** The three pages open on the category hero instead of a one-off header; without a photograph the empty height is gone, and classification carries D, C, B and A as tags. The index, the trail, the schema, the plan du site and the category kicker all drop d'achat: Guide on a page, Guides on the section.
+
+**No migration.**
+
 ## 2026-09-06 — v1.16.0 — build 3AH1GU
 
 ### Storefront
