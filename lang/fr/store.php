@@ -530,7 +530,10 @@ return [
     'footer_sitemap' => 'Plan du site',
     'footer_cookies' => 'Cookies',
     'cookie_banner_title' => 'Cookies',
-    'cookie_banner_text' => 'Ce site n\'utilise que des cookies essentiels (panier, connexion, préférence d\'affichage). Acceptez-vous la mesure d\'audience et de conversion : l\'identifiant de session côté site, PostHog (hébergé dans l\'Union européenne), Google Analytics et le suivi des conversions Google Ads (Google LLC, États-Unis) ? En cas de refus, aucun n\'est chargé.',
+    // The CNIL's first layer, nothing more: the purposes, the who, the
+    // right to change one's mind. The details live behind « En savoir
+    // plus », and the exempt cookies need no consent to be described here.
+    'cookie_banner_text' => 'Nous utilisons des cookies pour mesurer l\'audience du site et l\'efficacité de nos annonces (PostHog, Google). Vous pouvez accepter ou refuser, et changer d\'avis à tout moment.',
     'cookie_banner_accept' => 'Accepter',
     'cookie_banner_decline' => 'Refuser',
     'cookie_banner_more' => 'En savoir plus',
