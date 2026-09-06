@@ -348,10 +348,14 @@
                             <span class="home-voice-stars" aria-hidden="true">★★★★★</span>
                             <span class="sr-only">{{ trans_choice('store.review_rating_value', 5, ['count' => 5]) }}</span>
                             <p class="home-voice-body">{{ $review->comment }}</p>
-                            <p class="home-voice-foot">
-                                <span class="home-voice-author">{{ $review->reviewerName() }}</span>
-                                <a href="{{ localized_route('products.show', ['product' => $review->product->slug]) }}" class="home-voice-product">{{ $review->product->localizedName() }}</a>
-                            </p>
+                            <div class="home-voice-foot">
+                                {{-- The reviewer's monogram, as the blog comments sign theirs. --}}
+                                <span class="home-voice-avatar" aria-hidden="true">{{ $review->reviewerInitials() }}</span>
+                                <span class="home-voice-byline">
+                                    <span class="home-voice-author">{{ $review->reviewerName() }}</span>
+                                    <a href="{{ localized_route('products.show', ['product' => $review->product->slug]) }}" class="home-voice-product">{{ $review->product->localizedName() }}</a>
+                                </span>
+                            </div>
                         </li>
                     @endforeach
                 </ul>

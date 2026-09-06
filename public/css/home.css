@@ -1409,12 +1409,38 @@
 
 .home-voice-foot {
     display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
+    align-items: stretch;
+    gap: 0.65rem;
     margin: 0;
     padding-top: 0.6rem;
     border-top: 1px solid var(--border);
     font-size: 0.8125rem;
+}
+
+/* The reviewer's initial, cut from the same cloth as the blog comments'. */
+.home-voice-avatar {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    /* No height of its own: it is as tall as the name and the product
+       stacked beside it, and square on that. */
+    aspect-ratio: 1;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--accent-heading);
+    background: color-mix(in srgb, var(--accent-heading) 10%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 28%, var(--border));
+}
+
+.home-voice-byline {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    /* Without this the product name refuses to shorten and pushes the
+       card wider than its column. */
+    min-width: 0;
 }
 
 .home-voice-author {

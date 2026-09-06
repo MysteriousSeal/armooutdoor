@@ -61,4 +61,19 @@ class ProductReview extends Model
 
         return trim($this->user->first_name.($lastInitial !== '' ? ' '.$lastInitial.'.' : ''));
     }
+
+    /**
+     * The reviewer's monogram: the first letter of each of the first two
+     * words of the name they sign with, so « Colas D. » wears CD. A one-word
+     * name wears one letter rather than borrowing a second from somewhere.
+     */
+    public function reviewerInitials(): string
+    {
+        $words = preg_split('/\s+/u', trim($this->reviewerName()), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+        return mb_strtoupper(collect($words)
+            ->take(2)
+            ->map(fn (string $word): string => mb_substr($word, 0, 1))
+            ->implode(''));
+    }
 }

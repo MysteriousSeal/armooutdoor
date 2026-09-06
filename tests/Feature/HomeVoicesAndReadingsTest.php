@@ -56,6 +56,8 @@ class HomeVoicesAndReadingsTest extends TestCase
             ->assertSee('Cibles parfaites, impacts visibles de loin.')
             // First name and last initial, the reviews' own privacy rule.
             ->assertSee('Jean M.')
+            // The same name again as a monogram, in the avatar beside it.
+            ->assertSee('<span class="home-voice-avatar" aria-hidden="true">JM</span>', false)
             ->assertSee($product->localizedName())
             // A middling review is not a testimonial.
             ->assertDontSee('Correct sans plus.');
