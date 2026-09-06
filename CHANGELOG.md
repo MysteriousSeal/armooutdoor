@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-06 — v1.16.0 — build 3AH1GU
+
+### Storefront
+
+- **A third guide classifies the weapon.** Classer son arme, first on /guides, relates the shop's articles on categories D, C, B and A: sous 2 joules, de 2 à 20, dès 20, then the autorisation. A selector, a table of five régimes, and Les seuils en détail as a card each — D, C, B, A and the shop — with room to breathe. Search Console gets /sitemap-guides.xml; the plan du site gets its own Guides d'achat block, apart from the ordinary pages.
+
+- **The two older guides keep to the shelf.** The metal target is airguns 4,5 and 5,5 mm, not 22 LR; the entretien page aligns its calibres, FAQ and schema; and the body copy no longer leans on em dashes.
+
+**No migration.**
+
 ## 2026-09-06 — v1.15.1 — build WKGGVX
 
 ### Storefront
