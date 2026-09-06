@@ -24,6 +24,8 @@ class CategoryGuideTest extends TestCase
         \App\Models\Product::factory()->create(['category_id' => $category->id, 'is_active' => true]);
 
         $this->get('/categories/'.$category->slug)->assertOk()
+            ->assertSee('<p class="category-guide-kicker">Guide</p>', false)
+            ->assertDontSee("Guide d'achat", false)
             ->assertSee('Bien choisir : Cibles')
             ->assertSee('<h2>Quel carton choisir</h2>', false)
             ->assertSee('Une cible réactive se lit de loin.');

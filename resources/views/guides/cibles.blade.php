@@ -6,6 +6,7 @@
 @section('canonical', route('guides.cibles'))
 
 @push('head')
+    <link rel="stylesheet" href="{{ versioned_asset('css/categories.css') }}">
     <link rel="stylesheet" href="{{ versioned_asset('css/guides/guides.css') }}">
     <script type="application/ld+json">
         {!! json_encode([
@@ -43,7 +44,7 @@
             '@@type' => 'BreadcrumbList',
             'itemListElement' => [
                 ['@@type' => 'ListItem', 'position' => 1, 'name' => __('store.breadcrumb_home'), 'item' => localized_route('home')],
-                ['@@type' => 'ListItem', 'position' => 2, 'name' => 'Guides d\'achat', 'item' => route('guides.index')],
+                ['@@type' => 'ListItem', 'position' => 2, 'name' => 'Guides', 'item' => route('guides.index')],
                 ['@@type' => 'ListItem', 'position' => 3, 'name' => 'Bien choisir sa cible', 'item' => route('guides.cibles')],
             ],
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
@@ -52,24 +53,12 @@
 
 @section('content')
     <div class="container glab">
-        <nav class="breadcrumbs" aria-label="breadcrumb">
-            <a href="{{ localized_route('home') }}">{{ __('store.breadcrumb_home') }}</a>
-            <span class="breadcrumbs-sep" aria-hidden="true">/</span>
-            <a href="{{ route('guides.index') }}">Guides d'achat</a>
-            <span class="breadcrumbs-sep" aria-hidden="true">/</span>
-            <span>Bien choisir sa cible</span>
-        </nav>
-
-        <header class="glab-head">
-            <p class="glab-head-kicker">Guide d'achat</p>
-            <h1 class="glab-head-title">Bien choisir <span class="glab-title-accent">sa cible</span></h1>
-            <p class="glab-head-lede">
-                Une bonne cible se choisit d'après trois questions : à quelle distance tirez-vous,
-                que voulez-vous lire après le tir, et combien de feuilles partent à chaque séance.
-                Le rayon couvre les trois réponses : cibles autocollantes réactives, planches
-                complètes, carton classique et métal basculant.
-            </p>
-        </header>
+        @include('guides.partials.hero', [
+            'crumb' => 'Bien choisir sa cible',
+            'kicker' => 'Guide',
+            'title' => 'Bien choisir sa cible',
+            'lede' => 'Une bonne cible se choisit d\'après trois questions : à quelle distance tirez-vous, que voulez-vous lire après le tir, et combien de feuilles partent à chaque séance. Le rayon couvre les trois réponses : cibles autocollantes réactives, planches complètes, carton classique et métal basculant.',
+        ])
 
         {{-- The selector: two answers, a ranked recommendation. --}}
         <section class="glab-panel" data-glab-selector aria-labelledby="glab-selector-title">

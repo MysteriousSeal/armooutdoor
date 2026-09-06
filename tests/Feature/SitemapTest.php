@@ -63,11 +63,19 @@ class SitemapTest extends TestCase
         $this->get('/sitemap-pages.xml')->assertOk()
             ->assertDontSee(route('guides.index'));
 
-        $this->get('/plan-du-site')->assertOk()
+        $plan = $this->get('/plan-du-site')->assertOk()
             ->assertSee('id="sitemap-guides-heading"', false)
             ->assertSee('id="sitemap-pages-heading"', false)
             ->assertSee(__('store.sitemap_guides'))
-            ->assertSee('Classer son arme');
+            ->assertSee('Classer son arme')
+            ->getContent();
+
+        $this->assertMatchesRegularExpression(
+            '/<h2 class="sitemap-heading" id="sitemap-guides-heading">\s*Guides\s*<\/h2>/',
+            $plan,
+        );
+        $this->assertStringNotContainsString("Guides d'achat", $plan);
+        $this->assertStringNotContainsString('Guides d&#039;achat', $plan);
     }
 
     public function test_the_contact_page_and_the_html_plan_are_listed(): void

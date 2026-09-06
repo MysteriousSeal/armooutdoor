@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Guides d\'achat — Armo Outdoor')
-@section('meta_description', 'Les guides d\'achat de la boutique : classer son arme (D, C, B, A), bien choisir sa cible, entretenir son matériel, d\'après ce que le rayon vend vraiment.')
+@section('title', 'Guides — Armo Outdoor')
+@section('meta_description', 'Les guides de la boutique : classer son arme (D, C, B, A), bien choisir sa cible, entretenir son matériel, d\'après ce que le rayon vend vraiment.')
 @section('canonical', route('guides.index'))
 
 @php
@@ -35,7 +35,7 @@
         {!! json_encode([
             '@@context' => 'https://schema.org',
             '@@type' => 'CollectionPage',
-            'name' => 'Guides d\'achat',
+            'name' => 'Guides',
             'url' => route('guides.index'),
             'inLanguage' => 'fr-FR',
             'isPartOf' => ['@@id' => \App\Support\OrganizationSchema::websiteId()],
@@ -57,7 +57,7 @@
             '@@type' => 'BreadcrumbList',
             'itemListElement' => [
                 ['@@type' => 'ListItem', 'position' => 1, 'name' => __('store.breadcrumb_home'), 'item' => localized_route('home')],
-                ['@@type' => 'ListItem', 'position' => 2, 'name' => 'Guides d\'achat', 'item' => route('guides.index')],
+                ['@@type' => 'ListItem', 'position' => 2, 'name' => 'Guides', 'item' => route('guides.index')],
             ],
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
     </script>
@@ -68,12 +68,12 @@
         <nav class="breadcrumbs" aria-label="breadcrumb">
             <a href="{{ localized_route('home') }}">{{ __('store.breadcrumb_home') }}</a>
             <span class="breadcrumbs-sep" aria-hidden="true">/</span>
-            <span>Guides d'achat</span>
+            <span>Guides</span>
         </nav>
 
         <header class="glab-head">
             <p class="glab-head-kicker">La boutique conseille</p>
-            <h1 class="glab-head-title"><span class="glab-title-accent">Guides d'achat</span></h1>
+            <h1 class="glab-head-title"><span class="glab-title-accent">Guides</span></h1>
             <p class="glab-head-lede">
                 Avant d'ouvrir le panier : ce qu'il faut savoir pour choisir le bon matériel,
                 rayon par rayon, écrit par la boutique d'après ce qu'elle vend vraiment.

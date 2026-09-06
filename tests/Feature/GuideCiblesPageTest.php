@@ -3,15 +3,36 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
- * The buying guides: an index linked from the footer, and the Cibles
- * guide it lists - both indexable, both in the guides sitemap.
+ * The guides: an index linked from the footer, and the three guides it
+ * lists — both indexable, both in the guides sitemap.
  */
 class GuideCiblesPageTest extends TestCase
 {
     use RefreshDatabase;
+
+    /**
+     * @return array<string, array{0: string, 1: string, 2: string}>
+     */
+    public static function guidePages(): array
+    {
+        return [
+            'cibles' => ['/guides/bien-choisir-sa-cible', 'Bien choisir sa cible', 'Guide'],
+            'entretien' => ['/guides/entretenir-son-arme', 'Entretenir son arme', 'Guide'],
+            'classification' => ['/guides/classer-son-arme', 'Classer son arme', 'Réglementation'],
+        ];
+    }
+
+    /**
+     * @return array<string, array{0: string}>
+     */
+    public static function guideUrls(): array
+    {
+        return array_map(fn (array $row): array => [$row[0]], self::guidePages());
+    }
 
     public function test_the_guide_page_renders_for_the_end_user(): void
     {
@@ -122,5 +143,78 @@ class GuideCiblesPageTest extends TestCase
         $html = $this->get('/guides/bien-choisir-sa-cible')->assertOk()->getContent();
 
         $this->assertSame(1, preg_match_all('/<h1[\s>]/', $html));
+    }
+
+    #[DataProvider('guidePages')]
+    public function test_each_guide_leads_with_the_shop_hero(string $url, string $title, string $kicker): void
+    {
+        $html = $this->get($url)->assertOk()
+            ->assertSee('cat-hero', false)
+            ->assertSee('css/categories.css', false)
+            ->assertSee('css/guides/guides.css', false)
+            ->assertSee('<p class="cat-hero-kicker">'.$kicker.'</p>', false)
+            ->getContent();
+
+        $this->assertSame(1, preg_match_all('/<h1[\s>]/', $html));
+        $this->assertMatchesRegularExpression(
+            '/<h1 class="cat-hero-title[^"]*">\s*<span class="cat-hero-title-accent">'.preg_quote($title, '/').'/',
+            $html,
+        );
+        $this->assertStringNotContainsString('cat-hero has-image', $html);
+    }
+
+    #[DataProvider('guideUrls')]
+    public function test_each_guide_names_the_section_guides(string $url): void
+    {
+        $html = $this->get($url)->assertOk()->getContent();
+
+        $this->assertStringContainsString(
+            'href="'.route('guides.index').'">Guides</a>',
+            $html,
+        );
+        $this->assertStringContainsString('"name":"Guides"', $html);
+        $this->assertStringNotContainsString("Guides d'achat", $html);
+        $this->assertStringNotContainsString('Guides d&#039;achat', $html);
+        $this->assertStringNotContainsString("Guide d'achat", $html);
+        $this->assertStringNotContainsString('Guide d&#039;achat', $html);
+    }
+
+    public function test_the_guides_index_is_headed_guides(): void
+    {
+        $html = $this->get('/guides')->assertOk()
+            ->assertSee('<title>Guides — Armo Outdoor</title>', false)
+            ->assertSee('<span class="glab-title-accent">Guides</span>', false)
+            ->assertSee('"@type":"CollectionPage"', false)
+            ->getContent();
+
+        $this->assertStringContainsString('"name":"Guides"', $html);
+        $this->assertStringNotContainsString("Guides d'achat", $html);
+        $this->assertStringNotContainsString('Guides d&#039;achat', $html);
+    }
+
+    public function test_the_classification_guide_lays_out_the_four_categories_as_chapters(): void
+    {
+        $html = $this->get('/guides/classer-son-arme')->assertOk()
+            ->assertSee('glab-chapters', false)
+            ->assertSee('glab-chapter', false)
+            ->assertSee('glab-chapter-more', false)
+            ->assertSee(route('blog.show', 'categorie-b-les-armes-soumises-a-autorisation-et-comment-on-y-entre'))
+            ->getContent();
+
+        preg_match('#<ul class="cat-hero-tags">(.*?)</ul>#s', $html, $tags);
+        $this->assertNotEmpty($tags, 'The classification hero lists D, C, B and A.');
+        foreach (['D', 'C', 'B', 'A'] as $tag) {
+            $this->assertStringContainsString('<li>'.$tag.'</li>', $tags[0]);
+        }
+
+        $this->assertSame(5, substr_count($html, 'class="glab-chapter"'));
+    }
+
+    public function test_a_guide_hero_without_a_photograph_does_not_keep_the_empty_height(): void
+    {
+        $css = file_get_contents(public_path('css/guides/guides.css'));
+
+        $this->assertStringContainsString('.glab .cat-hero:not(.has-image)', $css);
+        $this->assertStringContainsString('min-height: 0', $css);
     }
 }

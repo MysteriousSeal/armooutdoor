@@ -6,6 +6,7 @@
 @section('canonical', route('guides.entretien'))
 
 @push('head')
+    <link rel="stylesheet" href="{{ versioned_asset('css/categories.css') }}">
     <link rel="stylesheet" href="{{ versioned_asset('css/guides/guides.css') }}">
     <script type="application/ld+json">
         {!! json_encode([
@@ -43,7 +44,7 @@
             '@@type' => 'BreadcrumbList',
             'itemListElement' => [
                 ['@@type' => 'ListItem', 'position' => 1, 'name' => __('store.breadcrumb_home'), 'item' => localized_route('home')],
-                ['@@type' => 'ListItem', 'position' => 2, 'name' => 'Guides d\'achat', 'item' => route('guides.index')],
+                ['@@type' => 'ListItem', 'position' => 2, 'name' => 'Guides', 'item' => route('guides.index')],
                 ['@@type' => 'ListItem', 'position' => 3, 'name' => 'Entretenir son arme', 'item' => route('guides.entretien')],
             ],
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
@@ -52,24 +53,12 @@
 
 @section('content')
     <div class="container glab">
-        <nav class="breadcrumbs" aria-label="breadcrumb">
-            <a href="{{ localized_route('home') }}">{{ __('store.breadcrumb_home') }}</a>
-            <span class="breadcrumbs-sep" aria-hidden="true">/</span>
-            <a href="{{ route('guides.index') }}">Guides d'achat</a>
-            <span class="breadcrumbs-sep" aria-hidden="true">/</span>
-            <span>Entretenir son arme</span>
-        </nav>
-
-        <header class="glab-head">
-            <p class="glab-head-kicker">Guide d'achat</p>
-            <h1 class="glab-head-title">Entretenir <span class="glab-title-accent">son arme</span></h1>
-            <p class="glab-head-lede">
-                Deux outils font tout l'entretien courant : la corde de nettoyage, qui fait
-                l'essentiel en deux minutes au stand, et le kit à tiges, qui fait le nettoyage
-                complet à l'établi. Ce guide dit lequel prendre pour quel calibre, dans quel sens
-                s'en servir, et à quelle fréquence.
-            </p>
-        </header>
+        @include('guides.partials.hero', [
+            'crumb' => 'Entretenir son arme',
+            'kicker' => 'Guide',
+            'title' => 'Entretenir son arme',
+            'lede' => 'Deux outils font tout l\'entretien courant : la corde de nettoyage, qui fait l\'essentiel en deux minutes au stand, et le kit à tiges, qui fait le nettoyage complet à l\'établi. Ce guide dit lequel prendre pour quel calibre, dans quel sens s\'en servir, et à quelle fréquence.',
+        ])
 
         <p class="glab-warning">
             Avant tout entretien : arme déchargée, chambre vérifiée vide, munitions à l'écart de

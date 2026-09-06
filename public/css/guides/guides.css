@@ -32,6 +32,17 @@
     color: var(--text-muted);
 }
 
+/* A guide page wears the shop hero (partials.page-hero). Without a
+   photograph the 20rem min-height is empty padding, and the lede is
+   wider than a category blurb. */
+.glab .cat-hero:not(.has-image) {
+    min-height: 0;
+}
+
+.glab .cat-hero-desc {
+    max-width: 34rem;
+}
+
 /* Each section of the guide lives in the olive panel the category
    guides wear. */
 .glab-panel {
