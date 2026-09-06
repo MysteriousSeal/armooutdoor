@@ -16,7 +16,7 @@
             'mainEntityOfPage' => route('guides.cibles'),
             'inLanguage' => 'fr-FR',
             'datePublished' => '2026-09-04',
-            'dateModified' => '2026-09-04',
+            'dateModified' => '2026-09-06',
             'author' => \App\Support\OrganizationSchema::reference(),
             'publisher' => \App\Support\OrganizationSchema::reference(),
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
@@ -26,9 +26,9 @@
             '@@context' => 'https://schema.org',
             '@@type' => 'FAQPage',
             'mainEntity' => collect([
-                ['Quel diamètre pour quelle distance ?', '76 mm : le format d\'entraînement de référence, à 10 ou 25 mètres, en lots de 100 à 250. 10 cm : distances plus longues, calibres plus remuants, débutants. Carrées à grille : pour régler une optique, la correction se lit en clics.'],
+                ['Quel diamètre pour quelle distance ?', '76 mm : le format d\'entraînement de référence, à 10 ou 25 mètres, en lots de 100 à 250. 10 cm : distances plus longues, calibres plus remuants, débutants. Carrées à grille : pour régler une optique, la correction se lit en clics, en 51 mm, 76 mm ou 10 cm.'],
                 ['Sur quoi coller une cible réactive ?', 'Sur n\'importe quel support qui tient : un carton usé, une vieille planche, le dos d\'une cible finie. On recharge la ligne sans racheter de porte-cible.'],
-                ['Le métal convient-il à mon calibre ?', 'Notre cible basculante est prévue pour les airguns et le 22 LR : vérifiez les calibres admis par la plaque, respectez la distance minimale du fabricant et portez une protection oculaire.'],
+                ['Le métal convient-il à mon calibre ?', 'Notre cible basculante est réservée aux armes à air comprimé de 4,5 et 5,5 mm : pas d\'arme à feu, les plaques de 2,5 mm ne l\'encaisseraient pas. Distance 10 à 25 m, protection oculaire obligatoire.'],
                 ['Combien de feuilles prévoir par séance ?', 'Une feuille par série de 10 à 20 impacts pour garder un score lisible. Un lot de 100 couvre une saison hebdomadaire ; les lots de 200 à 250 baissent le prix à l\'unité.'],
             ])->map(fn (array $qa): array => [
                 '@@type' => 'Question',
@@ -172,7 +172,7 @@
                             <td>Réactives autocollantes</td>
                             <td>Un anneau fluo à chaque impact, visible à la lunette</td>
                             <td>10 à 50 m</td>
-                            <td>Oui, à la feuille</td>
+                            <td>Oui, au lot</td>
                             <td>Réglage rapide, séance seule</td>
                         </tr>
                         <tr>
@@ -192,9 +192,9 @@
                         <tr>
                             <td>Métal basculant</td>
                             <td>Rien à lire : le son et la chute, réarmement automatique</td>
-                            <td>Selon fabricant</td>
+                            <td>10 à 25 m</td>
                             <td>Aucun</td>
-                            <td>Tir ludique, airguns et 22 LR</td>
+                            <td>Tir ludique, airguns 4,5 et 5,5 mm</td>
                         </tr>
                     </tbody>
                 </table>
@@ -209,7 +209,7 @@
                 <h3>Réactives autocollantes : lire ses impacts sans quitter la ligne</h3>
                 <p>
                     Sur une <a href="{{ route('categories.show', 'cibles-rondes') }}">cible réactive</a> dite « splatter », chaque impact fait éclater un anneau
-                    fluorescent, jaune, orange, vert ou rose, visible à la lunette comme à l'œil nu.
+                    fluorescent, jaune, orange, vert ou rouge, visible à la lunette comme à l'œil nu.
                     On corrige son groupement sans faire d'aller-retour ni attendre un cessez-le-feu.
                     Elles se collent sur n'importe quel support : un carton usé, une vieille planche,
                     le dos d'une cible finie.
@@ -227,7 +227,7 @@
                     </div>
                     <div>
                         <dt>Grille <em>carrées</em></dt>
-                        <dd>Elles servent à régler une optique : la grille donne la correction en clics, ligne par ligne, colonne par colonne. C'est <a href="{{ route('categories.show', 'cibles-carrees') }}">la cible du zérotage</a>, pas celle du score.</dd>
+                        <dd>Elles servent à régler une optique : la grille donne la correction en clics, ligne par ligne, colonne par colonne, en 51 mm, 76 mm ou 10 cm. C'est <a href="{{ route('categories.show', 'cibles-carrees') }}">la cible du zérotage</a>, pas celle du score.</dd>
                     </div>
                 </dl>
 
@@ -242,7 +242,7 @@
                 <h3>Carton : blasons et zones de score</h3>
                 <p>
                     Le carton reste le support du tir compté : <a href="{{ route('categories.show', 'cibles-carton-metal') }}">huit blasons ou zones de score</a> sur une
-                    feuille d'environ 23 x 18 cm, vendue par lots de 20. On note, on archive, on
+                    feuille de 22,86 x 17,78 cm, vendue par lots de 20. On note, on archive, on
                     compare d'une séance à l'autre, et la feuille s'agrafe sur n'importe quel
                     porte-cible.
                 </p>
@@ -250,9 +250,9 @@
                 <h3>Métal basculant : le retour immédiat</h3>
                 <p>
                     Le métal ne se lit pas, il s'entend : notre <a href="{{ route('products.show', 'cible-basculantes-rearmement-automatique-5-plaques') }}">cible basculante à réarmement
-                    automatique</a> sonne à chaque plaque touchée et se relève seule, cinq plaques
-                    d'affilée. Aucun consommable, un retour instantané, idéale pour le tir ludique
-                    aux airguns et au 22 LR.
+                    automatique</a> sonne à chaque plaque touchée ; un tir sur la cinquième, en haut
+                    du bâti, relance les quatre autres. Aucun consommable, un retour instantané,
+                    réservée aux armes à air comprimé de 4,5 et 5,5 mm.
                 </p>
                 <p class="glab-warning">
                     Le métal se tire uniquement avec une protection oculaire, à la distance minimale
@@ -271,7 +271,7 @@
                     <div>
                         <p><strong>76 mm</strong> : le format d'entraînement de référence. À 10 ou 25 mètres, il oblige à un vrai travail de précision, et les lots de 100 à 250 pièces suivent le rythme des séances.</p>
                         <p><strong>10 cm</strong> : pardonne davantage. Distances plus longues, calibres plus remuants, ou premiers tirs d'un débutant qui a besoin de voir ses réussites.</p>
-                        <p><strong>Carrées à grille</strong> : pour régler une optique. La grille donne la correction en clics, ligne par ligne, colonne par colonne. C'est la cible du zérotage, pas celle du score.</p>
+                        <p><strong>Carrées à grille</strong> : pour régler une optique. La grille donne la correction en clics, ligne par ligne, colonne par colonne, en 51 mm, 76 mm ou 10 cm. C'est la cible du zérotage, pas celle du score.</p>
                     </div>
                 </details>
                 <details>
@@ -283,7 +283,7 @@
                 <details>
                     <summary>Le métal convient-il à mon calibre ?</summary>
                     <div>
-                        <p>Notre cible basculante est prévue pour les airguns et le 22 LR : vérifiez les calibres admis par la plaque et respectez la distance minimale du fabricant. Protection oculaire obligatoire, un acier sollicité au-delà de sa classe peut renvoyer des fragments.</p>
+                        <p>Notre cible basculante est réservée aux armes à air comprimé de 4,5 et 5,5 mm : pas d'arme à feu, les plaques de 2,5 mm ne l'encaisseraient pas. Distance 10 à 25 m, protection oculaire obligatoire. Un acier sollicité au-delà de sa classe peut renvoyer des fragments.</p>
                     </div>
                 </details>
                 <details>

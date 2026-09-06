@@ -16,7 +16,7 @@
             'mainEntityOfPage' => route('guides.entretien'),
             'inLanguage' => 'fr-FR',
             'datePublished' => '2026-09-04',
-            'dateModified' => '2026-09-04',
+            'dateModified' => '2026-09-06',
             'author' => \App\Support\OrganizationSchema::reference(),
             'publisher' => \App\Support\OrganizationSchema::reference(),
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
@@ -26,9 +26,9 @@
             '@@context' => 'https://schema.org',
             '@@type' => 'FAQPage',
             'mainEntity' => collect([
-                ['La corde remplace-t-elle le kit à tiges ?', 'Non, elle le complète. La corde fait l\'essentiel en deux minutes au stand ; les tiges, brosses et écouvillons du kit font le nettoyage complet à l\'établi, chambre comprise. Le kit couvre les calibres .22, 9 mm, .40 et .357 ; au-delà, la corde du calibre reste l\'outil principal.'],
+                ['La corde remplace-t-elle le kit à tiges ?', 'Non, elle le complète. La corde fait l\'essentiel en deux minutes au stand ; les tiges, brosses et écouvillons du kit font le nettoyage complet à l\'établi, chambre comprise. Le kit couvre les calibres .22, 9 mm, .40 et .357 ; hors de ces calibres, la corde du calibre reste l\'outil principal.'],
                 ['Quelle corde pour un airgun à plombs 4,5 mm ?', 'La corde .17 / .177 / 4,5 mm : c\'est le même diamètre de canon. Un airgun s\'encrasse moins qu\'une arme à feu, mais un canon propre reste plus régulier.'],
-                ['Dans quel sens nettoyer le canon ?', 'De la chambre vers la bouche, dans le sens du projectile. On protège ainsi le couronnement, le dernier point d\'appui de la balle : abîmé, il coûte de la précision qu\'aucun nettoyage ne rend.'],
+                ['Dans quel sens nettoyer le canon ?', 'De la chambre vers la bouche, dans le sens du projectile. On protège ainsi le couronnement, le dernier point d\'appui de la balle : abîmé, il coûte de la précision qu\'aucun nettoyage ne rendra.'],
                 ['À quelle fréquence nettoyer ?', 'Un passage de corde après chaque séance suffit pour l\'entretien courant ; un nettoyage complet à l\'établi de temps en temps, et toujours avant un stockage prolongé. La corde elle-même se lave à l\'eau savonneuse et se réutilise.'],
             ])->map(fn (array $qa): array => [
                 '@@type' => 'Question',
@@ -88,15 +88,15 @@
                     <legend>01 · Votre calibre</legend>
                     <div class="glab-chips" data-glab-group="cal">
                         <button type="button" data-glab-value="45">.17 · 4,5 mm</button>
-                        <button type="button" data-glab-value="22" class="is-active">.22 LR · 5,56</button>
+                        <button type="button" data-glab-value="22" class="is-active">.22 LR · 5,56 mm</button>
                         <button type="button" data-glab-value="25">.25 · 6,35 mm</button>
                         <button type="button" data-glab-value="9">9 mm · .38 · .357</button>
-                        <button type="button" data-glab-value="308">.308 · 7,62</button>
+                        <button type="button" data-glab-value="308">.308 · 7,62 mm</button>
                         <button type="button" data-glab-value="12">Calibre 12</button>
                     </div>
                 </fieldset>
                 <fieldset class="glab-step">
-                    <legend>02 · Où nettoyez-vous</legend>
+                    <legend>02 · Où nettoyez-vous ?</legend>
                     <div class="glab-chips glab-chips--stacked" data-glab-group="lieu">
                         <button type="button" data-glab-value="stand" class="is-active">
                             Au stand, en deux minutes
@@ -112,7 +112,7 @@
 
             <div class="glab-reco">
                 <p class="glab-reco-label">Notre recommandation</p>
-                <p class="glab-reco-resume" data-glab-resume>Pour votre .22 LR, au stand :</p>
+                <p class="glab-reco-resume" data-glab-resume>Pour votre .22 LR · 5,56 mm, au stand :</p>
                 {{-- The default answer (.22 LR, au stand) rendered server-side:
                      crawlable links, and a real block without JavaScript. The
                      script re-renders it on interaction. --}}
@@ -120,7 +120,7 @@
                     <li>
                         <span class="glab-reco-rank">01</span>
                         <div class="glab-reco-head">
-                            <h3>Corde de nettoyage .22 · .223 · 5,56</h3>
+                            <h3>Corde de nettoyage .22 · .223 · 5,56 mm</h3>
                             <span class="glab-reco-meta">Bore rope · lavable</span>
                         </div>
                         <p>Brosse laiton et tissu en un seul passage, de la chambre vers la bouche. Tient dans une poche de sac de stand.</p>
@@ -194,7 +194,7 @@
                     dite « bore rope », embarque une zone de brosse en laiton puis une longueur de
                     tissu sur une seule cordelette lestée. On la laisse tomber côté chambre, on tire
                     côté bouche : la brosse décolle les résidus, le tissu les emporte, en un seul
-                    passage. Elle tient dans une poche, ne se démonte pas, et se range aussi vite
+                    passage. Elle tient dans une poche, ne se démonte pas et se range aussi vite
                     qu'elle sert : c'est l'outil du stand.
                 </p>
 
@@ -205,10 +205,10 @@
                 </p>
                 <ul>
                     <li><a href="{{ route('products.show', 'corde-nettoyage-canon-carabine-17-177-17hmr-17wmr-45mm-bore-rope') }}">.17 · .177 · .17 HMR · .17 WMR · 4,5 mm</a> : les airguns à plombs et les petits calibres à feu.</li>
-                    <li><a href="{{ route('products.show', 'corde-nettoyage-canon-22-223-5-56mm-bore-rope') }}">.22 · .223 · 5,56 mm</a> : le 22 LR du stand et les calibres AR.</li>
-                    <li><a href="{{ route('products.show', 'corde-nettoyage-canon-carabine-25-264-635mm-bore-rope') }}">.25 · .264 · 6,35 mm</a> : les airguns 6,35 et calibres intermédiaires.</li>
+                    <li><a href="{{ route('products.show', 'corde-nettoyage-canon-22-223-5-56mm-bore-rope') }}">.22 · .223 · 5,56 mm</a> : le 22 LR du stand et le 5,56 mm.</li>
+                    <li><a href="{{ route('products.show', 'corde-nettoyage-canon-carabine-25-264-635mm-bore-rope') }}">.25 · .264 · 6,35 mm</a> : les airguns 6,35 mm et les calibres intermédiaires.</li>
                     <li><a href="{{ route('products.show', 'corde-nettoyage-canon-38-357-380-9mm-bore-rope') }}">.38 · .357 · .380 · 9 mm</a> : le traditionnel 9 mm et les revolvers.</li>
-                    <li><a href="{{ route('products.show', 'corde-nettoyage-canon-carabine-30-308-30-06-300-303-7-62mm-bore-rope') }}">.30 · .308 · 30-06 · .300 · .303 · 7,62 mm</a> : les carabines de stand longue distance.</li>
+                    <li><a href="{{ route('products.show', 'corde-nettoyage-canon-carabine-30-308-30-06-300-303-7-62mm-bore-rope') }}">.30 · .308 · .30-06 · .300 · .303 · 7,62 mm</a> : les carabines de stand à longue distance.</li>
                     <li><a href="{{ route('products.show', 'corde-nettoyage-canon-calibre-12-bore-rope') }}">Calibre 12</a> : les fusils lisses.</li>
                 </ul>
 
@@ -225,10 +225,10 @@
                 <h3>Le sens du geste : de la chambre vers la bouche</h3>
                 <p>
                     Corde ou tige, le mouvement va de la chambre vers la bouche, dans le sens du
-                    projectile. La raison tient en un mot : le couronnement, le dernier appui de la
-                    balle à la sortie du canon. Nettoyer à rebours, c'est y frotter l'outil à chaque
-                    passage ; un couronnement marqué coûte de la précision qu'aucun nettoyage ne
-                    rendra.
+                    projectile. La raison tient en un mot : le couronnement, le dernier point d'appui
+                    de la balle à la sortie du canon. Nettoyer à rebours, c'est y frotter l'outil à
+                    chaque passage ; un couronnement abîmé coûte de la précision qu'aucun nettoyage
+                    ne rendra.
                 </p>
 
                 <h3>À quelle fréquence</h3>
@@ -268,7 +268,7 @@
                 <details>
                     <summary>La corde remplace-t-elle le kit à tiges ?</summary>
                     <div>
-                        <p>Non, elle le complète. La corde fait l'essentiel en deux minutes au stand ; les tiges, brosses et écouvillons du kit font le nettoyage complet à l'établi, chambre comprise. Le kit couvre les calibres .22, 9 mm, .40 et .357 ; au-delà, la corde du calibre reste l'outil principal.</p>
+                        <p>Non, elle le complète. La corde fait l'essentiel en deux minutes au stand ; les tiges, brosses et écouvillons du kit font le nettoyage complet à l'établi, chambre comprise. Le kit couvre les calibres .22, 9 mm, .40 et .357 ; hors de ces calibres, la corde du calibre reste l'outil principal.</p>
                     </div>
                 </details>
                 <details>
@@ -280,13 +280,13 @@
                 <details>
                     <summary>Dans quel sens nettoyer le canon ?</summary>
                     <div>
-                        <p>De la chambre vers la bouche, dans le sens du projectile. On protège ainsi le couronnement, le dernier point d'appui de la balle : abîmé, il coûte de la précision qu'aucun nettoyage ne rend.</p>
+                        <p>De la chambre vers la bouche, dans le sens du projectile. On protège ainsi le couronnement, le dernier point d'appui de la balle : abîmé, il coûte de la précision qu'aucun nettoyage ne rendra.</p>
                     </div>
                 </details>
                 <details>
                     <summary>À quelle fréquence nettoyer ?</summary>
                     <div>
-                        <p>Un passage de corde après chaque séance pour l'entretien courant ; un nettoyage complet à l'établi de temps en temps, et toujours avant un stockage prolongé. La corde elle-même se lave à l'eau savonneuse et se réutilise.</p>
+                        <p>Un passage de corde après chaque séance suffit pour l'entretien courant ; un nettoyage complet à l'établi de temps en temps, et toujours avant un stockage prolongé. La corde elle-même se lave à l'eau savonneuse et se réutilise.</p>
                     </div>
                 </details>
             </div>

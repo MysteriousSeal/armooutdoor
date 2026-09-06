@@ -42,15 +42,15 @@
         },
         grille: {
             title: 'Carrées à grille de zérotage',
-            meta: '51 à 76 mm · lots de 200',
+            meta: '51 mm à 10 cm · lots de 100 à 200',
             body: "La grille donne la correction en clics, ligne par ligne, colonne par colonne. La cible du réglage, pas celle du score.",
             href: '/categories/cibles-carrees',
             cta: 'Voir les carrées',
         },
         metal: {
             title: 'Cible basculante 5 plaques',
-            meta: 'Acier · réarmement automatique',
-            body: "Sonne à chaque plaque touchée et se relève seule. Aucun consommable, pour le tir ludique aux airguns et au 22 LR.",
+            meta: 'Acier · 4,5 et 5,5 mm',
+            body: "Quatre plaques tombent, un tir sur la cinquième les relève. Aucun consommable, réservée aux airguns 4,5 et 5,5 mm.",
             href: '/categories/cibles-carton-metal',
             cta: 'Voir carton & métal',
         },

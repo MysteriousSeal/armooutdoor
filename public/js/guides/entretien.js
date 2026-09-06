@@ -13,10 +13,10 @@
 
     var ROPES = {
         45: { label: '.17 · 4,5 mm', slug: 'corde-nettoyage-canon-carabine-17-177-17hmr-17wmr-45mm-bore-rope', family: '.17 · .177 · 4,5 mm' },
-        22: { label: '.22 LR · 5,56', slug: 'corde-nettoyage-canon-22-223-5-56mm-bore-rope', family: '.22 · .223 · 5,56 mm' },
+        22: { label: '.22 LR · 5,56 mm', slug: 'corde-nettoyage-canon-22-223-5-56mm-bore-rope', family: '.22 · .223 · 5,56 mm' },
         25: { label: '.25 · 6,35 mm', slug: 'corde-nettoyage-canon-carabine-25-264-635mm-bore-rope', family: '.25 · .264 · 6,35 mm' },
         9: { label: '9 mm · .38 · .357', slug: 'corde-nettoyage-canon-38-357-380-9mm-bore-rope', family: '.38 · .357 · .380 · 9 mm' },
-        308: { label: '.308 · 7,62', slug: 'corde-nettoyage-canon-carabine-30-308-30-06-300-303-7-62mm-bore-rope', family: '.30 · .308 · 7,62 mm' },
+        308: { label: '.308 · 7,62 mm', slug: 'corde-nettoyage-canon-carabine-30-308-30-06-300-303-7-62mm-bore-rope', family: '.30 · .308 · 7,62 mm' },
         12: { label: 'calibre 12', slug: 'corde-nettoyage-canon-calibre-12-bore-rope', family: 'Calibre 12' },
     };
 
