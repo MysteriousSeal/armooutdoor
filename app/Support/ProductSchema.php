@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\ProductReview;
 use App\Models\ProductVariant;
 use App\Models\ShippingSetting;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 /**
@@ -249,6 +250,22 @@ class ProductSchema
         if ($days[0] !== []) {
             $details['deliveryTime'] = [
                 '@type' => 'ShippingDeliveryTime',
+                // The shop's own rule, said in Google's terms: an order
+                // placed before ten leaves the same day, one placed after
+                // leaves the next, and never on a weekend. A product
+                // waiting on its supplier carries that wait on top.
+                'handlingTime' => self::handlingTime($product),
+                'cutoffTime' => Carbon::parse('10:00', 'Europe/Paris')->format('H:i:sP'),
+                'businessDays' => [
+                    '@type' => 'OpeningHoursSpecification',
+                    'dayOfWeek' => [
+                        'https://schema.org/Monday',
+                        'https://schema.org/Tuesday',
+                        'https://schema.org/Wednesday',
+                        'https://schema.org/Thursday',
+                        'https://schema.org/Friday',
+                    ],
+                ],
                 'transitTime' => [
                     '@type' => 'QuantitativeValue',
                     'minValue' => (int) $days[0][0],
@@ -259,6 +276,28 @@ class ProductSchema
         }
 
         return $details;
+    }
+
+    /**
+     * How long the shop keeps the parcel before handing it over: nought or
+     * one business day, the ten o'clock rule either way. A product that
+     * must be ordered from its supplier first waits that lead time on top,
+     * the same figure the cart shows the customer.
+     *
+     * @return array<string, mixed>
+     */
+    private static function handlingTime(Product $product): array
+    {
+        $lead = $product->availabilityState() === 'at_supplier'
+            ? (int) ($product->supplier?->lead_time_days ?? 0)
+            : 0;
+
+        return [
+            '@type' => 'QuantitativeValue',
+            'minValue' => $lead,
+            'maxValue' => $lead + 1,
+            'unitCode' => 'DAY',
+        ];
     }
 
     /**

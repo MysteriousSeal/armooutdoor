@@ -239,6 +239,37 @@ class ProductSchemaTest extends TestCase
         $this->assertSame('3.90', $cheap['offers']['shippingDetails']['shippingRate']['value']);
     }
 
+    public function test_the_delivery_time_says_how_long_the_shop_keeps_the_parcel(): void
+    {
+        Carrier::query()->create(['slug' => 'colissimo-home', 'name' => ['fr' => 'Colissimo'], 'description' => ['fr' => ''], 'eta' => ['fr' => '2–4 jours'], 'method' => 'home', 'price_cents' => 690, 'active' => true]);
+
+        $delivery = $this->schema($this->product())['offers']['shippingDetails']['deliveryTime'];
+
+        // In stock: out today or tomorrow, the ten o'clock rule either way.
+        $this->assertSame(0, $delivery['handlingTime']['minValue']);
+        $this->assertSame(1, $delivery['handlingTime']['maxValue']);
+        $this->assertMatchesRegularExpression('/^10:00:00[+-]\d{2}:\d{2}$/', $delivery['cutoffTime']);
+        $this->assertContains('https://schema.org/Monday', $delivery['businessDays']['dayOfWeek']);
+        $this->assertNotContains('https://schema.org/Saturday', $delivery['businessDays']['dayOfWeek']);
+    }
+
+    public function test_a_product_awaited_from_its_supplier_carries_that_wait(): void
+    {
+        Carrier::query()->create(['slug' => 'colissimo-home', 'name' => ['fr' => 'Colissimo'], 'description' => ['fr' => ''], 'eta' => ['fr' => '2–4 jours'], 'method' => 'home', 'price_cents' => 690, 'active' => true]);
+
+        $supplier = \App\Models\Supplier::query()->create(['name' => 'Fournisseur', 'lead_time_days' => 5]);
+        $product = $this->product([
+            'quantity' => 0,
+            'available_at_supplier' => true,
+            'supplier_id' => $supplier->id,
+        ]);
+
+        $handling = $this->schema($product)['offers']['shippingDetails']['deliveryTime']['handlingTime'];
+
+        $this->assertSame(5, $handling['minValue']);
+        $this->assertSame(6, $handling['maxValue']);
+    }
+
     public function test_no_carrier_means_no_shipping_details(): void
     {
         $this->assertArrayNotHasKey('shippingDetails', $this->schema($this->product())['offers']);
