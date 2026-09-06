@@ -1168,16 +1168,18 @@
 }
 
 .gloss-rail a {
-    color: var(--accent-heading);
-}
-
-.gloss-rail a:hover {
+    font-weight: 800;
     color: var(--surface);
     background: var(--accent-heading);
 }
 
+.gloss-rail a:hover {
+    background: var(--accent-hover);
+}
+
 .gloss-rail span {
-    color: color-mix(in srgb, var(--text-muted) 45%, transparent);
+    color: color-mix(in srgb, var(--text-muted) 55%, transparent);
+    background: color-mix(in srgb, var(--border) 45%, var(--surface));
 }
 
 .gloss-search {
@@ -1233,69 +1235,136 @@
 }
 
 .gloss-letter {
+    position: sticky;
+    top: 1.5rem;
+    align-self: start;
     margin: 0;
     font-size: clamp(1.8rem, 4vw, 2.6rem);
     font-weight: 700;
     line-height: 1;
     letter-spacing: -0.03em;
-    color: color-mix(in srgb, var(--accent-heading) 45%, transparent);
+    color: var(--accent-heading);
+}
+
+/* A rule under the letter, so the margin reads as a tab rather than as a
+   character that happened to be left there. */
+.gloss-letter::after {
+    content: '';
+    display: block;
+    width: 1.6rem;
+    height: 3px;
+    margin-top: 0.4rem;
+    background: var(--accent-heading);
 }
 
 .gloss-entries {
     margin: 0;
 }
 
-.gloss-entry + .gloss-entry {
-    margin-top: 1.3rem;
-    padding-top: 1.3rem;
-    border-top: 1px dashed color-mix(in srgb, var(--accent-heading) 20%, var(--border));
+/* The word on the left, the place it lives on the right. The right column
+   is the same width all the way down, so the counts read as a column of
+   figures rather than as forty separate afterthoughts. */
+.gloss-entry {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 16rem;
+    column-gap: 2.5rem;
+    align-items: start;
 }
 
-.gloss-entry dt {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.4rem 0.9rem;
-    margin: 0 0 0.4rem;
+.gloss-entry + .gloss-entry {
+    margin-top: 1.4rem;
+    padding-top: 1.4rem;
+    border-top: 1px solid color-mix(in srgb, var(--accent-heading) 30%, var(--border));
 }
 
 .gloss-term {
+    grid-column: 1;
+    margin: 0 0 0.35rem;
     font-size: 1.05rem;
     font-weight: 700;
     color: var(--accent-heading);
 }
 
-/* Where the word is met: the thing a dictionary cannot say. */
-.gloss-source {
-    margin-left: auto;
-    font-size: 0.66rem;
-    font-weight: 700;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-}
-
-.gloss-entry dd {
-    margin: 0;
-}
-
 .gloss-definition {
+    grid-column: 1;
     max-width: 44rem;
-    margin: 0 0 0.5rem;
+    margin: 0;
     font-size: 0.9375rem;
     line-height: 1.62;
 }
 
+/* The destination, coloured by what kind of place it is: stock you can
+   filter, a shelf, or the shop's own writing. The palette is the one the
+   catalogue already uses for meaning rather than three new hues. */
+.gloss-where {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    padding: 0.7rem 0.85rem;
+    background: var(--gk-wash);
+    border: 1px solid var(--gk-line);
+    border-left: 3px solid var(--gk-ink);
+}
+
+.gloss-where.is-filtre {
+    --gk-ink: #3d6b4e;
+    --gk-wash: #eef4ef;
+    --gk-line: #d5e4d8;
+}
+
+.gloss-where.is-rayon {
+    --gk-ink: #5b5c3b;
+    --gk-wash: #f2f2e8;
+    --gk-line: #dcdcc6;
+}
+
+.gloss-where.is-lecture {
+    --gk-ink: #2f5d8a;
+    --gk-wash: #eef3f8;
+    --gk-line: #c6d8e8;
+}
+
+[data-theme='dark'] .gloss-where.is-filtre {
+    --gk-ink: #8fc9a5;
+    --gk-wash: #23312a;
+    --gk-line: #3a5344;
+}
+
+[data-theme='dark'] .gloss-where.is-rayon {
+    --gk-ink: #a9ab77;
+    --gk-wash: #2c2d22;
+    --gk-line: #4a4b36;
+}
+
+[data-theme='dark'] .gloss-where.is-lecture {
+    --gk-ink: #86b6e0;
+    --gk-wash: #212f3b;
+    --gk-line: #3a5570;
+}
+
+/* Where the word is met: the thing a dictionary cannot say. */
+.gloss-source {
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--gk-ink);
+}
+
 .gloss-goto {
     display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.35rem 0.7rem;
-    font-size: 0.8rem;
+    align-items: baseline;
+    gap: 0.45rem;
+    font-size: 0.82rem;
     font-weight: 600;
-    color: var(--accent-heading);
-    background: color-mix(in srgb, var(--accent-heading) 8%, var(--surface));
-    border: 1px solid color-mix(in srgb, var(--accent-heading) 25%, var(--border));
+    line-height: 1.35;
+    color: var(--gk-ink);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--gk-ink) 35%, transparent);
+    text-underline-offset: 0.2em;
 }
 
 .gloss-goto::before {
@@ -1304,21 +1373,29 @@
 }
 
 .gloss-goto:hover {
-    color: var(--surface);
-    background: var(--accent-heading);
-    border-color: var(--accent-heading);
+    text-decoration-color: var(--gk-ink);
 }
 
-.gloss-goto-count {
-    padding-left: 0.5rem;
+/* The tally, tabular so the figures line up down the page. */
+.gloss-count {
+    margin: 0.1rem 0 0;
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.gloss-count strong {
+    font-size: 1.3rem;
+    font-weight: 800;
     font-variant-numeric: tabular-nums;
-    border-left: 1px solid color-mix(in srgb, var(--accent-heading) 30%, transparent);
+    color: var(--gk-ink);
 }
 
 /* Clear of whatever closes the page: the rule that opens the next section
-   sat flush against the last entry's link. */
+   sat flush against the last entry. */
 .gloss-list {
-    margin-bottom: 2.75rem;
+    margin-bottom: 3rem;
 }
 
 .gloss-empty {
@@ -1327,13 +1404,27 @@
     color: var(--text-muted);
 }
 
+@media (max-width: 62rem) {
+    /* The right column has nowhere to go, so the place a word lives is
+       said under its definition instead of beside it. */
+    .gloss-entry {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .gloss-where {
+        grid-column: 1;
+        grid-row: auto;
+        margin-top: 0.7rem;
+    }
+}
+
 @media (max-width: 46rem) {
     .gloss-group {
         grid-template-columns: minmax(0, 1fr);
         gap: 0.6rem;
     }
 
-    .gloss-source {
-        margin-left: 0;
+    .gloss-letter {
+        position: static;
     }
 }

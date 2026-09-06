@@ -80,32 +80,36 @@
                 <section class="gloss-group" id="lettre-{{ $initial }}" data-gloss-group aria-labelledby="lettre-{{ $initial }}-title">
                     <h2 class="gloss-letter" id="lettre-{{ $initial }}-title">{{ $initial }}</h2>
 
-                    <dl class="gloss-entries">
+                    <div class="gloss-entries">
                         @foreach ($group as $entry)
-                            <div
+                            {{-- An article with its own heading rather than a
+                                 definition list: forty headings are forty stops
+                                 a screen reader can jump between, and the word
+                                 and the place it lives need to sit in separate
+                                 columns. --}}
+                            <article
                                 class="gloss-entry"
-                                id="{{ \Illuminate\Support\Str::slug($entry['term']) }}"
                                 data-gloss-entry
                                 data-gloss-terms="{{ \Illuminate\Support\Str::lower($entry['term'].' '.implode(' ', $entry['aliases'] ?? [])) }}"
                             >
-                                <dt>
-                                    <span class="gloss-term">{{ $entry['term'] }}</span>
+                                <h3 class="gloss-term" id="{{ \Illuminate\Support\Str::slug($entry['term']) }}">{{ $entry['term'] }}</h3>
+                                <p class="gloss-definition">{{ $entry['definition'] }}</p>
+
+                                <div class="gloss-where is-{{ $entry['kind'] }}">
                                     <span class="gloss-source">{{ $entry['source'] }}</span>
-                                </dt>
-                                <dd>
-                                    <p class="gloss-definition">{{ $entry['definition'] }}</p>
                                     @if ($entry['url'] !== null)
-                                        <a href="{{ $entry['url'] }}" class="gloss-goto">
-                                            {{ $entry['label'] }}
-                                            @if ($entry['count'] !== null)
-                                                <span class="gloss-goto-count">{{ $entry['count'] }}</span>
-                                            @endif
-                                        </a>
+                                        <a href="{{ $entry['url'] }}" class="gloss-goto">{{ $entry['label'] }}</a>
                                     @endif
-                                </dd>
-                            </div>
+                                    @if ($entry['count'] !== null)
+                                        <p class="gloss-count">
+                                            <strong>{{ $entry['count'] }}</strong>
+                                            {{ $entry['count'] > 1 ? 'produits' : 'produit' }}
+                                        </p>
+                                    @endif
+                                </div>
+                            </article>
                         @endforeach
-                    </dl>
+                    </div>
                 </section>
             @endforeach
 

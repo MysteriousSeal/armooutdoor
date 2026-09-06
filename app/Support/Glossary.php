@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Support\Collection;
 
@@ -30,6 +31,90 @@ class Glossary
                 'aliases' => ['Automatic Electric Gun', 'électrique'],
                 'definition' => 'Automatic Electric Gun : une réplique dont un moteur électrique arme le ressort à chaque coup, alimentée par une batterie. C\'est la propulsion la plus courante en partie, parce qu\'elle tire en rafale et se moque du froid.',
                 'filter' => ['category' => 'repliques-airsoft', 'label' => 'Propulsion', 'value' => 'Électrique (AEG)', 'see' => 'les répliques électriques'],
+            ],
+            [
+                'term' => 'Allume-feu à magnésium',
+                'aliases' => ['pierre à feu', 'firesteel', 'bushcraft'],
+                'definition' => 'Barreau de magnésium et tige d\'alliage ferreux : on gratte le premier pour faire des copeaux, on frappe le second pour les enflammer. Il fonctionne mouillé, ne s\'épuise pas comme un briquet, et demande de l\'entraînement avant d\'en dépendre.',
+                'link' => ['kind' => 'Rayon', 'label' => 'Allumes feu', 'category' => 'allumes-feu'],
+            ],
+            [
+                'term' => 'Auto-agrippant',
+                'aliases' => ['velcro', 'scratch', 'hook and loop'],
+                'definition' => 'La bande à crochets et sa contrepartie bouclée, qui se collent l\'une à l\'autre. C\'est ce qui tient un patch sur une casquette, un étui sur un gilet, et ce qui distingue un ruban camo réutilisable d\'un adhésif jetable.',
+                'link' => ['kind' => 'Rayon', 'label' => 'Patches', 'category' => 'patches'],
+            ],
+            [
+                'term' => 'Bungee',
+                'aliases' => ['élastique', 'amortisseur'],
+                'definition' => 'Section élastique intégrée à une sangle, qui absorbe le débattement quand on épaule ou qu\'on court. Elle rend la sangle plus confortable en mouvement, au prix d\'un maintien moins ferme à l\'arrêt.',
+                'link' => ['kind' => 'Rayon', 'label' => 'Sangles', 'category' => 'sangles'],
+            ],
+            [
+                'term' => 'Camouflage CP',
+                'aliases' => ['ACU', 'multicam', 'motif', 'désert', 'jungle'],
+                'definition' => 'Les motifs se désignent par des sigles : CP pour le camouflage à taches multi-terrains, ACU pour le motif pixellisé gris-vert. À côté d\'eux vivent des familles nommées par leur milieu, désert, jungle, forêt, neige, et des unis comme le coyote ou le tan.',
+                'link' => ['kind' => 'Rayon', 'label' => 'Rubans camo', 'category' => 'ruban-camo'],
+            ],
+            [
+                'term' => 'Cartouchière de crosse',
+                'aliases' => ['porte-cartouches', 'buttstock'],
+                'definition' => 'Bande à passants qui se sangle sur la crosse et porte quelques cartouches à portée de main. Elle évite de fouiller une poche entre deux séries, et se monte sans outil.',
+                'link' => ['kind' => 'Rayon', 'label' => 'Cartouchières de crosse', 'category' => 'cartouchieres-de-crosse'],
+            ],
+            [
+                'term' => 'Holster',
+                'aliases' => ['étui de ceinture', 'de hanche'],
+                'definition' => 'L\'étui qui porte une arme de poing sur la ceinture ou la cuisse, et qui la retient. Se choisit sur le modèle qu\'il doit accueillir : un holster trop lâche ne retient rien, un holster trop serré ne rend pas l\'arme.',
+                'link' => ['kind' => 'Rayon', 'label' => 'Holsters', 'category' => 'holsters'],
+            ],
+            [
+                'term' => 'Keffieh',
+                'aliases' => ['chèche', 'shemagh', 'foulard'],
+                'definition' => 'Grand foulard de coton à franges, porté au cou ou sur la tête. Il coupe le vent, le sable et le soleil, sèche vite, et sert accessoirement de serviette ou de sangle de fortune.',
+                'link' => ['kind' => 'Rayon', 'label' => 'Écharpes et foulards', 'category' => 'echarpes-et-foulards'],
+            ],
+            [
+                'term' => 'Longue-vue',
+                'aliases' => ['spotting scope', '25-75x60'],
+                'definition' => 'Lunette d\'observation à fort grossissement, montée sur trépied, avec laquelle on lit les impacts sans quitter le pas de tir. La notation 25-75x60 se lit : grossissement réglable de 25 à 75 fois, objectif de 60 mm de diamètre.',
+                'link' => ['kind' => 'Rayon', 'label' => 'Longues-vues', 'category' => 'longues-vues'],
+            ],
+            [
+                'term' => 'M-LOK',
+                'aliases' => ['rail', 'interface'],
+                'definition' => 'Interface de fixation à fentes oblongues, ouverte par Magpul, que portent beaucoup de garde-mains et de crosses. Un accessoire M-LOK se boulonne directement dans la fente, sans rail intermédiaire.',
+                'link' => ['kind' => 'Rayon', 'label' => 'Accessoires de l\'arme', 'category' => 'accessoires-de-l-arme'],
+            ],
+            [
+                'term' => 'MOLLE',
+                'aliases' => ['PALS', 'sanglage'],
+                'definition' => 'Le quadrillage de sangles cousues sur un sac ou un gilet, dans lequel on tisse une poche pour la fixer. Rien ne se visse : tout se tresse, et se retire de la même façon.',
+                'link' => ['kind' => 'Rayon', 'label' => 'Poches et étuis', 'category' => 'poches-etuis'],
+            ],
+            [
+                'term' => 'Paracorde',
+                'aliases' => ['550', 'brins', 'cordage'],
+                'definition' => 'Cordage tressé de quelques millimètres, d\'abord fait pour les suspentes de parachute, dont la gaine abrite plusieurs brins internes. On la tresse en bracelet ou en sangle, et on la détresse le jour où on a besoin de la corde.',
+                'link' => ['kind' => 'Rayon', 'label' => 'Survie', 'category' => 'sacs'],
+            ],
+            [
+                'term' => 'QD',
+                'aliases' => ['quick detach', 'attache rapide'],
+                'definition' => 'Quick Detach : l\'attache à bouton-poussoir qui libère une sangle d\'une main, sans la déboucler. Elle demande un logement QD sur l\'arme, ou un adaptateur qui en fournit un.',
+                'link' => ['kind' => 'Rayon', 'label' => 'Sangles', 'category' => 'sangles'],
+            ],
+            [
+                'term' => 'Sangle 1, 2 ou 3 points',
+                'aliases' => ['bretelle', 'points d\'attache'],
+                'definition' => 'Le nombre d\'endroits par lesquels la sangle tient l\'arme. Un point laisse l\'arme pendre et pivoter librement, deux la plaquent au corps et la stabilisent, trois combinent les deux au prix d\'un réglage plus long.',
+                'link' => ['kind' => 'Rayon', 'label' => 'Sangles', 'category' => 'sangles'],
+            ],
+            [
+                'term' => 'Télémètre',
+                'aliases' => ['laser', 'distance'],
+                'definition' => 'Appareil qui mesure la distance d\'une cible en chronométrant un éclair laser aller-retour. Il évite d\'estimer une portée à l\'œil, ce que personne ne fait bien au-delà de cent mètres.',
+                'link' => ['kind' => 'Rayon', 'label' => 'Télémètres', 'category' => 'telemetres'],
             ],
             [
                 'term' => 'Bille acier',
@@ -131,7 +216,7 @@ class Glossary
                 'term' => 'Pastille de réparation',
                 'aliases' => ['pastille autocollante', 'patch'],
                 'definition' => 'Petite gommette opaque que l\'on colle sur un impact pour repartir d\'une cible vierge. Elle multiplie par plusieurs séances la vie d\'une planche de tir.',
-                'link' => ['kind' => 'Rayon', 'label' => 'Pastilles', 'category' => 'pastilles'],
+                'link' => ['kind' => 'Rayon', 'label' => 'Pastilles autocollantes', 'category' => 'pastilles-autocollantes'],
             ],
             [
                 'term' => 'Planche de tir',
@@ -195,11 +280,13 @@ class Glossary
     public static function resolved(): Collection
     {
         $products = Product::query()->active()->get();
+        $slugs = Category::query()->pluck('slug');
 
         return collect(self::entries())
-            ->map(function (array $entry) use ($products): array {
+            ->map(function (array $entry) use ($products, $slugs): array {
                 $entry['initial'] = mb_strtoupper(mb_substr($entry['term'], 0, 1));
                 $entry['source'] = null;
+                $entry['kind'] = null;
                 $entry['url'] = null;
                 $entry['count'] = null;
 
@@ -209,6 +296,7 @@ class Glossary
                         ->contains(fn (array $attribute): bool => ($attribute['label'] ?? null) === $filter['label']
                             && ($attribute['value'] ?? null) === $filter['value']))->count();
 
+                    $entry['kind'] = 'filtre';
                     $entry['source'] = 'Filtre · '.$filter['label'];
 
                     if ($count > 0) {
@@ -223,6 +311,16 @@ class Glossary
 
                 $link = $entry['link'];
                 $entry['source'] = $link['kind'];
+
+                // Three kinds of destination, and the page colours them
+                // apart: stock, shelf, and the shop's own writing.
+                $entry['kind'] = $link['kind'] === 'Rayon' ? 'rayon' : 'lecture';
+
+                // A rayon this instance does not carry loses its link and
+                // keeps its definition, the same rule an empty filter obeys.
+                if (isset($link['category']) && ! $slugs->contains($link['category'])) {
+                    return $entry;
+                }
 
                 // The same rule off the catalogue: the control says what it
                 // does, not what it is named after.

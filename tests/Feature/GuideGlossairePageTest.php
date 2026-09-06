@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Support\Glossary;
 use App\Support\Guides;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 /**
@@ -83,6 +84,21 @@ class GuideGlossairePageTest extends TestCase
         $this->assertNotSame('', $aeg['definition']);
     }
 
+    public function test_a_rayon_this_instance_does_not_carry_loses_its_link(): void
+    {
+        // Some rayons exist in production and not here. The entry keeps its
+        // definition rather than pointing at a 404, the same rule an empty
+        // filter obeys.
+        $holster = Glossary::resolved()->firstWhere('term', 'Holster');
+
+        $this->assertNull($holster['url']);
+        $this->assertNotSame('', $holster['definition']);
+
+        Category::factory()->create(['slug' => 'holsters']);
+
+        $this->assertNotNull(Glossary::resolved()->firstWhere('term', 'Holster')['url']);
+    }
+
     public function test_the_page_indexes_itself_by_letter(): void
     {
         $html = $this->get('/guides/glossaire')->assertOk()->getContent();
@@ -98,6 +114,34 @@ class GuideGlossairePageTest extends TestCase
         // the index does not look as though it skipped one.
         foreach (range('A', 'Z') as $letter) {
             $this->assertStringContainsString('>'.$letter.'</', $html);
+        }
+    }
+
+    public function test_each_term_is_a_heading_of_its_own(): void
+    {
+        $html = $this->get('/guides/glossaire')->assertOk()->getContent();
+
+        // Forty headings are forty stops a screen reader can jump between,
+        // which a definition list does not give.
+        $this->assertSame(count(Glossary::entries()), substr_count($html, '<h3 class="gloss-term"'));
+
+        foreach (Glossary::resolved()->take(3) as $entry) {
+            $this->assertStringContainsString('id="'.Str::slug($entry['term']).'"', $html);
+        }
+    }
+
+    public function test_each_entry_is_coloured_by_the_kind_of_place_it_leads_to(): void
+    {
+        $kinds = Glossary::resolved()->groupBy('kind');
+
+        // Three destinations, three colours: stock you can filter, a shelf,
+        // and the shop's own writing.
+        $this->assertEqualsCanonicalizing(['filtre', 'rayon', 'lecture'], $kinds->keys()->all());
+
+        $html = $this->get('/guides/glossaire')->assertOk()->getContent();
+
+        foreach ($kinds as $kind => $entries) {
+            $this->assertSame($entries->count(), substr_count($html, 'gloss-where is-'.$kind));
         }
     }
 
