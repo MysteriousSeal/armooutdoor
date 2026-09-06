@@ -1,0 +1,88 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\BlogPost;
+use App\Models\Order;
+use App\Models\Product;
+use App\Models\ProductReview;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+/**
+ * The two things a catalogue cannot say about itself: what customers
+ * said, and what the shop wrote. Both sit on the page that gets the most
+ * visits rather than in the footer alone.
+ */
+class HomeVoicesAndReadingsTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private function review(Product $product, int $rating, string $comment): ProductReview
+    {
+        $user = User::factory()->create(['first_name' => 'Jean', 'last_name' => 'martin']);
+
+        $order = Order::query()->create([
+            'number' => Order::generateNumber(),
+            'user_id' => $user->id,
+            'status' => 'delivered',
+            'address_snapshot' => ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'x', 'postal_code' => '75000', 'city' => 'Paris', 'country' => 'FR'],
+            'billing_address_snapshot' => ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'x', 'postal_code' => '75000', 'city' => 'Paris', 'country' => 'FR'],
+            'carrier_method' => 'home',
+            'carrier_snapshot' => ['name' => ['fr' => 'Colissimo']],
+            'subtotal_cents' => 1000, 'shipping_cents' => 0, 'discount_cents' => 0,
+            'total_cents' => 1000, 'payment_method' => 'card',
+        ]);
+
+        return ProductReview::query()->create([
+            'product_id' => $product->id,
+            'user_id' => $user->id,
+            'order_id' => $order->id,
+            'rating' => $rating,
+            'comment' => $comment,
+        ]);
+    }
+
+    public function test_the_home_quotes_five_star_reviews_and_names_their_product(): void
+    {
+        $product = Product::factory()->create(['is_active' => true, 'quantity' => 5]);
+        $this->review($product, 5, 'Cibles parfaites, impacts visibles de loin.');
+        $this->review($product, 3, 'Correct sans plus.');
+
+        $this->get('/')->assertOk()
+            ->assertSee('Ce que disent nos clients')
+            ->assertSee('Cibles parfaites, impacts visibles de loin.')
+            // First name and last initial, the reviews' own privacy rule.
+            ->assertSee('Jean M.')
+            ->assertSee($product->localizedName())
+            // A middling review is not a testimonial.
+            ->assertDontSee('Correct sans plus.');
+    }
+
+    public function test_the_home_links_the_guides_and_the_latest_article(): void
+    {
+        $post = BlogPost::factory()->create();
+
+        $this->get('/')->assertOk()
+            ->assertSee('À lire avant de commander')
+            ->assertSee(route('guides.cibles'))
+            ->assertSee(route('guides.entretien'))
+            ->assertSee(route('guides.index'))
+            ->assertSee(route('blog.show', $post->slug))
+            ->assertSee($post->localizedTitle());
+    }
+
+    public function test_a_shop_without_reviews_shows_no_empty_strip(): void
+    {
+        $this->get('/')->assertOk()
+            ->assertDontSee('home-voices', false)
+            // The readings never depend on customer data, so they stay.
+            ->assertSee('home-readings', false);
+    }
+
+    public function test_the_h1_names_the_aisles(): void
+    {
+        $this->get('/')->assertOk()->assertSee('Cibles, entretien', false);
+    }
+}

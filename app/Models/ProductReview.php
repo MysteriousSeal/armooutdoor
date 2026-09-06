@@ -55,7 +55,9 @@ class ProductReview extends Model
             return (string) $this->author_name;
         }
 
-        $lastInitial = mb_substr(trim($this->user->last_name ?? ''), 0, 1);
+        // Upper-cased on the way out: a customer who typed their name in
+        // lower case still signs « Jean M. », like the blog comments do.
+        $lastInitial = mb_strtoupper(mb_substr(trim($this->user->last_name ?? ''), 0, 1));
 
         return trim($this->user->first_name.($lastInitial !== '' ? ' '.$lastInitial.'.' : ''));
     }

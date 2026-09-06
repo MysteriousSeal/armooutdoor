@@ -36,7 +36,10 @@
                     'image' => asset('images/hero.webp'),
                     'focus' => '78%',
                     'kicker' => __('store.home_hero_kicker'),
-                    'lines' => ['Équipez-vous', 'pour le stand', 'et le terrain'],
+                    // The h1 of the whole site: it names the aisles rather
+                    // than shouting an imperative, because it is the strongest
+                    // on-page signal there is.
+                    'lines' => ['Cibles, entretien', 'et équipement', 'pour le stand et le terrain'],
                     'accent' => 1,
                     'text' => 'Équipement sélectionné pour le tir sportif, la chasse, l’airgun et l’aventure en plein air.',
                     'tags' => [__('store.home_hero_tag_range'), __('store.home_hero_tag_hunt'), __('store.home_hero_tag_outdoor')],
@@ -330,6 +333,50 @@
                 </div>
             </section>
         @endif
+
+        @if ($testimonials->isNotEmpty())
+            {{-- What customers said, each still pointing at the product it
+                 judged: a testimonial nobody can trace reads as invented. --}}
+            <section class="home-voices" aria-labelledby="home-voices-title">
+                <header class="home-cats-header">
+                    <p class="home-cats-kicker">{{ __('store.home_voices_kicker') }}</p>
+                    <h2 class="home-cats-title" id="home-voices-title">{{ __('store.home_voices_title') }}</h2>
+                </header>
+                <ul class="home-voices-list">
+                    @foreach ($testimonials as $review)
+                        <li class="home-voice">
+                            <span class="home-voice-stars" aria-hidden="true">★★★★★</span>
+                            <span class="sr-only">{{ trans_choice('store.review_rating_value', 5, ['count' => 5]) }}</span>
+                            <p class="home-voice-body">{{ $review->comment }}</p>
+                            <p class="home-voice-foot">
+                                <span class="home-voice-author">{{ $review->reviewerName() }}</span>
+                                <a href="{{ localized_route('products.show', ['product' => $review->product->slug]) }}" class="home-voice-product">{{ $review->product->localizedName() }}</a>
+                            </p>
+                        </li>
+                    @endforeach
+                </ul>
+            </section>
+        @endif
+
+        {{-- The shop's own writing, linked from the page that gets the most
+             visits rather than the footer alone. --}}
+        <section class="home-readings" aria-labelledby="home-readings-title">
+            <header class="home-cats-header">
+                <p class="home-cats-kicker">{{ __('store.home_readings_kicker') }}</p>
+                <h2 class="home-cats-title" id="home-readings-title">{{ __('store.home_readings_title') }}</h2>
+                <a href="{{ route('guides.index') }}" class="home-cats-link">{{ __('store.home_readings_link') }}</a>
+            </header>
+            <div class="home-readings-grid">
+                @foreach ($readings as $reading)
+                    <a href="{{ $reading['url'] }}" class="home-reading">
+                        <span class="home-reading-kicker">{{ $reading['kicker'] }}</span>
+                        <h3 class="home-reading-title">{{ $reading['title'] }}</h3>
+                        <p class="home-reading-text">{{ \Illuminate\Support\Str::limit($reading['text'], 130) }}</p>
+                        <span class="home-reading-more">{{ $reading['cta'] }}</span>
+                    </a>
+                @endforeach
+            </div>
+        </section>
 
         <section class="home-why" aria-labelledby="home-why-title">
             <header class="home-why-header">

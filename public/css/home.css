@@ -1335,3 +1335,135 @@
         order: 3;
     }
 }
+
+/* ============ what customers said ============ */
+
+/* Three quiet cards, each still pointing at the product it judged: a
+   testimonial nobody can trace reads as an invention. */
+.home .home-voices {
+    margin-top: 3rem;
+}
+
+.home-voices-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.home-voice {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1.15rem 1.3rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.home-voice-stars {
+    font-size: 0.8125rem;
+    letter-spacing: 0.12em;
+    color: var(--accent-heading);
+}
+
+.home-voice-body {
+    flex: 1;
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: var(--text);
+}
+
+.home-voice-foot {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    margin: 0;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.8125rem;
+}
+
+.home-voice-author {
+    font-weight: 700;
+}
+
+.home-voice-product {
+    color: var(--text-muted);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--accent-heading) 40%, transparent);
+    text-underline-offset: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.home-voice-product:hover {
+    color: var(--accent-heading);
+    text-decoration-color: var(--accent-heading);
+}
+
+/* ============ what the shop wrote ============ */
+
+.home .home-readings {
+    margin-top: 3rem;
+}
+
+.home-readings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+    gap: 1rem;
+}
+
+.home-reading {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding: 1.3rem 1.4rem 1.4rem;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.home-reading:hover {
+    border-color: var(--accent-heading);
+    background: color-mix(in srgb, var(--accent-heading) 6%, var(--surface));
+}
+
+.home-reading-kicker {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.home-reading-title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+    color: var(--accent-heading);
+}
+
+.home-reading-text {
+    flex: 1;
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+}
+
+.home-reading-more {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--accent-heading);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}

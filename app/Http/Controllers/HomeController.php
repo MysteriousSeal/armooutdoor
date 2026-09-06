@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BlogPost;
 use App\Models\Category;
+use App\Models\ProductReview;
 use App\Models\ShippingSetting;
 use App\Support\HomepageCatalog;
 use Illuminate\View\View;
@@ -67,6 +69,73 @@ class HomeController extends Controller
             'onSale' => $onSale,
             'featured' => $featured,
             'more' => $more,
+            // What customers said and what the shop wrote: the two things a
+            // catalogue cannot say about itself.
+            'testimonials' => $this->testimonials(),
+            'readings' => $this->readings(),
         ]);
+    }
+
+    /**
+     * The kindest recent word about what the shop sells.
+     *
+     * Five-star reviews only, newest first, each still pointing at the
+     * product it judged: an unsourced testimonial is worth nothing, and
+     * one that cannot be clicked reads like an invention.
+     *
+     * @return \Illuminate\Support\Collection<int, ProductReview>
+     */
+    private function testimonials(int $limit = 3): \Illuminate\Support\Collection
+    {
+        return ProductReview::query()
+            ->where('rating', 5)
+            ->whereHas('product', fn ($query) => $query->where('is_active', true))
+            ->with(['product', 'user'])
+            ->whereNotNull('comment')
+            ->where('comment', '!=', '')
+            ->orderByDesc('created_at')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * The shop's own writing, linked from the page that gets the most
+     * visits: two guides and the latest article. Until this, the whole
+     * editorial cluster hung off one footer column.
+     *
+     * @return array<int, array{kicker: string, title: string, text: string, url: string, cta: string}>
+     */
+    private function readings(): array
+    {
+        $readings = [
+            [
+                'kicker' => 'Guide',
+                'title' => 'Bien choisir sa cible',
+                'text' => 'Réactives, planches, carton ou métal : quel format pour quelle distance, et ce qu\'on lit après le tir.',
+                'url' => route('guides.cibles'),
+                'cta' => 'Lire le guide',
+            ],
+            [
+                'kicker' => 'Guide',
+                'title' => 'Entretenir son arme',
+                'text' => 'Corde ou kit à tiges, calibre par calibre, dans quel sens nettoyer et à quelle fréquence.',
+                'url' => route('guides.entretien'),
+                'cta' => 'Lire le guide',
+            ],
+        ];
+
+        $post = BlogPost::query()->visible()->with('category')->orderByDesc('published_at')->first();
+
+        if ($post !== null) {
+            $readings[] = [
+                'kicker' => $post->category?->localizedName() ?? 'Le blog',
+                'title' => $post->localizedTitle(),
+                'text' => $post->localizedExcerpt(),
+                'url' => route('blog.show', $post->slug),
+                'cta' => __('store.blog_read'),
+            ];
+        }
+
+        return $readings;
     }
 }

@@ -46,15 +46,16 @@ class HomeCarouselTest extends TestCase
         $this->assertSame(3, substr_count(implode('', $panels[0]), 'aria-hidden="true"'));
     }
 
-    public function test_the_original_hero_copy_survives(): void
+    public function test_the_leading_panel_names_the_aisles(): void
     {
-        // Le premier panneau est l'ancien hero : le remplacer ne devait rien
-        // lui enlever.
+        // Le premier panneau porte le h1 du site : il nomme les rayons
+        // plutôt que de lancer un impératif, parce que c'est le signal de
+        // page le plus fort dont dispose la boutique.
         $this->get('/')
             ->assertOk()
-            ->assertSee('Équipez-vous', false)
-            ->assertSee('pour le stand', false)
-            ->assertSee('et le terrain', false)
+            ->assertSee('Cibles, entretien', false)
+            ->assertSee('et équipement', false)
+            ->assertSee('pour le stand et le terrain', false)
             ->assertSee(__('store.hero_cta'), false);
     }
 
