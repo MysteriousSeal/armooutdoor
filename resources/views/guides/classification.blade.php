@@ -208,7 +208,7 @@
             </div>
         </section>
 
-        <section class="glab-panel" aria-labelledby="glab-guide-title">
+        <section class="glab-panel glab-detail" aria-labelledby="glab-guide-title">
             <h2 class="glab-title" id="glab-guide-title">Les seuils <span class="glab-title-accent">en détail</span></h2>
 
             <div class="glab-prose">
@@ -235,102 +235,114 @@
                         <dd>« Supérieure ou égale » : 20 J pile, c'est déjà la C. Licence de tir ou permis de chasser validé, compte SIA, déclaration.</dd>
                     </div>
                 </dl>
+            </div>
 
-                <h3>Catégorie D : libre à l'achat, jamais dans la rue</h3>
-                <p>
-                    Une pièce d'identité prouvant la majorité, et c'est terminé. Pas de licence,
-                    pas de compte SIA, pas de déclaration. Un mineur d'au moins 9 ans peut
-                    <em>détenir</em> (pas acheter) sous autorisation parentale et licence de club :
-                    acheter une carabine « pour le jardin » ne rentre pas dans ce cadre.
-                </p>
-                <p>
-                    Le piège est dehors. Le port (arme immédiatement utilisable) et le transport
-                    (arme qui ne l'est pas) exigent un motif légitime, les deux. Une carabine
-                    démontée, chargeur vide, plombs à part, housse fermée au fond du coffre :
-                    transport. La même, armée sur la banquette : port. Sans motif, un an et
-                    15 000 euros ; une amende forfaitaire de 500 euros peut éteindre l'action
-                    publique si l'on remet l'objet, sauf s'il s'agit d'une arme à feu.
-                </p>
-                <p>
-                    <a href="{{ route('blog.show', 'categorie-d-ce-que-la-loi-francaise-range-vraiment-dedans-et-ce-que-ca-change-pour-vous') }}">Catégorie D : ce que la loi range vraiment dedans</a>
-                    déroule la liste des douze entrées, le lieu de tir, et les trois idées reçues
-                    à jeter.
-                </p>
+            <div class="glab-chapters">
+                <article class="glab-chapter">
+                    <h3>Catégorie D : libre à l'achat, jamais dans la rue</h3>
+                    <p>
+                        Une pièce d'identité prouvant la majorité, et c'est terminé. Pas de licence,
+                        pas de compte SIA, pas de déclaration. Un mineur d'au moins 9 ans peut
+                        <em>détenir</em> (pas acheter) sous autorisation parentale et licence de club :
+                        acheter une carabine « pour le jardin » ne rentre pas dans ce cadre.
+                    </p>
+                    <p>
+                        Le piège est dehors. Le port (arme immédiatement utilisable) et le transport
+                        (arme qui ne l'est pas) exigent un motif légitime, les deux. Une carabine
+                        démontée, chargeur vide, plombs à part, housse fermée au fond du coffre :
+                        transport. La même, armée sur la banquette : port. Sans motif, un an et
+                        15 000 euros ; une amende forfaitaire de 500 euros peut éteindre l'action
+                        publique si l'on remet l'objet, sauf s'il s'agit d'une arme à feu.
+                    </p>
+                    <p class="glab-chapter-more">
+                        <a href="{{ route('blog.show', 'categorie-d-ce-que-la-loi-francaise-range-vraiment-dedans-et-ce-que-ca-change-pour-vous') }}">Catégorie D : ce que la loi range vraiment dedans</a>
+                        déroule la liste des douze entrées, le lieu de tir, et les trois idées reçues
+                        à jeter.
+                    </p>
+                </article>
 
-                <h3>Catégorie C : cinq joules d'écart, un autre monde</h3>
-                <p>
-                    Deux carabines 4,5 mm sur le même râtelier : 19 J contre pièce d'identité,
-                    24 J contre permis, numéro SIA, déclaration et rangement. Il n'y a pas de
-                    troisième voie à l'achat. Tout passe par un compte détenteur sur le portail
-                    du ministère, via FranceConnect. Le rangement n'est pas facultatif : coffre
-                    ou armoire forte adaptés, ou un élément démonté conservé à part ; les
-                    munitions, séparément.
-                </p>
-                <p>
-                    Hériter ou trouver un fusil ouvre une voie propre : déclarer sans délai sur
-                    un compte SIA « héritier », puis un certificat médical sous trois mois. On
-                    peut conserver l'arme, pas acheter de munitions. La laisser au grenier est
-                    un délit : deux ans et 30 000 euros, comme toute détention de catégorie C
-                    sans déclaration.
-                </p>
-                <p>
-                    <a href="{{ route('blog.show', 'categorie-c-les-armes-soumises-a-declaration-et-tout-ce-qui-va-avec') }}">Catégorie C : les armes soumises à déclaration</a>
-                    dit les douze entrées, le râtelier numérique, et ce que change le 5 janvier 2026
-                    pour les anciens licenciés sans compte.
-                </p>
+                <article class="glab-chapter">
+                    <h3>Catégorie C : cinq joules d'écart, un autre monde</h3>
+                    <p>
+                        Deux carabines 4,5 mm sur le même râtelier : 19 J contre pièce d'identité,
+                        24 J contre permis, numéro SIA, déclaration et rangement. Il n'y a pas de
+                        troisième voie à l'achat. Tout passe par un compte détenteur sur le portail
+                        du ministère, via FranceConnect. Le rangement n'est pas facultatif : coffre
+                        ou armoire forte adaptés, ou un élément démonté conservé à part ; les
+                        munitions, séparément.
+                    </p>
+                    <p>
+                        Hériter ou trouver un fusil ouvre une voie propre : déclarer sans délai sur
+                        un compte SIA « héritier », puis un certificat médical sous trois mois. On
+                        peut conserver l'arme, pas acheter de munitions. La laisser au grenier est
+                        un délit : deux ans et 30 000 euros, comme toute détention de catégorie C
+                        sans déclaration.
+                    </p>
+                    <p class="glab-chapter-more">
+                        <a href="{{ route('blog.show', 'categorie-c-les-armes-soumises-a-declaration-et-tout-ce-qui-va-avec') }}">Catégorie C : les armes soumises à déclaration</a>
+                        dit les douze entrées, le râtelier numérique, et ce que change le 5 janvier 2026
+                        pour les anciens licenciés sans compte.
+                    </p>
+                </article>
 
-                <h3>Catégorie B : on demande d'abord</h3>
-                <p>
-                    Ici, on ne déclare plus après coup. On demande, on attend, on n'achète que
-                    si le préfet a dit oui : pistolets, revolvers, certaines carabines
-                    semi-automatiques, armes courtes, fusils à pompe. Depuis février 2024, un
-                    seul titre, collé à la personne et non plus à chaque arme, vaut cinq ans
-                    et couvre le quota. Six armes pour un primo-demandeur, quinze au
-                    renouvellement. Dix chargeurs par arme, trois mille cartouches par arme et
-                    par an. Trois mois sans réponse, c'est un refus.
-                </p>
-                <p>
-                    Le rangement est plus étroit qu'en C : coffre-fort ou armoire forte, ou
-                    pièce forte à porte blindée. Pas le démontage d'un élément conservé à
-                    part. Ces armes ne s'utilisent que dans les stands d'associations agréées.
-                    Sans titre, c'est le même délit qu'en A : cinq ans et 75 000 euros.
-                </p>
-                <p>
-                    <a href="{{ route('blog.show', 'categorie-b-les-armes-soumises-a-autorisation-et-comment-on-y-entre') }}">Catégorie B : les armes soumises à autorisation</a>
-                    dit la liste, le dossier SIA, et ce qui tombe quand la licence n'est pas
-                    renouvelée.
-                </p>
+                <article class="glab-chapter">
+                    <h3>Catégorie B : on demande d'abord</h3>
+                    <p>
+                        Ici, on ne déclare plus après coup. On demande, on attend, on n'achète que
+                        si le préfet a dit oui : pistolets, revolvers, certaines carabines
+                        semi-automatiques, armes courtes, fusils à pompe. Depuis février 2024, un
+                        seul titre, collé à la personne et non plus à chaque arme, vaut cinq ans
+                        et couvre le quota. Six armes pour un primo-demandeur, quinze au
+                        renouvellement. Dix chargeurs par arme, trois mille cartouches par arme et
+                        par an. Trois mois sans réponse, c'est un refus.
+                    </p>
+                    <p>
+                        Le rangement est plus étroit qu'en C : coffre-fort ou armoire forte, ou
+                        pièce forte à porte blindée. Pas le démontage d'un élément conservé à
+                        part. Ces armes ne s'utilisent que dans les stands d'associations agréées.
+                        Sans titre, c'est le même délit qu'en A : cinq ans et 75 000 euros.
+                    </p>
+                    <p class="glab-chapter-more">
+                        <a href="{{ route('blog.show', 'categorie-b-les-armes-soumises-a-autorisation-et-comment-on-y-entre') }}">Catégorie B : les armes soumises à autorisation</a>
+                        dit la liste, le dossier SIA, et ce qui tombe quand la licence n'est pas
+                        renouvelée.
+                    </p>
+                </article>
 
-                <h3>Catégorie A : l'interdiction, et le chargeur qui bascule</h3>
-                <p>
-                    L'A2 (matériels de guerre, armes automatiques, munitions perforantes,
-                    explosives ou incendiaires) est réservée à l'État. L'A1 est une liste
-                    d'armes interdites par leurs caractéristiques, dont certaines ne le sont
-                    que dans un état donné. Une carabine semi-automatique à percussion centrale
-                    est en B avec un chargeur de 10, en A1 dès qu'un chargeur de plus de 10 y
-                    est inséré. Le chargeur seul, au-delà de 10 cartouches pour cette arme, est
-                    déjà classé A1.
-                </p>
-                <p>
-                    Hors stand et titre, acquérir ou détenir du A ou du B sans autorisation :
-                    cinq ans et 75 000 euros. Le décret du 5 septembre 2025 a fait passer
-                    certains couteaux à lame fixe et les coups de poing américains postérieurs
-                    à 1900 de la D à l'A1, avec trois mois pour s'en défaire.
-                </p>
-                <p>
-                    <a href="{{ route('blog.show', 'categorie-a-ce-qui-est-interdit-a-qui-et-comment-une-arme-b-y-bascule-dun-chargeur') }}">Catégorie A : ce qui est interdit, et comment une arme B y bascule</a>
-                    détaille A1 et A2, les seuils de chargeur, et les exceptions.
-                </p>
+                <article class="glab-chapter">
+                    <h3>Catégorie A : l'interdiction, et le chargeur qui bascule</h3>
+                    <p>
+                        L'A2 (matériels de guerre, armes automatiques, munitions perforantes,
+                        explosives ou incendiaires) est réservée à l'État. L'A1 est une liste
+                        d'armes interdites par leurs caractéristiques, dont certaines ne le sont
+                        que dans un état donné. Une carabine semi-automatique à percussion centrale
+                        est en B avec un chargeur de 10, en A1 dès qu'un chargeur de plus de 10 y
+                        est inséré. Le chargeur seul, au-delà de 10 cartouches pour cette arme, est
+                        déjà classé A1.
+                    </p>
+                    <p>
+                        Hors stand et titre, acquérir ou détenir du A ou du B sans autorisation :
+                        cinq ans et 75 000 euros. Le décret du 5 septembre 2025 a fait passer
+                        certains couteaux à lame fixe et les coups de poing américains postérieurs
+                        à 1900 de la D à l'A1, avec trois mois pour s'en défaire.
+                    </p>
+                    <p class="glab-chapter-more">
+                        <a href="{{ route('blog.show', 'categorie-a-ce-qui-est-interdit-a-qui-et-comment-une-arme-b-y-bascule-dun-chargeur') }}">Catégorie A : ce qui est interdit, et comment une arme B y bascule</a>
+                        détaille A1 et A2, les seuils de chargeur, et les exceptions.
+                    </p>
+                </article>
 
-                <h3>Ce que vend la boutique</h3>
-                <p>
-                    Les <a href="{{ route('categories.show', 'repliques-airsoft') }}">répliques airsoft</a>
-                    du rayon se situent sous 2 J, donc hors catégorie. Une réplique modifiée
-                    pour franchir 2 J bascule en D, avec toutes les obligations décrites plus
-                    haut, souvent sans que son propriétaire le sache. Pour le reste du stand,
-                    <a href="{{ route('guides.cibles') }}">bien choisir sa cible</a> et
-                    <a href="{{ route('guides.entretien') }}">entretenir son arme</a>.
-                </p>
+                <article class="glab-chapter">
+                    <h3>Ce que vend la boutique</h3>
+                    <p>
+                        Les <a href="{{ route('categories.show', 'repliques-airsoft') }}">répliques airsoft</a>
+                        du rayon se situent sous 2 J, donc hors catégorie. Une réplique modifiée
+                        pour franchir 2 J bascule en D, avec toutes les obligations décrites plus
+                        haut, souvent sans que son propriétaire le sache. Pour le reste du stand,
+                        <a href="{{ route('guides.cibles') }}">bien choisir sa cible</a> et
+                        <a href="{{ route('guides.entretien') }}">entretenir son arme</a>.
+                    </p>
+                </article>
             </div>
         </section>
 
