@@ -6429,6 +6429,34 @@ input[type="date"].form-control {
     color: var(--text-muted);
 }
 
+/* The catalogue strip: two figures outside the period, told apart from
+   the dated tiles below by their olive stroke and their fixed sub-line. */
+.dash-catalogue {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 1rem;
+    margin: 0 0 1.25rem;
+}
+
+.dash-tile--catalogue {
+    border-left: 3px solid var(--accent-heading);
+}
+
+.dash-tile--catalogue .dash-tile-value {
+    font-size: 1.6rem;
+    font-variant-numeric: tabular-nums;
+}
+
+/* What is on its way wears a dashed stroke: promised, not shelved. */
+.dash-tile--incoming {
+    border-left-style: dashed;
+}
+
+.dash-tile-note {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
 .dash-tiles {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));

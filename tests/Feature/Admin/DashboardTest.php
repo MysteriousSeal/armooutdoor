@@ -221,4 +221,54 @@ class DashboardTest extends TestCase
         // catalogue. Il doit maintenant être plat.
         $this->assertSame($small, $large, "Query count grew from {$small} to {$large} — an N+1 came back.");
     }
+
+    public function test_the_catalogue_strip_counts_references_and_shelf_stock(): void
+    {
+        // One plain active product, one with two declinations, one inactive
+        // plain product: 3 references for sale, 12 units on the shelves -
+        // the inactive product's 10 count nowhere.
+        Product::factory()->create(['is_active' => true, 'quantity' => 5]);
+        $sized = Product::factory()->create(['is_active' => true, 'quantity' => 0]);
+        foreach ([['M', 3], ['L', 4]] as [$size, $quantity]) {
+            \App\Models\ProductVariant::query()->create([
+                'product_id' => $sized->id,
+                'attribute_values' => [['label' => 'Taille', 'value' => $size]],
+                'sku' => 'VAR-'.$size,
+                'price_cents' => 1999,
+                'quantity' => $quantity,
+                'is_active' => true,
+            ]);
+        }
+        $sleeping = Product::factory()->create(['is_active' => false, 'quantity' => 10]);
+
+        // An open purchase order: 6 still awaited for the active plain
+        // product (7 ordered, 1 in), 20 for the sleeping one, which counts
+        // as one reference to receive and nothing in the stock to receive.
+        $supplier = \App\Models\Supplier::query()->create(['name' => 'Fournisseur', 'lead_time_days' => 5]);
+        $purchaseOrder = \App\Models\PurchaseOrder::query()->create([
+            'number' => 'BC-TEST-0001', 'supplier_id' => $supplier->id, 'supplier_name' => 'Fournisseur', 'status' => 'sent',
+        ]);
+        $awake = Product::query()->where('is_active', true)->whereDoesntHave('variants')->firstOrFail();
+        foreach ([[$awake, 7, 1], [$sleeping, 20, 0]] as [$product, $ordered, $received]) {
+            \App\Models\PurchaseOrderItem::query()->create([
+                'purchase_order_id' => $purchaseOrder->id, 'product_id' => $product->id,
+                'name' => $product->localizedName(), 'sku' => $product->sku,
+                'quantity_ordered' => $ordered, 'quantity_received' => $received, 'unit_cost_cents' => 100,
+            ]);
+        }
+
+        $html = $this->actingAs($this->admin())->get(route('admin.dashboard'))->assertOk()
+            ->assertSee('References for sale')
+            ->assertSee('Stock in the warehouse')
+            ->assertSee('References to receive')
+            ->assertSee('Stock to receive')
+            ->getContent();
+
+        $this->assertMatchesRegularExpression('#References to receive</span>\s*<span class="dash-tile-value">1</span>#', $html);
+        $this->assertMatchesRegularExpression('#Stock to receive</span>\s*<span class="dash-tile-value">6</span>#', $html);
+
+        $this->assertMatchesRegularExpression('#References for sale</span>\s*<span class="dash-tile-value">3</span>#', $html);
+        $this->assertStringContainsString('2 products · 2 variants', $html);
+        $this->assertMatchesRegularExpression('#Stock in the warehouse</span>\s*<span class="dash-tile-value">12</span>#', $html);
+    }
 }

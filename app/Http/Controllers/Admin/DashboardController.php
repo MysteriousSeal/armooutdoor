@@ -25,6 +25,7 @@ class DashboardController extends Controller
 
         return response()->view('admin.dashboard', [
             'period' => $period,
+            'catalogue' => $metrics->catalogue(),
             'headline' => $metrics->headline(),
             'sparklines' => $metrics->sparklines(),
             'revenueSeries' => $metrics->revenueSeries(),

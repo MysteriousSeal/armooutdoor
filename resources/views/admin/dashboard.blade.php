@@ -39,6 +39,32 @@
             </nav>
         </header>
 
+        {{-- The catalogue's standing, outside the period: what can be
+             sold, and what sits on the shelves. --}}
+        <section class="dash-catalogue" aria-labelledby="dash-catalogue-title">
+            <h3 class="sr-only" id="dash-catalogue-title">Catalogue</h3>
+            <div class="dash-tile dash-tile--catalogue">
+                <span class="dash-tile-label">References for sale</span>
+                <span class="dash-tile-value">{{ number_format($catalogue['references']) }}</span>
+                <span class="dash-tile-note">{{ number_format($catalogue['products']) }} {{ \Illuminate\Support\Str::plural('product', $catalogue['products']) }} · {{ number_format($catalogue['variants']) }} {{ \Illuminate\Support\Str::plural('variant', $catalogue['variants']) }}</span>
+            </div>
+            <div class="dash-tile dash-tile--catalogue">
+                <span class="dash-tile-label">Stock in the warehouse</span>
+                <span class="dash-tile-value">{{ number_format($catalogue['stock_units']) }}</span>
+                <span class="dash-tile-note">{{ \Illuminate\Support\Str::plural('unit', $catalogue['stock_units']) }} received and on the shelves</span>
+            </div>
+            <div class="dash-tile dash-tile--catalogue dash-tile--incoming">
+                <span class="dash-tile-label">References to receive</span>
+                <span class="dash-tile-value">{{ number_format($catalogue['references_incoming']) }}</span>
+                <span class="dash-tile-note">not yet for sale, on an open purchase order</span>
+            </div>
+            <div class="dash-tile dash-tile--catalogue dash-tile--incoming">
+                <span class="dash-tile-label">Stock to receive</span>
+                <span class="dash-tile-value">{{ number_format($catalogue['stock_incoming']) }}</span>
+                <span class="dash-tile-note">{{ \Illuminate\Support\Str::plural('unit', $catalogue['stock_incoming']) }} still awaited for references on sale</span>
+            </div>
+        </section>
+
         {{-- Rien ici quand tout est en ordre : une bande d'alerte toujours
              pleine apprend à l'ignorer. --}}
         @if ($attention->isNotEmpty())

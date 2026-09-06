@@ -6,6 +6,8 @@ use App\Models\Conversation;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\ProductVariant;
+use App\Models\PurchaseOrderItem;
 use App\Models\ProductSetting;
 use App\Models\PurchaseOrder;
 use App\Models\StockMovement;
@@ -39,6 +41,64 @@ class DashboardMetrics
     private function between(Builder $query, Carbon $start, Carbon $end): Builder
     {
         return $query->whereBetween('created_at', [$start, $end]);
+    }
+
+    /**
+     * The catalogue as it stands, whatever the period: what can be sold,
+     * and what sits on the shelves.
+     *
+     * References count what a customer can actually pick - an active
+     * product without declinations, or each active declination of an
+     * active product. Stock counts the units on hand behind those same
+     * references: an inactive product is off the shelf here too, and only
+     * the warehouse counts - what the supplier holds is theirs, not stock.
+     *
+     * Then what is on its way: the open purchase orders' unreceived lines,
+     * split the same way - references not yet for sale (a product or
+     * declination still inactive, waiting for its first delivery) and the
+     * units the shelves of what is for sale will gain.
+     *
+     * @return array{products: int, variants: int, references: int, stock_units: int, references_incoming: int, stock_incoming: int}
+     */
+    public function catalogue(): array
+    {
+        $activeProducts = Product::query()->where('is_active', true);
+
+        $plainActive = (clone $activeProducts)->whereDoesntHave('variants')->count();
+        $activeVariants = ProductVariant::query()
+            ->where('is_active', true)
+            ->whereHas('product', fn ($query) => $query->where('is_active', true))
+            ->count();
+
+        // One pass over what is still awaited, sorted by whether the
+        // reference it feeds is for sale today.
+        $awaited = PurchaseOrderItem::query()
+            ->whereColumn('quantity_received', '<', 'quantity_ordered')
+            ->whereHas('purchaseOrder', fn ($query) => $query->open())
+            ->with(['product', 'variant'])
+            ->get()
+            ->filter(fn (PurchaseOrderItem $item): bool => $item->product !== null);
+
+        $forSale = fn (PurchaseOrderItem $item): bool => $item->product->is_active
+            && ($item->variant === null || $item->variant->is_active);
+
+        return [
+            'products' => (clone $activeProducts)->count(),
+            'variants' => $activeVariants,
+            'references' => $plainActive + $activeVariants,
+            'stock_units' => (int) (clone $activeProducts)->whereDoesntHave('variants')->sum('quantity')
+                + (int) ProductVariant::query()
+                    ->where('is_active', true)
+                    ->whereHas('product', fn ($query) => $query->where('is_active', true))
+                    ->sum('quantity'),
+            'references_incoming' => $awaited
+                ->reject($forSale)
+                ->unique(fn (PurchaseOrderItem $item): string => $item->product_id.'-'.($item->product_variant_id ?? 0))
+                ->count(),
+            'stock_incoming' => (int) $awaited
+                ->filter($forSale)
+                ->sum(fn (PurchaseOrderItem $item): int => $item->quantityRemaining()),
+        ];
     }
 
     /**
