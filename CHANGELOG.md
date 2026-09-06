@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-06 — v1.15.1 — build WKGGVX
+
+### Storefront
+
+- **The home strips keep rupture off the page.** Les offres du moment, Sélectionné pour vous and Encore plus dans la boutique still show what is in stock, restocking or at the supplier — never the pieces that would wear « Rupture de stock ». A strip with nothing left to show simply is not there.
+
+### Admin
+
+- **The card leads, the balance closes.** The entry modal's payment list now starts with the way most purchases are paid, already selected, and ends on a way that pays nothing at all: a supplier deducting the amount from a balance the shop already holds with them — Déduit du solde in the French books. One constant feeds the select, the validation and the PDFs alike.
+
+**No migration.**
+
 ## 2026-09-06 — v1.15.0 — build 3KTFPE
 
 ### Admin
