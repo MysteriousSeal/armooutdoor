@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\ProductReview;
 use App\Models\ShippingSetting;
 use App\Support\HomepageCatalog;
+use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 class HomeController extends Controller
@@ -83,9 +84,9 @@ class HomeController extends Controller
      * product it judged: an unsourced testimonial is worth nothing, and
      * one that cannot be clicked reads like an invention.
      *
-     * @return \Illuminate\Support\Collection<int, ProductReview>
+     * @return Collection<int, ProductReview>
      */
-    private function testimonials(int $limit = 3): \Illuminate\Support\Collection
+    private function testimonials(int $limit = 3): Collection
     {
         return ProductReview::query()
             ->where('rating', 5)
@@ -103,20 +104,27 @@ class HomeController extends Controller
      * visits: two guides and the latest article. Until this, the whole
      * editorial cluster hung off one footer column.
      *
-     * @return array<int, array{kicker: string, title: string, text: string, url: string, cta: string}>
+     * Each card says what it is before saying what it is about: the kind of
+     * writing, then the rayon it belongs to. « Guide » alone did not say
+     * which shelf it advised on, and an article labelled « Conseils » alone
+     * did not say it came from the blog.
+     *
+     * @return array<int, array{kind: string, topic: ?string, title: string, text: string, url: string, cta: string}>
      */
     private function readings(): array
     {
         $readings = [
             [
-                'kicker' => 'Guide',
+                'kind' => 'Guide',
+                'topic' => 'Cibles',
                 'title' => 'Bien choisir sa cible',
                 'text' => 'Réactives, planches, carton ou métal : quel format pour quelle distance, et ce qu\'on lit après le tir.',
                 'url' => route('guides.cibles'),
                 'cta' => 'Lire le guide',
             ],
             [
-                'kicker' => 'Guide',
+                'kind' => 'Guide',
+                'topic' => 'Entretien',
                 'title' => 'Entretenir son arme',
                 'text' => 'Corde ou kit à tiges, calibre par calibre, dans quel sens nettoyer et à quelle fréquence.',
                 'url' => route('guides.entretien'),
@@ -128,7 +136,10 @@ class HomeController extends Controller
 
         if ($post !== null) {
             $readings[] = [
-                'kicker' => $post->category?->localizedName() ?? 'Le blog',
+                'kind' => 'Blog',
+                // Its rubric is the post's own; a category that no longer
+                // resolves leaves the card saying « Blog » and no more.
+                'topic' => $post->category?->localizedName(),
                 'title' => $post->localizedTitle(),
                 'text' => $post->localizedExcerpt(),
                 'url' => route('blog.show', $post->slug),

@@ -73,6 +73,31 @@ class HomeVoicesAndReadingsTest extends TestCase
             ->assertSee($post->localizedTitle());
     }
 
+    public function test_each_card_says_what_it_is_and_which_rayon_it_advises_on(): void
+    {
+        // The factory files its posts under « Conseils ».
+        BlogPost::factory()->create();
+
+        $html = $this->get('/')->assertOk()->getContent();
+
+        // « Guide » alone did not say which shelf, and « Conseils » alone did
+        // not say the article came from the blog.
+        $this->assertStringContainsString('<span class="home-reading-kind">Guide</span>', $html);
+        $this->assertStringContainsString('<span class="home-reading-topic">Cibles</span>', $html);
+        $this->assertStringContainsString('<span class="home-reading-topic">Entretien</span>', $html);
+        $this->assertStringContainsString('<span class="home-reading-kind">Blog</span>', $html);
+        $this->assertStringContainsString('<span class="home-reading-topic">Conseils</span>', $html);
+    }
+
+    public function test_a_shop_with_nothing_published_still_shows_its_guides(): void
+    {
+        $html = $this->get('/')->assertOk()->getContent();
+
+        // Both guides keep their rayon; there is simply no article card.
+        $this->assertSame(2, substr_count($html, 'home-reading-kind'));
+        $this->assertStringNotContainsString('>Blog</span>', $html);
+    }
+
     public function test_a_shop_without_reviews_shows_no_empty_strip(): void
     {
         $this->get('/')->assertOk()

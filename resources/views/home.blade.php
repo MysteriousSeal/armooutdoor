@@ -369,7 +369,12 @@
             <div class="home-readings-grid">
                 @foreach ($readings as $reading)
                     <a href="{{ $reading['url'] }}" class="home-reading">
-                        <span class="home-reading-kicker">{{ $reading['kicker'] }}</span>
+                        <span class="home-reading-kicker">
+                            <span class="home-reading-kind">{{ $reading['kind'] }}</span>
+                            @if ($reading['topic'] !== null)
+                                <span class="home-reading-topic">{{ $reading['topic'] }}</span>
+                            @endif
+                        </span>
                         <h3 class="home-reading-title">{{ $reading['title'] }}</h3>
                         <p class="home-reading-text">{{ \Illuminate\Support\Str::limit($reading['text'], 130) }}</p>
                         <span class="home-reading-more">{{ $reading['cta'] }}</span>

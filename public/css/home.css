@@ -1466,11 +1466,31 @@
 }
 
 .home-reading-kicker {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     font-size: 0.6875rem;
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--accent);
+}
+
+/* What it is, then which shelf it advises on: the second half is the
+   quieter of the two, and is missing on an article filed nowhere. */
+.home-reading-topic {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.home-reading-topic::before {
+    content: '';
+    width: 0.9rem;
+    height: 1px;
+    background: var(--border);
 }
 
 .home-reading-title {
