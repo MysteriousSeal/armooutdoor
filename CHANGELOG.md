@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-07 — v1.24.3 — build GMIZD9
+
+### Storefront
+
+- **A filter that divides nothing is no longer offered.** The cagoules rayon showed six filter groups of which four could not change the page: every cagoule is a cagoule, in polyester, integral and in one size, so clicking any of them reloaded eighteen products out of eighteen. Cache-cou carried two of these, and the only group casquettes had was one of them. A group with a single option is now left out. The attributes stay on the products, since it was the display that was wrong and not the data: the day a cotton cagoule or a half-face cut arrives, the group comes back by itself with nothing to edit. One case survives, a value picked from a typed address still shows its group, otherwise the visitor would be held in a filtered listing with no way to let go of it.
+
+**No migration.**
+
 ## 2026-09-07 — v1.24.2 — build C9LR0B
 
 ### Storefront
