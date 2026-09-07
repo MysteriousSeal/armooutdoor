@@ -73,7 +73,7 @@ class AllProductsSortTest extends TestCase
 
     public function test_the_order_survives_the_pager(): void
     {
-        Product::factory()->count(22)->create(['is_active' => true, 'quantity' => 5]);
+        Product::factory()->count(26)->create(['is_active' => true, 'quantity' => 5]);
 
         $this->get('/produits?sort=price-asc')->assertOk()
             ->assertSee('sort=price-asc', false);

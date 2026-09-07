@@ -14,7 +14,7 @@ use Illuminate\View\View;
 class CategoryController extends Controller
 {
     /** Produits par page sur une fiche catégorie. */
-    private const PER_PAGE = 20;
+    private const PER_PAGE = 24;
 
     /** Kept as the name the rest of the app knows; the list lives once. */
     public const SORTS = ProductSort::OPTIONS;

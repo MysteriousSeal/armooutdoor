@@ -88,7 +88,7 @@ class ListingCanonicalTest extends TestCase
         // The controller pulls an out-of-range page back into the listing's
         // bounds, so ?page=999 of a three-page category *is* page three and
         // says so, rather than claiming an address that holds nothing.
-        $category = $this->categoryWith(45);
+        $category = $this->categoryWith(60);
 
         $this->get('/categories/'.$category->slug.'?page=999')
             ->assertOk()

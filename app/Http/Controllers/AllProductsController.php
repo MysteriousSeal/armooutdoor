@@ -18,7 +18,7 @@ use Illuminate\View\View;
  */
 class AllProductsController extends Controller
 {
-    private const PER_PAGE = 20;
+    private const PER_PAGE = 24;
 
     public function index(Request $request): View|RedirectResponse
     {

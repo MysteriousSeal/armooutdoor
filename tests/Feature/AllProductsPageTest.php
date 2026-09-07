@@ -14,16 +14,16 @@ class AllProductsPageTest extends TestCase
     public function test_the_page_lists_the_whole_catalogue_paginated(): void
     {
         $category = Category::factory()->create();
-        Product::factory()->count(21)->create(['category_id' => $category->id, 'is_active' => true]);
+        Product::factory()->count(25)->create(['category_id' => $category->id, 'is_active' => true]);
         Product::factory()->create(['category_id' => $category->id, 'is_active' => false]);
 
         $response = $this->get('/produits')->assertOk()
             ->assertSee('Tous les produits');
 
         $products = $response->viewData('products');
-        // 21 active products: 20 on page one, the disabled one nowhere.
-        $this->assertSame(21, $products->total());
-        $this->assertCount(20, $products->items());
+        // 25 active products: 24 on page one, the disabled one nowhere.
+        $this->assertSame(25, $products->total());
+        $this->assertCount(24, $products->items());
 
         $this->get('/produits?page=2')->assertOk();
     }

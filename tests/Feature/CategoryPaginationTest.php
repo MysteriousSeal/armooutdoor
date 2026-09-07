@@ -30,13 +30,15 @@ class CategoryPaginationTest extends TestCase
 
     use RefreshDatabase;
 
-    public function test_a_page_holds_twenty_products(): void
+    public function test_a_page_holds_twenty_four_products(): void
     {
         $category = $this->categoryWith(25);
 
         $products = $this->get('/categories/'.$category->slug)->assertOk()->viewData('products');
 
-        $this->assertCount(20, $products);
+        // 24 rather than 20: it divides by the two, three and four columns
+        // the grid uses, so no breakpoint ends on a short row.
+        $this->assertCount(24, $products);
         $this->assertSame(25, $products->total());
         $this->assertSame(2, $products->lastPage());
     }
@@ -47,13 +49,15 @@ class CategoryPaginationTest extends TestCase
 
         $products = $this->get('/categories/'.$category->slug.'?page=2')->assertOk()->viewData('products');
 
-        $this->assertCount(5, $products);
+        $this->assertCount(1, $products);
         $this->assertSame(2, $products->currentPage());
     }
 
     public function test_no_product_is_shown_twice_or_skipped(): void
     {
-        $category = $this->categoryWith(45);
+        // 60 rather than 45: three full pages at 24, so the middle one is
+        // exercised and no page falls past the last.
+        $category = $this->categoryWith(60);
 
         $seen = collect();
 
@@ -65,8 +69,8 @@ class CategoryPaginationTest extends TestCase
 
         // Le vrai risque d'une pagination faite à la main : un décalage d'un
         // rang qui saute un produit ou en montre un deux fois.
-        $this->assertCount(45, $seen);
-        $this->assertCount(45, $seen->unique());
+        $this->assertCount(60, $seen);
+        $this->assertCount(60, $seen->unique());
     }
 
     public function test_the_pager_is_absent_when_everything_fits(): void

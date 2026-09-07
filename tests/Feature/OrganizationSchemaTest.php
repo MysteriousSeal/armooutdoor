@@ -84,9 +84,9 @@ class OrganizationSchemaTest extends TestCase
 
         $page->assertSee('"@type":"CollectionPage"', false);
         $page->assertSee('"@type":"BreadcrumbList"', false);
-        // Twenty-five products, twenty to a page: five on page two, and the
-        // first of them is the twenty-first of the category.
+        // Twenty-five products, twenty-four to a page: one on page two, and
+        // it is the twenty-fifth of the category.
         $page->assertSee('"numberOfItems":25', false);
-        $page->assertSee('"position":21', false);
+        $page->assertSee('"position":25', false);
     }
 }
