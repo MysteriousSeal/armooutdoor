@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-07 — v1.24.2 — build C9LR0B
+
+### Storefront
+
+- **The Merchant Center feed sends the whole gallery, not one photograph.** The field it used holds one image and only one, so every item showed Google a single picture while the rest of the gallery sat unused. Those go in their own repeated tag now, of which Merchant Center takes ten. The main image is kept out of that list, since a gallery that repeats it would spend a slot on a picture the shopper has already seen, and the ceiling is named rather than written as a bare number: the largest gallery in the catalogue holds eight, and the day it grows is the point of having a ceiling. The gallery is loaded with the products, two hundred and forty-four items being two hundred and forty-four queries otherwise.
+
+**No migration.**
+
 ## 2026-09-07 — v1.24.1 — build PNS5H9
 
 ### Storefront
