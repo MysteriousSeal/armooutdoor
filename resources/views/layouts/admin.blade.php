@@ -16,7 +16,12 @@
         })();
     </script>
     <title>@yield('title', 'Admin') — Armo Outdoor</title>
+    {{-- The SVG is the one browsers prefer and the one that follows the
+         tab strip's own light or dark. The PNGs are for those that take no
+         SVG, and for the home screen, where an icon may not be transparent. --}}
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
+    <link rel="icon" href="{{ asset('favicon-32.png') }}" sizes="32x32" type="image/png">
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
     <meta name="theme-color" content="#8b7e74">
     <link rel="preload" href="{{ asset('fonts/inter-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="{{ versioned_asset('css/base.css') }}">
