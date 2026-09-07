@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-07 — v1.25.1 — build KN75QI
+
+### Admin
+
+- **The NaturaBuy settings page stops shadowing the marketplace list.** Its update route took a name the list already owned, the one that attaches an order to a marketplace. Laravel tolerates that at runtime and lets the last one win in silence, refusing only when the routes are serialised, so nothing showed until the deploy cached them. The page is now settings.naturabuy, which is what it holds anyway: the address and the standing of one marketplace rather than the list of those an order can belong to. Its card and its title say NaturaBuy too, so the two entries under Settings cannot be taken for each other. A test walks the registered routes and refuses a name used twice, which turns the whole class of failure from a deploy into a local one.
+
+**No migration.** The table added in v1.25.0 is unchanged; a deploy that has not run it yet still needs `php artisan migrate`.
+
 ## 2026-09-07 — v1.25.0 — build 5DG0DV
 
 ### Storefront
