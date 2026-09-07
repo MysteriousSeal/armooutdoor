@@ -25,6 +25,13 @@ class GuidesTest extends TestCase
         return Guides::ofTheDay()->pluck('topic')->implode(', ');
     }
 
+    private function titlesOn(string $date): string
+    {
+        Carbon::setTestNow($date.' 12:00:00');
+
+        return Guides::ofTheDay()->pluck('title')->implode(', ');
+    }
+
     public function test_every_guide_is_named_priced_and_linked(): void
     {
         foreach (Guides::all() as $guide) {
@@ -81,11 +88,13 @@ class GuidesTest extends TestCase
         foreach (range(0, count(Guides::all()) - 1) as $day) {
             $date = Carbon::parse('2026-09-06')->addDays($day)->toDateString();
 
-            $shown = array_merge($shown, explode(', ', $this->topicsOn($date)));
+            $shown = array_merge($shown, explode(', ', $this->titlesOn($date)));
         }
 
+        // Compared on the title, which is unique: two guides may well cover
+        // the same rayon, and did as soon as a second one covered the law.
         $this->assertEqualsCanonicalizing(
-            array_column(Guides::all(), 'topic'),
+            array_column(Guides::all(), 'title'),
             array_values(array_unique($shown)),
         );
     }

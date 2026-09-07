@@ -25,6 +25,7 @@ class GuideCiblesPageTest extends TestCase
             'classification' => ['/guides/classer-son-arme', 'Classer son arme', 'Réglementation'],
             'joules' => ['/guides/joules-et-fps', 'Joules et FPS', 'Énergie'],
             'glossaire' => ['/guides/glossaire', 'Le glossaire', 'Vocabulaire'],
+            'ou-tirer' => ['/guides/ou-tirer-legalement', 'Où tirer légalement', 'Lieux'],
         ];
     }
 

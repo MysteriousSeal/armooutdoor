@@ -31,6 +31,13 @@ class Guides
                 'summary' => 'Sous 2 joules, de 2 à 20, dès 20, puis l\'autorisation : ce que la loi range en D, C, B et A, et le piège du chargeur.',
             ],
             [
+                'topic' => 'Lieux',
+                'title' => 'Où tirer légalement',
+                'url' => route('guides.ou-tirer'),
+                'teaser' => 'Chez soi, sur un terrain, en stand : ce qui décide vraiment, et les textes cités de travers.',
+                'summary' => 'Chez soi, sur un terrain d\'airsoft ou en stand homologué : la direction plutôt que la distance, le bruit, l\'arrêté du maire, et les deux textes que le web recopie de travers.',
+            ],
+            [
                 'topic' => 'Vocabulaire',
                 'title' => 'Le glossaire',
                 'url' => route('guides.glossaire'),

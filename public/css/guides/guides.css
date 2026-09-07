@@ -1442,3 +1442,196 @@
         position: static;
     }
 }
+
+/* ============ où tirer : the lane seen from above ============ */
+
+/* The whole page is one question drawn: what stands behind the target.
+   Flat, plan view, in the shop's own inks rather than a photograph. */
+.glab-lane {
+    max-width: 46rem;
+    margin: 0 0 1.5rem;
+    padding: 1.2rem 1.3rem 1rem;
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 20%, var(--border));
+    border-top: 2px solid var(--accent-heading);
+}
+
+/* Below about thirty-two rem the plan's labels shrink past reading size,
+   so it scrolls inside its own frame rather than becoming a picture of
+   text nobody can read. The page itself never scrolls sideways. */
+.glab-lane-frame {
+    overflow-x: auto;
+}
+
+.glab-lane svg {
+    display: block;
+    width: 100%;
+    min-width: 32rem;
+    height: auto;
+}
+
+/* What the projectile can still reach past the target. */
+.glab-lane-cone {
+    fill: color-mix(in srgb, #7a4a45 14%, transparent);
+}
+
+/* And the part of it the point d'arrêt closes off. */
+.glab-lane-safe {
+    fill: color-mix(in srgb, var(--accent-heading) 20%, transparent);
+}
+
+.glab-lane-axis {
+    stroke: color-mix(in srgb, var(--text) 40%, transparent);
+    stroke-width: 1.5;
+}
+
+.glab-lane-fence {
+    stroke: color-mix(in srgb, var(--text) 45%, transparent);
+    stroke-width: 2;
+    stroke-dasharray: 3 5;
+}
+
+.glab-lane-shooter {
+    fill: var(--text);
+}
+
+.glab-lane-target {
+    fill: color-mix(in srgb, var(--text) 55%, transparent);
+}
+
+.glab-lane-stop {
+    fill: var(--accent-heading);
+}
+
+.glab-lane-house {
+    fill: none;
+    stroke: #7a4a45;
+    stroke-width: 2;
+    stroke-linejoin: round;
+}
+
+.glab-lane-path {
+    stroke: #7a4a45;
+    stroke-width: 2.5;
+}
+
+.glab-lane-label {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    fill: var(--text-muted);
+}
+
+.glab-lane-label--key {
+    font-weight: 800;
+    fill: var(--accent-heading);
+}
+
+.glab-lane figcaption {
+    margin-top: 0.9rem;
+    padding-top: 0.8rem;
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+}
+
+[data-theme='dark'] .glab-lane-house,
+[data-theme='dark'] .glab-lane-path {
+    stroke: #e08585;
+}
+
+[data-theme='dark'] .glab-lane-cone {
+    fill: color-mix(in srgb, #e08585 16%, transparent);
+}
+
+/* ============ où tirer : what the web repeats ============ */
+
+.glab-myths {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 0.8rem;
+}
+
+.glab-myth {
+    padding: 1rem 1.1rem;
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 16%, var(--border));
+}
+
+/* The claim is struck through: it is quoted to be corrected, not repeated. */
+.glab-myth-claim {
+    margin: 0 0 0.6rem;
+    padding-bottom: 0.6rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-style: italic;
+    line-height: 1.45;
+    color: #7a4a45;
+    text-decoration: line-through;
+    text-decoration-color: color-mix(in srgb, #7a4a45 45%, transparent);
+    border-bottom: 1px solid var(--border);
+}
+
+.glab-myth-truth {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+}
+
+[data-theme='dark'] .glab-myth-claim {
+    color: #e08585;
+    text-decoration-color: color-mix(in srgb, #e08585 45%, transparent);
+}
+
+/* ============ où tirer : the receipts ============ */
+
+.glab-sources {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.glab-sources a {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    height: 100%;
+    padding: 0.75rem 0.9rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.glab-sources a:hover {
+    border-color: var(--accent-heading);
+}
+
+.glab-source-num {
+    font-size: 0.72rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent-heading);
+}
+
+.glab-source-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+}
+
+.glab-source-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--text);
+}
+
+.glab-source-host {
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+}

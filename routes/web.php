@@ -97,6 +97,7 @@ Route::view('/guides/entretenir-son-arme', 'guides.entretien')->name('guides.ent
 Route::view('/guides/classer-son-arme', 'guides.classification')->name('guides.classification');
 Route::view('/guides/joules-et-fps', 'guides.joules')->name('guides.joules');
 Route::view('/guides/glossaire', 'guides.glossaire')->name('guides.glossaire');
+Route::view('/guides/ou-tirer-legalement', 'guides.ou-tirer')->name('guides.ou-tirer');
 
 /*
 |--------------------------------------------------------------------------
