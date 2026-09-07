@@ -80,6 +80,9 @@
             <a href="{{ route('admin.products.index', $tabQuery('no-weight')) }}" class="{{ $tab === 'no-weight' ? 'active' : '' }}">
                 Missing weight <span class="admin-tab-count">{{ number_format($noWeightCount) }}</span>
             </a>
+            <a href="{{ route('admin.products.index', $tabQuery('no-image')) }}" class="{{ $tab === 'no-image' ? 'active' : '' }}">
+                One image only <span class="admin-tab-count">{{ number_format($oneImageCount) }}</span>
+            </a>
             <a href="{{ route('admin.products.index', $tabQuery('no-seo')) }}" class="{{ $tab === 'no-seo' ? 'active' : '' }}">
                 Missing SEO <span class="admin-tab-count">{{ number_format($noSeoCount) }}</span>
             </a>
@@ -191,6 +194,9 @@
                                 @break
                             @case('no-weight')
                                 No products missing a weight.
+                                @break
+                            @case('no-image')
+                                Every product carries more than one image.
                                 @break
                             @case('no-seo')
                                 Every product's SEO lengths sit in their good ranges.

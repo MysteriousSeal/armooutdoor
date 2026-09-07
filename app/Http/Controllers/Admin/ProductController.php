@@ -49,7 +49,7 @@ class ProductController extends Controller
         $search = trim((string) $request->query('search', ''));
         $categorySlug = (string) $request->query('category', '');
         $supplierId = $request->filled('supplier') ? (int) $request->query('supplier') : null;
-        $tab = in_array($request->query('tab'), ['active', 'disabled', 'in-stock', 'restocking', 'at-supplier', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight', 'no-seo'], true)
+        $tab = in_array($request->query('tab'), ['active', 'disabled', 'in-stock', 'restocking', 'at-supplier', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight', 'no-image', 'no-seo'], true)
             ? (string) $request->query('tab')
             : 'active';
 
@@ -82,6 +82,7 @@ class ProductController extends Controller
             'noSkuCount' => Product::query()->tap(fn ($query) => $this->missingSku($query))->count(),
             'noGtinCount' => Product::query()->where('is_active', true)->where(fn ($query) => $query->whereNull('gtin')->orWhere('gtin', ''))->count(),
             'noWeightCount' => Product::query()->where('is_active', true)->where(fn ($query) => $query->whereNull('weight_grams')->orWhere('weight_grams', 0))->count(),
+            'oneImageCount' => Product::query()->where('is_active', true)->doesntHave('images')->count(),
             'noSeoCount' => count($this->seoFailingIds()),
             'categories' => $this->categoryOptions(),
             'suppliers' => Supplier::query()->orderBy('name')->get(),
@@ -96,7 +97,7 @@ class ProductController extends Controller
         $search = trim((string) $request->query('search', ''));
         $categorySlug = (string) $request->query('category', '');
         $supplierId = $request->filled('supplier') ? (int) $request->query('supplier') : null;
-        $tab = in_array($request->query('tab'), ['active', 'disabled', 'in-stock', 'at-supplier', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight', 'no-seo'], true)
+        $tab = in_array($request->query('tab'), ['active', 'disabled', 'in-stock', 'at-supplier', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight', 'no-image', 'no-seo'], true)
             ? (string) $request->query('tab')
             : 'active';
 
@@ -680,7 +681,6 @@ class ProductController extends Controller
             });
     }
 
-
     /**
      * Ids of active products whose SEO lengths fail. The verdict lives on
      * the model — meta fields first, HTML stripped from the fallback — so
@@ -710,6 +710,10 @@ class ProductController extends Controller
             'no-sku' => $this->missingSku($query),
             'no-gtin' => $query->where('is_active', true)->where(fn (Builder $query) => $query->whereNull('gtin')->orWhere('gtin', '')),
             'no-weight' => $query->where('is_active', true)->where(fn (Builder $query) => $query->whereNull('weight_grams')->orWhere('weight_grams', 0)),
+            // The main image is always set, so a product with no gallery row
+            // shows exactly one photo: this is the shelf of one-picture
+            // listings, not of products without any picture at all.
+            'no-image' => $query->where('is_active', true)->doesntHave('images'),
             'no-seo' => $query->whereIn('id', $this->seoFailingIds()),
             default => $query->where('is_active', true),
         };
