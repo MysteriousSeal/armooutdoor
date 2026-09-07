@@ -207,11 +207,22 @@ class CategoryController extends Controller
                 }
             }
 
-            $groups[$label] = collect($values)
+            $options = collect($values)
                 ->filter(fn (string $value): bool => ($counts[$value] ?? 0) > 0 || ($selectedFilters[$label] ?? null) === $value)
                 ->map(fn (string $value): array => ['value' => $value, 'count' => $counts[$value] ?? 0])
                 ->values()
                 ->all();
+
+            // A group offering one option cannot divide anything: every
+            // cagoule is a cagoule, in polyester, in one size, so those three
+            // groups only ever reloaded the page with the same products.
+            // It stays when the visitor has picked that value from a typed
+            // URL, since they still need a way to let go of it.
+            if (count($options) < 2 && ! isset($selectedFilters[$label])) {
+                continue;
+            }
+
+            $groups[$label] = $options;
         }
 
         return $groups;
