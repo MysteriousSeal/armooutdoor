@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-07 — v1.27.1 — build CT3LCH
+
+### Storefront
+
+- **A refused visit is now counted without anything being kept on the visitor.** Google's tag runs under Consent Mode v2 rather than not running at all: its consent default is queued before the tag is fetched, since a default that arrives once the tag has started is one that arrived too late. A refusal and an unanswered banner mean the same thing, no cookie, nothing read from the device, the advertising click identifier stripped out of the request, and Google left with something it can only count in aggregate. Accepting sends an update rather than fetching anything, the tag being already there. Personalisation of advertising is refused on either answer, alongside the two flags that already said so: the shop measures its own advertising and does not build audiences out of the people who walk past. Google Ads has required this since March 2024 for anyone advertising in the EEA, which the shop was not doing.
+- **The privacy policy says what a refusal actually buys.** It stated three times that refusing loaded nothing and sent nothing, which the above makes untrue. It now separates the two: PostHog is not fetched at all, while Google's tag stays loaded in a mode that writes and reads nothing, and the page says what the remaining request carries and what becomes of the address in it. A policy that overstates what a refusal is worth is a worse thing to ship than the tag it describes. PostHog itself is unchanged, having no consent mode of its own.
+- **A purchase reaches both tools rather than whichever one happened to be ready.** An event captured while PostHog was still loading was dropped instead of held, so a sale on a freshly opened confirmation page was counted by Google and by nobody else. It waits in order now and is replayed once the library arrives. The same event had two call sites, one of them unreachable, which is a sale counted twice waiting for the day it stopped being unreachable.
+
+**No migration.**
+
 ## 2026-09-07 — v1.27.0 — build F9LLHK
 
 ### Storefront
