@@ -64,6 +64,48 @@ class HomeVoicesAndReadingsTest extends TestCase
             ->assertDontSee('Correct sans plus.');
     }
 
+    public function test_the_voices_line_ends_on_the_shops_own_score(): void
+    {
+        $product = Product::factory()->create(['is_active' => true, 'quantity' => 5]);
+        $this->review($product, 5, 'Cibles parfaites.');
+        $this->review($product, 4, 'Bien.');
+        $this->review($product, 3, 'Correct sans plus.');
+
+        // Four, five and three: an average of 4,0 over three reviews.
+        $this->get('/')->assertOk()
+            ->assertSee('4,0')
+            ->assertSee('/ 5')
+            ->assertSee('3 avis')
+            // Painted to the rounded figure, so the stars cannot say one
+            // thing while the number says another.
+            ->assertSee('--home-rating-fill: 80%', false);
+    }
+
+    public function test_the_score_counts_only_what_a_visitor_can_open(): void
+    {
+        $shown = Product::factory()->create(['is_active' => true, 'quantity' => 5]);
+        $hidden = Product::factory()->create(['is_active' => false]);
+
+        $this->review($shown, 5, 'Excellent.');
+        // Two ones on a product nobody can reach would drag the shop's score
+        // to 2,3 without a single visitor being able to check why.
+        $this->review($hidden, 1, 'Mauvais.');
+        $this->review($hidden, 1, 'Mauvais aussi.');
+
+        $this->get('/')->assertOk()
+            ->assertSee('5,0')
+            ->assertSee('1 avis')
+            ->assertDontSee('3 avis');
+    }
+
+    public function test_the_line_carries_no_score_before_the_first_review(): void
+    {
+        Product::factory()->create(['is_active' => true, 'quantity' => 5]);
+
+        // Nothing to average yet, and "0 / 5" would read as a verdict.
+        $this->get('/')->assertOk()->assertDontSee('home-rating-stars', false);
+    }
+
     public function test_the_home_links_the_days_guides_and_the_latest_article(): void
     {
         $post = BlogPost::factory()->create();

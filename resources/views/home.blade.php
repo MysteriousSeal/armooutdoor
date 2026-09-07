@@ -343,6 +343,22 @@
                         <p class="home-cats-kicker">{{ __('store.home_voices_kicker') }}</p>
                         <h2 class="home-cats-title" id="home-voices-title">{{ __('store.home_voices_title') }}</h2>
                     </div>
+                    @if ($reviewSummary)
+                        {{-- The shop's own score, at the far end of the rule.
+                             Outside the heading on purpose: the outline should
+                             read as the section's name and nothing else. The
+                             stars are painted to the same rounded figure the
+                             number shows, so the two cannot disagree. --}}
+                        <p class="home-rating" style="--home-rating-fill: {{ $reviewSummary['fill'] }}%">
+                            <span class="home-rating-stars" aria-hidden="true"></span>
+                            <span class="home-rating-copy">
+                                <span class="home-rating-score" aria-hidden="true">{{ number_format($reviewSummary['average'], 1, ',', '') }}</span>
+                                <span class="home-rating-out" aria-hidden="true">/ 5</span>
+                                <span class="home-rating-count" aria-hidden="true">{{ trans_choice('store.reviews_count', $reviewSummary['count'], ['count' => $reviewSummary['count']]) }}</span>
+                            </span>
+                            <span class="sr-only">{{ __('store.reviews_rating_summary', ['rating' => number_format($reviewSummary['average'], 1, ',', ''), 'count' => $reviewSummary['count']]) }}</span>
+                        </p>
+                    @endif
                 </header>
                 <ul class="home-voices-list">
                     @foreach ($testimonials as $review)

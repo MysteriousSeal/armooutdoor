@@ -102,6 +102,7 @@ return [
     'home_more_lede' => 'D’autres pièces parmi les cibles, le stand, les vêtements et le terrain.',
     'home_voices_kicker' => 'Ils ont commandé',
     'home_voices_title' => 'Ce que disent nos clients',
+    'home_voices_rating' => ':rating / 5',
     'home_readings_kicker' => 'La boutique conseille',
     'home_readings_title' => 'À lire avant de commander',
     'home_readings_link' => 'Voir tous les guides',

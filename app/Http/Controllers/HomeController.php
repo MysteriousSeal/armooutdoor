@@ -75,6 +75,7 @@ class HomeController extends Controller
             // What customers said and what the shop wrote: the two things a
             // catalogue cannot say about itself.
             'testimonials' => $this->testimonials(),
+            'reviewSummary' => $this->reviewSummary(),
             'readings' => $this->readings(),
             'marketplace' => MarketplaceSetting::current(),
         ]);
@@ -100,6 +101,38 @@ class HomeController extends Controller
             ->orderByDesc('created_at')
             ->limit($limit)
             ->get();
+    }
+
+    /**
+     * What the whole shop scores, for the line beside the testimonials.
+     *
+     * Every review on a product a visitor can still open, which is the same
+     * population the section's quotes are drawn from. A review stranded on
+     * a deactivated product would count towards a figure nobody can check.
+     *
+     * @return array{average: float, count: int, fill: float}|null
+     */
+    private function reviewSummary(): ?array
+    {
+        $reviews = ProductReview::query()
+            ->whereHas('product', fn ($query) => $query->where('is_active', true));
+
+        $count = (clone $reviews)->count();
+
+        if ($count === 0) {
+            return null;
+        }
+
+        $average = round((float) $reviews->avg('rating'), 1);
+
+        return [
+            'average' => $average,
+            'count' => $count,
+            // The width of the painted part of the star row. Rounded with
+            // the score rather than from the raw average, so the stars and
+            // the number cannot disagree about the same rating.
+            'fill' => round($average / 5 * 100, 1),
+        ];
     }
 
     /**
