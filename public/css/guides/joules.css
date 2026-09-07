@@ -218,6 +218,113 @@
     color: var(--accent-heading);
 }
 
+/* The worked example under the formula: three substitutions, then the
+   square that actually moves the number. */
+.glab-worked {
+    display: grid;
+    gap: 0.55rem;
+    max-width: 46rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.glab-worked li {
+    display: grid;
+    grid-template-columns: 6.5rem minmax(0, 1fr) auto;
+    gap: 0.75rem;
+    align-items: baseline;
+    padding: 0.7rem 0.95rem;
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 16%, var(--border));
+}
+
+.glab-worked li.is-result {
+    background: color-mix(in srgb, var(--accent-heading) 9%, var(--surface));
+    border-color: color-mix(in srgb, var(--accent-heading) 28%, var(--border));
+    border-top: 2px solid var(--accent-heading);
+}
+
+.glab-worked-kicker {
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.glab-worked-from {
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+}
+
+.glab-worked-to {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    color: var(--accent-heading);
+}
+
+.glab-worked li.is-result .glab-worked-to {
+    font-size: 1.25rem;
+}
+
+.glab-worked-note {
+    max-width: 46rem;
+    margin: 0.45rem 0 1.35rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.glab-square {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1rem;
+    max-width: 46rem;
+}
+
+.glab-square article {
+    padding: 1.2rem 1.25rem 1.15rem;
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 16%, var(--border));
+}
+
+.glab-square article.is-key {
+    background: color-mix(in srgb, var(--accent-heading) 9%, var(--surface));
+    border-color: color-mix(in srgb, var(--accent-heading) 28%, var(--border));
+    border-top: 2px solid var(--accent-heading);
+}
+
+.glab-square-kicker {
+    margin: 0 0 0.35rem;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.glab-square article.is-key .glab-square-kicker {
+    color: var(--accent-heading);
+}
+
+.glab-square-result {
+    margin: 0;
+    font-size: clamp(1.35rem, 2.4vw, 1.7rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    color: var(--accent-heading);
+}
+
+.glab-square-note {
+    max-width: 46rem;
+    margin: 0.85rem 0 0;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+}
+
 /* ============ the reference table ============ */
 
 /* The bille stays readable while the speeds scroll past it. */
@@ -428,4 +535,231 @@
             font-size: 0.58rem;
             letter-spacing: 0;
         }
+
+    .glab-units,
+    .glab-joules-pair,
+    .glab-square {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .glab-worked li {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.2rem;
+    }
+}
+
+/* ============ the page's own reading order ============ */
+
+.glab--joules .glab-title,
+.glab--joules .glab-section,
+.glab--joules .glab-panel {
+    scroll-margin-top: 5.5rem;
+}
+
+.glab--joules .glab-lede--thesis {
+    max-width: 36rem;
+    font-size: clamp(1.15rem, 2vw, 1.35rem);
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: -0.015em;
+    color: var(--accent-heading);
+}
+
+.glab--joules .glab-prose {
+    font-size: 1rem;
+    line-height: 1.72;
+}
+
+/* FPS faces the joule: one is a reading, the other is the law. */
+.glab-units {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1rem;
+    margin: 0 0 1rem;
+}
+
+.glab-unit {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1.25rem 1.3rem 1.3rem;
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 16%, var(--border));
+}
+
+.glab-unit.is-key {
+    background: color-mix(in srgb, var(--accent-heading) 9%, var(--surface));
+    border-color: color-mix(in srgb, var(--accent-heading) 28%, var(--border));
+    border-top: 2px solid var(--accent-heading);
+}
+
+.glab-unit-kicker {
+    margin: 0;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.glab-unit.is-key .glab-unit-kicker {
+    color: var(--accent-heading);
+}
+
+.glab-unit h3 {
+    margin: 0;
+    font-size: clamp(1.6rem, 3vw, 2.1rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: var(--accent-heading);
+}
+
+.glab-unit-read {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.glab-unit p {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.65;
+}
+
+/* Same energy, two speeds: the sentence the rest of the page is about. */
+.glab-joules-pair {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0.8rem 1rem;
+    margin: 0;
+    padding: 1.15rem 1.25rem 1.1rem;
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 16%, var(--border));
+    border-top: 2px solid var(--accent-heading);
+}
+
+.glab-joules-pair > p {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin: 0;
+}
+
+.glab-joules-pair-kicker {
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.glab-joules-pair strong {
+    font-size: clamp(1.6rem, 3vw, 2rem);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    color: var(--accent-heading);
+}
+
+.glab-joules-pair-note {
+    grid-column: 1 / -1;
+    padding-top: 0.7rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+    border-top: 1px solid color-mix(in srgb, var(--accent-heading) 18%, var(--border));
+}
+
+.glab--joules .glab-calc-result {
+    border-top: 2px solid var(--accent-heading);
+}
+
+.glab--joules .glab-calc-limits li.is-law {
+    border-top: 2px solid var(--accent-heading);
+}
+
+.glab-table-key {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.35rem;
+    margin: 0 0 0.9rem;
+    padding: 0;
+    list-style: none;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+}
+
+.glab-table-key i {
+    display: inline-block;
+    width: 0.7rem;
+    height: 0.7rem;
+    margin-right: 0.4rem;
+    vertical-align: -0.1em;
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 22%, var(--border));
+}
+
+.glab-table-key .is-mid {
+    background: color-mix(in srgb, var(--accent-heading) 8%, transparent);
+}
+
+.glab-table-key .is-near {
+    background: color-mix(in srgb, var(--accent-heading) 18%, transparent);
+}
+
+.glab-table-key .is-over {
+    background: color-mix(in srgb, var(--accent-heading) 32%, transparent);
+}
+
+.glab--joules .glab-specs {
+    gap: 1rem;
+    margin: 1.35rem 0 0;
+}
+
+.glab--joules .glab-specs > div {
+    padding: 1.2rem 1.25rem 1.25rem;
+    border-top: 2px solid var(--accent-heading);
+}
+
+.glab--joules .glab-specs dt {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+    margin-bottom: 0.55rem;
+    font-size: 1.2rem;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+.glab--joules .glab-specs dt em {
+    margin-left: 0;
+    font-size: 0.625rem;
+    letter-spacing: 0.14em;
+}
+
+.glab--joules .glab-specs dd {
+    font-size: 0.9rem;
+    line-height: 1.65;
+}
+
+.glab--joules .glab-rules a {
+    color: var(--accent-heading);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--accent-heading) 45%, transparent);
+    text-underline-offset: 2px;
+}
+
+.glab--joules .glab-rules a:hover {
+    text-decoration-color: var(--accent-heading);
+}
+
+.glab--joules .glab-faq details > div {
+    font-size: 0.9375rem;
+    line-height: 1.7;
 }

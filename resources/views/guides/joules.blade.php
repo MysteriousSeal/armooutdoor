@@ -82,7 +82,7 @@
 @endpush
 
 @section('content')
-    <div class="container glab">
+    <div class="container glab glab--joules">
         @include('guides.partials.hero', [
             'crumb' => 'Joules et FPS',
             'kicker' => 'Énergie',
@@ -91,33 +91,60 @@
             'tags' => ['½ m v²', '2 J', '20 J'],
         ])
 
+        <nav class="glab-plan" aria-label="Plan du guide">
+            <p class="glab-plan-kicker">Plan</p>
+            <div class="glab-plan-links">
+                <a href="#glab-why-title">Deux unités</a>
+                <a href="#glab-calc-title">Calculette</a>
+                <a href="#glab-formula-title">Formule</a>
+                <a href="#glab-table-title">Tableau</a>
+                <a href="#glab-thresholds-title">Seuils</a>
+                <a href="#glab-variance-title">Le chrono</a>
+                <a href="#glab-faq-title">Questions</a>
+            </div>
+        </nav>
+
         <section class="glab-section" aria-labelledby="glab-why-title">
             <h2 class="glab-title" id="glab-why-title">Deux unités, <span class="glab-title-accent">une seule réalité</span></h2>
-            <p class="glab-lede">
+            <p class="glab-lede glab-lede--thesis">
                 Un chronographe mesure une vitesse. La loi et les terrains, eux, comptent en énergie.
             </p>
 
-            <div class="glab-prose">
-                <p>
-                    Le FPS, « feet per second », est une vitesse : le nombre de pieds parcourus en
-                    une seconde par la bille au sortir du canon. C'est ce que lit un chronographe,
-                    et c'est donc ce que les fiches produit annoncent.
-                </p>
-                <p>
-                    Le joule est une énergie : ce que la bille emporte, et donc ce qu'elle est
-                    capable de faire à l'arrivée. C'est la seule grandeur qui tienne quand la bille
-                    change, et c'est pour cela que la loi française et les règlements de terrain
-                    sont écrits avec.
-                </p>
-                <p>
-                    La différence n'est pas cosmétique. Une réplique qui envoie une bille de
-                    0,20 g à 350 FPS développe 1,14 joule. La même réplique, sans rien y toucher,
-                    chargée en 0,28 g, tombe autour de 296 FPS mais reste à 1,14 joule : la vitesse
-                    a changé de cinquante pieds par seconde, l'énergie n'a pas bougé. Comparer deux
-                    répliques sur leurs FPS sans savoir avec quelle bille, c'est comparer deux
-                    prix sans savoir dans quelle monnaie.
-                </p>
+            <div class="glab-units">
+                <article class="glab-unit">
+                    <p class="glab-unit-kicker">Ce que lit le chrono</p>
+                    <h3>FPS</h3>
+                    <p class="glab-unit-read">Une vitesse</p>
+                    <p>
+                        « Feet per second » : le nombre de pieds parcourus en une seconde par la
+                        bille au sortir du canon. C'est ce que les fiches produit annoncent.
+                    </p>
+                </article>
+                <article class="glab-unit is-key">
+                    <p class="glab-unit-kicker">Ce que compte la loi</p>
+                    <h3>Joule</h3>
+                    <p class="glab-unit-read">Une énergie</p>
+                    <p>
+                        Ce que la bille emporte, et ce qu'elle est capable de faire à l'arrivée.
+                        La seule grandeur qui tienne quand la bille change.
+                    </p>
+                </article>
             </div>
+
+            <aside class="glab-joules-pair" aria-label="Même énergie, deux vitesses">
+                <p>
+                    <span class="glab-joules-pair-kicker">Même réplique · 0,20 g · 350 FPS</span>
+                    <strong>1,14 J</strong>
+                </p>
+                <p>
+                    <span class="glab-joules-pair-kicker">Même réplique · 0,28 g · 296 FPS</span>
+                    <strong>1,14 J</strong>
+                </p>
+                <p class="glab-joules-pair-note">
+                    La vitesse a changé de cinquante pieds. L'énergie, non. Comparer deux répliques
+                    sur leurs FPS sans la bille, c'est comparer deux prix sans la monnaie.
+                </p>
+            </aside>
         </section>
 
         {{-- The calculator. Hidden until the page knows it has JavaScript:
@@ -201,19 +228,40 @@
                 </figcaption>
             </figure>
 
-            <div class="glab-prose">
-                <p>
-                    Une bille de 0,20 g pèse 0,0002 kg. Un pied vaut 0,3048 mètre, donc 350 FPS
-                    font 106,7 m/s. Ce qui donne 0,5 × 0,0002 × 106,7², soit
-                    <strong>1,14 joule</strong>.
-                </p>
-                <p>
-                    Le carré est la partie qui compte : doubler la masse double l'énergie, mais
-                    doubler la vitesse la quadruple. C'est pourquoi cinquante FPS de plus se voient
-                    tout de suite sur le résultat, et pourquoi un terrain qui tolère un dépassement
-                    de vitesse ne tolère pas le même dépassement d'énergie.
-                </p>
+            <ol class="glab-worked">
+                <li>
+                    <span class="glab-worked-kicker">Masse</span>
+                    <span class="glab-worked-from">0,20 g</span>
+                    <span class="glab-worked-to">0,0002 kg</span>
+                </li>
+                <li>
+                    <span class="glab-worked-kicker">Vitesse</span>
+                    <span class="glab-worked-from">350 FPS</span>
+                    <span class="glab-worked-to">106,7 m/s</span>
+                </li>
+                <li class="is-result">
+                    <span class="glab-worked-kicker">Énergie</span>
+                    <span class="glab-worked-from">½ × 0,0002 × 106,7²</span>
+                    <strong class="glab-worked-to">1,14 J</strong>
+                </li>
+            </ol>
+            <p class="glab-worked-note">Un pied vaut 0,3048 mètre.</p>
+
+            <div class="glab-square">
+                <article>
+                    <p class="glab-square-kicker">Doubler la masse</p>
+                    <p class="glab-square-result">× 2 l'énergie</p>
+                </article>
+                <article class="is-key">
+                    <p class="glab-square-kicker">Doubler la vitesse</p>
+                    <p class="glab-square-result">× 4 l'énergie</p>
+                </article>
             </div>
+            <p class="glab-square-note">
+                Le carré est la partie qui compte. Cinquante FPS de plus se voient tout de suite
+                sur le résultat : un terrain qui tolère un dépassement de vitesse ne tolère pas
+                le même dépassement d'énergie.
+            </p>
         </section>
 
         <section class="glab-panel" aria-labelledby="glab-table-title">
@@ -222,6 +270,12 @@
                 Quarante-neuf réponses, sans rien calculer. Plus la case fonce, plus elle approche
                 des 2 joules ; les cases pleines les ont franchis.
             </p>
+
+            <ul class="glab-table-key">
+                <li><i class="is-mid"></i> dès 1 J</li>
+                <li><i class="is-near"></i> dès 1,5 J</li>
+                <li><i class="is-over"></i> 2 J et plus</li>
+            </ul>
 
             <div class="glab-table-wrap">
                 <table class="glab-table">
@@ -284,39 +338,44 @@
                 Cinq pour cent d'écart au fil d'une journée n'a rien d'anormal. Voici d'où ils viennent.
             </p>
 
-            <div class="glab-prose">
-                <h3>La bille</h3>
-                <p>
-                    C'est la première variable, et la seule qui change vraiment le chiffre annoncé.
-                    Un contrôle fait en 0,20 g et une partie jouée en 0,28 g ne mesurent pas la même
-                    chose. Le diamètre compte aussi : une bille mal calibrée frotte, et ce qu'elle
-                    perd en friction ne se retrouve pas au chronographe.
-                    <a href="{{ route('blog.show', 'billes-airsoft-poids-bio-et-qualite-ce-qui-justifie-lecart-de-prix') }}">Notre article sur les billes</a>
-                    revient sur ce que le poids et la qualité changent.
-                </p>
-
-                <h3>La température</h3>
-                <p>
-                    Une réplique à gaz est thermodynamique : le gaz froid se détend moins, et une
-                    matinée d'hiver coûte facilement un cinquième de la puissance d'un après-midi
-                    d'été. Une réplique électrique s'en moque presque, mais sa batterie non : pleine
-                    charge et fin de charge ne poussent pas le piston de la même façon.
-                </p>
-
-                <h3>Le hop-up</h3>
-                <p>
-                    Un hop-up trop serré freine la bille avant qu'elle ne sorte : le chronographe
-                    lit moins, alors que rien n'a été démonté. Un contrôle sérieux se fait hop-up
-                    relâché, sans quoi on mesure le réglage plutôt que la réplique.
-                </p>
-
-                <h3>Le chronographe lui-même</h3>
-                <p>
-                    Deux appareils ne s'accordent pas au FPS près, et la lumière ambiante suffit à
-                    les faire diverger. Une mesure isolée ne vaut rien : on tire cinq à dix billes
-                    et on lit la moyenne, en écartant la première, souvent basse.
-                </p>
-            </div>
+            <ol class="glab-rules">
+                <li>
+                    <h3>La bille</h3>
+                    <p>
+                        C'est la première variable, et la seule qui change vraiment le chiffre annoncé.
+                        Un contrôle fait en 0,20 g et une partie jouée en 0,28 g ne mesurent pas la même
+                        chose. Le diamètre compte aussi : une bille mal calibrée frotte, et ce qu'elle
+                        perd en friction ne se retrouve pas au chronographe.
+                        <a href="{{ route('blog.show', 'billes-airsoft-poids-bio-et-qualite-ce-qui-justifie-lecart-de-prix') }}">Notre article sur les billes</a>
+                        revient sur ce que le poids et la qualité changent.
+                    </p>
+                </li>
+                <li>
+                    <h3>La température</h3>
+                    <p>
+                        Une réplique à gaz est thermodynamique : le gaz froid se détend moins, et une
+                        matinée d'hiver coûte facilement un cinquième de la puissance d'un après-midi
+                        d'été. Une réplique électrique s'en moque presque, mais sa batterie non : pleine
+                        charge et fin de charge ne poussent pas le piston de la même façon.
+                    </p>
+                </li>
+                <li>
+                    <h3>Le hop-up</h3>
+                    <p>
+                        Un hop-up trop serré freine la bille avant qu'elle ne sorte : le chronographe
+                        lit moins, alors que rien n'a été démonté. Un contrôle sérieux se fait hop-up
+                        relâché, sans quoi on mesure le réglage plutôt que la réplique.
+                    </p>
+                </li>
+                <li>
+                    <h3>Le chronographe lui-même</h3>
+                    <p>
+                        Deux appareils ne s'accordent pas au FPS près, et la lumière ambiante suffit à
+                        les faire diverger. Une mesure isolée ne vaut rien : on tire cinq à dix billes
+                        et on lit la moyenne, en écartant la première, souvent basse.
+                    </p>
+                </li>
+            </ol>
         </section>
 
         <section class="glab-panel" aria-labelledby="glab-faq-title">
