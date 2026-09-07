@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-07 — v1.27.3 — build 1RSQG8
+
+### Storefront
+
+- **« Ce que disent nos clients » ends on the shop's own score.** A chip at the far end of that header, carrying the average rating out of five and the number of reviews behind it. Only reviews on a product a visitor can still open are counted, the same ones the quotes below are drawn from: a review stranded on a deactivated product would move a figure nobody can go and check. Nothing is drawn at all before the first review, « 0 / 5 » being a verdict rather than an absence. The stars are one element rather than five, a five-star mask over a gradient that turns at the score, so 4,4 cuts the fifth star at its own fraction instead of rounding down to four, and they are painted to the same rounded figure the number shows so the two cannot disagree. It sits outside the heading on purpose, the page's outline being the shop's own sections.
+- **The rule in that header still meets what it leads to.** That hairline is placed for the baseline of a text link, and the chip is more than twice a link's height, so the two had to be reconciled: the rule keeps the place it holds in every other section, and the chip hangs half of itself below it. The line goes through the chip's middle rather than across its bottom corner, and the gap down to the testimonials is the one every other section has. Narrow, where the header stacks and the rule is hidden, the chip simply sits under the title.
+
+**No migration.**
+
 ## 2026-09-07 — v1.27.2 — build 9XGU1X
 
 ### Storefront
