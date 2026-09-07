@@ -83,9 +83,9 @@ class AnalyticsTest extends TestCase
         $js = file_get_contents(public_path('js/analytics.js'));
 
         $this->assertStringContainsString('cookie_consent=all', $js);
-        // Both loaders ask the same question before fetching anything.
+        // PostHog has no consent mode of its own, so the answer decides
+        // whether it is fetched at all.
         $this->assertStringContainsString('!config.key || !accepted()', $js);
-        $this->assertStringContainsString('(!config.ga && !config.aw) || !accepted()', $js);
     }
 
     public function test_it_never_records_what_a_customer_types(): void
@@ -154,13 +154,66 @@ class AnalyticsTest extends TestCase
         $this->get('/')->assertOk()->assertSee('"ga":"G-TEST"', false);
     }
 
-    public function test_google_waits_for_the_same_answer_posthog_does(): void
+    public function test_google_runs_without_storage_until_the_answer_is_given(): void
     {
         $js = file_get_contents(public_path('js/analytics.js'));
 
-        $this->assertStringContainsString('(!config.ga && !config.aw) || !accepted()', $js);
+        // Consent Mode v2: the tag runs either way, and what changes is what
+        // it may keep on the device. Its default has to be queued before the
+        // tag is fetched, or the tag starts having assumed it could store.
+        $this->assertStringContainsString("window.gtag('consent', 'default', consent(granted));", $js);
+        $this->assertLessThan(
+            strpos($js, "googletagmanager.com/gtag/js"),
+            strpos($js, "window.gtag('consent', 'default'"),
+            'The consent default has to be queued before the tag is requested.'
+        );
+
+        // Denied is what an unanswered banner and a refusal both mean.
+        foreach (['analytics_storage', 'ad_storage', 'ad_user_data'] as $signal) {
+            $this->assertStringContainsString($signal.": granted ? 'granted' : 'denied',", $js);
+        }
+
+        // Without storage the ad click id is stripped from the request.
+        $this->assertStringContainsString("window.gtag('set', 'ads_data_redaction', !granted);", $js);
+    }
+
+    public function test_advertising_personalisation_is_refused_on_either_answer(): void
+    {
+        $js = file_get_contents(public_path('js/analytics.js'));
+
+        // The one signal the banner cannot grant: the shop measures its own
+        // advertising and does not build audiences out of its visitors.
+        $this->assertStringContainsString("ad_personalization: 'denied',", $js);
+        $this->assertStringNotContainsString("ad_personalization: granted", $js);
         $this->assertStringContainsString('allow_ad_personalization_signals: false', $js);
-        $this->assertStringContainsString('anonymize_ip: true', $js);
+        $this->assertStringContainsString('allow_google_signals: false', $js);
+
+        // GA4 truncates the address on its own and ignores the old flag, so
+        // the flag stated something the shop was not in fact doing.
+        $this->assertStringNotContainsString('anonymize_ip', $js);
+    }
+
+    public function test_accepting_updates_the_signals_rather_than_reloading(): void
+    {
+        $js = file_get_contents(public_path('js/analytics.js'));
+
+        // The tag is already running by then; only the update can widen what
+        // it may store, and the redaction is lifted with it.
+        $this->assertStringContainsString("window.gtag('consent', 'update', consent(true));", $js);
+        $this->assertStringContainsString("window.gtag('set', 'ads_data_redaction', false);", $js);
+        $this->assertStringContainsString('data-cookie-choice="all"', $js);
+    }
+
+    public function test_the_privacy_policy_admits_the_tag_still_runs_on_a_refusal(): void
+    {
+        // The page used to promise that a refusal loaded nothing at all.
+        // Consent mode made that false, and a policy that overstates what a
+        // refusal buys is worse than the tag it describes.
+        $this->get('/confidentialite')
+            ->assertOk()
+            ->assertSee('mode sans consentement', false)
+            ->assertSee('ne dépose aucun cookie', false)
+            ->assertDontSee("aucun de ces scripts n'est chargé", false);
     }
 
     public function test_an_event_reaches_whichever_tools_are_running(): void
@@ -169,6 +222,32 @@ class AnalyticsTest extends TestCase
 
         $this->assertStringContainsString('function capture(name, properties, google)', $js);
         $this->assertStringContainsString("window.gtag('event', google.name", $js);
+    }
+
+    public function test_an_event_is_held_rather_than_dropped_while_posthog_loads(): void
+    {
+        $js = file_get_contents(public_path('js/analytics.js'));
+
+        // The library is a network request behind the page, so a purchase
+        // captured on a freshly loaded confirmation page used to reach
+        // Google and nobody else. It is queued now, and replayed on load.
+        $this->assertStringContainsString('pending.push([name, properties || {}]);', $js);
+        $this->assertStringContainsString('window.posthog.capture(queued[0], queued[1]);', $js);
+
+        // Queued only where PostHog is configured, so a shop without it does
+        // not grow a list nothing will ever read.
+        $this->assertStringContainsString('} else if (config.key) {', $js);
+    }
+
+    public function test_the_page_event_has_one_call_site(): void
+    {
+        $js = file_get_contents(public_path('js/analytics.js'));
+
+        // It used to fire on load and again on a click, which on a
+        // confirmation page is a sale counted twice.
+        $this->assertSame(1, substr_count($js, "window.gtag('event', 'conversion'"));
+        $this->assertSame(1, substr_count($js, 'capture(config.event.name'));
+        $this->assertStringNotContainsString('window.setTimeout(fire, 400)', $js);
     }
 
     public function test_the_banner_holds_the_first_layer_and_the_policy_the_rest(): void

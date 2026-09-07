@@ -68,14 +68,20 @@
                     anonymisée avant transmission à Google, et les signaux publicitaires ainsi que la
                     personnalisation des annonces sont désactivés. Aucune donnée que vous saisissez (nom,
                     adresse, coordonnées bancaires) n'est transmise à l'un ou à l'autre. En cas de refus, ou
-                    tant que vous n'avez pas répondu, aucun de ces scripts n'est chargé et aucune donnée ne
-                    leur est envoyée.</li>
+                    tant que vous n'avez pas répondu, PostHog n'est pas chargé et ne reçoit rien. La balise
+                    Google reste chargée, mais dans un mode sans consentement : elle ne dépose aucun cookie,
+                    ne lit rien sur votre appareil et ne vous attribue aucun identifiant. Elle transmet alors
+                    une requête sans identifiant, contenant la page consultée, la page d'origine et votre
+                    adresse IP, cette dernière servant à déterminer un pays approximatif avant d'être écartée.
+                    Google ne s'en sert que pour produire des estimations agrégées de fréquentation.</li>
                 <li>Mesure des conversions publicitaires : si, et seulement si, vous l'acceptez via le même
                     bandeau, une commande validée est signalée à Google Ads (Google LLC, États-Unis) afin de
                     mesurer l'efficacité de nos annonces. Seuls sont transmis le numéro de commande, le montant
                     et la devise : ni votre nom, ni votre adresse, ni aucun article de la commande. Ce transfert
-                    repose sur la même décision d'adéquation que ci-dessus. En cas de refus, rien n'est signalé
-                    et aucune commande n'est rattachée à une annonce.</li>
+                    repose sur la même décision d'adéquation que ci-dessus. En cas de refus, aucun cookie n'est
+                    déposé et l'identifiant de clic publicitaire est retiré de la requête : la commande est
+                    signalée sans identifiant, ne peut être rattachée à une annonce précise, et n'alimente
+                    que des estimations agrégées.</li>
             </ul>
             <p>Aucune donnée bancaire n'est stockée par nos soins ; le paiement est traité par un prestataire tiers sécurisé.</p>
 
@@ -146,9 +152,10 @@
                 Analytics et du suivi des conversions Google Ads, qui déposent leurs propres cookies,
                 respectivement dans l'Union européenne et aux États-Unis. Le cookie Google Ads sert uniquement
                 à rattacher une commande à une annonce de la boutique ; aucun de ces cookies n'est utilisé à
-                des fins de personnalisation publicitaire ou de profilage. En l'absence de consentement, aucun
-                des trois n'est chargé. Vous pouvez revenir sur votre choix à tout
-                moment via le lien « Cookies » en pied de page.
+                des fins de personnalisation publicitaire ou de profilage. En l'absence de consentement, aucun de
+                ces cookies n'est déposé : PostHog n'est pas chargé du tout, et la balise Google fonctionne
+                dans un mode sans consentement, sans rien écrire ni lire sur votre appareil. Vous pouvez
+                revenir sur votre choix à tout moment via le lien « Cookies » en pied de page.
             </p>
 
             <h2>Sécurité</h2>
