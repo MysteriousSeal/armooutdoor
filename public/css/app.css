@@ -20,7 +20,47 @@
 }
 
 .site-header-main {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
     min-width: 0;
+}
+
+.site-header-name {
+    min-width: 0;
+}
+
+/* The mark repeats the link the wordmark beside it already makes, so it is
+   hidden from assistive tech and skipped by the keyboard rather than read
+   out and tabbed through twice. */
+.site-mark-link {
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+/* Sized to the two lines it stands beside, and drawn in the page's own
+   inks: the A follows the text, so it turns light where the page does,
+   and the ring keeps the taupe the artwork uses, which is the shop's
+   accent already. */
+.site-mark {
+    display: block;
+    height: 3.1rem;
+    width: auto;
+}
+
+.armo-ink {
+    fill: var(--text);
+}
+
+.armo-ring {
+    fill: none;
+    stroke: var(--accent);
+}
+
+@media (max-width: 640px) {
+    .site-mark {
+        height: 2.5rem;
+    }
 }
 
 .site-header-actions {
