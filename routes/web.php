@@ -349,8 +349,11 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         Route::get('/settings/invoice', [AdminInvoiceSettingController::class, 'edit'])->name('settings.invoice.edit');
         Route::put('/settings/invoice', [AdminInvoiceSettingController::class, 'update'])->name('settings.invoice.update');
         Route::put('/settings/carriers/{carrier}/price-tiers', [AdminCarrierPriceTierController::class, 'update'])->name('settings.carriers.price-tiers.update');
-        Route::get('/settings/marketplaces', [AdminMarketplaceSettingController::class, 'edit'])->name('settings.marketplaces.edit');
-        Route::put('/settings/marketplaces', [AdminMarketplaceSettingController::class, 'update'])->name('settings.marketplaces.update');
+        // Named apart from settings.marketplaces.*, which the marketplace
+        // list already owns: this page holds what the storefront says about
+        // NaturaBuy, not the marketplaces an order can be attached to.
+        Route::get('/settings/naturabuy', [AdminMarketplaceSettingController::class, 'edit'])->name('settings.naturabuy.edit');
+        Route::put('/settings/naturabuy', [AdminMarketplaceSettingController::class, 'update'])->name('settings.naturabuy.update');
         Route::get('/settings/products', [AdminProductSettingController::class, 'edit'])->name('settings.products.edit');
         Route::put('/settings/products', [AdminProductSettingController::class, 'update'])->name('settings.products.update');
         Route::get('/settings/orders', [AdminSettingsController::class, 'orders'])->name('settings.orders.edit');

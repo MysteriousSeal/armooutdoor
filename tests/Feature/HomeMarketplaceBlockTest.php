@@ -83,10 +83,29 @@ class HomeMarketplaceBlockTest extends TestCase
         }
     }
 
+    public function test_no_two_routes_share_a_name(): void
+    {
+        // A duplicate name is not an error until route:cache runs, which is
+        // to say until deploy: settings.marketplaces.update belonged to the
+        // marketplace list before this page borrowed it.
+        $names = [];
+
+        foreach (app('router')->getRoutes() as $route) {
+            if ($route->getName() !== null) {
+                $names[] = $route->getName();
+            }
+        }
+
+        $this->assertSame(
+            [],
+            array_keys(array_filter(array_count_values($names), fn (int $n): bool => $n > 1)),
+        );
+    }
+
     public function test_the_rating_survives_the_round_trip_through_the_form(): void
     {
         $this->actingAs(User::factory()->admin()->create())
-            ->put('/admin/settings/marketplaces', [
+            ->put('/admin/settings/naturabuy', [
                 'naturabuy_url' => 'https://www.naturabuy.fr/boutique-armo',
                 'naturabuy_rating' => '4.9',
                 'naturabuy_reviews' => '127',

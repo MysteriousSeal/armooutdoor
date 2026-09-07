@@ -13,7 +13,7 @@ class MarketplaceSettingController extends Controller
 {
     public function edit(): View
     {
-        return view('admin.settings.marketplaces', [
+        return view('admin.settings.naturabuy', [
             'setting' => MarketplaceSetting::current(),
         ]);
     }
@@ -39,7 +39,7 @@ class MarketplaceSettingController extends Controller
         AdminActivityLog::record('marketplace_setting.updated', null, 'Updated marketplace settings');
 
         return redirect()
-            ->route('admin.settings.marketplaces.edit')
+            ->route('admin.settings.naturabuy.edit')
             ->with('status', 'Marketplace settings saved.');
     }
 }

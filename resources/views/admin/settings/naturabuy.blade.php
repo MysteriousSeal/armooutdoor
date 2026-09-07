@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Marketplace settings')
+@section('title', 'NaturaBuy settings')
 
 @section('content')
     <div class="admin-list-page">
@@ -8,15 +8,15 @@
             <div class="admin-list-hero-row">
                 <div>
                     <p class="admin-list-kicker"><a href="{{ route('admin.settings.index') }}">Settings</a></p>
-                    <h2 class="admin-list-title">Marketplaces</h2>
+                    <h2 class="admin-list-title">NaturaBuy</h2>
                     <p class="admin-list-lede">
-                        What the shop says on its own pages about the places it also sells on.
+                        What the shop says on its own pages about the marketplace it also sells on.
                     </p>
                 </div>
             </div>
         </header>
 
-        <form method="POST" action="{{ route('admin.settings.marketplaces.update') }}" class="admin-form-card admin-form-card--solo">
+        <form method="POST" action="{{ route('admin.settings.naturabuy.update') }}" class="admin-form-card admin-form-card--solo">
             @csrf
             @method('PUT')
 

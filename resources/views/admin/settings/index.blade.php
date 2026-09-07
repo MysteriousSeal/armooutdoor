@@ -19,8 +19,8 @@
                 <span class="admin-stat-label">Company &amp; legal</span>
                 <span class="admin-stat-value admin-stat-value--sm">Info shown on the legal pages</span>
             </a>
-            <a href="{{ route('admin.settings.marketplaces.edit') }}" class="admin-stat-card">
-                <span class="admin-stat-label">Marketplaces</span>
+            <a href="{{ route('admin.settings.naturabuy.edit') }}" class="admin-stat-card">
+                <span class="admin-stat-label">NaturaBuy</span>
                 <span class="admin-stat-value admin-stat-value--sm">NaturaBuy rating shown on the home page</span>
             </a>
             <a href="{{ route('admin.settings.products.edit') }}" class="admin-stat-card">
