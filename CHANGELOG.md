@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-07 — v1.26.0 — build 1F19CE
+
+### Storefront
+
+- **The NaturaBuy block says how much the shop has sold there.** A line under the rating, on two lines of its own, reading « Déjà plus de X articles vendus et autant d'acheteurs qui nous font confiance ». The break is built in rather than left to whatever width the column happens to have, and the sentence closes on the buyers instead of repeating the review count already shown beside the score. The two figures now take the marketplace's own orange, the one its mark carries.
+
+### Admin
+
+- **A fourth field on the NaturaBuy settings page.** Optional, so the block keeps standing on the address, the rating and the count alone: an empty field drops the line and leaves the rest, and a zero drops it too, « plus de 0 articles vendus » being a boast nobody wants to make. The figure prints exactly as typed, « plus de » doing the softening, so the claim stays one the shop chose.
+
+**Migration:** one, run with `php artisan migrate`, a nullable `naturabuy_sales` column on `marketplace_settings`. It starts empty and the line stays hidden, which is what the block did before.
+
 ## 2026-09-07 — v1.25.1 — build KN75QI
 
 ### Admin
