@@ -241,6 +241,39 @@
             </section>
         @endif
 
+        @if ($catalogue)
+            {{-- How much there is. The figure is the whole design: three
+                 lines locked together so it reads as one sentence, with the
+                 way into the catalogue sitting beside it. --}}
+            <section class="home-stock" aria-labelledby="home-stock-figure">
+                <p class="home-stock-figure" id="home-stock-figure">
+                    <span class="home-stock-more">{{ __('store.home_stock_more') }}</span>
+                    <span class="home-stock-count">{{ $catalogue['rounded'] }}</span>
+                    <span class="home-stock-unit">{{ __('store.home_stock_unit') }}</span>
+                </p>
+                {{-- What the figure is spread across. Two smaller counts, so
+                     the shelves are read as depth rather than as a second
+                     menu: the aisles themselves are the next section. --}}
+                <dl class="home-stock-spread">
+                    <div class="home-stock-split">
+                        <dt class="home-stock-split-count">{{ $catalogue['rayons'] }}</dt>
+                        <dd class="home-stock-split-label">{{ trans_choice('store.home_stock_rayons', $catalogue['rayons']) }}</dd>
+                    </div>
+                    <div class="home-stock-split">
+                        <dt class="home-stock-split-count">{{ $catalogue['categories'] }}</dt>
+                        <dd class="home-stock-split-label">{{ trans_choice('store.home_stock_categories', $catalogue['categories']) }}</dd>
+                    </div>
+                </dl>
+                <div class="home-stock-aside">
+                    <p class="home-stock-text">{{ __('store.home_stock_text') }}</p>
+                    <a class="home-stock-link" href="{{ localized_route('products.all') }}">
+                        {{ __('store.home_stock_link') }}
+                        <span class="home-stock-arrow" aria-hidden="true">&rarr;</span>
+                    </a>
+                </div>
+            </section>
+        @endif
+
         @if ($categories->isNotEmpty())
             <section class="home-cats-section" id="categories" aria-labelledby="home-categories-title">
                 <header class="home-cats-header">

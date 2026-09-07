@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\BlogPost;
 use App\Models\Category;
 use App\Models\MarketplaceSetting;
+use App\Models\Product;
 use App\Models\ProductReview;
+use App\Models\ProductVariant;
 use App\Models\ShippingSetting;
 use App\Support\Guides;
 use App\Support\HomepageCatalog;
@@ -14,6 +16,9 @@ use Illuminate\View\View;
 
 class HomeController extends Controller
 {
+    /** The catalogue figure is rounded down to a multiple of this. */
+    private const REFERENCE_STEP = 50;
+
     public function __invoke(): View
     {
         $shipping = ShippingSetting::current();
@@ -76,6 +81,7 @@ class HomeController extends Controller
             // catalogue cannot say about itself.
             'testimonials' => $this->testimonials(),
             'reviewSummary' => $this->reviewSummary(),
+            'catalogue' => $this->catalogueSize(),
             'readings' => $this->readings(),
             'marketplace' => MarketplaceSetting::current(),
         ]);
@@ -101,6 +107,59 @@ class HomeController extends Controller
             ->orderByDesc('created_at')
             ->limit($limit)
             ->get();
+    }
+
+    /**
+     * How many references the shop carries, rounded down to a round figure.
+     *
+     * A product with variants is counted as its variants rather than as
+     * itself: the parent is not something anyone can buy, and counting it
+     * alongside its own sizes would inflate the claim. One with no variants
+     * is a reference on its own.
+     *
+     * Rounded down so the number stays true between two stock takes: the
+     * page says "plus de", and a figure that rounded up would not be.
+     *
+     * @return array{exact: int, rounded: int, rayons: int, categories: int}|null
+     */
+    private function catalogueSize(): ?array
+    {
+        $standalone = Product::query()
+            ->where('is_active', true)
+            ->whereDoesntHave('variants')
+            ->count();
+
+        $variants = ProductVariant::query()
+            ->where('is_active', true)
+            ->whereHas('product', fn ($query) => $query->where('is_active', true))
+            ->count();
+
+        $exact = $standalone + $variants;
+        $rounded = intdiv($exact, self::REFERENCE_STEP) * self::REFERENCE_STEP;
+
+        // Below one step there is no round figure to claim, and "plus de 0"
+        // is not a boast.
+        if ($rounded < self::REFERENCE_STEP) {
+            return null;
+        }
+
+        return [
+            'exact' => $exact,
+            'rounded' => $rounded,
+            // Only shelves a visitor can actually reach. A rayon counts if
+            // it holds active products itself or through one of its
+            // subcategories, which is how the menu treats it too.
+            'rayons' => Category::query()
+                ->whereNull('parent_id')
+                ->where(fn ($query) => $query
+                    ->whereHas('products', fn ($inner) => $inner->active())
+                    ->orWhereHas('children.products', fn ($inner) => $inner->active()))
+                ->count(),
+            'categories' => Category::query()
+                ->whereNotNull('parent_id')
+                ->whereHas('products', fn ($inner) => $inner->active())
+                ->count(),
+        ];
     }
 
     /**
