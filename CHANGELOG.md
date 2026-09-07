@@ -2,6 +2,22 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-07 — v1.23.0 — build OXGX4U
+
+### Storefront
+
+- **Un sixième guide : où tirer légalement.** Chez soi, sur un terrain d'airsoft ou en stand homologué, avec la seule question qui décide vraiment dessinée en haut de la page : le cône ne s'arrête ni à la cible ni à la clôture, et ce qui le referme est le point d'arrêt. Le guide dit aussi ce que chaque catégorie a le droit de faire et où. La D chez soi sous quatre conditions, au stand, jamais dans un lieu public. La C licite sur sa propriété en droit et bien plus exigeante en fait, puisque au-delà de vingt joules le point d'arrêt d'un plomb ne tient plus. La B au stand et nulle part ailleurs, l'arme voyageant déchargée et sous étui entre les deux.
+
+- **Deux textes que le web recopie de travers sont corrigés.** L'article R. 312-40 est présenté partout comme l'autorisation de tirer chez soi : il traite du tir sportif et réserve au contraire ces armes aux stands des associations. Les cent cinquante mètres sont présentés comme une distance de sécurité : ils viennent de l'article L. 422-10 du code de l'environnement, qui retire d'une chasse communale les terrains situés dans ce rayon autour d'une habitation. La règle qui gouverne, elle, porte sur la direction du tir. Huit sources sont listées et déclarées comme citations : une page juridique que personne ne peut vérifier ne vaut rien.
+
+- **Les guides joules et où tirer se lisent d'un coup d'œil.** Chacun s'ouvre sur son plan, les conditions et les étapes deviennent des listes numérotées, les cartes disent ce qu'il faut retenir, et le tableau des joules explique enfin son propre ombrage.
+
+### Under the hood
+
+- **Chaque guide a sa feuille de style.** Un seul fichier avait atteint dix-neuf cents lignes et chaque guide le chargeait en entier, alors que vingt-six de ses cent trente et une classes seulement servent à plus d'une page. Le tronc garde celles-là, le reste vit à côté, une feuille par guide. Les deux plus anciens guides chargent quatre cent soixante lignes au lieu de dix-neuf cents. Les mille huit déclarations d'avant sont les mille huit d'après, et pour chacune des sept pages les règles qui s'appliquent aux classes qu'elle affiche sont les mêmes qu'avant.
+
+**No migration.**
+
 ## 2026-09-07 — v1.22.0 — build T3AU9K
 
 ### Storefront
