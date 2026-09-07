@@ -2,6 +2,21 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-07 — v1.27.0 — build F9LLHK
+
+### Storefront
+
+- **The shop has a mark, and it is on the page.** The A with its bar and the ring beneath it, sitting left of the name and the line under it in the header, drawn rather than photographed so it stays sharp at any size and on any screen. It takes the page's own colours, the ink following the text and the ring the accent, which means it reverses with the dark theme instead of sitting in a pale box of its own.
+- **The tab carries it too.** The favicon is the same mark, with its ink flipped by the browser's light or dark setting, since a near black A disappears against a dark tab strip. A 32 pixel PNG stands behind it for browsers that want one, and a padded 180 pixel version covers the iOS home screen, where the system rounds the corners and paints anything transparent black.
+
+### Admin
+
+- **The invoice and the delivery slip carry the mark.** Beside the wordmark and squared to it, the ink starting on the cap height and finishing on the tagline. It is the drawing that goes into the PDF rather than a picture of one, so the paperwork prints at whatever resolution it is sent to.
+
+The mark is kept once, as the file it arrived in, and everything above is derived from it: the header, the two icons, and a print variant for the paperwork. That last one exists because the PDF renderer measures a drawing whose box has an offset origin wrongly, and given a height drew the ink at about two thirds of it; cropping the box to the artwork makes it behave like any other image. A test holds every copy to one definition of the three shapes, so a new logo cannot leave one of them behind.
+
+**No migration.**
+
 ## 2026-09-07 — v1.26.0 — build 1F19CE
 
 ### Storefront
