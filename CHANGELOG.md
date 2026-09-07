@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-07 — v1.24.1 — build PNS5H9
+
+### Storefront
+
+- **A product is no longer pushed down the listing for selling well.** The first key of the pertinence sort asks one question, can this be bought today, and « Derniers stocks disponibles » answers it as plainly as « En stock ». Ranking it a step below sent good products to the bottom of a category for the sole reason that they were running out, which is to say for the sole reason that they were selling. The two share the top rank now, and the keys underneath decide between them as before: units sold over the year, then views, then the hand ranking. The three states that cannot be bought today move up a step to close the gap. Category pages and the catalogue page both read the same sort, so both change.
+
+**No migration.**
+
 ## 2026-09-07 — v1.24.0 — build BSQGWF
 
 ### Admin
