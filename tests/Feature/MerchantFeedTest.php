@@ -2,7 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductImage;
+use App\Models\Supplier;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -35,6 +39,53 @@ class MerchantFeedTest extends TestCase
         $this->assertStringContainsString('/products/'.$product->slug, $xml);
         // Codes stated, so no disclaimer.
         $this->assertStringNotContainsString('identifier_exists', $xml);
+    }
+
+    public function test_the_gallery_rides_along_as_additional_images(): void
+    {
+        $product = Product::factory()->create(['is_active' => true, 'quantity' => 5, 'image' => 'products/main.webp']);
+
+        foreach (['products/a.webp', 'products/b.webp'] as $i => $file) {
+            ProductImage::query()->create(['product_id' => $product->id, 'image' => $file, 'sort_order' => $i]);
+        }
+
+        $xml = $this->get('/feed/google.xml')->assertOk()->getContent();
+
+        // One main image, and the gallery beside it: g:image_link holds one
+        // and only one, Merchant Center takes the rest in its own tag.
+        $this->assertSame(1, substr_count($xml, '<g:image_link>'));
+        $this->assertSame(2, substr_count($xml, '<g:additional_image_link>'));
+        $this->assertStringContainsString('products/a.webp</g:additional_image_link>', $xml);
+        $this->assertStringContainsString('products/b.webp</g:additional_image_link>', $xml);
+    }
+
+    public function test_a_product_without_a_gallery_adds_nothing(): void
+    {
+        Product::factory()->create(['is_active' => true, 'quantity' => 5]);
+
+        $xml = $this->get('/feed/google.xml')->assertOk()->getContent();
+
+        $this->assertSame(1, substr_count($xml, '<g:image_link>'));
+        $this->assertStringNotContainsString('additional_image_link', $xml);
+    }
+
+    public function test_the_main_image_is_not_repeated_and_ten_is_the_ceiling(): void
+    {
+        $product = Product::factory()->create(['is_active' => true, 'quantity' => 5, 'image' => 'products/main.webp']);
+
+        // The same file as the main image, then twelve others.
+        ProductImage::query()->create(['product_id' => $product->id, 'image' => 'products/main.webp', 'sort_order' => 0]);
+
+        for ($i = 1; $i <= 12; $i++) {
+            ProductImage::query()->create(['product_id' => $product->id, 'image' => 'products/g'.$i.'.webp', 'sort_order' => $i]);
+        }
+
+        $xml = $this->get('/feed/google.xml')->assertOk()->getContent();
+
+        // Repeating the main photograph would spend a slot on a picture the
+        // shopper has already seen, and Merchant Center takes ten.
+        $this->assertSame(10, substr_count($xml, '<g:additional_image_link>'));
+        $this->assertSame(1, substr_count($xml, 'products/main.webp'));
     }
 
     public function test_a_weighed_product_states_its_shipping_weight(): void
@@ -78,7 +129,7 @@ class MerchantFeedTest extends TestCase
             'is_active' => true, 'sku' => 'AT-SUPPLIER', 'quantity' => 0,
             // Backorderable means a supplier really holds it.
             'available_at_supplier' => true,
-            'supplier_id' => \App\Models\Supplier::query()->create(['name' => 'Fournisseur', 'lead_time_days' => 5])->id,
+            'supplier_id' => Supplier::query()->create(['name' => 'Fournisseur', 'lead_time_days' => 5])->id,
         ]);
 
         $xml = $this->get('/feed/google.xml')->getContent();
@@ -89,7 +140,7 @@ class MerchantFeedTest extends TestCase
 
     public function test_a_category_switched_out_keeps_its_products_home(): void
     {
-        $out = \App\Models\Category::factory()->create(['google_feed' => false]);
+        $out = Category::factory()->create(['google_feed' => false]);
         Product::factory()->create(['is_active' => true, 'quantity' => 5, 'sku' => 'KEPT-HOME', 'category_id' => $out->id]);
         Product::factory()->create(['is_active' => true, 'quantity' => 5, 'sku' => 'STILL-FED']);
 
@@ -101,8 +152,8 @@ class MerchantFeedTest extends TestCase
 
     public function test_a_parent_switched_out_takes_its_subcategories_along(): void
     {
-        $parent = \App\Models\Category::factory()->create(['google_feed' => false]);
-        $child = \App\Models\Category::factory()->create(['google_feed' => true, 'parent_id' => $parent->id]);
+        $parent = Category::factory()->create(['google_feed' => false]);
+        $child = Category::factory()->create(['google_feed' => true, 'parent_id' => $parent->id]);
         Product::factory()->create(['is_active' => true, 'quantity' => 5, 'sku' => 'CHILD-SKU', 'category_id' => $child->id]);
 
         $this->assertStringNotContainsString('CHILD-SKU', $this->get('/feed/google.xml')->getContent());
@@ -110,8 +161,8 @@ class MerchantFeedTest extends TestCase
 
     public function test_an_admin_flips_the_switch_from_the_categories_page(): void
     {
-        $category = \App\Models\Category::factory()->create();
-        $admin = \App\Models\User::factory()->admin()->create();
+        $category = Category::factory()->create();
+        $admin = User::factory()->admin()->create();
 
         $this->actingAs($admin)
             ->patch(route('admin.categories.google-feed', $category))
@@ -126,9 +177,9 @@ class MerchantFeedTest extends TestCase
 
     public function test_the_switch_answers_json_for_the_reloadless_pill(): void
     {
-        $category = \App\Models\Category::factory()->create();
+        $category = Category::factory()->create();
 
-        $this->actingAs(\App\Models\User::factory()->admin()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->patchJson(route('admin.categories.google-feed', $category))
             ->assertOk()
             ->assertExactJson(['google_feed' => false]);

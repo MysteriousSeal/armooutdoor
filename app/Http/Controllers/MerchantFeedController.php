@@ -30,7 +30,7 @@ class MerchantFeedController extends Controller
                 ->where(fn ($query) => $query
                     ->whereNull('parent_id')
                     ->orWhereHas('parent', fn ($parent) => $parent->where('google_feed', true))))
-            ->with(['discount', 'variants'])
+            ->with(['discount', 'variants', 'images'])
             ->orderBy('id')
             ->get();
 
@@ -47,6 +47,9 @@ class MerchantFeedController extends Controller
 
         return response($xml, 200, ['Content-Type' => 'application/xml; charset=UTF-8']);
     }
+
+    /** What Merchant Center accepts beside the main image. */
+    private const MAX_ADDITIONAL_IMAGES = 10;
 
     private function item(Product $product): string
     {
@@ -80,7 +83,33 @@ class MerchantFeedController extends Controller
             }
         }
 
+        // g:image_link holds one image and one only; the rest of the gallery
+        // goes in a repeated g:additional_image_link, which Merchant Center
+        // takes ten of. A product with an empty gallery adds nothing.
+        foreach ($this->additionalImages($product) as $url) {
+            $xml .= '<g:additional_image_link>'.$this->text($url).'</g:additional_image_link>';
+        }
+
         return $xml.'</item>';
+    }
+
+    /**
+     * The gallery, minus whatever is already the main image: repeating it
+     * costs a slot and shows the shopper the same photograph twice.
+     *
+     * @return list<string>
+     */
+    private function additionalImages(Product $product): array
+    {
+        $main = $product->imageUrl();
+
+        return $product->images
+            ->map(fn ($image): string => $image->imageUrl())
+            ->filter(fn (string $url): bool => $url !== '' && $url !== $main)
+            ->unique()
+            ->take(self::MAX_ADDITIONAL_IMAGES)
+            ->values()
+            ->all();
     }
 
     /**
