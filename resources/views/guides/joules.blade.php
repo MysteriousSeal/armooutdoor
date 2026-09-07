@@ -123,7 +123,7 @@
         {{-- The calculator. Hidden until the page knows it has JavaScript:
              the reference table below is the answer for everyone else, so
              nothing here promises a control that cannot work. --}}
-        <section class="glab-panel glab-calc" data-glab-joules hidden aria-labelledby="glab-calc-title">
+        <section class="glab-panel" data-glab-joules hidden aria-labelledby="glab-calc-title">
             <h2 class="glab-title" id="glab-calc-title">La <span class="glab-title-accent">calculette</span></h2>
             <p class="glab-lede">
                 Le poids de la bille et la vitesse au chronographe. Le reste se lit tout seul.

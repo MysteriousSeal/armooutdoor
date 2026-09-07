@@ -53,7 +53,7 @@
 @endpush
 
 @section('content')
-    <div class="container glab">
+    <div class="container glab glab--entretien">
         @include('guides.partials.hero', [
             'crumb' => 'Entretenir son arme',
             'kicker' => 'Guide',
@@ -62,9 +62,21 @@
         ])
 
         <p class="glab-warning">
-            Avant tout entretien : arme déchargée, chambre vérifiée vide, munitions à l'écart de
-            la table. Un drapeau de chambre vide rend l'état de l'arme visible d'un coup d'œil.
+            <strong class="glab-warning-label">Avant tout entretien</strong>
+            Arme déchargée, chambre vérifiée vide, munitions à l'écart de la table. Un
+            drapeau de chambre vide rend l'état de l'arme visible d'un coup d'œil.
         </p>
+
+        <nav class="glab-plan" aria-label="Plan du guide">
+            <p class="glab-plan-kicker">Plan</p>
+            <div class="glab-plan-links">
+                <a href="#glab-selector-title">Sélecteur</a>
+                <a href="#glab-table-title">Corde ou kit</a>
+                <a href="#glab-calibres-title">Calibres</a>
+                <a href="#glab-guide-title">Le geste</a>
+                <a href="#glab-faq-title">Questions</a>
+            </div>
+        </nav>
 
         {{-- The selector: calibre and place, a ranked kit. --}}
         <section class="glab-panel" data-glab-selector aria-labelledby="glab-selector-title">
@@ -138,110 +150,136 @@
             </div>
         </section>
 
-        {{-- The overview table: rope against rods. --}}
-        <section class="glab-panel" aria-labelledby="glab-table-title">
-            <h2 class="glab-title" id="glab-table-title">Corde ou kit à tiges, <span class="glab-title-accent">en un tableau</span></h2>
+        {{-- Rope against rods, two cards instead of a table that spills. --}}
+        <section class="glab-section" aria-labelledby="glab-table-title">
+            <h2 class="glab-title" id="glab-table-title">Corde ou kit à tiges, <span class="glab-title-accent">deux outils</span></h2>
+            <p class="glab-lede">
+                L'un fait l'essentiel au stand. L'autre fait le complet à l'établi. Ils se complètent.
+            </p>
 
-            <div class="glab-table-wrap">
-                <table class="glab-table">
-                    <thead>
-                        <tr>
-                            <th>Outil</th>
-                            <th>Où</th>
-                            <th>Ce que ça nettoie</th>
-                            <th>Calibres couverts</th>
-                            <th>Entretien</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Corde de nettoyage</td>
-                            <td>Au stand, en deux minutes</td>
-                            <td>Le canon : brosse laiton puis tissu, en un passage</td>
-                            <td>Une corde par calibre, du .17 au calibre 12</td>
-                            <td>Lavable et réutilisable</td>
-                        </tr>
-                        <tr>
-                            <td>Kit à tiges 16 pièces</td>
-                            <td>À l'établi</td>
-                            <td>Le nettoyage complet : canon, chambre, recoins</td>
-                            <td>.22, 9 mm, .40 et .357</td>
-                            <td>Tiges laiton, brosses et écouvillons</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="glab-families">
+                <article class="glab-family">
+                    <p class="glab-family-kicker">Au stand · deux minutes</p>
+                    <h3>Corde de nettoyage</h3>
+                    <p class="glab-family-read">Le canon : brosse laiton puis tissu, en un passage.</p>
+                    <p>
+                        Une <a href="{{ route('categories.show', 'entretien-arme') }}">corde de nettoyage</a>,
+                        dite « bore rope », embarque une brosse en laiton puis une longueur de tissu
+                        sur une cordelette lestée. On la laisse tomber côté chambre, on tire côté
+                        bouche. Elle tient dans une poche : c'est l'outil du stand. Une corde par
+                        calibre, du .17 au calibre 12. Lavable et réutilisable.
+                    </p>
+                    <a href="{{ route('categories.show', 'entretien-arme') }}">Voir le rayon entretien</a>
+                </article>
+                <article class="glab-family">
+                    <p class="glab-family-kicker">À l'établi · complet</p>
+                    <h3>Kit à tiges 16 pièces</h3>
+                    <p class="glab-family-read">Canon, chambre et recoins, tranquillement.</p>
+                    <p>
+                        Le <a href="{{ route('products.show', 'kit-de-nettoyage-universel-pour-armes-16-pieces-tiges-en-laiton-calibres-22-9mm-40-et-357') }}">kit universel 16 pièces</a>
+                        fait ce que la corde ne fait pas : tiges en laiton, brosses et écouvillons
+                        pour les calibres .22, 9 mm, .40 et .357. C'est le nettoyage d'avant un
+                        stockage prolongé. Hors de ces calibres, la corde du calibre reste l'outil
+                        principal.
+                    </p>
+                    <a href="{{ route('products.show', 'kit-de-nettoyage-universel-pour-armes-16-pieces-tiges-en-laiton-calibres-22-9mm-40-et-357') }}">Voir le kit</a>
+                </article>
             </div>
         </section>
 
-        {{-- The guide proper. --}}
-        <section class="glab-panel" aria-labelledby="glab-guide-title">
-            <h2 class="glab-title" id="glab-guide-title">L'entretien <span class="glab-title-accent">en détail</span></h2>
+        <section class="glab-section" aria-labelledby="glab-calibres-title">
+            <h2 class="glab-title" id="glab-calibres-title">Quelle corde <span class="glab-title-accent">pour quel calibre</span></h2>
+            <p class="glab-lede">
+                Le diamètre de la corde doit être celui du canon. Chaque corde couvre une famille de calibres voisins.
+            </p>
 
-            <div class="glab-prose">
-                <h3>La corde : le canon propre en deux minutes</h3>
-                <p>
-                    Une <a href="{{ route('categories.show', 'entretien-arme') }}">corde de nettoyage</a>,
-                    dite « bore rope », embarque une zone de brosse en laiton puis une longueur de
-                    tissu sur une seule cordelette lestée. On la laisse tomber côté chambre, on tire
-                    côté bouche : la brosse décolle les résidus, le tissu les emporte, en un seul
-                    passage. Elle tient dans une poche, ne se démonte pas et se range aussi vite
-                    qu'elle sert : c'est l'outil du stand.
-                </p>
+            <ul class="glab-calibres">
+                <li>
+                    <a href="{{ route('products.show', 'corde-nettoyage-canon-carabine-17-177-17hmr-17wmr-45mm-bore-rope') }}">
+                        <span class="glab-calibre-size">.17 · 4,5 mm</span>
+                        <span class="glab-calibre-use">Airguns à plombs et petits calibres à feu</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('products.show', 'corde-nettoyage-canon-22-223-5-56mm-bore-rope') }}">
+                        <span class="glab-calibre-size">.22 · 5,56 mm</span>
+                        <span class="glab-calibre-use">Le 22 LR du stand et le 5,56 mm</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('products.show', 'corde-nettoyage-canon-carabine-25-264-635mm-bore-rope') }}">
+                        <span class="glab-calibre-size">.25 · 6,35 mm</span>
+                        <span class="glab-calibre-use">Airguns 6,35 mm et calibres intermédiaires</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('products.show', 'corde-nettoyage-canon-38-357-380-9mm-bore-rope') }}">
+                        <span class="glab-calibre-size">9 mm · .38 · .357</span>
+                        <span class="glab-calibre-use">Le 9 mm et les revolvers</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('products.show', 'corde-nettoyage-canon-carabine-30-308-30-06-300-303-7-62mm-bore-rope') }}">
+                        <span class="glab-calibre-size">.308 · 7,62 mm</span>
+                        <span class="glab-calibre-use">Carabines de stand à longue distance</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('products.show', 'corde-nettoyage-canon-calibre-12-bore-rope') }}">
+                        <span class="glab-calibre-size">Calibre 12</span>
+                        <span class="glab-calibre-use">Les fusils lisses</span>
+                    </a>
+                </li>
+            </ul>
+        </section>
 
-                <h3>Quelle corde pour quel calibre</h3>
-                <p>
-                    Le diamètre de la corde doit être celui du canon. Chaque corde couvre une
-                    famille de calibres voisins :
-                </p>
-                <ul>
-                    <li><a href="{{ route('products.show', 'corde-nettoyage-canon-carabine-17-177-17hmr-17wmr-45mm-bore-rope') }}">.17 · .177 · .17 HMR · .17 WMR · 4,5 mm</a> : les airguns à plombs et les petits calibres à feu.</li>
-                    <li><a href="{{ route('products.show', 'corde-nettoyage-canon-22-223-5-56mm-bore-rope') }}">.22 · .223 · 5,56 mm</a> : le 22 LR du stand et le 5,56 mm.</li>
-                    <li><a href="{{ route('products.show', 'corde-nettoyage-canon-carabine-25-264-635mm-bore-rope') }}">.25 · .264 · 6,35 mm</a> : les airguns 6,35 mm et les calibres intermédiaires.</li>
-                    <li><a href="{{ route('products.show', 'corde-nettoyage-canon-38-357-380-9mm-bore-rope') }}">.38 · .357 · .380 · 9 mm</a> : le traditionnel 9 mm et les revolvers.</li>
-                    <li><a href="{{ route('products.show', 'corde-nettoyage-canon-carabine-30-308-30-06-300-303-7-62mm-bore-rope') }}">.30 · .308 · .30-06 · .300 · .303 · 7,62 mm</a> : les carabines de stand à longue distance.</li>
-                    <li><a href="{{ route('products.show', 'corde-nettoyage-canon-calibre-12-bore-rope') }}">Calibre 12</a> : les fusils lisses.</li>
-                </ul>
+        <section class="glab-section" aria-labelledby="glab-guide-title">
+            <h2 class="glab-title" id="glab-guide-title">Le geste <span class="glab-title-accent">et la cadence</span></h2>
+            <p class="glab-lede">
+                Le sens, la fréquence, et ce qui complète la trousse.
+            </p>
 
-                <h3>Le kit à tiges : le nettoyage d'établi</h3>
-                <p>
-                    Le <a href="{{ route('products.show', 'kit-de-nettoyage-universel-pour-armes-16-pieces-tiges-en-laiton-calibres-22-9mm-40-et-357') }}">kit universel 16 pièces</a>
-                    fait ce que la corde ne fait pas : tiges en laiton, brosses et écouvillons pour
-                    les calibres .22, 9 mm, .40 et .357, à passer tranquillement à l'établi. C'est
-                    le nettoyage complet, chambre et recoins compris, celui qu'on fait de temps en
-                    temps et avant un stockage prolongé. Pour les calibres qu'il ne couvre pas, la
-                    corde du calibre reste l'outil principal.
-                </p>
+            <ol class="glab-rules">
+                <li>
+                    <h3>De la chambre vers la bouche</h3>
+                    <p>
+                        Corde ou tige, le mouvement va dans le sens du projectile. La raison tient
+                        en un mot : le couronnement, le dernier point d'appui de la balle à la
+                        sortie du canon. Nettoyer à rebours, c'est y frotter l'outil à chaque
+                        passage ; un couronnement abîmé coûte de la précision qu'aucun nettoyage ne
+                        rendra.
+                    </p>
+                </li>
+                <li>
+                    <h3>Après chaque séance, et avant de ranger</h3>
+                    <p>
+                        Un passage de corde après chaque séance suffit pour l'entretien courant :
+                        deux minutes pendant que la ligne est froide. Le nettoyage complet à
+                        l'établi se fait de temps en temps, et toujours avant de ranger l'arme pour
+                        longtemps. La corde elle-même se lave à l'eau savonneuse, sèche à l'air et
+                        repart pour des dizaines de passages.
+                    </p>
+                </li>
+            </ol>
 
-                <h3>Le sens du geste : de la chambre vers la bouche</h3>
-                <p>
-                    Corde ou tige, le mouvement va de la chambre vers la bouche, dans le sens du
-                    projectile. La raison tient en un mot : le couronnement, le dernier point d'appui
-                    de la balle à la sortie du canon. Nettoyer à rebours, c'est y frotter l'outil à
-                    chaque passage ; un couronnement abîmé coûte de la précision qu'aucun nettoyage
-                    ne rendra.
-                </p>
-
-                <h3>À quelle fréquence</h3>
-                <p>
-                    Un passage de corde après chaque séance suffit pour l'entretien courant : deux
-                    minutes pendant que la ligne est froide. Le nettoyage complet à l'établi se fait
-                    de temps en temps, et toujours avant de ranger l'arme pour longtemps. La corde
-                    elle-même se lave à l'eau savonneuse, sèche à l'air et repart pour des dizaines
-                    de passages.
-                </p>
-
-                <h3>Ce qui complète la trousse</h3>
-                <p>
-                    Un <a href="{{ route('categories.show', 'kit-stand-tir') }}">tapis de tir</a>
-                    protège l'établi et la crosse pendant le démontage, les
-                    <a href="{{ route('products.show', 'lot-2-etiquettes-chambre-vide-brodees-rouges-porte-cles-securite-fusil-pistolet-universel') }}">étiquettes chambre vide</a>
-                    rendent l'arme visiblement sûre, un
-                    <a href="{{ route('categories.show', 'recuperateurs-de-douilles') }}">récupérateur de douilles</a>
-                    garde la ligne propre, et une
-                    <a href="{{ route('categories.show', 'boites-munitions') }}">boîte de munitions</a>
-                    range ce qui attend la prochaine séance.
-                </p>
-            </div>
+            <ul class="glab-takeaways">
+                <li>
+                    <span class="glab-takeaway-label">Tapis</span>
+                    <span>Un <a href="{{ route('categories.show', 'kit-stand-tir') }}">tapis de tir</a> protège l'établi et la crosse pendant le démontage.</span>
+                </li>
+                <li>
+                    <span class="glab-takeaway-label">Chambre vide</span>
+                    <span>Les <a href="{{ route('products.show', 'lot-2-etiquettes-chambre-vide-brodees-rouges-porte-cles-securite-fusil-pistolet-universel') }}">étiquettes chambre vide</a> rendent l'arme visiblement sûre.</span>
+                </li>
+                <li>
+                    <span class="glab-takeaway-label">Ligne</span>
+                    <span>Un <a href="{{ route('categories.show', 'recuperateurs-de-douilles') }}">récupérateur de douilles</a> garde la ligne propre.</span>
+                </li>
+                <li>
+                    <span class="glab-takeaway-label">Rangement</span>
+                    <span>Une <a href="{{ route('categories.show', 'boites-munitions') }}">boîte de munitions</a> range ce qui attend la prochaine séance.</span>
+                </li>
+            </ul>
 
             <p class="glab-more-reading">
                 Pour aller plus loin, notre article

@@ -1,8 +1,105 @@
 /*
- * « Entretenir son arme »: nothing of its own, for now.
- *
- * This file exists for the rule rather than for its contents: every guide
- * has one, and this one is waiting for the first rule the page cannot
- * take from the common trunk. Everything it wears today comes from
- * guides.css.
+ * « Entretenir son arme »: a selector, two tools, then six calibres.
+ * Families, rules and takeaways come from the common trunk; this file
+ * is the calibre grid and the range of six chips.
  */
+
+.glab--entretien .glab-title,
+.glab--entretien .glab-section,
+.glab--entretien .glab-panel {
+    scroll-margin-top: 5.5rem;
+}
+
+.glab--entretien .glab-chips:not(.glab-chips--stacked) {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.45rem;
+}
+
+.glab--entretien .glab-chips:not(.glab-chips--stacked) button {
+    align-items: center;
+    justify-content: center;
+    min-height: 2.7rem;
+    padding: 0.45rem 0.5rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.glab--entretien .glab-chips:not(.glab-chips--stacked) button.is-active {
+    color: var(--bg);
+    background: var(--accent-heading);
+    border-color: var(--accent-heading);
+}
+
+.glab--entretien .glab-reco {
+    border-top: 2px solid var(--accent-heading);
+}
+
+.glab--entretien .glab-reco-list li {
+    border-top: 2px solid var(--accent-heading);
+    padding: 1.1rem 1.15rem 1.2rem;
+}
+
+.glab--entretien .glab-reco-rank {
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+}
+
+.glab--entretien .glab-reco-head h3 {
+    font-size: 1rem;
+    letter-spacing: -0.015em;
+    color: var(--accent-heading);
+}
+
+.glab-calibres {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.8rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.glab-calibres a {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    height: 100%;
+    padding: 1.15rem 1.2rem 1.2rem;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 16%, var(--border));
+    border-top: 2px solid var(--accent-heading);
+}
+
+.glab-calibres a:hover {
+    border-color: var(--accent-heading);
+}
+
+.glab-calibre-size {
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    color: var(--accent-heading);
+}
+
+.glab-calibre-use {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+.glab--entretien .glab-faq details > div {
+    font-size: 0.9375rem;
+    line-height: 1.7;
+}
+
+@media (max-width: 900px) {
+    .glab--entretien .glab-chips:not(.glab-chips--stacked) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .glab-calibres {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

@@ -70,6 +70,23 @@
     border-left: 3px solid var(--accent-heading);
 }
 
+.glab-warning:has(.glab-warning-label) {
+    display: grid;
+    gap: 0.35rem;
+    max-width: none;
+    padding: 0.95rem 1.15rem;
+    font-size: 0.875rem;
+    line-height: 1.6;
+}
+
+.glab-warning-label {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-heading);
+}
+
 /* A warning standing at page level (the entretien guide's safety strip)
    breathes before the first panel; inside a panel the top margin the
    base rule gives it is enough. */
@@ -82,6 +99,58 @@
     flex-wrap: wrap;
     gap: 0.6rem;
     margin: 1.6rem 0 0;
+}
+
+/* The jump strip: a kicker and the sections, not a rule with leftover
+   empty line. Shared by every guide that needs a plan. */
+.glab-plan {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.35rem 1.25rem;
+    margin: 0 0 2rem;
+    padding: 0.7rem 1.15rem;
+    background: color-mix(in srgb, var(--accent-heading) 10%, var(--bg));
+    border-bottom: 1px solid var(--accent-heading);
+}
+
+.glab-plan-kicker {
+    margin: 0;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent-heading);
+}
+
+.glab-plan-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    min-width: 0;
+}
+
+.glab-plan a {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.6;
+    color: var(--accent-heading);
+}
+
+.glab-plan a + a::before {
+    content: '·';
+    margin: 0 0.65rem;
+    font-weight: 400;
+    color: color-mix(in srgb, var(--accent-heading) 40%, var(--text-muted));
+}
+
+.glab-plan a:hover {
+    color: var(--text);
+}
+
+.glab-plan a:focus-visible {
+    outline: 2px solid var(--accent-heading);
+    outline-offset: 2px;
 }
 
 /* ============ editorial prose ============ */
@@ -397,6 +466,12 @@
         .glab-reco-list {
             grid-template-columns: minmax(0, 1fr);
         }
+
+    .glab-plan {
+        flex-direction: column;
+        gap: 0.15rem;
+        padding: 0.65rem 1rem 0.75rem;
+    }
 }
 
 .glab-prose a,
@@ -461,4 +536,178 @@
     text-align: left;
     color: var(--text-muted);
     border-bottom: 1px solid var(--border);
+}
+
+/* Two or four things to compare, as cards rather than a table. */
+.glab-families {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.glab-family {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 0;
+    padding: 1.25rem 1.3rem 1.3rem;
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 16%, var(--border));
+    border-top: 2px solid var(--accent-heading);
+}
+
+.glab-family-kicker {
+    margin: 0;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.glab-family h3 {
+    margin: 0;
+    font-size: 1.12rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    color: var(--accent-heading);
+}
+
+.glab-family-read {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.45;
+    color: var(--text);
+}
+
+.glab-family p {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.65;
+}
+
+.glab-family a {
+    color: var(--accent-heading);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--accent-heading) 45%, transparent);
+    text-underline-offset: 2px;
+}
+
+.glab-family a:hover {
+    text-decoration-color: var(--accent-heading);
+}
+
+.glab-family > a:last-child {
+    align-self: flex-start;
+    margin-top: auto;
+    padding-top: 0.35rem;
+}
+
+/* A short numbered list of conditions or gestures. */
+.glab-rules {
+    display: grid;
+    gap: 0.9rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: glab-rule;
+}
+
+.glab-rules > li {
+    position: relative;
+    padding: 1.2rem 1.3rem 1.15rem 4.4rem;
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 16%, var(--border));
+    counter-increment: glab-rule;
+}
+
+.glab-rules > li::before {
+    content: counter(glab-rule, decimal-leading-zero);
+    position: absolute;
+    left: 1.15rem;
+    top: 1.25rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.08em;
+    color: var(--accent-heading);
+}
+
+.glab-rules h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+    color: var(--accent-heading);
+}
+
+.glab-rules p {
+    margin: 0;
+    max-width: 42rem;
+    font-size: 0.95rem;
+    line-height: 1.7;
+}
+
+.glab-takeaways {
+    display: grid;
+    gap: 0.55rem;
+    max-width: 46rem;
+    margin: 1.35rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.glab-takeaways li {
+    display: grid;
+    grid-template-columns: 8.5rem minmax(0, 1fr);
+    gap: 0.85rem;
+    align-items: baseline;
+    padding: 0.7rem 0.9rem;
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 16%, var(--border));
+}
+
+.glab-takeaway-label {
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-heading);
+}
+
+.glab-takeaways li span:last-child {
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.glab-takeaways a {
+    color: var(--accent-heading);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--accent-heading) 45%, transparent);
+    text-underline-offset: 2px;
+}
+
+@media (max-width: 900px) {
+    .glab-families {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .glab-rules > li {
+        padding: 1.1rem 1.1rem 1.05rem 3.7rem;
+    }
+
+    .glab-rules > li::before {
+        left: 0.9rem;
+        top: 1.15rem;
+    }
+
+    .glab-takeaways li {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.25rem;
+    }
 }
