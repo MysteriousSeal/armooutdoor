@@ -1578,6 +1578,9 @@
 /* Quiet on purpose: it sends people away, so it sits low on the page and
    asks for less attention than the shop's own testimonials. */
 .home .home-market {
+    /* The marketplace's own orange, on the mark and on the figures alike. */
+    --nb-orange: #ff7000;
+
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
@@ -1599,7 +1602,7 @@
 }
 
 .home-market-logo-mark {
-    fill: #ff7000;
+    fill: var(--nb-orange);
 }
 
 .home-market-logo-word {
@@ -1667,16 +1670,41 @@
     line-height: 1;
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.03em;
-    color: var(--accent-heading);
+    color: var(--nb-orange);
+}
+
+.home-market-count {
+    margin-left: 0.15rem;
+    white-space: nowrap;
 }
 
 .home-market-out {
     font-weight: 600;
 }
 
-.home-market-count {
-    margin-left: 0.15rem;
-    white-space: nowrap;
+/* The tally under the score. The words stay quiet and the figure takes the
+   accent, so the line echoes the rating above without competing with it:
+   two olive numbers, one large and one small. */
+.home-market-sales {
+    margin: -0.3rem 0 0;
+    font-size: 0.78rem;
+    line-height: 1.4;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+/* Each half on its own line: the break belongs to the sentence, not to
+   whatever width the column happens to have. */
+.home-market-sales span {
+    display: block;
+}
+
+.home-market-sales strong {
+    font-size: 0.95rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+    color: var(--nb-orange);
 }
 
 .home-market-link {

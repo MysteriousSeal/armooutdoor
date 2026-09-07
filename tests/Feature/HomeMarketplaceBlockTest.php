@@ -21,6 +21,7 @@ class HomeMarketplaceBlockTest extends TestCase
             'naturabuy_url' => 'https://www.naturabuy.fr/boutique-armo',
             'naturabuy_rating_tenths' => 49,
             'naturabuy_reviews' => 127,
+            'naturabuy_sales' => null,
             'naturabuy_on_home' => true,
         ], $overrides));
     }
@@ -81,6 +82,53 @@ class HomeMarketplaceBlockTest extends TestCase
 
             $this->get('/')->assertOk()->assertDontSee('home-market', false);
         }
+    }
+
+    public function test_the_sales_line_shows_when_a_figure_is_entered(): void
+    {
+        $this->configure(['naturabuy_sales' => 1200]);
+
+        $this->get('/')->assertOk()
+            // Printed as typed: « Plus de » does the softening.
+            ->assertSee('Déjà plus de')
+            // The figure is its own element so it can take the accent.
+            ->assertSee('<strong>1 200</strong>', false)
+            ->assertSee('articles vendus')
+            ->assertSee("et autant d'acheteurs qui nous font confiance !");
+    }
+
+    public function test_the_block_stands_without_a_sales_figure(): void
+    {
+        $this->configure(['naturabuy_sales' => null]);
+
+        // Optional, so an empty field drops the line and leaves the rest.
+        $this->get('/')->assertOk()
+            ->assertSee('home-market', false)
+            ->assertSee('127 avis')
+            ->assertDontSee('articles vendus');
+    }
+
+    public function test_a_zero_is_not_boasted_about(): void
+    {
+        $this->configure(['naturabuy_sales' => 0]);
+
+        $this->get('/')->assertOk()
+            ->assertSee('home-market', false)
+            ->assertDontSee('articles vendus');
+    }
+
+    public function test_the_sales_figure_survives_the_form(): void
+    {
+        $this->actingAs(User::factory()->admin()->create())
+            ->put('/admin/settings/naturabuy', [
+                'naturabuy_url' => 'https://www.naturabuy.fr/boutique-armo',
+                'naturabuy_rating' => '5',
+                'naturabuy_reviews' => '28',
+                'naturabuy_sales' => '1200',
+                'naturabuy_on_home' => '1',
+            ])->assertRedirect();
+
+        $this->assertSame(1200, MarketplaceSetting::current()->naturabuy_sales);
     }
 
     public function test_no_two_routes_share_a_name(): void

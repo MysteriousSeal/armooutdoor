@@ -76,6 +76,26 @@
             </div>
 
             <div class="form-group">
+                <label for="naturabuy_sales">Articles sold</label>
+                <input
+                    type="number"
+                    id="naturabuy_sales"
+                    name="naturabuy_sales"
+                    class="form-control"
+                    value="{{ old('naturabuy_sales', $setting->naturabuy_sales) }}"
+                    min="0"
+                    max="9999999"
+                    placeholder="1200"
+                >
+                @error('naturabuy_sales') <p class="form-error">{{ $message }}</p> @enderror
+                <p class="form-hint">
+                    Optional. The home page prints it as « Plus de X articles vendus », exactly
+                    as typed: « Plus de » does the softening, and the figure stays a claim you
+                    chose. Leave it empty and the line does not appear.
+                </p>
+            </div>
+
+            <div class="form-group">
                 <label class="form-check">
                     <input type="checkbox" name="naturabuy_on_home" value="1" @checked(old('naturabuy_on_home', $setting->naturabuy_on_home))>
                     <span>Show the block on the home page</span>

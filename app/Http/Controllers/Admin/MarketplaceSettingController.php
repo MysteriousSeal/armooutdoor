@@ -25,6 +25,7 @@ class MarketplaceSettingController extends Controller
             // Entered as 4,9 out of 5 and kept in tenths.
             'naturabuy_rating' => ['nullable', 'numeric', 'min:0', 'max:5'],
             'naturabuy_reviews' => ['nullable', 'integer', 'min:0', 'max:999999'],
+            'naturabuy_sales' => ['nullable', 'integer', 'min:0', 'max:9999999'],
         ]);
 
         MarketplaceSetting::current()->update([
@@ -33,6 +34,7 @@ class MarketplaceSettingController extends Controller
                 ? (int) round((float) $validated['naturabuy_rating'] * 10)
                 : null,
             'naturabuy_reviews' => $validated['naturabuy_reviews'] ?? null,
+            'naturabuy_sales' => $validated['naturabuy_sales'] ?? null,
             'naturabuy_on_home' => $request->boolean('naturabuy_on_home'),
         ]);
 

@@ -416,6 +416,22 @@
                         <span class="home-market-count">{{ trans_choice('store.home_market_reviews', $marketplace->naturabuy_reviews, ['count' => number_format($marketplace->naturabuy_reviews, 0, ',', ' ')]) }}</span>
                     </p>
 
+                    {{-- Above zero, not merely present: « plus de 0 articles
+                         vendus » is a boast nobody wants to make. --}}
+                    @if ($marketplace->naturabuy_sales > 0)
+                        {{-- Two lines by construction rather than by luck: the
+                             sentence is long enough to wrap, and where it wraps
+                             should not be left to the column's width. --}}
+                        <p class="home-market-sales">
+                            <span>
+                                {{ __('store.home_market_sales_before') }}
+                                <strong>{{ number_format($marketplace->naturabuy_sales, 0, ',', ' ') }}</strong>
+                                {{ __('store.home_market_sales_after') }}
+                            </span>
+                            <span>{{ __('store.home_market_sales_trust') }}</span>
+                        </p>
+                    @endif
+
                     {{-- A marketplace the shop competes with for its own product
                          names: the visitor may follow it, a crawler may not. --}}
                     <a
