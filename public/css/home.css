@@ -1369,25 +1369,48 @@
 /* ============ how much there is ============ */
 
 /*
- * The catalogue's size. The figure is the design: three lines locked into
- * one sentence, the numeral carrying it and the two words holding it in
- * place. Everything else on the band stays quiet so that block of type is
- * the thing the eye lands on.
+ * The catalogue's size. One cluster of figures, then the way in: the
+ * numeral is still the mark, the two footnotes sit against it, and the
+ * copy no longer floats in leftover space.
  */
 .home .home-stock {
     display: grid;
-    grid-template-columns: auto auto minmax(0, 1fr);
-    align-items: center;
-    gap: 2.75rem;
+    grid-template-columns: auto minmax(18rem, 1fr);
+    align-items: stretch;
     /* The rhythm the other sections keep between them: the band sits
        between two of them now rather than under the promises strip. */
     margin-top: 2.75rem;
-    padding: 2.1rem 2.3rem;
-    border: 1px solid color-mix(in srgb, var(--accent-heading) 26%, var(--border));
-    background: color-mix(in srgb, var(--accent-heading) 7%, var(--surface));
+    background: color-mix(in srgb, var(--accent-heading) 8%, var(--bg));
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 22%, var(--border));
+    border-top: 2px solid var(--accent-heading);
+}
+
+.home .home-stock-stats {
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-areas:
+        "kicker kicker"
+        "figure spread";
+    align-items: end;
+    gap: 0.7rem 2rem;
+    padding: 1.45rem 2rem 1.55rem;
+}
+
+.home .home-stock-kicker {
+    grid-area: kicker;
+    justify-self: start;
+    margin: 0;
+    padding: 0.22em 0.55em 0.26em;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--bg);
+    background: var(--accent-heading);
 }
 
 .home .home-stock-figure {
+    grid-area: figure;
     display: grid;
     justify-items: start;
     margin: 0;
@@ -1407,7 +1430,7 @@
     /* Set to crowd its own line. The digits are meant to read as one mark,
        and tabular figures keep the width the day the shop crosses the next
        fifty. */
-    font-size: clamp(3.6rem, 8vw, 5.6rem);
+    font-size: clamp(3.1rem, 6vw, 4.5rem);
     font-weight: 700;
     letter-spacing: -0.055em;
     line-height: 0.9;
@@ -1419,26 +1442,25 @@
    is part of the figure, not a caption under it. */
 .home .home-stock-unit {
     margin-top: 0.15rem;
-    font-size: clamp(1rem, 1.6vw, 1.2rem);
+    font-size: clamp(1rem, 1.6vw, 1.15rem);
     font-weight: 600;
     letter-spacing: -0.015em;
     color: var(--text);
 }
 
-/* A hairline between the figure and the way in, the rule this page uses
-   everywhere else to separate a thing from what follows it. */
 .home .home-stock-aside {
     display: flex;
     flex-direction: column;
+    justify-content: center;
     align-items: flex-start;
-    gap: 1.05rem;
-    max-width: 30rem;
-    padding-left: 2.75rem;
-    border-left: 1px solid color-mix(in srgb, var(--accent-heading) 20%, var(--border));
+    gap: 1rem;
+    padding: 1.55rem 2rem;
+    border-left: 1px solid color-mix(in srgb, var(--accent-heading) 22%, var(--border));
 }
 
 .home .home-stock-text {
     margin: 0;
+    max-width: 28rem;
     font-size: 0.9375rem;
     line-height: 1.6;
     color: var(--text-muted);
@@ -1464,6 +1486,11 @@
     background: color-mix(in srgb, var(--accent-heading) 82%, var(--text));
 }
 
+.home .home-stock-link:focus-visible {
+    outline: 2px solid var(--accent-heading);
+    outline-offset: 2px;
+}
+
 .home .home-stock-arrow {
     transition: transform 0.15s ease;
 }
@@ -1484,21 +1511,20 @@
     }
 }
 
-/*
- * What the figure is spread across, at the far end of the band. Set well
- * below the main count so the three read as one figure and two footnotes
- * rather than as a row of statistics competing with each other.
- */
 .home .home-stock-spread {
+    grid-area: spread;
     display: flex;
-    gap: 2.7rem;
+    gap: 0;
     margin: 0;
-    padding-left: 2.75rem;
-    border-left: 1px solid color-mix(in srgb, var(--accent-heading) 20%, var(--border));
+}
+
+.home .home-stock-split {
+    padding: 0 1.5rem;
+    border-left: 1px solid color-mix(in srgb, var(--accent-heading) 22%, var(--border));
 }
 
 .home .home-stock-split-count {
-    font-size: 2.35rem;
+    font-size: 1.85rem;
     font-weight: 700;
     letter-spacing: -0.03em;
     line-height: 1;
@@ -1507,49 +1533,60 @@
 }
 
 .home .home-stock-split-label {
-    margin: 0.35rem 0 0;
-    font-size: 0.75rem;
-    font-weight: 600;
+    margin: 0.4rem 0 0;
+    font-size: 0.625rem;
+    font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--text-muted);
 }
 
-/* The figures keep their row and the way in drops below them, rather than
-   the band squeezing three columns into a laptop width. */
 @media (max-width: 68rem) {
     .home .home-stock {
-        grid-template-columns: auto minmax(0, 1fr);
-    }
-
-    .home .home-stock-spread {
-        gap: 2rem;
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .home .home-stock-aside {
-        grid-column: 1 / -1;
-        max-width: none;
-        padding: 1.5rem 0 0;
+        padding: 1.25rem 2rem 1.5rem;
         border-left: 0;
-        border-top: 1px solid color-mix(in srgb, var(--accent-heading) 20%, var(--border));
+        border-top: 1px solid color-mix(in srgb, var(--accent-heading) 22%, var(--border));
     }
 }
 
-@media (max-width: 52rem) {
+@media (max-width: 40rem) {
     .home .home-stock {
-        grid-template-columns: minmax(0, 1fr);
-        gap: 1.5rem;
         margin-top: 2rem;
-        padding: 1.6rem 1.5rem;
     }
 
-    /* Stacked, the rules turn and run above what they separate. */
-    .home .home-stock-aside,
+    .home .home-stock-stats {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas:
+            "kicker"
+            "figure"
+            "spread";
+        gap: 1.1rem;
+        padding: 1.25rem 1.25rem 1.15rem;
+    }
+
     .home .home-stock-spread {
-        grid-column: 1;
-        padding: 1.5rem 0 0;
+        width: 100%;
+        padding-top: 1.1rem;
+        border-top: 1px solid color-mix(in srgb, var(--accent-heading) 22%, var(--border));
+    }
+
+    .home .home-stock-split {
+        flex: 1;
+        padding: 0;
         border-left: 0;
-        border-top: 1px solid color-mix(in srgb, var(--accent-heading) 20%, var(--border));
+    }
+
+    .home .home-stock-split + .home-stock-split {
+        padding-left: 1.25rem;
+        border-left: 1px solid color-mix(in srgb, var(--accent-heading) 22%, var(--border));
+    }
+
+    .home .home-stock-aside {
+        padding: 1.15rem 1.25rem 1.35rem;
     }
 }
 
