@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-07 — v1.28.1 — build Y59HXU
+
+### Storefront
+
+- **New photographs on the home page and the about page.** The four carousel panels and the picture on « À propos », at the same 1280x720 the panels are built around. They also weigh a great deal less than the ones they replace, 76 ko across the set where it was 604, and the first of them is fetched before anything else on the home page rather than lazily, so that saving lands on the slowest moment of the visit rather than on a later one.
+
+**No migration.**
+
 ## 2026-09-07 — v1.28.0 — build 1DRYQU
 
 ### Storefront
