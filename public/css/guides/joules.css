@@ -1,0 +1,431 @@
+/*
+ * « Joules et FPS » : the energy axis the page is built on, the
+ * calculator that rides a needle along it, the formula set as a formula,
+ * and the reference table shaded towards the legal line.
+ */
+
+/* ============ the energy scale ============ */
+
+/* Logarithmic: the regimes run from eight hundredths of a joule to twenty,
+   and a linear axis would crush everything an airsofter cares about into
+   the first two per cent of the width. */
+.glab-scale {
+    margin: 1.5rem 0 0;
+}
+
+.glab-scale-marks {
+    position: relative;
+    height: 1.05rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+}
+
+.glab-scale-marks span {
+    position: absolute;
+    left: var(--glab-mark-at);
+    transform: translateX(-50%);
+    white-space: nowrap;
+}
+
+/* The first mark is the axis's own left edge, so it hangs from it rather
+   than straddling it. */
+.glab-scale-marks span:first-child {
+    transform: none;
+}
+
+.glab-scale-track {
+    position: relative;
+    display: flex;
+    height: 0.95rem;
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 35%, var(--border));
+}
+
+.glab-scale-zone {
+    width: var(--glab-zone-width);
+}
+
+/* One hue, three densities: the axis darkens as the energy climbs. */
+.glab-scale-zone.is-free {
+    background: color-mix(in srgb, var(--accent-heading) 14%, var(--surface));
+}
+
+.glab-scale-zone.is-d {
+    background: color-mix(in srgb, var(--accent-heading) 42%, var(--surface));
+    border-left: 1px solid color-mix(in srgb, var(--accent-heading) 60%, var(--border));
+}
+
+.glab-scale-zone.is-c {
+    background: var(--accent-heading);
+    border-left: 1px solid color-mix(in srgb, var(--accent-heading) 60%, var(--border));
+}
+
+/* What the terrains cap at: three hairlines crowded into the last sliver
+   before the legal line, which is the whole point of showing them. */
+.glab-scale-cap {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--glab-cap-at);
+    width: 1px;
+    /* Read against the ink, not against the wash: all three ticks fall in
+       the palest zone, where a surface-coloured hairline disappears the
+       moment the page turns dark. */
+    background: color-mix(in srgb, var(--text) 55%, transparent);
+}
+
+/* The needle runs through the axis, its head above it: a reading taken on
+   the line rather than a marker resting near it. */
+.glab-scale-needle {
+    position: absolute;
+    top: -0.3rem;
+    bottom: -0.3rem;
+    left: var(--glab-scale-at, 0%);
+    width: 2px;
+    margin-left: -1px;
+    background: var(--text);
+    transition: left 0.18s ease;
+}
+
+.glab-scale-needle::before {
+    content: '';
+    position: absolute;
+    top: -0.32rem;
+    left: 50%;
+    width: 0;
+    height: 0;
+    transform: translateX(-50%);
+    border-left: 0.32rem solid transparent;
+    border-right: 0.32rem solid transparent;
+    border-top: 0.36rem solid var(--text);
+}
+
+/* ============ the terrain caps ============ */
+
+/* One brace for the three of them: they sit within seven per cent of each
+   other, so three labels would collide, and unlabelled ticks are three
+   scratches nobody can read. */
+.glab-scale-caps {
+    position: relative;
+    height: 1.5rem;
+    /* Clear of the needle's tail, which hangs below the track. */
+    margin-top: 0.55rem;
+}
+
+.glab-scale-caps-brace {
+    position: absolute;
+    top: 0;
+    left: var(--glab-caps-from);
+    width: calc(var(--glab-caps-to) - var(--glab-caps-from));
+    height: 0.32rem;
+    border: 1px solid color-mix(in srgb, var(--text) 40%, transparent);
+    border-top: 0;
+}
+
+.glab-scale-caps-label {
+    position: absolute;
+    top: 0.5rem;
+    left: var(--glab-caps-mid);
+    transform: translateX(-50%);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--text-muted);
+}
+
+.glab-scale-legend {
+    display: flex;
+    margin: 0.45rem 0 0;
+}
+
+.glab-scale-name {
+    width: var(--glab-zone-width);
+    padding: 0 0.2rem;
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--text-muted);
+    transition: color 0.18s ease;
+}
+
+/* The band the current result falls in, named as well as pointed at. */
+.glab-scale-name.is-current {
+    font-weight: 800;
+    color: var(--accent-heading);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .glab-scale-needle,
+        .glab-scale-name {
+            transition: none;
+        }
+}
+
+/* ============ the formula ============ */
+
+.glab-formula {
+    max-width: 46rem;
+    margin: 0 0 1.4rem;
+    padding: 1.5rem 1.2rem 1.1rem;
+    text-align: center;
+    background: color-mix(in srgb, var(--accent-heading) 7%, var(--surface));
+    border-top: 2px solid var(--accent-heading);
+    border-bottom: 1px solid color-mix(in srgb, var(--accent-heading) 18%, var(--border));
+}
+
+.glab-formula-line {
+    margin: 0;
+    font-size: clamp(1.75rem, 4.5vw, 2.5rem);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    color: var(--accent-heading);
+}
+
+/* Quantities in italic, constants upright: the way an equation is set. */
+.glab-formula-line em {
+    font-weight: 500;
+    font-style: italic;
+}
+
+.glab-formula-line sup {
+    font-size: 0.55em;
+    vertical-align: super;
+}
+
+.glab-formula figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.35rem 1.3rem;
+    margin-top: 1rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.glab-formula figcaption em {
+    font-style: italic;
+    text-transform: none;
+    color: var(--accent-heading);
+}
+
+/* ============ the reference table ============ */
+
+/* The bille stays readable while the speeds scroll past it. */
+.glab-table th[scope='row'] {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    font-size: 0.8125rem;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+/* The cell darkens as it approaches two joules, and states plainly the
+   pairs that have crossed the line. */
+.glab-table td.is-mid {
+    background: color-mix(in srgb, var(--accent-heading) 8%, transparent);
+}
+
+.glab-table td.is-near {
+    background: color-mix(in srgb, var(--accent-heading) 18%, transparent);
+}
+
+.glab-table td.is-over {
+    font-weight: 700;
+    color: var(--accent-heading);
+    background: color-mix(in srgb, var(--accent-heading) 32%, transparent);
+}
+
+/* ============ the calculator ============ */
+
+.glab-calc-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1rem;
+    align-items: stretch;
+}
+
+.glab-calc-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem 1.1rem;
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 16%, var(--border));
+}
+
+.glab-calc-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.glab-calc-field label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.glab-calc-field select,
+.glab-calc-field input {
+    width: 100%;
+    min-height: 2.5rem;
+    padding: 0.45rem 0.6rem;
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.glab-calc-field select:focus-visible,
+.glab-calc-field input:focus-visible {
+    outline: 2px solid var(--accent-heading);
+    outline-offset: 1px;
+}
+
+/* The unit rides beside the number it qualifies, not under it. */
+.glab-calc-speed {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.glab-calc-speed input {
+    flex: 1;
+    min-width: 0;
+}
+
+.glab-calc-speed select {
+    flex: 0 0 5.5rem;
+}
+
+.glab-calc-result {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 1.1rem 1.2rem;
+    text-align: center;
+    background: color-mix(in srgb, var(--accent-heading) 8%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 30%, var(--border));
+}
+
+.glab-calc-energy {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+}
+
+.glab-calc-energy strong {
+    display: block;
+    font-size: clamp(2.4rem, 6vw, 3.4rem);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.03em;
+    color: var(--accent-heading);
+}
+
+.glab-calc-equiv {
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+}
+
+.glab-calc-band {
+    padding-top: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--text);
+    border-top: 1px solid color-mix(in srgb, var(--accent-heading) 22%, var(--border));
+}
+
+.glab-calc-limits {
+    margin-top: 1.6rem;
+    padding-top: 1.3rem;
+    border-top: 1px solid color-mix(in srgb, var(--accent-heading) 18%, var(--border));
+}
+
+.glab-calc-limits h3 {
+    margin: 0 0 0.6rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.glab-calc-limits ul {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin: 0 0 0.7rem;
+    padding: 0;
+    list-style: none;
+}
+
+.glab-calc-limits li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.6rem 0.7rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.glab-calc-limits li span {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.glab-calc-limits li strong {
+    font-size: 1.05rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+}
+
+/* The only one of the four that is written in the code rather than in a
+   club's own rules. */
+.glab-calc-limits li.is-law {
+    background: color-mix(in srgb, var(--accent-heading) 9%, var(--surface));
+    border-color: color-mix(in srgb, var(--accent-heading) 32%, var(--border));
+}
+
+.glab-calc-limits li.is-law strong,
+.glab-calc-limits li.is-law span {
+    color: var(--accent-heading);
+}
+
+.glab-calc-note {
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+}
+
+@media (max-width: 46rem) {
+    .glab-calc-grid {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+    .glab-calc-limits ul {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+    .glab-scale-name {
+            font-size: 0.58rem;
+            letter-spacing: 0;
+        }
+}
