@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-07 — v1.25.0 — build 5DG0DV
+
+### Storefront
+
+- **The home page says where else the shop sells.** A block low on the page, under the readings and above the engagements, carrying the NaturaBuy seller rating, the number of reviews it rests on, and a link to check it. The figures are typed in the back office rather than fetched, the marketplace publishing no feed for them: a number nobody can refresh is better shown as a number somebody owns. Nothing appears until the address, the rating and the count are all filled, since a block that claims a standing has to carry what the standing rests on and half a claim is worse than none. The link goes to the seller shop rather than a listing, in a new tab and in nofollow: the visitor may follow it, a crawler competing for the shop's own product names may not. The line is not a heading either, the home page's outline being the shop's own sections. The marketplace's mark ends that line in place of its name, drawn inline so the wordmark, a green within a few percent of the dark theme's surface, can be reversed there instead of reading as a blank space.
+
+### Admin
+
+- **A Marketplaces page under Settings.** The NaturaBuy shop address, the rating out of five, the review count, and a switch to show the block. The rating is kept in tenths, so 4,9 does not become 4,8999 between the form and the page.
+
+**Migration:** one, run with `php artisan migrate`, a `marketplace_settings` table holding its single row. It starts empty and the block stays hidden, which is exactly what the home page did before.
+
 ## 2026-09-07 — v1.24.3 — build GMIZD9
 
 ### Storefront
