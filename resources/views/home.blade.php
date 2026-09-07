@@ -409,20 +409,22 @@
                     <p class="home-market-text">{{ __('store.home_market_text') }}</p>
                 </div>
 
-                <p class="home-market-score">
-                    <strong>{{ number_format($marketplace->naturabuyRating(), 1, ',', ' ') }}</strong>
-                    <span class="home-market-out">/ 5</span>
-                    <span class="home-market-count">{{ trans_choice('store.home_market_reviews', $marketplace->naturabuy_reviews, ['count' => number_format($marketplace->naturabuy_reviews, 0, ',', ' ')]) }}</span>
-                </p>
+                <div class="home-market-aside">
+                    <p class="home-market-score">
+                        <strong>{{ number_format($marketplace->naturabuyRating(), 1, ',', ' ') }}</strong>
+                        <span class="home-market-out">/ 5</span>
+                        <span class="home-market-count">{{ trans_choice('store.home_market_reviews', $marketplace->naturabuy_reviews, ['count' => number_format($marketplace->naturabuy_reviews, 0, ',', ' ')]) }}</span>
+                    </p>
 
-                {{-- A marketplace the shop competes with for its own product
-                     names: the visitor may follow it, a crawler may not. --}}
-                <a
-                    href="{{ $marketplace->naturabuy_url }}"
-                    class="home-market-link"
-                    target="_blank"
-                    rel="nofollow noopener"
-                >{{ __('store.home_market_cta') }}</a>
+                    {{-- A marketplace the shop competes with for its own product
+                         names: the visitor may follow it, a crawler may not. --}}
+                    <a
+                        href="{{ $marketplace->naturabuy_url }}"
+                        class="home-market-link"
+                        target="_blank"
+                        rel="nofollow noopener"
+                    >{{ __('store.home_market_cta') }}</a>
+                </div>
             </section>
         @endif
 

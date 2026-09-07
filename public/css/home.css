@@ -1579,7 +1579,7 @@
    asks for less attention than the shop's own testimonials. */
 .home .home-market {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
     gap: 1rem 2rem;
     margin-top: 3rem;
@@ -1638,15 +1638,27 @@
 }
 
 /* The figure is the point of the block, so it is the one thing set large. */
+/* The standing, and the way to check it, in one column: the figure reads
+   as the reason for the link rather than as a neighbour of it. */
+.home-market-aside {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding-left: 1.7rem;
+    border-left: 1px solid var(--border);
+}
+
 .home-market-score {
     display: flex;
     align-items: baseline;
+    justify-content: center;
+    flex-wrap: wrap;
     gap: 0.35rem;
     margin: 0;
-    padding: 0 1.6rem;
     font-size: 0.78rem;
+    text-align: center;
     color: var(--text-muted);
-    border-left: 1px solid var(--border);
 }
 
 .home-market-score strong {
@@ -1697,8 +1709,8 @@
         gap: 1.1rem;
     }
 
-    .home-market-score {
-        padding: 0;
+    .home-market-aside {
+        padding-left: 0;
         border-left: 0;
     }
 
