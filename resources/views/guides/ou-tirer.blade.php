@@ -2,10 +2,12 @@
 
 @php
     $faq = [
-        ['Peut-on tirer à la carabine à plomb dans son jardin ?', 'Aucun texte ne l\'autorise et aucun ne l\'interdit expressément. Ce qui décide, c\'est le droit commun : le projectile ne doit menacer personne, le tir ne doit pas être dirigé vers une habitation, une route ou un chemin, le bruit ne doit pas nuire au voisinage, et aucun arrêté municipal ou préfectoral ne doit s\'y opposer. Réunies, ces conditions sont exigeantes ; un jardin de ville les réunit rarement.'],
+        ['Peut-on tirer à la carabine à plomb dans son jardin ?', 'Pour une arme de catégorie D, aucun texte ne l\'autorise et aucun ne l\'interdit expressément. Ce qui décide, c\'est le droit commun : le projectile ne doit menacer personne, le tir ne doit pas être dirigé vers une habitation, une route ou un chemin, le bruit ne doit pas nuire au voisinage, et aucun arrêté municipal ou préfectoral ne doit s\'y opposer. Réunies, ces conditions sont exigeantes ; un jardin de ville les réunit rarement.'],
         ['L\'article R. 312-40 autorise-t-il le tir à domicile ?', 'Non, et c\'est la confusion la plus répandue. Cet article du code de la sécurité intérieure traite du tir sportif : qui peut être autorisé à acquérir des armes de catégorie B pour la compétition, les clubs, les tireurs licenciés, les mineurs dès douze ans pour le pistolet à un coup. Il précise même que ces armes ne peuvent être utilisées que dans les stands des associations concernées. Il ne dit rien du jardin.'],
         ['Faut-il se tenir à 150 mètres des habitations ?', 'Ces 150 mètres ne sont pas une distance de sécurité. Ils viennent de l\'article L. 422-10 du code de l\'environnement, qui exclut du territoire d\'une association communale de chasse agréée les terrains situés dans un rayon de 150 mètres autour d\'une habitation. C\'est une règle sur les terrains où la chasse peut s\'exercer, pas sur la distance à laquelle on peut tirer. La règle de sécurité, elle, porte sur la direction du tir.'],
         ['Faut-il déclarer un terrain d\'airsoft en mairie ?', 'La Fédération française d\'airsoft ne mentionne que l\'autorisation du propriétaire et un contrat écrit. D\'autres sources évoquent une démarche en préfecture pour organiser une partie. Les pratiques varient d\'un département à l\'autre : la mairie et la préfecture du lieu sont les seules à pouvoir répondre pour un terrain donné.'],
+        ['Peut-on tirer avec une arme de catégorie B chez soi ?', 'Non. L\'article R. 312-40 du code de la sécurité intérieure réserve l\'usage des armes acquises pour le tir sportif aux stands des associations agréées. Aucune installation privée, si sûre soit-elle, ne remplace un stand homologué. Entre le domicile et le stand, l\'arme voyage déchargée et sous étui, munitions séparées, licence à l\'appui.'],
+        ['Et une arme de catégorie C, dans son jardin ?', 'Rien ne l\'interdit en droit : aucune disposition ne restreint le lieu d\'usage de la catégorie C comme elle le fait pour la B. Mais les quatre conditions du tir chez soi deviennent bien plus dures à réunir au-delà de vingt joules, où le point d\'arrêt d\'un plomb ne tient plus et où la portée se compte en centaines de mètres. À la chasse, il faut le permis validé et le droit de chasse sur le terrain.'],
         ['Un mineur peut-il tirer ?', 'En stand, oui : le tir sportif encadré accueille les mineurs, et la réglementation prévoit même l\'accès au pistolet à un coup de calibre 22 dès douze ans, dans le cadre d\'un club. Ailleurs, la vente d\'une réplique est interdite aux mineurs dès 0,08 joule, et la surveillance d\'un adulte ne remplace pas les conditions de sécurité du lieu.'],
     ];
 
@@ -15,6 +17,8 @@
         ['label' => 'Code général des collectivités territoriales, article L. 2212-2 (pouvoirs de police du maire)', 'url' => 'https://www.legifrance.gouv.fr/codes/id/LEGISCTA000006164555', 'host' => 'legifrance.gouv.fr'],
         ['label' => 'La chasse à proximité des habitations, et ce que valent les 150 mètres', 'url' => 'http://www.oncfs.gouv.fr/Fiches-juridiques-chasse-ru377/La-chasse-a-proximite-des-habitations-ar1035', 'host' => 'oncfs.gouv.fr'],
         ['label' => 'À quelle distance des habitations doivent se trouver les chasseurs ?', 'url' => 'https://faq.gendarmerie.interieur.gouv.fr/fr-FR/Post/2453', 'host' => 'gendarmerie.interieur.gouv.fr'],
+        ['label' => 'Tirer dans sa propriété avec une arme, catégorie par catégorie', 'url' => 'https://www.armes-ufa.com/spip.php?article307=', 'host' => 'armes-ufa.com'],
+        ['label' => 'Les règles de sécurité du tir sportif', 'url' => 'https://www.fftir.org/les-regles-de-securite/', 'host' => 'fftir.org'],
         ['label' => 'Comment légaliser l\'utilisation d\'un terrain', 'url' => 'https://ffairsoft.org/ufaqs/comment-legaliser-lutilisation-dun-terrain/', 'host' => 'ffairsoft.org'],
     ];
 @endphp
@@ -93,6 +97,7 @@
             <div class="glab-plan-links">
                 <a href="#ou-question-title">La question</a>
                 <a href="#ou-places-title">Trois lieux</a>
+                <a href="#ou-categories-title">D, C et B</a>
                 <a href="#ou-home-title">Chez soi</a>
                 <a href="#ou-myths-title">Le web répète</a>
                 <a href="#ou-terrain-title">Terrain</a>
@@ -138,9 +143,9 @@
                 <div>
                     <dt>
                         Chez soi
-                        <span class="glab-spec-kicker">Rien ne l'autorise, rien ne l'interdit</span>
+                        <span class="glab-spec-kicker">En D et en C, jamais en B</span>
                     </dt>
-                    <dd>Aucun texte ne vise le tir de loisir sur un terrain privé. C'est le droit commun qui décide : sécurité, direction du tir, bruit, arrêtés locaux. Vous répondez de tout, seul.</dd>
+                    <dd>Aucun texte ne vise le tir de loisir en catégorie D ou C sur un terrain privé : c'est le droit commun qui décide, sécurité, direction, bruit, arrêtés locaux. La catégorie B, elle, y est exclue. Vous répondez de tout, seul.</dd>
                 </div>
                 <div>
                     <dt>
@@ -157,6 +162,60 @@
                     <dd>Un stand homologué est construit autour du point d'arrêt et tenu par une association agréée. C'est le seul endroit où les armes de catégorie B acquises pour le tir sportif peuvent servir.</dd>
                 </div>
             </dl>
+        </section>
+
+        <section class="glab-panel" aria-labelledby="ou-categories-title">
+            <h2 class="glab-title" id="ou-categories-title">Chaque catégorie, <span class="glab-title-accent">et où elle a le droit de servir</span></h2>
+            <p class="glab-lede">
+                Le lieu ne se décide pas seulement par ce qu'il y a derrière la cible : il se
+                décide aussi par ce que vous tenez. Un même jardin est ouvert à une arme et fermé
+                à une autre.
+            </p>
+
+            <ol class="glab-rules">
+                <li>
+                    <h3>Catégorie D : chez soi, en stand, jamais dans un lieu public</h3>
+                    <p>
+                        C'est le régime des carabines et pistolets à air comprimé, et des billes
+                        acier. Rien n'interdit d'en faire usage sur un terrain privé, à condition
+                        que les quatre règles de la section précédente soient réunies. Le stand
+                        les accepte aussi. En revanche l'achat libre ne vaut pas port libre : hors
+                        de chez vous, le transport demande un motif légitime, et le tir dans un
+                        lieu public est exclu.
+                    </p>
+                </li>
+                <li>
+                    <h3>Catégorie C : chez soi en droit, à la chasse, en stand</h3>
+                    <p>
+                        Aucune disposition ne restreint le lieu d'usage de la catégorie C comme
+                        elle le fait pour la B : ce qui n'est pas défendu est permis, et le tir sur
+                        sa propriété est donc licite. En fait, tout devient plus exigeant d'un
+                        coup. Au-delà de vingt joules, le point d'arrêt qui suffisait à un plomb ne
+                        suffit plus, la portée maximale se compte en centaines de mètres, et le
+                        bruit ne se discute même pas avec le voisinage. À la chasse, il faut le
+                        permis validé et le droit de chasse sur le terrain ; en stand, la licence.
+                    </p>
+                </li>
+                <li>
+                    <h3>Catégorie B : le stand, et rien d'autre</h3>
+                    <p>
+                        C'est ici que le droit cesse de se taire. L'article R. 312-40 du code de la
+                        sécurité intérieure dit que les armes acquises pour le tir sportif ne
+                        peuvent être utilisées que dans les stands des associations agréées. Le
+                        jardin n'est pas une option, quelle que soit la sécurité qu'on y a
+                        installée. Entre le domicile et le stand, l'arme voyage déchargée, dans un
+                        étui fermé, munitions à part, la licence en cours de validité valant motif
+                        légitime. Sans ce motif, le transport d'une arme de catégorie B coûte cinq
+                        ans et 75 000 euros.
+                    </p>
+                </li>
+            </ol>
+
+            <p class="glab-more-reading">
+                Ce que recouvrent ces catégories, et comment on y entre, est le sujet de notre guide
+                <a href="{{ route('guides.classification') }}">Classer son arme</a>. Cette page ne
+                traite que du lieu.
+            </p>
         </section>
 
         <section class="glab-section" aria-labelledby="ou-home-title">

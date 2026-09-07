@@ -62,10 +62,10 @@ class GuideOuTirerPageTest extends TestCase
 
         // A legal page that cannot be checked is worth nothing. Six sources,
         // linked out and declared to search engines as citations.
-        $this->assertSame(6, substr_count($html, 'glab-source-num'));
+        $this->assertSame(8, substr_count($html, 'glab-source-num'));
         $this->assertStringContainsString('legifrance.gouv.fr', $html);
         $this->assertStringContainsString('"citation"', $html);
-        $this->assertSame(6, substr_count($html, 'rel="noopener nofollow"'));
+        $this->assertSame(8, substr_count($html, 'rel="noopener nofollow"'));
     }
 
     public function test_the_plan_is_described_for_those_who_cannot_see_it(): void
@@ -77,15 +77,35 @@ class GuideOuTirerPageTest extends TestCase
         $this->assertStringContainsString('<desc id="lane-desc">', $guide);
     }
 
+    public function test_it_says_where_each_category_may_be_used(): void
+    {
+        $guide = $this->guide();
+
+        // The question a reader arrives with is not only « where », it is
+        // « where, with this ». A page on places that never names D, C and B
+        // leaves the most important restriction unsaid.
+        foreach (['Catégorie D', 'Catégorie C', 'Catégorie B'] as $category) {
+            $this->assertStringContainsString($category, $guide);
+        }
+
+        // And the one restriction that is written in a text rather than
+        // deduced from the droit commun.
+        $this->assertMatchesRegularExpression('/Cat\x{00e9}gorie B\s*:\s*le stand/u', $guide);
+        $this->assertStringContainsString('R. 312-40', $guide);
+    }
+
     public function test_it_does_not_re_explain_what_the_other_guides_own(): void
     {
         $guide = $this->guide();
 
-        // The categories and the joule thresholds belong to « Classer son
-        // arme » and « Joules et FPS ». This page links to them instead of
-        // saying it all again.
-        $this->assertStringNotContainsString('2 à 20 joules', $guide);
-        $this->assertStringNotContainsString('Catégorie C', $guide);
+        // The line is drawn on the subject, not on the words: « Classer son
+        // arme » owns what the categories are and how one acquires them,
+        // this page owns where each may be fired. So the thresholds and the
+        // acquisition formalities stay out of it, and the link goes there.
+        foreach (['2 à 20 joules', 'supérieure ou égale à 20 joules', 'compte SIA'] as $owned) {
+            $this->assertStringNotContainsString($owned, $guide);
+        }
+
         $this->assertStringContainsString(route('guides.classification'), $guide);
         $this->assertStringContainsString(route('guides.glossaire'), $guide);
     }
