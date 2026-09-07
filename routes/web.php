@@ -30,6 +30,7 @@ use App\Http\Controllers\Admin\InvoiceSettingController as AdminInvoiceSettingCo
 use App\Http\Controllers\Admin\LabelController as AdminLabelController;
 use App\Http\Controllers\Admin\MarketplaceController as AdminMarketplaceController;
 use App\Http\Controllers\Admin\MarketplaceListingController as AdminMarketplaceListingController;
+use App\Http\Controllers\Admin\MarketplaceSettingController as AdminMarketplaceSettingController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PackageTypeController as AdminPackageTypeController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
@@ -348,6 +349,8 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         Route::get('/settings/invoice', [AdminInvoiceSettingController::class, 'edit'])->name('settings.invoice.edit');
         Route::put('/settings/invoice', [AdminInvoiceSettingController::class, 'update'])->name('settings.invoice.update');
         Route::put('/settings/carriers/{carrier}/price-tiers', [AdminCarrierPriceTierController::class, 'update'])->name('settings.carriers.price-tiers.update');
+        Route::get('/settings/marketplaces', [AdminMarketplaceSettingController::class, 'edit'])->name('settings.marketplaces.edit');
+        Route::put('/settings/marketplaces', [AdminMarketplaceSettingController::class, 'update'])->name('settings.marketplaces.update');
         Route::get('/settings/products', [AdminProductSettingController::class, 'edit'])->name('settings.products.edit');
         Route::put('/settings/products', [AdminProductSettingController::class, 'update'])->name('settings.products.update');
         Route::get('/settings/orders', [AdminSettingsController::class, 'orders'])->name('settings.orders.edit');

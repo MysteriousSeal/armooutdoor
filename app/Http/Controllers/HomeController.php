@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BlogPost;
 use App\Models\Category;
+use App\Models\MarketplaceSetting;
 use App\Models\ProductReview;
 use App\Models\ShippingSetting;
 use App\Support\Guides;
@@ -75,6 +76,7 @@ class HomeController extends Controller
             // catalogue cannot say about itself.
             'testimonials' => $this->testimonials(),
             'readings' => $this->readings(),
+            'marketplace' => MarketplaceSetting::current(),
         ]);
     }
 

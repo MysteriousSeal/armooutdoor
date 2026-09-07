@@ -393,6 +393,39 @@
             </div>
         </section>
 
+        @if ($marketplace->showsNaturabuyOnHome())
+            {{-- The shop sells on NaturaBuy too, and the standing it has
+                 there is worth saying here. The figures are typed in the back
+                 office: nothing is read back from the marketplace. --}}
+            <section class="home-market" aria-labelledby="home-market-title">
+                <div class="home-market-copy">
+                    <p class="home-market-kicker">{{ __('store.home_market_kicker') }}</p>
+                    {{-- Not a heading: the home page's outline is the shop's own
+                         sections, and a marketplace it competes with has no place
+                         in it. The region keeps its accessible name all the same. --}}
+                    <p class="home-market-title" id="home-market-title">
+                        {{ __('store.home_market_title') }}@include('partials.naturabuy-logo')
+                    </p>
+                    <p class="home-market-text">{{ __('store.home_market_text') }}</p>
+                </div>
+
+                <p class="home-market-score">
+                    <strong>{{ number_format($marketplace->naturabuyRating(), 1, ',', ' ') }}</strong>
+                    <span class="home-market-out">/ 5</span>
+                    <span class="home-market-count">{{ trans_choice('store.home_market_reviews', $marketplace->naturabuy_reviews, ['count' => number_format($marketplace->naturabuy_reviews, 0, ',', ' ')]) }}</span>
+                </p>
+
+                {{-- A marketplace the shop competes with for its own product
+                     names: the visitor may follow it, a crawler may not. --}}
+                <a
+                    href="{{ $marketplace->naturabuy_url }}"
+                    class="home-market-link"
+                    target="_blank"
+                    rel="nofollow noopener"
+                >{{ __('store.home_market_cta') }}</a>
+            </section>
+        @endif
+
         <section class="home-why" aria-labelledby="home-why-title">
             <header class="home-why-header">
                 <p class="home-why-kicker">{{ __('store.home_why_kicker') }}</p>

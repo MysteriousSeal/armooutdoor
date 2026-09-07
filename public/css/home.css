@@ -1572,3 +1572,137 @@
     text-decoration: underline;
     text-underline-offset: 2px;
 }
+
+/* ============ the marketplace the shop also sells on ============ */
+
+/* Quiet on purpose: it sends people away, so it sits low on the page and
+   asks for less attention than the shop's own testimonials. */
+.home .home-market {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 1rem 2rem;
+    margin-top: 3rem;
+    padding: 1.5rem 1.7rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent-heading);
+}
+
+/* The mark stands in for the word it replaces, so it is sized to the line
+   rather than to a fixed pixel height. The viewBox carries the ratio. */
+.home-market-logo {
+    height: 1.15em;
+    width: auto;
+    margin-left: 0.35em;
+    vertical-align: -0.16em;
+}
+
+.home-market-logo-mark {
+    fill: #ff7000;
+}
+
+.home-market-logo-word {
+    fill: #183f33;
+}
+
+/* Reversed on the dark theme: the wordmark's dark green sits within a
+   hair of the surface behind it and would read as a blank space. */
+[data-theme='dark'] .home-market-logo-word {
+    fill: var(--text);
+}
+
+.home-market-kicker {
+    margin: 0 0 0.3rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.home-market-title {
+    margin: 0 0 0.35rem;
+    font-size: clamp(1.05rem, 2vw, 1.25rem);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text);
+}
+
+.home-market-text {
+    max-width: 34rem;
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+}
+
+/* The figure is the point of the block, so it is the one thing set large. */
+.home-market-score {
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0 1.6rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    border-left: 1px solid var(--border);
+}
+
+.home-market-score strong {
+    font-size: 2.1rem;
+    font-weight: 800;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.03em;
+    color: var(--accent-heading);
+}
+
+.home-market-out {
+    font-weight: 600;
+}
+
+.home-market-count {
+    margin-left: 0.15rem;
+    white-space: nowrap;
+}
+
+.home-market-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.6rem 1.05rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--surface);
+    background: var(--accent-heading);
+    border: 1px solid var(--accent-heading);
+}
+
+.home-market-link::after {
+    content: '\2197';
+    font-weight: 400;
+}
+
+.home-market-link:hover {
+    color: var(--surface);
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
+
+@media (max-width: 52rem) {
+    .home .home-market {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 1.1rem;
+    }
+
+    .home-market-score {
+        padding: 0;
+        border-left: 0;
+    }
+
+    .home-market-link {
+        justify-content: center;
+    }
+}
