@@ -1361,8 +1361,7 @@
         display: none;
     }
 
-    .home .home-cats-link,
-    .home .home-rating {
+    .home .home-cats-link {
         order: 3;
     }
 }
@@ -1429,15 +1428,15 @@
  */
 .home .home-rating {
     order: 2;
-    /* The header aligns its children to the bottom, which is right for a
-       title and a text link. A chip is taller than either, so it and the
-       rule are both centred on the line instead: that way the rule meets it
-       at its middle whatever the two happen to measure. */
-    align-self: center;
+    /* Bottom-aligned like the text link it stands in for, then pulled down
+       by half its own height: the rule sits where a link's baseline would
+       be, and this is what puts that line through the chip's middle rather
+       than across its bottom corner. */
+    align-self: flex-end;
     display: flex;
     align-items: center;
     gap: 0.55rem;
-    margin: 0 0 0.1rem;
+    margin: 0 0 -0.67rem;
     padding: 0.42rem 0.72rem;
     white-space: nowrap;
     /* A tag at the end of the rule: hairline and sharp corners, the shop's
@@ -1447,9 +1446,12 @@
     background: color-mix(in srgb, var(--accent-heading) 10%, var(--surface));
 }
 
-.home .home-voices .home-cats-header::after {
-    align-self: center;
-    margin-bottom: 0;
+/* The rule keeps the place it holds in every other header, low against the
+   title. The chip is taller than the text link that place was measured for,
+   so it hangs half of itself below the line in order to meet it at its own
+   middle, and the header gives back that overhang as bottom margin. */
+.home .home-voices .home-cats-header {
+    margin-bottom: 2.02rem;
 }
 
 /* One row of five, filled to a fraction rather than a whole number: the
@@ -1506,6 +1508,21 @@
     content: '·';
     margin-right: 0.4rem;
     color: color-mix(in srgb, var(--text-muted) 55%, transparent);
+}
+
+/* After the base rules on purpose. A media query carries no extra weight of
+   its own, so an override of the same specificity written earlier in the
+   file loses to the rule it means to override. */
+@media (max-width: 40rem) {
+    .home .home-rating {
+        order: 3;
+        /* The header runs as a column here, where bottom alignment would put
+           the chip against the right edge of the page instead of under the
+           title. The rule is hidden at this width, so there is also nothing
+           left to hang below and the negative margin goes with it. */
+        align-self: flex-start;
+        margin: 0.2rem 0 0;
+    }
 }
 
 .home-voice-quote {
