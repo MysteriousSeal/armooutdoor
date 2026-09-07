@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-07 — v1.23.1 — build HNGPJR
+
+### Admin
+
+- **The changelog reads in one language, and drops a punctuation mark it leaned on.** Five releases had been written in French and are English now, keeping in French only what is quoted from the shop itself and the shooting vocabulary the glossary entry is about: translating la ligne de mire would have described words the site does not use. Four hundred and fifty-eight em dashes leave the body, read for what each was doing rather than swapped for a single replacement: a colon where the dash opened an appositive, commas or brackets where a pair enclosed an aside, brackets whenever that aside already carried commas of its own. The release headings keep theirs, since the page reads the version and the build number off them.
+
+**No migration.**
+
 ## 2026-09-07 — v1.23.0 — build OXGX4U
 
 ### Storefront
