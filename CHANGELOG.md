@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-07 — v1.28.2 — build MDOUU8
+
+### Storefront
+
+- **The picture at the top of an article is no longer cropped.** The banner held every hero at a fixed height and filled it, cutting the top and bottom off a set of photographs that are all 1600x900 to begin with. It runs as two columns now, the copy beside the picture rather than washed over it, and the picture carries the 16/9 itself. Giving the whole banner that shape was tried first and made a hero of nearly seven hundred pixels with the title adrift in the middle of it; a column comes to 390, which is close to what the banner stood at while it was still cropping. Narrow, the two stack and the picture keeps its shape above the title.
+- **Three things came off with it.** The white veil, which existed to keep the title readable over a photograph and was washing out most of a picture the title no longer sits on. The frosted card behind that title, which is a panel on a panel once it is not floating. And the minimum height on small screens, which stopped the copy overflowing the picture back when it sat inside it, and would now only add empty banner beneath the two of them. A test holds the shape of every hero on disk as well, so a portrait upload fails out loud instead of being quietly cropped again.
+
+**No migration.**
+
 ## 2026-09-07 — v1.28.1 — build Y59HXU
 
 ### Storefront
