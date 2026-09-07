@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-07 — v1.24.0 — build BSQGWF
+
+### Admin
+
+- **A tab lists the products carrying a single photo.** The main image is always set, so the gallery is what decides: a product with no gallery row shows one picture and nothing else, which is the state of two hundred and seven of the two hundred and sixty-nine active products. Nothing in the back office said so. The tab counts active products only, like Missing GTIN and Missing weight beside it, since a disabled product with one photo is not work waiting to be done, and the export honours it too. It is named for what it shows rather than for what is missing, because « Missing images » would be false of every row in the catalogue.
+
+**No migration.**
+
 ## 2026-09-07 — v1.23.1 — build HNGPJR
 
 ### Admin
