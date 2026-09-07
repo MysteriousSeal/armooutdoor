@@ -16,6 +16,17 @@
 
         .header { width: 100%; border-collapse: collapse; margin-bottom: 22px; }
         .header td { vertical-align: top; }
+        /* Nested table rather than a float: it is what this renderer lays
+           out reliably, and the mark has to sit beside two stacked lines. */
+        .brand-row { border-collapse: collapse; }
+        .brand-row td { vertical-align: top; padding: 0; }
+        /* Squared to the text beside it: the top on the wordmark's cap, the
+           bottom on the tagline. It uses the print variant of the mark,
+           whose box is cropped to the drawing, because this renderer reads
+           a viewBox offset badly and left the ink at two thirds of the
+           height it was given. */
+        .brand-mark { width: 58px; }
+        .brand-mark img { height: 41px; margin-top: 13px; }
         .brand { font-size: 20.5px; letter-spacing: -0.03em; }
         .brand-primary { font-weight: bold; color: #2c2c2c; }
         .brand-secondary { font-weight: normal; color: #6b6b6b; }
@@ -117,10 +128,20 @@
     <table class="header">
         <tr>
             <td>
-                <div class="brand">
-                    <span class="brand-primary">Armo</span><span class="brand-secondary">Outdoor</span>
-                </div>
-                <div class="brand-tag">Stand et terrain</div>
+                {{-- The mark itself, read from the brand folder: this renderer
+                     takes an SVG, so the document carries the drawing rather
+                     than a picture of it, and prints it at any resolution. --}}
+                <table class="brand-row">
+                    <tr>
+                        <td class="brand-mark"><img src="{{ resource_path('brand/armo-mark-print.svg') }}" alt=""></td>
+                        <td>
+                            <div class="brand">
+                                <span class="brand-primary">Armo</span><span class="brand-secondary">Outdoor</span>
+                            </div>
+                            <div class="brand-tag">Stand et terrain</div>
+                        </td>
+                    </tr>
+                </table>
             </td>
             <td class="company-info">
                 <div class="name">{{ $company->value('company_name') }}</div>
