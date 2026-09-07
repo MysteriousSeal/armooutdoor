@@ -71,7 +71,7 @@
 @endpush
 
 @section('content')
-    <div class="container glab">
+    <div class="container glab glab--ou-tirer">
         @include('guides.partials.hero', [
             'crumb' => 'Où tirer légalement',
             'kicker' => 'Lieux',
@@ -81,15 +81,29 @@
         ])
 
         <p class="glab-warning">
-            Ceci décrit l'état du droit à la date de publication et n'est pas un conseil
-            juridique. Pour un lieu précis, la mairie et la préfecture du département sont
-            les interlocutrices compétentes : les arrêtés locaux priment sur ce que dit une
-            page générale.
+            <strong class="glab-warning-label">Pas un conseil juridique</strong>
+            Ceci décrit l'état du droit à la date de publication. Pour un lieu précis, la
+            mairie et la préfecture du département sont les interlocutrices compétentes :
+            les arrêtés locaux priment sur ce que dit une page générale.
         </p>
+
+        <nav class="glab-plan" aria-label="Plan du guide">
+            <p class="glab-plan-kicker">Plan</p>
+            <div class="glab-plan-links">
+                <a href="#ou-question-title">La question</a>
+                <a href="#ou-places-title">Trois lieux</a>
+                <a href="#ou-home-title">Chez soi</a>
+                <a href="#ou-myths-title">Le web répète</a>
+                <a href="#ou-terrain-title">Terrain</a>
+                <a href="#ou-stand-title">Stand</a>
+                <a href="#ou-faq-title">Questions</a>
+                <a href="#ou-sources-title">Sources</a>
+            </div>
+        </nav>
 
         <section class="glab-section" aria-labelledby="ou-question-title">
             <h2 class="glab-title" id="ou-question-title">La seule question <span class="glab-title-accent">qui compte</span></h2>
-            <p class="glab-lede">
+            <p class="glab-lede glab-lede--thesis">
                 Ce n'est pas « à quelle distance », c'est « dans quelle direction, et qu'y a-t-il
                 derrière ».
             </p>
@@ -119,17 +133,26 @@
                 la sécurité, et devant qui.
             </p>
 
-            <dl class="glab-specs">
+            <dl class="glab-specs glab-place-cards">
                 <div>
-                    <dt>Chez soi <em>rien ne l'autorise, rien ne l'interdit</em></dt>
+                    <dt>
+                        Chez soi
+                        <span class="glab-spec-kicker">Rien ne l'autorise, rien ne l'interdit</span>
+                    </dt>
                     <dd>Aucun texte ne vise le tir de loisir sur un terrain privé. C'est le droit commun qui décide : sécurité, direction du tir, bruit, arrêtés locaux. Vous répondez de tout, seul.</dd>
                 </div>
                 <div>
-                    <dt>Sur un terrain <em>l'accord du propriétaire</em></dt>
+                    <dt>
+                        Sur un terrain
+                        <span class="glab-spec-kicker">L'accord du propriétaire</span>
+                    </dt>
                     <dd>Un terrain d'airsoft se prête ou se loue, et l'association qui l'exploite porte le cadre et l'assurance des joueurs. Le propriétaire donne son accord, de préférence écrit.</dd>
                 </div>
                 <div>
-                    <dt>En stand <em>le seul lieu prévu pour ça</em></dt>
+                    <dt>
+                        En stand
+                        <span class="glab-spec-kicker">Le seul lieu prévu pour ça</span>
+                    </dt>
                     <dd>Un stand homologué est construit autour du point d'arrêt et tenu par une association agréée. C'est le seul endroit où les armes de catégorie B acquises pour le tir sportif peuvent servir.</dd>
                 </div>
             </dl>
@@ -142,43 +165,48 @@
                 générales, et il suffit qu'une seule manque.
             </p>
 
-            <div class="glab-prose">
-                <h3>La direction, et le point d'arrêt</h3>
-                <p>
-                    Les arrêtés préfectoraux types interdisent de tirer <em>en direction</em> des
-                    habitations, des routes, des chemins, des lieux et installations publics. La
-                    formulation vise la direction, pas une distance : un tir dirigé vers une maison
-                    reste fautif à trois cents mètres, et un tir dirigé vers une butte de terre ne
-                    l'est pas à dix. Ces arrêtés se consultent en mairie.
-                </p>
-
-                <h3>Le bruit</h3>
-                <p>
-                    L'article R. 1336-5 du code de la santé publique interdit qu'un bruit nuise,
-                    par sa durée, sa répétition ou son intensité, à la tranquillité du voisinage,
-                    <em>en lieu public comme en lieu privé</em>. Un seul voisin gêné suffit à
-                    caractériser la nuisance. Une séance de plinking un dimanche après-midi coche
-                    la durée et la répétition sans effort.
-                </p>
-
-                <h3>L'arrêté municipal</h3>
-                <p>
-                    Le maire tient de l'article L. 2212-2 du code général des collectivités
-                    territoriales une police générale de la sûreté et de la tranquillité. Il peut,
-                    lorsqu'un risque particulier le justifie, restreindre ou interdire le tir sur
-                    tout ou partie de la commune. L'interdiction générale et absolue, elle, lui est
-                    fermée : il faut des circonstances. C'est encore en mairie que cela se vérifie.
-                </p>
-
-                <h3>Ce que vous engagez</h3>
-                <p>
-                    Votre responsabilité civile couvre les dommages que vous causez, à condition
-                    que votre contrat ne l'exclue pas : le tir à domicile fait partie des activités
-                    que certains assureurs traitent à part, et cela se demande avant, pas après. Un
-                    blessé fait basculer l'affaire sur le terrain pénal, où l'absence de point
-                    d'arrêt se lit comme une imprudence caractérisée.
-                </p>
-            </div>
+            <ol class="glab-rules">
+                <li>
+                    <h3>La direction, et le point d'arrêt</h3>
+                    <p>
+                        Les arrêtés préfectoraux types interdisent de tirer <em>en direction</em> des
+                        habitations, des routes, des chemins, des lieux et installations publics. La
+                        formulation vise la direction, pas une distance : un tir dirigé vers une maison
+                        reste fautif à trois cents mètres, et un tir dirigé vers une butte de terre ne
+                        l'est pas à dix. Ces arrêtés se consultent en mairie.
+                    </p>
+                </li>
+                <li>
+                    <h3>Le bruit</h3>
+                    <p>
+                        L'article R. 1336-5 du code de la santé publique interdit qu'un bruit nuise,
+                        par sa durée, sa répétition ou son intensité, à la tranquillité du voisinage,
+                        <em>en lieu public comme en lieu privé</em>. Un seul voisin gêné suffit à
+                        caractériser la nuisance. Une séance de plinking un dimanche après-midi coche
+                        la durée et la répétition sans effort.
+                    </p>
+                </li>
+                <li>
+                    <h3>L'arrêté municipal</h3>
+                    <p>
+                        Le maire tient de l'article L. 2212-2 du code général des collectivités
+                        territoriales une police générale de la sûreté et de la tranquillité. Il peut,
+                        lorsqu'un risque particulier le justifie, restreindre ou interdire le tir sur
+                        tout ou partie de la commune. L'interdiction générale et absolue, elle, lui est
+                        fermée : il faut des circonstances. C'est encore en mairie que cela se vérifie.
+                    </p>
+                </li>
+                <li>
+                    <h3>Ce que vous engagez</h3>
+                    <p>
+                        Votre responsabilité civile couvre les dommages que vous causez, à condition
+                        que votre contrat ne l'exclue pas : le tir à domicile fait partie des activités
+                        que certains assureurs traitent à part, et cela se demande avant, pas après. Un
+                        blessé fait basculer l'affaire sur le terrain pénal, où l'absence de point
+                        d'arrêt se lit comme une imprudence caractérisée.
+                    </p>
+                </li>
+            </ol>
         </section>
 
         <section class="glab-panel" aria-labelledby="ou-myths-title">
@@ -189,7 +217,9 @@
 
             <div class="glab-myths">
                 <article class="glab-myth">
+                    <p class="glab-myth-flag">On lit</p>
                     <p class="glab-myth-claim">« L'article R. 312-40 autorise le tir chez soi. »</p>
+                    <p class="glab-myth-flag glab-myth-flag--truth">En réalité</p>
                     <p class="glab-myth-truth">
                         Il traite du tir sportif : qui peut être autorisé à acquérir des armes de
                         catégorie B, les clubs, les compétiteurs, les mineurs dès douze ans pour le
@@ -198,7 +228,9 @@
                     </p>
                 </article>
                 <article class="glab-myth">
+                    <p class="glab-myth-flag">On lit</p>
                     <p class="glab-myth-claim">« Il faut être à 150 mètres des habitations. »</p>
+                    <p class="glab-myth-flag glab-myth-flag--truth">En réalité</p>
                     <p class="glab-myth-truth">
                         Ces 150 mètres sortent de l'article L. 422-10 du code de l'environnement,
                         qui retire du territoire d'une chasse communale agréée les terrains situés
@@ -207,7 +239,9 @@
                     </p>
                 </article>
                 <article class="glab-myth">
+                    <p class="glab-myth-flag">On lit</p>
                     <p class="glab-myth-claim">« C'est chez moi, donc je fais ce que je veux. »</p>
+                    <p class="glab-myth-flag glab-myth-flag--truth">En réalité</p>
                     <p class="glab-myth-truth">
                         La propriété ne suspend ni le code de la santé publique, ni la police du
                         maire, ni votre responsabilité. Elle règle une seule question, celle de
@@ -250,6 +284,21 @@
                     ils appartiennent à quelqu'un.
                 </p>
             </div>
+
+            <ul class="glab-takeaways">
+                <li>
+                    <span class="glab-takeaway-label">Accord</span>
+                    <span>Du propriétaire ou de son mandataire, de préférence écrit.</span>
+                </li>
+                <li>
+                    <span class="glab-takeaway-label">Cadre</span>
+                    <span>Une association loi 1901 porte l'assurance et le règlement des joueurs.</span>
+                </li>
+                <li>
+                    <span class="glab-takeaway-label">Administration</span>
+                    <span>Les usages varient : seule la préfecture du lieu tranche pour un terrain donné.</span>
+                </li>
+            </ul>
         </section>
 
         <section class="glab-section" aria-labelledby="ou-stand-title">
@@ -274,6 +323,21 @@
                     quoi que ce soit.
                 </p>
             </div>
+
+            <ul class="glab-takeaways">
+                <li>
+                    <span class="glab-takeaway-label">Sécurité</span>
+                    <span>Point d'arrêt, directions matérialisées, un commandement du pas de tir.</span>
+                </li>
+                <li>
+                    <span class="glab-takeaway-label">Pratique régulière</span>
+                    <span>Licence et carnet de tir, dont les visas nourrissent les autorisations.</span>
+                </li>
+                <li>
+                    <span class="glab-takeaway-label">Essayer</span>
+                    <span>Séances de découverte encadrées, armes et munitions fournies.</span>
+                </li>
+            </ul>
 
             <p class="glab-more-reading">
                 Le régime de votre arme, catégorie par catégorie, est dans notre guide
