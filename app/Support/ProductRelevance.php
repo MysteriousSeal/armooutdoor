@@ -46,12 +46,16 @@ class ProductRelevance
             ->groupBy('product_id')
             ->pluck('aggregate', 'product_id');
 
+        // « Derniers stocks disponibles » ranks with « En stock »: both can be
+        // bought today, and that is the only thing this first key sorts on.
+        // Ranking it below sent good products to the bottom of the listing
+        // for the sole reason that they were selling well.
         $availabilityRank = [
             'in_stock' => 0,
-            'low_stock' => 1,
-            'restocking' => 2,
-            'at_supplier' => 3,
-            'out_of_stock' => 4,
+            'low_stock' => 0,
+            'restocking' => 1,
+            'at_supplier' => 2,
+            'out_of_stock' => 3,
         ];
 
         return $products

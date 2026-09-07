@@ -59,6 +59,30 @@ class CategoryRelevanceSortTest extends TestCase
         }
     }
 
+    public function test_the_last_pieces_rank_with_what_is_in_stock(): void
+    {
+        $category = Category::factory()->create();
+
+        // Threshold is two by default, so a quantity of one wears
+        // « Derniers stocks disponibles ».
+        $lastPieces = $this->product($category, 'Derniers stocks', 1, sortOrder: 1);
+        $plenty = $this->product($category, 'En stock', 50, sortOrder: 2);
+
+        $this->sell($lastPieces, 9);
+
+        $this->assertSame('low_stock', $lastPieces->fresh()->availabilityState());
+
+        // Both can be bought today, so the sales decide between them. Ranking
+        // the last pieces below sent a product to the bottom of the listing
+        // for the sole reason that it was selling well.
+        $names = $this->get('/categories/'.$category->slug)->assertOk()->getContent();
+
+        $this->assertLessThan(
+            strpos($names, 'En stock'),
+            strpos($names, 'Derniers stocks'),
+        );
+    }
+
     public function test_relevance_ranks_availability_then_sales_then_views_then_hand_order(): void
     {
         $category = Category::factory()->create();
