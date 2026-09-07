@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-07 — v1.28.0 — build 1DRYQU
+
+### Storefront
+
+- **The home page says how much there is.** A band under the offers row carrying the size of the catalogue: how many references, across how many rayons and how many categories, with the way into all of it beside them. A product sold in several sizes counts as its sizes rather than as itself, the parent being nothing anyone can buy. The figure is rounded down to the fifty, so « plus de » stays true between two stock takes, and no band is drawn at all below the first fifty, « plus de 0 » not being a boast. The two smaller counts hold only shelves a visitor can reach: a rayon counts through its subcategories, and a subcategory holding nothing buyable counts for nothing, which is three fewer than the table has rows.
+- **The band is built as two panels against each other.** Figures on the left, the way in on the right, divided by the border they share rather than by a hairline floating in padding, with an olive rule across the top. « Le catalogue » sits above the figure as a filled label, in the same olive stub the button and the review score already wear, and the counts are divided from the numeral and from each other so the cluster reads as one plate of figures. The order in the markup is the order on the screen, so what a keyboard reaches matches what an eye reads, the link carries a focus outline of its own, and its arrow stands still where motion is not wanted. Narrow, the copy drops under the figures and the shared border turns; narrower still, the two counts sit side by side under the numeral and split the width.
+
+**No migration.**
+
 ## 2026-09-07 — v1.27.3 — build 1RSQG8
 
 ### Storefront
