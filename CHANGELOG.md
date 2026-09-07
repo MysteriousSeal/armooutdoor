@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-07 — v1.27.2 — build 9XGU1X
+
+### Storefront
+
+- **A listing page holds 24 products instead of 20.** Both on a category and on the whole catalogue. The grid runs two, three or four columns depending on the width of the screen, and 24 is the first number above 20 that divides by all three: at the middle breakpoint, 20 ended the page with two products alone on a row. It also means a category of 24 or fewer stops needing a second page at all. Page addresses now cut the list at different places, which costs nothing since each page has named itself as its own canonical since v1.1.5.
+
+**No migration.**
+
 ## 2026-09-07 — v1.27.1 — build CT3LCH
 
 ### Storefront
