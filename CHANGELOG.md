@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-08 — v1.29.5 — build NZSQ34
+
+### Storefront
+
+- **The category hero shows its photograph whole.** With an image the hero was a content-height box that a background filled to cover, and a box like that has no ratio of its own: measured across the breakpoints it ran from 3.47 on a desktop down to 1.14 on a phone, so the crop threw away whatever did not fit — half the height of every picture on a wide screen. It is two columns now, the copy beside the picture rather than washed over it, and the picture carries the 21/9 the files already are. The wash goes with the crop, having existed to keep a title legible over a photograph, and the frosted card under the copy with it: beside a picture, on the hero's own ground, it was a panel drawn on a panel. Under 900 pixels the photograph takes the full width at the same ratio and the copy sits beneath.
+- **The about block stops looking like a form telling you a field is valid.** Its two promises each sat in a grey box behind a green tick, which is the grammar of a page answering you back rather than of a shop saying what it chooses to stock — and three bordered boxes inside a bordered block gave the section four frames. They are held by an olive rule down the left now, separated by a hairline and with no fill at all, and the tick becomes the shop's own bullseye at the size of the text: a circle drawn around a circle was doing nothing, and the target is the one glyph that belongs to this trade. Its box is exactly one line tall so the mark stays on its line when the text wraps, where the hand-set offset it replaces drifted. A third line joins them, saying where an order is prepared, that it is tracked, and that it reaches a door or a relay point — the two above it say what the shop chooses, this one says what it does with it, and it is the only place those words appear in prose rather than as icons. The button's arrow moves a hair on hover, and holds still for anyone who has asked the page to.
+- **A drawn packing bench behind the about block**, in the family the hero panels use: a bench, a figure packing a box, shelves of stock behind, in place of a photograph that belonged to nobody in particular. Cut to exactly the size the markup declares, and its subject sits left, where the crop is anchored and the copy column is not.
+
+**No migration.**
+
 ## 2026-09-08 — v1.29.4 — build Z5BEW9
 
 ### Storefront
