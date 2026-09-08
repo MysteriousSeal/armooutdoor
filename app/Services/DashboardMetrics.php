@@ -653,8 +653,33 @@ class DashboardMetrics
         $purchaseOrders = PurchaseOrder::query()->awaitingReceipt()->count();
         $overduePurchaseOrders = PurchaseOrder::query()->awaitingReceipt()
             ->whereNotNull('expected_at')->whereDate('expected_at', '<', now())->count();
-        $outOfStock = Product::query()->active()->where('quantity', '<=', 0)->count();
-        $lowStock = Product::query()->active()->where('quantity', '>', 0)->where('quantity', '<=', ProductSetting::lowStockThreshold())->count();
+        $outOfStockQuery = fn (): Builder => Product::query()->active()->where('quantity', '<=', 0);
+        $lowStockQuery = fn (): Builder => Product::query()->active()
+            ->where('quantity', '>', 0)
+            ->where('quantity', '<=', ProductSetting::lowStockThreshold());
+
+        $outOfStock = $outOfStockQuery()->count();
+        $lowStock = $lowStockQuery()->count();
+
+        // Combien de ces références sont déjà commandées. Une rupture dont
+        // le réassort est parti n'appelle pas la même chose qu'une rupture
+        // que personne n'a encore traitée, et la puce ne disait pas la
+        // différence : elle envoyait chercher soixante-trois fiches dont
+        // douze n'attendaient plus que le facteur.
+        $awaited = fn (Builder $line) => $line
+            ->whereColumn('quantity_received', '<', 'quantity_ordered')
+            ->whereHas('purchaseOrder', fn (Builder $order) => $order->open());
+
+        // Les lignes du produit ou celles de ses déclinaisons : c'est là que
+        // vit le réassort d'un produit décliné, comme pour scopeNotOutOfStock.
+        $onOrder = fn (Builder $query): int => (clone $query)
+            ->where(fn (Builder $inner) => $inner
+                ->whereHas('purchaseOrderItems', $awaited)
+                ->orWhereHas('variants.purchaseOrderItems', $awaited))
+            ->count();
+
+        $outOfStockOnOrder = $onOrder($outOfStockQuery());
+        $lowStockOnOrder = $onOrder($lowStockQuery());
 
         return collect([
             [
@@ -695,6 +720,7 @@ class DashboardMetrics
                 'key' => 'out-of-stock',
                 'count' => $outOfStock,
                 'label' => 'out of stock',
+                'note' => $outOfStockOnOrder > 0 ? $outOfStockOnOrder.' on order' : null,
                 'level' => 'critical',
                 'url' => route('admin.products.index', ['tab' => 'out-of-stock', 'sort' => 'stock-asc']),
             ],
@@ -702,6 +728,7 @@ class DashboardMetrics
                 'key' => 'low-stock',
                 'count' => $lowStock,
                 'label' => 'low on stock',
+                'note' => $lowStockOnOrder > 0 ? $lowStockOnOrder.' on order' : null,
                 'level' => 'warning',
                 'url' => route('admin.products.index', ['tab' => 'in-stock', 'sort' => 'stock-asc']),
             ],

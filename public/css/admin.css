@@ -6424,6 +6424,34 @@ input[type="date"].form-control {
     font-variant-numeric: tabular-nums;
 }
 
+/* Ce qui est déjà commandé, entre parenthèses au bout de la puce : une
+   nuance du compte, pas un second compte. Elle prend la teinte de l'alerte
+   à demi, derrière un filet de la même encre — assez pour se lire, pas
+   assez pour disputer le chiffre son voisin. */
+.dash-chip-note {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding-left: 0.5rem;
+    margin-left: 0.1rem;
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    color: color-mix(in srgb, currentColor 62%, var(--text-muted));
+    border-left: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+}
+
+/* Une flèche entrante plutôt que des parenthèses : le sens est « ça
+   arrive », et le glyphe le dit sans coûter un mot. */
+.dash-chip-note::before {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    flex-shrink: 0;
+    background: currentColor;
+    opacity: 0.55;
+    clip-path: polygon(0 40%, 55% 40%, 55% 15%, 100% 50%, 55% 85%, 55% 60%, 0 60%);
+}
+
 .dash-chip.is-warning {
     color: color-mix(in srgb, var(--status-warning) 70%, var(--text));
     background: color-mix(in srgb, var(--status-warning) 10%, var(--surface));

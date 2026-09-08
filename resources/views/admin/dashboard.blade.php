@@ -79,6 +79,13 @@
                                 </svg>
                                 <span class="dash-chip-count">{{ number_format($item['count']) }}</span>
                                 <span class="dash-chip-label">{{ $item['label'] }}</span>
+                                @if (($item['note'] ?? null) !== null)
+                                    {{-- Ce qui est déjà parti chez le
+                                         fournisseur : la puce dit combien de
+                                         ces références n'attendent plus que
+                                         le facteur. --}}
+                                    <span class="dash-chip-note">{{ $item['note'] }}</span>
+                                @endif
                             </a>
                         </li>
                     @endforeach

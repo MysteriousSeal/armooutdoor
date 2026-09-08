@@ -735,4 +735,56 @@ class DashboardTest extends TestCase
         $this->assertSame(9000, $metrics->money()['revenue_cents']);
         $this->assertSame(1, $metrics->headline()['orders']);
     }
+
+    public function test_the_stock_chips_say_how_many_references_are_already_on_order(): void
+    {
+        // Deux ruptures, une seule réapprovisionnée : la puce doit dire la
+        // différence, sinon elle envoie chercher deux fiches dont une
+        // n'attend plus que le facteur.
+        $coming = Product::factory()->create(['is_active' => true, 'quantity' => 0]);
+        Product::factory()->create(['is_active' => true, 'quantity' => 0]);
+
+        $supplier = \App\Models\Supplier::query()->create(['name' => 'Fournisseur', 'lead_time_days' => 5]);
+        $open = \App\Models\PurchaseOrder::query()->create([
+            'number' => 'BC-ONORDER-1', 'supplier_id' => $supplier->id,
+            'supplier_name' => 'Fournisseur', 'status' => 'sent',
+        ]);
+        \App\Models\PurchaseOrderItem::query()->create([
+            'purchase_order_id' => $open->id, 'product_id' => $coming->id,
+            'name' => $coming->localizedName(), 'sku' => $coming->sku,
+            'quantity_ordered' => 10, 'quantity_received' => 0, 'unit_cost_cents' => 500,
+        ]);
+
+        $attention = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->attention();
+        $chip = $attention->firstWhere('key', 'out-of-stock');
+
+        $this->assertSame(2, $chip['count']);
+        $this->assertSame('1 on order', $chip['note']);
+
+        $this->actingAs($this->admin())->get(route('admin.dashboard'))->assertOk()
+            ->assertSee('1 on order');
+    }
+
+    public function test_a_received_purchase_order_no_longer_counts_as_on_order(): void
+    {
+        $product = Product::factory()->create(['is_active' => true, 'quantity' => 0]);
+
+        $supplier = \App\Models\Supplier::query()->create(['name' => 'Fournisseur', 'lead_time_days' => 5]);
+        $closed = \App\Models\PurchaseOrder::query()->create([
+            'number' => 'BC-DONE-1', 'supplier_id' => $supplier->id,
+            'supplier_name' => 'Fournisseur', 'status' => 'received',
+        ]);
+        \App\Models\PurchaseOrderItem::query()->create([
+            'purchase_order_id' => $closed->id, 'product_id' => $product->id,
+            'name' => $product->localizedName(), 'sku' => $product->sku,
+            'quantity_ordered' => 10, 'quantity_received' => 10, 'unit_cost_cents' => 500,
+        ]);
+
+        $chip = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))
+            ->attention()->firstWhere('key', 'out-of-stock');
+
+        // Rien en route : la puce ne porte pas de parenthèse vide.
+        $this->assertSame(1, $chip['count']);
+        $this->assertNull($chip['note']);
+    }
 }
