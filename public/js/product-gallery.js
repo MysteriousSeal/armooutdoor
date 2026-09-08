@@ -58,16 +58,54 @@
               '<svg viewBox="0 0 320 512" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L233.4 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"/></svg>' +
               '</button>'
             : '') +
-        '<figure class="lightbox-stage"><img class="lightbox-image" alt="' + mainImage.alt.replace(/"/g, '&quot;') + '"></figure>' +
-        (slides.length > 1
-            ? '<div class="lightbox-foot">' +
-              '<span class="lightbox-counter" aria-live="polite"></span>' +
-              '<div class="lightbox-thumbs">' +
-              slides.map(function (slide, i) {
-                  return '<button type="button" class="lightbox-thumb" data-index="' + i + '"><img src="' + slide.thumb + '" alt="" loading="lazy"></button>';
-              }).join('') +
-              '</div></div>'
-            : '');
+        '';
+
+    // Le reste de la boîte n'est que du dessin : des icônes écrites en dur,
+    // rien qui vienne d'une donnée. Ce qui en vient — le texte alternatif de
+    // la photo et l'adresse des vignettes — est posé sur des nœuds, propriété
+    // par propriété. La version d'avant recollait ces deux valeurs dans une
+    // chaîne HTML et échappait les guillemets à la main, ce qui tenait tant
+    // que personne ne touchait à la ligne.
+    var stage = document.createElement('figure');
+    stage.className = 'lightbox-stage';
+
+    var stageImage = document.createElement('img');
+    stageImage.className = 'lightbox-image';
+    stageImage.alt = mainImage.alt;
+    stage.appendChild(stageImage);
+    box.appendChild(stage);
+
+    if (slides.length > 1) {
+        var foot = document.createElement('div');
+        foot.className = 'lightbox-foot';
+
+        var counterEl = document.createElement('span');
+        counterEl.className = 'lightbox-counter';
+        counterEl.setAttribute('aria-live', 'polite');
+        foot.appendChild(counterEl);
+
+        var thumbStrip = document.createElement('div');
+        thumbStrip.className = 'lightbox-thumbs';
+
+        slides.forEach(function (slide, i) {
+            var button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'lightbox-thumb';
+            button.setAttribute('data-index', String(i));
+
+            var thumbImage = document.createElement('img');
+            thumbImage.src = slide.thumb;
+            thumbImage.alt = '';
+            thumbImage.loading = 'lazy';
+            button.appendChild(thumbImage);
+
+            thumbStrip.appendChild(button);
+        });
+
+        foot.appendChild(thumbStrip);
+        box.appendChild(foot);
+    }
+
     document.body.appendChild(box);
 
     var image = box.querySelector('.lightbox-image');
