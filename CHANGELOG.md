@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-08 — v1.29.4 — build Z5BEW9
+
+### Storefront
+
+- **The free-shipping strip is the first thing the page says.** It sat above the header as a wash of olive on cream, at the weight of the rule beneath it, and read as chrome — the one sentence on the homepage that changes a basket was the easiest thing on it to skim past. It is a filled band now, the darkest thing above the fold, cream type at 6.8:1 in the light theme and 8:1 in the dark one, the polarity the same in both so switching mode does not flip the page. The threshold stops being a highlight and becomes the ticket the code already called it: a stub with notched ends, light paper on the dark ground, falling back to a plain rectangle where the shape cannot be cut. Both ends of the band are hatched on the diagonal like the border of an airmail envelope, faded out before they reach the words and dropped altogether on a phone, where there is no width to spend on a border; a gradient was the alternative and would have meant nothing. The truck becomes a parcel drawn in line with three lines of travel behind it — the truck said truck, this says on its way — at twenty-eight pixels rather than fifteen, where the filled silhouette was a blot.
+- **The photo gallery and the discount countdown are built out of nodes.** Neither was exploitable: the countdown's labels come from the translation files and the gallery's thumbnail addresses are read back from `src`, where the browser has already encoded anything that could close an attribute. Both were safe by what happens to feed them, which is not the same as being safe, and is the kind of safety a later edit removes without anyone noticing. The countdown pasted its label into an HTML string, where a chevron left in a translation would have become a tag; the gallery interpolated the photo's alt text behind a hand-written quote escape, and each thumbnail's address into a `src` with none at all. Both now set properties on real elements, and the hand-written escape goes with them.
+- **Choosing a relay point copies its card instead of reprinting it.** The card was serialised to HTML and read straight back by the parser to fill the summary slot — never a way in, since the point's name, street and hours are posed as text on the way in, but the same work done twice. Its nodes are cloned and moved across now, the way the other route to the same panel has always done it.
+
+**No migration.**
+
 ## 2026-09-08 — v1.29.3 — build K77HJM
 
 ### Admin
