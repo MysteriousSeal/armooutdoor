@@ -2,6 +2,20 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-08 — v1.29.0 — build 8PJ1ZW
+
+### Storefront
+
+- **New illustrations on the four hero panels.** Flat sunset drawings in place of the photographs: a target on the range, a crate of new stock, a price tag, and four figures walking out. Each carries its subject on the side its panel leaves uncovered, so the card sits over open sky rather than over the thing the picture is of, which is the side each slide's focus point already named. They keep the shape they were drawn at, wider than the 16/9 the photographs used: the panel is nearer four to one and crops top and bottom whatever it is handed, so a wider file loses less of itself. The four come to 134 ko against 604 for the photographs they replace, and their addresses carry each file's own timestamp, so they arrive without anyone clearing a cache.
+- **The stacked hero shows the picture it is built around.** On a phone the panel reserved a band for its image and framed what landed there against the top, which on these drawings is the empty sky above the horizon: the band came out a stripe of cream and the picture never arrived. Nor was that band the same height twice, panels stretching to the tallest of them and the difference falling into the image, which bought the promotions slide some 130 pixels of extra sky. The picture now has a band of its own, cut two to one and centred on the file, so every slide shows the same picture and the same amount of it, and the whole panel is shorter than the band alone used to be on the short ones.
+- **The carousel answers a finger.** Its track is moved by a transform inside a clipped frame, so there was nothing for a thumb to push and the dots were the only way to the next panel, whatever the comment in the source claimed. A drag follows the finger now, resists at both ends, waits until the gesture is clearly sideways before taking it from the page, and swallows the click when a swipe finishes on a button. The arrows, meanwhile, were hidden below 640 pixels only, which left them sitting on the card from there to 900: at 760 the previous arrow covered the title. They go for the whole stacked range, and the dots keep their look while growing a target a thumb can actually find.
+
+### Under the hood
+
+- **The project's own tooling configuration is in the repository.** The agents, skills, commands, hook handlers, the server declaration and the CLAUDE.md that says how this repository expects to be worked on had been sitting outside version control, so anyone cloning it got a project whose instructions lived on one machine. What stays out is the part that is not the same twice: the runtime state the tooling writes as it runs, and one file holding an absolute path into the cache of whichever machine set it up, which is wrong everywhere else and names its user for nothing.
+
+**No migration.**
+
 ## 2026-09-08 — v1.28.4 — build DNK4NV
 
 ### Storefront
