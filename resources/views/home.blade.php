@@ -205,7 +205,7 @@
             </li>
             <li class="home-trust-item">
                 <span class="home-trust-icon" aria-hidden="true">
-                    @include('partials.icon', ['name' => 'headset', 'size' => 22])
+                    @include('partials.icon', ['name' => 'envelope', 'size' => 22])
                 </span>
                 <span class="home-trust-copy">
                     <strong>{{ __('store.home_hero_help_title') }}</strong>
@@ -548,7 +548,7 @@
                 </li>
                 <li class="home-why-item">
                     <span class="home-why-icon" aria-hidden="true">
-                        @include('partials.icon', ['name' => 'headset', 'size' => 22])
+                        @include('partials.icon', ['name' => 'envelope', 'size' => 22])
                     </span>
                     <span class="home-why-index" aria-hidden="true">04</span>
                     <span class="home-why-copy">
