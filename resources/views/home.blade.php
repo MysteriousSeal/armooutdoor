@@ -515,48 +515,39 @@
                 <h2 class="home-why-title" id="home-why-title">{{ __('store.home_why_title') }}</h2>
                 <p class="home-why-text">{{ __('store.home_why_text') }}</p>
             </header>
+            {{-- Four undertakings, written out rather than boxed. Each is
+                 numbered the way the articles of an undertaking are, and
+                 closed by the shop's own stamp: this is the page saying what
+                 it holds itself to, and a statement is signed, not tiled. --}}
             <ul class="home-why-list">
                 <li class="home-why-item">
-                    <span class="home-why-icon" aria-hidden="true">
-                        @include('partials.icon', ['name' => 'award', 'size' => 22])
-                    </span>
                     <span class="home-why-index" aria-hidden="true">01</span>
-                    <span class="home-why-copy">
-                        <strong>{{ __('store.home_why_useful_title') }}</strong>
-                        <span>{{ __('store.home_why_useful_text') }}</span>
-                    </span>
+                    <strong>{{ __('store.home_why_useful_title') }}</strong>
+                    <span>{{ __('store.home_why_useful_text') }}</span>
                 </li>
                 <li class="home-why-item">
-                    <span class="home-why-icon" aria-hidden="true">
-                        @include('partials.icon', ['name' => 'tag', 'size' => 22])
-                    </span>
                     <span class="home-why-index" aria-hidden="true">02</span>
-                    <span class="home-why-copy">
-                        <strong>{{ __('store.home_why_price_title') }}</strong>
-                        <span>{{ __('store.home_why_price_text') }}</span>
-                    </span>
+                    <strong>{{ __('store.home_why_price_title') }}</strong>
+                    <span>{{ __('store.home_why_price_text') }}</span>
                 </li>
                 <li class="home-why-item">
-                    <span class="home-why-icon" aria-hidden="true">
-                        @include('partials.icon', ['name' => 'truck-fast', 'size' => 22])
-                    </span>
                     <span class="home-why-index" aria-hidden="true">03</span>
-                    <span class="home-why-copy">
-                        <strong>{{ __('store.home_why_ship_title') }}</strong>
-                        <span>{{ __('store.home_why_ship_text') }}</span>
-                    </span>
+                    <strong>{{ __('store.home_why_ship_title') }}</strong>
+                    <span>{{ __('store.home_why_ship_text') }}</span>
                 </li>
                 <li class="home-why-item">
-                    <span class="home-why-icon" aria-hidden="true">
-                        @include('partials.icon', ['name' => 'envelope', 'size' => 22])
-                    </span>
                     <span class="home-why-index" aria-hidden="true">04</span>
-                    <span class="home-why-copy">
-                        <strong>{{ __('store.home_why_support_title') }}</strong>
-                        <span>{{ __('store.home_why_support_text') }}</span>
-                    </span>
+                    <strong>{{ __('store.home_why_support_title') }}</strong>
+                    <span>{{ __('store.home_why_support_text') }}</span>
                 </li>
             </ul>
+
+            {{-- The seal. It carries the shop's name, which the heading has
+                 already said, so it is read by nobody who cannot see it. --}}
+            <p class="home-why-stamp" aria-hidden="true">
+                <span class="home-why-stamp-name">{{ config('app.name') }}</span>
+                <span class="home-why-stamp-place">{{ __('store.home_why_stamp_place') }}</span>
+            </p>
         </section>
 
         <section class="home-about" aria-labelledby="home-about-title">

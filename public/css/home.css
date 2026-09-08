@@ -682,17 +682,17 @@
 }
 
 .home .home-why {
+    display: flex;
+    flex-direction: column;
     margin-top: 2.75rem;
-    padding: 2.35rem 2.35rem 2.5rem;
+    padding: 2.35rem 2.35rem 1.9rem;
     background: var(--surface);
     border: 1px solid var(--border);
-    box-shadow: var(--shadow);
 }
 
 .home .home-why-header {
-    max-width: 36rem;
-    margin: 0 auto 1.85rem;
-    text-align: center;
+    max-width: 40rem;
+    margin: 0 0 2rem;
 }
 
 .home .home-why-kicker {
@@ -706,106 +706,150 @@
 
 .home .home-why-title {
     margin: 0;
-    font-size: clamp(1.25rem, 2vw, 1.65rem);
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1.1;
-    text-transform: uppercase;
+    font-size: clamp(1.35rem, 2.1vw, 1.75rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
 }
 
 .home .home-why-text {
-    margin: 0.75rem auto 0;
-    max-width: 32rem;
-    font-size: 0.9rem;
+    margin: 0.7rem 0 0;
+    max-width: 34rem;
+    font-size: 0.9375rem;
     line-height: 1.55;
     color: var(--text-muted);
 }
 
+/*
+ * The four undertakings, written out.
+ *
+ * They were four bordered cards inside a bordered panel, each with a circled
+ * icon and a number from one to four — frames within a frame, and a sequence
+ * claimed over four things that happen in no order. What the block actually
+ * is is a statement the shop makes about itself, so it is set as one: each
+ * clause opened by a rule, nothing boxed, and the shop's stamp closing them.
+ */
+/*
+ * The four undertakings, written out.
+ *
+ * They were four bordered cards inside a bordered panel, each with a circled
+ * icon — frames within a frame. What the block actually is is a statement the
+ * shop makes about itself, so it is set as one: numbered clauses, nothing
+ * boxed and nothing ruled, and the shop's stamp closing them. The numbering
+ * is the article numbering of an undertaking, which is the one place a count
+ * from one to four says something true about unordered things: it says how
+ * many there are, and that each is a separate promise.
+ */
 .home .home-why-list {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.85rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2.5rem 3.5rem;
     margin: 0;
     padding: 0;
     list-style: none;
 }
 
 .home .home-why-item {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 0.95rem;
-    min-height: 100%;
-    padding: 1.25rem 1.15rem 1.3rem;
-    background: color-mix(in srgb, var(--bg) 72%, var(--surface));
-    border: 1px solid var(--border);
-    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-content: start;
+    column-gap: 1.1rem;
+    row-gap: 0.28rem;
 }
 
-.home .home-why-item:hover {
-    border-color: color-mix(in srgb, #5b5c3b 35%, var(--border));
-    box-shadow: var(--shadow-hover);
-    transform: translateY(-1px);
-}
-
-.home .home-why-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.75rem;
-    height: 2.75rem;
-    flex-shrink: 0;
-    color: #5b5c3b;
-    background: var(--surface);
-    border: 1.5px solid color-mix(in srgb, #5b5c3b 42%, var(--border));
-    border-radius: 50%;
-}
-
+/*
+ * Stencilled, not printed.
+ *
+ * The numeral is drawn as an outline with the faintest fill behind it: it has
+ * to separate one clause from the next across a page with no rules on it, and
+ * a solid figure that size would have out-shouted the promise beside it. The
+ * outline is also the hand the shop's world writes in — a number on the side
+ * of a crate — and it costs the block no line at all.
+ */
 .home .home-why-index {
-    position: absolute;
-    top: 1.15rem;
-    right: 1.1rem;
-    font-size: 0.7rem;
+    grid-row: 1 / span 2;
+    align-self: start;
+    margin-top: -0.28rem;
+    font-size: 2.6rem;
     font-weight: 700;
-    letter-spacing: 0.08em;
+    letter-spacing: -0.045em;
     line-height: 1;
-    color: color-mix(in srgb, var(--text-muted) 70%, transparent);
     font-variant-numeric: tabular-nums;
+    /* The fill stands alone where the stroke is not supported. */
+    color: color-mix(in srgb, var(--accent-heading) 12%, transparent);
+    -webkit-text-stroke: 1.1px color-mix(in srgb, var(--accent-heading) 85%, transparent);
 }
 
-.home .home-why-copy {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-    min-width: 0;
-    padding-right: 1.5rem;
+.home .home-why-item strong {
+    grid-column: 2;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+    color: var(--text);
 }
 
-.home .home-why-copy strong {
-    font-size: 0.84rem;
-    font-weight: 800;
-    letter-spacing: 0.02em;
-    line-height: 1.25;
-    text-transform: uppercase;
-}
-
-.home .home-why-copy span {
-    font-size: 0.8125rem;
-    line-height: 1.5;
+.home .home-why-item span:not(.home-why-index) {
+    grid-column: 2;
+    font-size: 0.875rem;
+    line-height: 1.55;
     color: var(--text-muted);
 }
 
-[data-theme='dark'] .home .home-why-item {
-    background: color-mix(in srgb, var(--bg) 55%, var(--surface));
+/*
+ * The seal.
+ *
+ * A statement is closed by a mark, and this shop's world is one of parcels
+ * leaving a bench: an ink stamp is the object that belongs here, where a
+ * pretended signature would be a person the page cannot produce. Set slightly
+ * off square, since a stamp pressed by hand never lands straight.
+ */
+.home .home-why-stamp {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.22rem;
+    margin: 1.6rem 0.5rem 0 auto;
+    padding: 0.6rem 1.15rem 0.65rem;
+    color: color-mix(in srgb, var(--accent-heading) 70%, transparent);
+    border: 2px solid currentColor;
+    box-shadow: 0 0 0 1px currentColor inset;
+    transform: rotate(-3.5deg);
 }
 
-[data-theme='dark'] .home .home-why-kicker,
-[data-theme='dark'] .home .home-why-icon {
+.home .home-why-stamp-name {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    /* The tracking pushes the word right; the last letter's space is taken
+       back so the block sits centred in its frame. */
+    text-indent: 0.2em;
+}
+
+.home .home-why-stamp-place {
+    padding-top: 0.22rem;
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    text-indent: 0.28em;
+    border-top: 1px solid currentColor;
+    align-self: stretch;
+    text-align: center;
+}
+
+[data-theme='dark'] .home .home-why-kicker {
     color: var(--accent);
 }
 
-[data-theme='dark'] .home .home-why-icon {
-    border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+[data-theme='dark'] .home .home-why-index {
+    color: color-mix(in srgb, var(--accent) 18%, transparent);
+    -webkit-text-stroke-color: color-mix(in srgb, var(--accent) 66%, transparent);
+}
+
+[data-theme='dark'] .home .home-why-stamp {
+    color: color-mix(in srgb, var(--accent) 72%, transparent);
 }
 
 .home .home-about {
@@ -1383,10 +1427,6 @@
         padding: 1.6rem 1.25rem 1.75rem;
     }
 
-    .home .home-why-list {
-        grid-template-columns: 1fr 1fr;
-    }
-
     .home .home-about {
         grid-template-columns: 1fr;
     }
@@ -1421,15 +1461,16 @@
 @media (max-width: 640px) {
     .home .home-why-header {
         margin-bottom: 1.35rem;
-        text-align: left;
-    }
-
-    .home .home-why-text {
-        margin-left: 0;
     }
 
     .home .home-why-list {
         grid-template-columns: 1fr;
+        gap: 1.4rem;
+    }
+
+    .home .home-why-stamp {
+        margin-top: 1.85rem;
+        margin-right: 0;
     }
 
     .home .home-hero-title {
