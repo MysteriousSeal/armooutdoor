@@ -42,12 +42,12 @@ class DashboardMetrics
     }
 
     /**
-     * Les comptes bannis, hors de tout dénombrement de têtes.
+     * Banned accounts, out of every head count.
      *
-     * Leurs commandes restent des ventes — l'argent a bien été encaissé, et
-     * les retirer ferait dire au tableau de bord moins que la liste des
-     * commandes pour la même période. C'est la personne qui ne compte plus,
-     * pas ce qu'elle a acheté.
+     * Their orders remain sales — that money really was taken, and removing
+     * it would have the dashboard report less than the orders list for the
+     * same period. It is the person who stops counting, not what they
+     * bought.
      *
      * @return Collection<int, int>
      */
@@ -252,9 +252,9 @@ class DashboardMetrics
         $productCostCents = (int) $priced->sum(
             fn (Order $order): int => $order->productCostInclVatCents($costsByProductId),
         );
-        // Les frais des seules commandes chiffrées : la barre les met en
-        // regard de leur propre chiffre d'affaires, et mélanger les deux
-        // périmètres ferait des parts qui ne totalisent rien.
+        // The costs of the priced orders only: the bar sets them against
+        // their own revenue, and mixing the two perimeters would give shares
+        // that add up to nothing.
         $pricedCostsCents = (int) $priced->sum(
             fn (Order $order): int => (int) $order->shipping_paid_cents
                 + (int) $order->marketplace_commission_cents
@@ -263,9 +263,9 @@ class DashboardMetrics
         $profitCents = (int) $priced->sum(
             fn (Order $order): int => $order->profitInclVatCents($costsByProductId),
         );
-        // La marge se rapporte au chiffre d'affaires des seules commandes
-        // chiffrées : rapportée au total, elle mélangerait un profit partiel
-        // à des ventes qu'il ne couvre pas.
+        // The margin is a share of the priced orders' revenue: against the
+        // total it would mix a partial profit with sales it does not
+        // cover.
         $pricedRevenueCents = (int) $priced->sum('total_cents');
 
         $orderCostsCents = (int) $recorded->shipping_cents
@@ -294,10 +294,10 @@ class DashboardMetrics
     }
 
     /**
-     * Ce que les rayons valent au prix d'achat, et ce qui est engagé
-     * dessus. Une référence sans historique d'achat n'a pas de valeur
-     * connue : elle est comptée à part plutôt qu'à zéro, sinon le total
-     * baisse quand le catalogue grandit.
+     * What the shelves are worth at purchase cost, and what is committed
+     * on top. A reference with no purchase history has no known value: it is
+     * counted separately rather than at zero, or the total falls as the
+     * catalogue grows.
      *
      * @return array<string, int|null>
      */
@@ -305,9 +305,9 @@ class DashboardMetrics
     {
         $products = Product::query()
             ->where('is_active', true)
-            // La remise fait partie du prix du jour : la valeur de revente
-            // est ce que le rayon rapporterait s'il partait maintenant, pas
-            // ce qu'il rapporterait au tarif plein.
+            // A discount is part of today's price: the resale value is what
+            // the shelves would fetch if they sold now, not what they would
+            // fetch at full price.
             ->with(['variants', 'discount'])
             ->get(['id', 'quantity', 'price_cents']);
 
@@ -320,20 +320,19 @@ class DashboardMetrics
         $unpriced = 0;
 
         foreach ($products as $product) {
-            // Même règle que catalogue() : dès qu'un produit a des
-            // déclinaisons, les unités sont les leurs et la colonne du
-            // produit ne compte pas. L'additionner comptait deux fois un
-            // stock que la tuile « Units in stock », juste à côté, ne
-            // comptait qu'une.
+            // Same rule as catalogue(): as soon as a product has
+            // declinations the units are theirs and the product's own column
+            // does not count. Adding it counted twice a stock the "Units in
+            // stock" tile right beside it counted once.
             $activeVariants = $product->variants->where('is_active', true);
 
             $onHand = $product->variants->isEmpty()
                 ? (int) $product->quantity
                 : (int) $activeVariants->sum('quantity');
 
-            // Le prix de vente, lui, est toujours connu : la valeur de
-            // revente couvre donc tout le rayon, y compris ce dont le coût
-            // d'achat manque.
+            // A selling price, on the other hand, is always known: the
+            // resale value therefore covers the whole shelf, including what
+            // has no purchase cost.
             $onShelfRetail = $product->variants->isEmpty()
                 ? $onHand * $product->effectivePriceCents()
                 : (int) $activeVariants->sum(
@@ -349,16 +348,16 @@ class DashboardMetrics
             }
 
             $valued += $onHand * $costs[$product->id];
-            // La marge ne se lit que là où les deux bouts sont connus :
-            // retirer un coût partiel d'un prix complet annoncerait un
-            // bénéfice que le rayon ne porte pas.
+            // The margin can only be read where both ends are known: taking
+            // a partial cost off a complete price would claim a profit the
+            // shelves do not carry.
             $retailOfValued += $onShelfRetail;
             $units += $onHand;
         }
 
-        // Ce qui est commandé et pas encore reçu, au prix du bon de commande
-        // plutôt qu'à la moyenne : cet argent-là est déjà engagé au tarif
-        // qui figure dessus.
+        // What is ordered and not yet received, at the purchase order's own
+        // price rather than the average: that money is already committed at
+        // the rate written on it.
         $openOrders = PurchaseOrder::query()->open()->with('items')->get();
 
         $committed = (int) $openOrders->sum(
@@ -383,20 +382,20 @@ class DashboardMetrics
     }
 
     /**
-     * Qui achète : les nouveaux venus de la période, ceux qui reviennent,
-     * et ce qu'un client vaut en moyenne depuis le début.
+     * Who buys: the period's newcomers, those who come back, and what a
+     * customer is worth on average since the beginning.
      *
-     * « Revenu » veut dire qu'il avait déjà commandé avant la période, pas
-     * qu'il a commandé deux fois dedans : c'est la fidélité qu'on regarde,
-     * pas la cadence.
+     * "Returning" means they had already ordered before the period, not that
+     * they ordered twice inside it: what is being looked at is loyalty, not
+     * cadence.
      *
      * @return array<string, mixed>
      */
     public function customers(): array
     {
-        // Ce panneau compte des personnes : un compte banni n'en est plus
-        // une. La moyenne dépensée écarte donc aussi ses commandes, sans
-        // quoi elle diviserait l'argent de tous par la foule qui reste.
+        // This panel counts people: a banned account is no longer one. The
+        // average spent therefore drops their orders too, or it would divide
+        // everyone's money by the crowd that remains.
         $counted = fn (Builder $query): Builder => $query
             ->whereNotNull('user_id')
             ->whereNotIn('user_id', $this->bannedUserIds());
@@ -459,17 +458,16 @@ class DashboardMetrics
     }
 
     /**
-     * Une case par jour, ou par mois quand la tranche est longue : au-delà
-     * de quatre mois, un point par jour donne des cheveux serrés qu'on ne
-     * lit plus et un tableau jumeau d'autant de lignes que de jours.
+     * A bucket per day, or per month when the window is long: past four
+     * months, a point per day is hair rather than a line, and its table twin
+     * has a row for every one of them.
      *
      * @return Collection<int, array{date: Carbon, label: string, revenue_cents: int, orders: int}>
      */
     private function dailyBuckets(Carbon $start, Carbon $end): Collection
     {
-        // « Depuis le début » n'a pas de tranche précédente : la fenêtre
-        // qu'on nous passe alors se termine avant de commencer, et il n'y a
-        // pas de case à remplir.
+        // "All time" has no previous window: the one handed over then ends
+        // before it begins, and there is no bucket to fill.
         if ($end->lessThan($start)) {
             return collect();
         }
@@ -561,8 +559,8 @@ class DashboardMetrics
             ->get()
             ->keyBy('id');
 
-        // Et le coût d'achat de ces cinq-là, en une fois : ce que l'unité
-        // coûte en face de ce qu'elle rapporte.
+        // And the purchase cost of those five, in one go: what the unit
+        // costs against what it brings in.
         $costs = Product::averagePurchaseCostsInclVatCents(
             $samples->pluck('product_id')->filter(),
         );
@@ -576,19 +574,19 @@ class DashboardMetrics
             return [
                 'product' => $sample?->product,
                 'name' => $sample?->localizedName() ?? 'Produit supprimé',
-                // La référence vient de la fiche, pas de la ligne vendue :
-                // celle-ci n'en garde pas, et un produit supprimé n'a donc
-                // plus de SKU à montrer.
+                // The reference comes from the product record, not the sold
+                // line: that keeps none, so a deleted product has no SKU
+                // left to show.
                 'sku' => $sample?->product?->sku,
                 'quantity' => $quantity,
                 'revenue_cents' => $revenue,
-                // Ce que l'unité s'est vendue en moyenne : le prix affiché
-                // aujourd'hui ne dit pas à combien elle est partie, remises
-                // et prix de place de marché compris.
+                // What the unit sold for on average: today's list price does
+                // not say what it went for, discounts and marketplace prices
+                // included.
                 'unit_price_cents' => $quantity > 0 ? (int) round($revenue / $quantity) : null,
-                // Absent plutôt que zéro quand rien n'a été reçu : un coût
-                // inconnu n'est pas un coût nul, et la marge qu'on lirait
-                // en face serait fausse.
+                // Absent rather than zero when nothing has been received: an
+                // unknown cost is not a cost of nothing, and the margin read
+                // against it would be false.
                 'unit_cost_cents' => $costs[$sample?->product_id] ?? null,
             ];
         })->values();
@@ -609,9 +607,9 @@ class DashboardMetrics
             ->orderByDesc('revenue_cents')
             ->get();
 
-        // La commission n'est pas un détail du canal, c'est son prix : un
-        // canal qui vend plus et rend plus n'est pas le meilleur, et seule
-        // la colonne nette le dit.
+        // The commission is not a detail of the channel, it is its price: a
+        // channel that sells more and hands more back is not the better one,
+        // and only the net column says so.
         $line = fn (string $label, int $orders, int $revenue, int $commission): array => [
             'label' => $label,
             'orders' => $orders,
@@ -642,19 +640,19 @@ class DashboardMetrics
     }
 
     /**
-     * Le tuyau des commandes en cours. Chaque étape porte la couleur que la
-     * liste des commandes donne déjà à ce statut : c'est la même distinction
-     * que l'œil y a apprise, et la rappeler ici évite d'en enseigner une
-     * seconde pour la même chose.
+     * The pipeline of orders in hand. Each stage wears the colour the
+     * orders list already gives that status: it is the distinction the eye
+     * learned there, and repeating it here saves teaching a second one for
+     * the same thing.
      *
      * @return Collection<int, array{status: string, label: string, count: int, open: bool}>
      */
     public function pipeline(): Collection
     {
-        // Remboursée n'est pas une étape de plus, c'est la sortie : elle
-        // ferme la ligne au lieu de l'avancer. Elle est comptée ici quand
-        // même, parce qu'une commande sortie du tuyau reste une commande
-        // dont le tuyau doit rendre compte.
+        // Refunded is not one more stage, it is the way out: it closes the
+        // row instead of advancing it. It is counted here all the same,
+        // because an order that has left the pipeline is still an order the
+        // pipeline has to account for.
         $statuses = ['placed', 'preparing', 'shipped', 'in_transit', 'delivered', 'refunded'];
 
         $counts = Order::query()
@@ -665,11 +663,10 @@ class DashboardMetrics
             ->groupBy('status')
             ->pluck('count', 'status');
 
-        // Ouverte veut dire qu'il reste quelque chose à faire. Livrée et
-        // remboursée sont des fins : elles se comptent, mais elles ne
-        // tiennent plus de place dans la barre, sans quoi la seule chose
-        // qu'elle montrerait, à mesure que la boutique vieillit, serait
-        // combien de commandes sont déjà finies.
+        // Open means there is something left to do. Delivered and refunded
+        // are endings: they are counted, but they take no room in the bar,
+        // or the only thing it would show, as the shop ages, is how many
+        // orders are already finished.
         $open = ['placed' => 'Placed', 'preparing' => 'Preparing', 'shipped' => 'Shipped', 'in_transit' => 'In transit'];
         $closed = ['delivered' => 'Delivered', 'refunded' => 'Refunded'];
 
@@ -708,17 +705,18 @@ class DashboardMetrics
         $outOfStock = $outOfStockQuery()->count();
         $lowStock = $lowStockQuery()->count();
 
-        // Combien de ces références sont déjà commandées. Une rupture dont
-        // le réassort est parti n'appelle pas la même chose qu'une rupture
-        // que personne n'a encore traitée, et la puce ne disait pas la
-        // différence : elle envoyait chercher soixante-trois fiches dont
-        // douze n'attendaient plus que le facteur.
+        // How many of these references are already on order. A shortage
+        // whose restock has left does not call for the same thing as one
+        // nobody has handled, and the chip did not say the difference: it
+        // sent the reader to sixty-three product pages of which twelve were
+        // waiting on nothing but the postman.
         $awaited = fn (Builder $line) => $line
             ->whereColumn('quantity_received', '<', 'quantity_ordered')
             ->whereHas('purchaseOrder', fn (Builder $order) => $order->open());
 
-        // Les lignes du produit ou celles de ses déclinaisons : c'est là que
-        // vit le réassort d'un produit décliné, comme pour scopeNotOutOfStock.
+        // The product's own purchase lines or its declinations': that is
+        // where a declined product's restock lives, as scopeNotOutOfStock
+        // already reads it.
         $onOrder = fn (Builder $query): int => (clone $query)
             ->where(fn (Builder $inner) => $inner
                 ->whereHas('purchaseOrderItems', $awaited)
@@ -826,8 +824,8 @@ class DashboardMetrics
             ->whereNull('archived_at')
             ->excludingTest()
             ->where('status', '!=', 'draft')
-            // Le logo de la place de marché et le nombre d'articles : deux
-            // requêtes de plus au total, pas deux par ligne.
+            // The marketplace logo and the item count: two more queries in
+            // total, not two per row.
             ->with(['user', 'marketplace'])
             ->withSum('items as units_count', 'quantity')
             ->latest()

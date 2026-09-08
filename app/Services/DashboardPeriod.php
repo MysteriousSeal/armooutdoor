@@ -46,10 +46,10 @@ class DashboardPeriod
             '7d' => now()->subDays(6)->startOfDay(),
             '90d' => now()->subDays(89)->startOfDay(),
             'mtd' => now()->startOfMonth(),
-            // Depuis la première vente, pas depuis une date ronde : une
-            // borne inventée ferait commencer chaque graphique par des mois
-            // vides que la boutique n'a pas vécus. Sans vente, la tranche
-            // est celle du jour, qui est vide aussi et le dit.
+            // From the first sale, not from a round date: an invented
+            // boundary would open every chart on months the shop never
+            // lived. With no sale at all the window is today's, which is
+            // empty too and says so.
             'all' => self::firstSaleDay(),
             default => now()->subDays(29)->startOfDay(),
         };
@@ -58,10 +58,10 @@ class DashboardPeriod
         // juste avant celle-ci : comparer 30 jours à un mois calendaire
         // ferait varier l'écart avec la longueur des mois.
         //
-        // « Depuis le début » n'en a pas : rien ne précède la première
-        // vente. La tranche précédente est donc vide de bout en bout, ce
-        // que les écarts lisent déjà comme « pas de référent » — un tiret
-        // plutôt qu'un pourcentage inventé.
+        // "All time" has none: nothing precedes the first sale. Its
+        // previous window is therefore empty end to end, which the deltas
+        // already read as "no reference" — a dash rather than an invented
+        // percentage.
         $lengthInDays = (int) $start->diffInDays($end->copy()->startOfDay()) + 1;
 
         return new self(
@@ -92,9 +92,9 @@ class DashboardPeriod
     }
 
     /**
-     * Le jour de la première vente, ou aujourd'hui quand il n'y en a pas
-     * encore. Les commandes de test sont hors du compte, comme partout
-     * ailleurs sur la page : elles n'ont jamais eu lieu.
+     * The day of the first sale, or today when there has not been one.
+     * Test orders are left out, as everywhere else on the page: they never
+     * happened.
      */
     private static function firstSaleDay(): Carbon
     {
@@ -107,9 +107,9 @@ class DashboardPeriod
     }
 
     /**
-     * Le graphique compte par mois dès que la tranche dépasse quatre mois :
-     * au-delà, un point par jour donne des cheveux serrés qu'on ne lit plus,
-     * et un tableau jumeau d'autant de lignes que de jours.
+     * The chart counts by month as soon as the window passes four months:
+     * beyond that, a point per day is hair rather than a line, and its
+     * table twin has a row for every one of them.
      */
     public function bucketsByMonth(): bool
     {

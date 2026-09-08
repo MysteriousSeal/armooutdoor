@@ -203,7 +203,7 @@ class OrderProductCostColumnTest extends TestCase
         $product = Product::factory()->create();
         $this->receive($product, 10, 100); // avg 120 incl. VAT
 
-        // Perçu 1500, coût produit 240 : 1260 / 240 = 525 %.
+        // Perceived 1500, goods 240: 1260 / 240 = 525 %.
         $order = $this->order(['total_cents' => 1500]);
         $this->line($order, $product, 2);
         $order->load('items');
@@ -221,8 +221,8 @@ class OrderProductCostColumnTest extends TestCase
 
         $this->assertNull($unpriced->profitPercentageOfProductCost([]));
 
-        // Un coût nul connu ne donne pas un pourcentage infini : il n'en
-        // donne aucun.
+        // A known cost of zero gives no infinite percentage: it gives
+        // none at all.
         $free = Product::factory()->create();
         $this->receive($free, 5, 0);
 
@@ -241,7 +241,7 @@ class OrderProductCostColumnTest extends TestCase
         $product = Product::factory()->create();
         $this->receive($product, 10, 100); // avg 120 incl. VAT
 
-        // Perçu 1500, coût 240, profit 1260 : 525,0 % dans les deux endroits.
+        // Perceived 1500, cost 240, profit 1260: 525,0 % in both places.
         $order = $this->order(['total_cents' => 1500]);
         $this->line($order, $product, 2);
 

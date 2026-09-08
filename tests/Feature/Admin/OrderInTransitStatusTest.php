@@ -200,8 +200,8 @@ class OrderInTransitStatusTest extends TestCase
     {
         $pipeline = $this->metrics()->pipeline();
 
-        // « Remboursée » ferme la file plutôt que de l'avancer : elle vient
-        // après « Livrée », qui reste le dernier pas en avant.
+        // "Refunded" closes the queue rather than advancing it: it comes
+        // after "Delivered", which stays the last step forward.
         $this->assertSame(
             ['placed', 'preparing', 'shipped', 'in_transit', 'delivered', 'refunded'],
             $pipeline->pluck('status')->all()

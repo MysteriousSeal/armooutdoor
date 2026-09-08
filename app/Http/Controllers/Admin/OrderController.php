@@ -111,9 +111,9 @@ class OrderController extends Controller
                 'profit_cents' => $profitCents,
                 'profit_priced_order_count' => $pricedOrderCount,
                 'profit_total_order_count' => $totalOrderCount,
-                // Rapporté au coût des marchandises des seules commandes
-                // chiffrées, pas au coût de toutes : le profit au-dessus ne
-                // couvre que celles-là non plus.
+                // Against the goods cost of the priced orders only, not of
+                // all of them: the profit above covers no more than those
+                // either.
                 'profit_pct_product_cost' => $percentOf($profitCents, $profitProductCostCents),
                 'shipping_cost_cents' => $shippingCostCents,
                 'shipping_cost_pct_amount' => $percentOf($shippingCostCents, $amountCents),

@@ -11,10 +11,10 @@
             'date_to' => $dateTo ?: null,
         ]);
         $hasFilters = $baseFilters !== [];
-        // Le menu « Actions » de chaque ligne est mis de côté, pas retiré :
-        // tout ce qu'il propose reste écrit plus bas. Le drapeau vit dans la
-        // config plutôt qu'ici pour que les tests puissent encore rendre la
-        // colonne et vérifier ce qu'elle contient.
+        // The "Actions" menu on each row is set aside, not removed:
+        // everything it offers is still written below. The flag lives in the
+        // config rather than here so tests can still render the column and
+        // check what it holds.
         $showRowActions = (bool) config('shop.admin_row_actions');
         // Changer d'onglet garde la recherche et les dates, jamais le statut :
         // c'est l'onglet lui-même qui le porte.

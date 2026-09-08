@@ -22,23 +22,23 @@
                     </p>
                 </div>
                 <div class="admin-list-hero-actions">
-                    {{-- Seulement sur un produit qui existe : une annonce se
-                         rattache à une fiche enregistrée, pas à un formulaire
-                         encore vide. --}}
+                    {{-- Only on a product that exists: a listing attaches to
+                         a saved record, not to a form that is still
+                         empty. --}}
                     @if ($product->exists)
                         @php
-                            // Sans annonce, tout est à écrire : la même liste,
-                            // toute vide, plutôt qu'un cas particulier.
+                            // With no listing, everything is still to write:
+                            // the same list, all empty, rather than a special
+                            // case.
                             $vinted = $product->vintedListing;
                             $vintedChecks = $vinted?->readiness() ?? ['Title' => false, 'Text' => false, 'Price' => false, 'Photos' => false];
                             $vintedPhotos = $vinted?->imageCount() ?? 0;
                             $vintedDone = count(array_filter($vintedChecks));
                         @endphp
 
-                        {{-- Un seul contrôle : le nom, puis ce qui manque.
-                             Deux éléments séparés flottaient entre les
-                             boutons voisins sans qu'on sache lequel ils
-                             décrivaient. --}}
+                        {{-- One control: the name, then what is missing. Two
+                             separate elements floated between the
+                             neighbouring buttons belonging to neither. --}}
                         <a
                             href="{{ route('admin.products.vinted.edit', $product) }}"
                             class="vinted-link {{ ($vinted?->isReady() ?? false) ? 'is-ready' : '' }}"
@@ -58,8 +58,8 @@
                                     </span>
                                 @endforeach
                             </span>
-                            {{-- Le résumé porte la nouvelle : prête, ou ce
-                                 qu'il reste. --}}
+                            {{-- The summary carries the news: ready, or what
+                                 is left. --}}
                             <span class="vinted-link-state">
                                 {{ ($vinted?->isReady() ?? false) ? 'Ready' : $vintedDone.'/'.count($vintedChecks) }}
                             </span>

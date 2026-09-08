@@ -12,11 +12,11 @@ use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 
 /**
- * L'annonce Vinted d'un produit.
+ * A product's Vinted listing.
  *
- * Rien n'est envoyé à Vinted — la page compose et garde le texte. Ce qu'elle
- * doit tenir : un brouillon parti de la fiche, une seule annonce par produit,
- * et des photos qui n'appartiennent qu'à elle.
+ * Nothing is sent to Vinted — the page composes and keeps the wording. What
+ * it has to hold: a blank draft, one listing per product, and photos that
+ * belong to it alone.
  */
 class VintedListingTest extends TestCase
 {
@@ -40,8 +40,8 @@ class VintedListingTest extends TestCase
 
     public function test_a_product_being_created_has_no_listing_to_offer(): void
     {
-        // Une annonce se rattache à une fiche enregistrée : le formulaire de
-        // création n'a pas encore de produit à quoi l'accrocher.
+        // A listing attaches to a saved record: the creation form has no
+        // product to hang one on yet.
         $this->actingAs($this->admin())
             ->get(route('admin.products.create'))
             ->assertOk()
@@ -59,24 +59,24 @@ class VintedListingTest extends TestCase
         $html = $this->actingAs($this->admin())
             ->get(route('admin.products.vinted.edit', $product))
             ->assertOk()
-            // Le produit se nomme en tête de page, pour savoir de quoi on
-            // parle — mais les champs, eux, sont vides.
+            // The product is named at the top of the page, to know what this
+            // is about — but the fields themselves are empty.
             ->assertSee('Cagoule camouflage')
             ->getContent();
 
-        // Les deux champs de texte arrivent vides. Le titre se lit sur son
-        // attribut plutôt qu'à l'absence du nom, qui figure en tête de page.
+        // Both text fields arrive empty. The title is read off its attribute
+        // rather than the absence of the name, which is in the header.
         $this->assertMatchesRegularExpression('#id="vinted-title".*?value=""#s', $html);
         $this->assertMatchesRegularExpression('#id="vinted-description".*?>\s*</textarea>#s', $html);
         $this->assertStringNotContainsString('Respirante et légère', $html);
 
-        // Le prix non plus n'est pas repris : celui de la boutique se lit à
-        // côté du champ, il ne s'y installe pas.
+        // The price is not carried over either: the shop's own reads beside
+        // the field, it does not settle into it.
         $this->assertMatchesRegularExpression('#id="vinted-price".*?value=""#s', $html);
         $this->assertStringContainsString('Shop price', $html);
 
-        // Ouvrir la page n'écrit rien : tant qu'on n'enregistre pas, il n'y a
-        // pas d'annonce.
+        // Opening the page writes nothing: until it is saved there is no
+        // listing.
         $this->assertSame(0, VintedListing::query()->count());
     }
 
@@ -101,8 +101,8 @@ class VintedListingTest extends TestCase
 
     public function test_saving_twice_edits_the_same_listing(): void
     {
-        // Une seule annonce par produit : deux brouillons obligeraient chaque
-        // écran à choisir lequel montrer.
+        // One listing per product: two drafts would force every screen to
+        // choose which to show.
         $product = Product::factory()->create();
 
         foreach (['Premier jet', 'Deuxième jet'] as $title) {
@@ -116,9 +116,9 @@ class VintedListingTest extends TestCase
 
     public function test_the_saved_stamp_is_in_english_like_the_rest_of_the_admin(): void
     {
-        // La locale de l'application est le français, celle de la boutique.
-        // Le back-office est en anglais de bout en bout, et un « il y a une
-        // minute » au milieu d'une page anglaise vient de là.
+        // The application locale is French, the shop's own. The back-office
+        // is English throughout, and an "il y a une minute" in the middle of
+        // an English page comes from there.
         $product = Product::factory()->create();
         VintedListing::query()->create(['product_id' => $product->id, 'title' => 'Écrite']);
 
@@ -132,7 +132,7 @@ class VintedListingTest extends TestCase
 
     public function test_a_listing_can_be_left_without_a_price(): void
     {
-        // On écrit le texte un jour, on fixe le prix un autre.
+        // One writes the text one day and settles the price another.
         $product = Product::factory()->create();
 
         $this->actingAs($this->admin())
@@ -161,7 +161,7 @@ class VintedListingTest extends TestCase
 
         $this->assertCount(2, $images);
         $this->assertSame([1, 2], $images->pluck('sort_order')->all());
-        // Les fichiers vivent à part de ceux du catalogue.
+        // The files live apart from the catalogue's.
         $this->assertStringStartsWith('vinted/', $images->first()->image);
 
         $kept = $images->last();
@@ -179,16 +179,16 @@ class VintedListingTest extends TestCase
 
         $this->assertSame(1, $listing->images()->count());
         $this->assertFalse(is_file($droppedPath), 'the removed photo should leave no file behind');
-        // La vignette part avec elle : plus aucune ligne ne la nomme, donc
-        // rien ne viendrait la balayer plus tard.
+        // The thumbnail goes with it: no row names it any more, so nothing
+        // would sweep it later.
         $this->assertFalse(is_file($droppedThumb), 'the removed photo should take its thumbnail with it');
 
         $this->forget($listing);
     }
 
     /**
-     * Ces fichiers-là sont écrits dans public/, hors du disque de test : la
-     * base est reconstruite entre deux tests, pas le dossier d'images.
+     * These files are written into public/, outside the test disk: the
+     * database is rebuilt between tests, the images directory is not.
      */
     private function forget(VintedListing $listing): void
     {
@@ -200,7 +200,7 @@ class VintedListingTest extends TestCase
 
     public function test_the_order_only_moves_this_listings_photos(): void
     {
-        // Un identifiant venu d'une autre annonce ne doit rien déplacer.
+        // An id from another listing must move nothing.
         $product = Product::factory()->create();
         $other = Product::factory()->create();
 
@@ -239,8 +239,8 @@ class VintedListingTest extends TestCase
 
         $this->get(route('admin.products.vinted.edit', $product))->assertRedirect();
 
-        // Le back-office renvoie les non-admins vers la boutique plutôt que
-        // de leur confirmer que l'adresse existe.
+        // The back-office sends non-admins to the shop rather than
+        // confirming the address exists.
         $this->actingAs(User::factory()->create())
             ->get(route('admin.products.vinted.edit', $product))
             ->assertRedirect();
@@ -248,8 +248,8 @@ class VintedListingTest extends TestCase
 
     public function test_a_photo_can_be_taken_away_as_a_jpeg(): void
     {
-        // La boutique stocke du WebP, dont le formulaire de Vinted ne veut
-        // pas : le lien rend la même image en JPEG sans toucher au fichier.
+        // The shop stores WebP, which Vinted's form will not take: the link
+        // renders the same image as a JPEG without touching the file.
         $product = Product::factory()->create();
 
         $this->actingAs($this->admin())
@@ -268,10 +268,10 @@ class VintedListingTest extends TestCase
             ->assertHeader('content-type', 'image/jpeg');
 
         $this->assertStringContainsString('attachment;', $response->headers->get('content-disposition'));
-        // sku_1.jpg : la référence du produit, puis le rang de la photo.
+        // sku_1.jpg: the product's reference, then the photo's rank.
         $this->assertStringContainsString(\Illuminate\Support\Str::slug($product->sku).'_1.jpg', $response->headers->get('content-disposition'));
 
-        // Ce qui sort est bien un JPEG, et le fichier d'origine est intact.
+        // What comes out is a JPEG, and the original file is untouched.
         $this->assertSame('image/jpeg', (string) getimagesizefromstring($response->getContent())['mime']);
         $this->assertTrue(is_file($source), 'the stored photo must be left alone');
 
@@ -280,8 +280,8 @@ class VintedListingTest extends TestCase
 
     public function test_every_photo_names_its_own_file(): void
     {
-        // Trois liens qui portent le même nom, c'est un fichier téléchargé
-        // trois fois par-dessus lui-même. Le rang est celui de l'annonce.
+        // Three links carrying the same name is one file downloaded three
+        // times over itself. The rank is the listing's own.
         $product = Product::factory()->create(['sku' => 'CAG-MCDES-BREATH']);
 
         $this->actingAs($this->admin())
@@ -304,9 +304,9 @@ class VintedListingTest extends TestCase
             $names,
         );
 
-        // Le lien porte le même nom que l'en-tête : les deux le calculent au
-        // même endroit, et une page qui promettrait autre chose que la
-        // réponse serait pire que pas de nom du tout.
+        // The link carries the same name as the header: both compute it in
+        // one place, and a page promising something other than the response
+        // would be worse than no name at all.
         $html = $this->actingAs($this->admin())
             ->get(route('admin.products.vinted.edit', $product))
             ->assertOk()
@@ -321,8 +321,8 @@ class VintedListingTest extends TestCase
 
     public function test_a_photo_from_another_listing_cannot_be_downloaded_through_this_product(): void
     {
-        // L'identifiant est dans l'adresse : sans contrôle, il servirait
-        // n'importe quelle photo depuis n'importe quel produit.
+        // The id is in the address: without a check it would serve any photo
+        // from any product.
         $product = Product::factory()->create();
         $other = Product::factory()->create();
 

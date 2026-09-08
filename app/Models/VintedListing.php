@@ -8,12 +8,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * Ce qu'on écrira sur Vinted pour un produit.
+ * What will be written on Vinted for a product.
  *
- * Rien n'est envoyé nulle part : Vinted n'ouvre pas d'API pour déposer une
- * annonce, et la déposer à la main est de toute façon le moment où l'on
- * décide qu'elle part. Cette page garde le texte prêt entre deux fois, pour
- * qu'il ne soit pas réécrit à chaque dépôt ni cherché dans un carnet.
+ * Nothing is sent anywhere: Vinted opens no API for depositing a listing,
+ * and depositing it by hand is in any case the moment one decides it goes
+ * up. This holds the wording ready from one posting to the next, so it is
+ * neither rewritten each time nor hunted for in a notebook.
  */
 #[Fillable([
     'product_id',
@@ -40,37 +40,37 @@ class VintedListing extends Model
         return $this->hasMany(VintedListingImage::class)->orderBy('sort_order')->orderBy('id');
     }
 
-    /** Le prix tel qu'on le tape dans un champ : « 12.90 », jamais « 12,90 ». */
+    /** The price as one types it into a field: "12.90", never "12,90". */
     public function priceInput(): string
     {
         return $this->price_cents === null ? '' : number_format($this->price_cents / 100, 2, '.', '');
     }
 
     /**
-     * Ce qu'on colle dans Vinted, à la virgule française et sans symbole :
-     * le champ prix de Vinted n'en veut pas.
+     * What gets pasted into Vinted, with a French comma and no symbol:
+     * Vinted's price field will not take one.
      */
     public function priceForCopy(): string
     {
         return $this->price_cents === null ? '' : number_format($this->price_cents / 100, 2, ',', '');
     }
 
-    /** Une annonce vide n'a rien à copier : le bouton le dit plutôt que de mentir. */
+    /** An empty listing has nothing to copy: the button says so rather than lying. */
     public function isEmpty(): bool
     {
         return blank($this->title) && blank($this->description) && $this->price_cents === null;
     }
 
     /**
-     * Vinted refuse une annonce à une seule photo, et une annonce à une seule
-     * photo se vend mal de toute façon : deux est le minimum qui compte.
+     * Vinted refuses a listing with a single photo, and a listing with a
+     * single photo sells badly anyway: two is the minimum that counts.
      */
     public const MINIMUM_IMAGES = 2;
 
     /**
-     * Ce qui est écrit et ce qui manque, poste par poste. La fiche produit
-     * s'en sert pour dire d'un coup d'œil si l'annonce peut partir, sans
-     * avoir à l'ouvrir.
+     * What is written and what is missing, item by item. The product page
+     * uses it to say at a glance whether the listing can go up, without
+     * having to open it.
      *
      * @return array<string, bool>
      */
@@ -89,8 +89,8 @@ class VintedListing extends Model
         return ! in_array(false, $this->readiness(), true);
     }
 
-    /** Compté sur la relation déjà chargée quand elle l'est, pour ne pas
-     *  refaire une requête par produit dans une liste. */
+    /** Counted on the already-loaded relation when there is one, so a list
+     *  does not run a query per product. */
     public function imageCount(): int
     {
         return $this->relationLoaded('images')

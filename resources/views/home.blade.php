@@ -10,10 +10,10 @@
              free shipping with no threshold behind it is worse than silence. --}}
         <aside class="ship-strip" aria-label="{{ __('store.home_ship_banner_title', ['amount' => $freeShippingAmount]) }}">
             <p class="ship-strip-inner">
-                {{-- Un colis au trait plutôt que la silhouette pleine du
-                     catalogue : à cette taille un aplat devient une tache, et
-                     les deux traits de vitesse disent « en route » là où le
-                     camion ne disait que « camion ». --}}
+                {{-- A parcel drawn in line rather than the catalogue's
+                     filled silhouette: at this size a solid shape becomes a
+                     blot, and the lines of travel say "on its way" where the
+                     truck only said "truck". --}}
                 <svg class="ship-strip-icon" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false">
                     <path d="M1.6 9.4h3.6M0.8 12.6h3.2M2.4 15.8h2.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".65"/>
                     <path d="M8.4 8.2 14.6 5l6.2 3.2v7.6L14.6 19l-6.2-3.2V8.2Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
@@ -566,10 +566,10 @@
                 <p class="home-about-kicker">{{ __('store.home_about_kicker') }}</p>
                 <h2 class="home-about-title" id="home-about-title">{{ __('store.home_about_heading') }}</h2>
                 <p class="home-about-lead">{{ __('store.home_about_lead') }}</p>
-                {{-- Une cible plutôt qu'une coche : la coche disait « validé »,
-                     comme un formulaire qui a bien voulu de vous, là où ces
-                     deux lignes disent ce que la boutique choisit. Et c'est le
-                     dessin du métier. --}}
+                {{-- A target rather than a tick: the tick said "valid", the
+                     way a form that has accepted you does, where these lines
+                     say what the shop chooses to stock. And it is the glyph
+                     of the trade. --}}
                 <ul class="home-about-points">
                     <li>
                         <span class="home-about-point-mark" aria-hidden="true">
@@ -583,11 +583,10 @@
                         </span>
                         <span>{{ __('store.home_about_goal') }}</span>
                     </li>
-                    {{-- Les deux premières lignes disent ce que la boutique
-                         choisit ; celle-ci dit ce qu'elle en fait. C'est la
-                         phrase que l'on cherche à lire avant de commander,
-                         et celle qui porte les mots que l'on tape pour la
-                         trouver. --}}
+                    {{-- The first two lines say what the shop chooses; this
+                         one says what it does with it. It is the sentence one
+                         looks for before ordering, and the one carrying the
+                         words people type to find it. --}}
                     <li>
                         <span class="home-about-point-mark" aria-hidden="true">
                             @include('partials.icon', ['name' => 'bullseye', 'size' => 13])

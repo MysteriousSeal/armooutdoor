@@ -119,9 +119,9 @@ class AdminAuthorizationTest extends TestCase
             'payment_method' => 'bank_wire',
         ]);
 
-        // La photo d'une annonce Vinted : sans identifiant valide, l'adresse
-        // rend 404 avant d'atteindre la porte, et le balayage lirait ce 404
-        // comme une porte non gardée.
+        // A Vinted listing's photo: without a valid id the address returns
+        // 404 before reaching the door, and the sweep would read that 404 as
+        // an unguarded door.
         $vintedListing = VintedListing::query()->create([
             'product_id' => $product->id,
             'title' => 'Annonce',

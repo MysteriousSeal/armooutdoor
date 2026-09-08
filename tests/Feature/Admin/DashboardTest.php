@@ -287,9 +287,9 @@ class DashboardTest extends TestCase
             ]);
         }
 
-        // Les quatre chiffres vivent dans le panneau « Warehouse » depuis
-        // qu'ils y ont rejoint la valeur du stock : mêmes comptes, même
-        // règle, une bande de tuiles en moins.
+        // The four figures live in the Warehouse panel since they joined the
+        // stock value there: same counts, same rule, one strip of tiles
+        // fewer.
         $html = $this->actingAs($this->admin())->get(route('admin.dashboard'))->assertOk()
             ->assertSee('References for sale')
             ->assertSee('Units in stock')
@@ -309,8 +309,8 @@ class DashboardTest extends TestCase
         $product = Product::factory()->create();
         $this->receive($product, 10, 100); // 1,20 € TTC l'unité
 
-        // 15,00 € encaissés, 3,00 € de frais, 2 unités à 1,20 € :
-        // 15,00 − 3,00 − 2,40 = 9,60 € de bénéfice.
+        // 15,00 € taken, 3,00 € of costs, 2 units at 1,20 €:
+        // 15,00 − 3,00 − 2,40 = 9,60 € of profit.
         $order = $this->order([
             'total_cents' => 1500,
             'shipping_paid_cents' => 100,
@@ -336,9 +336,9 @@ class DashboardTest extends TestCase
 
     public function test_an_order_that_cannot_be_priced_stays_out_of_the_profit(): void
     {
-        // Aucun bon de commande derrière ce produit : le bénéfice de cette
-        // vente est inconnu, pas nul. Elle compte dans le chiffre d'affaires
-        // et le compteur dit qu'elle manque au reste.
+        // No purchase order behind this product: the profit on this sale is
+        // unknown, not nothing. It counts towards revenue, and the counter
+        // says it is missing from the rest.
         $order = $this->order(['total_cents' => 2000]);
         OrderItem::query()->create([
             'order_id' => $order->id, 'product_id' => Product::factory()->create()->id,
@@ -353,14 +353,14 @@ class DashboardTest extends TestCase
         $this->assertSame(0, $money['profit_cents']);
         $this->assertSame(0, $money['priced_orders']);
         $this->assertSame(1, $money['total_orders']);
-        // Sans commande chiffrée, il n'y a pas de marge à écrire.
+        // With no priced order there is no margin to write.
         $this->assertNull($money['margin_percent']);
     }
 
     public function test_the_ledger_bar_keeps_one_base_for_its_three_shares(): void
     {
-        // Deux ventes, une seule chiffrable : la barre se rapporte au chiffre
-        // d'affaires de celle-là, donc ses trois parts totalisent 100 %.
+        // Two sales, only one priceable: the bar is a share of that one's
+        // revenue, so its three parts add up to 100 %.
         $product = Product::factory()->create();
         $this->receive($product, 10, 100);
 
@@ -382,7 +382,7 @@ class DashboardTest extends TestCase
 
         $this->assertSame(6500, $money['revenue_cents']);
         $this->assertSame(1500, $money['priced_revenue_cents']);
-        // Les frais de la seule commande chiffrée, pas des deux.
+        // The costs of the priced order only, not of both.
         $this->assertSame(60, $money['priced_costs_cents']);
         $this->assertSame(260, $money['order_costs_cents']);
 
@@ -397,8 +397,8 @@ class DashboardTest extends TestCase
         $priced = Product::factory()->create(['is_active' => true, 'quantity' => 4]);
         $this->receive($priced, 10, 250); // 3,00 € TTC l'unité
 
-        // Une référence en stock sans historique d'achat n'a pas de valeur
-        // connue : comptée à part, jamais à zéro.
+        // A reference in stock with no purchase history has no known value:
+        // counted separately, never at zero.
         Product::factory()->create(['is_active' => true, 'quantity' => 7]);
 
         $stock = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->stockValue();
@@ -410,10 +410,10 @@ class DashboardTest extends TestCase
 
     public function test_a_product_with_declinations_is_valued_on_its_declinations(): void
     {
-        // La colonne du produit reste renseignée derrière ses déclinaisons.
-        // C'est celle des déclinaisons qui fait foi — la tuile « Units in
-        // stock » compte comme cela, et deux chiffres du même panneau ne
-        // peuvent pas compter le même stock deux fois.
+        // The product's own column stays filled behind its declinations. It
+        // is the declinations' that counts — the "Units in stock" tile counts
+        // that way, and two figures in one panel cannot count the same stock
+        // twice.
         $sized = Product::factory()->create(['is_active' => true, 'quantity' => 9]);
         $this->receive($sized, 10, 250); // 3,00 € TTC l'unité
 
@@ -430,7 +430,7 @@ class DashboardTest extends TestCase
 
         $stock = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->stockValue();
 
-        // 5 unités déclinées à 3,00 €, jamais 14.
+        // 5 declined units at 3,00 €, never 14.
         $this->assertSame(5, $stock['valued_units']);
         $this->assertSame(1500, $stock['warehouse_cents']);
     }
@@ -452,7 +452,7 @@ class DashboardTest extends TestCase
 
         $stock = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->stockValue();
 
-        // Six unités encore dues à 5,00 € HT, TVA 20 % : 36,00 €.
+        // Six units still owed at 5,00 € excl. VAT, VAT 20 %: 36,00 €.
         $this->assertSame(3600, $stock['committed_cents']);
         $this->assertSame(1, $stock['open_purchase_orders']);
     }
@@ -474,8 +474,8 @@ class DashboardTest extends TestCase
         $this->assertSame(1, $customers['returning']);
         $this->assertSame(1, $customers['new']);
         $this->assertSame(50.0, $customers['returning_percent']);
-        // Deux commandes pour le fidèle, une pour l'autre : un seul client
-        // sur deux a acheté plus d'une fois.
+        // Two orders for the loyal one, one for the other: one customer in
+        // two bought more than once.
         $this->assertSame(1, $customers['repeat_buyers']);
     }
 
@@ -495,7 +495,7 @@ class DashboardTest extends TestCase
 
         $this->assertSame(1400, $marketplace['commission_cents']);
         $this->assertSame(8600, $marketplace['net_cents']);
-        // Une vente directe ne paie de commission à personne.
+        // A direct sale pays commission to nobody.
         $this->assertSame(0, $direct['commission_cents']);
         $this->assertSame(5000, $direct['net_cents']);
     }
@@ -520,14 +520,14 @@ class DashboardTest extends TestCase
             ->assertSee('Warehouse')
             ->assertSee('Customers')
             ->assertSee('Orders per day')
-            // La barre de la ligne de compte et ses trois segments.
+            // The ledger bar and its three segments.
             ->assertSee('dash-ledger-segment is-profit', false);
     }
 
     public function test_all_time_starts_at_the_first_sale(): void
     {
-        // Une commande de test n'a jamais eu lieu : elle ne peut pas ouvrir
-        // la période, sans quoi la page commencerait sur des mois vides.
+        // A test order never happened: it cannot open the period, or the
+        // page would start on empty months.
         $ghost = $this->orderAt('2024-01-05');
         $ghost->forceFill(['test_marked_at' => now()])->save();
 
@@ -546,8 +546,8 @@ class DashboardTest extends TestCase
 
         $period = DashboardPeriod::resolve('all');
 
-        // La fenêtre précédente se termine avant de commencer : elle est
-        // vide, et l'écart n'a donc pas de référent.
+        // The previous window ends before it begins: it is empty, so the
+        // delta has nothing to measure against.
         $this->assertTrue($period->previousEnd->lessThan($period->previousStart));
 
         $metrics = new \App\Services\DashboardMetrics($period);
@@ -568,7 +568,8 @@ class DashboardTest extends TestCase
 
         $series = (new \App\Services\DashboardMetrics($period))->revenueSeries()['current'];
 
-        // Six mois, six cases — jamais cent cinquante jours de cheveux.
+        // Six months, six buckets — never a hundred and fifty days of
+        // hair.
         $this->assertSame(6, $series->count());
         $this->assertSame(1000, $series->first()['revenue_cents']);
         $this->assertSame(2000, $series->last()['revenue_cents']);
@@ -590,23 +591,23 @@ class DashboardTest extends TestCase
         $this->actingAs($this->admin())->get(route('admin.dashboard', ['period' => 'all']))->assertOk()
             ->assertSee('All time')
             ->assertSee('Orders per month')
-            // Sans tranche précédente, la légende n'annonce pas une série
-            // que le graphique ne trace pas.
+            // With no previous window the legend does not announce a series
+            // the chart does not draw.
             ->assertDontSee('Previous period');
     }
 
     /**
-     * Le tuyau reprend la couleur que la liste des commandes donne déjà à
-     * chaque statut. Deux jeux de teintes pour la même distinction, c'est
-     * une distinction de plus à apprendre pour rien.
+     * The pipeline takes the colour the orders list already gives each
+     * status. Two sets of tones for the same distinction is one more
+     * distinction to learn for nothing.
      */
     public function test_each_stage_wears_the_colour_of_its_status(): void
     {
         $css = file_get_contents(__DIR__.'/../../../public/css/admin.css');
         $base = file_get_contents(__DIR__.'/../../../public/css/base.css');
 
-        // La pastille de la liste et le jeton du tableau de bord tiennent le
-        // même hexadécimal, statut par statut.
+        // The list's badge and the dashboard's token hold the same hex,
+        // status by status.
         foreach ([
             'shipped' => '#3d6b4e',
             'in-transit' => '#6a4a9c',
@@ -617,7 +618,7 @@ class DashboardTest extends TestCase
             $this->assertStringContainsString($hex, $base, "List badge colour for {$status}");
         }
 
-        // Et chaque étape a bien une classe pour la porter.
+        // And every stage has a class to carry it.
         foreach (['placed', 'preparing', 'shipped', 'in_transit', 'delivered', 'refunded'] as $status) {
             $this->assertStringContainsString(".dash-status-{$status} {", $css);
         }
@@ -635,15 +636,15 @@ class DashboardTest extends TestCase
 
         $this->assertSame('Refunded', $refunded['label']);
         $this->assertSame(2, $refunded['count']);
-        // Dernière de la file : elle en sort, elle ne l'avance pas.
+        // Last in the queue: it leaves it, it does not advance it.
         $this->assertSame('refunded', $pipeline->last()['status']);
     }
 
     public function test_only_open_stages_are_drawn_in_the_bar(): void
     {
-        // Livrées et remboursées sont des fins : comptées, mais hors de la
-        // barre, qu'elles écraseraient en vieillissant — 185 sur 211 ne
-        // laissent rien à voir aux quatre étapes qui restent à traiter.
+        // Delivered and refunded are endings: counted, but out of the bar
+        // they would crush as they age — 185 of 211 leaves nothing to see of
+        // the four stages still to work.
         $this->order(['status' => 'placed']);
         $this->order(['status' => 'delivered']);
         $this->order(['status' => 'refunded']);
@@ -661,11 +662,11 @@ class DashboardTest extends TestCase
 
         $html = $this->actingAs($this->admin())->get(route('admin.dashboard'))->assertOk()->getContent();
 
-        // Un seul segment dans la barre du tuyau : la commande placée.
+        // One segment only in the pipeline bar: the placed order.
         $this->assertStringContainsString('dash-stack-segment dash-status-placed', $html);
         $this->assertStringNotContainsString('dash-stack-segment dash-status-delivered', $html);
         $this->assertStringNotContainsString('dash-stack-segment dash-status-refunded', $html);
-        // Comptées quand même, sous le filet.
+        // Counted all the same, under the rule.
         $this->assertStringContainsString('dash-swatch dash-status-delivered', $html);
         $this->assertStringContainsString('dash-pipeline-list--closed', $html);
     }
@@ -682,8 +683,8 @@ class DashboardTest extends TestCase
 
     public function test_an_archived_refund_stays_out_of_the_pipeline(): void
     {
-        // Le tuyau est la file de travail : archiver range la ligne, ici
-        // comme pour les autres statuts.
+        // The pipeline is the work queue: archiving files the row away, here
+        // as for every other status.
         $this->order(['status' => 'refunded'])->forceFill(['archived_at' => now()])->save();
 
         $pipeline = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->pipeline();
@@ -702,14 +703,14 @@ class DashboardTest extends TestCase
         $metrics = new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d'));
         $customers = $metrics->customers();
 
-        // Une tête en moins partout : acheteurs de la période, acheteurs de
-        // toujours, et la moyenne qui les divise.
+        // One head fewer everywhere: buyers of the period, buyers of all
+        // time, and the average that divides them.
         $this->assertSame(1, $customers['buyers']);
         $this->assertSame(1, $customers['lifetime_buyers']);
         $this->assertSame(1000, $customers['lifetime_value_cents']);
 
-        // Les comptes ouverts se comptent sur la même règle : lever le
-        // bannissement rend exactement une tête aux deux chiffres.
+        // Shop accounts are counted on the same rule: lifting the ban gives
+        // exactly one head back to both figures.
         $accountsBanned = $metrics->reference()['customers'];
         $newBanned = $metrics->headline()['new_customers'];
 
@@ -724,8 +725,8 @@ class DashboardTest extends TestCase
 
     public function test_a_banned_customers_orders_are_still_revenue(): void
     {
-        // L'argent a bien été encaissé : le retirer ferait dire au tableau
-        // de bord moins que la liste des commandes pour la même période.
+        // That money really was taken: removing it would have the dashboard
+        // report less than the orders list for the same period.
         $banned = User::factory()->create(['banned_at' => now()]);
         $this->order(['user_id' => $banned->id, 'total_cents' => 9000]);
 
@@ -738,9 +739,9 @@ class DashboardTest extends TestCase
 
     public function test_the_stock_chips_say_how_many_references_are_already_on_order(): void
     {
-        // Deux ruptures, une seule réapprovisionnée : la puce doit dire la
-        // différence, sinon elle envoie chercher deux fiches dont une
-        // n'attend plus que le facteur.
+        // Two shortages, only one restocked: the chip has to say the
+        // difference, or it sends the reader to two product pages one of
+        // which is waiting on nothing but the postman.
         $coming = Product::factory()->create(['is_active' => true, 'quantity' => 0]);
         Product::factory()->create(['is_active' => true, 'quantity' => 0]);
 
@@ -783,7 +784,7 @@ class DashboardTest extends TestCase
         $chip = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))
             ->attention()->firstWhere('key', 'out-of-stock');
 
-        // Rien en route : la puce ne porte pas de parenthèse vide.
+        // Nothing on its way: the chip carries no empty bracket.
         $this->assertSame(1, $chip['count']);
         $this->assertNull($chip['note']);
     }
@@ -815,16 +816,16 @@ class DashboardTest extends TestCase
 
         $orders = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->recentOrders();
 
-        // Les unités de la boîte, pas le nombre de références : trois cibles
-        // et un rouleau font quatre articles à emballer.
+        // The units in the box, not the number of references: three targets
+        // and one roll make four items to pack.
         $this->assertSame(4, (int) $orders->firstWhere('number', $direct->number)->units_count);
         $this->assertSame(1, (int) $orders->firstWhere('number', $sold->number)->units_count);
 
         $html = $this->actingAs($this->admin())->get(route('admin.dashboard'))->assertOk()->getContent();
 
         $this->assertStringContainsString('4 items', $html);
-        // Le canal ferme la ligne des faits : la place de marché se nomme,
-        // et la vente directe, qui n'a personne à créditer, le dit.
+        // The channel closes the line of facts: the marketplace is named,
+        // and a direct sale, having nobody to credit, says so.
         $this->assertMatchesRegularExpression('#dash-order-channel">\s*NaturaBuy#', $html);
         $this->assertMatchesRegularExpression('#dash-order-channel">\s*Direct#', $html);
     }
@@ -833,8 +834,8 @@ class DashboardTest extends TestCase
     {
         $product = Product::factory()->create(['sku' => 'CRT-REACT-076']);
 
-        // Deux ventes du même article à deux prix : la moyenne est celle du
-        // chiffre d'affaires par unité, pas le prix affiché aujourd'hui.
+        // Two sales of the same article at two prices: the average is
+        // revenue per unit, not the price shown today.
         foreach ([[2, 1000], [3, 2100]] as [$quantity, $lineCents]) {
             $order = $this->order(['total_cents' => $lineCents]);
             OrderItem::query()->create([
@@ -878,8 +879,8 @@ class DashboardTest extends TestCase
 
     public function test_a_product_never_purchased_has_no_cost_to_show(): void
     {
-        // Sans historique d'achat le coût est inconnu, jamais nul : une
-        // marge lue en face d'un zéro serait fausse.
+        // With no purchase history the cost is unknown, never nothing: a
+        // margin read against a zero would be false.
         $product = Product::factory()->create();
 
         $order = $this->order(['total_cents' => 2000]);
@@ -896,9 +897,9 @@ class DashboardTest extends TestCase
 
     public function test_a_deleted_product_has_no_sku_to_show(): void
     {
-        // La ligne vendue garde le nom, jamais la référence : un produit
-        // supprimé n'a plus de SKU, et inventer un tiret vaut mieux qu'en
-        // inventer un.
+        // The sold line keeps the name, never the reference: a deleted
+        // product has no SKU left, and a dash is better than inventing
+        // one.
         $order = $this->order();
         OrderItem::query()->create([
             'order_id' => $order->id, 'product_id' => null, 'product_slug' => 'gone',
@@ -919,7 +920,7 @@ class DashboardTest extends TestCase
 
         $stock = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->stockValue();
 
-        // 4 × 10,00 € en rayon contre 4 × 3,00 € payés.
+        // 4 × 10,00 € on the shelf against 4 × 3,00 € paid.
         $this->assertSame(4000, $stock['retail_cents']);
         $this->assertSame(1200, $stock['warehouse_cents']);
         $this->assertSame(2800, $stock['shelf_margin_cents']);
@@ -928,9 +929,9 @@ class DashboardTest extends TestCase
 
     public function test_the_shelf_margin_only_covers_references_whose_cost_is_known(): void
     {
-        // Un prix de vente existe toujours, un coût d'achat non : la valeur
-        // de revente couvre tout le rayon, la marge seulement la part dont
-        // les deux bouts sont connus.
+        // A selling price always exists, a purchase cost does not: the
+        // resale value covers the whole shelf, the margin only the part
+        // whose two ends are known.
         $priced = Product::factory()->create(['is_active' => true, 'quantity' => 2, 'price_cents' => 1000]);
         $this->receive($priced, 10, 250);
 
@@ -959,7 +960,7 @@ class DashboardTest extends TestCase
 
         $stock = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->stockValue();
 
-        // 3 × 15,00 €, le prix que le client paie aujourd'hui.
+        // 3 × 15,00 €, the price a customer pays today.
         $this->assertSame(4500, $stock['retail_cents']);
     }
 }

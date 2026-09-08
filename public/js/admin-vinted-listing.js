@@ -1,9 +1,9 @@
 (function () {
     var buttons = Array.prototype.slice.call(document.querySelectorAll('.vinted-copy'));
 
-    // Le compte de caractères et le nom des fichiers choisis vivent ici
-    // aussi : ils n'ont rien à voir avec le presse-papiers, et doivent
-    // marcher même là où il manque.
+    // The character count and the names of the picked files live here too:
+    // they have nothing to do with the clipboard, and must work even where
+    // it is missing.
     countCharacters();
     reportPickedFiles();
 
@@ -11,9 +11,9 @@
         return;
     }
 
-    // Sans presse-papiers — un vieux navigateur, une page servie sans HTTPS —
-    // les boutons ne feraient rien en silence. Mieux vaut qu'ils ne soient
-    // pas là : le champ est juste à côté, il se sélectionne à la main.
+    // With no clipboard — an old browser, a page served without HTTPS — the
+    // buttons would do nothing, silently. Better that they are not there at
+    // all: the field is right beside them and selects by hand.
     if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
         buttons.forEach(function (button) {
             button.hidden = true;
@@ -39,7 +39,7 @@
 
             var value = field.value;
 
-            // Le champ prix de Vinted attend une virgule et refuse le point.
+            // Vinted's price field wants a comma and refuses a full stop.
             if (button.hasAttribute('data-copy-decimal-comma')) {
                 value = value.replace('.', ',');
             }
@@ -54,8 +54,8 @@
                     label(button, idle);
                 }, 1600);
             }, function () {
-                // Le refus du navigateur se dit : un bouton qui ne réagit pas
-                // laisse croire que la valeur est partie.
+                // A refusal from the browser is said out loud: a button that
+                // does nothing lets one believe the value went across.
                 clearTimeout(timer);
                 label(button, 'Press ⌘C');
 
@@ -70,9 +70,9 @@
     });
 
     /**
-     * Combien de caractères sont écrits, et — pour le titre — à partir de
-     * quand Vinted coupera sur un téléphone. Une information, jamais un
-     * blocage : un titre plus long reste un titre valide.
+     * How many characters are written, and — for the title — from where
+     * Vinted will cut on a phone. Information, never a block: a longer title
+     * is still a valid title.
      */
     function countCharacters() {
         var fields = Array.prototype.slice.call(document.querySelectorAll('[data-counter-for]'));
@@ -105,7 +105,7 @@
         });
     }
 
-    /** Ce que le sélecteur de fichiers a retenu, dit en toutes lettres. */
+    /** What the file picker kept, said in words. */
     function reportPickedFiles() {
         var notes = Array.prototype.slice.call(document.querySelectorAll('[data-picked-for]'));
 

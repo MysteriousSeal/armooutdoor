@@ -9,15 +9,15 @@
  * dark ground rather than the other way round.
  */
 :root {
-    /* Un olive plus profond que celui des titres : le même ton de la maison,
-       assez sombre pour porter du texte clair (6,6:1). */
+    /* An olive deeper than the headings' own: the same house tone, dark
+       enough to carry light text (6.6:1). */
     --ship-band: #55573a;
     --ship-ink: #f6f4ec;
 }
 
-/* Sur fond sombre la bande reste sombre : inverser la polarité d'un thème
-   à l'autre ferait clignoter la page au changement de mode. Elle se
-   détache du noir par l'olive, pas par la clarté. */
+/* On a dark ground the band stays dark: flipping polarity from one theme
+   to the other would make the page blink on a mode change. It stands out
+   from the black by its olive, not by its lightness. */
 [data-theme='dark'] {
     --ship-band: #454731;
     --ship-ink: #eeecdf;
@@ -31,10 +31,10 @@
 }
 
 /*
- * Les deux bouts de la bande sont hachurés en diagonale, comme le bord
- * d'une enveloppe par avion. C'est le seul ornement de la bande, et il
- * vient du sujet : ce ruban parle d'expédition, il en porte la marque
- * plutôt qu'un dégradé qui n'aurait parlé de rien.
+ * Both ends of the band are hatched on the diagonal, like the border of an
+ * airmail envelope. It is the band's only ornament, and it comes from the
+ * subject: this ribbon is about shipping, so it wears a postal mark rather
+ * than a gradient that would have meant nothing.
  */
 .ship-strip::before,
 .ship-strip::after {
@@ -53,8 +53,8 @@
 
 .ship-strip::before {
     left: 0;
-    /* Les hachures s'éteignent vers le texte : elles bordent, elles
-       n'empiètent pas. */
+    /* The hatching fades towards the text: it borders, it does not
+       encroach. */
     mask-image: linear-gradient(90deg, #000 0%, transparent 100%);
 }
 
@@ -86,16 +86,16 @@
     color: var(--ship-ink);
 }
 
-/* Le colis annonce le sujet avant que la phrase soit lue. Sans cadre :
-   les hachures des deux bords portent déjà tout l'ornement de la bande, et
-   un troisième rectangle en aurait fait un tableau de bord. */
+/* The parcel announces the subject before the sentence is read. Unframed:
+   the hatching at both edges already carries all the band's ornament, and a
+   third rectangle would have made it a dashboard. */
 .ship-strip-icon {
     flex-shrink: 0;
     color: var(--ship-ink);
 }
 
-/* Le trait s'affine à mesure que le dessin grandit : à 28px, une épaisseur
-   de 1,5 le rendrait plus gras que la phrase qu'il accompagne. */
+/* The stroke thins as the drawing grows: at 28px, a weight of 1.5 would
+   make it heavier than the sentence beside it. */
 .ship-strip-icon path {
     stroke-width: 1.35;
 }
@@ -111,11 +111,11 @@
     min-width: 0;
 }
 
-/* Le seuil, tamponné : papier clair sur la bande, l'inverse de ce qu'il
-   était sur le lavis. C'est le chiffre qu'on retient de la phrase. */
-/* Le seuil est un ticket, pas un surlignage : encoché aux deux bouts,
-   comme un talon qu'on détache. Le repli sur un simple rectangle est
-   prévu pour les navigateurs sans clip-path. */
+/* The threshold, stamped: light paper on the band, the reverse of what it
+   was on the wash. It is the figure one keeps from the sentence. */
+/* The threshold is a ticket, not a highlight: notched at both ends, like a
+   stub one tears off. The fallback to a plain rectangle is there for
+   browsers without clip-path. */
 .ship-strip-amount {
     display: inline-block;
     padding: 0.11em 0.62em 0.13em;
@@ -179,7 +179,7 @@
         display: none;
     }
 
-    /* Plus de bord à border : la bande n'est plus qu'un message. */
+    /* No edge left to border: the band is nothing but its message. */
     .ship-strip::before,
     .ship-strip::after {
         display: none;
@@ -882,11 +882,11 @@
 }
 
 /*
- * Les deux principes. Encadrés chacun dans sa boîte grise, ils se lisaient
- * comme deux messages de formulaire — quelque chose que la page vous
- * répond, pas quelque chose que la maison dit. Ils sont tenus par un filet
- * olive à gauche, séparés d'un trait, et n'ont plus de fond du tout : une
- * note en marge de catalogue plutôt qu'une alerte.
+ * The two principles. Each in its own grey box, they read like two form
+ * messages — something the page answers back, not something the house says.
+ * They are held by an olive rule down the left, separated by a hairline,
+ * and have no fill at all: a note in the margin of a catalogue rather than
+ * an alert.
  */
 .home .home-about-points {
     display: flex;
@@ -909,13 +909,12 @@
     border-top: 1px solid var(--border);
 }
 
-/* La cible, à l'échelle du texte : elle marque la ligne, elle ne la
-   décore pas. Pas de cercle autour d'un cercle.
+/* The target, at the size of the text: it marks the line, it does not
+   decorate it. No circle drawn around a circle.
 
-   Sa boîte fait exactement la hauteur d'une ligne de la phrase — même
-   corps, même interligne — et le dessin s'y centre : caler la marque à la
-   main sur une marge du haut la laissait dériver dès que le texte passait
-   à la ligne suivante. */
+   Its box is exactly one line of the sentence tall — same size, same
+   leading — and the drawing centres in it: setting the mark by hand with a
+   top margin let it drift the moment the text wrapped to a second line. */
 .home .home-about-point-mark {
     display: inline-flex;
     align-items: center;
@@ -946,8 +945,8 @@
     text-transform: uppercase;
 }
 
-/* La flèche avance d'un cheveu au survol : le seul mouvement du bloc, et
-   il dit où mène le bouton. */
+/* The arrow moves a hair on hover: the only movement in the block, and it
+   says where the button leads. */
 .home .home-about-cta-arrow {
     flex-shrink: 0;
     transition: transform 160ms ease;

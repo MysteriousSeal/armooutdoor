@@ -12,9 +12,9 @@
         return String(value).padStart(2, '0');
     }
 
-    // Le libellé vient d'un data-attribut, donc d'une chaîne de traduction :
-    // collé dans du HTML, un chevron oublié dans une traduction deviendrait
-    // une balise. Posé au textContent, il ne peut être que du texte.
+    // The label comes from a data attribute, so from a translation string:
+    // pasted into HTML, a chevron left in a translation would become a tag.
+    // Set with textContent, it can only ever be text.
     function unit(value, label) {
         var wrap = document.createElement('span');
         wrap.className = 'discount-countdown-unit';

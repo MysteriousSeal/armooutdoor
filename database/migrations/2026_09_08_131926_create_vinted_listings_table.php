@@ -5,13 +5,13 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * L'annonce Vinted d'un produit : son titre, son texte, son prix, ses photos.
+ * A product's Vinted listing: its title, its text, its price, its photos.
  *
- * Une table à part plutôt que des colonnes sur `products` : ce que la
- * boutique vend et ce qu'elle raconte sur une place de marché sont deux
- * choses, et la seconde recommencera à zéro pour la place suivante. Une
- * ligne par produit — l'unicité le dit, pour qu'aucun écran n'ait à choisir
- * entre deux brouillons.
+ * A table of its own rather than columns on `products`: what the shop sells
+ * and what it says about it on a marketplace are two things, and the second
+ * starts from nothing again for the next marketplace. One row per product —
+ * the unique constraint says so, so no screen has to choose between two
+ * drafts.
  */
 return new class extends Migration
 {
@@ -22,17 +22,17 @@ return new class extends Migration
             $table->foreignId('product_id')->unique()->constrained()->cascadeOnDelete();
             $table->string('title')->nullable();
             $table->text('description')->nullable();
-            // En centimes comme partout ailleurs, et facultatif : une annonce
-            // en cours d'écriture n'a pas encore de prix.
+            // In cents like everywhere else, and optional: a listing still
+            // being written does not have a price yet.
             $table->unsignedInteger('price_cents')->nullable();
             $table->timestamps();
         });
 
         /*
-         * Les photos de l'annonce sont les siennes. Sur Vinted on photographie
-         * l'article porté, posé, dans la lumière du salon ; ce ne sont pas les
-         * images du catalogue, et les lier aurait forcé les deux à changer
-         * ensemble.
+         * The listing's photos are its own. On Vinted one photographs the
+         * article worn, on a table, in the light of the room; these are not
+         * the catalogue's images, and tying the two together would have
+         * forced each to change with the other.
          */
         Schema::create('vinted_listing_images', function (Blueprint $table): void {
             $table->id();

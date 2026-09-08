@@ -2767,8 +2767,8 @@ button.supplier-availability-chip:hover {
     color: #2f5d8a;
 }
 
-/* La part entre parenthèses accompagne le chiffre sans le concurrencer :
-   même couleur, plus petite et allégée, comme une unité. */
+/* The bracketed share accompanies the figure without competing with it:
+   same colour, a size down and lighter, the way a unit does. */
 .admin-stat-part-value-pct {
     margin-left: 0.25rem;
     font-size: 0.8125rem;
@@ -6158,8 +6158,8 @@ input[type="date"].form-control {
     border: 1px solid #c6d8e8;
 }
 
-/* Le pourcentage tient dans la même pastille que le montant : deux
-   pastilles côte à côte se liraient comme deux chiffres indépendants. */
+/* The percentage sits in the same chip as the amount: two chips side by
+   side would read as two independent figures. */
 .admin-order-profit {
     gap: 0.3rem;
 }
@@ -6268,11 +6268,11 @@ input[type="date"].form-control {
     --chart-stage-4: #2661a8;
     --chart-stage-5: #17457f;
 
-    /* Les statuts de commande, repris de la pastille que porte chaque ligne
-       de la liste des commandes. La rampe ordinale disait mieux l'ordre des
-       étapes, mais ces six teintes-là sont celles que l'œil a déjà apprises
-       en travaillant la liste, et un remboursement n'est de toute façon pas
-       une étape du tuyau : c'est là qu'il en sort. */
+    /* Order statuses, taken from the badge each row of the orders list
+       wears. The ordinal ramp said the sequence better, but these six tones
+       are the ones the eye already learned working that list, and a refund
+       is not a stage of the pipeline anyway: it is where an order leaves
+       it. */
     --status-placed: #8b7e74;
     --status-preparing: #8a6d1f;
     --status-shipped: #3d6b4e;
@@ -6280,10 +6280,10 @@ input[type="date"].form-control {
     --status-delivered: #2f5d8a;
     --status-refunded: #aa4444;
 
-    /* La ligne de compte : une part-à-tout d'une seule quantité, donc une
-       progression et non un jeu catégoriel. Elle sort des deux couleurs de
-       la maison — le taupe de l'accent, l'olive des titres — pour que ce
-       que la boutique garde soit de la couleur de la boutique. */
+    /* The ledger line: a part-to-whole of one quantity, so a progression
+       rather than a categorical set. It comes out of the two house colours —
+       the accent's taupe, the headings' olive — so that what the shop keeps
+       is the colour of the shop. */
     --ledger-costs: #c3b5a7;
     --ledger-goods: #8b7e74;
     --ledger-profit: #5b5c3b;
@@ -6316,9 +6316,9 @@ input[type="date"].form-control {
     --chart-stage-4: #3f77c9;
     --chart-stage-5: #2a5896;
 
-    /* Les mêmes six statuts, aux valeurs claires que la liste des commandes
-       leur donne déjà en sombre — jamais les valeurs du mode clair
-       éclaircies au jugé. */
+    /* The same six statuses, at the light values the orders list already
+       gives them in dark — never the light-mode values brightened by
+       eye. */
     --status-placed: #b0a396;
     --status-preparing: #e0c56a;
     --status-shipped: #8fceac;
@@ -6326,9 +6326,10 @@ input[type="date"].form-control {
     --status-delivered: #8ab4dd;
     --status-refunded: #e08585;
 
-    /* Sur fond sombre l'olive des titres devient de la boue : la même
-       progression est reprise plus claire, l'écart entre les trois pas
-       vérifié sur la surface sombre plutôt qu'éclairci mécaniquement. */
+    /* On a dark ground the headings' olive turns to mud: the same
+       progression is taken lighter, the distance between the three steps
+       checked against the dark surface rather than brightened
+       mechanically. */
     --ledger-costs: #6d635b;
     --ledger-goods: #a3958a;
     --ledger-profit: #b6b878;
@@ -6424,10 +6425,10 @@ input[type="date"].form-control {
     font-variant-numeric: tabular-nums;
 }
 
-/* Ce qui est déjà commandé, entre parenthèses au bout de la puce : une
-   nuance du compte, pas un second compte. Elle prend la teinte de l'alerte
-   à demi, derrière un filet de la même encre — assez pour se lire, pas
-   assez pour disputer le chiffre son voisin. */
+/* What is already on order, in brackets at the end of the chip: a
+   qualifier of the count, not a second count. It takes the alert's own ink
+   at half strength, behind a hairline of the same — enough to read, not
+   enough to fight the figure beside it. */
 .dash-chip-note {
     display: inline-flex;
     align-items: center;
@@ -6440,8 +6441,8 @@ input[type="date"].form-control {
     border-left: 1px solid color-mix(in srgb, currentColor 30%, transparent);
 }
 
-/* Une flèche entrante plutôt que des parenthèses : le sens est « ça
-   arrive », et le glyphe le dit sans coûter un mot. */
+/* An inbound arrow rather than brackets: the sense is "on its way", and
+   the glyph says it without costing a word. */
 .dash-chip-note::before {
     content: '';
     width: 0.5rem;
@@ -6687,8 +6688,8 @@ input[type="date"].form-control {
 .dash-stage-4 { --swatch-color: var(--chart-stage-4); }
 .dash-stage-5 { --swatch-color: var(--chart-stage-5); }
 
-/* Nommées par le statut et non par un rang : l'ordre des étapes peut
-   changer sans repeindre la mauvaise. */
+/* Named by status and not by rank: the order of the stages can change
+   without repainting the wrong one. */
 .dash-status-placed { --swatch-color: var(--status-placed); }
 .dash-status-preparing { --swatch-color: var(--status-preparing); }
 .dash-status-shipped { --swatch-color: var(--status-shipped); }
@@ -6742,8 +6743,8 @@ input[type="date"].form-control {
     font-size: 0.8125rem;
 }
 
-/* Ce qui est fini se lit plus bas et plus discrètement : ce sont des
-   totaux, pas du travail. */
+/* What is finished reads lower and quieter: these are totals, not
+   work. */
 .dash-pipeline-list--closed {
     margin-top: 0.75rem;
     color: var(--text-muted);
@@ -6753,8 +6754,8 @@ input[type="date"].form-control {
     font-weight: 500;
 }
 
-/* Le filet porte son étiquette plutôt que de la surmonter : une ligne de
-   titre pour deux chiffres coûterait plus de hauteur qu'elle n'en éclaire. */
+/* The rule carries its label rather than sitting under one: a heading line
+   for two figures would cost more height than it lights. */
 .dash-pipeline-rule {
     flex: 1 1 100%;
     display: flex;
@@ -6775,8 +6776,8 @@ input[type="date"].form-control {
     background: var(--border);
 }
 
-/* Une file vide est une bonne nouvelle : elle le dit, plutôt que de
-   laisser une barre grise là où il n'y a rien à montrer. */
+/* An empty queue is good news: it says so, rather than leaving a grey bar
+   where there is nothing to show. */
 .dash-pipeline-clear {
     margin: 0 0 1rem;
     padding: 0.7rem 0.85rem;
@@ -6812,10 +6813,9 @@ input[type="date"].form-control {
     padding: 0.15rem 0;
 }
 
-/* Le filet de part, sous le nom plutôt que derrière lui : du texte posé
-   sur un lavis se lit moins bien, et une barre qui part toujours du même
-   bord se compare d'une rangée à l'autre sans que l'œil ait à chercher où
-   elle commence. */
+/* The share rule, under the name rather than behind it: text set on a wash
+   reads worse, and a bar that always starts from the same edge compares
+   from row to row without the eye hunting for where it begins. */
 .dash-bar {
     display: block;
     width: var(--bar-width);
@@ -6832,9 +6832,9 @@ input[type="date"].form-control {
     position: relative;
 }
 
-/* La référence sous le nom : elle sert à reconnaître et à dicter, pas à
-   lire, donc chiffres à chasse fixe, une taille en dessous et l'encre
-   sourde — le nom garde le poids de la ligne. */
+/* The reference under the name: it is for recognising and for reading
+   aloud, not for reading, so tabular figures, a size down and muted ink —
+   the name keeps the weight of the row. */
 .dash-bar-sku {
     display: block;
     overflow: hidden;
@@ -6847,16 +6847,16 @@ input[type="date"].form-control {
     color: var(--text-muted);
 }
 
-/* Les moyennes se lisent contre le total qu'elles décomposent : un cran
-   plus léger, pour qu'on trouve le total d'abord. */
+/* The averages read against the total they break down: a shade lighter, so
+   the total is found first. */
 .dash-unit-price {
     color: var(--text-muted);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
 }
 
-/* Le rang. Le panneau est un classement : c'est la seule chose que l'ordre
-   des lignes dit sans la montrer, et deux chiffres suffisent à la dire. */
+/* The rank. The panel is a ranking: that is the one thing the row order
+   says without showing it, and two digits are enough to say it. */
 .dash-rank-head {
     width: 1.75rem;
     padding-right: 0 !important;
@@ -6872,8 +6872,7 @@ input[type="date"].form-control {
     color: color-mix(in srgb, var(--accent-heading) 60%, var(--text-muted));
 }
 
-/* La première place porte l'olive pleine : une seule ligne se distingue,
-   sinon aucune ne se distingue. */
+/* First place carries the full olive: one row stands out, or none does. */
 .dash-bar-table tbody tr:first-child .dash-rank {
     color: var(--accent-heading);
 }
@@ -6902,10 +6901,10 @@ input[type="date"].form-control {
     overflow-x: hidden;
 }
 
-/* Largeurs posées plutôt que devinées : en disposition automatique, un
-   `max-width` sur une cellule ne la contraint pas — le tableau se
-   dimensionne sur le titre le plus long et pousse le panneau. Chaque
-   colonne chiffrée prend donc sa largeur, et le nom hérite du reste. */
+/* Widths declared rather than guessed: under automatic layout a `max-width`
+   on a cell does not constrain it — the table sizes itself to the longest
+   title and pushes the panel. Each numeric column therefore takes its
+   width, and the name inherits the rest. */
 .dash-bar-table {
     table-layout: fixed;
 }
@@ -6917,7 +6916,7 @@ input[type="date"].form-control {
 .dash-bar-table th:nth-child(6) { width: 6.5rem; }
 .dash-bar-table th:nth-child(7) { width: 7rem; }
 
-/* Les chiffres gardent leur ligne : c'est le titre qui cède, pas eux. */
+/* The numbers keep their line: it is the title that gives, not them. */
 .dash-bar-table .admin-table-num {
     white-space: nowrap;
 }
@@ -6950,13 +6949,13 @@ input[type="date"].form-control {
     margin-bottom: 1rem;
 }
 
-/* Une courbe a besoin de place, un compte de barres beaucoup moins. */
+/* A line chart needs room, a count of bars much less. */
 .dash-row--chart {
     grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
 }
 
-/* Un tableau à cinq colonnes contre une liste : la moitié chacun serait
-   large pour l'une et étroit pour l'autre. */
+/* A five-column table against a list: half each would be wide for one and
+   narrow for the other. */
 .dash-row--wide-narrow {
     grid-template-columns: minmax(0, 7fr) minmax(0, 6fr);
 }
@@ -6965,9 +6964,8 @@ input[type="date"].form-control {
     grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-/* Les panneaux d'une rangée s'alignent en haut et en bas ; celui qui a le
-   moins à dire pousse sa note de pied contre le bord plutôt que de laisser
-   un vide sous elle. */
+/* Panels in a row align top and bottom; the one with least to say pushes
+   its footnote against the edge rather than leaving a void under it. */
 .dash-row > .order-panel {
     display: flex;
     flex-direction: column;
@@ -7068,8 +7066,8 @@ input[type="date"].form-control {
     color: var(--text-muted);
 }
 
-/* Ce qui sort est écrit dans la couleur de son segment ; ce qui reste
-   porte l'olive, comme le liseré du panneau. */
+/* What goes out is written in its segment's colour; what stays carries the
+   olive, like the panel's own edge. */
 .dash-term--cost .dash-term-value {
     color: color-mix(in srgb, var(--ledger-costs) 45%, var(--text));
 }
@@ -7100,8 +7098,8 @@ input[type="date"].form-control {
     color: var(--ledger-profit);
 }
 
-/* La même soustraction à l'échelle. Le reste de la barre — le blanc à
-   droite — est ce que la période n'a pas pu chiffrer : il se voit. */
+/* The same subtraction, to scale. The rest of the bar — the white to the
+   right — is what the period could not price: it shows. */
 .dash-ledger-bar {
     display: flex;
     gap: 2px;
@@ -7162,9 +7160,9 @@ input[type="date"].form-control {
     --swatch-color: var(--ledger-profit);
 }
 
-/* Empilée, la soustraction garde son sens : l'opérateur passe devant le
-   terme qu'il introduit plutôt que de se retrouver dans une colonne à
-   lui, vide sur toute la hauteur. */
+/* Stacked, the subtraction keeps its sense: the operator moves in front of
+   the term it introduces rather than ending up in a column of its own,
+   empty for its whole height. */
 @media (max-width: 1080px) {
     .dash-ledger-line {
         grid-template-columns: auto minmax(0, 1fr);
@@ -7213,9 +7211,9 @@ input[type="date"].form-control {
     border-bottom: 1px solid var(--border);
 }
 
-/* Deux chiffres qui ne veulent rien dire l'un sans l'autre : posés côte à
-   côte, séparés par un filet, à la même taille — le prix de revient n'est
-   pas plus important que ce qu'il rapporterait. */
+/* Two figures that mean nothing without each other: set side by side,
+   split by a hairline, at the same size — what it cost is no more important
+   than what it would fetch. */
 .dash-figure--pair {
     flex-direction: row;
     gap: 1.15rem;
@@ -7247,8 +7245,8 @@ input[type="date"].form-control {
     font-size: clamp(1.15rem, 1.5vw, 1.45rem);
 }
 
-/* Ce qui dort sur les étagères : l'olive de la maison, comme le bénéfice
-   de la ligne de compte — c'est la même chose, en attente. */
+/* What sleeps on the shelves: the house olive, like the ledger line's
+   profit — it is the same thing, waiting. */
 .dash-shelf-margin {
     display: flex;
     align-items: baseline;
@@ -7271,8 +7269,8 @@ input[type="date"].form-control {
     color: var(--ledger-profit);
 }
 
-/* Le périmètre, en dernier et en retrait : une précision, pas une
-   condition à lire avant le chiffre. */
+/* The perimeter, last and set back: a qualification, not a condition to
+   read before the figure. */
 .dash-shelf-margin-note {
     flex-basis: 100%;
     font-size: 0.6875rem;
@@ -7298,10 +7296,10 @@ input[type="date"].form-control {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.85rem 1rem;
-    /* `margin-top: auto` sur la note du bas mange sa marge fixe : dans un
-       panneau plein elle vaut zéro, et le filet vient se coller aux faits,
-       tout l'air restant en dessous. L'espace au-dessus du filet est donc
-       porté ici, où rien ne peut l'effacer. */
+    /* `margin-top: auto` on the footnote below eats its fixed margin: in a
+       full panel it resolves to zero and the rule comes to sit against the
+       facts, all the air left underneath. The space above the rule is
+       therefore carried here, where nothing can erase it. */
     margin: 0 0 0.95rem;
     padding: 0;
     list-style: none;
@@ -7340,8 +7338,8 @@ input[type="date"].form-control {
     color: var(--text-muted);
 }
 
-/* La note de pied d'un panneau : ce qui nuance le chiffre au-dessus,
-   jamais un chiffre de plus. */
+/* A panel's footnote: what qualifies the figure above, never one more
+   figure. */
 .dash-panel-foot {
     margin: 0.9rem 0 0;
     padding-top: 0.8rem;
@@ -7355,8 +7353,8 @@ input[type="date"].form-control {
     color: inherit;
 }
 
-/* Une déduction dans un tableau : la couleur du terme, pas celle d'une
-   alerte — la commission est un prix convenu, pas un incident. */
+/* A deduction in a table: the colour of the term, not of an alert — a
+   commission is an agreed price, not an incident. */
 .dash-cost-figure {
     color: color-mix(in srgb, var(--ledger-goods) 62%, var(--text));
     font-variant-numeric: tabular-nums;
@@ -7414,9 +7412,9 @@ input[type="date"].form-control {
     gap: 0.3rem;
 }
 
-/* Le canal est le dernier des faits, et le seul qui porte l'encre de la
-   maison : assez pour se trouver d'un coup d'œil, pas assez pour peser
-   autant que le nom du client. */
+/* The channel is the last of the facts, and the only one carrying the
+   house ink: enough to find at a glance, not enough to weigh as much as the
+   customer's name. */
 .dash-order-channel {
     display: inline-flex;
     align-items: center;
@@ -7429,8 +7427,8 @@ input[type="date"].form-control {
     width: 0.875rem;
     height: 0.875rem;
     object-fit: contain;
-    /* Un dessin sur fond blanc a besoin de son cadre pour ne pas se
-       dissoudre dans la carte. */
+    /* A drawing on a white ground needs its frame or it dissolves into the
+       card. */
     background: var(--bg);
     border: 1px solid var(--border);
 }
@@ -11529,12 +11527,12 @@ a.order-stepper-btn:focus-visible {
 }
 
 /*
- * Le bandeau de cette page seulement.
+ * The hero of this page only.
  *
- * Le titre disait où l'on était, pas ce qu'on y faisait. Le kicker dit
- * maintenant le trajet — du catalogue vers Vinted — parce que c'est tout
- * le propos de l'écran, et la phrase en dessous tient sur une ligne large
- * plutôt que sur deux étroites avec la moitié du bandeau vide à droite.
+ * The title said where one was, not what one did there. The kicker now says
+ * the journey — catalogue to Vinted — because that is the whole point of the
+ * screen, and the sentence below it holds one wide line rather than two
+ * narrow ones with half the band empty to the right.
  */
 .vinted-hero .admin-list-hero-row {
     align-items: flex-start;
@@ -11550,8 +11548,8 @@ a.order-stepper-btn:focus-visible {
     gap: 0.5rem;
 }
 
-/* La flèche part du gris de l'origine et arrive sur l'olive : le trajet se
-   lit sans qu'on ait à nommer ses deux bouts deux fois. */
+/* The arrow leaves the grey of where it starts and lands on the olive: the
+   journey reads without naming its two ends twice. */
 .vinted-hero-kicker svg {
     color: color-mix(in srgb, var(--accent) 60%, transparent);
 }
@@ -11575,21 +11573,21 @@ a.order-stepper-btn:focus-visible {
     max-width: 52rem;
 }
 
-/* Ce qui compte dans cette phrase : la page ne dépose rien, et le savoir
-   change la façon de s'en servir. */
+/* What matters in that sentence: the page posts nothing, and knowing it
+   changes how one uses it. */
 .vinted-hero-lede strong {
     font-weight: 600;
     color: var(--text);
 }
 
-/* Le bouton s'aligne sur le titre plutôt que de flotter à mi-hauteur. */
+/* The button aligns with the title rather than floating at mid-height. */
 .vinted-hero-back {
     flex-shrink: 0;
     margin-top: 0.15rem;
 }
 
-/* De quel article il s'agit. Une bande, pas une carte : elle situe la page
-   sans se disputer la place avec les étapes. */
+/* Which article this is. A band, not a card: it places the page without
+   fighting the steps for room. */
 .vinted-product {
     display: flex;
     align-items: center;
@@ -11646,8 +11644,8 @@ a.order-stepper-btn:focus-visible {
     letter-spacing: 0.04em;
 }
 
-/* Où en est l'annonce, dit en toutes lettres : « enregistrée il y a deux
-   jours » vaut mieux qu'une pastille de couleur à interpréter. */
+/* Where the listing stands, said in words: "saved two days ago" beats a
+   coloured pip to interpret. */
 .vinted-state {
     flex-shrink: 0;
     padding: 0.25rem 0.6rem;
@@ -11672,9 +11670,9 @@ a.order-stepper-btn:focus-visible {
     border-color: color-mix(in srgb, var(--accent) 32%, var(--border));
 }
 
-/* Deux colonnes : le texte à gauche, où la description a besoin de sa
-   largeur, les photos à droite sur toute la hauteur — on les ajoute une
-   fois, on relit le texte dix. */
+/* Two columns: the text on the left, where the description needs its
+   width, the photos on the right down the full height — one adds them once
+   and rereads the text ten times. */
 .vinted-steps {
     display: grid;
     grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
@@ -11720,8 +11718,8 @@ a.order-stepper-btn:focus-visible {
     min-width: 0;
 }
 
-/* Le numéro porte l'olive de la maison, à la taille d'un chiffre qu'on
-   compte, pas d'un titre. */
+/* The number carries the house olive, at the size of a figure one counts,
+   not of a heading. */
 .vinted-step-number {
     display: inline-flex;
     align-items: center;
@@ -11770,9 +11768,8 @@ a.order-stepper-btn:focus-visible {
     border: 1px solid var(--border);
 }
 
-/* Le bouton de copie est l'action de la page : il est en tête de chaque
-   étape, toujours au même endroit, pour que la main y retourne sans
-   chercher. */
+/* The copy button is the page's action: it heads every step, always in the
+   same place, so the hand goes back to it without looking. */
 .vinted-copy {
     flex-shrink: 0;
     min-width: 5.25rem;
@@ -11800,8 +11797,8 @@ a.order-stepper-btn:focus-visible {
     resize: vertical;
 }
 
-/* Le compte de caractères ne juge pas : il dit où on en est, et se teinte
-   seulement quand Vinted coupera. */
+/* The character count does not judge: it says where one is, and takes a
+   colour only when Vinted will cut. */
 .vinted-count {
     margin: 0.4rem 0 0;
     font-size: 0.6875rem;
@@ -11844,8 +11841,8 @@ a.order-stepper-btn:focus-visible {
     pointer-events: none;
 }
 
-/* Les deux bornes, l'une sous l'autre pour tenir à côté du champ dans une
-   colonne plus étroite. */
+/* The two bounds, one under the other to sit beside the field in a
+   narrower column. */
 .vinted-price-compare {
     display: flex;
     flex-direction: column;
@@ -11885,8 +11882,8 @@ a.order-stepper-btn:focus-visible {
     border: 1px solid var(--border);
 }
 
-/* La première photo est celle que Vinted montre dans le fil, et la seule
-   que beaucoup verront : elle se nomme au lieu de porter un « 1 ». */
+/* The first photo is the one Vinted shows in the feed, and the only one
+   many will see: it is named rather than carrying a "1". */
 .vinted-photo-rank {
     position: absolute;
     top: 0.35rem;
@@ -11930,9 +11927,9 @@ a.order-stepper-btn:focus-visible {
    une bordure. Séparés, ils flottaient entre les boutons voisins sans
    qu'on sache lequel des deux ils décrivaient.
    ------------------------------------------------------------------ */
-/* Même hauteur que les boutons voisins : ce contrôle est dans la même
-   rangée qu'eux, et deux hauteurs côte à côte se voient. `.btn` fait
-   0.625rem de marge haute et basse autour d'une ligne de 0.875rem. */
+/* The same height as the buttons beside it: this control shares their row,
+   and two heights side by side show. `.btn` is 0.625rem of padding above
+   and below a 0.875rem line. */
 .vinted-link {
     display: inline-flex;
     align-items: stretch;
@@ -11959,8 +11956,8 @@ a.order-stepper-btn:focus-visible {
     white-space: nowrap;
 }
 
-/* Les quatre postes, sur leur propre fond : c'est un état, pas une
-   commande, et le creux le dit avant qu'on lise. */
+/* The four items, on a ground of their own: this is a state, not a
+   control, and the recess says so before one reads. */
 .vinted-checks {
     display: flex;
     align-items: center;
@@ -11982,8 +11979,8 @@ a.order-stepper-btn:focus-visible {
     color: var(--text-muted);
 }
 
-/* Un point plein pour ce qui est fait, un cercle creux pour ce qui reste :
-   la forme dit l'état, la couleur ne fait que l'appuyer. */
+/* A filled dot for what is done, a hollow ring for what is left: the shape
+   says the state, the colour only agrees. */
 .vinted-check-mark {
     width: 0.45rem;
     height: 0.45rem;
@@ -12015,7 +12012,7 @@ a.order-stepper-btn:focus-visible {
     opacity: 0.75;
 }
 
-/* Le compte au bout : trois sur quatre, ou le mot qu'on attend. */
+/* The count at the end: three of four, or the word one is waiting for. */
 .vinted-link-state {
     display: flex;
     align-items: center;
@@ -12029,8 +12026,8 @@ a.order-stepper-btn:focus-visible {
     white-space: nowrap;
 }
 
-/* Prête : le contrôle entier prend l'olive, une fois, plutôt que quatre
-   points verts qu'il faut compter. */
+/* Ready: the whole control takes the olive, once, rather than four green
+   dots to be counted. */
 .vinted-link.is-ready {
     border-color: color-mix(in srgb, var(--accent-heading) 45%, var(--border));
 }
@@ -12048,8 +12045,8 @@ a.order-stepper-btn:focus-visible {
     color: var(--accent);
 }
 
-/* Étroit, les libellés tombent : les points et le compte suffisent, et les
-   infobulles gardent les mots. */
+/* Narrow, the labels drop: the dots and the count are enough, and the
+   tooltips keep the words. */
 @media (max-width: 1100px) {
     .vinted-check-label {
         position: absolute;
@@ -12061,7 +12058,7 @@ a.order-stepper-btn:focus-visible {
     }
 }
 
-/* Le JPEG se prend, il ne se choisit pas : un lien, pas une case. */
+/* A JPEG is taken, not chosen: a link, not a checkbox. */
 .vinted-photo-download {
     padding: 0.1rem 0.4rem;
     font-size: 0.6875rem;
@@ -12079,8 +12076,8 @@ a.order-stepper-btn:focus-visible {
     border-color: var(--accent);
 }
 
-/* Le champ de fichier natif est laid et minuscule : il est masqué derrière
-   son étiquette, qui devient la cible entière. */
+/* The native file input is ugly and tiny: it hides behind its label, which
+   becomes the whole target. */
 .vinted-drop {
     display: flex;
     flex-direction: column;
@@ -12125,8 +12122,8 @@ a.order-stepper-btn:focus-visible {
     white-space: nowrap;
 }
 
-/* Ce que le sélecteur a retenu : sans cela, choisir trois fichiers ne
-   change rien à l'écran et l'on choisit deux fois. */
+/* What the picker kept: without it, choosing three files changes nothing on
+   screen and one chooses twice. */
 .vinted-drop-picked {
     margin: 0.6rem 0 0;
     font-size: 0.75rem;

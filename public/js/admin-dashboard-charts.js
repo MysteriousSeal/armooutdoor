@@ -52,13 +52,13 @@
         var current = parse('data-current');
         var previous = parse('data-previous');
 
-        // Une courbe adoucie entre deux jours reste une lecture ; entre deux
-        // mois elle invente un creux et une bosse que rien n'a mesurés, donc
-        // les points mensuels se rejoignent tout droit.
+        // A smoothed curve between two days is still a reading; between two
+        // months it invents a dip and a rise nobody measured, so monthly
+        // points are joined straight.
         var tension = host.getAttribute('data-bucket') === 'month' ? 0 : 0.25;
 
-        // « Depuis le début » n'a pas de tranche précédente : sans ce tri,
-        // la série fantôme resterait dans l'infobulle, à zéro euro partout.
+        // "All time" has no previous window: without this, the ghost series
+        // would stay in the tooltip at zero euros everywhere.
         var ghost = previous.length > 0 ? [{
             label: 'Previous period',
             data: previous,
@@ -152,8 +152,8 @@
 
         var colors = palette();
 
-        // Repérées par leur nom : sans tranche précédente, la série courante
-        // est la première, et un index en dur la peindrait en gris.
+        // Found by name: with no previous window the current series is the
+        // first one, and a hard-coded index would paint it grey.
         chart.data.datasets.forEach(function (dataset) {
             var isGhost = dataset.label === 'Previous period';
             var hue = isGhost ? colors.previous : colors.current;
@@ -180,9 +180,9 @@
         chart.update('none');
     }
 
-    // Le compte de commandes par jour. Des barres et non une courbe : une
-    // quantité comptée par intervalle ne coule pas d'un jour au suivant, et
-    // une ligne qui la relie invente une valeur entre deux points.
+    // The count of orders per day. Bars rather than a line: a quantity
+    // counted per interval does not flow from one day to the next, and a
+    // line joining them invents a value between two points.
     var ordersHost = document.querySelector('[data-orders-chart]');
     var ordersChart = null;
 
@@ -209,7 +209,7 @@
                     backgroundColor: colors.current,
                     hoverBackgroundColor: colors.current,
                     borderWidth: 0,
-                    // Des barres carrées, comme tout le reste du back-office.
+                    // Square bars, like everything else in the back-office.
                     borderRadius: 0,
                     maxBarThickness: 18,
                 }],
@@ -247,7 +247,7 @@
                         beginAtZero: true,
                         grid: { color: colors.grid, drawTicks: false },
                         border: { display: false },
-                        // Des commandes se comptent : pas de demi-graduation.
+                        // Orders are counted: no half a tick.
                         ticks: { color: colors.text, padding: 8, precision: 0 },
                     },
                 },

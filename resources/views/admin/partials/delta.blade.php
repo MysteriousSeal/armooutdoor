@@ -22,8 +22,8 @@
 @endphp
 
 @if ($percent === null)
-    {{-- Pas de référent : une croissance depuis zéro n'a pas de pourcentage,
-         et « +∞ % » n'informe personne. --}}
+    {{-- No reference to measure against: growth from zero has no
+         percentage, and "+∞ %" tells nobody anything. --}}
     <span class="dash-delta is-flat">—</span>
 @else
     <span class="dash-delta is-{{ $tone }}">

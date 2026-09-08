@@ -9,10 +9,9 @@ return [
     // Le chemin du back-office. Renommé en production pour ne pas s'offrir
     // au premier scanner venu ; les noms de routes (admin.*) ne bougent pas.
     'admin_path' => env('ADMIN_PATH', 'admin'),
-    // Le menu « Actions » de chaque ligne de la liste des commandes. Mis de
-    // côté, pas retiré : tout ce qu'il propose est toujours écrit dans la
-    // vue, et repasser ce drapeau à true le remet en place, colonne
-    // d'en-tête comprise.
+    // The "Actions" menu on each row of the orders list. Set aside, not
+    // removed: everything it offers is still written in the view, and
+    // turning this flag back to true puts it back, header cell included.
     'admin_row_actions' => false,
     // Prévenu à chaque commande devenue réelle — boutique comme manuelle.
     // Vide : personne n'est prévenu.

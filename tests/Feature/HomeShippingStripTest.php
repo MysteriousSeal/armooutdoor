@@ -88,8 +88,8 @@ class HomeShippingStripTest extends TestCase
 
     public function test_the_amount_is_stamped_inside_the_sentence(): void
     {
-        // La phrase est interpolée en HTML brut pour porter le tampon : si
-        // l'échappement revenait, la balise s'afficherait telle quelle.
+        // The sentence is interpolated as raw HTML so it can carry the
+        // stamp: were escaping to come back, the tag would print as text.
         $this->freeShippingOver(4900);
 
         $this->get('/')->assertOk()
@@ -98,9 +98,9 @@ class HomeShippingStripTest extends TestCase
     }
 
     /**
-     * La bande est pleine : son encre doit tenir dessus. Un olive éclairci
-     * un jour de retouche ferait passer la seule phrase que la page doit
-     * faire lire sous le seuil de lisibilité, sans que rien ne casse.
+     * The band is filled: its ink has to hold on it. An olive lightened in
+     * some later pass would drop the one sentence the page exists to make
+     * people read below legibility, without anything breaking.
      */
     public function test_the_band_keeps_its_text_readable_in_both_themes(): void
     {
@@ -117,7 +117,7 @@ class HomeShippingStripTest extends TestCase
         preg_match_all('/--ship-band:\s*(#[0-9a-f]{6})/i', $css, $bands);
         preg_match_all('/--ship-ink:\s*(#[0-9a-f]{6})/i', $css, $inks);
 
-        // Un jeu par thème : clair et sombre.
+        // One pair per theme: light and dark.
         $this->assertCount(2, $bands[1]);
         $this->assertCount(2, $inks[1]);
 

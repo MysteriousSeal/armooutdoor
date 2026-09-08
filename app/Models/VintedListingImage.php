@@ -9,9 +9,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
 /**
- * Une photo d'annonce. Les siennes, pas celles du catalogue : sur Vinted on
- * montre l'article posé sur une table ou porté, ce que la fiche produit ne
- * montre pas et n'a pas à montrer.
+ * A listing photo. The listing's own, not the catalogue's: on Vinted an
+ * article is shown on a table or worn, which the product page does not show
+ * and has no business showing.
  */
 #[Fillable([
     'vinted_listing_id',
@@ -33,11 +33,10 @@ class VintedListingImage extends Model
     }
 
     /**
-     * Le nom sous lequel cette photo se télécharge : la référence du produit,
-     * un tiret bas, son rang dans l'annonce. Il vit ici plutôt que dans le
-     * contrôleur parce que le lien l'écrit aussi, dans son attribut
-     * `download` — deux endroits qui le calculeraient chacun de leur côté
-     * finiraient par ne plus dire la même chose.
+     * The name this photo downloads under: the product's reference, an
+     * underscore, its rank in the listing. It lives here rather than in the
+     * controller because the link writes it too, in its `download`
+     * attribute — two places computing it apart would end up disagreeing.
      */
     public function downloadName(): string
     {

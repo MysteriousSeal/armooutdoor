@@ -212,12 +212,12 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         Route::get('/products/create', [AdminProductController::class, 'create'])->name('products.create');
         Route::post('/products', [AdminProductController::class, 'store'])->name('products.store');
         Route::get('/products/{product}/edit', [AdminProductController::class, 'edit'])->name('products.edit');
-        // L'annonce Vinted du produit : un écran à elle, parce que ce qu'on
-        // raconte sur une place de marché n'est pas ce qu'on met en fiche.
+        // The product's Vinted listing: a screen of its own, because what
+        // one says on a marketplace is not what goes on a product page.
         Route::get('/products/{product}/vinted', [VintedListingController::class, 'edit'])->name('products.vinted.edit');
         Route::put('/products/{product}/vinted', [VintedListingController::class, 'update'])->name('products.vinted.update');
-        // La photo en JPEG : la boutique stocke du WebP, dont le formulaire
-        // de Vinted ne veut pas.
+        // The photo as a JPEG: the shop stores WebP, which Vinted's form
+        // will not take.
         Route::get('/products/{product}/vinted/photos/{image}.jpg', [VintedListingController::class, 'downloadImage'])
             ->name('products.vinted.photo');
         // The cover as a JPEG: the shop stores WebP, which no marketplace form

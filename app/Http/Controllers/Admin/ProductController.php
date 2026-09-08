@@ -243,9 +243,9 @@ class ProductController extends Controller
     public function edit(Product $product): View
     {
         return view('admin.products.form', [
-            // L'annonce Vinted vient avec ses photos : la fiche dit ce qui
-            // lui manque encore, et le compter ligne par ligne relancerait
-            // une requête pour chaque poste.
+            // The Vinted listing comes with its photos: the product page
+            // says what it still needs, and counting them item by item would
+            // start a query for each.
             'product' => $product->load('images', 'variants', 'vintedListing.images'),
             'categories' => $this->categoryOptions(),
             'carriers' => Carrier::query()->orderBy('sort_order')->get(),

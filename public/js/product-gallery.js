@@ -60,12 +60,12 @@
             : '') +
         '';
 
-    // Le reste de la boîte n'est que du dessin : des icônes écrites en dur,
-    // rien qui vienne d'une donnée. Ce qui en vient — le texte alternatif de
-    // la photo et l'adresse des vignettes — est posé sur des nœuds, propriété
-    // par propriété. La version d'avant recollait ces deux valeurs dans une
-    // chaîne HTML et échappait les guillemets à la main, ce qui tenait tant
-    // que personne ne touchait à la ligne.
+    // The rest of the box is drawing only: icons written out in full,
+    // nothing coming from data. What does come from data — the photo's alt
+    // text and the thumbnails' addresses — is set on real nodes, property by
+    // property. The version before pasted both into an HTML string and
+    // escaped the quotes by hand, which held for exactly as long as nobody
+    // touched the line.
     var stage = document.createElement('figure');
     stage.className = 'lightbox-stage';
 

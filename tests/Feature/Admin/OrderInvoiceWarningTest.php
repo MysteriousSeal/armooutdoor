@@ -191,9 +191,9 @@ class OrderInvoiceWarningTest extends TestCase
     }
 
     /**
-     * La colonne « Actions » est masquée par un drapeau de config ; ce que
-     * l'avertissement fait se vérifie colonne rendue, sinon le test ne dit
-     * plus que le drapeau est à false.
+     * The "Actions" column is hidden behind a config flag; what the warning
+     * does is checked with the column rendered, or the test says nothing
+     * beyond the flag being false.
      */
     public function test_the_orders_list_flags_the_same_missing_fields(): void
     {

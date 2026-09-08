@@ -13,10 +13,10 @@
         <header class="admin-list-hero vinted-hero">
             <div class="admin-list-hero-row">
                 <div class="vinted-hero-main">
-                    {{-- Le trajet plutôt que le nom seul : cette page prend ce
-                         qui est dans le catalogue et l'emmène ailleurs, et
-                         c'est la seule chose qu'il faut comprendre en
-                         arrivant. --}}
+                    {{-- The journey rather than the name alone: this page
+                         takes what is in the catalogue and carries it
+                         elsewhere, and that is the only thing one needs to
+                         understand on arriving. --}}
                     <p class="admin-list-kicker vinted-hero-kicker">
                         <span>Catalog</span>
                         <svg viewBox="0 0 24 10" width="26" height="10" aria-hidden="true" focusable="false">
@@ -26,8 +26,9 @@
                     </p>
                     <h2 class="admin-list-title">Vinted listing</h2>
                     <p class="admin-list-lede vinted-hero-lede">
-                        {{-- Dire ce que la page fait et ce qu'elle ne fait pas :
-                             sans cela on attend un dépôt qui n'arrive jamais. --}}
+                        {{-- Say what the page does and what it does not:
+                             without that one waits for a posting that never
+                             comes. --}}
                         Write it once, keep it between two postings, and carry it across field by field.
                         <strong>Nothing is sent from this page.</strong>
                     </p>
@@ -36,9 +37,9 @@
             </div>
         </header>
 
-        {{-- De quel article on parle. Deux annonces ouvertes côte à côte se
-             ressemblent, et la photo du catalogue est ce qui les sépare le
-             plus vite. --}}
+        {{-- Which article this is about. Two listings open side by side look
+             alike, and the catalogue photo is what tells them apart
+             fastest. --}}
         <div class="vinted-product">
             @if (filled($product->image))
                 <img src="{{ $product->imageUrl() }}" alt="" width="52" height="52" class="vinted-product-thumb" loading="lazy">
@@ -51,8 +52,9 @@
                 <span class="vinted-product-meta">
                     <span class="vinted-product-sku">{{ $product->sku }}</span>
                     <span>Shop price <strong>{{ format_euros($product->price_cents) }}</strong></span>
-                    {{-- Le coût d'achat en face du prix : c'est l'écart entre
-                         les deux qui décide de ce qu'on accepte sur Vinted. --}}
+                    {{-- The purchase cost against the price: it is the gap
+                         between the two that decides what one accepts on
+                         Vinted. --}}
                     <span>
                         Avg cost
                         @if ($costCents === null)
@@ -67,10 +69,9 @@
 
             <span class="vinted-state {{ $listing->exists ? 'is-saved' : '' }}">
                 @if ($listing->exists)
-                    {{-- La locale de l'application est le français, celle de
-                         la boutique ; le back-office, lui, est en anglais de
-                         bout en bout. On la nomme plutôt que de la laisser
-                         suivre celle du site. --}}
+                    {{-- The application locale is French, the shop's own; the
+                         back-office is English throughout. This names its
+                         locale rather than following the site's. --}}
                     Saved {{ $listing->updated_at->locale('en')->diffForHumans() }}
                 @else
                     Not written yet
@@ -87,9 +88,9 @@
             @csrf
             @method('PUT')
 
-            {{-- Numérotées parce que c'en est une : ce sont les champs du
-                 formulaire de Vinted, dans l'ordre où il les demande. On
-                 descend la page en le remplissant. --}}
+            {{-- Numbered because it is one: these are the fields of Vinted's
+                 own form, in the order it asks for them. One goes down this
+                 page while filling that one. --}}
             <ol class="vinted-steps">
                 <li class="vinted-step">
                     <div class="vinted-step-head">
@@ -144,9 +145,9 @@
                         <span class="vinted-step-number" aria-hidden="true">3</span>
                         <div>
                             <label class="vinted-step-label" for="vinted-price">Price</label>
-                            {{-- Vinted attend une virgule et pas de symbole :
-                                 le bouton copie ce que son champ accepte, pas
-                                 ce que la page affiche. --}}
+                            {{-- Vinted wants a comma and no symbol: the
+                                 button copies what its field accepts, not
+                                 what the page shows. --}}
                             <p class="vinted-step-hint">Copied with a comma and no symbol, the way Vinted's own field wants it.</p>
                         </div>
                         <button
@@ -172,9 +173,9 @@
                             <span class="vinted-price-unit" aria-hidden="true">€</span>
                         </div>
 
-                        {{-- Les deux bornes en regard : au-dessus du coût on
-                             gagne, au-dessus du prix boutique on se fait
-                             concurrence à soi-même. --}}
+                        {{-- Both bounds in view: above the cost there is
+                             money, above the shop price the shop competes
+                             with itself. --}}
                         <span class="vinted-price-compare">
                             <span>Shop <strong>{{ format_euros($product->price_cents) }}</strong></span>
                             <span>Cost {{ $costCents === null ? '—' : format_euros($costCents) }}</span>
@@ -188,7 +189,7 @@
                         <span class="vinted-step-number" aria-hidden="true">4</span>
                         <div>
                             <span class="vinted-step-label">Photos</span>
-                            {{-- Pourquoi elles ne viennent pas de la fiche. --}}
+                            {{-- Why they do not come from the product page. --}}
                             <p class="vinted-step-hint">
                                 The listing's own photos — worn, on a table, in the light of the room.
                                 The catalogue's images stay where they are.
@@ -203,23 +204,23 @@
                                 <li class="vinted-photo">
                                     <img src="{{ $image->thumbnailUrl() }}" alt="" loading="lazy">
                                     <input type="hidden" name="order[]" value="{{ $image->id }}">
-                                    {{-- La première est celle que Vinted montre
-                                         dans le fil : elle se dit, elle ne se
-                                         devine pas au rang. --}}
+                                    {{-- The first is the one Vinted shows in
+                                         the feed: it is named, not guessed
+                                         at from its rank. --}}
                                     <span class="vinted-photo-rank {{ $index === 0 ? 'is-cover' : '' }}">
                                         {{ $index === 0 ? 'Cover' : $index + 1 }}
                                     </span>
                                     <span class="vinted-photo-actions">
-                                        {{-- Vinted n'accepte pas le WebP que
-                                             la boutique stocke : le lien rend
-                                             la même photo en JPEG, sans
-                                             toucher au fichier. --}}
-                                        {{-- `download` nomme le fichier côté
-                                             navigateur : sans lui, tout
-                                             repose sur l'en-tête de la
-                                             réponse, que Chrome ignore dès
-                                             qu'il croit voir une rafale de
-                                             téléchargements. --}}
+                                        {{-- Vinted will not take the WebP the
+                                             shop stores: the link renders the
+                                             same photo as a JPEG, leaving the
+                                             file alone. --}}
+                                        {{-- `download` names the file on the
+                                             browser's side: without it
+                                             everything rests on the response
+                                             header, which Chrome drops the
+                                             moment it thinks it sees a burst
+                                             of downloads. --}}
                                         <a
                                             href="{{ route('admin.products.vinted.photo', ['product' => $product, 'image' => $image]) }}"
                                             download="{{ $image->downloadName() }}"

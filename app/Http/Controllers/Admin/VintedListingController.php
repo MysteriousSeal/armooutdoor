@@ -15,45 +15,45 @@ use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 /**
- * L'annonce Vinted d'un produit : la composer, la garder, la copier.
+ * A product's Vinted listing: compose it, keep it, copy it.
  *
- * Rien ne part d'ici. Vinted n'ouvre pas d'API pour déposer une annonce, et
- * c'est aussi bien : le moment du dépôt est celui où l'on décide qu'elle
- * part. Cette page tient le texte prêt d'une fois sur l'autre, avec de quoi
- * l'emporter champ par champ dans le formulaire de Vinted.
+ * Nothing leaves from here. Vinted opens no API for depositing a listing,
+ * and just as well: the moment of posting is the moment one decides it goes
+ * up. This page holds the wording ready from one time to the next, with what
+ * it takes to carry it field by field into Vinted's own form.
  */
 class VintedListingController extends Controller
 {
-    /** Assez pour une annonce, pas de quoi peser trois mégaoctets. */
+    /** Enough for a listing, not enough to weigh three megabytes. */
     private const JPEG_QUALITY = 90;
 
     public function edit(Product $product): View
     {
         return view('admin.products.vinted', [
             'product' => $product->load('images'),
-            // Ce que l'unité a coûté : on fixe un prix Vinted en le voyant,
-            // pas en s'en souvenant. Nul quand rien n'a été reçu — un coût
-            // inconnu n'est pas un coût de zéro.
+            // What the unit cost: a Vinted price is set by seeing it, not by
+            // remembering it. Null when nothing has been received — an
+            // unknown cost is not a cost of zero.
             'costCents' => $product->averagePurchaseCostInclVatCents(),
-            // Une annonce jamais ouverte n'est pas encore une ligne en base :
-            // la page part du produit, et n'écrit qu'à l'enregistrement.
+            // A listing never opened is not a row yet: the page starts from
+            // the product, and writes only on save.
             'listing' => $product->vintedListing()->with('images')->first()
                 ?? $this->draftFrom($product),
         ]);
     }
 
     /**
-     * Une photo de l'annonce en JPEG.
+     * One of the listing's photos, as a JPEG.
      *
-     * La boutique stocke du WebP, et le formulaire de Vinted n'en veut pas —
-     * pas plus qu'un fournisseur ou une imprimerie. Le fichier sur le disque
-     * n'est pas touché : c'est une copie faite pour le téléchargement, jetée
-     * avec la réponse.
+     * The shop stores WebP, and Vinted's form will not take it — no more
+     * than a supplier or a printer will. The file on disk is left alone:
+     * this is a copy made for the download and thrown away with the
+     * response.
      */
     public function downloadImage(Product $product, VintedListingImage $image): Response
     {
-        // La photo doit appartenir à l'annonce de ce produit : sans ce
-        // contrôle, l'identifiant dans l'adresse servirait n'importe laquelle.
+        // The photo must belong to this product's listing: without the
+        // check, the id in the address would serve any of them.
         abort_unless(
             $image->listing !== null && $image->listing->product_id === $product->id,
             404,
@@ -67,8 +67,8 @@ class VintedListingController extends Controller
 
         abort_if($decoded === false, 404);
 
-        // Un JPEG n'a pas de transparence : ce qui était translucide
-        // sortirait noir sans un fond à lui.
+        // A JPEG has no transparency: anything see-through would come out
+        // black without a ground of its own.
         $flattened = imagecreatetruecolor(imagesx($decoded), imagesy($decoded));
         imagefill($flattened, 0, 0, imagecolorallocate($flattened, 255, 255, 255));
         imagecopy($flattened, $decoded, 0, 0, 0, 0, imagesx($decoded), imagesy($decoded));
@@ -91,7 +91,7 @@ class VintedListingController extends Controller
         $data = $request->validate([
             'title' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:5000'],
-            // Vinted plafonne à 500 000 € ; au-delà c'est une faute de frappe.
+            // Vinted caps at 500,000 €; past that it is a typing slip.
             'price' => ['nullable', 'numeric', 'min:0', 'max:500000'],
             'images' => ['nullable', 'array'],
             'images.*' => ['image', 'max:8192'],
@@ -122,11 +122,11 @@ class VintedListingController extends Controller
     }
 
     /**
-     * Une annonce vierge, entièrement. Rien n'est repris de la fiche : ce
-     * qu'on écrit sur Vinted n'est pas ce qu'on écrit en catalogue, et un
-     * champ prérempli se corrige moins bien qu'il ne s'écrit — on garde la
-     * formule d'à côté faute de l'avoir effacée. Le prix de la boutique
-     * reste sous les yeux, à côté du champ, sans s'y installer.
+     * A blank listing, entirely. Nothing is carried over from the product
+     * page: what one writes on Vinted is not what one writes in a catalogue,
+     * and a prefilled field gets corrected rather than written — one keeps
+     * the phrasing next door for want of having cleared it. The shop's price
+     * stays in view beside the field without settling into it.
      */
     private function draftFrom(Product $product): VintedListing
     {
@@ -171,8 +171,8 @@ class VintedListingController extends Controller
     }
 
     /**
-     * L'ordre voulu, appliqué aux seules photos de cette annonce : un
-     * identifiant venu d'ailleurs ne déplace rien.
+     * The requested order, applied to this listing's photos only: an id
+     * from anywhere else moves nothing.
      *
      * @param  array<int, int>  $ids
      */
@@ -213,9 +213,9 @@ class VintedListingController extends Controller
     }
 
     /**
-     * Le fichier part avec la ligne, et sa vignette avec lui : générée à
-     * l'envoi, elle n'a plus rien à illustrer, et rien ne la balaierait plus
-     * tard puisque aucune ligne ne la nomme.
+     * The file goes with the row, and its thumbnail with it: generated on
+     * upload, it has nothing left to illustrate, and nothing would sweep it
+     * later since no row names it.
      */
     private function deleteFile(string $image): void
     {

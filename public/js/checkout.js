@@ -381,10 +381,10 @@
             return;
         }
 
-        // Les nœuds sont recopiés tels quels plutôt que sérialisés puis
-        // reparsés : le contenu de la carte est posé au textContent, le
-        // tour par une chaîne HTML ne fait donc que travailler deux fois.
-        // Vider puis remplir, comme la fonction voisine juste en dessous.
+        // The nodes are copied across rather than serialised and reparsed:
+        // the card's content is set with textContent, so a trip through an
+        // HTML string is only the same work done twice. Clear, then fill,
+        // the way the neighbouring function just below has always done.
         var copy = body.cloneNode(true);
 
         relaySelectedBody.innerHTML = '';

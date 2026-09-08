@@ -7,24 +7,23 @@
         $series = $revenueSeries['current'];
         $previousSeries = $revenueSeries['previous'];
         $channelTotal = max(1, $channelSplit->sum('revenue_cents'));
-        // La barre ne met à l'échelle que le travail en cours : les
-        // commandes finies écraseraient tout le reste en vieillissant.
+        // The bar scales open work only: finished orders would crush
+        // everything else as the shop ages.
         $pipelineOpen = $pipeline->where('open', true);
         $pipelineClosed = $pipeline->where('open', false);
         $pipelineTotal = max(1, $pipelineOpen->sum('count'));
         $topQuantityMax = max(1, $topProducts->max('quantity') ?? 1);
 
-        // La barre se rapporte au chiffre d'affaires des seules commandes
-        // chiffrées, comme la marge : rapportée au total, ses trois parts
-        // couvriraient des ventes que le coût des marchandises n'a pas
-        // atteintes, et ne totaliseraient plus rien.
+        // The bar is a share of the revenue of the priced orders only, like
+        // the margin: against the total, its three parts would cover sales
+        // the goods cost never reached, and would add up to nothing.
         $ledgerBase = max(1, $money['priced_revenue_cents']);
         $ledgerShare = fn (int $cents): float => round(min(100, max(0, $cents / $ledgerBase * 100)), 2);
         $ledgerIsPartial = $money['priced_orders'] < $money['total_orders'];
 
-        // Passé quatre mois la série compte par mois, et tout ce qui la
-        // nomme suit : « Orders per day » sur une colonne mensuelle
-        // annoncerait un chiffre qu'elle ne porte pas.
+        // Past four months the series counts by month, and everything that
+        // names it follows: "Orders per day" over a monthly column would
+        // announce a figure it does not carry.
         $bucket = $period->bucketsByMonth() ? 'month' : 'day';
     @endphp
 
@@ -80,10 +79,10 @@
                                 <span class="dash-chip-count">{{ number_format($item['count']) }}</span>
                                 <span class="dash-chip-label">{{ $item['label'] }}</span>
                                 @if (($item['note'] ?? null) !== null)
-                                    {{-- Ce qui est déjà parti chez le
-                                         fournisseur : la puce dit combien de
-                                         ces références n'attendent plus que
-                                         le facteur. --}}
+                                    {{-- What has already gone to the
+                                         supplier: the chip says how many of
+                                         these references are waiting on
+                                         nothing but the postman. --}}
                                     <span class="dash-chip-note">{{ $item['note'] }}</span>
                                 @endif
                             </a>
@@ -96,11 +95,10 @@
         <section class="dash-performance" aria-labelledby="dash-performance-title">
             <h3 class="sr-only" id="dash-performance-title">Performance</h3>
 
-            {{-- La ligne de compte. Quatre termes et deux opérateurs : ce qui
-                 est entré, ce qui en est sorti, ce que la marchandise a coûté,
-                 ce qui reste. Écrite comme une soustraction parce que c'en est
-                 une, et parce qu'un chiffre d'affaires seul ne dit pas si la
-                 boutique gagne de l'argent. --}}
+            {{-- The ledger line. Four terms and two operators: what came in,
+                 what went out of it, what the goods cost, what is left.
+                 Written as the subtraction it is, and because revenue alone
+                 does not say whether the shop makes money. --}}
             <section class="dash-ledger" aria-labelledby="dash-ledger-title">
                 <div class="dash-ledger-head">
                     <h3 class="order-panel-title" id="dash-ledger-title">What the shop kept</h3>
@@ -135,9 +133,10 @@
                         <span class="dash-term-label">Goods</span>
                         <span class="dash-term-value">{{ format_euros($money['product_cost_cents']) }}</span>
                         <span class="dash-term-note">
-                            {{-- Une commande dont une ligne n'a pas d'historique
-                                 d'achat sort du calcul plutôt que d'y entrer à
-                                 zéro : le compteur dit combien sont concernées. --}}
+                            {{-- An order with a line that has no purchase
+                                 history leaves the calculation rather than
+                                 entering it at zero: the counter says how
+                                 many that affects. --}}
                             at average purchase cost, on {{ number_format($money['priced_orders']) }} of {{ number_format($money['total_orders']) }} {{ \Illuminate\Support\Str::plural('order', $money['total_orders']) }}
                         </span>
                     </div>
@@ -156,9 +155,9 @@
                     </div>
                 </div>
 
-                {{-- La même soustraction, à l'échelle : chaque segment est sa
-                     part du chiffre d'affaires, et le blanc à droite est ce
-                     qui n'a pas pu être chiffré. --}}
+                {{-- The same subtraction, to scale: each segment is its share
+                     of revenue, and the white to the right is what could not
+                     be priced. --}}
                 <div class="dash-ledger-bar" role="img" aria-label="Share of revenue taken by costs, goods and profit">
                     <span class="dash-ledger-segment is-cost" style="--segment-width: {{ $ledgerShare($money['priced_costs_cents']) }}%"></span>
                     <span class="dash-ledger-segment is-goods" style="--segment-width: {{ $ledgerShare($money['product_cost_cents']) }}%"></span>
@@ -276,13 +275,12 @@
                     </details>
                 </section>
 
-                {{-- Le nombre de commandes par jour, en barres : une quantité
-                     comptée par intervalle, pas une valeur qui coule.
+                {{-- The count of orders per day, in bars: a quantity counted
+                     per interval, not a value that flows.
 
-                     Son jumeau en tableau est celui du panneau voisin, dont
-                     la colonne « Orders » porte les mêmes valeurs jour par
-                     jour : deux tableaux identiques côte à côte ne rendraient
-                     personne plus avancé. --}}
+                     Its table twin is the neighbouring panel's, whose Orders
+                     column carries the same values day by day: two identical
+                     tables side by side would leave nobody better off. --}}
                 <section class="order-panel dash-chart-panel">
                     <div class="dash-panel-head">
                         <h3 class="order-panel-title">Orders per {{ $bucket }}</h3>
@@ -316,8 +314,8 @@
                     @if ($topProducts->isEmpty())
                         <p class="empty-state">Nothing sold in this period.</p>
                     @else
-                        {{-- Pas de défilement latéral dans un panneau : c'est
-                             le nom qui cède, pas la colonne. --}}
+                        {{-- No sideways scrolling inside a panel: it is the
+                             name that gives, not the column. --}}
                         <div class="admin-table-wrap admin-table-wrap--tight">
                             <table class="admin-table dash-bar-table">
                                 <thead>
@@ -334,10 +332,10 @@
                                 <tbody>
                                     @foreach ($topProducts as $index => $row)
                                         <tr>
-                                            {{-- Un rang chiffré : le panneau est
-                                                 un classement, et c'est la seule
-                                                 chose que l'ordre des lignes dit
-                                                 sans le montrer. --}}
+                                            {{-- A numbered rank: the panel is a
+                                                 ranking, and that is the one
+                                                 thing the row order says
+                                                 without showing it. --}}
                                             <td class="dash-rank">{{ $index + 1 }}</td>
                                             {{-- La vignette vient de la fiche produit, pas de
                                                  l'image figée dans la ligne : le tableau de bord
@@ -364,25 +362,23 @@
                                                         <span class="admin-table-strong admin-table-truncate">{{ $row['name'] }}</span>
                                                     @endif
                                                     @if (filled($row['sku']))
-                                                        {{-- La référence sous le nom : c'est elle qu'on
-                                                             lit à voix haute au fournisseur, et elle est
-                                                             plus courte à reconnaître qu'un titre qui se
-                                                             coupe. --}}
+                                                        {{-- The reference under the name: it is what one
+                                                             reads aloud to a supplier, and quicker to
+                                                             recognise than a title that truncates. --}}
                                                         <span class="dash-bar-sku">{{ $row['sku'] }}</span>
                                                     @endif
-                                                    {{-- La part des ventes en un filet sous le nom, plutôt
-                                                         qu'en lavis derrière : le texte se lit mieux sur du
-                                                         blanc, et une barre posée sur sa propre ligne se
-                                                         compare d'une rangée à l'autre. --}}
+                                                    {{-- The share of sales as a rule under the name rather
+                                                         than a wash behind it: text reads better on white,
+                                                         and a bar on its own line compares from one row to
+                                                         the next. --}}
                                                     <span class="dash-bar" style="--bar-width: {{ round($row['quantity'] / $topQuantityMax * 100, 2) }}%"></span>
                                                 </span>
                                             </td>
                                             <td class="admin-table-num">{{ number_format($row['quantity']) }}</td>
                                             <td class="admin-table-num dash-unit-price">
-                                                {{-- Des moyennes, pas des prix de
-                                                     vente : ce que l'unité est
-                                                     partie chercher, et ce qu'elle
-                                                     a coûté à mettre en rayon. --}}
+                                                {{-- Averages, not list prices: what
+                                                     the unit went for, and what it
+                                                     cost to put on the shelf. --}}
                                                 {{ $row['unit_price_cents'] === null ? '—' : format_euros($row['unit_price_cents']) }}
                                             </td>
                                             <td class="admin-table-num dash-unit-price">
@@ -462,19 +458,19 @@
             </div>
 
             <div class="dash-row dash-row--thirds">
-                {{-- L'entrepôt : ce qui est en rayon, ce qu'il vaut, et ce qui
-                     est déjà payé pour arriver. Les quatre tuiles de catalogue
-                     tenaient la même place sans jamais dire combien tout cela
-                     coûte. --}}
+                {{-- The warehouse: what is on the shelves, what it is worth,
+                     and what is already paid for to arrive. The four
+                     catalogue tiles held the same space without ever saying
+                     what any of it cost. --}}
                 <section class="order-panel">
                     <div class="dash-panel-head">
                         <h3 class="order-panel-title">Warehouse</h3>
                         <a href="{{ route('admin.purchase-orders.index') }}" class="dash-panel-note">Purchase orders</a>
                     </div>
 
-                    {{-- Ce que le rayon a coûté et ce qu'il rapporterait :
-                         l'un ne dit rien sans l'autre, et c'est l'écart entre
-                         les deux qui dort sur les étagères. --}}
+                    {{-- What the shelves cost and what they would fetch: one
+                         says nothing without the other, and it is the gap
+                         between them that sleeps on the shelves. --}}
                     <div class="dash-figure dash-figure--pair">
                         <div class="dash-figure-half">
                             <span class="dash-figure-label">Cost</span>
@@ -489,10 +485,10 @@
                     </div>
 
                     @if ($stockValue['shelf_markup_percent'] !== null)
-                        {{-- La marge ne couvre que les références dont les
-                             deux bouts sont connus : retirer un coût partiel
-                             d'un prix complet annoncerait un bénéfice que le
-                             rayon ne porte pas. --}}
+                        {{-- The margin covers only the references whose two
+                             ends are known: taking a partial cost off a
+                             complete price would claim a profit the shelves
+                             do not carry. --}}
                         <p class="dash-shelf-margin">
                             <span class="dash-shelf-margin-value">+{{ format_euros($stockValue['shelf_margin_cents']) }}</span>
                             waiting on the shelves, {{ number_format($stockValue['shelf_markup_percent'], 1) }}% on what it cost
@@ -526,9 +522,9 @@
                     </ul>
 
                     @if ($stockValue['unpriced_references'] > 0)
-                        {{-- Une référence sans historique d'achat n'est pas
-                             comptée à zéro : elle est dite à part, sinon la
-                             valeur baisserait quand le catalogue grandit. --}}
+                        {{-- A reference with no purchase history is not
+                             counted at zero: it is said separately, or the
+                             value would fall as the catalogue grows. --}}
                         <p class="dash-panel-foot">
                             {{ number_format($stockValue['unpriced_references']) }} {{ \Illuminate\Support\Str::plural('reference', $stockValue['unpriced_references']) }} in stock with no purchase history, left out of the value.
                         </p>
@@ -546,9 +542,9 @@
                         <span class="dash-figure-note">average spent per customer, since the shop opened</span>
                     </div>
 
-                    {{-- Nouveaux et revenus sur la période : une barre en deux
-                         parts, la fidélité étant une proportion avant d'être un
-                         compte. --}}
+                    {{-- New and returning over the period: a bar in two
+                         parts, loyalty being a proportion before it is a
+                         count. --}}
                     @if ($customers['buyers'] > 0)
                         <div class="dash-stack" role="img" aria-label="New and returning buyers this period">
                             <span class="dash-stack-segment dash-series-1" style="--segment-width: {{ round($customers['returning'] / max(1, $customers['buyers']) * 100, 2) }}%"></span>
@@ -577,9 +573,9 @@
                             <span class="dash-fact-note">all time</span>
                         </li>
                         <li>
-                            {{-- Les comptes ouverts sur la boutique, à part :
-                                 une commande de place de marché crée son
-                                 client sans qu'il se soit inscrit ici. --}}
+                            {{-- Accounts opened on the shop, kept separate: a
+                                 marketplace order creates its customer
+                                 without them registering here. --}}
                             <span class="dash-fact-label">Shop accounts</span>
                             <span class="dash-fact-value">{{ number_format($reference['customers']) }}</span>
                             <span class="dash-fact-note">registered here, of {{ number_format($customers['lifetime_buyers']) }} who have ordered</span>
@@ -593,9 +589,9 @@
                         <a href="{{ route('admin.orders.index') }}" class="dash-panel-note">All orders</a>
                     </div>
 
-                    {{-- Chaque étape porte la couleur que la pastille de son
-                         statut porte dans la liste des commandes : une seule
-                         distinction à apprendre pour les deux pages. --}}
+                    {{-- Each stage wears the colour its status badge wears on
+                         the orders list: one distinction to learn for both
+                         pages. --}}
                     @if ($pipelineOpen->sum('count') > 0)
                         <div class="dash-stack" role="img" aria-label="Open orders by stage">
                             @foreach ($pipelineOpen as $stage)
@@ -621,8 +617,8 @@
                         @endforeach
                     </ul>
 
-                    {{-- Les fins de course, sous un filet : comptées, mais
-                         hors de la barre qu'elles écraseraient. --}}
+                    {{-- The end states, under a rule: counted, but out of the
+                         bar they would crush. --}}
                     <ul class="dash-pipeline-list dash-pipeline-list--closed">
                         <li class="dash-pipeline-rule"><span>Closed</span></li>
                         @foreach ($pipelineClosed as $stage)
@@ -659,11 +655,11 @@
                                     <span class="admin-table-sub">
                                         {{ $order->user?->name ?? 'Guest' }} · {{ $order->created_at->format('d/m') }}
                                         · {{ number_format($units) }} {{ \Illuminate\Support\Str::plural('item', $units) }}
-                                        {{-- D'où vient la vente, au bout des
-                                             faits qui la décrivent plutôt qu'en
-                                             pastille : six « DIRECT » encadrés
-                                             se disputaient la colonne avec la
-                                             somme sans rien apprendre. --}}
+                                        {{-- Where the sale came from, at the end
+                                             of the facts describing it rather
+                                             than in a chip: six boxed DIRECTs
+                                             fought the amount for the column
+                                             and taught nobody anything. --}}
                                         · <span class="dash-order-channel">
                                             @if ($order->marketplace?->logo)
                                                 <img src="{{ $order->marketplace->logoUrl() }}" alt="" class="dash-order-channel-logo" width="14" height="14" loading="lazy">

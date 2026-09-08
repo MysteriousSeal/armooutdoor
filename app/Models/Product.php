@@ -196,8 +196,8 @@ class Product extends Model
     }
 
     /**
-     * L'annonce Vinted de ce produit, s'il en a une. Une seule : le brouillon
-     * qu'on retouche entre deux dépôts, pas un historique.
+     * This product's Vinted listing, if it has one. Only ever one: the
+     * draft reworked between two postings, not a history of them.
      */
     public function vintedListing(): HasOne
     {

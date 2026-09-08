@@ -50,5 +50,5 @@ ruvector.db
 # npx cache and means nothing anywhere else.
 .claude-flow/memory-package.json
 
-# Rapports du scanner, réécrits à chaque passage
+# Scanner reports, rewritten from scratch on every run
 .claude/security-scans/
