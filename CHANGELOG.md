@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-08 — v1.28.3 — build TVQ92A
+
+### Storefront
+
+- **A replaced photograph reaches people who have already been here.** The four carousel panels, the picture on the about page and the card a link carries when a page has none of its own now go through the same helper the stylesheets use. They keep their filenames when they are swapped, so until now a returning visitor held on to the old picture until they emptied a cache, which nobody does. The stamp is the file's own timestamp rather than the release number, exactly as it is for the stylesheets: a picture that changes reaches people the day it changes, and one that has not changed is left alone in their cache. The five swapped yesterday would have arrived on upload rather than waiting for a release.
+- **The card a shared link brings with it refreshes on its own.** The picture behind that card carries the same stamp, so replacing it is enough: the services that cache a preview against its address see a new one instead of holding the old picture on every message and post already sent.
+
+**No migration.** The preload on the first panel reads the address the panel paints rather than writing its own, so the two still agree and the photograph is still fetched once; a test now holds them together, that being how this goes wrong.
+
 ## 2026-09-07 — v1.28.2 — build MDOUU8
 
 ### Storefront
