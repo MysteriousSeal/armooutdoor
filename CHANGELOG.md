@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-08 — v1.29.1 — build 7KU7LP
+
+### Admin
+
+- **Profit says what it is worth against what the goods cost.** The figure stood on its own, in euros, so twelve euros made on a forty-euro order and twelve made on a four-euro one read the same, though only one of them says the stock is working. Each row now carries that share in brackets beside the amount, and the Results card carries the same share over the orders it could price. It divides by the product cost rather than by what was perceived — the question being what a euro spent on goods brings back — so the figure runs past 100 % and is meant to. An order whose goods cost nothing gets the euros and no bracket, a percentage of zero being a division rather than a number, as does one whose cost is unknown, which is already the rule for the profit itself.
+- **The row actions menu is set aside.** Every action it offered is still written in the view; a flag in the shop configuration decides whether the column is rendered, and it is off. It takes the header cell with it, so nothing stands empty at the end of the row, and two invoice-warning tests turn it back on before looking for the link they are about, or they would quietly become tests of the flag.
+
+**No migration.**
+
 ## 2026-09-08 — v1.29.0 — build 8PJ1ZW
 
 ### Storefront
