@@ -48,6 +48,17 @@ class VintedCopywriter
         l'état neuf, puis une dernière ligne sur l'envoi rapide et soigné. Au
         plus un emoji, et seulement s'il tombe juste.
 
+        Vinted modère les annonces automatiquement, et le vocabulaire de
+        l'armement fait retirer une annonce avant même qu'un humain la lise.
+        Décris donc l'accessoire, jamais ce sur quoi il se monte : parle de
+        loisir, de sport de précision, de plein air, de nature. Évite « arme »,
+        « fusil », « carabine », « pistolet », « munition », « cartouche »,
+        « projectile », « balle », « tactique », « militaire », « combat »,
+        « tuer », « abattre », et tout terme de violence ou de danger. Si un
+        mot de la fiche produit tombe dans cette liste, remplace-le par le
+        terme neutre le plus proche ou n'en parle pas. Aucune mention de
+        législation, d'âge légal ni de catégorie réglementaire.
+
         N'invente rien : n'écris que ce que la fiche produit donne.
 
         Réponds uniquement par un objet JSON, sans texte autour et sans bloc

@@ -93,8 +93,8 @@
                 <div class="vinted-assist-main">
                     <p class="vinted-assist-title">Let Claude write it</p>
                     <p class="vinted-assist-note">
-                        Reads the product sheet and drafts the title and the description, in French, the way a Vinted seller writes them.
-                        Nothing is saved until you press Save.
+                        Reads the product sheet and drafts the title and the description, in French, the way a Vinted seller writes them —
+                        clear of the vocabulary Vinted's moderation removes a listing for. Nothing is saved until you press Save.
                     </p>
                 </div>
 

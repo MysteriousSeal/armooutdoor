@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\User;
 use App\Services\VintedCopywriter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use ReflectionClass;
 use ReflectionMethod;
 use RuntimeException;
 use Tests\TestCase;
@@ -147,6 +148,23 @@ class VintedCopyGenerationTest extends TestCase
         $this->expectException(RuntimeException::class);
 
         $this->parse('{"title": "Cagoule camo"}');
+    }
+
+    /**
+     * Vinted's moderation removes a listing on the vocabulary alone, before
+     * anybody reads it — and the shop sells accessories for shooting sports.
+     * The instruction that keeps that vocabulary out is the whole reason a
+     * generated listing survives, so it is not left to be tidied away.
+     */
+    public function test_the_prompt_keeps_the_listing_clear_of_flagged_vocabulary(): void
+    {
+        $prompt = (new ReflectionClass(VintedCopywriter::class))->getConstant('SYSTEM_PROMPT');
+
+        $this->assertStringContainsString('modère', $prompt);
+
+        foreach (['arme', 'munition', 'militaire', 'violence'] as $word) {
+            $this->assertStringContainsString($word, $prompt, "The prompt must name « {$word} » as a word to avoid");
+        }
     }
 
     /**
