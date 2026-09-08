@@ -20,6 +20,8 @@ use App\Models\ProductVariant;
 use App\Models\PurchaseOrder;
 use App\Models\Supplier;
 use App\Models\User;
+use App\Models\VintedListing;
+use App\Models\VintedListingImage;
 use App\Support\AccountingPeriods;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Route as RoutingRoute;
@@ -117,6 +119,20 @@ class AdminAuthorizationTest extends TestCase
             'payment_method' => 'bank_wire',
         ]);
 
+        // La photo d'une annonce Vinted : sans identifiant valide, l'adresse
+        // rend 404 avant d'atteindre la porte, et le balayage lirait ce 404
+        // comme une porte non gardée.
+        $vintedListing = VintedListing::query()->create([
+            'product_id' => $product->id,
+            'title' => 'Annonce',
+        ]);
+
+        $vintedImage = VintedListingImage::query()->create([
+            'vinted_listing_id' => $vintedListing->id,
+            'image' => 'vinted/audit.webp',
+            'sort_order' => 1,
+        ]);
+
         $identityDocument = IdentityDocument::query()->create([
             'user_id' => $customer->id,
             'kind' => 'passport',
@@ -154,6 +170,7 @@ class AdminAuthorizationTest extends TestCase
             'section' => 'sales',
             'entry' => $accountingEntry->id,
             'document' => $identityDocument->id,
+            'image' => $vintedImage->id,
         ];
 
         $nonAdmin = User::factory()->create();
