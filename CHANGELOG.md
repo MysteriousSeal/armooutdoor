@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-08 — v1.28.4 — build DNK4NV
+
+### Storefront
+
+- **The footer's bottom line keeps the size it was given on a phone.** It came out larger than the legal links beneath it, though the two have been declared at the same size all along and measure the same in a desktop browser at phone width. The size was never the problem: Safari and Chrome inflate text inside a wide block of their own accord, and nothing on the site had ever declined that, so the copyright line was boosted as one long paragraph while the links beside it, short items in a flex row, were not. Only that line declines it. The boost is doing the reading pages a favour on a phone, and switching it off everywhere would shrink guide and article prose with it.
+
+**No migration.**
+
 ## 2026-09-08 — v1.28.3 — build TVQ92A
 
 ### Storefront
