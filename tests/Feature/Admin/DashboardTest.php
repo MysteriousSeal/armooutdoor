@@ -48,6 +48,32 @@ class DashboardTest extends TestCase
         ]);
     }
 
+    /** Receive $quantity units of $product at $unitCostCents excl. VAT. */
+    private function receive(Product $product, int $quantity, int $unitCostCents, int $vatBasisPoints = 2000): \App\Models\PurchaseOrder
+    {
+        $supplier = \App\Models\Supplier::query()->create(['name' => 'Fournisseur', 'lead_time_days' => 5]);
+
+        $purchaseOrder = \App\Models\PurchaseOrder::query()->create([
+            'number' => 'BC-'.str_pad((string) random_int(1, 99999), 5, '0', STR_PAD_LEFT),
+            'supplier_id' => $supplier->id,
+            'supplier_name' => 'Fournisseur',
+            'status' => 'received',
+            'vat_rate_basis_points' => $vatBasisPoints,
+        ]);
+
+        \App\Models\PurchaseOrderItem::query()->create([
+            'purchase_order_id' => $purchaseOrder->id,
+            'product_id' => $product->id,
+            'name' => $product->localizedName(),
+            'sku' => $product->sku,
+            'quantity_ordered' => $quantity,
+            'quantity_received' => $quantity,
+            'unit_cost_cents' => $unitCostCents,
+        ]);
+
+        return $purchaseOrder;
+    }
+
     private function orderAt(string $date, int $totalCents = 1500): Order
     {
         $order = $this->order(['total_cents' => $totalCents]);
@@ -261,18 +287,240 @@ class DashboardTest extends TestCase
             ]);
         }
 
+        // Les quatre chiffres vivent dans le panneau « Warehouse » depuis
+        // qu'ils y ont rejoint la valeur du stock : mêmes comptes, même
+        // règle, une bande de tuiles en moins.
         $html = $this->actingAs($this->admin())->get(route('admin.dashboard'))->assertOk()
             ->assertSee('References for sale')
-            ->assertSee('Stock in the warehouse')
-            ->assertSee('References to receive')
-            ->assertSee('Stock to receive')
+            ->assertSee('Units in stock')
+            ->assertSee('Still to receive')
             ->getContent();
 
-        $this->assertMatchesRegularExpression('#References to receive</span>\s*<span class="dash-tile-value">1</span>#', $html);
-        $this->assertMatchesRegularExpression('#Stock to receive</span>\s*<span class="dash-tile-value">6</span>#', $html);
+        $this->assertMatchesRegularExpression('#Still to receive</span>\s*<span class="dash-fact-value">6</span>#', $html);
+        $this->assertStringContainsString('1 reference not yet for sale', $html);
 
-        $this->assertMatchesRegularExpression('#References for sale</span>\s*<span class="dash-tile-value">5</span>#', $html);
+        $this->assertMatchesRegularExpression('#References for sale</span>\s*<span class="dash-fact-value">5</span>#', $html);
         $this->assertStringContainsString('4 products · 2 variants', $html);
-        $this->assertMatchesRegularExpression('#Stock in the warehouse</span>\s*<span class="dash-tile-value">12</span>#', $html);
+        $this->assertMatchesRegularExpression('#Units in stock</span>\s*<span class="dash-fact-value">12</span>#', $html);
+    }
+
+    public function test_the_ledger_subtracts_costs_and_goods_from_revenue(): void
+    {
+        $product = Product::factory()->create();
+        $this->receive($product, 10, 100); // 1,20 € TTC l'unité
+
+        // 15,00 € encaissés, 3,00 € de frais, 2 unités à 1,20 € :
+        // 15,00 − 3,00 − 2,40 = 9,60 € de bénéfice.
+        $order = $this->order([
+            'total_cents' => 1500,
+            'shipping_paid_cents' => 100,
+            'marketplace_commission_cents' => 150,
+            'payment_fee_cents' => 50,
+        ]);
+        OrderItem::query()->create([
+            'order_id' => $order->id, 'product_id' => $product->id, 'product_slug' => $product->slug,
+            'name' => ['fr' => 'X'], 'image' => '', 'quantity' => 2,
+            'unit_price_cents' => 750, 'line_cents' => 1500,
+        ]);
+
+        $money = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->money();
+
+        $this->assertSame(1500, $money['revenue_cents']);
+        $this->assertSame(300, $money['order_costs_cents']);
+        $this->assertSame(240, $money['product_cost_cents']);
+        $this->assertSame(960, $money['profit_cents']);
+        $this->assertSame(64.0, $money['margin_percent']);
+        $this->assertSame(1, $money['priced_orders']);
+        $this->assertSame(1, $money['total_orders']);
+    }
+
+    public function test_an_order_that_cannot_be_priced_stays_out_of_the_profit(): void
+    {
+        // Aucun bon de commande derrière ce produit : le bénéfice de cette
+        // vente est inconnu, pas nul. Elle compte dans le chiffre d'affaires
+        // et le compteur dit qu'elle manque au reste.
+        $order = $this->order(['total_cents' => 2000]);
+        OrderItem::query()->create([
+            'order_id' => $order->id, 'product_id' => Product::factory()->create()->id,
+            'product_slug' => 'x', 'name' => ['fr' => 'X'], 'image' => '', 'quantity' => 1,
+            'unit_price_cents' => 2000, 'line_cents' => 2000,
+        ]);
+
+        $money = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->money();
+
+        $this->assertSame(2000, $money['revenue_cents']);
+        $this->assertSame(0, $money['product_cost_cents']);
+        $this->assertSame(0, $money['profit_cents']);
+        $this->assertSame(0, $money['priced_orders']);
+        $this->assertSame(1, $money['total_orders']);
+        // Sans commande chiffrée, il n'y a pas de marge à écrire.
+        $this->assertNull($money['margin_percent']);
+    }
+
+    public function test_the_ledger_bar_keeps_one_base_for_its_three_shares(): void
+    {
+        // Deux ventes, une seule chiffrable : la barre se rapporte au chiffre
+        // d'affaires de celle-là, donc ses trois parts totalisent 100 %.
+        $product = Product::factory()->create();
+        $this->receive($product, 10, 100);
+
+        $priced = $this->order(['total_cents' => 1500, 'payment_fee_cents' => 60]);
+        OrderItem::query()->create([
+            'order_id' => $priced->id, 'product_id' => $product->id, 'product_slug' => $product->slug,
+            'name' => ['fr' => 'X'], 'image' => '', 'quantity' => 2,
+            'unit_price_cents' => 750, 'line_cents' => 1500,
+        ]);
+
+        $unpriced = $this->order(['total_cents' => 5000, 'payment_fee_cents' => 200]);
+        OrderItem::query()->create([
+            'order_id' => $unpriced->id, 'product_id' => Product::factory()->create()->id,
+            'product_slug' => 'y', 'name' => ['fr' => 'Y'], 'image' => '', 'quantity' => 1,
+            'unit_price_cents' => 5000, 'line_cents' => 5000,
+        ]);
+
+        $money = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->money();
+
+        $this->assertSame(6500, $money['revenue_cents']);
+        $this->assertSame(1500, $money['priced_revenue_cents']);
+        // Les frais de la seule commande chiffrée, pas des deux.
+        $this->assertSame(60, $money['priced_costs_cents']);
+        $this->assertSame(260, $money['order_costs_cents']);
+
+        $base = $money['priced_revenue_cents'];
+        $shares = ($money['priced_costs_cents'] + $money['product_cost_cents'] + $money['profit_cents']) / $base;
+
+        $this->assertEqualsWithDelta(1.0, $shares, 0.0001);
+    }
+
+    public function test_the_warehouse_values_the_shelves_at_average_purchase_cost(): void
+    {
+        $priced = Product::factory()->create(['is_active' => true, 'quantity' => 4]);
+        $this->receive($priced, 10, 250); // 3,00 € TTC l'unité
+
+        // Une référence en stock sans historique d'achat n'a pas de valeur
+        // connue : comptée à part, jamais à zéro.
+        Product::factory()->create(['is_active' => true, 'quantity' => 7]);
+
+        $stock = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->stockValue();
+
+        $this->assertSame(1200, $stock['warehouse_cents']);
+        $this->assertSame(4, $stock['valued_units']);
+        $this->assertSame(1, $stock['unpriced_references']);
+    }
+
+    public function test_a_product_with_declinations_is_valued_on_its_declinations(): void
+    {
+        // La colonne du produit reste renseignée derrière ses déclinaisons.
+        // C'est celle des déclinaisons qui fait foi — la tuile « Units in
+        // stock » compte comme cela, et deux chiffres du même panneau ne
+        // peuvent pas compter le même stock deux fois.
+        $sized = Product::factory()->create(['is_active' => true, 'quantity' => 9]);
+        $this->receive($sized, 10, 250); // 3,00 € TTC l'unité
+
+        foreach ([['M', 2], ['L', 3]] as [$size, $quantity]) {
+            \App\Models\ProductVariant::query()->create([
+                'product_id' => $sized->id,
+                'attribute_values' => [['label' => 'Taille', 'value' => $size]],
+                'sku' => 'VAR-'.$size,
+                'price_cents' => 1999,
+                'quantity' => $quantity,
+                'is_active' => true,
+            ]);
+        }
+
+        $stock = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->stockValue();
+
+        // 5 unités déclinées à 3,00 €, jamais 14.
+        $this->assertSame(5, $stock['valued_units']);
+        $this->assertSame(1500, $stock['warehouse_cents']);
+    }
+
+    public function test_the_warehouse_counts_what_is_still_owed_to_suppliers(): void
+    {
+        $product = Product::factory()->create(['is_active' => true, 'quantity' => 0]);
+
+        $supplier = \App\Models\Supplier::query()->create(['name' => 'Fournisseur', 'lead_time_days' => 5]);
+        $open = \App\Models\PurchaseOrder::query()->create([
+            'number' => 'BC-OPEN-1', 'supplier_id' => $supplier->id, 'supplier_name' => 'Fournisseur',
+            'status' => 'sent', 'vat_rate_basis_points' => 2000,
+        ]);
+        \App\Models\PurchaseOrderItem::query()->create([
+            'purchase_order_id' => $open->id, 'product_id' => $product->id,
+            'name' => $product->localizedName(), 'sku' => $product->sku,
+            'quantity_ordered' => 10, 'quantity_received' => 4, 'unit_cost_cents' => 500,
+        ]);
+
+        $stock = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->stockValue();
+
+        // Six unités encore dues à 5,00 € HT, TVA 20 % : 36,00 €.
+        $this->assertSame(3600, $stock['committed_cents']);
+        $this->assertSame(1, $stock['open_purchase_orders']);
+    }
+
+    public function test_a_buyer_who_bought_before_the_period_counts_as_returning(): void
+    {
+        $loyal = User::factory()->create();
+        $fresh = User::factory()->create();
+
+        $old = $this->order(['user_id' => $loyal->id]);
+        $old->forceFill(['created_at' => now()->subDays(90)])->save();
+
+        $this->order(['user_id' => $loyal->id]);
+        $this->order(['user_id' => $fresh->id]);
+
+        $customers = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->customers();
+
+        $this->assertSame(2, $customers['buyers']);
+        $this->assertSame(1, $customers['returning']);
+        $this->assertSame(1, $customers['new']);
+        $this->assertSame(50.0, $customers['returning_percent']);
+        // Deux commandes pour le fidèle, une pour l'autre : un seul client
+        // sur deux a acheté plus d'une fois.
+        $this->assertSame(1, $customers['repeat_buyers']);
+    }
+
+    public function test_the_channel_split_takes_the_commission_off_each_channel(): void
+    {
+        $this->order([
+            'total_cents' => 10000,
+            'marketplace_name' => 'NaturaBuy',
+            'marketplace_commission_cents' => 1400,
+        ]);
+        $this->order(['total_cents' => 5000]);
+
+        $split = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->channelSplit();
+
+        $marketplace = $split->firstWhere('label', 'NaturaBuy');
+        $direct = $split->firstWhere('label', 'Direct sale');
+
+        $this->assertSame(1400, $marketplace['commission_cents']);
+        $this->assertSame(8600, $marketplace['net_cents']);
+        // Une vente directe ne paie de commission à personne.
+        $this->assertSame(0, $direct['commission_cents']);
+        $this->assertSame(5000, $direct['net_cents']);
+    }
+
+    public function test_the_page_shows_the_ledger_the_warehouse_and_the_customers(): void
+    {
+        $product = Product::factory()->create(['is_active' => true, 'quantity' => 3]);
+        $this->receive($product, 10, 100);
+
+        $order = $this->order(['total_cents' => 1500, 'payment_fee_cents' => 50]);
+        OrderItem::query()->create([
+            'order_id' => $order->id, 'product_id' => $product->id, 'product_slug' => $product->slug,
+            'name' => ['fr' => 'X'], 'image' => '', 'quantity' => 2,
+            'unit_price_cents' => 750, 'line_cents' => 1500,
+        ]);
+
+        $this->actingAs($this->admin())->get(route('admin.dashboard'))->assertOk()
+            ->assertSee('What the shop kept')
+            ->assertSee('Selling costs')
+            ->assertSee('Goods')
+            ->assertSee('Profit')
+            ->assertSee('Warehouse')
+            ->assertSee('Customers')
+            ->assertSee('Orders per day')
+            // La barre de la ligne de compte et ses trois segments.
+            ->assertSee('dash-ledger-segment is-profit', false);
     }
 }

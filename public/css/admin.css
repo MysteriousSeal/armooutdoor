@@ -6268,6 +6268,14 @@ input[type="date"].form-control {
     --chart-stage-4: #2661a8;
     --chart-stage-5: #17457f;
 
+    /* La ligne de compte : une part-à-tout d'une seule quantité, donc une
+       progression et non un jeu catégoriel. Elle sort des deux couleurs de
+       la maison — le taupe de l'accent, l'olive des titres — pour que ce
+       que la boutique garde soit de la couleur de la boutique. */
+    --ledger-costs: #c3b5a7;
+    --ledger-goods: #8b7e74;
+    --ledger-profit: #5b5c3b;
+
     /* Statuts : réservés à l'état, jamais réutilisés comme série. */
     --status-good: #0ca30c;
     --status-warning: #fab219;
@@ -6295,6 +6303,13 @@ input[type="date"].form-control {
     --chart-stage-3: #6398e8;
     --chart-stage-4: #3f77c9;
     --chart-stage-5: #2a5896;
+
+    /* Sur fond sombre l'olive des titres devient de la boue : la même
+       progression est reprise plus claire, l'écart entre les trois pas
+       vérifié sur la surface sombre plutôt qu'éclairci mécaniquement. */
+    --ledger-costs: #6d635b;
+    --ledger-goods: #a3958a;
+    --ledger-profit: #b6b878;
 
     --status-good: #4cc24c;
     --status-warning: #f5c451;
@@ -6727,6 +6742,366 @@ input[type="date"].form-control {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr));
     gap: 1rem;
+}
+
+/* ------------------------------------------------------------------
+   Les rangées du tableau de bord
+
+   Des colonnes nommées plutôt qu'un `auto-fit` : la largeur d'un panneau
+   dépend de ce qu'il contient, et une grille qui la devine coupait le
+   tableau des meilleures ventes en quatre colonnes de 21rem tout en
+   laissant les trois quarts d'une rangée vides sous le dernier panneau.
+   ------------------------------------------------------------------ */
+.dash-row {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Une courbe a besoin de place, un compte de barres beaucoup moins. */
+.dash-row--chart {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+}
+
+/* Un tableau à cinq colonnes contre une liste : la moitié chacun serait
+   large pour l'une et étroit pour l'autre. */
+.dash-row--wide-narrow {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 6fr);
+}
+
+.dash-row--thirds {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* Les panneaux d'une rangée s'alignent en haut et en bas ; celui qui a le
+   moins à dire pousse sa note de pied contre le bord plutôt que de laisser
+   un vide sous elle. */
+.dash-row > .order-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.dash-row .dash-panel-foot {
+    margin-top: auto;
+}
+
+@media (max-width: 1180px) {
+    .dash-row--chart,
+    .dash-row--wide-narrow {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .dash-row--thirds {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    .dash-row--thirds {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* ------------------------------------------------------------------
+   La ligne de compte
+
+   Le chiffre d'affaires seul ne dit pas si la boutique gagne de l'argent.
+   Écrite comme la soustraction qu'elle est — entré, retiré, marchandise,
+   reste — avec les opérateurs à leur place plutôt que quatre cartes
+   côte à côte qui laisseraient au lecteur le soin de deviner qu'elles
+   se répondent.
+   ------------------------------------------------------------------ */
+.dash-ledger {
+    padding: 1.35rem 1.35rem 1.15rem;
+    margin-bottom: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--ledger-profit);
+}
+
+.dash-ledger-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.1rem;
+}
+
+.dash-ledger-head .order-panel-title {
+    margin: 0;
+}
+
+.dash-ledger-line {
+    display: grid;
+    grid-template-columns:
+        minmax(0, 1fr) auto minmax(0, 1.25fr) auto
+        minmax(0, 1.1fr) auto minmax(0, 1fr);
+    align-items: start;
+    gap: 0 1.1rem;
+}
+
+.dash-term {
+    display: flex;
+    flex-direction: column;
+    gap: 0.28rem;
+    min-width: 0;
+    padding: 0.15rem 0 0.2rem;
+}
+
+.dash-term-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.dash-term-value {
+    font-size: clamp(1.4rem, 2vw, 1.9rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+}
+
+.dash-term-note {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    font-size: 0.72rem;
+    line-height: 1.45;
+    color: var(--text-muted);
+}
+
+/* Ce qui sort est écrit dans la couleur de son segment ; ce qui reste
+   porte l'olive, comme le liseré du panneau. */
+.dash-term--cost .dash-term-value {
+    color: color-mix(in srgb, var(--ledger-costs) 45%, var(--text));
+}
+
+.dash-term--goods .dash-term-value {
+    color: color-mix(in srgb, var(--ledger-goods) 62%, var(--text));
+}
+
+.dash-term--profit {
+    padding-left: 1rem;
+    border-left: 1px solid var(--border);
+}
+
+.dash-term--profit .dash-term-value {
+    color: var(--ledger-profit);
+}
+
+.dash-operator {
+    align-self: center;
+    padding-top: 1.1rem;
+    font-size: 1.5rem;
+    font-weight: 300;
+    line-height: 1;
+    color: var(--accent);
+}
+
+.dash-operator--equals {
+    color: var(--ledger-profit);
+}
+
+/* La même soustraction à l'échelle. Le reste de la barre — le blanc à
+   droite — est ce que la période n'a pas pu chiffrer : il se voit. */
+.dash-ledger-bar {
+    display: flex;
+    gap: 2px;
+    height: 0.5rem;
+    margin: 1.15rem 0 0.7rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.dash-ledger-segment {
+    width: var(--segment-width, 0);
+    min-width: 0;
+}
+
+.dash-ledger-segment.is-cost {
+    background: var(--ledger-costs);
+}
+
+.dash-ledger-segment.is-goods {
+    background: var(--ledger-goods);
+}
+
+.dash-ledger-segment.is-profit {
+    background: var(--ledger-profit);
+}
+
+.dash-ledger-key {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1.1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.dash-ledger-key li {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.dash-ledger-key-note {
+    margin-left: auto;
+    color: var(--accent-heading);
+}
+
+.dash-swatch.is-cost {
+    --swatch-color: var(--ledger-costs);
+}
+
+.dash-swatch.is-goods {
+    --swatch-color: var(--ledger-goods);
+}
+
+.dash-swatch.is-profit {
+    --swatch-color: var(--ledger-profit);
+}
+
+/* Empilée, la soustraction garde son sens : l'opérateur passe devant le
+   terme qu'il introduit plutôt que de se retrouver dans une colonne à
+   lui, vide sur toute la hauteur. */
+@media (max-width: 1080px) {
+    .dash-ledger-line {
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 0.75rem 0.75rem;
+        align-items: center;
+    }
+
+    .dash-term {
+        grid-column: 2;
+    }
+
+    .dash-term--revenue {
+        grid-column: 1 / -1;
+    }
+
+    .dash-term--profit {
+        padding-left: 0;
+        padding-top: 0.75rem;
+        border-left: 0;
+        border-top: 1px solid var(--border);
+        grid-column: 1 / -1;
+    }
+
+    .dash-operator {
+        padding-top: 0;
+        grid-column: 1;
+    }
+
+    .dash-operator--equals {
+        display: none;
+    }
+}
+
+/* ------------------------------------------------------------------
+   Les panneaux de chiffres
+
+   Un chiffre en tête, puis les faits qui le situent : la même structure
+   que les cartes de la liste des commandes, à la largeur d'un tiers.
+   ------------------------------------------------------------------ */
+.dash-figure {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding-bottom: 0.9rem;
+    margin-bottom: 0.9rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.dash-figure-value {
+    font-size: 1.75rem;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+}
+
+.dash-figure-note {
+    font-size: 0.75rem;
+    line-height: 1.45;
+    color: var(--text-muted);
+}
+
+.dash-facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.dash-facts li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.dash-fact-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.dash-fact-value {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+    color: var(--text);
+}
+
+.dash-fact-note {
+    font-size: 0.7rem;
+    line-height: 1.4;
+    color: var(--text-muted);
+}
+
+/* La note de pied d'un panneau : ce qui nuance le chiffre au-dessus,
+   jamais un chiffre de plus. */
+.dash-panel-foot {
+    margin: 0.9rem 0 0;
+    padding-top: 0.75rem;
+    font-size: 0.7rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+}
+
+.dash-panel-foot a {
+    color: inherit;
+}
+
+/* Une déduction dans un tableau : la couleur du terme, pas celle d'une
+   alerte — la commission est un prix convenu, pas un incident. */
+.dash-cost-figure {
+    color: color-mix(in srgb, var(--ledger-goods) 62%, var(--text));
+    font-variant-numeric: tabular-nums;
+}
+
+.dash-tiles--five {
+    grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
+    margin-bottom: 1rem;
+}
+
+.dash-chart--short canvas {
+    max-height: 160px;
 }
 
 .dash-list {

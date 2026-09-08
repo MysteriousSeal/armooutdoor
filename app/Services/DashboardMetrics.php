@@ -177,6 +177,221 @@ class DashboardMetrics
     }
 
     /**
+     * What the period brought in and what it kept, written as the
+     * subtraction it is: revenue, the costs deducted from it, what the
+     * goods cost, and the profit left over.
+     *
+     * The costs are the ones already recorded against each order — own
+     * shipping, marketplace commission, payment fees — the same three the
+     * orders list totals. The goods are priced at their average purchase
+     * cost including VAT, and an order holding a line that cannot be
+     * priced is left out of the profit entirely rather than counted at
+     * zero: the counter says how many that is.
+     *
+     * @return array<string, mixed>
+     */
+    public function money(): array
+    {
+        $current = $this->windowMoney($this->period->start, $this->period->end);
+        $previous = $this->windowMoney($this->period->previousStart, $this->period->previousEnd);
+
+        return [
+            ...$current,
+            'profit_delta' => $this->delta($current['profit_cents'], $previous['profit_cents']),
+            'costs_delta' => $this->delta($current['order_costs_cents'], $previous['order_costs_cents']),
+            'goods_delta' => $this->delta($current['product_cost_cents'], $previous['product_cost_cents']),
+            'previous_margin_percent' => $previous['margin_percent'],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function windowMoney(Carbon $start, Carbon $end): array
+    {
+        $scope = fn (): Builder => $this->between($this->salesQuery(), $start, $end);
+
+        $recorded = $scope()->selectRaw(
+            'coalesce(sum(total_cents), 0) as revenue_cents,'
+            .' coalesce(sum(shipping_paid_cents), 0) as shipping_cents,'
+            .' coalesce(sum(marketplace_commission_cents), 0) as commission_cents,'
+            .' coalesce(sum(payment_fee_cents), 0) as fee_cents,'
+            .' count(*) as orders'
+        )->first();
+
+        $orders = $scope()->with('items')->get();
+
+        $costsByProductId = Product::averagePurchaseCostsInclVatCents(
+            $orders->flatMap(fn (Order $order) => $order->items->pluck('product_id'))->filter(),
+        );
+
+        $priced = $orders->filter(
+            fn (Order $order): bool => $order->profitInclVatCents($costsByProductId) !== null,
+        );
+
+        $productCostCents = (int) $priced->sum(
+            fn (Order $order): int => $order->productCostInclVatCents($costsByProductId),
+        );
+        // Les frais des seules commandes chiffrées : la barre les met en
+        // regard de leur propre chiffre d'affaires, et mélanger les deux
+        // périmètres ferait des parts qui ne totalisent rien.
+        $pricedCostsCents = (int) $priced->sum(
+            fn (Order $order): int => (int) $order->shipping_paid_cents
+                + (int) $order->marketplace_commission_cents
+                + (int) $order->payment_fee_cents,
+        );
+        $profitCents = (int) $priced->sum(
+            fn (Order $order): int => $order->profitInclVatCents($costsByProductId),
+        );
+        // La marge se rapporte au chiffre d'affaires des seules commandes
+        // chiffrées : rapportée au total, elle mélangerait un profit partiel
+        // à des ventes qu'il ne couvre pas.
+        $pricedRevenueCents = (int) $priced->sum('total_cents');
+
+        $orderCostsCents = (int) $recorded->shipping_cents
+            + (int) $recorded->commission_cents
+            + (int) $recorded->fee_cents;
+
+        return [
+            'revenue_cents' => (int) $recorded->revenue_cents,
+            'shipping_cents' => (int) $recorded->shipping_cents,
+            'commission_cents' => (int) $recorded->commission_cents,
+            'fee_cents' => (int) $recorded->fee_cents,
+            'order_costs_cents' => $orderCostsCents,
+            'product_cost_cents' => $productCostCents,
+            'profit_cents' => $profitCents,
+            'priced_revenue_cents' => $pricedRevenueCents,
+            'priced_costs_cents' => $pricedCostsCents,
+            'margin_percent' => $pricedRevenueCents > 0
+                ? round($profitCents / $pricedRevenueCents * 100, 1)
+                : null,
+            'markup_percent' => $productCostCents > 0
+                ? round($profitCents / $productCostCents * 100, 1)
+                : null,
+            'priced_orders' => $priced->count(),
+            'total_orders' => (int) $recorded->orders,
+        ];
+    }
+
+    /**
+     * Ce que les rayons valent au prix d'achat, et ce qui est engagé
+     * dessus. Une référence sans historique d'achat n'a pas de valeur
+     * connue : elle est comptée à part plutôt qu'à zéro, sinon le total
+     * baisse quand le catalogue grandit.
+     *
+     * @return array<string, int|null>
+     */
+    public function stockValue(): array
+    {
+        $products = Product::query()
+            ->where('is_active', true)
+            ->with('variants')
+            ->get(['id', 'quantity']);
+
+        $costs = Product::averagePurchaseCostsInclVatCents($products->pluck('id'));
+
+        $valued = 0;
+        $units = 0;
+        $unpriced = 0;
+
+        foreach ($products as $product) {
+            // Même règle que catalogue() : dès qu'un produit a des
+            // déclinaisons, les unités sont les leurs et la colonne du
+            // produit ne compte pas. L'additionner comptait deux fois un
+            // stock que la tuile « Units in stock », juste à côté, ne
+            // comptait qu'une.
+            $activeVariants = $product->variants->where('is_active', true);
+
+            $onHand = $product->variants->isEmpty()
+                ? (int) $product->quantity
+                : (int) $activeVariants->sum('quantity');
+
+            if (! array_key_exists($product->id, $costs)) {
+                $unpriced += $onHand > 0 ? 1 : 0;
+
+                continue;
+            }
+
+            $valued += $onHand * $costs[$product->id];
+            $units += $onHand;
+        }
+
+        // Ce qui est commandé et pas encore reçu, au prix du bon de commande
+        // plutôt qu'à la moyenne : cet argent-là est déjà engagé au tarif
+        // qui figure dessus.
+        $openOrders = PurchaseOrder::query()->open()->with('items')->get();
+
+        $committed = (int) $openOrders->sum(
+            fn (PurchaseOrder $order): int => $order->withVatCents((int) $order->items->sum(
+                fn (PurchaseOrderItem $item): int => $item->unit_cost_cents * $item->quantityRemaining(),
+            )),
+        );
+
+        return [
+            'warehouse_cents' => $valued,
+            'valued_units' => $units,
+            'unpriced_references' => $unpriced,
+            'committed_cents' => $committed,
+            'open_purchase_orders' => $openOrders->count(),
+        ];
+    }
+
+    /**
+     * Qui achète : les nouveaux venus de la période, ceux qui reviennent,
+     * et ce qu'un client vaut en moyenne depuis le début.
+     *
+     * « Revenu » veut dire qu'il avait déjà commandé avant la période, pas
+     * qu'il a commandé deux fois dedans : c'est la fidélité qu'on regarde,
+     * pas la cadence.
+     *
+     * @return array<string, mixed>
+     */
+    public function customers(): array
+    {
+        $buyerIds = $this->between($this->salesQuery(), $this->period->start, $this->period->end)
+            ->whereNotNull('user_id')
+            ->distinct()
+            ->pluck('user_id');
+
+        $returningIds = $buyerIds->isEmpty()
+            ? collect()
+            : $this->salesQuery()
+                ->whereIn('user_id', $buyerIds)
+                ->where('created_at', '<', $this->period->start)
+                ->distinct()
+                ->pluck('user_id');
+
+        $lifetime = $this->salesQuery()
+            ->whereNotNull('user_id')
+            ->selectRaw('count(distinct user_id) as buyers, coalesce(sum(total_cents), 0) as revenue_cents, count(*) as orders')
+            ->first();
+
+        $buyers = (int) $lifetime->buyers;
+
+        $repeatBuyers = $this->salesQuery()
+            ->whereNotNull('user_id')
+            ->selectRaw('user_id')
+            ->groupBy('user_id')
+            ->havingRaw('count(*) > 1')
+            ->get()
+            ->count();
+
+        return [
+            'buyers' => $buyerIds->count(),
+            'returning' => $returningIds->count(),
+            'new' => $buyerIds->count() - $returningIds->count(),
+            'returning_percent' => $buyerIds->count() > 0
+                ? round($returningIds->count() / $buyerIds->count() * 100, 1)
+                : null,
+            'lifetime_buyers' => $buyers,
+            'lifetime_value_cents' => $buyers > 0 ? (int) round((int) $lifetime->revenue_cents / $buyers) : 0,
+            'orders_per_buyer' => $buyers > 0 ? round((int) $lifetime->orders / $buyers, 2) : null,
+            'repeat_buyers' => $repeatBuyers,
+            'repeat_percent' => $buyers > 0 ? round($repeatBuyers / $buyers * 100, 1) : null,
+        ];
+    }
+
+    /**
      * Le chiffre d'affaires jour par jour, période courante et précédente.
      *
      * Une seule requête par tranche, ventilée en PHP : strftime() ne parle
@@ -297,25 +512,38 @@ class DashboardMetrics
     public function channelSplit(int $limit = 3): Collection
     {
         $rows = $this->between($this->salesQuery(), $this->period->start, $this->period->end)
-            ->selectRaw("coalesce(nullif(marketplace_name, ''), 'Direct sale') as label, count(*) as orders, sum(total_cents) as revenue_cents")
+            ->selectRaw("coalesce(nullif(marketplace_name, ''), 'Direct sale') as label, count(*) as orders, sum(total_cents) as revenue_cents, coalesce(sum(marketplace_commission_cents), 0) as commission_cents")
             ->groupBy('label')
             ->orderByDesc('revenue_cents')
             ->get();
 
-        $head = $rows->take($limit)->map(fn ($row): array => [
-            'label' => $row->label,
-            'orders' => (int) $row->orders,
-            'revenue_cents' => (int) $row->revenue_cents,
-        ]);
+        // La commission n'est pas un détail du canal, c'est son prix : un
+        // canal qui vend plus et rend plus n'est pas le meilleur, et seule
+        // la colonne nette le dit.
+        $line = fn (string $label, int $orders, int $revenue, int $commission): array => [
+            'label' => $label,
+            'orders' => $orders,
+            'revenue_cents' => $revenue,
+            'commission_cents' => $commission,
+            'net_cents' => $revenue - $commission,
+        ];
+
+        $head = $rows->take($limit)->map(fn ($row): array => $line(
+            $row->label,
+            (int) $row->orders,
+            (int) $row->revenue_cents,
+            (int) $row->commission_cents,
+        ));
 
         $tail = $rows->skip($limit);
 
         if ($tail->isNotEmpty()) {
-            $head->push([
-                'label' => 'Other',
-                'orders' => (int) $tail->sum('orders'),
-                'revenue_cents' => (int) $tail->sum('revenue_cents'),
-            ]);
+            $head->push($line(
+                'Other',
+                (int) $tail->sum('orders'),
+                (int) $tail->sum('revenue_cents'),
+                (int) $tail->sum('commission_cents'),
+            ));
         }
 
         return $head->values();

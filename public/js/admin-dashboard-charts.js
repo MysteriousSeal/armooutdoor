@@ -1,13 +1,13 @@
 (function () {
     var host = document.querySelector('[data-revenue-chart]');
 
-    if (!host || typeof Chart === 'undefined') {
+    if (typeof Chart === 'undefined') {
         // Sans JavaScript — ou sans Chart.js — le tableau rendu côté serveur
         // porte déjà chaque valeur. Il n'y a rien à réparer ici.
         return;
     }
 
-    var canvas = host.querySelector('canvas');
+    var canvas = host ? host.querySelector('canvas') : null;
     var chart = null;
 
     // Les couleurs viennent des variables CSS, jamais d'hexadécimaux écrits
@@ -26,12 +26,16 @@
         };
     }
 
-    function parse(attribute) {
+    function read(element, attribute) {
         try {
-            return JSON.parse(host.getAttribute(attribute)) || [];
+            return JSON.parse(element.getAttribute(attribute)) || [];
         } catch (error) {
             return [];
         }
+    }
+
+    function parse(attribute) {
+        return read(host, attribute);
     }
 
     function euros(value) {
@@ -39,6 +43,10 @@
     }
 
     function build() {
+        if (!canvas) {
+            return;
+        }
+
         var colors = palette();
         var labels = parse('data-labels');
         var current = parse('data-current');
@@ -158,7 +166,106 @@
         chart.update('none');
     }
 
+    // Le compte de commandes par jour. Des barres et non une courbe : une
+    // quantité comptée par intervalle ne coule pas d'un jour au suivant, et
+    // une ligne qui la relie invente une valeur entre deux points.
+    var ordersHost = document.querySelector('[data-orders-chart]');
+    var ordersChart = null;
+
+    function buildOrders() {
+        if (!ordersHost) {
+            return;
+        }
+
+        var ordersCanvas = ordersHost.querySelector('canvas');
+
+        if (!ordersCanvas) {
+            return;
+        }
+
+        var colors = palette();
+
+        ordersChart = new Chart(ordersCanvas.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: read(ordersHost, 'data-labels'),
+                datasets: [{
+                    label: 'Orders',
+                    data: read(ordersHost, 'data-current'),
+                    backgroundColor: colors.current,
+                    hoverBackgroundColor: colors.current,
+                    borderWidth: 0,
+                    // Des barres carrées, comme tout le reste du back-office.
+                    borderRadius: 0,
+                    maxBarThickness: 18,
+                }],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: colors.surface,
+                        titleColor: token('--text'),
+                        bodyColor: token('--text'),
+                        borderColor: colors.grid,
+                        borderWidth: 1,
+                        padding: 10,
+                        displayColors: false,
+                        callbacks: {
+                            label: function (context) {
+                                var count = context.parsed.y;
+
+                                return count + (count === 1 ? ' order' : ' orders');
+                            },
+                        },
+                    },
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        border: { color: colors.grid },
+                        ticks: { color: colors.text, maxRotation: 0, autoSkipPadding: 20 },
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: colors.grid, drawTicks: false },
+                        border: { display: false },
+                        // Des commandes se comptent : pas de demi-graduation.
+                        ticks: { color: colors.text, padding: 8, precision: 0 },
+                    },
+                },
+            },
+        });
+    }
+
+    function recolorOrders() {
+        if (!ordersChart) {
+            return;
+        }
+
+        var colors = palette();
+
+        ordersChart.data.datasets[0].backgroundColor = colors.current;
+        ordersChart.data.datasets[0].hoverBackgroundColor = colors.current;
+
+        ordersChart.options.plugins.tooltip.backgroundColor = colors.surface;
+        ordersChart.options.plugins.tooltip.titleColor = token('--text');
+        ordersChart.options.plugins.tooltip.bodyColor = token('--text');
+        ordersChart.options.plugins.tooltip.borderColor = colors.grid;
+
+        ordersChart.options.scales.x.border.color = colors.grid;
+        ordersChart.options.scales.x.ticks.color = colors.text;
+        ordersChart.options.scales.y.grid.color = colors.grid;
+        ordersChart.options.scales.y.ticks.color = colors.text;
+
+        ordersChart.update('none');
+    }
+
     build();
+    buildOrders();
 
     // Le sélecteur de thème bascule data-theme sur <html> : sans écouter ce
     // changement, passer en sombre laisserait un graphique en couleurs claires.
@@ -166,6 +273,7 @@
         mutations.forEach(function (mutation) {
             if (mutation.attributeName === 'data-theme') {
                 recolor();
+                recolorOrders();
             }
         });
     }).observe(document.documentElement, { attributes: true });

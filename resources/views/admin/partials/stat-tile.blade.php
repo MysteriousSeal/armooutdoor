@@ -1,39 +1,14 @@
 {{-- $label · $value · $delta · $upIsGood · $points (optionnel)
 
-     La couleur de l'écart, c'est le sens du mouvement croisé avec le fait
-     qu'aller vers le haut soit une bonne nouvelle : des remboursements qui
-     montent ne sont pas verts. --}}
-@php
-    $direction = $delta['direction'] ?? 'flat';
-    $percent = $delta['percent'] ?? null;
-    $good = $upIsGood ?? true;
-
-    $tone = match (true) {
-        $direction === 'flat' => 'flat',
-        ($direction === 'up') === $good => 'good',
-        default => 'bad',
-    };
-
-    $arrow = match ($direction) {
-        'up' => '▲',
-        'down' => '▼',
-        default => '',
-    };
-@endphp
-
+     L'écart lui-même est rendu par admin.partials.delta : la ligne de compte
+     affiche le même signe hors d'une tuile, et deux copies de la règle
+     « monter n'est pas toujours une bonne nouvelle » finiraient par
+     diverger. --}}
 <div class="dash-tile">
     <span class="dash-tile-label">{{ $label }}</span>
     <span class="dash-tile-value">{{ $value }}</span>
     <span class="dash-tile-foot">
-        @if ($percent === null)
-            {{-- Pas de référent : une croissance depuis zéro n'a pas de
-                 pourcentage, et « +∞ % » n'informe personne. --}}
-            <span class="dash-delta is-flat">—</span>
-        @else
-            <span class="dash-delta is-{{ $tone }}">
-                <span aria-hidden="true">{{ $arrow }}</span>{{ $percent > 0 ? '+' : '' }}{{ number_format($percent, 1) }}%
-            </span>
-        @endif
+        @include('admin.partials.delta', ['delta' => $delta, 'upIsGood' => $upIsGood ?? true])
         <span class="dash-tile-compare">{{ $comparison }}</span>
         @isset($points)
             @include('admin.partials.sparkline', ['points' => $points, 'tone' => 'accent'])
