@@ -6812,20 +6812,74 @@ input[type="date"].form-control {
     padding: 0.15rem 0;
 }
 
+/* Le filet de part, sous le nom plutôt que derrière lui : du texte posé
+   sur un lavis se lit moins bien, et une barre qui part toujours du même
+   bord se compare d'une rangée à l'autre sans que l'œil ait à chercher où
+   elle commence. */
 .dash-bar {
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
+    display: block;
     width: var(--bar-width);
-    background: color-mix(in srgb, var(--chart-series-1) 18%, transparent);
-    border-radius: 0 3px 3px 0;
+    min-width: 2px;
+    height: 3px;
+    margin-top: 0.4rem;
+    background: color-mix(in srgb, var(--accent-heading) 55%, transparent);
+    border-radius: 0 2px 2px 0;
     pointer-events: none;
 }
 
 .dash-bar-cell > a,
 .dash-bar-cell > span {
     position: relative;
+}
+
+/* La référence sous le nom : elle sert à reconnaître et à dicter, pas à
+   lire, donc chiffres à chasse fixe, une taille en dessous et l'encre
+   sourde — le nom garde le poids de la ligne. */
+.dash-bar-sku {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-top: 0.1rem;
+    font-size: 0.6875rem;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+}
+
+/* Les moyennes se lisent contre le total qu'elles décomposent : un cran
+   plus léger, pour qu'on trouve le total d'abord. */
+.dash-unit-price {
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* Le rang. Le panneau est un classement : c'est la seule chose que l'ordre
+   des lignes dit sans la montrer, et deux chiffres suffisent à la dire. */
+.dash-rank-head {
+    width: 1.75rem;
+    padding-right: 0 !important;
+}
+
+.dash-rank {
+    width: 1.75rem;
+    padding-right: 0 !important;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    color: color-mix(in srgb, var(--accent-heading) 60%, var(--text-muted));
+}
+
+/* La première place porte l'olive pleine : une seule ligne se distingue,
+   sinon aucune ne se distingue. */
+.dash-bar-table tbody tr:first-child .dash-rank {
+    color: var(--accent-heading);
+}
+
+.dash-bar-table tbody tr:first-child .dash-bar {
+    background: var(--accent-heading);
 }
 
 /* Le nom absorbe la place restante et se coupe, au lieu d'imposer sa
@@ -6836,8 +6890,42 @@ input[type="date"].form-control {
     max-width: 0;
 }
 
+/* ------------------------------------------------------------------
+   Un panneau ne défile pas latéralement
+
+   `max-width: 0` sur la seule colonne élastique est ce qui permet à son
+   contenu de se couper : sans cela, la cellule se dimensionne sur son
+   texte, le `100%` de l'ellipse se mesure contre cette largeur-là, et le
+   tableau pousse le panneau au lieu de tronquer le titre.
+   ------------------------------------------------------------------ */
+.admin-table-wrap--tight {
+    overflow-x: hidden;
+}
+
+/* Largeurs posées plutôt que devinées : en disposition automatique, un
+   `max-width` sur une cellule ne la contraint pas — le tableau se
+   dimensionne sur le titre le plus long et pousse le panneau. Chaque
+   colonne chiffrée prend donc sa largeur, et le nom hérite du reste. */
+.dash-bar-table {
+    table-layout: fixed;
+}
+
+.dash-bar-table th:nth-child(1) { width: 1.75rem; }
+.dash-bar-table th:nth-child(2) { width: 3.5rem; }
+.dash-bar-table th:nth-child(4) { width: 4.25rem; }
+.dash-bar-table th:nth-child(5) { width: 7rem; }
+.dash-bar-table th:nth-child(6) { width: 6.5rem; }
+.dash-bar-table th:nth-child(7) { width: 7rem; }
+
+/* Les chiffres gardent leur ligne : c'est le titre qui cède, pas eux. */
+.dash-bar-table .admin-table-num {
+    white-space: nowrap;
+}
+
+/* Un bloc remplit sa cellule tout seul ; un `max-width: 100%` se
+   mesurerait contre le `max-width: 0` ci-dessus et le réduirait à rien. */
 .dash-bar-table .admin-table-truncate {
-    max-width: 100%;
+    max-width: none;
 }
 
 /* --- Panneaux et listes ----------------------------------------------- */
@@ -6888,6 +6976,7 @@ input[type="date"].form-control {
 .dash-row .dash-panel-foot {
     margin-top: auto;
 }
+
 
 @media (max-width: 1180px) {
     .dash-row--chart,
@@ -7124,6 +7213,72 @@ input[type="date"].form-control {
     border-bottom: 1px solid var(--border);
 }
 
+/* Deux chiffres qui ne veulent rien dire l'un sans l'autre : posés côte à
+   côte, séparés par un filet, à la même taille — le prix de revient n'est
+   pas plus important que ce qu'il rapporterait. */
+.dash-figure--pair {
+    flex-direction: row;
+    gap: 1.15rem;
+    align-items: stretch;
+}
+
+.dash-figure-half {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+    flex: 1;
+}
+
+.dash-figure-half--retail {
+    padding-left: 1.15rem;
+    border-left: 1px solid var(--border);
+}
+
+.dash-figure-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.dash-figure--pair .dash-figure-value {
+    font-size: clamp(1.15rem, 1.5vw, 1.45rem);
+}
+
+/* Ce qui dort sur les étagères : l'olive de la maison, comme le bénéfice
+   de la ligne de compte — c'est la même chose, en attente. */
+.dash-shelf-margin {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin: -0.35rem 0 0.9rem;
+    padding: 0.55rem 0.7rem;
+    font-size: 0.75rem;
+    line-height: 1.45;
+    color: var(--text-muted);
+    background: color-mix(in srgb, var(--ledger-profit) 7%, var(--surface));
+    border-left: 2px solid color-mix(in srgb, var(--ledger-profit) 55%, transparent);
+}
+
+.dash-shelf-margin-value {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+    color: var(--ledger-profit);
+}
+
+/* Le périmètre, en dernier et en retrait : une précision, pas une
+   condition à lire avant le chiffre. */
+.dash-shelf-margin-note {
+    flex-basis: 100%;
+    font-size: 0.6875rem;
+    opacity: 0.85;
+}
+
 .dash-figure-value {
     font-size: 1.75rem;
     font-weight: 600;
@@ -7143,9 +7298,17 @@ input[type="date"].form-control {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.85rem 1rem;
-    margin: 0;
+    /* `margin-top: auto` sur la note du bas mange sa marge fixe : dans un
+       panneau plein elle vaut zéro, et le filet vient se coller aux faits,
+       tout l'air restant en dessous. L'espace au-dessus du filet est donc
+       porté ici, où rien ne peut l'effacer. */
+    margin: 0 0 0.95rem;
     padding: 0;
     list-style: none;
+}
+
+.dash-facts:last-child {
+    margin-bottom: 0;
 }
 
 .dash-facts li {
@@ -7181,7 +7344,7 @@ input[type="date"].form-control {
    jamais un chiffre de plus. */
 .dash-panel-foot {
     margin: 0.9rem 0 0;
-    padding-top: 0.75rem;
+    padding-top: 0.8rem;
     font-size: 0.7rem;
     line-height: 1.5;
     color: var(--text-muted);
@@ -7234,6 +7397,42 @@ input[type="date"].form-control {
     font-weight: 600;
     font-variant-numeric: tabular-nums;
     color: var(--text);
+}
+
+/* ------------------------------------------------------------------
+   Les commandes récentes
+
+   Deux lignes et une somme, comme les autres listes du tableau de bord :
+   la provenance rejoint les faits de la seconde ligne au lieu de se
+   dresser en pastille entre le numéro et le montant, où elle décalait la
+   colonne des sommes d'une ligne à l'autre.
+   ------------------------------------------------------------------ */
+.dash-list--orders .admin-table-sub {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+}
+
+/* Le canal est le dernier des faits, et le seul qui porte l'encre de la
+   maison : assez pour se trouver d'un coup d'œil, pas assez pour peser
+   autant que le nom du client. */
+.dash-order-channel {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-weight: 500;
+    color: color-mix(in srgb, var(--accent-heading) 72%, var(--text-muted));
+}
+
+.dash-order-channel-logo {
+    width: 0.875rem;
+    height: 0.875rem;
+    object-fit: contain;
+    /* Un dessin sur fond blanc a besoin de son cadre pour ne pas se
+       dissoudre dans la carte. */
+    background: var(--bg);
+    border: 1px solid var(--border);
 }
 
 .dash-reference {

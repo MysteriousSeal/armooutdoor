@@ -316,19 +316,29 @@
                     @if ($topProducts->isEmpty())
                         <p class="empty-state">Nothing sold in this period.</p>
                     @else
-                        <div class="admin-table-wrap">
+                        {{-- Pas de défilement latéral dans un panneau : c'est
+                             le nom qui cède, pas la colonne. --}}
+                        <div class="admin-table-wrap admin-table-wrap--tight">
                             <table class="admin-table dash-bar-table">
                                 <thead>
                                     <tr>
+                                        <th class="dash-rank-head"><span class="sr-only">Rank</span></th>
                                         <th class="admin-table-media"></th>
                                         <th>Product</th>
                                         <th class="admin-table-num">Units</th>
+                                        <th class="admin-table-num">Avg sold at</th>
+                                        <th class="admin-table-num">Avg cost</th>
                                         <th class="admin-table-num">Revenue</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($topProducts as $row)
+                                    @foreach ($topProducts as $index => $row)
                                         <tr>
+                                            {{-- Un rang chiffré : le panneau est
+                                                 un classement, et c'est la seule
+                                                 chose que l'ordre des lignes dit
+                                                 sans le montrer. --}}
+                                            <td class="dash-rank">{{ $index + 1 }}</td>
                                             {{-- La vignette vient de la fiche produit, pas de
                                                  l'image figée dans la ligne : le tableau de bord
                                                  suit le produit tel qu'il est aujourd'hui. --}}
@@ -348,15 +358,40 @@
                                                      catégories nominales, donc rien à encoder dans la
                                                      teinte que la longueur ne dise déjà. --}}
                                                 <span class="dash-bar-cell">
-                                                    <span class="dash-bar" style="--bar-width: {{ round($row['quantity'] / $topQuantityMax * 100, 2) }}%"></span>
                                                     @if ($row['product'])
                                                         <a href="{{ route('admin.products.edit', $row['product']) }}" class="admin-table-strong admin-table-truncate" title="{{ $row['name'] }}">{{ $row['name'] }}</a>
                                                     @else
                                                         <span class="admin-table-strong admin-table-truncate">{{ $row['name'] }}</span>
                                                     @endif
+                                                    @if (filled($row['sku']))
+                                                        {{-- La référence sous le nom : c'est elle qu'on
+                                                             lit à voix haute au fournisseur, et elle est
+                                                             plus courte à reconnaître qu'un titre qui se
+                                                             coupe. --}}
+                                                        <span class="dash-bar-sku">{{ $row['sku'] }}</span>
+                                                    @endif
+                                                    {{-- La part des ventes en un filet sous le nom, plutôt
+                                                         qu'en lavis derrière : le texte se lit mieux sur du
+                                                         blanc, et une barre posée sur sa propre ligne se
+                                                         compare d'une rangée à l'autre. --}}
+                                                    <span class="dash-bar" style="--bar-width: {{ round($row['quantity'] / $topQuantityMax * 100, 2) }}%"></span>
                                                 </span>
                                             </td>
                                             <td class="admin-table-num">{{ number_format($row['quantity']) }}</td>
+                                            <td class="admin-table-num dash-unit-price">
+                                                {{-- Des moyennes, pas des prix de
+                                                     vente : ce que l'unité est
+                                                     partie chercher, et ce qu'elle
+                                                     a coûté à mettre en rayon. --}}
+                                                {{ $row['unit_price_cents'] === null ? '—' : format_euros($row['unit_price_cents']) }}
+                                            </td>
+                                            <td class="admin-table-num dash-unit-price">
+                                                @if ($row['unit_cost_cents'] === null)
+                                                    <span title="No purchase history for this product">—</span>
+                                                @else
+                                                    {{ format_euros($row['unit_cost_cents']) }}
+                                                @endif
+                                            </td>
                                             <td class="admin-table-num">{{ format_euros($row['revenue_cents']) }}</td>
                                         </tr>
                                     @endforeach
@@ -437,12 +472,35 @@
                         <a href="{{ route('admin.purchase-orders.index') }}" class="dash-panel-note">Purchase orders</a>
                     </div>
 
-                    <div class="dash-figure">
-                        <span class="dash-figure-value">{{ format_euros($stockValue['warehouse_cents']) }}</span>
-                        <span class="dash-figure-note">
-                            {{ number_format($stockValue['valued_units']) }} {{ \Illuminate\Support\Str::plural('unit', $stockValue['valued_units']) }} on the shelves, at average purchase cost
-                        </span>
+                    {{-- Ce que le rayon a coûté et ce qu'il rapporterait :
+                         l'un ne dit rien sans l'autre, et c'est l'écart entre
+                         les deux qui dort sur les étagères. --}}
+                    <div class="dash-figure dash-figure--pair">
+                        <div class="dash-figure-half">
+                            <span class="dash-figure-label">Cost</span>
+                            <span class="dash-figure-value">{{ format_euros($stockValue['warehouse_cents']) }}</span>
+                            <span class="dash-figure-note">{{ number_format($stockValue['valued_units']) }} {{ \Illuminate\Support\Str::plural('unit', $stockValue['valued_units']) }} at average purchase cost</span>
+                        </div>
+                        <div class="dash-figure-half dash-figure-half--retail">
+                            <span class="dash-figure-label">If it all sold</span>
+                            <span class="dash-figure-value">{{ format_euros($stockValue['retail_cents']) }}</span>
+                            <span class="dash-figure-note">every unit on the shelves, at today's price</span>
+                        </div>
                     </div>
+
+                    @if ($stockValue['shelf_markup_percent'] !== null)
+                        {{-- La marge ne couvre que les références dont les
+                             deux bouts sont connus : retirer un coût partiel
+                             d'un prix complet annoncerait un bénéfice que le
+                             rayon ne porte pas. --}}
+                        <p class="dash-shelf-margin">
+                            <span class="dash-shelf-margin-value">+{{ format_euros($stockValue['shelf_margin_cents']) }}</span>
+                            waiting on the shelves, {{ number_format($stockValue['shelf_markup_percent'], 1) }}% on what it cost
+                            @if ($stockValue['unpriced_references'] > 0)
+                                <span class="dash-shelf-margin-note">on the {{ format_euros($stockValue['retail_of_valued_cents']) }} whose cost is known</span>
+                            @endif
+                        </p>
+                    @endif
 
                     <ul class="dash-facts">
                         <li>
@@ -593,11 +651,26 @@
                     @if ($recentOrders->isEmpty())
                         <p class="empty-state">No orders yet.</p>
                     @else
-                        <ul class="dash-list">
+                        <ul class="dash-list dash-list--orders">
                             @foreach ($recentOrders as $order)
+                                @php($units = (int) ($order->units_count ?? 0))
                                 <li>
                                     <a href="{{ route('admin.orders.show', $order) }}" class="admin-table-strong">{{ $order->number }}</a>
-                                    <span class="admin-table-sub">{{ $order->user?->name ?? 'Guest' }} · {{ $order->created_at->format('d/m') }}</span>
+                                    <span class="admin-table-sub">
+                                        {{ $order->user?->name ?? 'Guest' }} · {{ $order->created_at->format('d/m') }}
+                                        · {{ number_format($units) }} {{ \Illuminate\Support\Str::plural('item', $units) }}
+                                        {{-- D'où vient la vente, au bout des
+                                             faits qui la décrivent plutôt qu'en
+                                             pastille : six « DIRECT » encadrés
+                                             se disputaient la colonne avec la
+                                             somme sans rien apprendre. --}}
+                                        · <span class="dash-order-channel">
+                                            @if ($order->marketplace?->logo)
+                                                <img src="{{ $order->marketplace->logoUrl() }}" alt="" class="dash-order-channel-logo" width="14" height="14" loading="lazy">
+                                            @endif
+                                            {{ filled($order->marketplace_name) ? $order->marketplace_name : 'Direct' }}
+                                        </span>
+                                    </span>
                                     <span class="dash-list-value">{{ format_euros($order->total_cents) }}</span>
                                 </li>
                             @endforeach

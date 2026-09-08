@@ -305,12 +305,17 @@ class DashboardMetrics
     {
         $products = Product::query()
             ->where('is_active', true)
-            ->with('variants')
-            ->get(['id', 'quantity']);
+            // La remise fait partie du prix du jour : la valeur de revente
+            // est ce que le rayon rapporterait s'il partait maintenant, pas
+            // ce qu'il rapporterait au tarif plein.
+            ->with(['variants', 'discount'])
+            ->get(['id', 'quantity', 'price_cents']);
 
         $costs = Product::averagePurchaseCostsInclVatCents($products->pluck('id'));
 
         $valued = 0;
+        $retail = 0;
+        $retailOfValued = 0;
         $units = 0;
         $unpriced = 0;
 
@@ -326,6 +331,17 @@ class DashboardMetrics
                 ? (int) $product->quantity
                 : (int) $activeVariants->sum('quantity');
 
+            // Le prix de vente, lui, est toujours connu : la valeur de
+            // revente couvre donc tout le rayon, y compris ce dont le coût
+            // d'achat manque.
+            $onShelfRetail = $product->variants->isEmpty()
+                ? $onHand * $product->effectivePriceCents()
+                : (int) $activeVariants->sum(
+                    fn (ProductVariant $variant): int => $variant->quantity * $variant->effectivePriceCents(),
+                );
+
+            $retail += $onShelfRetail;
+
             if (! array_key_exists($product->id, $costs)) {
                 $unpriced += $onHand > 0 ? 1 : 0;
 
@@ -333,6 +349,10 @@ class DashboardMetrics
             }
 
             $valued += $onHand * $costs[$product->id];
+            // La marge ne se lit que là où les deux bouts sont connus :
+            // retirer un coût partiel d'un prix complet annoncerait un
+            // bénéfice que le rayon ne porte pas.
+            $retailOfValued += $onShelfRetail;
             $units += $onHand;
         }
 
@@ -349,6 +369,12 @@ class DashboardMetrics
 
         return [
             'warehouse_cents' => $valued,
+            'retail_cents' => $retail,
+            'retail_of_valued_cents' => $retailOfValued,
+            'shelf_margin_cents' => $retailOfValued - $valued,
+            'shelf_markup_percent' => $valued > 0
+                ? round(($retailOfValued - $valued) / $valued * 100, 1)
+                : null,
             'valued_units' => $units,
             'unpriced_references' => $unpriced,
             'committed_cents' => $committed,
@@ -535,14 +561,35 @@ class DashboardMetrics
             ->get()
             ->keyBy('id');
 
-        return $rows->map(function ($row) use ($samples): array {
+        // Et le coût d'achat de ces cinq-là, en une fois : ce que l'unité
+        // coûte en face de ce qu'elle rapporte.
+        $costs = Product::averagePurchaseCostsInclVatCents(
+            $samples->pluck('product_id')->filter(),
+        );
+
+        return $rows->map(function ($row) use ($samples, $costs): array {
             $sample = $samples->get($row->sample_item_id);
+
+            $quantity = (int) $row->quantity;
+            $revenue = (int) $row->revenue_cents;
 
             return [
                 'product' => $sample?->product,
                 'name' => $sample?->localizedName() ?? 'Produit supprimé',
-                'quantity' => (int) $row->quantity,
-                'revenue_cents' => (int) $row->revenue_cents,
+                // La référence vient de la fiche, pas de la ligne vendue :
+                // celle-ci n'en garde pas, et un produit supprimé n'a donc
+                // plus de SKU à montrer.
+                'sku' => $sample?->product?->sku,
+                'quantity' => $quantity,
+                'revenue_cents' => $revenue,
+                // Ce que l'unité s'est vendue en moyenne : le prix affiché
+                // aujourd'hui ne dit pas à combien elle est partie, remises
+                // et prix de place de marché compris.
+                'unit_price_cents' => $quantity > 0 ? (int) round($revenue / $quantity) : null,
+                // Absent plutôt que zéro quand rien n'a été reçu : un coût
+                // inconnu n'est pas un coût nul, et la marge qu'on lirait
+                // en face serait fausse.
+                'unit_cost_cents' => $costs[$sample?->product_id] ?? null,
             ];
         })->values();
     }
@@ -779,7 +826,10 @@ class DashboardMetrics
             ->whereNull('archived_at')
             ->excludingTest()
             ->where('status', '!=', 'draft')
-            ->with('user')
+            // Le logo de la place de marché et le nombre d'articles : deux
+            // requêtes de plus au total, pas deux par ligne.
+            ->with(['user', 'marketplace'])
+            ->withSum('items as units_count', 'quantity')
             ->latest()
             ->limit($limit)
             ->get();

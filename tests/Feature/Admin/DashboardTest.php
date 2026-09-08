@@ -787,4 +787,179 @@ class DashboardTest extends TestCase
         $this->assertSame(1, $chip['count']);
         $this->assertNull($chip['note']);
     }
+
+    public function test_recent_orders_show_their_units_and_their_channel(): void
+    {
+        $product = Product::factory()->create();
+
+        $direct = $this->order(['total_cents' => 1500]);
+        foreach ([3, 1] as $quantity) {
+            OrderItem::query()->create([
+                'order_id' => $direct->id, 'product_id' => $product->id, 'product_slug' => $product->slug,
+                'name' => ['fr' => 'X'], 'image' => '', 'quantity' => $quantity,
+                'unit_price_cents' => 500, 'line_cents' => 500 * $quantity,
+            ]);
+        }
+
+        $marketplace = \App\Models\Marketplace::query()->create(['name' => 'NaturaBuy']);
+        $sold = $this->order([
+            'total_cents' => 2000,
+            'marketplace_id' => $marketplace->id,
+            'marketplace_name' => 'NaturaBuy',
+        ]);
+        OrderItem::query()->create([
+            'order_id' => $sold->id, 'product_id' => $product->id, 'product_slug' => $product->slug,
+            'name' => ['fr' => 'X'], 'image' => '', 'quantity' => 1,
+            'unit_price_cents' => 2000, 'line_cents' => 2000,
+        ]);
+
+        $orders = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->recentOrders();
+
+        // Les unités de la boîte, pas le nombre de références : trois cibles
+        // et un rouleau font quatre articles à emballer.
+        $this->assertSame(4, (int) $orders->firstWhere('number', $direct->number)->units_count);
+        $this->assertSame(1, (int) $orders->firstWhere('number', $sold->number)->units_count);
+
+        $html = $this->actingAs($this->admin())->get(route('admin.dashboard'))->assertOk()->getContent();
+
+        $this->assertStringContainsString('4 items', $html);
+        // Le canal ferme la ligne des faits : la place de marché se nomme,
+        // et la vente directe, qui n'a personne à créditer, le dit.
+        $this->assertMatchesRegularExpression('#dash-order-channel">\s*NaturaBuy#', $html);
+        $this->assertMatchesRegularExpression('#dash-order-channel">\s*Direct#', $html);
+    }
+
+    public function test_top_products_carry_their_average_unit_price_and_sku(): void
+    {
+        $product = Product::factory()->create(['sku' => 'CRT-REACT-076']);
+
+        // Deux ventes du même article à deux prix : la moyenne est celle du
+        // chiffre d'affaires par unité, pas le prix affiché aujourd'hui.
+        foreach ([[2, 1000], [3, 2100]] as [$quantity, $lineCents]) {
+            $order = $this->order(['total_cents' => $lineCents]);
+            OrderItem::query()->create([
+                'order_id' => $order->id, 'product_id' => $product->id, 'product_slug' => $product->slug,
+                'name' => ['fr' => 'X'], 'image' => '', 'quantity' => $quantity,
+                'unit_price_cents' => (int) ($lineCents / $quantity), 'line_cents' => $lineCents,
+            ]);
+        }
+
+        $row = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->topProducts()->first();
+
+        $this->assertSame(5, $row['quantity']);
+        $this->assertSame(3100, $row['revenue_cents']);
+        $this->assertSame(620, $row['unit_price_cents']);
+        $this->assertSame('CRT-REACT-076', $row['sku']);
+
+        $this->actingAs($this->admin())->get(route('admin.dashboard'))->assertOk()
+            ->assertSee('CRT-REACT-076')
+            ->assertSee('6,20')
+            ->assertSee('Avg sold at')
+            ->assertSee('Avg cost');
+    }
+
+    public function test_top_products_show_what_the_unit_cost_to_buy(): void
+    {
+        $product = Product::factory()->create();
+        $this->receive($product, 10, 250); // 3,00 € TTC l'unité
+
+        $order = $this->order(['total_cents' => 2000]);
+        OrderItem::query()->create([
+            'order_id' => $order->id, 'product_id' => $product->id, 'product_slug' => $product->slug,
+            'name' => ['fr' => 'X'], 'image' => '', 'quantity' => 2,
+            'unit_price_cents' => 1000, 'line_cents' => 2000,
+        ]);
+
+        $row = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->topProducts()->first();
+
+        $this->assertSame(1000, $row['unit_price_cents']);
+        $this->assertSame(300, $row['unit_cost_cents']);
+    }
+
+    public function test_a_product_never_purchased_has_no_cost_to_show(): void
+    {
+        // Sans historique d'achat le coût est inconnu, jamais nul : une
+        // marge lue en face d'un zéro serait fausse.
+        $product = Product::factory()->create();
+
+        $order = $this->order(['total_cents' => 2000]);
+        OrderItem::query()->create([
+            'order_id' => $order->id, 'product_id' => $product->id, 'product_slug' => $product->slug,
+            'name' => ['fr' => 'X'], 'image' => '', 'quantity' => 1,
+            'unit_price_cents' => 2000, 'line_cents' => 2000,
+        ]);
+
+        $row = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->topProducts()->first();
+
+        $this->assertNull($row['unit_cost_cents']);
+    }
+
+    public function test_a_deleted_product_has_no_sku_to_show(): void
+    {
+        // La ligne vendue garde le nom, jamais la référence : un produit
+        // supprimé n'a plus de SKU, et inventer un tiret vaut mieux qu'en
+        // inventer un.
+        $order = $this->order();
+        OrderItem::query()->create([
+            'order_id' => $order->id, 'product_id' => null, 'product_slug' => 'gone',
+            'name' => ['fr' => 'Article supprimé'], 'image' => '', 'quantity' => 1,
+            'unit_price_cents' => 500, 'line_cents' => 500,
+        ]);
+
+        $row = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->topProducts()->first();
+
+        $this->assertNull($row['sku']);
+        $this->assertSame(500, $row['unit_price_cents']);
+    }
+
+    public function test_the_warehouse_values_the_shelves_at_todays_selling_price(): void
+    {
+        $product = Product::factory()->create(['is_active' => true, 'quantity' => 4, 'price_cents' => 1000]);
+        $this->receive($product, 10, 250); // 3,00 € TTC l'unité
+
+        $stock = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->stockValue();
+
+        // 4 × 10,00 € en rayon contre 4 × 3,00 € payés.
+        $this->assertSame(4000, $stock['retail_cents']);
+        $this->assertSame(1200, $stock['warehouse_cents']);
+        $this->assertSame(2800, $stock['shelf_margin_cents']);
+        $this->assertSame(233.3, $stock['shelf_markup_percent']);
+    }
+
+    public function test_the_shelf_margin_only_covers_references_whose_cost_is_known(): void
+    {
+        // Un prix de vente existe toujours, un coût d'achat non : la valeur
+        // de revente couvre tout le rayon, la marge seulement la part dont
+        // les deux bouts sont connus.
+        $priced = Product::factory()->create(['is_active' => true, 'quantity' => 2, 'price_cents' => 1000]);
+        $this->receive($priced, 10, 250);
+
+        Product::factory()->create(['is_active' => true, 'quantity' => 5, 'price_cents' => 4000]);
+
+        $stock = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->stockValue();
+
+        $this->assertSame(22000, $stock['retail_cents']);
+        $this->assertSame(2000, $stock['retail_of_valued_cents']);
+        $this->assertSame(600, $stock['warehouse_cents']);
+        $this->assertSame(1400, $stock['shelf_margin_cents']);
+        $this->assertSame(1, $stock['unpriced_references']);
+    }
+
+    public function test_an_active_discount_lowers_the_shelf_value(): void
+    {
+        $product = Product::factory()->create(['is_active' => true, 'quantity' => 3, 'price_cents' => 2000]);
+
+        \App\Models\Discount::query()->create([
+            'product_id' => $product->id,
+            'type' => 'percentage',
+            'value' => 25,
+            'starts_at' => now()->subDay(),
+            'ends_at' => now()->addDay(),
+        ]);
+
+        $stock = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->stockValue();
+
+        // 3 × 15,00 €, le prix que le client paie aujourd'hui.
+        $this->assertSame(4500, $stock['retail_cents']);
+    }
 }
