@@ -21,7 +21,15 @@
                         French name, a euro price, and photos.
                     </p>
                 </div>
-                <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">Back to products</a>
+                <div class="admin-list-hero-actions">
+                    {{-- Seulement sur un produit qui existe : une annonce se
+                         rattache à une fiche enregistrée, pas à un formulaire
+                         encore vide. --}}
+                    @if ($product->exists)
+                        <a href="{{ route('admin.products.vinted.edit', $product) }}" class="btn btn-secondary">Vinted listing</a>
+                    @endif
+                    <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">Back to products</a>
+                </div>
             </div>
         </header>
 

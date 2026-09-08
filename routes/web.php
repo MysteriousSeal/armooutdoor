@@ -34,6 +34,7 @@ use App\Http\Controllers\Admin\MarketplaceSettingController as AdminMarketplaceS
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PackageTypeController as AdminPackageTypeController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\VintedListingController;
 use App\Http\Controllers\Admin\ProductSettingController as AdminProductSettingController;
 use App\Http\Controllers\Admin\PurchaseOrderController as AdminPurchaseOrderController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
@@ -211,6 +212,10 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         Route::get('/products/create', [AdminProductController::class, 'create'])->name('products.create');
         Route::post('/products', [AdminProductController::class, 'store'])->name('products.store');
         Route::get('/products/{product}/edit', [AdminProductController::class, 'edit'])->name('products.edit');
+        // L'annonce Vinted du produit : un écran à elle, parce que ce qu'on
+        // raconte sur une place de marché n'est pas ce qu'on met en fiche.
+        Route::get('/products/{product}/vinted', [VintedListingController::class, 'edit'])->name('products.vinted.edit');
+        Route::put('/products/{product}/vinted', [VintedListingController::class, 'update'])->name('products.vinted.update');
         // The cover as a JPEG: the shop stores WebP, which no marketplace form
         // or supplier wants.
         Route::get('/products/{product}/cover.jpg', [AdminProductController::class, 'coverImage'])->name('products.cover');

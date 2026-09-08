@@ -195,6 +195,15 @@ class Product extends Model
         });
     }
 
+    /**
+     * L'annonce Vinted de ce produit, s'il en a une. Une seule : le brouillon
+     * qu'on retouche entre deux dépôts, pas un historique.
+     */
+    public function vintedListing(): HasOne
+    {
+        return $this->hasOne(VintedListing::class);
+    }
+
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class)->orderBy('sort_order');

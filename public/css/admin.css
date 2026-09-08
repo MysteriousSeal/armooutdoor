@@ -11514,3 +11514,423 @@ a.order-stepper-btn:focus-visible {
     background: var(--accent-heading);
     border: 1px solid var(--accent-heading);
 }
+
+/* ------------------------------------------------------------------
+   L'annonce Vinted
+
+   Un écran de transfert : on a Vinted ouvert dans l'autre fenêtre et on
+   descend celui-ci en le recopiant. D'où la colonne unique et les étapes
+   numérotées — ce sont les champs du formulaire de Vinted, dans l'ordre où
+   il les demande, et c'est le seul endroit du back-office où un numéro dit
+   quelque chose de vrai.
+   ------------------------------------------------------------------ */
+.vinted-page {
+    max-width: 74rem;
+}
+
+/* De quel article il s'agit. Une bande, pas une carte : elle situe la page
+   sans se disputer la place avec les étapes. */
+.vinted-product {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-bottom: 1.25rem;
+    padding: 0.75rem 0.9rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.vinted-product-thumb {
+    width: 3.25rem;
+    height: 3.25rem;
+    flex-shrink: 0;
+    object-fit: cover;
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.vinted-product-thumb.is-empty {
+    display: block;
+}
+
+.vinted-product-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+    flex: 1;
+}
+
+.vinted-product-name {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text);
+    text-decoration: none;
+}
+
+.vinted-product-name:hover {
+    color: var(--accent-hover);
+}
+
+.vinted-product-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.3rem 0.7rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.vinted-product-sku {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+}
+
+/* Où en est l'annonce, dit en toutes lettres : « enregistrée il y a deux
+   jours » vaut mieux qu'une pastille de couleur à interpréter. */
+.vinted-state {
+    flex-shrink: 0;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.vinted-state.is-saved {
+    color: var(--accent-heading);
+    background: color-mix(in srgb, var(--accent-heading) 8%, var(--surface));
+    border-color: color-mix(in srgb, var(--accent-heading) 28%, var(--border));
+}
+
+[data-theme='dark'] .vinted-state.is-saved {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+    border-color: color-mix(in srgb, var(--accent) 32%, var(--border));
+}
+
+/* Deux colonnes : le texte à gauche, où la description a besoin de sa
+   largeur, les photos à droite sur toute la hauteur — on les ajoute une
+   fois, on relit le texte dix. */
+.vinted-steps {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.vinted-steps > .vinted-step:nth-child(4) {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    align-self: stretch;
+}
+
+@media (max-width: 1000px) {
+    .vinted-steps {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .vinted-steps > .vinted-step:nth-child(4) {
+        grid-column: 1;
+        grid-row: auto;
+    }
+}
+
+.vinted-step {
+    padding: 1.15rem 1.25rem 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.vinted-step-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    margin-bottom: 0.85rem;
+}
+
+.vinted-step-head > div {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Le numéro porte l'olive de la maison, à la taille d'un chiffre qu'on
+   compte, pas d'un titre. */
+.vinted-step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    flex-shrink: 0;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent-heading);
+    background: color-mix(in srgb, var(--accent-heading) 9%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 32%, var(--border));
+}
+
+[data-theme='dark'] .vinted-step-number {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+    border-color: color-mix(in srgb, var(--accent) 32%, var(--border));
+}
+
+.vinted-step-label {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.vinted-step-hint {
+    margin: 0.2rem 0 0;
+    font-size: 0.75rem;
+    line-height: 1.45;
+    color: var(--text-muted);
+}
+
+.vinted-step-count {
+    flex-shrink: 0;
+    min-width: 1.75rem;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+/* Le bouton de copie est l'action de la page : il est en tête de chaque
+   étape, toujours au même endroit, pour que la main y retourne sans
+   chercher. */
+.vinted-copy {
+    flex-shrink: 0;
+    min-width: 5.25rem;
+}
+
+.vinted-copy.is-copied {
+    color: var(--accent-heading);
+    background: color-mix(in srgb, var(--accent-heading) 10%, var(--surface));
+    border-color: color-mix(in srgb, var(--accent-heading) 40%, var(--border));
+}
+
+[data-theme='dark'] .vinted-copy.is-copied {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+    border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+}
+
+.vinted-input,
+.vinted-textarea {
+    width: 100%;
+}
+
+.vinted-textarea {
+    line-height: 1.55;
+    resize: vertical;
+}
+
+/* Le compte de caractères ne juge pas : il dit où on en est, et se teinte
+   seulement quand Vinted coupera. */
+.vinted-count {
+    margin: 0.4rem 0 0;
+    font-size: 0.6875rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+}
+
+.vinted-count .is-over {
+    color: #a44;
+}
+
+[data-theme='dark'] .vinted-count .is-over {
+    color: #e08585;
+}
+
+.vinted-price-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem 1rem;
+}
+
+.vinted-price-field {
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.vinted-price-field .form-control {
+    width: 9.5rem;
+    padding-right: 2rem;
+}
+
+.vinted-price-unit {
+    position: absolute;
+    top: 50%;
+    right: 0.7rem;
+    transform: translateY(-50%);
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+/* Les deux bornes, l'une sous l'autre pour tenir à côté du champ dans une
+   colonne plus étroite. */
+.vinted-price-compare {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: var(--text-muted);
+}
+
+.vinted-price-compare strong {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+}
+
+.vinted-photos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+    gap: 0.75rem;
+    margin: 0 0 1rem;
+    padding: 0;
+    list-style: none;
+}
+
+.vinted-photo {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.vinted-photo img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+/* La première photo est celle que Vinted montre dans le fil, et la seule
+   que beaucoup verront : elle se nomme au lieu de porter un « 1 ». */
+.vinted-photo-rank {
+    position: absolute;
+    top: 0.35rem;
+    left: 0.35rem;
+    min-width: 1.35rem;
+    padding: 0.12rem 0.4rem;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    color: var(--surface);
+    background: color-mix(in srgb, var(--text) 72%, transparent);
+}
+
+.vinted-photo-rank.is-cover {
+    background: var(--accent-heading);
+}
+
+.vinted-photo-remove {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Le champ de fichier natif est laid et minuscule : il est masqué derrière
+   son étiquette, qui devient la cible entière. */
+.vinted-drop {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    color: var(--text-muted);
+    background: color-mix(in srgb, var(--bg) 55%, var(--surface));
+    border: 1px dashed color-mix(in srgb, var(--accent) 45%, var(--border));
+    cursor: pointer;
+    transition:
+        border-color 140ms ease,
+        background 140ms ease;
+}
+
+.vinted-drop:hover,
+.vinted-drop:focus-within {
+    color: var(--text);
+    background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+    border-color: var(--accent);
+}
+
+.vinted-drop-main {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.vinted-drop-note {
+    font-size: 0.75rem;
+}
+
+.vinted-drop-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+/* Ce que le sélecteur a retenu : sans cela, choisir trois fichiers ne
+   change rien à l'écran et l'on choisit deux fois. */
+.vinted-drop-picked {
+    margin: 0.6rem 0 0;
+    font-size: 0.75rem;
+    color: var(--accent-heading);
+}
+
+[data-theme='dark'] .vinted-drop-picked {
+    color: var(--accent);
+}
+
+.vinted-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 1.25rem;
+}
+
+@media (max-width: 640px) {
+    .vinted-product {
+        flex-wrap: wrap;
+    }
+
+    .vinted-step-head {
+        flex-wrap: wrap;
+    }
+
+    .vinted-copy {
+        order: 3;
+        width: 100%;
+    }
+}
