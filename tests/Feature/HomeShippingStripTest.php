@@ -85,4 +85,72 @@ class HomeShippingStripTest extends TestCase
             $this->get($path)->assertOk()->assertDontSee('ship-strip', false);
         }
     }
+
+    public function test_the_amount_is_stamped_inside_the_sentence(): void
+    {
+        // La phrase est interpolée en HTML brut pour porter le tampon : si
+        // l'échappement revenait, la balise s'afficherait telle quelle.
+        $this->freeShippingOver(4900);
+
+        $this->get('/')->assertOk()
+            ->assertSee('<b class="ship-strip-amount">49€</b>', false)
+            ->assertDontSee('&lt;b class=', false);
+    }
+
+    /**
+     * La bande est pleine : son encre doit tenir dessus. Un olive éclairci
+     * un jour de retouche ferait passer la seule phrase que la page doit
+     * faire lire sous le seuil de lisibilité, sans que rien ne casse.
+     */
+    public function test_the_band_keeps_its_text_readable_in_both_themes(): void
+    {
+        $css = file_get_contents(__DIR__.'/../../public/css/home.css');
+
+        foreach (['--ship-band', '--ship-ink'] as $token) {
+            $this->assertMatchesRegularExpression(
+                '/'.$token.':\s*#[0-9a-f]{6}/i',
+                $css,
+                "{$token} must be declared as a hex colour"
+            );
+        }
+
+        preg_match_all('/--ship-band:\s*(#[0-9a-f]{6})/i', $css, $bands);
+        preg_match_all('/--ship-ink:\s*(#[0-9a-f]{6})/i', $css, $inks);
+
+        // Un jeu par thème : clair et sombre.
+        $this->assertCount(2, $bands[1]);
+        $this->assertCount(2, $inks[1]);
+
+        foreach ($bands[1] as $index => $band) {
+            $ratio = $this->contrastRatio($band, $inks[1][$index]);
+
+            $this->assertGreaterThanOrEqual(
+                4.5,
+                $ratio,
+                "Contrast of {$inks[1][$index]} on {$band} is ".round($ratio, 2).':1, below AA'
+            );
+        }
+    }
+
+    private function contrastRatio(string $a, string $b): float
+    {
+        $lighter = max($this->relativeLuminance($a), $this->relativeLuminance($b));
+        $darker = min($this->relativeLuminance($a), $this->relativeLuminance($b));
+
+        return ($lighter + 0.05) / ($darker + 0.05);
+    }
+
+    private function relativeLuminance(string $hex): float
+    {
+        [$r, $g, $b] = array_map(
+            fn (string $pair): float => (int) hexdec($pair) / 255,
+            str_split(ltrim($hex, '#'), 2),
+        );
+
+        $channel = fn (float $value): float => $value <= 0.03928
+            ? $value / 12.92
+            : (($value + 0.055) / 1.055) ** 2.4;
+
+        return 0.2126 * $channel($r) + 0.7152 * $channel($g) + 0.0722 * $channel($b);
+    }
 }
