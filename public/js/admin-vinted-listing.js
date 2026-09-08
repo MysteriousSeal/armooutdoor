@@ -6,6 +6,7 @@
     // it is missing.
     countCharacters();
     reportPickedFiles();
+    wireGenerator();
 
     if (buttons.length === 0) {
         return;
@@ -102,6 +103,84 @@
 
             field.addEventListener('input', render);
             render();
+        });
+    }
+
+    /**
+     * The « Write with Claude » button: it asks the server for a title and a
+     * description, and writes them into the fields as though they had been
+     * typed. Nothing is saved — the form still has to be submitted, which is
+     * what makes the proposal correctable rather than applied.
+     */
+    function wireGenerator() {
+        var run = document.querySelector('.vinted-assist-run');
+        var status = document.querySelector('[data-generate-status]');
+        var title = document.getElementById('vinted-title');
+        var description = document.getElementById('vinted-description');
+
+        if (!run || !title || !description) {
+            return;
+        }
+
+        var idle = run.textContent;
+        var token = document.querySelector('meta[name="csrf-token"]');
+
+        function say(message, failed) {
+            if (!status) {
+                return;
+            }
+
+            status.hidden = !message;
+            status.textContent = message || '';
+            status.className = 'vinted-assist-status' + (failed ? ' is-failed' : '');
+        }
+
+        // The counter under each field listens for `input`; a value written
+        // by script raises no event of its own, and the count would keep the
+        // figure from before.
+        function fill(field, value) {
+            field.value = value;
+            field.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
+        run.addEventListener('click', function () {
+            // What is already written was written by somebody: it is not
+            // replaced without being asked for.
+            if ((title.value || description.value)
+                && !window.confirm('Replace the title and the description that are already written?')) {
+                return;
+            }
+
+            run.disabled = true;
+            run.textContent = 'Writing…';
+            say('Claude is reading the product sheet — a few seconds.', false);
+
+            fetch(run.getAttribute('data-generate-url'), {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': token ? token.getAttribute('content') : '',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin'
+            }).then(function (response) {
+                return response.json().then(function (body) {
+                    if (!response.ok) {
+                        throw new Error(body && body.message ? body.message : 'Claude could not be reached.');
+                    }
+
+                    return body;
+                });
+            }).then(function (body) {
+                fill(title, body.title || '');
+                fill(description, body.description || '');
+                say('Written. Read it over, then save.', false);
+            }).catch(function (error) {
+                say(error.message || 'Claude could not be reached.', true);
+            }).then(function () {
+                run.disabled = false;
+                run.textContent = idle;
+            });
         });
     }
 

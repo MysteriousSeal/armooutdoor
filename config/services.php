@@ -49,6 +49,14 @@ return [
         'orders_path' => env('NATURABUY_ORDERS_PATH', '/v5/orders'),
     ],
 
+    /*
+     * Claude, for the admin's writing helpers. Without a key the buttons
+     * that call it say so rather than failing on submit.
+     */
+    'anthropic' => [
+        'key' => env('ANTHROPIC_API_KEY'),
+    ],
+
     'sendcloud' => [
         'public_key' => env('SENDCLOUD_PUBLIC_KEY'),
         'secret_key' => env('SENDCLOUD_SECRET_KEY'),

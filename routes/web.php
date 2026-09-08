@@ -34,7 +34,6 @@ use App\Http\Controllers\Admin\MarketplaceSettingController as AdminMarketplaceS
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PackageTypeController as AdminPackageTypeController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
-use App\Http\Controllers\Admin\VintedListingController;
 use App\Http\Controllers\Admin\ProductSettingController as AdminProductSettingController;
 use App\Http\Controllers\Admin\PurchaseOrderController as AdminPurchaseOrderController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
@@ -43,6 +42,7 @@ use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\ShippingSettingController as AdminShippingSettingController;
 use App\Http\Controllers\Admin\StripePaymentController as AdminStripePaymentController;
 use App\Http\Controllers\Admin\SupplierController as AdminSupplierController;
+use App\Http\Controllers\Admin\VintedListingController;
 // Auth (customer-facing login/register/password reset)
 use App\Http\Controllers\AllProductsController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
@@ -216,6 +216,8 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         // one says on a marketplace is not what goes on a product page.
         Route::get('/products/{product}/vinted', [VintedListingController::class, 'edit'])->name('products.vinted.edit');
         Route::put('/products/{product}/vinted', [VintedListingController::class, 'update'])->name('products.vinted.update');
+        Route::post('/products/{product}/vinted/generate', [VintedListingController::class, 'generate'])
+            ->name('products.vinted.generate');
         // The photo as a JPEG: the shop stores WebP, which Vinted's form
         // will not take.
         Route::get('/products/{product}/vinted/photos/{image}.jpg', [VintedListingController::class, 'downloadImage'])

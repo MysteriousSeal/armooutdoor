@@ -79,6 +79,34 @@
             </span>
         </div>
 
+        {{-- Claude writes the two fields that take the longest and are
+             rewritten the most. It proposes; the form still has to be saved,
+             and every word can be corrected before that. --}}
+        @if ($canGenerate)
+            <div class="vinted-assist">
+                <span class="vinted-assist-mark" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="18" height="18" focusable="false">
+                        <path d="M12 3.2 13.7 9l5.8 1.7-5.8 1.7L12 18.2 10.3 12.4 4.5 10.7 10.3 9zM18.4 3.4l.7 2.3 2.3.7-2.3.7-.7 2.3-.7-2.3-2.3-.7 2.3-.7z" fill="currentColor"/>
+                    </svg>
+                </span>
+
+                <div class="vinted-assist-main">
+                    <p class="vinted-assist-title">Let Claude write it</p>
+                    <p class="vinted-assist-note">
+                        Reads the product sheet and drafts the title and the description, in French, the way a Vinted seller writes them.
+                        Nothing is saved until you press Save.
+                    </p>
+                </div>
+
+                <button
+                    type="button"
+                    class="btn btn-primary vinted-assist-run"
+                    data-generate-url="{{ route('admin.products.vinted.generate', $product) }}"
+                >Write with Claude</button>
+            </div>
+            <p class="vinted-assist-status" data-generate-status role="status" hidden></p>
+        @endif
+
         <form
             method="POST"
             action="{{ route('admin.products.vinted.update', $product) }}"

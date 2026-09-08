@@ -10,6 +10,7 @@ use App\Models\Order;
 use App\Models\PurchaseOrder;
 use App\Models\User;
 use App\Models\WishlistItem;
+use App\Services\VintedCopywriter;
 use App\Support\Cart;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -27,6 +28,12 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(Cart::class);
+
+        // The key is a string, which nothing can autowire; and binding the
+        // writer by hand is also what lets a test swap it for a stub.
+        $this->app->bind(VintedCopywriter::class, fn (): VintedCopywriter => new VintedCopywriter(
+            config('services.anthropic.key'),
+        ));
 
         // Resolved once per request and shared by every composer below, so
         // rendering a page full of product cards doesn't run one query per card.

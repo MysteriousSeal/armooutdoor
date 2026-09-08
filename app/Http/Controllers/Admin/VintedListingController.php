@@ -6,13 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\VintedListing;
 use App\Models\VintedListingImage;
+use App\Services\VintedCopywriter;
 use App\Support\ImageThumbnailer;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use RuntimeException;
 
 /**
  * A product's Vinted listing: compose it, keep it, copy it.
@@ -27,9 +30,12 @@ class VintedListingController extends Controller
     /** Enough for a listing, not enough to weigh three megabytes. */
     private const JPEG_QUALITY = 90;
 
-    public function edit(Product $product): View
+    public function edit(Product $product, VintedCopywriter $writer): View
     {
         return view('admin.products.vinted', [
+            // No key on this environment, no button: one that answers "not
+            // configured" every time is worse than one that is not there.
+            'canGenerate' => $writer->isConfigured(),
             'product' => $product->load('images'),
             // What the unit cost: a Vinted price is set by seeing it, not by
             // remembering it. Null when nothing has been received — an
@@ -40,6 +46,33 @@ class VintedListingController extends Controller
             'listing' => $product->vintedListing()->with('images')->first()
                 ?? $this->draftFrom($product),
         ]);
+    }
+
+    /**
+     * Claude writes the title and the text, for the fields to receive.
+     *
+     * The answer is not saved: it lands in the form like something typed
+     * there, and it is the Save button — as before — that decides whether it
+     * stays. The wording is proposed, never applied.
+     */
+    public function generate(Product $product, VintedCopywriter $writer): JsonResponse
+    {
+        if (! $writer->isConfigured()) {
+            return response()->json(
+                ['message' => 'No Anthropic API key is configured on this environment.'],
+                503,
+            );
+        }
+
+        try {
+            return response()->json($writer->write($product->load('category')));
+        } catch (RuntimeException $e) {
+            // Said out loud rather than logged alone: somebody is waiting on
+            // the button, and an empty field would read as an empty answer.
+            report($e);
+
+            return response()->json(['message' => $e->getMessage()], 502);
+        }
     }
 
     /**

@@ -11617,6 +11617,93 @@ a.order-stepper-btn:focus-visible {
 
 /* Which article this is. A band, not a card: it places the page without
    fighting the steps for room. */
+/* The Claude strip: the one thing on this page that produces text rather than
+   receiving it, so it is the only block with a filled ground. Olive, the
+   heading accent — it belongs to the shop, not to a brand of its own. */
+.vinted-assist {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    margin-bottom: 1.25rem;
+    padding: 0.85rem 0.95rem;
+    background: color-mix(in srgb, var(--accent-heading) 8%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 32%, var(--border));
+}
+
+.vinted-assist-mark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2.1rem;
+    height: 2.1rem;
+    color: var(--accent-heading);
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 30%, var(--border));
+}
+
+.vinted-assist-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.vinted-assist-title {
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent-heading);
+}
+
+.vinted-assist-note {
+    margin: 0.2rem 0 0;
+    font-size: 0.75rem;
+    line-height: 1.45;
+    color: var(--text-muted);
+}
+
+.vinted-assist-run {
+    flex-shrink: 0;
+}
+
+.vinted-assist-run[disabled] {
+    opacity: 0.6;
+    cursor: progress;
+}
+
+/* Said under the strip rather than inside the button: the sentence is longer
+   than a label, and the button has to keep its width while it works. */
+.vinted-assist-status {
+    margin: -0.9rem 0 1.25rem;
+    padding: 0.5rem 0.7rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 0;
+}
+
+.vinted-assist-status.is-failed {
+    color: #c44;
+    border-color: color-mix(in srgb, #c44 35%, var(--border));
+}
+
+[data-theme='dark'] .vinted-assist-status.is-failed {
+    color: #e08585;
+    border-color: color-mix(in srgb, #e08585 35%, var(--border));
+}
+
+@media (max-width: 640px) {
+    .vinted-assist {
+        flex-wrap: wrap;
+    }
+
+    .vinted-assist-run {
+        width: 100%;
+    }
+}
+
 .vinted-product {
     display: flex;
     align-items: center;
