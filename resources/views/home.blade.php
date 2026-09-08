@@ -168,13 +168,17 @@
         <ul class="home-trust">
             <li class="home-trust-item">
                 <span class="home-trust-icon" aria-hidden="true">
-                    @include('partials.icon', ['name' => 'truck-fast', 'size' => 19])
+                    @include('partials.icon', ['name' => 'truck-fast', 'size' => 22])
                 </span>
                 <span class="home-trust-copy">
                     <strong>{{ __('store.home_hero_ship_title') }}</strong>
                     <span>
                         @if ($freeShippingAmount)
-                            {{ __('store.home_hero_ship_from', ['amount' => $freeShippingAmount]) }}
+                            {{-- The threshold carries the emphasis, the way it
+                                 does in the strip at the top of the page: it is
+                                 the one figure of the four a shopper is
+                                 counting on. --}}
+                            {!! __('store.home_hero_ship_from', ['amount' => '<b class="home-trust-amount">'.e($freeShippingAmount).'</b>']) !!}
                         @else
                             {{ __('store.home_hero_ship_plain') }}
                         @endif
@@ -183,7 +187,7 @@
             </li>
             <li class="home-trust-item">
                 <span class="home-trust-icon" aria-hidden="true">
-                    @include('partials.icon', ['name' => 'shield-halved', 'size' => 19])
+                    @include('partials.icon', ['name' => 'shield-halved', 'size' => 22])
                 </span>
                 <span class="home-trust-copy">
                     <strong>{{ __('store.home_hero_pay_title') }}</strong>
@@ -192,7 +196,7 @@
             </li>
             <li class="home-trust-item">
                 <span class="home-trust-icon" aria-hidden="true">
-                    @include('partials.icon', ['name' => 'box', 'size' => 19])
+                    @include('partials.icon', ['name' => 'box', 'size' => 22])
                 </span>
                 <span class="home-trust-copy">
                     <strong>{{ __('store.home_hero_track_title') }}</strong>
@@ -201,7 +205,7 @@
             </li>
             <li class="home-trust-item">
                 <span class="home-trust-icon" aria-hidden="true">
-                    @include('partials.icon', ['name' => 'headset', 'size' => 19])
+                    @include('partials.icon', ['name' => 'headset', 'size' => 22])
                 </span>
                 <span class="home-trust-copy">
                     <strong>{{ __('store.home_hero_help_title') }}</strong>

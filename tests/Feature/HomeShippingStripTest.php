@@ -98,6 +98,22 @@ class HomeShippingStripTest extends TestCase
     }
 
     /**
+     * The threshold appears twice on the home page — in the band at the very
+     * top and again among the four promises under the hero — and both stamp
+     * it inside their sentence. The promise interpolates raw to do it, so the
+     * same guard applies: were escaping to come back, the tag would print as
+     * text beside the truck.
+     */
+    public function test_the_promise_under_the_hero_stamps_the_threshold_too(): void
+    {
+        $this->freeShippingOver(4900);
+
+        $this->get('/')->assertOk()
+            ->assertSee('<b class="home-trust-amount">49€</b>', false)
+            ->assertDontSee('&lt;b class="home-trust-amount"', false);
+    }
+
+    /**
      * The band is filled: its ink has to hold on it. An olive lightened in
      * some later pass would drop the one sentence the page exists to make
      * people read below legibility, without anything breaking.
