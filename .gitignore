@@ -49,3 +49,6 @@ ruvector.db
 # Resolved on the machine that ran init: the path inside is that machine's
 # npx cache and means nothing anywhere else.
 .claude-flow/memory-package.json
+
+# Rapports du scanner, réécrits à chaque passage
+.claude/security-scans/

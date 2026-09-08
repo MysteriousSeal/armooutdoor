@@ -381,7 +381,17 @@
             return;
         }
 
-        relaySelectedBody.innerHTML = body.innerHTML;
+        // Les nœuds sont recopiés tels quels plutôt que sérialisés puis
+        // reparsés : le contenu de la carte est posé au textContent, le
+        // tour par une chaîne HTML ne fait donc que travailler deux fois.
+        // Vider puis remplir, comme la fonction voisine juste en dessous.
+        var copy = body.cloneNode(true);
+
+        relaySelectedBody.innerHTML = '';
+
+        while (copy.firstChild) {
+            relaySelectedBody.appendChild(copy.firstChild);
+        }
         relayList.hidden = true;
         relaySelected.hidden = false;
         clearRelayPointError();
