@@ -825,6 +825,16 @@ body.has-menu-open {
 .site-footer-copy {
     font-size: 0.8125rem;
     color: var(--text-muted);
+    /*
+     * The line is set at the size the legal links beside it are, and on a
+     * phone it was not arriving that way. Safari and Chrome inflate text
+     * inside a wide block on their own, and this line is one long paragraph
+     * where its neighbours are short items in a flex row: the paragraph got
+     * boosted and they did not. Declining the boost is the only way to
+     * declare a size here and have it hold.
+     */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
 }
 
 .site-footer-copy a {
