@@ -513,12 +513,16 @@
             <header class="home-why-header">
                 <p class="home-why-kicker">{{ __('store.home_why_kicker') }}</p>
                 <h2 class="home-why-title" id="home-why-title">{{ __('store.home_why_title') }}</h2>
-                <p class="home-why-text">{{ __('store.home_why_text') }}</p>
+                {{-- Raw so the sentence can weight its own second half: the
+                     first says how the catalogue is built, the second is the
+                     line worth remembering. --}}
+                <p class="home-why-text">{!! __('store.home_why_text') !!}</p>
             </header>
-            {{-- Four undertakings, written out rather than boxed. Each is
-                 numbered the way the articles of an undertaking are, and
-                 closed by the shop's own stamp: this is the page saying what
-                 it holds itself to, and a statement is signed, not tiled. --}}
+
+            {{-- Four undertakings, written out rather than boxed, and
+                 numbered the way the articles of an undertaking are: this is
+                 the page saying what it holds itself to, and a statement is
+                 set in clauses, not tiled. --}}
             <ul class="home-why-list">
                 <li class="home-why-item">
                     <span class="home-why-index" aria-hidden="true">01</span>
@@ -543,7 +547,9 @@
             </ul>
 
             {{-- The seal. It carries the shop's name, which the heading has
-                 already said, so it is read by nobody who cannot see it. --}}
+                 already said, so it is read by nobody who cannot see it. Last
+                 in reading order either way; the grid decides whether it is
+                 stamped in the corner of the sheet or centred at its foot. --}}
             <p class="home-why-stamp" aria-hidden="true">
                 <span class="home-why-stamp-name">{{ config('app.name') }}</span>
                 <span class="home-why-stamp-place">{{ __('store.home_why_stamp_place') }}</span>

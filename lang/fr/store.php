@@ -123,7 +123,7 @@ return [
     'home_market_cta' => 'Voir la boutique NaturaBuy',
     'home_why_kicker' => 'Nos engagements',
     'home_why_title' => 'Pourquoi choisir Armo Outdoor ?',
-    'home_why_text' => 'Une sélection rigoureuse de matériel utile et fiable. Des produits testés, approuvés et choisis par des passionnés pour des passionnés.',
+    'home_why_text' => 'Chaque référence est choisie une par une, par des gens qui s’en servent. <strong>Rien qu’on ne mettrait pas dans son propre sac.</strong>',
     'home_why_useful_title' => 'Produits utiles',
     'home_why_useful_text' => 'Du matériel choisi pour sa qualité et son utilité sur le terrain.',
     'home_why_price_title' => 'Prix justes toute l’année',

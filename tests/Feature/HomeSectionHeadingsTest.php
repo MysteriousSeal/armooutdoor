@@ -129,4 +129,17 @@ class HomeSectionHeadingsTest extends TestCase
         $this->assertMatchesRegularExpression('/:root \{[^}]*--accent-heading: #5b5c3b;/s', $base);
         $this->assertMatchesRegularExpression("/\[data-theme='dark'\] \{[^}]*--accent-heading:/s", $base);
     }
+
+    /**
+     * The line under "Pourquoi choisir Armo Outdoor ?" weights its own second
+     * half, so it is interpolated raw. Were escaping to come back, the tag
+     * would print as text in the middle of the page's own argument for
+     * itself.
+     */
+    public function test_the_engagements_lede_stamps_its_own_second_half(): void
+    {
+        $this->get('/')->assertOk()
+            ->assertSee('<strong>Rien qu’on ne mettrait pas dans son propre sac.</strong>', false)
+            ->assertDontSee('&lt;strong&gt;Rien', false);
+    }
 }
