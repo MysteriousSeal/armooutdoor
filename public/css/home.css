@@ -109,6 +109,9 @@
 
 .home .home-carousel-viewport {
     overflow: hidden;
+    /* The finger owns the horizontal axis, the page keeps the vertical one:
+       without this the browser claims the swipe and the panels never move. */
+    touch-action: pan-y;
     border: 1px solid var(--border);
     box-shadow: var(--shadow);
 }
@@ -117,8 +120,23 @@
     display: flex;
     /* La translation est posée par le script ; sans lui la piste reste une
        bande que l'on fait défiler au doigt. */
-    transform: translate3d(calc(var(--carousel-offset, 0) * -100%), 0, 0);
+    transform: translate3d(calc(var(--carousel-offset, 0) * -100% + var(--carousel-drag, 0px)), 0, 0);
     transition: transform 620ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* While a finger holds the track it follows without easing, and the panel
+   coming in has to be visible before it arrives. */
+.home .home-carousel-track.is-dragging {
+    transition: none;
+}
+
+.home .home-carousel-track.is-dragging .home-carousel-panel[aria-hidden='true'] {
+    visibility: visible;
+}
+
+.home .home-carousel-track.is-dragging .home-carousel-panel[aria-hidden='true'] .home-hero-copy {
+    opacity: 1;
+    transform: none;
 }
 
 .home .home-carousel-panel {
@@ -239,12 +257,6 @@
     outline-offset: 3px;
 }
 
-@media (max-width: 640px) {
-    .home .home-carousel-arrow {
-        display: none;
-    }
-}
-
 /* Rien ne bouge pour qui a demandé que rien ne bouge : le script coupe la
    rotation, le CSS coupe les transitions. */
 @media (prefers-reduced-motion: reduce) {
@@ -297,18 +309,8 @@
    Kicker, title and buttons all start at the card's left edge, so the
    paragraph does too — pushing it right left it the only stray element. */
 
-/* Empilé, le miroir n'a plus de sens : il ne ferait que déplacer le texte
-   d'un bord à l'autre sans qu'aucune image ne l'accompagne. */
-@media (max-width: 720px) {
-    .home .home-hero--mirrored {
-        justify-content: flex-start;
-        background-position: center right;
-    }
-
-    .home .home-hero--mirrored .home-hero-overlay {
-        transform: none;
-    }
-}
+/* Stacked, the mirror has nothing left to mirror — the reset lives with the
+   rest of the stacked panel, in the 900px block. */
 
 .home .home-hero-overlay {
     position: absolute;
@@ -1149,38 +1151,96 @@
 }
 
 @media (max-width: 900px) {
+    /* Stacked, the panel is a picture with a card under it rather than a
+       card laid over a picture. */
     .home .home-hero {
+        display: flex;
+        flex-direction: column;
+        /* Column now: without this the band, centred on the cross axis,
+           would be as wide as its content — nothing. */
+        align-items: stretch;
         min-height: 0;
         margin-top: 0;
-        /* The copy card is stacked below the photo rather than laid over it,
-           so the top padding is what reserves a band of image to look at.
-           Without it the card covers the panel and the photo is a rumour. */
-        padding: 8.5rem 1.15rem 1.4rem;
-        /* Stacked, the panel is portrait while the photo is 16:9: `cover`
-           throws away most of the width. Each slide names the column its
-           gear sits in so the crop keeps the subject instead of the mist. */
-        background-position: var(--hero-focus, 50%) top;
-        background-size: cover;
-        align-items: flex-end;
+        padding: 0;
+        /* The photo moves to the band below. Left on the panel, its crop
+           depended on whatever height the tallest slide happened to need. */
+        background-image: none;
     }
 
+    /* The band is cut to a shape of its own, so every slide shows the same
+       picture and the same amount of it. Reserving the image with top
+       padding could not: panels all stretch to the tallest, so the shortest
+       slide spent the difference — some 130px — on empty sky, and `top`
+       framed the one part of these illustrations where nothing happens. */
+    .home .home-hero::before {
+        content: '';
+        display: block;
+        flex: none;
+        aspect-ratio: 2 / 1;
+        max-height: 20rem;
+        background-image:
+            linear-gradient(
+                180deg,
+                transparent 68%,
+                color-mix(in srgb, var(--surface) 45%, transparent) 88%,
+                var(--surface) 100%
+            ),
+            var(--hero-image);
+        background-repeat: no-repeat;
+        /* The band is wider than the file, so the crop only ever takes from
+           the top and the bottom; the slide's own column is kept as the
+           horizontal anchor for whenever that stops being true. */
+        background-position: var(--hero-focus, 50%) center;
+        background-size: cover;
+    }
+
+    /* One above the other, there is no side left to mirror. */
+    .home .home-hero--mirrored {
+        justify-content: flex-start;
+    }
+
+    /* The wash belongs to the band now: over the whole panel it would only
+       fog the card. */
     .home .home-hero-overlay {
-        /* The wash now has to clear the image band before it closes, or the
-           photo we just made room for reads as fog. It still lands on solid
-           surface behind the card, which carries the text either way. */
-        background: linear-gradient(
-            180deg,
-            color-mix(in srgb, var(--surface) 4%, transparent) 0%,
-            color-mix(in srgb, var(--surface) 10%, transparent) 30%,
-            color-mix(in srgb, var(--surface) 62%, transparent) 56%,
-            var(--surface) 76%
-        );
+        display: none;
     }
 
     .home .home-hero-copy {
+        /* The card takes whatever height the tallest slide sets and centres
+           its own content in it, so a short slide reads as a card with room
+           around it rather than a button left at the bottom. */
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
         max-width: none;
         width: 100%;
-        padding: 1.25rem 1.15rem 1.3rem;
+        padding: 1.3rem 1.25rem 1.5rem;
+        /* It sits on the panel now, not on the photo: nothing to lift it
+           off, and no blur to pay for. */
+        background: none;
+        backdrop-filter: none;
+    }
+
+    /* Stacked, the arrows land on the copy card — they sat over the photo
+       when the photo was the whole panel. The dots and a swipe carry it. */
+    .home .home-carousel-arrow {
+        display: none;
+    }
+
+    /* A 0.3rem bar is a fine mark and a poor target: the padding gives the
+       thumb something to hit without thickening the bar. */
+    .home .home-carousel-dot,
+    .home .home-carousel-dot.is-current {
+        box-sizing: content-box;
+        padding: 0.5rem 0;
+        /* The current dot repaints its background as a shorthand, which
+           resets the clip: it has to be named on both. */
+        background-clip: content-box;
+    }
+
+    .home .home-carousel-dots {
+        margin-top: 0.35rem;
     }
 
     .home .home-why {
@@ -1238,7 +1298,23 @@
     }
 
     .home .home-hero-title {
-        font-size: 1.7rem;
+        font-size: clamp(1.45rem, 6.6vw, 1.7rem);
+    }
+
+    /* The pills name the same three aisles as the kicker two lines above
+       them. On a phone that is a row of the card spent saying it twice, and
+       the card is the part of the panel that has to stay short. */
+    .home .home-hero-tags {
+        display: none;
+    }
+
+    .home .home-hero-text {
+        margin-top: 0.7rem;
+        font-size: 0.94rem;
+    }
+
+    .home .home-hero-actions {
+        margin-top: 0.95rem;
     }
 
     .home .home-cats {

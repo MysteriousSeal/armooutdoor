@@ -122,6 +122,113 @@
 
     pauseWhile(root);
 
+    // Touch has neither the arrows (hidden once the panels stack) nor a
+    // real target in the dots: without a swipe, the next panel is only
+    // reachable by waiting for the timer to bring it round.
+    (function enableSwipe() {
+        var viewport = root.querySelector('.home-carousel-viewport');
+
+        if (!viewport || typeof viewport.setPointerCapture !== 'function') {
+            return;
+        }
+
+        var startX = 0;
+        var startY = 0;
+        var delta = 0;
+        var pointer = null;
+        var axis = null;
+        var swallowClick = false;
+
+        function reset() {
+            pointer = null;
+            axis = null;
+            delta = 0;
+            track.classList.remove('is-dragging');
+            track.style.removeProperty('--carousel-drag');
+        }
+
+        viewport.addEventListener('pointerdown', function (event) {
+            // A mouse has the arrows and the dots; taking its drag would
+            // only cost the reader the ability to select the text.
+            if (pointer !== null || event.button !== 0 || event.pointerType === 'mouse') {
+                return;
+            }
+
+            pointer = event.pointerId;
+            startX = event.clientX;
+            startY = event.clientY;
+            delta = 0;
+            axis = null;
+        });
+
+        viewport.addEventListener('pointermove', function (event) {
+            if (pointer !== event.pointerId) {
+                return;
+            }
+
+            var dx = event.clientX - startX;
+            var dy = event.clientY - startY;
+
+            // Until the direction is settled the page keeps the gesture: a
+            // finger going down must scroll, not drag.
+            if (axis === null) {
+                if (Math.abs(dx) < 8 && Math.abs(dy) < 8) {
+                    return;
+                }
+
+                if (Math.abs(dy) >= Math.abs(dx)) {
+                    pointer = null;
+                    return;
+                }
+
+                axis = 'x';
+                viewport.setPointerCapture(event.pointerId);
+                track.classList.add('is-dragging');
+                stop();
+            }
+
+            // The track resists at either end: there is nothing to show
+            // beyond it, and the pull back says so without a message.
+            var edge = (current === 0 && dx > 0) || (current === panels.length - 1 && dx < 0);
+            delta = edge ? dx / 3.5 : dx;
+            track.style.setProperty('--carousel-drag', delta + 'px');
+        });
+
+        function release(event) {
+            if (pointer !== event.pointerId) {
+                return;
+            }
+
+            var moved = axis === 'x' ? delta : 0;
+            // Enough of the panel to be a decision rather than a tremor.
+            var threshold = Math.max(40, viewport.offsetWidth * 0.12);
+
+            swallowClick = Math.abs(moved) > 8;
+            reset();
+
+            if (moved <= -threshold) {
+                go(current + 1);
+            } else if (moved >= threshold) {
+                go(current - 1);
+            } else {
+                start();
+            }
+        }
+
+        viewport.addEventListener('pointerup', release);
+        viewport.addEventListener('pointercancel', release);
+
+        // A swipe often ends on a button: without this guard, letting go on
+        // one opens the page the reader was swiping away from.
+        viewport.addEventListener('click', function (event) {
+            if (swallowClick) {
+                swallowClick = false;
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        }, true);
+    })();
+
     // Un onglet en arrière-plan ne doit pas revenir trois panneaux plus loin.
     document.addEventListener('visibilitychange', function () {
         if (document.hidden) {
