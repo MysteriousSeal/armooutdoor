@@ -2,6 +2,17 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-08 — v1.29.2 — build 4Q67EQ
+
+### Admin
+
+- **The dashboard opens on what the shop kept, not on what went through the till.** Revenue stood alone at the top of the page, and a thousand euros taken says nothing about whether the month was worth having — the answer existed on the orders list, profit against average purchase cost, and was never brought back here. The page now opens on the subtraction itself: revenue, less what selling it cost, less what the goods cost, leaving profit and its margin, with the operators written between the terms because they are what makes four figures one sentence. A bar underneath gives the same three shares to scale. It divides by the revenue of the orders that could be priced rather than by all of them: costs cover every order while the goods cover only those with a purchase history behind every line, and mixing the two bases gave three shares totalling thirty per cent of nothing.
+- **Three panels join it.** The warehouse says what the shelves are worth at purchase cost, what is committed to suppliers and what is still owed, taking in the four catalogue tiles that held the same space without ever saying what any of it cost; a reference in stock with no purchase history is set aside rather than valued at zero, which would drop the total as the catalogue grew. The customers panel gives what a customer is worth over their life, new against returning on the period, and how many have ever come back. The channel split gains commission and net, a channel that sells more and hands more back not being the better one.
+- **The layout was wrong, and visibly.** Columns fitted automatically at 21rem came out four across on a wide screen, which cut the top-products table off inside its own panel and left three quarters of a row empty beneath the last one. The rows are named now — two to one for the charts, seven to six for a table beside a list, thirds for the rest — and a panel with less to say pushes its footnote to the bottom edge instead of leaving a hole. Orders per day sit in bars beside the revenue line, counted per interval rather than flowing; their table twin is the neighbouring panel's, whose Orders column holds the same values day by day.
+- **Stock is valued on declinations when a product has them**, as the catalogue count has always done. Adding the product's own column to theirs counted twenty-five units twice and had two figures of one panel disagreeing.
+
+**No migration.**
+
 ## 2026-09-08 — v1.29.1 — build 7KU7LP
 
 ### Admin
