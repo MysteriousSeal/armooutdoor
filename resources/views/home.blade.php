@@ -274,7 +274,10 @@
                     </dl>
                 </div>
                 <div class="home-stock-aside">
-                    <p class="home-stock-text">{{ __('store.home_stock_text') }}</p>
+                    {{-- Raw so the sentence can weight its own second half:
+                         the range is the fact, where it ships from is the
+                         promise, and they are not read with the same eye. --}}
+                    <p class="home-stock-text">{!! __('store.home_stock_text') !!}</p>
                     <a class="home-stock-link" href="{{ localized_route('products.all') }}">
                         {{ __('store.home_stock_link') }}
                         <span class="home-stock-arrow" aria-hidden="true">&rarr;</span>

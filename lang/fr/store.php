@@ -104,7 +104,7 @@ return [
     'home_stock_kicker' => 'Le catalogue',
     'home_stock_more' => 'Plus de',
     'home_stock_unit' => 'références',
-    'home_stock_text' => 'Des cibles aux optiques, en passant par le matériel de stand et les vêtements. Tout est expédié depuis la France.',
+    'home_stock_text' => 'Des cibles aux optiques, en passant par le matériel de stand et les vêtements. <strong>Tout est expédié depuis la France.</strong>',
     'home_stock_link' => 'Voir tout le catalogue',
     'home_stock_rayons' => 'rayon|rayons',
     'home_stock_categories' => 'catégorie|catégories',

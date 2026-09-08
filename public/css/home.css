@@ -1586,6 +1586,9 @@
 }
 
 .home .home-stock-stats {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
     display: grid;
     grid-template-columns: auto auto;
     grid-template-areas:
@@ -1593,7 +1596,40 @@
         "figure spread";
     align-items: end;
     gap: 0.7rem 2rem;
-    padding: 1.45rem 2rem 1.55rem;
+    padding: 1.75rem 2.25rem 1.85rem;
+}
+
+/*
+ * A target face behind the figure, cut by the block's own edges.
+ *
+ * The count wanted a ground, and the ground had to belong to this trade
+ * rather than to statistics: every discipline the shop equips is scored on
+ * concentric rings, and the numeral lands in the ten. Drawn at a tenth of the
+ * olive, it is texture — read it and it is a target, glance at it and the
+ * figure is still the only thing on the panel.
+ */
+.home .home-stock-stats::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    top: 52%;
+    left: -6.4rem;
+    width: 26rem;
+    height: 26rem;
+    transform: translateY(-50%);
+    border-radius: 50%;
+    /* No filled ten: the numeral is the ten, and a disc behind it only put a
+       smudge across the middle digit. */
+    background: repeating-radial-gradient(
+        circle at center,
+        transparent 0 1.5rem,
+        color-mix(in srgb, var(--accent-heading) 20%, transparent) 1.5rem 1.56rem
+    );
+    /* Fading outward keeps the rings from ending on a hard circle where the
+       panel still has ground left to give, and stops stray arcs from
+       surfacing behind the kicker. */
+    -webkit-mask-image: radial-gradient(circle at center, #000 34%, transparent 66%);
+    mask-image: radial-gradient(circle at center, #000 34%, transparent 66%);
 }
 
 .home .home-stock-kicker {
@@ -1611,6 +1647,7 @@
 
 .home .home-stock-figure {
     grid-area: figure;
+    position: relative;
     display: grid;
     justify-items: start;
     margin: 0;
@@ -1630,10 +1667,10 @@
     /* Set to crowd its own line. The digits are meant to read as one mark,
        and tabular figures keep the width the day the shop crosses the next
        fifty. */
-    font-size: clamp(3.1rem, 6vw, 4.5rem);
+    font-size: clamp(3.4rem, 6.6vw, 5.2rem);
     font-weight: 700;
     letter-spacing: -0.055em;
-    line-height: 0.9;
+    line-height: 0.88;
     color: var(--accent-heading);
     font-variant-numeric: tabular-nums;
 }
@@ -1658,12 +1695,21 @@
     border-left: 1px solid color-mix(in srgb, var(--accent-heading) 22%, var(--border));
 }
 
+/* Read after the figure and before the button, so it is set at reading size
+   in the page's own ink: at fifteen pixels of grey it was a caption under a
+   headline that has no need of one. */
 .home .home-stock-text {
     margin: 0;
-    max-width: 28rem;
-    font-size: 0.9375rem;
-    line-height: 1.6;
-    color: var(--text-muted);
+    max-width: 30rem;
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    color: var(--text);
+}
+
+/* The first clause names the range, so it is the half worth weighting. */
+.home .home-stock-text strong {
+    font-weight: 600;
+    color: var(--accent-heading);
 }
 
 /* The olive stub the score chip already uses, given a job to do. */
@@ -1671,8 +1717,8 @@
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.62rem 1.1rem;
-    font-size: 0.875rem;
+    padding: 0.78rem 1.35rem;
+    font-size: 0.9375rem;
     font-weight: 600;
     letter-spacing: 0.01em;
     color: var(--bg);
@@ -1718,13 +1764,20 @@
     margin: 0;
 }
 
+/* Ruled off the figure rather than boxed: the rule stops at the height of
+   the two lines it separates, where a full-height divider drew a column that
+   holds nothing. */
 .home .home-stock-split {
-    padding: 0 1.5rem;
-    border-left: 1px solid color-mix(in srgb, var(--accent-heading) 22%, var(--border));
+    padding: 0.1rem 0 0.1rem 1.6rem;
+    border-left: 1px solid color-mix(in srgb, var(--accent-heading) 30%, var(--border));
+}
+
+.home .home-stock-split + .home-stock-split {
+    margin-left: 1.6rem;
 }
 
 .home .home-stock-split-count {
-    font-size: 1.85rem;
+    font-size: 2.1rem;
     font-weight: 700;
     letter-spacing: -0.03em;
     line-height: 1;
@@ -1733,7 +1786,7 @@
 }
 
 .home .home-stock-split-label {
-    margin: 0.4rem 0 0;
+    margin: 0.35rem 0 0;
     font-size: 0.625rem;
     font-weight: 700;
     letter-spacing: 0.14em;
@@ -1765,7 +1818,16 @@
             "figure"
             "spread";
         gap: 1.1rem;
-        padding: 1.25rem 1.25rem 1.15rem;
+        padding: 1.4rem 1.25rem 1.25rem;
+    }
+
+    /* The panel is a third of the width here: at full size the rings stop
+       being a ground and become a pattern the text sits on. */
+    .home .home-stock-stats::before {
+        top: 6.6rem;
+        left: -3.1rem;
+        width: 15rem;
+        height: 15rem;
     }
 
     .home .home-stock-spread {
@@ -1781,6 +1843,7 @@
     }
 
     .home .home-stock-split + .home-stock-split {
+        margin-left: 0;
         padding-left: 1.25rem;
         border-left: 1px solid color-mix(in srgb, var(--accent-heading) 22%, var(--border));
     }

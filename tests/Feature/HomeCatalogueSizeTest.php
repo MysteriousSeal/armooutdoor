@@ -138,4 +138,19 @@ class HomeCatalogueSizeTest extends TestCase
             ->assertSee('Voir tout le catalogue')
             ->assertSee(route('products.all'), false);
     }
+
+    /**
+     * The sentence beside the figure weights its own second half: the range
+     * is a fact and where it ships from is a promise. It is interpolated raw
+     * to carry that — were escaping to come back, the tag would print as
+     * text in the middle of the page.
+     */
+    public function test_the_promise_is_stamped_inside_the_sentence(): void
+    {
+        $this->standalone(60);
+
+        $this->get('/')->assertOk()
+            ->assertSee('<strong>Tout est expédié depuis la France.</strong>', false)
+            ->assertDontSee('&lt;strong&gt;', false);
+    }
 }
