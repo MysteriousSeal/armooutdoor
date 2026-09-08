@@ -55,6 +55,10 @@ return [
      */
     'anthropic' => [
         'key' => env('ANTHROPIC_API_KEY'),
+        // Only for a key created at the account level: the API refuses the
+        // call unless a workspace is named. A key created inside a workspace
+        // carries its own, and this stays empty.
+        'workspace_id' => env('ANTHROPIC_WORKSPACE_ID'),
     ],
 
     'sendcloud' => [

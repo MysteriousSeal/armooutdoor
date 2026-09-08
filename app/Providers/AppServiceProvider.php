@@ -33,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
         // writer by hand is also what lets a test swap it for a stub.
         $this->app->bind(VintedCopywriter::class, fn (): VintedCopywriter => new VintedCopywriter(
             config('services.anthropic.key'),
+            config('services.anthropic.workspace_id'),
         ));
 
         // Resolved once per request and shared by every composer below, so

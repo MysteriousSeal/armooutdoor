@@ -5,6 +5,7 @@ namespace App\Services;
 use Anthropic\Client;
 use Anthropic\Core\Exceptions\AnthropicException;
 use Anthropic\Core\Exceptions\APIStatusException;
+use Anthropic\Core\Util;
 use App\Models\Product;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -65,7 +66,13 @@ class VintedCopywriter
         de code, de la forme : {"title": "...", "description": "..."}
         PROMPT;
 
-    public function __construct(private readonly ?string $apiKey) {}
+    public function __construct(
+        private readonly ?string $apiKey,
+        // A key made at the account level belongs to no workspace, and the
+        // API then refuses the call unless one is named. A key made inside a
+        // workspace carries its own, and this stays empty.
+        private readonly ?string $workspaceId = null,
+    ) {}
 
     /** Whether the button has any chance of working. */
     public function isConfigured(): bool
@@ -94,9 +101,18 @@ class VintedCopywriter
                 thinking: ['type' => 'disabled'],
                 outputConfig: ['effort' => 'medium'],
                 messages: [['role' => 'user', 'content' => $this->brief($product)]],
+                workspaceID: $this->workspaceId ?: null,
             );
         } catch (APIStatusException $e) {
-            throw new RuntimeException('Claude refused the request ('.($e->type?->value ?? 'error').').', previous: $e);
+            // The API's own sentence, not merely its error type: « key not
+            // scoped to a workspace » is actionable and « invalid_request »
+            // is a trip through the log to find out the same thing.
+            $said = Util::dig(Util::dig($e->body, 'error'), 'message');
+
+            throw new RuntimeException(
+                is_string($said) ? $said : 'Claude refused the request ('.($e->type?->value ?? 'error').').',
+                previous: $e,
+            );
         } catch (AnthropicException $e) {
             // A timeout, a name that does not resolve, a proxy in the way:
             // the admin gets a sentence rather than a five hundred.
