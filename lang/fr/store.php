@@ -137,6 +137,7 @@ return [
     'home_about_lead' => 'Armo Outdoor est une boutique spécialisée dans le tir sportif, la chasse, l’airsoft et le matériel d’extérieur.',
     'home_about_quality' => 'Nous privilégions la qualité, la discrétion et l’utilité réelle sur le terrain.',
     'home_about_goal' => 'Notre objectif : vous proposer le meilleur équipement, sans superflu.',
+    'home_about_shipping' => 'Commandes préparées et expédiées depuis la France, en suivi, à domicile ou en point relais.',
     'home_about_cta' => 'En savoir plus',
     'view_all_in' => 'Voir toute la catégorie :category',
     'view_category' => 'Voir la catégorie',

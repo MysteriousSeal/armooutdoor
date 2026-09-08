@@ -566,24 +566,42 @@
                 <p class="home-about-kicker">{{ __('store.home_about_kicker') }}</p>
                 <h2 class="home-about-title" id="home-about-title">{{ __('store.home_about_heading') }}</h2>
                 <p class="home-about-lead">{{ __('store.home_about_lead') }}</p>
+                {{-- Une cible plutôt qu'une coche : la coche disait « validé »,
+                     comme un formulaire qui a bien voulu de vous, là où ces
+                     deux lignes disent ce que la boutique choisit. Et c'est le
+                     dessin du métier. --}}
                 <ul class="home-about-points">
                     <li>
                         <span class="home-about-point-mark" aria-hidden="true">
-                            @include('partials.icon', ['name' => 'circle-check', 'size' => 16])
+                            @include('partials.icon', ['name' => 'bullseye', 'size' => 13])
                         </span>
                         <span>{{ __('store.home_about_quality') }}</span>
                     </li>
                     <li>
                         <span class="home-about-point-mark" aria-hidden="true">
-                            @include('partials.icon', ['name' => 'circle-check', 'size' => 16])
+                            @include('partials.icon', ['name' => 'bullseye', 'size' => 13])
                         </span>
                         <span>{{ __('store.home_about_goal') }}</span>
+                    </li>
+                    {{-- Les deux premières lignes disent ce que la boutique
+                         choisit ; celle-ci dit ce qu'elle en fait. C'est la
+                         phrase que l'on cherche à lire avant de commander,
+                         et celle qui porte les mots que l'on tape pour la
+                         trouver. --}}
+                    <li>
+                        <span class="home-about-point-mark" aria-hidden="true">
+                            @include('partials.icon', ['name' => 'bullseye', 'size' => 13])
+                        </span>
+                        <span>{{ __('store.home_about_shipping') }}</span>
                     </li>
                 </ul>
                 {{-- « En savoir plus » about the shop goes to the page about
                      the shop, not to a product listing. --}}
                 <a href="{{ route('about') }}" class="btn btn-primary home-about-cta">
                     {{ __('store.home_about_cta') }}
+                    <svg class="home-about-cta-arrow" viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" focusable="false">
+                        <path d="M2.5 8h10m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
                 </a>
             </div>
         </section>

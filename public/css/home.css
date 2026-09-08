@@ -881,54 +881,90 @@
     color: var(--text-muted);
 }
 
+/*
+ * Les deux principes. Encadrés chacun dans sa boîte grise, ils se lisaient
+ * comme deux messages de formulaire — quelque chose que la page vous
+ * répond, pas quelque chose que la maison dit. Ils sont tenus par un filet
+ * olive à gauche, séparés d'un trait, et n'ont plus de fond du tout : une
+ * note en marge de catalogue plutôt qu'une alerte.
+ */
 .home .home-about-points {
     display: flex;
     flex-direction: column;
-    gap: 0.65rem;
-    margin: 1.25rem 0 0;
-    padding: 0;
+    margin: 1.4rem 0 0;
+    padding: 0.15rem 0 0.15rem 1.15rem;
     list-style: none;
     max-width: 34rem;
+    border-left: 2px solid color-mix(in srgb, #5b5c3b 55%, transparent);
 }
 
 .home .home-about-points li {
     display: flex;
     align-items: flex-start;
-    gap: 0.75rem;
-    padding: 0.85rem 0.95rem;
-    background: color-mix(in srgb, var(--bg) 72%, var(--surface));
-    border: 1px solid var(--border);
+    gap: 0.7rem;
+    padding: 0.8rem 0;
 }
 
+.home .home-about-points li + li {
+    border-top: 1px solid var(--border);
+}
+
+/* La cible, à l'échelle du texte : elle marque la ligne, elle ne la
+   décore pas. Pas de cercle autour d'un cercle.
+
+   Sa boîte fait exactement la hauteur d'une ligne de la phrase — même
+   corps, même interligne — et le dessin s'y centre : caler la marque à la
+   main sur une marge du haut la laissait dériver dès que le texte passait
+   à la ligne suivante. */
 .home .home-about-point-mark {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.85rem;
-    height: 1.85rem;
     flex-shrink: 0;
+    height: 1.5em;
+    font-size: 0.9375rem;
     color: #5b5c3b;
-    background: var(--surface);
-    border: 1.5px solid color-mix(in srgb, #5b5c3b 40%, var(--border));
-    border-radius: 50%;
 }
 
 .home .home-about-points span:last-child {
-    font-size: 0.875rem;
-    line-height: 1.45;
+    font-size: 0.9375rem;
+    line-height: 1.5;
     color: var(--text);
-    padding-top: 0.15rem;
 }
 
 .home .home-about-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
     align-self: flex-start;
-    margin-top: 1.45rem;
+    margin-top: 1.6rem;
     min-height: 2.7rem;
     padding: 0.65rem 1.25rem;
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.07em;
     text-transform: uppercase;
+}
+
+/* La flèche avance d'un cheveu au survol : le seul mouvement du bloc, et
+   il dit où mène le bouton. */
+.home .home-about-cta-arrow {
+    flex-shrink: 0;
+    transition: transform 160ms ease;
+}
+
+.home .home-about-cta:hover .home-about-cta-arrow {
+    transform: translateX(0.2rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .home .home-about-cta-arrow {
+        transition: none;
+    }
+
+    .home .home-about-cta:hover .home-about-cta-arrow {
+        transform: none;
+    }
 }
 
 [data-theme='dark'] .home .home-about-kicker {
@@ -941,11 +977,10 @@
 
 [data-theme='dark'] .home .home-about-point-mark {
     color: var(--accent);
-    border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
 }
 
-[data-theme='dark'] .home .home-about-points li {
-    background: color-mix(in srgb, var(--bg) 55%, var(--surface));
+[data-theme='dark'] .home .home-about-points {
+    border-left-color: color-mix(in srgb, var(--accent) 55%, transparent);
 }
 
 .home .home-ship-banner {
