@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-08 — v1.31.0 — build 5YPV58
+
+### Admin
+
+- **Claude writes the Vinted listing.** The title and the description are what take the longest on that page and what get rewritten the most, and nothing was prefilled there on purpose — a filled field gets corrected rather than written. A button is not a prefill: it drafts on demand, into fields that were empty until asked, and it asks before replacing anything already typed. What comes back is written for Vinted rather than summarised from the catalogue — short lines, the two or three facts that matter, the newness, the shipping note — because the shop page is read by somebody who navigated to it and a listing is read by somebody deciding in three seconds. Nothing is saved: the wording lands in the form and Save still decides.
+- **The wording keeps clear of what Vinted's moderation removes a listing for.** The shop sells accessories for shooting sports, and the vocabulary alone takes an annonce down before a human reads it. So the instruction is to describe the accessory and never what it mounts on — most of this catalogue is bags, optics, clothing and targets whose sheets name the weapon only in passing — and to leave out the words that trip it, along with any mention of legislation or age categories. A test holds that instruction in place: it is the reason a generated listing survives, and it would otherwise be the first thing tidied away in a later pass.
+- **A price comes with it, priced for being haggled over.** Every Vinted listing gets an offer ten to twenty percent under what it asks, so a price set at the figure one would accept is a price one ends up below. The suggestion is that figure raised by about fifteen percent to leave the room the offer will take — under the shop price, and never under the purchase cost, which now travels with the product sheet so the floor is something Claude can see rather than infer.
+- **The three fields are asked for as a tool call**, not as JSON written in prose. Prose came back inside a code fence, then with a French decimal comma, then without the price at all, and each of those cost a field that filled with nothing and said nothing about it. Declared as a schema the keys are required and the price is a number by the time it arrives, and where a suggestion still cannot be read the strip says so instead of leaving an empty box to be noticed.
+- **What Claude refused is said in the page.** The button first answered `invalid_request_error`, and the reason sat in the log: an API key made at the account level belongs to no workspace, and the call is refused until one is named. The message named the fix and only the log ever saw it. The API's own sentence is now what the strip shows, and a workspace can be configured for the keys that need one — sent only when set, so a key made inside a workspace still needs nothing.
+
+**No migration.** Two settings, both optional: `ANTHROPIC_API_KEY` in the environment, without which the button is absent rather than present and broken, and `ANTHROPIC_WORKSPACE_ID` only for a key that was not made inside a workspace. The API is billed separately from any subscription. `composer install` is needed on deploy: the official Anthropic PHP SDK joins the dependencies.
+
 ## 2026-09-08 — v1.30.1 — build Q69SZZ
 
 ### Storefront
