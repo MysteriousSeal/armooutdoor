@@ -117,6 +117,7 @@
         var status = document.querySelector('[data-generate-status]');
         var title = document.getElementById('vinted-title');
         var description = document.getElementById('vinted-description');
+        var price = document.getElementById('vinted-price');
 
         if (!run || !title || !description) {
             return;
@@ -146,8 +147,9 @@
         run.addEventListener('click', function () {
             // What is already written was written by somebody: it is not
             // replaced without being asked for.
-            if ((title.value || description.value)
-                && !window.confirm('Replace the title and the description that are already written?')) {
+            var written = title.value || description.value || (price && price.value);
+
+            if (written && !window.confirm('Replace what is already written?')) {
                 return;
             }
 
@@ -174,7 +176,24 @@
             }).then(function (body) {
                 fill(title, body.title || '');
                 fill(description, body.description || '');
-                say('Written. Read it over, then save.', false);
+
+                // A price can come back absent — the two fields above cannot.
+                // The field keeps what it had rather than being emptied, and
+                // the strip says so: a field silently skipped reads as a bug.
+                var suggested = body.price === null || body.price === undefined
+                    ? NaN
+                    : parseFloat(body.price);
+
+                if (price && !isNaN(suggested)) {
+                    fill(price, String(suggested));
+                }
+
+                say(
+                    isNaN(suggested)
+                        ? 'Written, but Claude suggested no price — set it yourself.'
+                        : 'Written. The price leaves room to be haggled down — read it over, then save.',
+                    isNaN(suggested)
+                );
             }).catch(function (error) {
                 say(error.message || 'Claude could not be reached.', true);
             }).then(function () {

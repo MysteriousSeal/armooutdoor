@@ -62,9 +62,52 @@ class VintedCopywriter
 
         N'invente rien : n'écris que ce que la fiche produit donne.
 
-        Réponds uniquement par un objet JSON, sans texte autour et sans bloc
-        de code, de la forme : {"title": "...", "description": "..."}
+        Le prix : propose le prix affiché, en euros, nombre seul. Sur Vinted
+        on négocie toujours — la plupart des acheteurs proposent 10 à 20 % de
+        moins. Affiche donc un prix qui laisse cette marge : le prix que tu
+        accepterais vraiment, majoré d'environ 15 %. Reste sous le prix
+        boutique, jamais sous le coût d'achat, et arrondis à un chiffre
+        crédible (5, 10, 12, 15, 24.50). Écris-le en JSON : un nombre, avec un
+        point décimal et sans symbole — 24.50, jamais "24,50 €".
+
+        Rends ta réponse en appelant l'outil « annonce_vinted », jamais en
+        écrivant du texte à côté.
         PROMPT;
+
+    /**
+     * The answer's shape, declared. Asked for JSON in prose, a model returns
+     * it inside a fence, or with a French decimal comma, or without the price
+     * at all — each of which cost a silent field. Declared as a tool, the
+     * three keys are required and the price is a number by the time it
+     * arrives.
+     *
+     * @return array<string, mixed>
+     */
+    private static function tool(): array
+    {
+        return [
+            'name' => 'annonce_vinted',
+            'description' => "Dépose le titre, la description et le prix de l'annonce Vinted.",
+            'inputSchema' => [
+                'type' => 'object',
+                'properties' => [
+                    'title' => [
+                        'type' => 'string',
+                        'description' => 'Le titre, 60 caractères maximum.',
+                    ],
+                    'description' => [
+                        'type' => 'string',
+                        'description' => 'La description, 4 à 6 lignes séparées par des retours à la ligne.',
+                    ],
+                    'price' => [
+                        'type' => 'number',
+                        'description' => 'Le prix affiché en euros, marge de négociation comprise. Un nombre : 12.5, jamais "12,50 €".',
+                    ],
+                ],
+                'required' => ['title', 'description', 'price'],
+            ],
+        ];
+    }
 
     public function __construct(
         private readonly ?string $apiKey,
@@ -81,7 +124,7 @@ class VintedCopywriter
     }
 
     /**
-     * @return array{title: string, description: string}
+     * @return array{title: string, description: string, price: float|null}
      */
     public function write(Product $product): array
     {
@@ -101,6 +144,8 @@ class VintedCopywriter
                 thinking: ['type' => 'disabled'],
                 outputConfig: ['effort' => 'medium'],
                 messages: [['role' => 'user', 'content' => $this->brief($product)]],
+                tools: [self::tool()],
+                toolChoice: ['type' => 'tool', 'name' => self::tool()['name']],
                 workspaceID: $this->workspaceId ?: null,
             );
         } catch (APIStatusException $e) {
@@ -119,7 +164,7 @@ class VintedCopywriter
             throw new RuntimeException('Claude could not be reached.', previous: $e);
         }
 
-        return $this->parse($this->text($message->content));
+        return $this->answer($message->content);
     }
 
     /**
@@ -141,6 +186,14 @@ class VintedCopywriter
         }
 
         $lines[] = 'Prix boutique : '.number_format($product->price_cents / 100, 2, ',', ' ').' €';
+
+        $costCents = $product->averagePurchaseCostInclVatCents();
+
+        if ($costCents !== null) {
+            // The floor. Without it a suggested price can sit under what the
+            // unit cost, and nothing on the page would say so.
+            $lines[] = 'Coût d\'achat TTC : '.number_format($costCents / 100, 2, ',', ' ').' €';
+        }
 
         foreach ($product->characteristics ?? [] as $row) {
             if (filled($row['label'] ?? null) && filled($row['value'] ?? null)) {
@@ -166,24 +219,34 @@ class VintedCopywriter
     }
 
     /**
-     * The answer's text. Thinking is off, so a text block is expected first —
-     * the loop holds all the same, since a content shape is not a promise.
+     * The answer, from the tool call it was asked to make.
+     *
+     * The text fallback is not decoration: an answer cut short by the token
+     * ceiling comes back as text, and reading it is better than telling the
+     * admin nothing came.
      *
      * @param  array<int, object>  $content
+     * @return array{title: string, description: string, price: float|null}
      */
-    private function text(array $content): string
+    private function answer(array $content): array
     {
         foreach ($content as $block) {
-            if ($block->type === 'text') {
-                return $block->text;
+            if ($block->type === 'tool_use' && $block->name === self::tool()['name']) {
+                return $this->normalize($block->input);
             }
         }
 
-        throw new RuntimeException('Claude answered with no text.');
+        foreach ($content as $block) {
+            if ($block->type === 'text') {
+                return $this->parse($block->text);
+            }
+        }
+
+        throw new RuntimeException('Claude answered with nothing to read.');
     }
 
     /**
-     * @return array{title: string, description: string}
+     * @return array{title: string, description: string, price: float|null}
      */
     private function parse(string $text): array
     {
@@ -196,8 +259,30 @@ class VintedCopywriter
             ? null
             : json_decode(substr($text, $start, $end - $start + 1), true);
 
-        if (! is_array($decoded) || ! isset($decoded['title'], $decoded['description'])) {
+        if (! is_array($decoded)) {
             throw new RuntimeException('Claude answered in an unexpected shape.');
+        }
+
+        return $this->normalize($decoded);
+    }
+
+    /**
+     * @param  array<string, mixed>  $decoded
+     * @return array{title: string, description: string, price: float|null}
+     */
+    private function normalize(array $decoded): array
+    {
+        if (! isset($decoded['title'], $decoded['description'])) {
+            throw new RuntimeException('Claude answered in an unexpected shape.');
+        }
+
+        $price = $decoded['price'] ?? null;
+
+        // Asked for a number in a French prompt, a model writes 24,50 often
+        // enough — and a comma is not a decimal point to `is_numeric`. The
+        // symbol and the spaces go the same way.
+        if (is_string($price)) {
+            $price = str_replace([',', ' ', "\u{00a0}", "\u{202f}", '€'], ['.', '', '', '', ''], $price);
         }
 
         return [
@@ -205,6 +290,12 @@ class VintedCopywriter
             // one cut by the form after being pasted.
             'title' => Str::limit(trim((string) $decoded['title']), self::TITLE_LIMIT, ''),
             'description' => trim((string) $decoded['description']),
+            // A price is a suggestion among two fields that are not: if it
+            // arrives absent or unreadable, the field is left as it was
+            // rather than the whole answer being thrown away.
+            'price' => is_numeric($price) && (float) $price > 0
+                ? round((float) $price, 2)
+                : null,
         ];
     }
 }

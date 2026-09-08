@@ -84,12 +84,12 @@ class VintedCopyGenerationTest extends TestCase
 
     public function test_it_answers_with_a_title_and_a_description(): void
     {
-        $this->writerReturning(['title' => 'Cagoule camo', 'description' => "Neuve.\nEnvoi rapide."]);
+        $this->writerReturning(['title' => 'Cagoule camo', 'description' => "Neuve.\nEnvoi rapide.", 'price' => 12.5]);
 
         $this->actingAs($this->admin())
             ->postJson(route('admin.products.vinted.generate', Product::factory()->create()))
             ->assertOk()
-            ->assertJson(['title' => 'Cagoule camo', 'description' => "Neuve.\nEnvoi rapide."]);
+            ->assertJson(['title' => 'Cagoule camo', 'description' => "Neuve.\nEnvoi rapide.", 'price' => 12.5]);
     }
 
     public function test_nothing_is_saved_by_generating(): void
@@ -97,7 +97,7 @@ class VintedCopyGenerationTest extends TestCase
         // The wording lands in the form, not in the table: the admin still
         // decides, and Save is still what decides it.
         $product = Product::factory()->create();
-        $this->writerReturning(['title' => 'Cagoule camo', 'description' => 'Neuve.']);
+        $this->writerReturning(['title' => 'Cagoule camo', 'description' => 'Neuve.', 'price' => 12.5]);
 
         $this->actingAs($this->admin())->postJson(route('admin.products.vinted.generate', $product));
 
@@ -148,6 +148,100 @@ class VintedCopyGenerationTest extends TestCase
         $this->expectException(RuntimeException::class);
 
         $this->parse('{"title": "Cagoule camo"}');
+    }
+
+    public function test_a_price_comes_back_with_the_wording(): void
+    {
+        $copy = $this->parse('{"title": "Cagoule camo", "description": "Neuve.", "price": 12.5}');
+
+        $this->assertSame(12.5, $copy['price']);
+    }
+
+    /**
+     * The three fields are asked for as a tool call, which is what makes them
+     * arrive typed and all present. Free-text JSON came back fenced, or with
+     * a decimal comma, or without the price — each costing a silent field.
+     */
+    public function test_the_answer_is_read_from_the_tool_call(): void
+    {
+        $block = new class
+        {
+            public string $type = 'tool_use';
+
+            public string $name = 'annonce_vinted';
+
+            public array $input = ['title' => 'Cagoule camo', 'description' => 'Neuve.', 'price' => 8.5];
+        };
+
+        $method = new ReflectionMethod(VintedCopywriter::class, 'answer');
+        $copy = $method->invoke(new VintedCopywriter('test-key'), [$block]);
+
+        $this->assertSame('Cagoule camo', $copy['title']);
+        $this->assertSame(8.5, $copy['price']);
+    }
+
+    /**
+     * An answer cut short by the token ceiling comes back as text rather than
+     * as a call. Reading it beats telling the admin that nothing came.
+     */
+    public function test_a_text_answer_is_still_read_when_no_tool_was_called(): void
+    {
+        $block = new class
+        {
+            public string $type = 'text';
+
+            public string $text = '{"title": "Cagoule camo", "description": "Neuve.", "price": 8.5}';
+        };
+
+        $method = new ReflectionMethod(VintedCopywriter::class, 'answer');
+        $copy = $method->invoke(new VintedCopywriter('test-key'), [$block]);
+
+        $this->assertSame('Cagoule camo', $copy['title']);
+    }
+
+    /**
+     * The prompt is French and asks for a number; a model writes 24,50 all
+     * the same. The comma cost the price field a whole generation once, in
+     * silence, which is what this keeps from coming back.
+     */
+    public function test_a_french_decimal_is_still_a_price(): void
+    {
+        // The euro sign arrives after a plain space, a no-break space or a
+        // narrow one depending on who formatted it.
+        foreach (['"24,50"', '"24,50 €"', "\"24,50\u{00a0}€\"", "\"24,50\u{202f}€\"", '"24.50"', '24.5'] as $written) {
+            $copy = $this->parse('{"title": "T", "description": "D", "price": '.$written.'}');
+
+            $this->assertSame(24.5, $copy['price'], "Unread: {$written}");
+        }
+    }
+
+    /**
+     * A price is a suggestion, and the two fields beside it are not. An
+     * answer that forgets it — or writes "environ 12 €" — must still fill the
+     * title and the text rather than costing the whole click.
+     */
+    public function test_an_unreadable_price_leaves_the_field_alone(): void
+    {
+        foreach (['{"title": "T", "description": "D"}', '{"title": "T", "description": "D", "price": "environ 12"}'] as $answer) {
+            $copy = $this->parse($answer);
+
+            $this->assertNull($copy['price']);
+            $this->assertSame('T', $copy['title']);
+        }
+    }
+
+    /**
+     * The listing has to leave room for the offer that always comes, and it
+     * has to leave the shop something. Both bounds are in the prompt: the
+     * margin, and the purchase cost as a floor.
+     */
+    public function test_the_prompt_prices_for_haggling_and_never_under_cost(): void
+    {
+        $prompt = (new ReflectionClass(VintedCopywriter::class))->getConstant('SYSTEM_PROMPT');
+
+        $this->assertStringContainsString('négocie', $prompt);
+        $this->assertStringContainsString('10 à 20', $prompt);
+        $this->assertStringContainsString("sous le coût d'achat", $prompt);
     }
 
     /**
