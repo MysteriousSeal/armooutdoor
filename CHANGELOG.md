@@ -2,6 +2,21 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-08 — v1.30.0 — build 8FMAHX
+
+### Admin
+
+- **A product keeps its Vinted wording between two postings.** Vinted opens no API for depositing a listing, and just as well: the moment of posting is the moment one decides it goes up. What was missing was everything before that — the title rewritten each time from memory, the description composed again in the box on Vinted's own page and lost the moment it is submitted. The product page grows a Vinted button, and behind it a page that holds the wording and sends nothing. Each field carries a copy button in the same place on every step, since the work is transferring text into another window and the hand goes back and forth a dozen times per listing; the price copies with a comma and no symbol, which is what Vinted's field accepts, while the page shows it with the symbol, which is what a person reads. The four steps are numbered — they are the fields of Vinted's own form, in the order it asks for them, and one descends this page while filling that one.
+- **Nothing is prefilled.** Starting from the catalogue was tried and is worse: a filled field gets corrected rather than written, and the shop's own phrasing ends up on a marketplace where it does not belong. What sits beside the price field instead is what one needs to set it — the shop's price and what the unit cost to buy, since above the cost there is money and above the shop price the shop competes with itself. An unknown cost shows a dash: no purchase history is not a cost of zero.
+- **The photos are the listing's own**, in their own directory, not the catalogue's. On Vinted an article is photographed worn, on a table, in the light of the room, and tying the two libraries together would have forced each to change with the other. The first is marked Cover, being the only one many people will see, and each can be taken away as a JPEG — decoded, laid on white since a JPEG has no transparency, re-encoded, the file on disk untouched — because Vinted's uploader will not take the WebP the shop stores. The name is the SKU and the photo's rank, carried by the link itself and not only by the response header, since a browser that thinks it sees a burst of downloads drops all but one of them silently.
+- **The product page says what the listing still needs.** Title, text, price and photos, a filled dot for what is done and a hollow ring for what is not, so the shape says it and the colour only agrees; photos count against two, which is what Vinted asks and what a listing needs to sell anyway. All four done and the control turns olive and reads Ready. Opening the listing to find out is what one did ten times an afternoon.
+
+### Under the hood
+
+- **This session's comments are in English.** The repository is commented in French from before and the standing rule is that new comments are written in English regardless; this session wrote French throughout, and twenty-eight files are now put back. Only the comments added here — the French that predates the session stays where it is, since translating it would rewrite someone else's voice across a diff nobody asked for.
+
+**Migration:** one, run with `php artisan migrate`, a `vinted_listings` table holding one row per product and a `vinted_listing_images` table for its photos. Both start empty, both fall with the product they belong to, and nothing in the shop reads them.
+
 ## 2026-09-08 — v1.29.5 — build NZSQ34
 
 ### Storefront
