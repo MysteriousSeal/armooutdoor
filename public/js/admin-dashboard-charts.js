@@ -52,24 +52,32 @@
         var current = parse('data-current');
         var previous = parse('data-previous');
 
+        // Une courbe adoucie entre deux jours reste une lecture ; entre deux
+        // mois elle invente un creux et une bosse que rien n'a mesurés, donc
+        // les points mensuels se rejoignent tout droit.
+        var tension = host.getAttribute('data-bucket') === 'month' ? 0 : 0.25;
+
+        // « Depuis le début » n'a pas de tranche précédente : sans ce tri,
+        // la série fantôme resterait dans l'infobulle, à zéro euro partout.
+        var ghost = previous.length > 0 ? [{
+            label: 'Previous period',
+            data: previous,
+            borderColor: colors.previous,
+            backgroundColor: 'transparent',
+            borderWidth: 2,
+            pointRadius: 0,
+            pointHoverRadius: 5,
+            pointHoverBorderWidth: 2,
+            pointHoverBorderColor: colors.surface,
+            pointHoverBackgroundColor: colors.previous,
+            tension: tension,
+        }] : [];
+
         chart = new Chart(canvas.getContext('2d'), {
             type: 'line',
             data: {
                 labels: labels,
-                datasets: [
-                    {
-                        label: 'Previous period',
-                        data: previous,
-                        borderColor: colors.previous,
-                        backgroundColor: 'transparent',
-                        borderWidth: 2,
-                        pointRadius: 0,
-                        pointHoverRadius: 5,
-                        pointHoverBorderWidth: 2,
-                        pointHoverBorderColor: colors.surface,
-                        pointHoverBackgroundColor: colors.previous,
-                        tension: 0.25,
-                    },
+                datasets: ghost.concat([
                     {
                         label: 'Current period',
                         data: current,
@@ -83,9 +91,9 @@
                         pointHoverBorderWidth: 2,
                         pointHoverBorderColor: colors.surface,
                         pointHoverBackgroundColor: colors.current,
-                        tension: 0.25,
+                        tension: tension,
                     },
-                ],
+                ]),
             },
             options: {
                 responsive: true,
@@ -144,14 +152,20 @@
 
         var colors = palette();
 
-        chart.data.datasets[0].borderColor = colors.previous;
-        chart.data.datasets[0].pointHoverBorderColor = colors.surface;
-        chart.data.datasets[0].pointHoverBackgroundColor = colors.previous;
+        // Repérées par leur nom : sans tranche précédente, la série courante
+        // est la première, et un index en dur la peindrait en gris.
+        chart.data.datasets.forEach(function (dataset) {
+            var isGhost = dataset.label === 'Previous period';
+            var hue = isGhost ? colors.previous : colors.current;
 
-        chart.data.datasets[1].borderColor = colors.current;
-        chart.data.datasets[1].backgroundColor = 'color-mix(in srgb, ' + colors.current + ' 10%, transparent)';
-        chart.data.datasets[1].pointHoverBorderColor = colors.surface;
-        chart.data.datasets[1].pointHoverBackgroundColor = colors.current;
+            dataset.borderColor = hue;
+            dataset.pointHoverBorderColor = colors.surface;
+            dataset.pointHoverBackgroundColor = hue;
+
+            if (!isGhost) {
+                dataset.backgroundColor = 'color-mix(in srgb, ' + hue + ' 10%, transparent)';
+            }
+        });
 
         chart.options.plugins.tooltip.backgroundColor = colors.surface;
         chart.options.plugins.tooltip.titleColor = token('--text');

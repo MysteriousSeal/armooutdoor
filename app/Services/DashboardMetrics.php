@@ -409,27 +409,47 @@ class DashboardMetrics
     }
 
     /**
+     * Une case par jour, ou par mois quand la tranche est longue : au-delà
+     * de quatre mois, un point par jour donne des cheveux serrés qu'on ne
+     * lit plus et un tableau jumeau d'autant de lignes que de jours.
+     *
      * @return Collection<int, array{date: Carbon, label: string, revenue_cents: int, orders: int}>
      */
     private function dailyBuckets(Carbon $start, Carbon $end): Collection
     {
+        // « Depuis le début » n'a pas de tranche précédente : la fenêtre
+        // qu'on nous passe alors se termine avant de commencer, et il n'y a
+        // pas de case à remplir.
+        if ($end->lessThan($start)) {
+            return collect();
+        }
+
+        $byMonth = $this->period->bucketsByMonth();
+        $key = fn (Carbon $date): string => $byMonth ? $date->format('Y-m') : $date->format('Y-m-d');
+
         $rows = $this->between($this->salesQuery(), $start, $end)
             ->get(['created_at', 'total_cents'])
-            ->groupBy(fn (Order $order): string => $order->created_at->format('Y-m-d'));
+            ->groupBy(fn (Order $order): string => $key($order->created_at));
 
-        $days = (int) $start->copy()->startOfDay()->diffInDays($end->copy()->startOfDay());
+        $cursor = $byMonth ? $start->copy()->startOfMonth() : $start->copy()->startOfDay();
+        $last = $byMonth ? $end->copy()->startOfMonth() : $end->copy()->startOfDay();
 
-        return collect(range(0, $days))->map(function (int $offset) use ($start, $rows): array {
-            $date = $start->copy()->addDays($offset);
-            $bucket = $rows->get($date->format('Y-m-d'));
+        $buckets = collect();
 
-            return [
-                'date' => $date,
-                'label' => $date->format('d/m'),
+        while ($cursor->lessThanOrEqualTo($last)) {
+            $bucket = $rows->get($key($cursor));
+
+            $buckets->push([
+                'date' => $cursor->copy(),
+                'label' => $cursor->format($byMonth ? 'm/y' : 'd/m'),
                 'revenue_cents' => (int) ($bucket?->sum('total_cents') ?? 0),
                 'orders' => (int) ($bucket?->count() ?? 0),
-            ];
-        });
+            ]);
+
+            $byMonth ? $cursor->addMonth() : $cursor->addDay();
+        }
+
+        return $buckets;
     }
 
     /**
@@ -443,6 +463,7 @@ class DashboardMetrics
     {
         $buckets = $this->dailyBuckets($this->period->start, $this->period->end);
         $chunkSize = max(1, (int) ceil($buckets->count() / 12));
+
 
         $revenue = $buckets->chunk($chunkSize)
             ->map(fn (Collection $chunk): int => (int) $chunk->sum('revenue_cents'))->values();

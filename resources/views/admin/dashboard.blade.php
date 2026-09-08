@@ -17,6 +17,11 @@
         $ledgerBase = max(1, $money['priced_revenue_cents']);
         $ledgerShare = fn (int $cents): float => round(min(100, max(0, $cents / $ledgerBase * 100)), 2);
         $ledgerIsPartial = $money['priced_orders'] < $money['total_orders'];
+
+        // Passé quatre mois la série compte par mois, et tout ce qui la
+        // nomme suit : « Orders per day » sur une colonne mensuelle
+        // annoncerait un chiffre qu'elle ne porte pas.
+        $bucket = $period->bucketsByMonth() ? 'month' : 'day';
     @endphp
 
     <div class="admin-list-page admin-dashboard">
@@ -211,13 +216,16 @@
                         <h3 class="order-panel-title">Revenue over time</h3>
                         <span class="dash-legend">
                             <span class="dash-legend-item"><span class="dash-swatch dash-swatch--current"></span>{{ $period->label() }}</span>
-                            <span class="dash-legend-item"><span class="dash-swatch dash-swatch--previous"></span>Previous period</span>
+                            @if ($previousSeries->isNotEmpty())
+                                <span class="dash-legend-item"><span class="dash-swatch dash-swatch--previous"></span>Previous period</span>
+                            @endif
                         </span>
                     </div>
 
                     <div
                         class="dash-chart"
                         data-revenue-chart
+                        data-bucket="{{ $bucket }}"
                         data-current="{{ json_encode($series->map(fn ($d) => $d['revenue_cents'] / 100)->all()) }}"
                         data-previous="{{ json_encode($previousSeries->map(fn ($d) => $d['revenue_cents'] / 100)->all()) }}"
                         data-labels="{{ json_encode($series->pluck('label')->all()) }}"
@@ -229,13 +237,15 @@
                         <summary>Table view</summary>
                         <div class="admin-table-wrap">
                             <table class="admin-table">
-                                <caption class="sr-only">Revenue per day, current and previous period</caption>
+                                <caption class="sr-only">Revenue per {{ $bucket }}, current and previous period</caption>
                                 <thead>
                                     <tr>
-                                        <th>Day</th>
+                                        <th>{{ ucfirst($bucket) }}</th>
                                         <th class="admin-table-num">Orders</th>
                                         <th class="admin-table-num">Revenue</th>
-                                        <th class="admin-table-num">Previous</th>
+                                        @if ($previousSeries->isNotEmpty())
+                                            <th class="admin-table-num">Previous</th>
+                                        @endif
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -244,7 +254,9 @@
                                             <td>{{ $day['label'] }}</td>
                                             <td class="admin-table-num">{{ number_format($day['orders']) }}</td>
                                             <td class="admin-table-num">{{ format_euros($day['revenue_cents']) }}</td>
-                                            <td class="admin-table-num">{{ format_euros($previousSeries[$index]['revenue_cents'] ?? 0) }}</td>
+                                            @if ($previousSeries->isNotEmpty())
+                                                <td class="admin-table-num">{{ format_euros($previousSeries[$index]['revenue_cents'] ?? 0) }}</td>
+                                            @endif
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -262,7 +274,7 @@
                      personne plus avancé. --}}
                 <section class="order-panel dash-chart-panel">
                     <div class="dash-panel-head">
-                        <h3 class="order-panel-title">Orders per day</h3>
+                        <h3 class="order-panel-title">Orders per {{ $bucket }}</h3>
                         <span class="dash-panel-note">{{ number_format($headline['orders']) }} in {{ strtolower($period->label()) }}</span>
                     </div>
 
@@ -276,9 +288,9 @@
                     </div>
 
                     <p class="dash-panel-foot">
-                        Busiest day {{ $series->sortByDesc('orders')->first()['label'] ?? '—' }}
+                        Busiest {{ $bucket }} {{ $series->sortByDesc('orders')->first()['label'] ?? '—' }}
                         · {{ number_format($series->max('orders') ?? 0) }} {{ \Illuminate\Support\Str::plural('order', $series->max('orders') ?? 0) }}
-                        · {{ number_format($series->where('orders', 0)->count()) }} quiet {{ \Illuminate\Support\Str::plural('day', $series->where('orders', 0)->count()) }}
+                        · {{ number_format($series->where('orders', 0)->count()) }} quiet {{ \Illuminate\Support\Str::plural($bucket, $series->where('orders', 0)->count()) }}
                     </p>
                 </section>
             </div>

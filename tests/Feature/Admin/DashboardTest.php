@@ -523,4 +523,75 @@ class DashboardTest extends TestCase
             // La barre de la ligne de compte et ses trois segments.
             ->assertSee('dash-ledger-segment is-profit', false);
     }
+
+    public function test_all_time_starts_at_the_first_sale(): void
+    {
+        // Une commande de test n'a jamais eu lieu : elle ne peut pas ouvrir
+        // la période, sans quoi la page commencerait sur des mois vides.
+        $ghost = $this->orderAt('2024-01-05');
+        $ghost->forceFill(['test_marked_at' => now()])->save();
+
+        $this->orderAt('2026-03-11');
+        $this->orderAt('2026-05-02');
+
+        $period = DashboardPeriod::resolve('all');
+
+        $this->assertSame('2026-03-11', $period->start->toDateString());
+        $this->assertSame('All time', $period->label());
+    }
+
+    public function test_all_time_has_no_earlier_period_to_compare_against(): void
+    {
+        $this->orderAt('2026-05-02', 5000);
+
+        $period = DashboardPeriod::resolve('all');
+
+        // La fenêtre précédente se termine avant de commencer : elle est
+        // vide, et l'écart n'a donc pas de référent.
+        $this->assertTrue($period->previousEnd->lessThan($period->previousStart));
+
+        $metrics = new \App\Services\DashboardMetrics($period);
+
+        $this->assertSame(0, $metrics->revenueSeries()['previous']->count());
+        $this->assertNull($metrics->headline()['revenue_delta']['percent']);
+        $this->assertSame('since the first sale', $period->comparisonLabel());
+    }
+
+    public function test_a_long_period_counts_by_month_rather_than_by_day(): void
+    {
+        $this->orderAt(now()->subMonths(5)->startOfMonth()->toDateTimeString(), 1000);
+        $this->orderAt(now()->startOfMonth()->toDateTimeString(), 2000);
+
+        $period = DashboardPeriod::resolve('all');
+
+        $this->assertTrue($period->bucketsByMonth());
+
+        $series = (new \App\Services\DashboardMetrics($period))->revenueSeries()['current'];
+
+        // Six mois, six cases — jamais cent cinquante jours de cheveux.
+        $this->assertSame(6, $series->count());
+        $this->assertSame(1000, $series->first()['revenue_cents']);
+        $this->assertSame(2000, $series->last()['revenue_cents']);
+        $this->assertMatchesRegularExpression('#^\d{2}/\d{2}$#', $series->first()['label']);
+    }
+
+    public function test_a_short_period_still_counts_by_day(): void
+    {
+        $period = DashboardPeriod::resolve('7d');
+
+        $this->assertFalse($period->bucketsByMonth());
+        $this->assertSame(7, (new \App\Services\DashboardMetrics($period))->revenueSeries()['current']->count());
+    }
+
+    public function test_the_page_offers_all_time_and_names_its_buckets(): void
+    {
+        $this->orderAt(now()->subMonths(5)->toDateTimeString(), 1000);
+
+        $this->actingAs($this->admin())->get(route('admin.dashboard', ['period' => 'all']))->assertOk()
+            ->assertSee('All time')
+            ->assertSee('Orders per month')
+            // Sans tranche précédente, la légende n'annonce pas une série
+            // que le graphique ne trace pas.
+            ->assertDontSee('Previous period');
+    }
 }
