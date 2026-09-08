@@ -198,6 +198,63 @@ class OrderProductCostColumnTest extends TestCase
         $this->assertNull($order->profitInclVatCents([]));
     }
 
+    public function test_the_profit_percentage_is_a_share_of_the_product_cost(): void
+    {
+        $product = Product::factory()->create();
+        $this->receive($product, 10, 100); // avg 120 incl. VAT
+
+        // Perçu 1500, coût produit 240 : 1260 / 240 = 525 %.
+        $order = $this->order(['total_cents' => 1500]);
+        $this->line($order, $product, 2);
+        $order->load('items');
+
+        $averages = Product::averagePurchaseCostsInclVatCents([$product->id]);
+
+        $this->assertSame(525.0, $order->profitPercentageOfProductCost($averages));
+    }
+
+    public function test_the_profit_percentage_is_null_when_the_cost_is_unknown_or_zero(): void
+    {
+        $unpriced = $this->order();
+        $this->line($unpriced, Product::factory()->create(), 1);
+        $unpriced->load('items');
+
+        $this->assertNull($unpriced->profitPercentageOfProductCost([]));
+
+        // Un coût nul connu ne donne pas un pourcentage infini : il n'en
+        // donne aucun.
+        $free = Product::factory()->create();
+        $this->receive($free, 5, 0);
+
+        $order = $this->order();
+        $this->line($order, $free, 1);
+        $order->load('items');
+
+        $averages = Product::averagePurchaseCostsInclVatCents([$free->id]);
+
+        $this->assertSame(0, $order->productCostInclVatCents($averages));
+        $this->assertNull($order->profitPercentageOfProductCost($averages));
+    }
+
+    public function test_the_list_shows_the_percentage_beside_the_profit_and_in_the_kpi_card(): void
+    {
+        $product = Product::factory()->create();
+        $this->receive($product, 10, 100); // avg 120 incl. VAT
+
+        // Perçu 1500, coût 240, profit 1260 : 525,0 % dans les deux endroits.
+        $order = $this->order(['total_cents' => 1500]);
+        $this->line($order, $product, 2);
+
+        $html = $this->actingAs(User::factory()->admin()->create())
+            ->get(route('admin.orders.index'))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('admin-order-profit-pct', $html);
+        $this->assertStringContainsString('(525,0 %)', $html);
+        $this->assertStringContainsString('the bracket is its share of product cost', $html);
+    }
+
     public function test_profit_can_be_negative(): void
     {
         $product = Product::factory()->create();

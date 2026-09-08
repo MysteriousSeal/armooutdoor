@@ -368,6 +368,23 @@ class Order extends Model
     }
 
     /**
+     * The profit as a share of what the goods cost, e.g. "62,0 %" — how much
+     * each euro spent on stock brought back. Null whenever the profit is
+     * (an unpriced line), and null too when the goods cost nothing: a
+     * percentage of zero is a division, not a figure.
+     */
+    public function profitPercentageOfProductCost(array $averageCostsByProductId): ?float
+    {
+        $productCostCents = $this->productCostInclVatCents($averageCostsByProductId);
+
+        if ($productCostCents === null || $productCostCents === 0) {
+            return null;
+        }
+
+        return ($this->perceivedTotalCents() - $productCostCents) / $productCostCents * 100;
+    }
+
+    /**
      * The payment processing fee as a share of the order total, e.g. "4.7%".
      */
     public function formattedPaymentFeePercentage(): ?string

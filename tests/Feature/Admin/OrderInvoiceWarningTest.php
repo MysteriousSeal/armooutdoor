@@ -190,8 +190,15 @@ class OrderInvoiceWarningTest extends TestCase
         return (new \DOMXPath($document))->query('//table//a[@data-invoice-confirm]');
     }
 
+    /**
+     * La colonne « Actions » est masquée par un drapeau de config ; ce que
+     * l'avertissement fait se vérifie colonne rendue, sinon le test ne dit
+     * plus que le drapeau est à false.
+     */
     public function test_the_orders_list_flags_the_same_missing_fields(): void
     {
+        config()->set('shop.admin_row_actions', true);
+
         $order = $this->order();
 
         $html = $this->actingAs($this->admin())
@@ -210,6 +217,8 @@ class OrderInvoiceWarningTest extends TestCase
 
     public function test_the_orders_list_stays_quiet_when_everything_is_filled_in(): void
     {
+        config()->set('shop.admin_row_actions', true);
+
         $carrier = $this->carrier();
         $packageType = PackageType::query()->create(['name' => 'Box']);
 
@@ -224,6 +233,19 @@ class OrderInvoiceWarningTest extends TestCase
             ->assertOk()
             ->getContent();
 
+        $this->assertSame(0, $this->invoiceConfirmLinks($html)->length);
+    }
+
+    public function test_the_row_actions_column_is_off_by_default(): void
+    {
+        $this->order();
+
+        $html = $this->actingAs($this->admin())
+            ->get(route('admin.orders.index'))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringNotContainsString('admin-actions-menu', $html);
         $this->assertSame(0, $this->invoiceConfirmLinks($html)->length);
     }
 }

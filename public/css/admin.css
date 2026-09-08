@@ -2767,6 +2767,16 @@ button.supplier-availability-chip:hover {
     color: #2f5d8a;
 }
 
+/* La part entre parenthèses accompagne le chiffre sans le concurrencer :
+   même couleur, plus petite et allégée, comme une unité. */
+.admin-stat-part-value-pct {
+    margin-left: 0.25rem;
+    font-size: 0.8125rem;
+    font-weight: 400;
+    letter-spacing: 0;
+    opacity: 0.72;
+}
+
 [data-theme='dark'] .admin-stat-part-value.is-cost {
     color: #e08585;
 }
@@ -6146,6 +6156,18 @@ input[type="date"].form-control {
     color: #2f5d8a;
     background: #eef3f8;
     border: 1px solid #c6d8e8;
+}
+
+/* Le pourcentage tient dans la même pastille que le montant : deux
+   pastilles côte à côte se liraient comme deux chiffres indépendants. */
+.admin-order-profit {
+    gap: 0.3rem;
+}
+
+.admin-order-profit-pct {
+    font-size: 0.75rem;
+    font-weight: 400;
+    opacity: 0.75;
 }
 
 [data-theme='dark'] .admin-order-profit {

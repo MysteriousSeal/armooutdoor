@@ -97,7 +97,7 @@ class OrderController extends Controller
 
         $percentOf = fn (int $part, int $whole): ?float => $whole > 0 ? round($part / $whole * 100, 2) : null;
 
-        [$profitCents, $pricedOrderCount, $totalOrderCount] = $this->profitSummary(clone $salesOrders);
+        [$profitCents, $pricedOrderCount, $totalOrderCount, $profitProductCostCents] = $this->profitSummary(clone $salesOrders);
 
         return view('admin.orders.index', [
             'orders' => $orders,
@@ -111,6 +111,10 @@ class OrderController extends Controller
                 'profit_cents' => $profitCents,
                 'profit_priced_order_count' => $pricedOrderCount,
                 'profit_total_order_count' => $totalOrderCount,
+                // Rapporté au coût des marchandises des seules commandes
+                // chiffrées, pas au coût de toutes : le profit au-dessus ne
+                // couvre que celles-là non plus.
+                'profit_pct_product_cost' => $percentOf($profitCents, $profitProductCostCents),
                 'shipping_cost_cents' => $shippingCostCents,
                 'shipping_cost_pct_amount' => $percentOf($shippingCostCents, $amountCents),
                 'shipping_cost_pct_costs' => $percentOf($shippingCostCents, $totalCostsCents),
@@ -210,7 +214,10 @@ class OrderController extends Controller
      * says how many orders that affects, the same honesty as the dash on
      * each row.
      *
-     * @return array{0: int, 1: int, 2: int}
+     * The fourth figure is the product cost those priced orders carried,
+     * which is what the profit percentage is a share of.
+     *
+     * @return array{0: int, 1: int, 2: int, 3: int}
      */
     private function profitSummary(Builder $salesOrders): array
     {
@@ -220,10 +227,14 @@ class OrderController extends Controller
             $orders->flatMap(fn (Order $order) => $order->items->pluck('product_id'))->filter(),
         );
 
-        $priced = $orders->map(fn (Order $order) => $order->profitInclVatCents($productCostsByProductId))
-            ->filter(fn (?int $profit) => $profit !== null);
+        $pricedOrders = $orders->filter(
+            fn (Order $order) => $order->profitInclVatCents($productCostsByProductId) !== null,
+        );
 
-        return [(int) $priced->sum(), $priced->count(), $orders->count()];
+        $profitCents = $pricedOrders->sum(fn (Order $order) => $order->profitInclVatCents($productCostsByProductId));
+        $productCostCents = $pricedOrders->sum(fn (Order $order) => $order->productCostInclVatCents($productCostsByProductId));
+
+        return [(int) $profitCents, $pricedOrders->count(), $orders->count(), (int) $productCostCents];
     }
 
     private function backfillMissingPaymentFees($orders): void

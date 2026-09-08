@@ -11,6 +11,11 @@
             'date_to' => $dateTo ?: null,
         ]);
         $hasFilters = $baseFilters !== [];
+        // Le menu « Actions » de chaque ligne est mis de côté, pas retiré :
+        // tout ce qu'il propose reste écrit plus bas. Le drapeau vit dans la
+        // config plutôt qu'ici pour que les tests puissent encore rendre la
+        // colonne et vérifier ce qu'elle contient.
+        $showRowActions = (bool) config('shop.admin_row_actions');
         // Changer d'onglet garde la recherche et les dates, jamais le statut :
         // c'est l'onglet lui-même qui le porte.
         $tabUrl = fn (array $overrides = []): string => route('admin.orders.index', [...$baseFilters, ...$overrides]);
@@ -125,9 +130,12 @@
                          comme le tiret sur chaque ligne de la liste. --}}
                     <li class="admin-stat-part">
                         <span class="admin-stat-part-name" title="Perceived − product cost. Orders with an unknown product cost are left out.">Profit</span>
-                        <span class="admin-stat-part-value is-profit">{{ format_euros($kpis['profit_cents']) }}</span>
+                        <span class="admin-stat-part-value is-profit">{{ format_euros($kpis['profit_cents']) }}@if (($kpis['profit_pct_product_cost'] ?? null) !== null)<span class="admin-stat-part-value-pct" title="Profit as a share of what the goods cost">({{ number_format($kpis['profit_pct_product_cost'], 1, ',', ' ') }} %)</span>@endif</span>
                         <span class="admin-stat-part-pcts">
                             <span class="admin-stat-pct">on {{ number_format($kpis['profit_priced_order_count']) }} of {{ number_format($kpis['profit_total_order_count']) }} orders</span>
+                            @if (($kpis['profit_pct_product_cost'] ?? null) !== null)
+                                <span class="admin-stat-pct">the bracket is its share of product cost</span>
+                            @endif
                         </span>
                     </li>
                 </ul>
@@ -285,7 +293,9 @@
                             <th class="admin-table-num">P. costs</th>
                             <th class="admin-table-num">Perceived</th>
                             <th class="admin-table-num">Profit</th>
-                            <th></th>
+                            @if ($showRowActions)
+                                <th></th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -423,12 +433,14 @@
                                 </td>
                                 <td class="admin-table-num">
                                     @php($profitCents = $order->profitInclVatCents($productCostsByProductId))
+                                    @php($profitPct = $order->profitPercentageOfProductCost($productCostsByProductId))
                                     @if ($profitCents !== null)
-                                        <span class="admin-order-profit">{{ format_euros($profitCents) }}</span>
+                                        <span class="admin-order-profit">{{ format_euros($profitCents) }}@if ($profitPct !== null)<span class="admin-order-profit-pct" title="Profit as a share of what the goods cost">({{ number_format($profitPct, 1, ',', ' ') }} %)</span>@endif</span>
                                     @else
                                         <span class="admin-table-sub" title="Missing purchase history for at least one line">—</span>
                                     @endif
                                 </td>
+                                @if ($showRowActions)
                                 <td>
                                     <div class="admin-actions-menu">
                                         <button type="button" class="admin-actions-trigger" data-actions-toggle aria-haspopup="true" aria-expanded="false">
@@ -545,6 +557,7 @@
                                         </div>
                                     </div>
                                 </td>
+                                @endif
                             </tr>
                         @endforeach
                     </tbody>
