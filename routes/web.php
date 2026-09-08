@@ -216,6 +216,10 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         // raconte sur une place de marché n'est pas ce qu'on met en fiche.
         Route::get('/products/{product}/vinted', [VintedListingController::class, 'edit'])->name('products.vinted.edit');
         Route::put('/products/{product}/vinted', [VintedListingController::class, 'update'])->name('products.vinted.update');
+        // La photo en JPEG : la boutique stocke du WebP, dont le formulaire
+        // de Vinted ne veut pas.
+        Route::get('/products/{product}/vinted/photos/{image}.jpg', [VintedListingController::class, 'downloadImage'])
+            ->name('products.vinted.photo');
         // The cover as a JPEG: the shop stores WebP, which no marketplace form
         // or supplier wants.
         Route::get('/products/{product}/cover.jpg', [AdminProductController::class, 'coverImage'])->name('products.cover');

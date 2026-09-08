@@ -26,7 +26,44 @@
                          rattache à une fiche enregistrée, pas à un formulaire
                          encore vide. --}}
                     @if ($product->exists)
-                        <a href="{{ route('admin.products.vinted.edit', $product) }}" class="btn btn-secondary">Vinted listing</a>
+                        @php
+                            // Sans annonce, tout est à écrire : la même liste,
+                            // toute vide, plutôt qu'un cas particulier.
+                            $vinted = $product->vintedListing;
+                            $vintedChecks = $vinted?->readiness() ?? ['Title' => false, 'Text' => false, 'Price' => false, 'Photos' => false];
+                            $vintedPhotos = $vinted?->imageCount() ?? 0;
+                            $vintedDone = count(array_filter($vintedChecks));
+                        @endphp
+
+                        {{-- Un seul contrôle : le nom, puis ce qui manque.
+                             Deux éléments séparés flottaient entre les
+                             boutons voisins sans qu'on sache lequel ils
+                             décrivaient. --}}
+                        <a
+                            href="{{ route('admin.products.vinted.edit', $product) }}"
+                            class="vinted-link {{ ($vinted?->isReady() ?? false) ? 'is-ready' : '' }}"
+                        >
+                            <span class="vinted-link-label">Vinted listing</span>
+                            <span class="vinted-checks">
+                                @foreach ($vintedChecks as $label => $done)
+                                    <span
+                                        class="vinted-check {{ $done ? 'is-done' : '' }}"
+                                        title="{{ $label }}{{ $label === 'Photos' ? ' — '.$vintedPhotos.' of '.\App\Models\VintedListing::MINIMUM_IMAGES.' needed' : '' }}{{ $done ? ' — done' : ' — still to write' }}"
+                                    >
+                                        <span class="vinted-check-mark" aria-hidden="true"></span>
+                                        <span class="vinted-check-label">{{ $label }}</span>
+                                        @if ($label === 'Photos')
+                                            <span class="vinted-check-count">{{ $vintedPhotos }}/{{ \App\Models\VintedListing::MINIMUM_IMAGES }}</span>
+                                        @endif
+                                    </span>
+                                @endforeach
+                            </span>
+                            {{-- Le résumé porte la nouvelle : prête, ou ce
+                                 qu'il reste. --}}
+                            <span class="vinted-link-state">
+                                {{ ($vinted?->isReady() ?? false) ? 'Ready' : $vintedDone.'/'.count($vintedChecks) }}
+                            </span>
+                        </a>
                     @endif
                     <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">Back to products</a>
                 </div>

@@ -114,6 +114,22 @@ class VintedListingTest extends TestCase
         $this->assertSame('Deuxième jet', $product->fresh()->vintedListing->title);
     }
 
+    public function test_the_saved_stamp_is_in_english_like_the_rest_of_the_admin(): void
+    {
+        // La locale de l'application est le français, celle de la boutique.
+        // Le back-office est en anglais de bout en bout, et un « il y a une
+        // minute » au milieu d'une page anglaise vient de là.
+        $product = Product::factory()->create();
+        VintedListing::query()->create(['product_id' => $product->id, 'title' => 'Écrite']);
+
+        $this->actingAs($this->admin())
+            ->get(route('admin.products.vinted.edit', $product))
+            ->assertOk()
+            ->assertSee('Saved')
+            ->assertSee('ago')
+            ->assertDontSee('il y a');
+    }
+
     public function test_a_listing_can_be_left_without_a_price(): void
     {
         // On écrit le texte un jour, on fixe le prix un autre.
@@ -228,5 +244,97 @@ class VintedListingTest extends TestCase
         $this->actingAs(User::factory()->create())
             ->get(route('admin.products.vinted.edit', $product))
             ->assertRedirect();
+    }
+
+    public function test_a_photo_can_be_taken_away_as_a_jpeg(): void
+    {
+        // La boutique stocke du WebP, dont le formulaire de Vinted ne veut
+        // pas : le lien rend la même image en JPEG sans toucher au fichier.
+        $product = Product::factory()->create();
+
+        $this->actingAs($this->admin())
+            ->put(route('admin.products.vinted.update', $product), [
+                'title' => 'Avec une photo',
+                'images' => [UploadedFile::fake()->image('shot.jpg', 800, 800)],
+            ]);
+
+        $listing = $product->fresh()->vintedListing;
+        $image = $listing->images()->first();
+        $source = public_path('images/'.$image->image);
+
+        $response = $this->actingAs($this->admin())
+            ->get(route('admin.products.vinted.photo', ['product' => $product, 'image' => $image]))
+            ->assertOk()
+            ->assertHeader('content-type', 'image/jpeg');
+
+        $this->assertStringContainsString('attachment;', $response->headers->get('content-disposition'));
+        // sku_1.jpg : la référence du produit, puis le rang de la photo.
+        $this->assertStringContainsString(\Illuminate\Support\Str::slug($product->sku).'_1.jpg', $response->headers->get('content-disposition'));
+
+        // Ce qui sort est bien un JPEG, et le fichier d'origine est intact.
+        $this->assertSame('image/jpeg', (string) getimagesizefromstring($response->getContent())['mime']);
+        $this->assertTrue(is_file($source), 'the stored photo must be left alone');
+
+        $this->forget($listing);
+    }
+
+    public function test_every_photo_names_its_own_file(): void
+    {
+        // Trois liens qui portent le même nom, c'est un fichier téléchargé
+        // trois fois par-dessus lui-même. Le rang est celui de l'annonce.
+        $product = Product::factory()->create(['sku' => 'CAG-MCDES-BREATH']);
+
+        $this->actingAs($this->admin())
+            ->put(route('admin.products.vinted.update', $product), [
+                'title' => 'Trois photos',
+                'images' => [
+                    UploadedFile::fake()->image('one.jpg'),
+                    UploadedFile::fake()->image('two.jpg'),
+                    UploadedFile::fake()->image('three.jpg'),
+                ],
+            ]);
+
+        $listing = $product->fresh()->vintedListing;
+        $listing->load('images');
+
+        $names = $listing->images->map(fn ($image) => $image->downloadName())->all();
+
+        $this->assertSame(
+            ['cag-mcdes-breath_1.jpg', 'cag-mcdes-breath_2.jpg', 'cag-mcdes-breath_3.jpg'],
+            $names,
+        );
+
+        // Le lien porte le même nom que l'en-tête : les deux le calculent au
+        // même endroit, et une page qui promettrait autre chose que la
+        // réponse serait pire que pas de nom du tout.
+        $html = $this->actingAs($this->admin())
+            ->get(route('admin.products.vinted.edit', $product))
+            ->assertOk()
+            ->getContent();
+
+        foreach ($names as $name) {
+            $this->assertStringContainsString('download="'.$name.'"', $html);
+        }
+
+        $this->forget($listing);
+    }
+
+    public function test_a_photo_from_another_listing_cannot_be_downloaded_through_this_product(): void
+    {
+        // L'identifiant est dans l'adresse : sans contrôle, il servirait
+        // n'importe quelle photo depuis n'importe quel produit.
+        $product = Product::factory()->create();
+        $other = Product::factory()->create();
+
+        $theirs = VintedListing::query()->create(['product_id' => $other->id, 'title' => 'Ailleurs']);
+        $image = VintedListingImage::query()->create([
+            'vinted_listing_id' => $theirs->id,
+            'image' => 'vinted/nothing.webp',
+            'sort_order' => 1,
+        ]);
+
+        $this->actingAs($this->admin())
+            ->get(route('admin.products.vinted.photo', ['product' => $product, 'image' => $image]))
+            ->assertNotFound();
     }
 }

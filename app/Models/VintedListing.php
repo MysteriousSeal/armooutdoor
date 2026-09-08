@@ -60,4 +60,41 @@ class VintedListing extends Model
     {
         return blank($this->title) && blank($this->description) && $this->price_cents === null;
     }
+
+    /**
+     * Vinted refuse une annonce à une seule photo, et une annonce à une seule
+     * photo se vend mal de toute façon : deux est le minimum qui compte.
+     */
+    public const MINIMUM_IMAGES = 2;
+
+    /**
+     * Ce qui est écrit et ce qui manque, poste par poste. La fiche produit
+     * s'en sert pour dire d'un coup d'œil si l'annonce peut partir, sans
+     * avoir à l'ouvrir.
+     *
+     * @return array<string, bool>
+     */
+    public function readiness(): array
+    {
+        return [
+            'Title' => filled($this->title),
+            'Text' => filled($this->description),
+            'Price' => $this->price_cents !== null,
+            'Photos' => $this->imageCount() >= self::MINIMUM_IMAGES,
+        ];
+    }
+
+    public function isReady(): bool
+    {
+        return ! in_array(false, $this->readiness(), true);
+    }
+
+    /** Compté sur la relation déjà chargée quand elle l'est, pour ne pas
+     *  refaire une requête par produit dans une liste. */
+    public function imageCount(): int
+    {
+        return $this->relationLoaded('images')
+            ? $this->images->count()
+            : $this->images()->count();
+    }
 }

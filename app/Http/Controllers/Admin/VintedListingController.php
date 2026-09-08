@@ -9,9 +9,10 @@ use App\Models\VintedListingImage;
 use App\Support\ImageThumbnailer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
-use Illuminate\View\View;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 /**
  * L'annonce Vinted d'un produit : la composer, la garder, la copier.
@@ -23,6 +24,9 @@ use Illuminate\Support\Str;
  */
 class VintedListingController extends Controller
 {
+    /** Assez pour une annonce, pas de quoi peser trois mégaoctets. */
+    private const JPEG_QUALITY = 90;
+
     public function edit(Product $product): View
     {
         return view('admin.products.vinted', [
@@ -35,6 +39,50 @@ class VintedListingController extends Controller
             // la page part du produit, et n'écrit qu'à l'enregistrement.
             'listing' => $product->vintedListing()->with('images')->first()
                 ?? $this->draftFrom($product),
+        ]);
+    }
+
+    /**
+     * Une photo de l'annonce en JPEG.
+     *
+     * La boutique stocke du WebP, et le formulaire de Vinted n'en veut pas —
+     * pas plus qu'un fournisseur ou une imprimerie. Le fichier sur le disque
+     * n'est pas touché : c'est une copie faite pour le téléchargement, jetée
+     * avec la réponse.
+     */
+    public function downloadImage(Product $product, VintedListingImage $image): Response
+    {
+        // La photo doit appartenir à l'annonce de ce produit : sans ce
+        // contrôle, l'identifiant dans l'adresse servirait n'importe laquelle.
+        abort_unless(
+            $image->listing !== null && $image->listing->product_id === $product->id,
+            404,
+        );
+
+        $source = public_path('images/'.$image->image);
+
+        abort_unless(is_file($source), 404);
+
+        $decoded = @imagecreatefromstring((string) file_get_contents($source));
+
+        abort_if($decoded === false, 404);
+
+        // Un JPEG n'a pas de transparence : ce qui était translucide
+        // sortirait noir sans un fond à lui.
+        $flattened = imagecreatetruecolor(imagesx($decoded), imagesy($decoded));
+        imagefill($flattened, 0, 0, imagecolorallocate($flattened, 255, 255, 255));
+        imagecopy($flattened, $decoded, 0, 0, 0, 0, imagesx($decoded), imagesy($decoded));
+
+        ob_start();
+        imagejpeg($flattened, null, self::JPEG_QUALITY);
+        $jpeg = (string) ob_get_clean();
+
+        imagedestroy($decoded);
+        imagedestroy($flattened);
+
+        return response($jpeg, 200, [
+            'Content-Type' => 'image/jpeg',
+            'Content-Disposition' => 'attachment; filename="'.$image->downloadName().'"',
         ]);
     }
 

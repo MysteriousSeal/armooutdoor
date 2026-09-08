@@ -11528,6 +11528,66 @@ a.order-stepper-btn:focus-visible {
     max-width: 74rem;
 }
 
+/*
+ * Le bandeau de cette page seulement.
+ *
+ * Le titre disait où l'on était, pas ce qu'on y faisait. Le kicker dit
+ * maintenant le trajet — du catalogue vers Vinted — parce que c'est tout
+ * le propos de l'écran, et la phrase en dessous tient sur une ligne large
+ * plutôt que sur deux étroites avec la moitié du bandeau vide à droite.
+ */
+.vinted-hero .admin-list-hero-row {
+    align-items: flex-start;
+}
+
+.vinted-hero-main {
+    min-width: 0;
+}
+
+.vinted-hero-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* La flèche part du gris de l'origine et arrive sur l'olive : le trajet se
+   lit sans qu'on ait à nommer ses deux bouts deux fois. */
+.vinted-hero-kicker svg {
+    color: color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+.vinted-hero-dest {
+    padding: 0.1rem 0.45rem;
+    color: var(--accent-heading);
+    background: color-mix(in srgb, var(--accent-heading) 10%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 30%, var(--border));
+}
+
+[data-theme='dark'] .vinted-hero-dest {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+    border-color: color-mix(in srgb, var(--accent) 32%, var(--border));
+}
+
+.vinted-hero-lede {
+    /* Assez large pour une ligne : deux lignes courtes sous un titre qui
+       n'en fait qu'une donnaient un bandeau en escalier. */
+    max-width: 52rem;
+}
+
+/* Ce qui compte dans cette phrase : la page ne dépose rien, et le savoir
+   change la façon de s'en servir. */
+.vinted-hero-lede strong {
+    font-weight: 600;
+    color: var(--text);
+}
+
+/* Le bouton s'aligne sur le titre plutôt que de flotter à mi-hauteur. */
+.vinted-hero-back {
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+}
+
 /* De quel article il s'agit. Une bande, pas une carte : elle situe la page
    sans se disputer la place avec les étapes. */
 .vinted-product {
@@ -11847,12 +11907,176 @@ a.order-stepper-btn:focus-visible {
     background: var(--accent-heading);
 }
 
+.vinted-photo-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
 .vinted-photo-remove {
     display: flex;
     align-items: center;
     gap: 0.35rem;
     font-size: 0.75rem;
     color: var(--text-muted);
+}
+
+/* ------------------------------------------------------------------
+   L'annonce Vinted, vue de la fiche produit
+
+   Un seul contrôle plutôt qu'un bouton et des marques posées à côté : le
+   nom à gauche, ce qui est écrit au milieu, le compte à droite, tenus par
+   une bordure. Séparés, ils flottaient entre les boutons voisins sans
+   qu'on sache lequel des deux ils décrivaient.
+   ------------------------------------------------------------------ */
+/* Même hauteur que les boutons voisins : ce contrôle est dans la même
+   rangée qu'eux, et deux hauteurs côte à côte se voient. `.btn` fait
+   0.625rem de marge haute et basse autour d'une ligne de 0.875rem. */
+.vinted-link {
+    display: inline-flex;
+    align-items: stretch;
+    min-height: 2.25rem;
+    font-size: 0.875rem;
+    text-decoration: none;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition:
+        border-color 140ms ease,
+        background 140ms ease;
+}
+
+.vinted-link:hover {
+    border-color: var(--accent);
+}
+
+.vinted-link-label {
+    display: flex;
+    align-items: center;
+    padding: 0 0.9rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* Les quatre postes, sur leur propre fond : c'est un état, pas une
+   commande, et le creux le dit avant qu'on lise. */
+.vinted-checks {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0 0.85rem;
+    background: color-mix(in srgb, var(--bg) 70%, var(--surface));
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+}
+
+.vinted-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+/* Un point plein pour ce qui est fait, un cercle creux pour ce qui reste :
+   la forme dit l'état, la couleur ne fait que l'appuyer. */
+.vinted-check-mark {
+    width: 0.45rem;
+    height: 0.45rem;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 1.5px solid color-mix(in srgb, var(--text-muted) 50%, transparent);
+}
+
+.vinted-check.is-done {
+    color: var(--accent-heading);
+}
+
+.vinted-check.is-done .vinted-check-mark {
+    background: var(--accent-heading);
+    border-color: var(--accent-heading);
+}
+
+[data-theme='dark'] .vinted-check.is-done {
+    color: var(--accent);
+}
+
+[data-theme='dark'] .vinted-check.is-done .vinted-check-mark {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.vinted-check-count {
+    font-variant-numeric: tabular-nums;
+    opacity: 0.75;
+}
+
+/* Le compte au bout : trois sur quatre, ou le mot qu'on attend. */
+.vinted-link-state {
+    display: flex;
+    align-items: center;
+    padding: 0 0.85rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+/* Prête : le contrôle entier prend l'olive, une fois, plutôt que quatre
+   points verts qu'il faut compter. */
+.vinted-link.is-ready {
+    border-color: color-mix(in srgb, var(--accent-heading) 45%, var(--border));
+}
+
+.vinted-link.is-ready .vinted-checks {
+    background: color-mix(in srgb, var(--accent-heading) 8%, var(--surface));
+    border-color: color-mix(in srgb, var(--accent-heading) 30%, var(--border));
+}
+
+.vinted-link.is-ready .vinted-link-state {
+    color: var(--accent-heading);
+}
+
+[data-theme='dark'] .vinted-link.is-ready .vinted-link-state {
+    color: var(--accent);
+}
+
+/* Étroit, les libellés tombent : les points et le compte suffisent, et les
+   infobulles gardent les mots. */
+@media (max-width: 1100px) {
+    .vinted-check-label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+}
+
+/* Le JPEG se prend, il ne se choisit pas : un lien, pas une case. */
+.vinted-photo-download {
+    padding: 0.1rem 0.4rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    color: var(--accent-hover);
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.vinted-photo-download:hover {
+    color: var(--surface);
+    background: var(--accent);
+    border-color: var(--accent);
 }
 
 /* Le champ de fichier natif est laid et minuscule : il est masqué derrière

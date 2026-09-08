@@ -10,19 +10,29 @@
     @endphp
 
     <div class="admin-list-page vinted-page">
-        <header class="admin-list-hero">
+        <header class="admin-list-hero vinted-hero">
             <div class="admin-list-hero-row">
-                <div>
-                    <p class="admin-list-kicker">Vinted</p>
+                <div class="vinted-hero-main">
+                    {{-- Le trajet plutôt que le nom seul : cette page prend ce
+                         qui est dans le catalogue et l'emmène ailleurs, et
+                         c'est la seule chose qu'il faut comprendre en
+                         arrivant. --}}
+                    <p class="admin-list-kicker vinted-hero-kicker">
+                        <span>Catalog</span>
+                        <svg viewBox="0 0 24 10" width="26" height="10" aria-hidden="true" focusable="false">
+                            <path d="M0 5h20m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span class="vinted-hero-dest">Vinted</span>
+                    </p>
                     <h2 class="admin-list-title">Vinted listing</h2>
-                    <p class="admin-list-lede">
+                    <p class="admin-list-lede vinted-hero-lede">
                         {{-- Dire ce que la page fait et ce qu'elle ne fait pas :
                              sans cela on attend un dépôt qui n'arrive jamais. --}}
-                        Write it here, keep it between two postings, and carry it into Vinted one field at a time.
-                        Nothing is sent from this page.
+                        Write it once, keep it between two postings, and carry it across field by field.
+                        <strong>Nothing is sent from this page.</strong>
                     </p>
                 </div>
-                <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-secondary">Back to product</a>
+                <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-secondary vinted-hero-back">Back to product</a>
             </div>
         </header>
 
@@ -57,7 +67,11 @@
 
             <span class="vinted-state {{ $listing->exists ? 'is-saved' : '' }}">
                 @if ($listing->exists)
-                    Saved {{ $listing->updated_at->diffForHumans() }}
+                    {{-- La locale de l'application est le français, celle de
+                         la boutique ; le back-office, lui, est en anglais de
+                         bout en bout. On la nomme plutôt que de la laisser
+                         suivre celle du site. --}}
+                    Saved {{ $listing->updated_at->locale('en')->diffForHumans() }}
                 @else
                     Not written yet
                 @endif
@@ -195,10 +209,27 @@
                                     <span class="vinted-photo-rank {{ $index === 0 ? 'is-cover' : '' }}">
                                         {{ $index === 0 ? 'Cover' : $index + 1 }}
                                     </span>
-                                    <label class="vinted-photo-remove">
-                                        <input type="checkbox" name="remove_images[]" value="{{ $image->id }}">
-                                        Remove
-                                    </label>
+                                    <span class="vinted-photo-actions">
+                                        {{-- Vinted n'accepte pas le WebP que
+                                             la boutique stocke : le lien rend
+                                             la même photo en JPEG, sans
+                                             toucher au fichier. --}}
+                                        {{-- `download` nomme le fichier côté
+                                             navigateur : sans lui, tout
+                                             repose sur l'en-tête de la
+                                             réponse, que Chrome ignore dès
+                                             qu'il croit voir une rafale de
+                                             téléchargements. --}}
+                                        <a
+                                            href="{{ route('admin.products.vinted.photo', ['product' => $product, 'image' => $image]) }}"
+                                            download="{{ $image->downloadName() }}"
+                                            class="vinted-photo-download"
+                                        >JPG</a>
+                                        <label class="vinted-photo-remove">
+                                            <input type="checkbox" name="remove_images[]" value="{{ $image->id }}">
+                                            Remove
+                                        </label>
+                                    </span>
                                 </li>
                             @endforeach
                         </ul>

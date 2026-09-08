@@ -6,6 +6,7 @@ use App\Support\ImageThumbnailer;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 /**
  * Une photo d'annonce. Les siennes, pas celles du catalogue : sur Vinted on
@@ -29,6 +30,24 @@ class VintedListingImage extends Model
     public function listing(): BelongsTo
     {
         return $this->belongsTo(VintedListing::class, 'vinted_listing_id');
+    }
+
+    /**
+     * Le nom sous lequel cette photo se télécharge : la référence du produit,
+     * un tiret bas, son rang dans l'annonce. Il vit ici plutôt que dans le
+     * contrôleur parce que le lien l'écrit aussi, dans son attribut
+     * `download` — deux endroits qui le calculeraient chacun de leur côté
+     * finiraient par ne plus dire la même chose.
+     */
+    public function downloadName(): string
+    {
+        $listing = $this->listing;
+        $product = $listing?->product;
+
+        $rank = $listing?->images->search(fn (self $image): bool => $image->id === $this->id);
+        $name = filled($product?->sku) ? $product->sku : ($product?->slug ?? 'photo');
+
+        return Str::slug($name).'_'.(is_int($rank) ? $rank + 1 : 1).'.jpg';
     }
 
     public function imageUrl(): string

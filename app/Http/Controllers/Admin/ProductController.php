@@ -243,7 +243,10 @@ class ProductController extends Controller
     public function edit(Product $product): View
     {
         return view('admin.products.form', [
-            'product' => $product->load('images', 'variants'),
+            // L'annonce Vinted vient avec ses photos : la fiche dit ce qui
+            // lui manque encore, et le compter ligne par ligne relancerait
+            // une requête pour chaque poste.
+            'product' => $product->load('images', 'variants', 'vintedListing.images'),
             'categories' => $this->categoryOptions(),
             'carriers' => Carrier::query()->orderBy('sort_order')->get(),
             'suppliers' => Supplier::query()->orderBy('name')->get(),
