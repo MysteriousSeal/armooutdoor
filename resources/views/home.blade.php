@@ -33,7 +33,7 @@
             // deux autres pointent vers les rayons qui bougent le plus.
             $slides = [
                 [
-                    'image' => asset('images/hero.webp'),
+                    'image' => versioned_asset('images/hero.webp'),
                     'focus' => '78%',
                     'kicker' => __('store.home_hero_kicker'),
                     // The h1 of the whole site: it names the aisles rather
@@ -47,7 +47,7 @@
                     'ghost' => ['label' => __('store.home_browse'), 'url' => localized_route('products.new-arrivals')],
                 ],
                 [
-                    'image' => asset('images/hero-2.webp'),
+                    'image' => versioned_asset('images/hero-2.webp'),
                     'focus' => '28%',
                     'kicker' => __('store.home_slide_new_kicker'),
                     'lines' => ['Les dernières', 'nouveautés', 'en rayon'],
@@ -58,7 +58,7 @@
                     'ghost' => null,
                 ],
                 [
-                    'image' => asset('images/hero-3.webp'),
+                    'image' => versioned_asset('images/hero-3.webp'),
                     'focus' => '75%',
                     'kicker' => __('store.home_slide_sale_kicker'),
                     'lines' => ['Des prix', 'en baisse', 'cette semaine'],
@@ -69,7 +69,7 @@
                     'ghost' => null,
                 ],
                 [
-                    'image' => asset('images/hero-4.webp'),
+                    'image' => versioned_asset('images/hero-4.webp'),
                     'focus' => '28%',
                     'kicker' => __('store.home_slide_best_kicker'),
                     'lines' => ['Ce que les', 'tireurs', 'achètent le plus'],
@@ -549,7 +549,7 @@
         <section class="home-about" aria-labelledby="home-about-title">
             <div class="home-about-media">
                 <img
-                    src="{{ asset('images/about.webp') }}"
+                    src="{{ versioned_asset('images/about.webp') }}"
                     alt=""
                     width="1280"
                     height="720"

@@ -5,7 +5,7 @@
     // or a more precise type than "a page", says so through @@section.
     $socialUrl = trim($__env->yieldContent('canonical')) ?: url()->current();
     $socialDescription = trim($__env->yieldContent('meta_description', __('store.meta_home')));
-    $socialImage = trim($__env->yieldContent('og_image')) ?: asset('images/hero.webp');
+    $socialImage = trim($__env->yieldContent('og_image')) ?: versioned_asset('images/hero.webp');
 
     // og:site_name already carries the brand, so the suffix comes off: left
     // on, a shared link would print "Armo Outdoor" twice in the same card.

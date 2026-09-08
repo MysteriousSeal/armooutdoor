@@ -62,8 +62,10 @@ class SocialMetaTest extends TestCase
     {
         $category = Category::factory()->create(['image' => null]);
 
+        // Stamped like the stylesheets, so replacing the photograph refreshes
+        // the card every service has already cached against that URL.
         $this->get('/categories/'.$category->slug)
             ->assertOk()
-            ->assertSee('<meta property="og:image" content="'.asset('images/hero.webp').'">', false);
+            ->assertSee('<meta property="og:image" content="'.versioned_asset('images/hero.webp').'">', false);
     }
 }
