@@ -26,6 +26,10 @@ class MarketplaceSettingController extends Controller
             'naturabuy_rating' => ['nullable', 'numeric', 'min:0', 'max:5'],
             'naturabuy_reviews' => ['nullable', 'integer', 'min:0', 'max:999999'],
             'naturabuy_sales' => ['nullable', 'integer', 'min:0', 'max:9999999'],
+            // Published as it stands in the home page's structured data: an
+            // address that leads nowhere weakens the signal rather than
+            // supporting it.
+            'vinted_url' => ['nullable', 'url', 'max:255'],
         ]);
 
         MarketplaceSetting::current()->update([
@@ -36,6 +40,7 @@ class MarketplaceSettingController extends Controller
             'naturabuy_reviews' => $validated['naturabuy_reviews'] ?? null,
             'naturabuy_sales' => $validated['naturabuy_sales'] ?? null,
             'naturabuy_on_home' => $request->boolean('naturabuy_on_home'),
+            'vinted_url' => $validated['vinted_url'] ?? null,
         ]);
 
         AdminActivityLog::record('marketplace_setting.updated', null, 'Updated marketplace settings');

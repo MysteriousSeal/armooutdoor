@@ -20,8 +20,8 @@
                 <span class="admin-stat-value admin-stat-value--sm">Info shown on the legal pages</span>
             </a>
             <a href="{{ route('admin.settings.naturabuy.edit') }}" class="admin-stat-card">
-                <span class="admin-stat-label">NaturaBuy</span>
-                <span class="admin-stat-value admin-stat-value--sm">NaturaBuy rating shown on the home page</span>
+                <span class="admin-stat-label">Marketplaces</span>
+                <span class="admin-stat-value admin-stat-value--sm">The NaturaBuy standing shown on the home page, and where else the shop sells</span>
             </a>
             <a href="{{ route('admin.settings.products.edit') }}" class="admin-stat-card">
                 <span class="admin-stat-label">Products</span>

@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Model;
  * The rating is stored in tenths, so 4.9 is 49 and no float rounds itself
  * into 4.8999 on the way to the page.
  */
-#[Fillable(['naturabuy_url', 'naturabuy_rating_tenths', 'naturabuy_reviews', 'naturabuy_sales', 'naturabuy_on_home'])]
+#[Fillable(['naturabuy_url', 'naturabuy_rating_tenths', 'naturabuy_reviews', 'naturabuy_sales', 'naturabuy_on_home', 'vinted_url'])]
 class MarketplaceSetting extends Model
 {
     protected $attributes = [

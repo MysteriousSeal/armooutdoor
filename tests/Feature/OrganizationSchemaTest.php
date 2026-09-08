@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Category;
 use App\Models\CompanySetting;
+use App\Models\MarketplaceSetting;
 use App\Models\Product;
 use App\Support\OrganizationSchema;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -88,5 +89,68 @@ class OrganizationSchemaTest extends TestCase
         // it is the twenty-fifth of the category.
         $page->assertSee('"numberOfItems":25', false);
         $page->assertSee('"position":25', false);
+    }
+
+    /**
+     * The one-word spelling is the wordmark, and it is what people type. It
+     * is declared as a name of the same business so the two spellings are
+     * not two unrelated strings to a search engine.
+     */
+    public function test_the_business_is_also_named_by_its_one_word_spelling(): void
+    {
+        $schema = OrganizationSchema::for($this->company());
+
+        $this->assertSame('Armo Outdoor', $schema['name']);
+        $this->assertSame('ArmoOutdoor', $schema['alternateName']);
+    }
+
+    public function test_the_shops_other_pages_are_declared_as_the_same_business(): void
+    {
+        // Read from the marketplace settings, where the NaturaBuy address has
+        // always lived: a second copy on the company would be one more place
+        // to look and one more to keep in step.
+        MarketplaceSetting::current()->update([
+            'naturabuy_url' => 'https://www.naturabuy.fr/stores/2811/',
+            'vinted_url' => 'https://www.vinted.fr/member/1-armooutdoor',
+        ]);
+
+        $this->assertSame(
+            ['https://www.naturabuy.fr/stores/2811/', 'https://www.vinted.fr/member/1-armooutdoor'],
+            OrganizationSchema::for($this->company())['sameAs'],
+        );
+    }
+
+    public function test_a_shop_with_no_profile_declares_none(): void
+    {
+        // sameAs is a claim that these pages are the same business. Empty, it
+        // says nothing; pointing at a dead address would say something false.
+        $schema = OrganizationSchema::for($this->company());
+
+        $this->assertArrayNotHasKey('sameAs', $schema);
+    }
+
+    public function test_one_profile_alone_is_enough(): void
+    {
+        MarketplaceSetting::current()->update([
+            'vinted_url' => 'https://www.vinted.fr/member/1-armooutdoor',
+        ]);
+
+        $this->assertSame(
+            ['https://www.vinted.fr/member/1-armooutdoor'],
+            OrganizationSchema::for($this->company())['sameAs'],
+        );
+    }
+
+    public function test_the_naturabuy_address_is_not_stored_twice(): void
+    {
+        // The home page's marketplace block and the structured data read the
+        // same column. Two copies of one address drift, and the page would
+        // then link one shop while the markup declared another.
+        MarketplaceSetting::current()->update(['naturabuy_url' => 'https://www.naturabuy.fr/stores/2811/']);
+
+        $this->assertSame(
+            [MarketplaceSetting::current()->naturabuy_url],
+            OrganizationSchema::for($this->company())['sameAs'],
+        );
     }
 }

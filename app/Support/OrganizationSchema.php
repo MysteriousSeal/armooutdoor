@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\CompanySetting;
+use App\Models\MarketplaceSetting;
 
 /**
  * The shop as a business, for the search engines that ask who is selling.
@@ -66,6 +67,11 @@ class OrganizationSchema
             '@type' => 'OnlineStore',
             '@id' => self::id(),
             'name' => config('app.name'),
+            // The wordmark's one-word spelling, declared as a name of the
+            // same business. It is what the logo reads as and what people
+            // type; without it the two spellings are two unrelated strings
+            // as far as a search engine is concerned.
+            'alternateName' => 'ArmoOutdoor',
             'legalName' => self::stated($company, 'company_name'),
             'url' => localized_route('home'),
             'logo' => asset('favicon.svg'),
@@ -78,7 +84,33 @@ class OrganizationSchema
             'address' => self::address($company),
             'currenciesAccepted' => config('shop.currency'),
             'areaServed' => config('shop.customer_countries'),
+            // The same shop, elsewhere. This is how a search engine joins
+            // pages that are plainly one business into one entity, and it is
+            // the difference between a name it recognises and a string it
+            // has only ever seen here.
+            'sameAs' => self::profiles(),
         ], fn ($value): bool => $value !== null && $value !== '' && $value !== []);
+    }
+
+    /**
+     * The shop's pages on other sites.
+     *
+     * Read from the marketplace settings, where the NaturaBuy address has
+     * always lived and where the home page's own marketplace block reads it
+     * from. Only what has been filled in: `sameAs` is a claim that these
+     * pages are the same business, and pointing it at nothing says nothing
+     * while pointing it at a dead address says something false.
+     *
+     * @return array<int, string>
+     */
+    private static function profiles(): array
+    {
+        $marketplaces = MarketplaceSetting::current();
+
+        return array_values(array_filter(
+            [$marketplaces->naturabuy_url, $marketplaces->vinted_url],
+            fn (?string $url): bool => $url !== null && trim($url) !== '',
+        ));
     }
 
     /**

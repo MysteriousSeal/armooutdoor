@@ -4884,6 +4884,31 @@ input[type="date"].form-control {
     max-width: 40rem;
 }
 
+/* Several cards under one form: they save together, so the button belongs to
+   the stack rather than to the last card.
+
+   Side by side, because they are read one at a time and never compared: two
+   marketplaces stacked pushed the second below the fold on a laptop, where
+   nothing announced it. */
+.admin-settings-stack {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 1rem;
+    max-width: 66rem;
+}
+
+/* The button belongs to both cards, so it spans them. */
+.admin-settings-stack .form-actions {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 900px) {
+    .admin-settings-stack {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
 .admin-order-create {
     max-width: none;
 }
@@ -5277,7 +5302,11 @@ input[type="date"].form-control {
     margin-top: 1.5rem;
 }
 
-.admin-detail-grid .admin-form-card {
+.admin-detail-grid .admin-form-card,
+/* Side by side, the second card is not below the first: the stacking margin
+   would drop it by its own height of air and the two tops would not line
+   up. The grid's own gap does the spacing here. */
+.admin-settings-stack .admin-form-card + .admin-form-card {
     margin-top: 0;
 }
 
