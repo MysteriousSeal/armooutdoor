@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-08 — v1.30.1 — build Q69SZZ
+
+### Storefront
+
+- **The home page says that the shop's pages elsewhere are the same shop.** Searching the wordmark's one-word spelling finds nothing while the spaced one finds the shop, and the token itself was never missing — the logo renders as two adjacent spans and reads as ArmoOutdoor twice on the page. What was missing is anything joining that string to a business a search engine recognises: the Organization node carried a name and a legal name and nothing else of the kind. It now names the one-word spelling as a name of the same business, and declares the shop's marketplace pages through `sameAs`, which is how a search engine folds pages that are plainly one shop into one entity. None of it manufactures recognition — a one-word brand query on a young domain is won by pages elsewhere that name the shop, and this only lets a search engine connect the ones that already exist.
+
+### Admin
+
+- **A Vinted address joins the NaturaBuy one in the marketplace settings.** It goes where the same kind of fact already lives rather than starting a second place to keep it: two copies drift, and the page would then link one shop while the markup declared another. Nothing of it is shown on the site — it exists for the structured data — and an address left blank is left out entirely, since the claim is that these pages are this business and a dead address makes it falsely. The page holds two marketplaces now, so it is named for them and they take a card each, side by side.
+
+**Migration:** one, run with `php artisan migrate`, a nullable `vinted_url` column on `marketplace_settings`. It starts empty and nothing is declared until it is filled.
+
 ## 2026-09-08 — v1.30.0 — build 8FMAHX
 
 ### Admin
