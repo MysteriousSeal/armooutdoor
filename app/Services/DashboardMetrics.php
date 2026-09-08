@@ -30,12 +30,30 @@ use Illuminate\Support\Facades\DB;
  */
 class DashboardMetrics
 {
+    /** @var Collection<int, int>|null */
+    private ?Collection $bannedUserIds = null;
+
     public function __construct(private readonly DashboardPeriod $period) {}
 
     /** Commandes qui comptent comme du chiffre d'affaires. */
     private function salesQuery(): Builder
     {
         return Order::query()->excludingTest()->whereNotIn('status', ['refunded', 'draft']);
+    }
+
+    /**
+     * Les comptes bannis, hors de tout dénombrement de têtes.
+     *
+     * Leurs commandes restent des ventes — l'argent a bien été encaissé, et
+     * les retirer ferait dire au tableau de bord moins que la liste des
+     * commandes pour la même période. C'est la personne qui ne compte plus,
+     * pas ce qu'elle a acheté.
+     *
+     * @return Collection<int, int>
+     */
+    private function bannedUserIds(): Collection
+    {
+        return $this->bannedUserIds ??= User::query()->whereNotNull('banned_at')->pluck('id');
     }
 
     private function between(Builder $query, Carbon $start, Carbon $end): Builder
@@ -147,7 +165,9 @@ class DashboardMetrics
                 Order::query()->excludingTest()->where('status', 'refunded'), $start, $end
             )->sum('total_cents'),
             'new_customers' => (int) $this->between(
-                User::query()->where('is_admin', false)->where('external', false), $start, $end
+                User::query()->where('is_admin', false)->where('external', false)->whereNull('banned_at'),
+                $start,
+                $end,
             )->count(),
         ];
     }
@@ -348,8 +368,14 @@ class DashboardMetrics
      */
     public function customers(): array
     {
-        $buyerIds = $this->between($this->salesQuery(), $this->period->start, $this->period->end)
+        // Ce panneau compte des personnes : un compte banni n'en est plus
+        // une. La moyenne dépensée écarte donc aussi ses commandes, sans
+        // quoi elle diviserait l'argent de tous par la foule qui reste.
+        $counted = fn (Builder $query): Builder => $query
             ->whereNotNull('user_id')
+            ->whereNotIn('user_id', $this->bannedUserIds());
+
+        $buyerIds = $counted($this->between($this->salesQuery(), $this->period->start, $this->period->end))
             ->distinct()
             ->pluck('user_id');
 
@@ -361,15 +387,13 @@ class DashboardMetrics
                 ->distinct()
                 ->pluck('user_id');
 
-        $lifetime = $this->salesQuery()
-            ->whereNotNull('user_id')
+        $lifetime = $counted($this->salesQuery())
             ->selectRaw('count(distinct user_id) as buyers, coalesce(sum(total_cents), 0) as revenue_cents, count(*) as orders')
             ->first();
 
         $buyers = (int) $lifetime->buyers;
 
-        $repeatBuyers = $this->salesQuery()
-            ->whereNotNull('user_id')
+        $repeatBuyers = $counted($this->salesQuery())
             ->selectRaw('user_id')
             ->groupBy('user_id')
             ->havingRaw('count(*) > 1')
@@ -571,32 +595,44 @@ class DashboardMetrics
     }
 
     /**
-     * Le tuyau des commandes en cours : des étapes ordonnées, pas des
-     * catégories — d'où la rampe d'une seule teinte côté affichage.
+     * Le tuyau des commandes en cours. Chaque étape porte la couleur que la
+     * liste des commandes donne déjà à ce statut : c'est la même distinction
+     * que l'œil y a apprise, et la rappeler ici évite d'en enseigner une
+     * seconde pour la même chose.
      *
-     * @return Collection<int, array{status: string, label: string, count: int}>
+     * @return Collection<int, array{status: string, label: string, count: int, open: bool}>
      */
     public function pipeline(): Collection
     {
+        // Remboursée n'est pas une étape de plus, c'est la sortie : elle
+        // ferme la ligne au lieu de l'avancer. Elle est comptée ici quand
+        // même, parce qu'une commande sortie du tuyau reste une commande
+        // dont le tuyau doit rendre compte.
+        $statuses = ['placed', 'preparing', 'shipped', 'in_transit', 'delivered', 'refunded'];
+
         $counts = Order::query()
             ->whereNull('archived_at')
             ->excludingTest()
-            ->whereIn('status', ['placed', 'preparing', 'shipped', 'in_transit', 'delivered'])
+            ->whereIn('status', $statuses)
             ->selectRaw('status, count(*) as count')
             ->groupBy('status')
             ->pluck('count', 'status');
 
-        return collect([
-            'placed' => 'Placed',
-            'preparing' => 'Preparing',
-            'shipped' => 'Shipped',
-            'in_transit' => 'In transit',
-            'delivered' => 'Delivered',
-        ])->map(fn (string $label, string $status): array => [
-            'status' => $status,
-            'label' => $label,
-            'count' => (int) ($counts[$status] ?? 0),
-        ])->values();
+        // Ouverte veut dire qu'il reste quelque chose à faire. Livrée et
+        // remboursée sont des fins : elles se comptent, mais elles ne
+        // tiennent plus de place dans la barre, sans quoi la seule chose
+        // qu'elle montrerait, à mesure que la boutique vieillit, serait
+        // combien de commandes sont déjà finies.
+        $open = ['placed' => 'Placed', 'preparing' => 'Preparing', 'shipped' => 'Shipped', 'in_transit' => 'In transit'];
+        $closed = ['delivered' => 'Delivered', 'refunded' => 'Refunded'];
+
+        return collect([...$open, ...$closed])
+            ->map(fn (string $label, string $status): array => [
+                'status' => $status,
+                'label' => $label,
+                'count' => (int) ($counts[$status] ?? 0),
+                'open' => array_key_exists($status, $open),
+            ])->values();
     }
 
     /**
@@ -748,7 +784,7 @@ class DashboardMetrics
     public function reference(): array
     {
         return [
-            'customers' => User::query()->where('is_admin', false)->where('external', false)->count(),
+            'customers' => User::query()->where('is_admin', false)->where('external', false)->whereNull('banned_at')->count(),
             'products' => Product::query()->count(),
             'active_products' => Product::query()->active()->count(),
             'drafts' => Order::query()->whereNull('archived_at')->excludingTest()->where('status', 'draft')->count(),

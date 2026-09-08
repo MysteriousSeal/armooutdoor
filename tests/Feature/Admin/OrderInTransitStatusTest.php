@@ -200,8 +200,10 @@ class OrderInTransitStatusTest extends TestCase
     {
         $pipeline = $this->metrics()->pipeline();
 
+        // « Remboursée » ferme la file plutôt que de l'avancer : elle vient
+        // après « Livrée », qui reste le dernier pas en avant.
         $this->assertSame(
-            ['placed', 'preparing', 'shipped', 'in_transit', 'delivered'],
+            ['placed', 'preparing', 'shipped', 'in_transit', 'delivered', 'refunded'],
             $pipeline->pluck('status')->all()
         );
         $this->assertSame('In transit', $pipeline->firstWhere('status', 'in_transit')['label']);

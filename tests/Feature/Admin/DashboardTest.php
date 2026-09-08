@@ -594,4 +594,145 @@ class DashboardTest extends TestCase
             // que le graphique ne trace pas.
             ->assertDontSee('Previous period');
     }
+
+    /**
+     * Le tuyau reprend la couleur que la liste des commandes donne déjà à
+     * chaque statut. Deux jeux de teintes pour la même distinction, c'est
+     * une distinction de plus à apprendre pour rien.
+     */
+    public function test_each_stage_wears_the_colour_of_its_status(): void
+    {
+        $css = file_get_contents(__DIR__.'/../../../public/css/admin.css');
+        $base = file_get_contents(__DIR__.'/../../../public/css/base.css');
+
+        // La pastille de la liste et le jeton du tableau de bord tiennent le
+        // même hexadécimal, statut par statut.
+        foreach ([
+            'shipped' => '#3d6b4e',
+            'in-transit' => '#6a4a9c',
+            'delivered' => '#2f5d8a',
+            'preparing' => '#8a6d1f',
+        ] as $status => $hex) {
+            $this->assertStringContainsString("--status-{$status}: {$hex};", $css, "Dashboard token for {$status}");
+            $this->assertStringContainsString($hex, $base, "List badge colour for {$status}");
+        }
+
+        // Et chaque étape a bien une classe pour la porter.
+        foreach (['placed', 'preparing', 'shipped', 'in_transit', 'delivered', 'refunded'] as $status) {
+            $this->assertStringContainsString(".dash-status-{$status} {", $css);
+        }
+    }
+
+    public function test_the_pipeline_counts_refunded_orders(): void
+    {
+        $this->order(['status' => 'placed']);
+        $this->order(['status' => 'refunded']);
+        $this->order(['status' => 'refunded']);
+
+        $pipeline = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->pipeline();
+
+        $refunded = $pipeline->firstWhere('status', 'refunded');
+
+        $this->assertSame('Refunded', $refunded['label']);
+        $this->assertSame(2, $refunded['count']);
+        // Dernière de la file : elle en sort, elle ne l'avance pas.
+        $this->assertSame('refunded', $pipeline->last()['status']);
+    }
+
+    public function test_only_open_stages_are_drawn_in_the_bar(): void
+    {
+        // Livrées et remboursées sont des fins : comptées, mais hors de la
+        // barre, qu'elles écraseraient en vieillissant — 185 sur 211 ne
+        // laissent rien à voir aux quatre étapes qui restent à traiter.
+        $this->order(['status' => 'placed']);
+        $this->order(['status' => 'delivered']);
+        $this->order(['status' => 'refunded']);
+
+        $pipeline = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->pipeline();
+
+        $this->assertSame(
+            ['placed', 'preparing', 'shipped', 'in_transit'],
+            $pipeline->where('open', true)->pluck('status')->values()->all()
+        );
+        $this->assertSame(
+            ['delivered', 'refunded'],
+            $pipeline->where('open', false)->pluck('status')->values()->all()
+        );
+
+        $html = $this->actingAs($this->admin())->get(route('admin.dashboard'))->assertOk()->getContent();
+
+        // Un seul segment dans la barre du tuyau : la commande placée.
+        $this->assertStringContainsString('dash-stack-segment dash-status-placed', $html);
+        $this->assertStringNotContainsString('dash-stack-segment dash-status-delivered', $html);
+        $this->assertStringNotContainsString('dash-stack-segment dash-status-refunded', $html);
+        // Comptées quand même, sous le filet.
+        $this->assertStringContainsString('dash-swatch dash-status-delivered', $html);
+        $this->assertStringContainsString('dash-pipeline-list--closed', $html);
+    }
+
+    public function test_an_empty_queue_says_so_instead_of_drawing_a_bar(): void
+    {
+        $this->order(['status' => 'delivered']);
+
+        $html = $this->actingAs($this->admin())->get(route('admin.dashboard'))->assertOk()->getContent();
+
+        $this->assertStringContainsString('Nothing waiting. Every order is delivered or refunded.', $html);
+        $this->assertStringNotContainsString('aria-label="Open orders by stage"', $html);
+    }
+
+    public function test_an_archived_refund_stays_out_of_the_pipeline(): void
+    {
+        // Le tuyau est la file de travail : archiver range la ligne, ici
+        // comme pour les autres statuts.
+        $this->order(['status' => 'refunded'])->forceFill(['archived_at' => now()])->save();
+
+        $pipeline = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->pipeline();
+
+        $this->assertSame(0, $pipeline->firstWhere('status', 'refunded')['count']);
+    }
+
+    public function test_a_banned_account_is_no_longer_counted_as_a_customer(): void
+    {
+        $banned = User::factory()->create(['banned_at' => now()]);
+        $good = User::factory()->create();
+
+        $this->order(['user_id' => $banned->id, 'total_cents' => 9000]);
+        $this->order(['user_id' => $good->id, 'total_cents' => 1000]);
+
+        $metrics = new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d'));
+        $customers = $metrics->customers();
+
+        // Une tête en moins partout : acheteurs de la période, acheteurs de
+        // toujours, et la moyenne qui les divise.
+        $this->assertSame(1, $customers['buyers']);
+        $this->assertSame(1, $customers['lifetime_buyers']);
+        $this->assertSame(1000, $customers['lifetime_value_cents']);
+
+        // Les comptes ouverts se comptent sur la même règle : lever le
+        // bannissement rend exactement une tête aux deux chiffres.
+        $accountsBanned = $metrics->reference()['customers'];
+        $newBanned = $metrics->headline()['new_customers'];
+
+        $banned->forceFill(['banned_at' => null])->save();
+
+        $lifted = new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d'));
+
+        $this->assertSame($accountsBanned + 1, $lifted->reference()['customers']);
+        $this->assertSame($newBanned + 1, $lifted->headline()['new_customers']);
+        $this->assertSame(2, $lifted->customers()['buyers']);
+    }
+
+    public function test_a_banned_customers_orders_are_still_revenue(): void
+    {
+        // L'argent a bien été encaissé : le retirer ferait dire au tableau
+        // de bord moins que la liste des commandes pour la même période.
+        $banned = User::factory()->create(['banned_at' => now()]);
+        $this->order(['user_id' => $banned->id, 'total_cents' => 9000]);
+
+        $metrics = new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d'));
+
+        $this->assertSame(9000, $metrics->headline()['revenue_cents']);
+        $this->assertSame(9000, $metrics->money()['revenue_cents']);
+        $this->assertSame(1, $metrics->headline()['orders']);
+    }
 }

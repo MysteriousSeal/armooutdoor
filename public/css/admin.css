@@ -6268,6 +6268,18 @@ input[type="date"].form-control {
     --chart-stage-4: #2661a8;
     --chart-stage-5: #17457f;
 
+    /* Les statuts de commande, repris de la pastille que porte chaque ligne
+       de la liste des commandes. La rampe ordinale disait mieux l'ordre des
+       étapes, mais ces six teintes-là sont celles que l'œil a déjà apprises
+       en travaillant la liste, et un remboursement n'est de toute façon pas
+       une étape du tuyau : c'est là qu'il en sort. */
+    --status-placed: #8b7e74;
+    --status-preparing: #8a6d1f;
+    --status-shipped: #3d6b4e;
+    --status-in-transit: #6a4a9c;
+    --status-delivered: #2f5d8a;
+    --status-refunded: #aa4444;
+
     /* La ligne de compte : une part-à-tout d'une seule quantité, donc une
        progression et non un jeu catégoriel. Elle sort des deux couleurs de
        la maison — le taupe de l'accent, l'olive des titres — pour que ce
@@ -6303,6 +6315,16 @@ input[type="date"].form-control {
     --chart-stage-3: #6398e8;
     --chart-stage-4: #3f77c9;
     --chart-stage-5: #2a5896;
+
+    /* Les mêmes six statuts, aux valeurs claires que la liste des commandes
+       leur donne déjà en sombre — jamais les valeurs du mode clair
+       éclaircies au jugé. */
+    --status-placed: #b0a396;
+    --status-preparing: #e0c56a;
+    --status-shipped: #8fceac;
+    --status-in-transit: #ab93dc;
+    --status-delivered: #8ab4dd;
+    --status-refunded: #e08585;
 
     /* Sur fond sombre l'olive des titres devient de la boue : la même
        progression est reprise plus claire, l'écart entre les trois pas
@@ -6637,6 +6659,15 @@ input[type="date"].form-control {
 .dash-stage-4 { --swatch-color: var(--chart-stage-4); }
 .dash-stage-5 { --swatch-color: var(--chart-stage-5); }
 
+/* Nommées par le statut et non par un rang : l'ordre des étapes peut
+   changer sans repeindre la mauvaise. */
+.dash-status-placed { --swatch-color: var(--status-placed); }
+.dash-status-preparing { --swatch-color: var(--status-preparing); }
+.dash-status-shipped { --swatch-color: var(--status-shipped); }
+.dash-status-in_transit { --swatch-color: var(--status-in-transit); }
+.dash-status-delivered { --swatch-color: var(--status-delivered); }
+.dash-status-refunded { --swatch-color: var(--status-refunded); }
+
 .dash-table-view {
     margin-top: 1rem;
 }
@@ -6675,11 +6706,56 @@ input[type="date"].form-control {
 .dash-pipeline-list {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 0.35rem 1.25rem;
     margin: 0;
     padding: 0;
     list-style: none;
     font-size: 0.8125rem;
+}
+
+/* Ce qui est fini se lit plus bas et plus discrètement : ce sont des
+   totaux, pas du travail. */
+.dash-pipeline-list--closed {
+    margin-top: 0.75rem;
+    color: var(--text-muted);
+}
+
+.dash-pipeline-list--closed .dash-pipeline-count {
+    font-weight: 500;
+}
+
+/* Le filet porte son étiquette plutôt que de la surmonter : une ligne de
+   titre pour deux chiffres coûterait plus de hauteur qu'elle n'en éclaire. */
+.dash-pipeline-rule {
+    flex: 1 1 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin-bottom: 0.15rem;
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.dash-pipeline-rule::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+
+/* Une file vide est une bonne nouvelle : elle le dit, plutôt que de
+   laisser une barre grise là où il n'y a rien à montrer. */
+.dash-pipeline-clear {
+    margin: 0 0 1rem;
+    padding: 0.7rem 0.85rem;
+    font-size: 0.8125rem;
+    color: var(--accent-heading);
+    background: color-mix(in srgb, var(--accent-heading) 8%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 28%, var(--border));
 }
 
 .dash-pipeline-list li {

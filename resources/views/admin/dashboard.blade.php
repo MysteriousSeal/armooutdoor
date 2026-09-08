@@ -7,7 +7,11 @@
         $series = $revenueSeries['current'];
         $previousSeries = $revenueSeries['previous'];
         $channelTotal = max(1, $channelSplit->sum('revenue_cents'));
-        $pipelineTotal = max(1, $pipeline->sum('count'));
+        // La barre ne met à l'échelle que le travail en cours : les
+        // commandes finies écraseraient tout le reste en vieillissant.
+        $pipelineOpen = $pipeline->where('open', true);
+        $pipelineClosed = $pipeline->where('open', false);
+        $pipelineTotal = max(1, $pipelineOpen->sum('count'));
         $topQuantityMax = max(1, $topProducts->max('quantity') ?? 1);
 
         // La barre se rapporte au chiffre d'affaires des seules commandes
@@ -524,24 +528,41 @@
                         <a href="{{ route('admin.orders.index') }}" class="dash-panel-note">All orders</a>
                     </div>
 
-                    {{-- Des étapes ordonnées, pas des catégories : une seule
-                         teinte du clair au foncé, jamais la palette
-                         catégorielle. --}}
-                    <div class="dash-stack" role="img" aria-label="Open orders by stage">
-                        @foreach ($pipeline as $index => $stage)
-                            @if ($stage['count'] > 0)
-                                <span
-                                    class="dash-stack-segment dash-stage-{{ $index + 1 }}"
-                                    style="--segment-width: {{ round($stage['count'] / $pipelineTotal * 100, 2) }}%"
-                                ></span>
-                            @endif
-                        @endforeach
-                    </div>
+                    {{-- Chaque étape porte la couleur que la pastille de son
+                         statut porte dans la liste des commandes : une seule
+                         distinction à apprendre pour les deux pages. --}}
+                    @if ($pipelineOpen->sum('count') > 0)
+                        <div class="dash-stack" role="img" aria-label="Open orders by stage">
+                            @foreach ($pipelineOpen as $stage)
+                                @if ($stage['count'] > 0)
+                                    <span
+                                        class="dash-stack-segment dash-status-{{ $stage['status'] }}"
+                                        style="--segment-width: {{ round($stage['count'] / $pipelineTotal * 100, 2) }}%"
+                                    ></span>
+                                @endif
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="dash-pipeline-clear">Nothing waiting. Every order is delivered or refunded.</p>
+                    @endif
 
                     <ul class="dash-pipeline-list">
-                        @foreach ($pipeline as $index => $stage)
+                        @foreach ($pipelineOpen as $stage)
                             <li>
-                                <span class="dash-swatch dash-stage-{{ $index + 1 }}"></span>
+                                <span class="dash-swatch dash-status-{{ $stage['status'] }}"></span>
+                                <span class="dash-pipeline-label">{{ $stage['label'] }}</span>
+                                <span class="dash-pipeline-count">{{ number_format($stage['count']) }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+
+                    {{-- Les fins de course, sous un filet : comptées, mais
+                         hors de la barre qu'elles écraseraient. --}}
+                    <ul class="dash-pipeline-list dash-pipeline-list--closed">
+                        <li class="dash-pipeline-rule"><span>Closed</span></li>
+                        @foreach ($pipelineClosed as $stage)
+                            <li>
+                                <span class="dash-swatch dash-status-{{ $stage['status'] }}"></span>
                                 <span class="dash-pipeline-label">{{ $stage['label'] }}</span>
                                 <span class="dash-pipeline-count">{{ number_format($stage['count']) }}</span>
                             </li>
