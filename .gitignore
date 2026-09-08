@@ -28,3 +28,24 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Ruflo local secrets and runtime data
+.env.local
+.env.*.local
+.claude-flow/data/
+.claude-flow/logs/
+.claude-flow/sessions/
+
+# Ruflo runtime state
+ruvector.db
+.swarm/
+.claude-flow/metrics/
+.claude-flow/daemon-state.json
+.claude-flow/daemon.pid
+.claude-flow/policy/state.json
+.claude-flow/security/audit-status.json
+.claude-flow/harness-active-policy.json
+
+# Resolved on the machine that ran init: the path inside is that machine's
+# npx cache and means nothing anywhere else.
+.claude-flow/memory-package.json
