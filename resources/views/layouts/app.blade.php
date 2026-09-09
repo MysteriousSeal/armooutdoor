@@ -303,8 +303,17 @@
                     <a href="{{ localized_route('home') }}" class="site-footer-brand-name">
                         <span class="logo-primary">Armo</span><span class="logo-secondary">Outdoor</span>
                     </a>
-                    <p class="site-footer-about">{{ __('store.footer_about') }}</p>
-                    <p class="site-footer-about">{{ __('store.footer_about_more') }}</p>
+                    {{-- data-nosnippet: this blurb sits on every page of the
+                         site, and Google was quoting it as the search snippet
+                         for category pages instead of their own description.
+                         The attribute is only honoured on div, span and
+                         section, which is why it is a wrapper rather than an
+                         attribute on the paragraphs. It withholds the text
+                         from snippets only; the page is still indexed. --}}
+                    <div data-nosnippet>
+                        <p class="site-footer-about">{{ __('store.footer_about') }}</p>
+                        <p class="site-footer-about">{{ __('store.footer_about_more') }}</p>
+                    </div>
                 </div>
 
                 <nav class="site-footer-col" aria-labelledby="footer-shop-heading">
