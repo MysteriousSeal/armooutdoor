@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-10 · v1.36.1 · build 4ABV25
+
+### Fixed
+
+- **The home page and the back office reported two different records for the same shop.** The page put the rating at 5 / 5 over 132 reviews while the admin reported 4,98 over 133, and a visitor comparing the two would have been right to trust neither. The count had been narrowed to reviews on a product still on sale, so every review left on a retired one fell out of the public figure: it counts them all now, which is what the back office reports and therefore the only figure the two pages can agree on. Deactivation was the only way a review could go missing, since a product's reviews are deleted with it by cascade and a stranded row cannot exist. The quotes underneath keep the narrower population on purpose, and that is the distinction the single filter had been blurring: a testimonial names and links the product it judged, and a link to a product nobody can open reads like an invention. A retired product's review counts towards the score and is never quoted.
+- **The shop was claiming a perfect score it has not got.** The rating was rounded to one decimal, so 4,98 became 5,0 and printed as « 5 / 5 ». It is given to the hundredth now, in the figure, in the line a screen reader announces, and in the width of the painted stars, which are still filled from the rounded number so the stars and the figure cannot disagree. Per-product averages are left at one decimal: this was the shop's own score, and « 5,00 sur 5 » under a product with a single review reads worse than « 5,0 ».
+
+**No migration.**
+
 ## 2026-09-10 · v1.36.0 · build QHEZ34
 
 ### Storefront
