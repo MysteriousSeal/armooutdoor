@@ -1247,10 +1247,14 @@
  */
 .home .home-cat {
     position: relative;
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+        'name name'
+        'icon copy';
     align-items: center;
-    gap: 1.05rem;
+    column-gap: 1.05rem;
+    row-gap: 0.75rem;
     min-height: 7.5rem;
     padding: 1.2rem 1.35rem 1.2rem 1.25rem;
     background: var(--surface);
@@ -1272,6 +1276,7 @@
 /* The mark, in a square well rather than a circle: everything else on this
    page is square, and the circle was the one thing that was not. */
 .home .home-cat-icon {
+    grid-area: icon;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1295,17 +1300,19 @@
 }
 
 .home .home-cat-copy {
+    grid-area: copy;
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
     min-width: 0;
-    flex: 1;
     padding-right: 1.25rem;
 }
 
 /* Out of eight hundred weight: eight names in capitals at that weight read as
    a row of shouting rather than as labels. */
 .home .home-cat-name {
+    grid-area: name;
+    align-self: start;
     font-size: 0.8125rem;
     font-weight: 700;
     letter-spacing: 0.1em;

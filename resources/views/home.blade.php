@@ -312,11 +312,15 @@
                                     : trans_choice('store.products_count', $category->listingCount(), ['count' => $category->listingCount()]));
                         @endphp
                         <a href="{{ localized_route('categories.show', ['category' => $category->slug]) }}" class="home-cat">
+                            {{-- The name has the card's full width, above the
+                                 mark rather than beside it: the longest of
+                                 them took two lines against an icon and left
+                                 the card taller than its neighbours. --}}
+                            <span class="home-cat-name">{{ $category->localizedName() }}</span>
                             <span class="home-cat-icon">
                                 @include('partials.icon', ['name' => $category->iconName(), 'size' => 30])
                             </span>
                             <span class="home-cat-copy">
-                                <span class="home-cat-name">{{ $category->localizedName() }}</span>
                                 <span class="home-cat-desc">{{ $blurb }}</span>
                                 {{-- How much is behind the door. The blurb says
                                      what the aisle holds; the count says
