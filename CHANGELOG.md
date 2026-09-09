@@ -2,6 +2,25 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-09 · v1.35.0 · build A5W84P
+
+### Storefront
+
+- **The guides read as one shelf rather than as seven pages.** A reader who has read one should know where to look in the next, and they did not offer that: two names for a block that rendered identically, two markups for the questions, the warning printed in three different places, and one guide's receipts printed after the buttons that end the page. Every part is a section now, the questions are a section like any other, the warning comes straight after the plan on every guide, and the sources sit with the reading rather than after the way out.
+- **The shelf says what the guides cover.** It is the page best placed to answer a broad question about the sport and it answered none: a title of one word, a heading of one word, and three hundred words on it. It now says what the seven cover, in the order they are read, and what these pages are: each answers a question that keeps coming back, cites its texts where there are any, and admits what it does not know.
+- **Fifteen rayons name the guide that answers for them.** A category page could reach the shelf only through a link to the shelf itself, which is the least useful link the shop could offer someone already looking at targets. Targets, clothing, replicas and gun care now carry the guide that serves them, and a rayon no guide answers for says nothing rather than pointing at the shelf and hoping. The camouflage guide stops being an orphan while we are here: it was the newest page and the one nothing pointed at, in a shelf where three other guides had three inbound links each.
+
+### Fixed
+
+- **Two guides had been answering with another guide's recommendations.** Three guides run a two-answer selector, and while they had a script each in a file each, every one of them could look for a nameless attribute and find its own. Once the six scripts became one file, in v1.34.1, they all ran on every guide, they all found the same nameless root, and the last to run painted its own recommendations over the others: the targets guide and the classification guide answered with cleaning rods. Every selector names the guide it belongs to now, and a test fails if one goes back to the bare attribute.
+- **A crawler was told nothing about when any of this changed.** Each guide wrote its own publication dates into its structured data while the sitemap read the shelf, which is two places that could not both be right the first time a guide was revised, and the sitemap printed no lastmod at all. The dates live on the shelf now, with the route each guide answers to and the picture it is about, and both the page and the sitemap read that one row. No Article declared an image either, which search engines ask for: the camouflage guide points at its own photograph, and the same photograph now draws its preview card, which had been borrowing the shopfront.
+
+### Under the hood
+
+- **Four selectors became one engine.** Three guides name a handful of products and the camouflage guide ranks seven motifs, but the chips, the state, the pressed class and the rendering were the same work written four times. Each guide supplies only what it knows: a function turning two answers into a sentence and a list of cards. The camouflage ranking is one of the answer shapes rather than a script of its own, which is why a card's rank is a word there and a number elsewhere, and why every field but the title is optional. The guides' script went from 917 lines to 765, and their stylesheet from 2736 to 2667.
+
+**No migration.**
+
 ## 2026-09-09 · v1.34.2 · build 8M2A2W
 
 ### Admin
