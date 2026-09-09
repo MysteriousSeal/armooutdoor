@@ -47,7 +47,7 @@ class CheckoutTest extends TestCase
         $this->actingAs($user)
             ->post('/cart', ['product_id' => $product->id, 'quantity' => 1]);
 
-        $this->actingAs($user)
+        $response = $this->actingAs($user)
             ->get('/checkout')
             ->assertOk()
             ->assertSee('À domicile')
@@ -55,8 +55,15 @@ class CheckoutTest extends TestCase
             ->assertSee('Colissimo')
             ->assertSee('Carte bancaire')
             ->assertSee('PayPal')
-            ->assertDontSee('Stripe')
             ->assertSee('Nouvelle adresse');
+
+        // The page names what the customer chooses, not who processes it. The
+        // footer does name Stripe, deliberately, as reassurance on every page
+        // of the shop, so the check is on the checkout's own labels rather
+        // than on the whole document.
+        $checkout = Str::before(Str::after($response->getContent(), '<main'), '</main>');
+
+        $this->assertStringNotContainsString('Stripe', $checkout);
     }
 
     public function test_paypal_is_shown_but_disabled_with_a_soon_badge(): void
