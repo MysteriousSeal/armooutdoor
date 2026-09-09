@@ -141,47 +141,106 @@
         </dialog>
 
         @if ($total > 0)
-            <div class="admin-review-stats">
-                <div class="admin-review-stat">
-                    <span class="admin-review-stat-value">
-                        {{ number_format($average, 1) }}
-                        <span class="admin-review-stars" aria-hidden="true">{{ str_repeat('★', (int) round($average)) }}{{ str_repeat('☆', 5 - (int) round($average)) }}</span>
+            {{-- Three cards on the shop's usual stat grid: what the reviews
+                 say on average, how they are spread across the stars, and
+                 where they came from. The last two are the filters as well
+                 as the counts, so the numbers you are already reading are
+                 the thing you click. --}}
+            <div class="admin-stat-grid admin-review-stats">
+                <div class="admin-stat-card admin-review-average">
+                    <span class="admin-stat-label">Average rating</span>
+                    <span class="admin-stat-value">
+                        {{ number_format($average, 2) }}
+                        @include('admin.partials.stars', ['value' => $average])
                     </span>
-                    <span class="admin-review-stat-label">Average rating</span>
-                </div>
-                <div class="admin-review-stat">
-                    <span class="admin-review-stat-value">{{ number_format($total) }}</span>
-                    <span class="admin-review-stat-label">{{ $total === 1 ? 'Review posted' : 'Reviews posted' }}</span>
-                </div>
-                <div class="admin-review-stat admin-review-stat--bars">
-                    @foreach ($ratingCounts as $stars => $count)
-                        <div class="admin-review-bar-row">
-                            <span class="admin-review-bar-stars" aria-hidden="true">{{ $stars }} ★</span>
-                            <span class="sr-only">{{ $stars }} {{ $stars === 1 ? 'star' : 'stars' }}</span>
-                            <span class="admin-review-bar-track">
-                                <span class="admin-review-bar-fill" style="width: {{ $total > 0 ? round($count / $total * 100) : 0 }}%"></span>
-                            </span>
-                            <span class="admin-review-bar-count">{{ number_format($count) }}</span>
+                    <span class="admin-stat-value--sm">
+                        {{ number_format($total) }} {{ $total === 1 ? 'review' : 'reviews' }} posted
+                    </span>
+
+                    {{-- What the average cannot say: how much of the catalogue
+                         has anything written about it at all. --}}
+                    <dl class="admin-review-coverage">
+                        <div>
+                            <dt>Products reviewed</dt>
+                            <dd>{{ number_format($reviewedProducts) }}</dd>
                         </div>
-                    @endforeach
+                        <div>
+                            <dt>Products in catalogue</dt>
+                            <dd>{{ number_format($productCount) }}</dd>
+                        </div>
+                        <div>
+                            <dt>Coverage</dt>
+                            <dd>{{ $productCount > 0 ? round($reviewedProducts / $productCount * 100) : 0 }}%</dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <div class="admin-stat-card admin-stat-card--breakdown">
+                    <span class="admin-stat-label">By rating</span>
+                    <ul class="admin-stat-parts admin-review-breakdown">
+                        @foreach ($ratingCounts as $stars => $count)
+                            @php($active = $rating === $stars)
+                            <li>
+                                <a
+                                    href="{{ route('admin.reviews.index', array_filter([
+                                        'rating' => $active ? null : $stars,
+                                        'channel' => $channel ?: null,
+                                        'search' => $search ?: null,
+                                    ])) }}"
+                                    class="admin-review-row {{ $active ? 'is-active' : '' }}"
+                                    @if ($active) aria-current="true" @endif
+                                >
+                                    <span class="admin-review-row-name">
+                                        <span aria-hidden="true">{{ $stars }} ★</span>
+                                        <span class="sr-only">{{ $stars }} {{ $stars === 1 ? 'star' : 'stars' }}</span>
+                                        <span class="admin-review-bar-track">
+                                            <span class="admin-review-bar-fill" style="width: {{ round($count / $total * 100) }}%"></span>
+                                        </span>
+                                    </span>
+                                    <span class="admin-review-row-count">{{ number_format($count) }}</span>
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+
+                <div class="admin-stat-card admin-stat-card--breakdown">
+                    <span class="admin-stat-label">By channel</span>
+                    <ul class="admin-stat-parts admin-review-breakdown admin-review-channels">
+                        @foreach ($channels as $row)
+                            @php($active = $channel === $row['key'])
+                            <li>
+                                <a
+                                    href="{{ route('admin.reviews.index', array_filter([
+                                        'channel' => $active ? null : $row['key'],
+                                        'rating' => $rating ?: null,
+                                        'search' => $search ?: null,
+                                    ])) }}"
+                                    class="admin-review-row {{ $active ? 'is-active' : '' }}"
+                                    @if ($active) aria-current="true" @endif
+                                >
+                                    <span class="admin-review-row-name">
+                                        {{ $row['label'] }}
+                                        @if ($row['direct'])
+                                            <span class="admin-review-row-note">on the shop</span>
+                                        @endif
+                                    </span>
+                                    <span class="admin-review-row-count">{{ number_format($row['total']) }}</span>
+                                    <span class="admin-review-row-share">{{ round($row['total'] / $total * 100) }}%</span>
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
                 </div>
             </div>
         @endif
 
-        <nav class="admin-subtabs" aria-label="Filter by rating">
-            <a href="{{ route('admin.reviews.index', array_filter(['search' => $search ?: null])) }}" class="{{ $rating === 0 ? 'active' : '' }}">
-                All <span class="admin-tab-count">{{ number_format($total) }}</span>
-            </a>
-            @foreach ($ratingCounts as $stars => $count)
-                <a href="{{ route('admin.reviews.index', array_filter(['rating' => $stars, 'search' => $search ?: null])) }}" class="{{ $rating === $stars ? 'active' : '' }}">
-                    {{ $stars }} ★ <span class="admin-tab-count">{{ number_format($count) }}</span>
-                </a>
-            @endforeach
-        </nav>
-
         <form method="GET" action="{{ route('admin.reviews.index') }}" class="admin-filter-bar">
             @if ($rating > 0)
                 <input type="hidden" name="rating" value="{{ $rating }}">
+            @endif
+            @if ($channel !== '')
+                <input type="hidden" name="channel" value="{{ $channel }}">
             @endif
             <div class="admin-filter-row">
                 <div class="admin-filter-field admin-filter-field--search">
@@ -191,14 +250,17 @@
                         type="search"
                         name="search"
                         class="form-control admin-toolbar-search"
-                        placeholder="Product, reference, customer name or email…"
+                        placeholder="Product, reference, customer name, email or marketplace…"
                         value="{{ $search }}"
                     >
                 </div>
                 <div class="admin-filter-actions">
                     <button type="submit" class="btn btn-primary">Search</button>
-                    @if ($search !== '')
-                        <a href="{{ route('admin.reviews.index', array_filter(['rating' => $rating ?: null])) }}" class="admin-link">Clear</a>
+                    @if ($search !== '' || $channel !== '' || $rating > 0)
+                        {{-- One way out for all three. Which filters are on is
+                             legible from the cards above, so the bar carries
+                             the button and not a second copy of the state. --}}
+                        <a href="{{ route('admin.reviews.index') }}" class="btn btn-secondary">Clear filters</a>
                     @endif
                 </div>
             </div>
@@ -212,7 +274,9 @@
             <div class="empty-state">
                 <p>
                     @if ($search !== '')
-                        Nothing matches “{{ $search }}”{{ $rating > 0 ? ' with '.$rating.' star'.($rating > 1 ? 's' : '') : '' }}.
+                        Nothing matches “{{ $search }}”{{ $rating > 0 ? ' with '.$rating.' star'.($rating > 1 ? 's' : '') : '' }}{{ $channel !== '' ? ' from '.$channelLabel : '' }}.
+                    @elseif ($channel !== '')
+                        No {{ $rating > 0 ? $rating.'-star ' : '' }}reviews from {{ $channelLabel }}.
                     @else
                         No {{ $rating }}-star reviews yet.
                     @endif
@@ -232,28 +296,28 @@
                         @endif
 
                         <div class="admin-review-main">
-                            <div class="admin-review-head">
-                                <p class="admin-review-product">
-                                    @if ($product)
-                                        <a href="{{ route('admin.products.edit', $product) }}">{{ $product->localizedName() }}</a>
-                                    @else
-                                        Deleted product
-                                    @endif
-                                </p>
-                                <span class="admin-review-rating" role="img" aria-label="{{ $review->rating }} out of 5">
-                                    <span class="admin-review-stars" aria-hidden="true">{{ str_repeat('★', $review->rating) }}</span><span class="admin-review-stars is-empty" aria-hidden="true">{{ str_repeat('★', 5 - $review->rating) }}</span>
-                                </span>
-                            </div>
-                            <p class="admin-review-meta">
-                                @if ($review->user)
-                                    <a href="{{ route('admin.customers.show', $review->user) }}">{{ $review->user->name }}</a>
-                                @elseif ($review->isManual())
-                                    {{ $review->author_name }}
+                            <p class="admin-review-product">
+                                @if ($product)
+                                    <a href="{{ route('admin.products.edit', $product) }}">{{ $product->localizedName() }}</a>
                                 @else
-                                    Deleted customer
+                                    Deleted product
                                 @endif
+                            </p>
+                            {{-- Who, when, and where it came from. The name is the
+                                 one thing here worth reading at a glance, so it is
+                                 the only one set in the page's own colour. --}}
+                            <p class="admin-review-meta">
+                                <span class="admin-review-who">
+                                    @if ($review->user)
+                                        <a href="{{ route('admin.customers.show', $review->user) }}">{{ $review->user->name }}</a>
+                                    @elseif ($review->isManual())
+                                        {{ $review->author_name }}
+                                    @else
+                                        Deleted customer
+                                    @endif
+                                </span>
                                 <span aria-hidden="true">·</span>
-                                {{ $review->created_at->format('d M Y') }}
+                                <span>{{ $review->created_at->format('d M Y') }}</span>
                                 @if ($review->order)
                                     <span aria-hidden="true">·</span>
                                     <a href="{{ route('admin.orders.show', $review->order) }}">{{ $review->order->number }}</a>
@@ -262,14 +326,139 @@
                                     <span class="admin-review-source">{{ $review->source ?? 'Added manually' }}</span>
                                 @endif
                             </p>
+                            {{-- The words are what the row is for: set as a quote,
+                                 against a rule, at reading size. --}}
                             @if (filled($review->comment))
-                                <p class="admin-review-comment">{{ $review->comment }}</p>
+                                <blockquote class="admin-review-comment">{{ $review->comment }}</blockquote>
                             @else
                                 <p class="admin-review-comment is-empty">No comment — rating only.</p>
                             @endif
                         </div>
 
+                        {{-- Its own column, so the ratings line up down the page
+                             instead of landing wherever the product name ends. --}}
+                        <div class="admin-review-rating">
+                            @include('admin.partials.stars', ['value' => $review->rating])
+                            <span class="admin-review-rating-value">{{ $review->rating }}/5</span>
+                        </div>
+
                         <div class="admin-review-actions">
+                            @if ($review->isManual())
+                                @php($form = 'review-edit-'.$review->id)
+                                {{-- A refused edit reopens this modal with what was
+                                     typed still in it; otherwise the fields show the
+                                     review as it stands. --}}
+                                @php($was = fn (string $field, $current) => old('_form') === $form ? old($field, $current) : $current)
+                                @php($editProduct = $products->firstWhere('id', (int) $was('product_id', $review->product_id)))
+                                <button type="button" class="btn btn-sm btn-secondary" data-modal-open="{{ $form }}">Edit</button>
+                                <dialog id="{{ $form }}" class="modal admin-review-create" aria-labelledby="{{ $form }}-title">
+                                    <form method="POST" action="{{ route('admin.reviews.update', $review) }}">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input type="hidden" name="_form" value="{{ $form }}">
+                                        <input type="hidden" name="back" value="{{ url()->full() }}">
+                                        <p class="modal-kicker">{{ $review->source ?? 'Added manually' }}</p>
+                                        <h3 class="modal-title" id="{{ $form }}-title">Edit this review</h3>
+
+                                        <div class="form-group">
+                                            <label for="{{ $form }}-product">Product</label>
+                                            <div class="search-select" data-search-select data-source="products">
+                                                <input type="hidden" name="product_id" value="{{ $was('product_id', $review->product_id) }}">
+                                                <input
+                                                    type="text"
+                                                    id="{{ $form }}-product"
+                                                    class="form-control search-select-input"
+                                                    placeholder="Search by name or SKU…"
+                                                    value="{{ $editProduct?->localizedName() ?? '' }}"
+                                                    autocomplete="off"
+                                                    spellcheck="false"
+                                                >
+                                                <ul class="search-select-list" hidden></ul>
+                                            </div>
+                                            @error('product_id') <p class="form-error">{{ $message }}</p> @enderror
+                                        </div>
+
+                                        <div class="admin-review-create-row">
+                                            <div class="form-group">
+                                                <label for="{{ $form }}-author">Customer name</label>
+                                                <input
+                                                    id="{{ $form }}-author"
+                                                    type="text"
+                                                    name="author_name"
+                                                    class="form-control"
+                                                    value="{{ $was('author_name', $review->author_name) }}"
+                                                    maxlength="100"
+                                                    required
+                                                >
+                                                @error('author_name') <p class="form-error">{{ $message }}</p> @enderror
+                                            </div>
+                                            <div class="form-group">
+                                                <label id="{{ $form }}-rating-label">Rating</label>
+                                                <div class="admin-star-picker" role="radiogroup" aria-labelledby="{{ $form }}-rating-label">
+                                                    @foreach ([5, 4, 3, 2, 1] as $stars)
+                                                        <input
+                                                            type="radio"
+                                                            id="{{ $form }}-rating-{{ $stars }}"
+                                                            name="rating"
+                                                            value="{{ $stars }}"
+                                                            @checked((int) $was('rating', $review->rating) === $stars)
+                                                            required
+                                                        >
+                                                        <label for="{{ $form }}-rating-{{ $stars }}" aria-label="{{ $stars }} {{ $stars === 1 ? 'star' : 'stars' }}">★</label>
+                                                    @endforeach
+                                                </div>
+                                                @error('rating') <p class="form-error">{{ $message }}</p> @enderror
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="{{ $form }}-comment">Review</label>
+                                            <textarea
+                                                id="{{ $form }}-comment"
+                                                name="comment"
+                                                class="form-control"
+                                                rows="4"
+                                                maxlength="2000"
+                                                required
+                                            >{{ $was('comment', $review->comment) }}</textarea>
+                                            @error('comment') <p class="form-error">{{ $message }}</p> @enderror
+                                        </div>
+
+                                        <div class="admin-review-create-row">
+                                            <div class="form-group">
+                                                <label for="{{ $form }}-source">Source <span class="admin-field-optional">optional</span></label>
+                                                <input
+                                                    id="{{ $form }}-source"
+                                                    type="text"
+                                                    name="source"
+                                                    class="form-control"
+                                                    placeholder="Naturabuy, Amazon…"
+                                                    value="{{ $was('source', $review->source) }}"
+                                                    maxlength="50"
+                                                >
+                                                @error('source') <p class="form-error">{{ $message }}</p> @enderror
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="{{ $form }}-posted-at">Posted on</label>
+                                                <input
+                                                    id="{{ $form }}-posted-at"
+                                                    type="date"
+                                                    name="posted_at"
+                                                    class="form-control"
+                                                    value="{{ $was('posted_at', $review->created_at->toDateString()) }}"
+                                                    max="{{ now()->toDateString() }}"
+                                                >
+                                                @error('posted_at') <p class="form-error">{{ $message }}</p> @enderror
+                                            </div>
+                                        </div>
+
+                                        <div class="modal-actions">
+                                            <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                                            <button type="submit" class="btn btn-primary">Save review</button>
+                                        </div>
+                                    </form>
+                                </dialog>
+                            @endif
                             @if ($product)
                                 {{-- Straight to the review's own section of the page, not the top of it. --}}
                                 <a
@@ -285,7 +474,7 @@
                                 </a>
                             @endif
                             @if (auth()->user()->isOwner())
-                                <button type="button" class="btn btn-sm btn-secondary" data-modal-open="review-delete-{{ $review->id }}">Delete</button>
+                                <button type="button" class="btn btn-sm btn-secondary admin-review-delete" data-modal-open="review-delete-{{ $review->id }}">Delete</button>
                                 <dialog id="review-delete-{{ $review->id }}" class="modal" aria-labelledby="review-delete-{{ $review->id }}-title">
                                     <form method="POST" action="{{ route('admin.reviews.destroy', $review) }}">
                                         @csrf
@@ -317,11 +506,12 @@
         AdminSearchSelect.catalogs.products = @json($productOptions);
         AdminSearchSelect.mountAll();
     </script>
-    @if ($errors->any() && old('_form') === 'review-create')
+    @if ($errors->any() && old('_form'))
         {{-- A refused submission reopens the modal it came from, errors and
-             typed values still in place. --}}
+             typed values still in place. Every form on the page names itself
+             after its own dialog, so this holds for the edits too. --}}
         <script>
-            document.getElementById('review-create')?.showModal();
+            document.getElementById(@json(old('_form')))?.showModal();
         </script>
     @endif
 @endpush

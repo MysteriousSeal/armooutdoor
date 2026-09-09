@@ -223,7 +223,7 @@
                                                 <span class="admin-table-strong">Deleted product</span>
                                             @endif
                                             <span class="admin-review-rating" role="img" aria-label="{{ $review->rating }} out of 5">
-                                                <span class="admin-review-stars" aria-hidden="true">{{ str_repeat('★', $review->rating) }}</span><span class="admin-review-stars is-empty" aria-hidden="true">{{ str_repeat('★', 5 - $review->rating) }}</span>
+                                                @include('admin.partials.stars', ['value' => $review->rating])
                                             </span>
                                         </span>
                                         @if (filled($review->comment))
