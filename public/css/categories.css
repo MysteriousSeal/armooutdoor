@@ -41,6 +41,17 @@
        on the page, which is the side the hero has always used. */
     grid-column: 2;
     grid-row: 1;
+    /* The copy is the taller column at most widths, so it is what sets the
+       row height. Centred, the picture floated in that row with white above
+       and below it; stretched, it fills the panel. The ratio still governs
+       when the picture is the taller of the two, since a row is never
+       shorter than the item that sizes it: it is the floor, not the height. */
+    align-self: stretch;
+    /* The width belongs to the column, never to the ratio. Stretched, the
+       height becomes definite, and the ratio would otherwise work backwards
+       from it and make the picture wider than the column it sits in, which
+       the panel then clips on the right. */
+    width: 100%;
     aspect-ratio: 21 / 9;
     background-image: var(--cat-hero-image);
     background-repeat: no-repeat;
