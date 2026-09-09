@@ -50,7 +50,7 @@ class GuideJoulesPageTest extends TestCase
         // A control that cannot work without JavaScript must not be offered
         // by a page that has none; the table answers the same question.
         $this->assertMatchesRegularExpression('/<section[^>]*data-glab-joules[^>]*\shidden/', $html);
-        $this->assertStringContainsString('js/guides/guides.js', $html);
+        $this->assertStringContainsString('js/guides.js', $html);
         $this->assertStringContainsString('<table class="glab-table">', $html);
     }
 

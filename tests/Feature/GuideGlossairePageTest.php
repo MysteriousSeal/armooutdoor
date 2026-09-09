@@ -187,7 +187,7 @@ class GuideGlossairePageTest extends TestCase
 
         // Typing needs JavaScript; reading and the letter index do not.
         $this->assertMatchesRegularExpression('/data-gloss-search\s+hidden/', $html);
-        $this->assertStringContainsString('js/guides/guides.js', $html);
+        $this->assertStringContainsString('js/guides.js', $html);
         $this->assertSame(Glossary::entries() === [] ? 0 : count(Glossary::entries()), substr_count($html, 'data-gloss-entry'));
     }
 

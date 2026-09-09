@@ -46,7 +46,7 @@ class GuideCamouflagePageTest extends TestCase
         $html = $this->get(route('guides.camouflage'))->assertOk()->getContent();
 
         $this->assertStringContainsString('data-cam-picker hidden', $html);
-        $this->assertStringContainsString('js/guides/guides.js', $html);
+        $this->assertStringContainsString('js/guides.js', $html);
     }
 
     /**
@@ -167,7 +167,7 @@ class GuideCamouflagePageTest extends TestCase
      */
     private function cssSection(string $slug): string
     {
-        $css = file_get_contents(public_path('css/guides/guides.css'));
+        $css = file_get_contents(public_path('css/guides.css'));
 
         $start = strpos($css, '/* ============================== '.$slug.' ');
         $this->assertNotFalse($start, 'guides.css has no section for '.$slug);

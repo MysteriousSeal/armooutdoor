@@ -167,7 +167,7 @@ class GuideCiblesPageTest extends TestCase
         $html = $this->get($url)->assertOk()
             ->assertSee('cat-hero', false)
             ->assertSee('css/categories.css', false)
-            ->assertSee('css/guides/guides.css', false)
+            ->assertSee('css/guides.css', false)
             ->assertSee('<p class="cat-hero-kicker">'.$kicker.'</p>', false)
             ->getContent();
 
@@ -237,28 +237,26 @@ class GuideCiblesPageTest extends TestCase
      */
     public function test_the_shelf_is_served_from_one_sheet_and_one_script(): void
     {
-        $this->assertSame(
-            ['guides.css'],
-            array_map('basename', glob(public_path('css/guides/*.css'))),
-        );
-        $this->assertSame(
-            ['guides.js'],
-            array_map('basename', glob(public_path('js/guides/*.js'))),
-        );
+        $this->assertFileExists(public_path('css/guides.css'));
+        $this->assertFileExists(public_path('js/guides.js'));
+
+        // And no folder of per-guide files grows back beside them.
+        $this->assertSame([], glob(public_path('css/guides/*')));
+        $this->assertSame([], glob(public_path('js/guides/*')));
 
         $urls = array_merge([route('guides.index')], array_column(Guides::all(), 'url'));
 
         foreach ($urls as $url) {
             $html = $this->get($url)->assertOk()->getContent();
 
-            $this->assertSame(1, substr_count($html, 'css/guides/'), $url.' asks for more than one sheet');
-            $this->assertLessThanOrEqual(1, substr_count($html, 'js/guides/'), $url.' asks for more than one script');
+            $this->assertSame(1, substr_count($html, 'css/guides.css'), $url.' asks for more than one sheet');
+            $this->assertLessThanOrEqual(1, substr_count($html, 'js/guides.js'), $url.' asks for more than one script');
         }
     }
 
     public function test_a_guide_hero_without_a_photograph_does_not_keep_the_empty_height(): void
     {
-        $css = file_get_contents(public_path('css/guides/guides.css'));
+        $css = file_get_contents(public_path('css/guides.css'));
 
         $this->assertStringContainsString('.glab .cat-hero:not(.has-image)', $css);
         $this->assertStringContainsString('min-height: 0', $css);

@@ -41,7 +41,7 @@
 
 @push('head')
     <link rel="stylesheet" href="{{ versioned_asset('css/categories.css') }}">
-    <link rel="stylesheet" href="{{ versioned_asset('css/guides/guides.css') }}">
+    <link rel="stylesheet" href="{{ versioned_asset('css/guides.css') }}">
     <script type="application/ld+json">
         {!! json_encode([
             '@@context' => 'https://schema.org',
@@ -405,5 +405,5 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ versioned_asset('js/guides/guides.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/guides.js') }}" defer></script>
 @endpush

@@ -8,7 +8,8 @@
  *
  * Eight files became one because eight files was eight requests and eight
  * places to look for a rule, for a total under three thousand lines that a
- * single page never used more than a fifth of. The sections are fenced and
+ * single page never used more than a fifth of. One file needs no folder, so
+ * it sits beside the shop's other sheets. The sections are fenced and
  * named below so a rule can still be found by the page it belongs to, and a
  * rule used by more than one guide belongs in the shared part above them.
  */
