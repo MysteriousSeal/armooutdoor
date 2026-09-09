@@ -260,6 +260,113 @@ class ManualOrderRelayPointTest extends TestCase
             ->assertSee('value="paypal"', false);
     }
 
+    /**
+     * A plain order, built without going through the form: these tests are
+     * about what happens to an order that already exists.
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    private function order(array $attributes = []): Order
+    {
+        return Order::query()->create([
+            'number' => Order::generateNumber(),
+            'user_id' => User::factory()->create()->id,
+            'status' => 'placed',
+            'is_manual' => true,
+            'address_snapshot' => ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'x', 'postal_code' => '75000', 'city' => 'Paris', 'country' => 'FR'],
+            'billing_address_snapshot' => ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'x', 'postal_code' => '75000', 'city' => 'Paris', 'country' => 'FR'],
+            'carrier_method' => 'home',
+            'carrier_snapshot' => ['name' => ['fr' => 'Colissimo']],
+            'subtotal_cents' => 1000,
+            'shipping_cents' => 500,
+            'discount_cents' => 0,
+            'total_cents' => 1500,
+            'payment_method' => PaymentMethod::PayPal,
+            ...$attributes,
+        ]);
+    }
+
+    /**
+     * What PayPal kept on an order typed in by hand.
+     *
+     * Stripe is asked for its fee and answers; nothing here can ask PayPal, so
+     * the figure is read off the statement and entered by hand, the way the
+     * marketplace commission beside it already is.
+     */
+    public function test_the_paypal_fee_is_saved_on_a_manual_order(): void
+    {
+        $order = $this->order();
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->patch('/admin/orders/'.$order->number.'/payment-fee', ['payment_fee' => '0.95'])
+            ->assertRedirect();
+
+        $this->assertSame(95, $order->fresh()->payment_fee_cents);
+    }
+
+    public function test_emptying_the_fee_makes_it_unknown_rather_than_zero(): void
+    {
+        // Nothing entered means nobody has looked it up yet. Storing zero
+        // would claim the sale cost nothing to collect, and the profit
+        // figures would believe it.
+        $order = $this->order(['payment_fee_cents' => 95]);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->patch('/admin/orders/'.$order->number.'/payment-fee', ['payment_fee' => ''])
+            ->assertRedirect();
+
+        $this->assertNull($order->fresh()->payment_fee_cents);
+    }
+
+    public function test_a_card_order_has_no_paypal_fee_to_enter(): void
+    {
+        // A card order's fee comes from Stripe, which knows it.
+        $order = $this->order(['payment_method' => PaymentMethod::Card]);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->patch('/admin/orders/'.$order->number.'/payment-fee', ['payment_fee' => '0.95'])
+            ->assertNotFound();
+
+        $this->assertNull($order->fresh()->payment_fee_cents);
+    }
+
+    public function test_an_order_the_shop_did_not_type_in_is_left_alone(): void
+    {
+        $order = $this->order(['is_manual' => false]);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->patch('/admin/orders/'.$order->number.'/payment-fee', ['payment_fee' => '0.95'])
+            ->assertNotFound();
+
+        $this->assertNull($order->fresh()->payment_fee_cents);
+    }
+
+    public function test_a_negative_fee_is_refused(): void
+    {
+        $order = $this->order();
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->patch('/admin/orders/'.$order->number.'/payment-fee', ['payment_fee' => '-1'])
+            ->assertSessionHasErrors('payment_fee');
+
+        $this->assertNull($order->fresh()->payment_fee_cents);
+    }
+
+    public function test_the_fee_field_is_on_a_paypal_order_and_not_on_a_card_one(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->get('/admin/orders/'.$this->order()->number)
+            ->assertOk()
+            ->assertSee('name="payment_fee"', false);
+
+        $this->actingAs($admin)
+            ->get('/admin/orders/'.$this->order(['payment_method' => PaymentMethod::Card])->number)
+            ->assertOk()
+            ->assertDontSee('name="payment_fee"', false);
+    }
+
     public function test_two_lines_of_the_same_product_become_one(): void
     {
         $admin = User::factory()->admin()->create();

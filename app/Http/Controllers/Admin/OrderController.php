@@ -1135,6 +1135,35 @@ class OrderController extends Controller
         return back()->with('status', 'Marketplace commission saved.');
     }
 
+    /**
+     * What PayPal kept on an order typed in by hand.
+     *
+     * A Stripe order gets its fee from Stripe, which knows the real figure and
+     * is asked for it. Nothing here can ask PayPal, so the figure is read off
+     * the statement and entered: better a number somebody checked than one
+     * computed from a published rate that the account may not be on.
+     */
+    public function updatePaymentFee(Request $request, Order $order): RedirectResponse
+    {
+        abort_unless($order->is_manual && $order->payment_method === PaymentMethod::PayPal, 404);
+
+        $validated = $request->validate([
+            'payment_fee' => ['nullable', 'numeric', 'min:0', 'max:99999.99'],
+        ]);
+
+        $fee = $validated['payment_fee'] ?? null;
+
+        $order->update([
+            // Emptied means unknown, not zero: a blank field would otherwise
+            // claim the sale cost nothing to collect.
+            'payment_fee_cents' => $fee === null || $fee === ''
+                ? null
+                : (int) round(((float) $fee) * 100),
+        ]);
+
+        return back()->with('status', 'Payment fee saved.');
+    }
+
     public function updateShippingPaid(Request $request, Order $order): RedirectResponse
     {
         abort_unless($order->is_manual && $order->marketplace_id, 404);

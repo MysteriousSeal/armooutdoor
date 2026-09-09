@@ -346,6 +346,7 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         Route::post('/orders/{order}/discount-code', [AdminOrderController::class, 'createDiscountCode'])->name('orders.discount-code.store');
         Route::patch('/orders/{order}/marketplace-commission', [AdminOrderController::class, 'updateMarketplaceCommission'])->name('orders.marketplace-commission.update');
         Route::patch('/orders/{order}/shipping-paid', [AdminOrderController::class, 'updateShippingPaid'])->name('orders.shipping-paid.update');
+        Route::patch('/orders/{order}/payment-fee', [AdminOrderController::class, 'updatePaymentFee'])->name('orders.payment-fee.update');
         Route::patch('/orders/{order}/shipping-address', [AdminOrderController::class, 'updateShippingAddress'])->name('orders.address.shipping');
         Route::patch('/orders/{order}/billing-address', [AdminOrderController::class, 'updateBillingAddress'])->name('orders.address.billing');
 

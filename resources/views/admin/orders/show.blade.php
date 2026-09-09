@@ -560,6 +560,40 @@
                     </section>
                 @endif
 
+                {{-- What PayPal kept. A Stripe order is told its fee by
+                     Stripe; nothing here can ask PayPal, so the figure is read
+                     off the statement and typed in. --}}
+                @if ($order->is_manual && $order->payment_method === \App\Enums\PaymentMethod::PayPal)
+                    <section class="order-fact">
+                        <h3 class="order-fact-title">Payment fee</h3>
+
+                        <form method="POST" action="{{ route('admin.orders.payment-fee.update', $order) }}" class="order-shipping-form">
+                            @csrf
+                            @method('PATCH')
+                            <div class="order-shipping-field">
+                                <label for="payment_fee">PayPal fee (EUR)</label>
+                                <input
+                                    type="number"
+                                    id="payment_fee"
+                                    name="payment_fee"
+                                    class="order-shipping-input"
+                                    value="{{ old('payment_fee', $order->payment_fee_cents !== null ? number_format($order->payment_fee_cents / 100, 2, '.', '') : '') }}"
+                                    min="0"
+                                    max="99999.99"
+                                    step="0.01"
+                                    placeholder="e.g. 0.95"
+                                >
+                                @error('payment_fee') <p class="form-error">{{ $message }}</p> @enderror
+                            </div>
+                            <p class="order-fact-extra">
+                                From your PayPal statement. The usual French rate is around 2,99% plus 0,35 EUR, which on this order would be about
+                                {{ format_euros((int) round($order->total_cents * 0.0299) + 35) }}. Left empty, the fee counts as unknown rather than as zero.
+                            </p>
+                            <button type="submit" class="btn btn-secondary btn-block">Save payment fee</button>
+                        </form>
+                    </section>
+                @endif
+
                 <section class="order-fact">
                     <h3 class="order-fact-title">Shipping</h3>
                     <p class="order-shipping-summary">
