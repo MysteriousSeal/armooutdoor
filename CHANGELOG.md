@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-09 · v1.32.0 · build 4UR8TB
+
+### Admin
+
+- **A manual order paid by PayPal can record what PayPal kept.** A card order is told its fee by Stripe, which knows the real figure and is asked for it. Nothing in the shop can ask PayPal, and a fee worked out from a published rate would be a guess about an account that may not be on that rate, so the figure is read off the statement and typed in. The field sits in the order sidebar beside the marketplace commission and the shipping paid, which are entered the same way and for the same reason, and it appears only on an order the shop typed in itself and marked as paid by PayPal. Left empty it stores nothing rather than zero: zero would tell the profit figures the sale cost nothing to collect, where an empty field only means nobody has looked it up yet. A hint under the field names the usual French rate and what it would come to on that order, as something to check the statement against rather than a value the shop stores.
+- **Nothing else needed changing to show it.** The Payment section of an order already displayed whatever fee an order carried, with its share of the total, and named Stripe only for a card. So a PayPal fee, once entered, reaches the orders list, the profit calculation and the accounting export exactly as a Stripe one does.
+
+**No migration.** The column already existed and was only ever filled by Stripe.
+
 ## 2026-09-09 · v1.31.2 · build 5J9DF0
 
 ### Admin
