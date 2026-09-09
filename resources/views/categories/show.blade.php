@@ -262,6 +262,25 @@
                             <div class="category-guide-body">{!! $category->localizedGuide() !!}</div>
                         </section>
                     @endif
+
+                    @if ($products->currentPage() === 1)
+                        {{-- The guide that answers for this rayon, where there
+                             is one. A shopper here is nearer to needing it than
+                             anyone arriving cold from a search, and until now
+                             the shelf was reachable from a category page only
+                             through a link to the shelf itself. --}}
+                        @php($categoryGuide = \App\Support\Guides::forCategory($category->slug))
+
+                        @if ($categoryGuide)
+                            <aside class="category-guide-link">
+                                <p class="category-guide-link-kicker">{{ $categoryGuide['topic'] }}</p>
+                                <h2 class="category-guide-link-title">
+                                    <a href="{{ $categoryGuide['url'] }}">{{ $categoryGuide['title'] }}</a>
+                                </h2>
+                                <p class="category-guide-link-teaser">{{ $categoryGuide['teaser'] }}</p>
+                            </aside>
+                        @endif
+                    @endif
                 </div>
             </div>
         @endif

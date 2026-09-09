@@ -403,7 +403,9 @@
             <p class="glab-more-reading">
                 Le régime de votre arme, catégorie par catégorie, est dans notre guide
                 <a href="{{ route('guides.classification') }}">Classer son arme</a> ; le vocabulaire
-                du pas de tir est au <a href="{{ route('guides.glossaire') }}">glossaire</a>.
+                du pas de tir est au <a href="{{ route('guides.glossaire') }}">glossaire</a>. Et sur
+                un terrain, ce qu'il faut porter est le sujet de
+                <a href="{{ route('guides.camouflage') }}">Choisir son camouflage</a>.
             </p>
         </section>
 

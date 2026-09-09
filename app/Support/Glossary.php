@@ -240,7 +240,7 @@ class Glossary
                 'term' => 'Camouflage CP',
                 'aliases' => ['ACU', 'multicam', 'motif', 'désert', 'jungle'],
                 'definition' => 'Les motifs se désignent par des sigles : CP pour le camouflage à taches multi-terrains, ACU pour le motif pixellisé gris-vert. À côté d\'eux vivent des familles nommées par leur milieu, désert, jungle, forêt, neige, et des unis comme le coyote ou le tan.',
-                'link' => ['kind' => 'Rayon', 'label' => 'Rubans camo', 'category' => 'ruban-camo'],
+                'link' => ['kind' => 'Guide', 'label' => 'Choisir son camouflage', 'route' => 'guides.camouflage'],
             ],
             [
                 'term' => 'Cartouchière de crosse',

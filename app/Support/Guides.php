@@ -18,7 +18,7 @@ class Guides
      * Ordered as the index page presents them: the law first, then the two
      * rayons it applies to.
      *
-     * @return list<array{topic: string, title: string, url: string, route: string, published: string, updated: string, image?: string, teaser: string, summary: string}>
+     * @return list<array{topic: string, title: string, url: string, route: string, categories: list<string>, published: string, updated: string, image?: string, teaser: string, summary: string}>
      */
     public static function all(): array
     {
@@ -28,6 +28,7 @@ class Guides
                 'title' => 'Classer son arme',
                 'url' => route('guides.classification'),
                 'route' => 'guides.classification',
+                'categories' => [],
                 'published' => '2026-09-06',
                 'updated' => '2026-09-06',
                 'teaser' => 'Sous 2 joules, de 2 à 20, dès 20 : ce que la loi range en D, C, B et A.',
@@ -38,6 +39,7 @@ class Guides
                 'title' => 'Où tirer légalement',
                 'url' => route('guides.ou-tirer'),
                 'route' => 'guides.ou-tirer',
+                'categories' => [],
                 'published' => '2026-09-07',
                 'updated' => '2026-09-07',
                 'teaser' => 'Chez soi, sur un terrain, en stand : ce qui décide vraiment, et les textes cités de travers.',
@@ -48,6 +50,7 @@ class Guides
                 'title' => 'Le glossaire',
                 'url' => route('guides.glossaire'),
                 'route' => 'guides.glossaire',
+                'categories' => [],
                 'published' => '2026-09-05',
                 'updated' => '2026-09-06',
                 'teaser' => 'AEG, hop-up, diabolo, MED : les mots du rayon, et où chacun se rencontre.',
@@ -58,6 +61,7 @@ class Guides
                 'title' => 'Joules et FPS',
                 'url' => route('guides.joules'),
                 'route' => 'guides.joules',
+                'categories' => ['repliques-airsoft', 'repliques-de-poing', 'repliques-longues', 'repliques-sniper'],
                 'published' => '2026-09-07',
                 'updated' => '2026-09-07',
                 'teaser' => 'La conversion, la calculette, et pourquoi la même réplique ne chrone pas deux fois pareil.',
@@ -68,6 +72,7 @@ class Guides
                 'title' => 'Bien choisir sa cible',
                 'url' => route('guides.cibles'),
                 'route' => 'guides.cibles',
+                'categories' => ['cibles', 'cibles-rondes', 'cibles-carrees', 'planches-cibles', 'cibles-carton-metal'],
                 'published' => '2026-09-04',
                 'updated' => '2026-09-06',
                 'teaser' => 'Réactives, planches, carton ou métal : quel format pour quelle distance, et ce qu\'on lit après le tir.',
@@ -78,6 +83,7 @@ class Guides
                 'title' => 'Choisir son camouflage',
                 'url' => route('guides.camouflage'),
                 'route' => 'guides.camouflage',
+                'categories' => ['vetements', 'cagoules', 'casquettes', 'gants', 'ruban-camo'],
                 'published' => '2026-09-09',
                 'updated' => '2026-09-09',
                 'image' => 'images/guides/camouflage/ce.webp',
@@ -89,6 +95,7 @@ class Guides
                 'title' => 'Entretenir son arme',
                 'url' => route('guides.entretien'),
                 'route' => 'guides.entretien',
+                'categories' => ['entretien-arme'],
                 'published' => '2026-09-04',
                 'updated' => '2026-09-06',
                 'teaser' => 'Corde ou kit à tiges, calibre par calibre, dans quel sens nettoyer et à quelle fréquence.',
@@ -105,7 +112,7 @@ class Guides
      * written twice, and the two copies would drift the first time a guide
      * was revised.
      *
-     * @return array{topic: string, title: string, url: string, route: string, published: string, updated: string, image?: string, teaser: string, summary: string}
+     * @return array{topic: string, title: string, url: string, route: string, categories: list<string>, published: string, updated: string, image?: string, teaser: string, summary: string}
      */
     public static function byRoute(string $route): array
     {
@@ -119,6 +126,29 @@ class Guides
     }
 
     /**
+     * The guide that serves a rayon, if one does.
+     *
+     * A shopper on the targets page is nearer to needing the targets guide
+     * than anyone arriving cold from a search, and the shelf was reachable
+     * from a category page only through a link to the shelf itself. Named
+     * here rather than on the category row: which guide answers for a rayon
+     * is an editorial fact about the guide, and it changes when a guide is
+     * written, not when a rayon is renamed.
+     *
+     * @return array{topic: string, title: string, url: string, route: string, categories: list<string>, published: string, updated: string, image?: string, teaser: string, summary: string}|null
+     */
+    public static function forCategory(string $slug): ?array
+    {
+        foreach (self::all() as $guide) {
+            if (in_array($slug, $guide['categories'], true)) {
+                return $guide;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * The guides the home page offers today.
      *
      * The strip has room for two and the shelf holds more, so the two that
@@ -129,7 +159,7 @@ class Guides
      * It is read off the date, so every visitor of a given day sees the
      * same pair, and it turns over at French midnight rather than UTC's.
      *
-     * @return Collection<int, array{topic: string, title: string, url: string, route: string, published: string, updated: string, image?: string, teaser: string, summary: string}>
+     * @return Collection<int, array{topic: string, title: string, url: string, route: string, categories: list<string>, published: string, updated: string, image?: string, teaser: string, summary: string}>
      */
     public static function ofTheDay(int $count = 2): Collection
     {

@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\Category;
+use App\Models\Product;
 use App\Support\Guides;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -198,8 +200,8 @@ class GuideCiblesPageTest extends TestCase
     public function test_the_guides_index_is_headed_guides(): void
     {
         $html = $this->get('/guides')->assertOk()
-            ->assertSee('<title>Guides — Armo Outdoor</title>', false)
-            ->assertSee('<span class="glab-title-accent">Guides</span>', false)
+            ->assertSee('<title>Guides du tir et de l&#039;airsoft : loi, énergie, matériel — Armo Outdoor</title>', false)
+            ->assertSee('<span class="glab-title-accent">et de l\'airsoft</span>', false)
             ->assertSee('"@type":"CollectionPage"', false)
             ->getContent();
 
@@ -251,6 +253,49 @@ class GuideCiblesPageTest extends TestCase
 
             $this->assertSame(1, substr_count($html, 'css/guides.css'), $url.' asks for more than one sheet');
             $this->assertLessThanOrEqual(1, substr_count($html, 'js/guides.js'), $url.' asks for more than one script');
+        }
+    }
+
+    /**
+     * A rayon links the guide that answers for it, and no guide is an orphan.
+     *
+     * The shelf was reachable from a category page only through a link to the
+     * shelf itself, which is the least useful link the shop could offer a
+     * shopper already looking at targets. And within the shelf the camouflage
+     * guide had nothing pointing at it at all: the newest page, and the one
+     * hardest to reach.
+     */
+    public function test_a_rayon_links_its_guide_and_no_guide_is_an_orphan(): void
+    {
+        // A rayon with nothing in it never reaches its own grid, so the
+        // fixture stocks one: the link sits under the products.
+        $category = Category::factory()->create(['slug' => 'cibles', 'name' => 'Cibles']);
+        Product::factory()->create(['category_id' => $category->id]);
+
+        $this->get('/categories/'.$category->slug)->assertOk()
+            ->assertSee(route('guides.cibles'), false)
+            ->assertSee('<aside class="category-guide-link">', false);
+
+        // A rayon no guide answers for says nothing, rather than pointing at
+        // the shelf and hoping.
+        $other = Category::factory()->create(['slug' => 'poches-utilitaires', 'name' => 'Poches']);
+        Product::factory()->create(['category_id' => $other->id]);
+
+        $this->get('/categories/'.$other->slug)->assertOk()
+            ->assertDontSee('<aside class="category-guide-link">', false);
+
+        // Every guide is reachable from at least one other guide.
+        $pages = collect(Guides::all())->mapWithKeys(fn (array $guide): array => [
+            $guide['url'] => $this->get($guide['url'])->assertOk()->getContent(),
+        ]);
+
+        foreach (Guides::all() as $guide) {
+            $inbound = $pages
+                ->reject(fn (string $html, string $url): bool => $url === $guide['url'])
+                ->filter(fn (string $html): bool => str_contains($html, $guide['url'].'"'))
+                ->count();
+
+            $this->assertGreaterThan(0, $inbound, $guide['route'].' is an orphan inside the shelf');
         }
     }
 
