@@ -1,10 +1,10 @@
 /*
  * Every guide's script, in one file.
  *
- * Each of the six is an immediately invoked function that looks for the one
+ * Each block is an immediately invoked function that looks for the one
  * element it drives and returns when the page does not carry it, so a guide
- * loading this file runs its own block and skips the other five. That guard
- * was already there when they were six files; it is what makes one file safe.
+ * loading this file runs its own block and skips every other. That guard was
+ * already there when they were separate files; it is what makes one file safe.
  *
  * ES5 throughout, like the rest of public/js.
  */
@@ -763,3 +763,172 @@ var GlabSelector = (function () {
     render();
 })();
 
+/* ============================== optique ==============================
+ *
+ * Regler sa lunette : the click converter
+ */
+
+/*
+ * The instrument the guide is built around.
+ *
+ * A reader arrives having measured a group three centimetres low, and the
+ * only thing standing between that measurement and a zeroed rifle is an
+ * angle-to-distance conversion nobody does in their head at the bench. So
+ * the page does it: centimetres in, clicks out, once per turret.
+ *
+ * The ladder underneath answers the question the conversion raises, which is
+ * why the same rifle takes forty clicks at ten metres and four at a hundred.
+ */
+(function () {
+    var root = document.querySelector('[data-glab-clicks]');
+
+    if (!root) {
+        return;
+    }
+
+    // One MOA is a sixtieth of a degree and subtends 2,908 cm at 100 m; one
+    // milliradian subtends exactly 10 cm at the same distance. Both are
+    // angles, so what a click is worth in centimetres depends on how far the
+    // target stands. That dependency is the whole point of the instrument.
+    var MOA_AT_100 = 2.908;
+    var MRAD_AT_100 = 10;
+    var LADDER = [10, 25, 50, 100];
+
+    var distance = root.querySelector('[data-glab-distance]');
+    var turret = root.querySelector('[data-glab-turret]');
+    var fields = {
+        drop: {
+            amount: root.querySelector('[data-glab-drop]'),
+            way: root.querySelector('[data-glab-drop-way]'),
+            count: root.querySelector('[data-glab-drop-count]'),
+            label: root.querySelector('[data-glab-drop-label]')
+        },
+        drift: {
+            amount: root.querySelector('[data-glab-drift]'),
+            way: root.querySelector('[data-glab-drift-way]'),
+            count: root.querySelector('[data-glab-drift-count]'),
+            label: root.querySelector('[data-glab-drift-label]')
+        }
+    };
+    var band = root.querySelector('[data-glab-band]');
+    var ladder = Array.prototype.slice.call(root.querySelectorAll('[data-glab-rung]'));
+
+    if (!distance || !turret || !band) {
+        return;
+    }
+
+    function french(value, decimals) {
+        return value.toFixed(decimals).replace('.', ',');
+    }
+
+    /** What one click of the chosen turret moves the impact, at `metres`. */
+    function clickCm(metres) {
+        var parts = turret.value.split('|');
+        var step = parseFloat(parts[0]);
+        var unit = parts[1] === 'mrad' ? MRAD_AT_100 : MOA_AT_100;
+
+        return step * unit * (metres / 100);
+    }
+
+    // Below a centimetre the number stops being readable as a distance you
+    // could mark on paper, so it changes unit rather than growing decimals.
+    function span(cm) {
+        return cm < 1 ? french(cm * 10, 1) + ' mm' : french(cm, 2) + ' cm';
+    }
+
+    function turn(field, metres) {
+        var measured = parseFloat(String(field.amount.value).replace(',', '.'));
+        var per = clickCm(metres);
+
+        if (!isFinite(measured) || measured <= 0 || !isFinite(per) || per <= 0) {
+            field.count.textContent = '0';
+            field.label.textContent = 'rien à corriger';
+
+            return;
+        }
+
+        var clicks = Math.round(measured / per);
+
+        field.count.textContent = String(clicks);
+        field.label.textContent = clicks === 1 ? 'clic ' + field.way.value : 'clics ' + field.way.value;
+    }
+
+    function render() {
+        var metres = parseFloat(String(distance.value).replace(',', '.'));
+
+        if (!isFinite(metres) || metres <= 0) {
+            metres = 25;
+        }
+
+        turn(fields.drop, metres);
+        turn(fields.drift, metres);
+
+        band.textContent = 'À ' + french(metres, 0) + ' m, un clic déplace l\'impact de ' + span(clickCm(metres)) + '.';
+
+        ladder.forEach(function (rung, index) {
+            rung.textContent = span(clickCm(LADDER[index]));
+        });
+    }
+
+    root.addEventListener('input', render);
+    root.addEventListener('change', render);
+    render();
+})();
+
+/* ============================== premiere seance ==============================
+ *
+ * Votre premiere seance au stand : what goes in the bag
+ */
+
+/*
+ * The same two-answer selector the other guides use, answering the only
+ * question a first-timer can actually act on the night before: what do I
+ * put in the bag. The first answer decides most of it, because a discovery
+ * session is the one visit where the right answer is « almost nothing ».
+ */
+(function () {
+    var BAG = {
+        decouverte: [
+            { title: 'Une pièce d\'identité', meta: 'En cours de validité', body: 'Le club la demande pour vérifier votre inscription au fichier des interdits d\'acquisition avant de vous mettre une arme entre les mains. Sans elle, la séance ne commence pas.' },
+            { title: 'Des chaussures fermées et plates', meta: 'Et un haut ajusté', body: 'Un étui à douilles chaudes trouve toujours le col d\'une chemise flottante, et une semelle plate tient l\'équilibre mieux qu\'un talon. Rien à acheter : ce que vous avez fait l\'affaire.' },
+            { title: 'De quoi boire', meta: 'Une heure à une heure trente', body: 'Une séance de découverte dure entre une heure et une heure et demie, dont la moitié debout à se concentrer. Une gourde suffit.', href: '/categories/survie', cta: 'Voir les gourdes et le nécessaire' },
+            { title: 'Surtout pas votre propre arme', meta: 'Même si vous en avez une', body: 'Tant que la licence n\'est pas délivrée, la séance se fait avec le matériel du club, armes et munitions comprises. Arriver avec la sienne fait perdre du temps à tout le monde.' }
+        ],
+        licencie: [
+            { title: 'Licence et carnet de tir', meta: 'Les deux, pas l\'un', body: 'La licence en cours de validité ouvre le pas de tir et vaut motif légitime pour le trajet. Le carnet reçoit le visa de la séance, et ce sont ces visas qui comptent plus tard.' },
+            { title: 'Un tapis ou un sac de tir', meta: 'Le club prête rarement le confort', body: 'Le poste couché se joue sur la stabilité, et un tapis vaut plusieurs séances d\'entraînement. Un trépied rend le même service à la lunette d\'observation.', href: '/categories/kit-stand-tir', cta: 'Voir le kit de stand' },
+            { title: 'Vos cibles', meta: 'Le club en vend, rarement les vôtres', body: 'Un stand fournit ses cartons réglementaires ; les cibles réactives et les planches d\'entraînement, c\'est vous qui les apportez.', href: '/categories/cibles', cta: 'Voir les cibles' },
+            { title: 'Une boîte à munitions', meta: 'Fermée, séparée de l\'arme', body: 'Elle range, elle compte, et elle vous évite de fouiller un sac au milieu d\'une série. Sur le trajet, elle voyage à part de l\'arme.', href: '/categories/boites-munitions', cta: 'Voir les boîtes' }
+        ],
+        propre: [
+            { title: 'Une housse ou une mallette fermée', meta: 'Arme déchargée, munitions à part', body: 'Entre chez vous et le stand, l\'arme voyage déchargée, dans un étui fermé, munitions rangées séparément, la licence valant motif légitime. Ce n\'est pas une recommandation de club, c\'est la condition du transport.', href: '/categories/housses-fourreaux-mallettes', cta: 'Voir les housses et mallettes' },
+            { title: 'Un témoin de chambre vide', meta: 'Ce que le voisin de pas de tir regarde', body: 'Drapeau ou étiquette, il dit à trois mètres que la chambre est ouverte et vide. Beaucoup de clubs le rendent obligatoire au râtelier, et personne ne vous en prêtera un.', href: '/categories/temoin-de-chambre-vide', cta: 'Voir les témoins' },
+            { title: 'Vos munitions, dans leur boîte', meta: 'Un seul lot par séance', body: 'Un lot par séance, noté quelque part : c\'est la seule façon de savoir plus tard si un groupement qui s\'ouvre vient de vous ou du lot.', href: '/categories/munitions', cta: 'Voir les munitions' },
+            { title: 'De quoi nettoyer en rentrant', meta: 'Le soir même', body: 'Le nettoyage se fait le jour du tir, pas le week-end suivant. Une corde suffit pour un canon, un kit à tiges pour le reste.', href: '/categories/entretien-arme', cta: 'Voir l\'entretien' }
+        ]
+    };
+
+    // What the discipline adds to the bag, whatever the visit: one card, in
+    // the rayon the shop actually stocks for it.
+    var EXTRA = {
+        air: { title: 'Vos plombs, et une cible à grille', meta: 'Air comprimé, 10 m', body: 'À dix mètres tout se joue sur le lot de plombs et sur ce que vous savez lire du carton. Une cible à grille transforme un groupement décentré en un nombre de clics.', href: '/categories/cibles-carrees', cta: 'Voir les cibles à grille' },
+        poing: { title: 'Un récupérateur de douilles', meta: 'Pistolet, 25 m', body: 'Il tient le pas de tir propre, il vous évite de ramper sous la tablette du voisin, et il rend les étuis récupérables pour qui recharge.', href: '/categories/recuperateurs-de-douilles', cta: 'Voir les récupérateurs' },
+        carabine: { title: 'Une longue-vue', meta: 'Carabine, 50 m et plus', body: 'À cinquante mètres, on ne voit plus ses impacts à l\'œil nu, et on ne descend pas au but quand on veut. Une longue-vue sur trépied vous rend la séance.', href: '/categories/longues-vues', cta: 'Voir les longues-vues' }
+    };
+
+    GlabSelector.mount('[data-glab-selector="seance"]', function (state) {
+        var cards = (BAG[state.visite] || BAG.decouverte).slice(0);
+
+        // A discovery session is the one visit where adding gear is the
+        // wrong advice: the club supplies it, and the guide says so instead
+        // of selling into it.
+        if (state.visite !== 'decouverte' && EXTRA[state.arme]) {
+            cards.push(EXTRA[state.arme]);
+        }
+
+        return {
+            resume: 'Pour ' + state.visitePhrase + ' ' + state.armePhrase + ' :',
+            cards: cards
+        };
+    });
+})();

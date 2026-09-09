@@ -252,7 +252,20 @@ class GuideCiblesPageTest extends TestCase
             $html = $this->get($url)->assertOk()->getContent();
 
             $this->assertSame(1, substr_count($html, 'css/guides.css'), $url.' asks for more than one sheet');
-            $this->assertLessThanOrEqual(1, substr_count($html, 'js/guides.js'), $url.' asks for more than one script');
+
+            // A page carrying an instrument carries the script that drives
+            // it, exactly once. « At most once » let a new guide ship with a
+            // converter on the page and nothing behind it: it rendered its
+            // server-side defaults and answered nothing on interaction.
+            $drives = str_contains($html, 'data-glab-') || str_contains($html, 'gloss-search');
+
+            $this->assertSame(
+                $drives ? 1 : 0,
+                substr_count($html, 'js/guides.js'),
+                $drives
+                    ? $url.' has an instrument and does not ask for the script'
+                    : $url.' asks for a script it has nothing to drive with',
+            );
         }
     }
 

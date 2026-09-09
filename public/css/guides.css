@@ -722,6 +722,20 @@
     color: var(--accent-heading);
 }
 
+/* A numbered step that takes a known amount of time says so beside its own
+   title. On a page describing a first visit, « how long » is most of the
+   question, and it belongs where the eye already is rather than buried in
+   the paragraph under it. */
+.glab-rule-time {
+    margin-left: 0.6rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--accent);
+}
+
 .glab-rules p {
     margin: 0;
     max-width: 42rem;
@@ -778,6 +792,95 @@
         grid-template-columns: minmax(0, 1fr);
         gap: 0.25rem;
     }
+}
+
+/* ============ 1d - what the page corrects ============ */
+
+.glab-myths {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 0.8rem;
+}
+
+.glab-myth {
+    padding: 1rem 1.1rem;
+}
+
+/* The claim is struck through: it is quoted to be corrected, not repeated. */
+.glab-myth-claim {
+    margin: 0 0 0.6rem;
+    padding-bottom: 0.6rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-style: italic;
+    line-height: 1.45;
+    color: #7a4a45;
+    text-decoration: line-through;
+    text-decoration-color: color-mix(in srgb, #7a4a45 45%, transparent);
+    border-bottom: 1px solid var(--border);
+}
+
+.glab-myth-truth {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+}
+
+[data-theme='dark'] .glab-myth-claim {
+    color: #e08585;
+    text-decoration-color: color-mix(in srgb, #e08585 45%, transparent);
+}
+
+/* ============ 1e - the receipts ============ */
+
+.glab-sources {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.glab-sources a {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    height: 100%;
+    padding: 0.75rem 0.9rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.glab-sources a:hover {
+    border-color: var(--accent-heading);
+}
+
+.glab-source-num {
+    font-size: 0.72rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent-heading);
+}
+
+.glab-source-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+}
+
+.glab-source-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--text);
+}
+
+.glab-source-host {
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
 }
 
 /* ============================== classification ==============================
@@ -872,8 +975,9 @@
  */
 
 /*
- * « Où tirer légalement » : the lane seen from above, the claims the web
- * repeats, the four conditions numbered, and the receipts.
+ * « Où tirer légalement » : the lane seen from above, and the four conditions
+ * numbered. What the page corrects and the receipts it shows moved up to the
+ * shared chrome the day a second guide needed them.
  */
 
 /* ============ où tirer : the lane seen from above ============ */
@@ -976,95 +1080,6 @@
 
 [data-theme='dark'] .glab-lane-cone {
     fill: color-mix(in srgb, #e08585 16%, transparent);
-}
-
-/* ============ où tirer : what the web repeats ============ */
-
-.glab-myths {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-    gap: 0.8rem;
-}
-
-.glab-myth {
-    padding: 1rem 1.1rem;
-}
-
-/* The claim is struck through: it is quoted to be corrected, not repeated. */
-.glab-myth-claim {
-    margin: 0 0 0.6rem;
-    padding-bottom: 0.6rem;
-    font-size: 0.9rem;
-    font-weight: 600;
-    font-style: italic;
-    line-height: 1.45;
-    color: #7a4a45;
-    text-decoration: line-through;
-    text-decoration-color: color-mix(in srgb, #7a4a45 45%, transparent);
-    border-bottom: 1px solid var(--border);
-}
-
-.glab-myth-truth {
-    margin: 0;
-    font-size: 0.875rem;
-    line-height: 1.6;
-}
-
-[data-theme='dark'] .glab-myth-claim {
-    color: #e08585;
-    text-decoration-color: color-mix(in srgb, #e08585 45%, transparent);
-}
-
-/* ============ où tirer : the receipts ============ */
-
-.glab-sources {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
-    gap: 0.6rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-.glab-sources a {
-    display: flex;
-    align-items: baseline;
-    gap: 0.8rem;
-    height: 100%;
-    padding: 0.75rem 0.9rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-}
-
-.glab-sources a:hover {
-    border-color: var(--accent-heading);
-}
-
-.glab-source-num {
-    font-size: 0.72rem;
-    font-weight: 800;
-    font-variant-numeric: tabular-nums;
-    color: var(--accent-heading);
-}
-
-.glab-source-copy {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-    min-width: 0;
-}
-
-.glab-source-label {
-    font-size: 0.85rem;
-    font-weight: 600;
-    line-height: 1.4;
-    color: var(--text);
-}
-
-.glab-source-host {
-    font-size: 0.72rem;
-    letter-spacing: 0.04em;
-    color: var(--text-muted);
 }
 
 /* ============ où tirer : making a legal page scannable ============ */
@@ -2483,6 +2498,103 @@
 
     .glab-calibres {
         grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* ============================== optique ==============================
+ *
+ * Regler sa lunette
+ */
+
+/* ============ the click converter ============ */
+
+/*
+ * A scope is turned twice, so the converter answers twice.
+ *
+ * The joules calculator next door prints one enormous number because it
+ * answers one question. This one would be lying by omission if it did the
+ * same: elevation and windage are separate turrets, turned separately, and a
+ * reader who takes away only the bigger of the two numbers has half a zero.
+ * They sit side by side at equal weight, each under the axis it turns.
+ */
+.glab-clicks {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    background: color-mix(in srgb, var(--accent-heading) 30%, var(--border));
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 30%, var(--border));
+}
+
+.glab-click {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 1.15rem 1rem 1.25rem;
+    text-align: center;
+    background: color-mix(in srgb, var(--accent-heading) 8%, var(--surface));
+}
+
+.glab-click-axis {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.glab-click-count {
+    font-size: clamp(1.9rem, 5vw, 2.8rem);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.03em;
+    color: var(--accent-heading);
+}
+
+/* The direction is the half of the answer that gets a turret turned the
+   wrong way, so it is set as a word rather than as an arrow. */
+.glab-click-way {
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--text);
+}
+
+.glab-click-way small {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+/* The reference distance. Every scope's specification quotes its click value
+   at a hundred metres, and the reader's whole surprise comes from comparing
+   that figure with the distance they actually shoot at. */
+.glab--optique .glab-calc-limits li.is-reference {
+    background: color-mix(in srgb, var(--accent-heading) 9%, var(--surface));
+    border-color: color-mix(in srgb, var(--accent-heading) 32%, var(--border));
+}
+
+.glab--optique .glab-calc-limits li.is-reference span,
+.glab--optique .glab-calc-limits li.is-reference strong {
+    color: var(--accent-heading);
+}
+
+/* The unit beside a speed is « m/s »; the word beside an offset is « trop à
+   gauche ». The shared field was cut for the first and truncated the second,
+   so this page widens it to the width of its own vocabulary. */
+.glab--optique .glab-calc-speed select {
+    flex: 0 0 9rem;
+}
+
+@media (max-width: 30rem) {
+    .glab--optique .glab-calc-speed {
+        flex-direction: column;
+    }
+
+    .glab--optique .glab-calc-speed select {
+        flex: 1 1 auto;
     }
 }
 

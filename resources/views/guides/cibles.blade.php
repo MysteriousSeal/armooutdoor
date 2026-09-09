@@ -271,7 +271,9 @@
             </p>
 
             <p class="glab-more-reading">
-                Et après la séance, votre canon mérite le même soin :
+                Si votre cible sert à régler une lunette, la correction se lit en clics et non
+                en centimètres : <a href="{{ route('guides.optique') }}">Régler sa lunette</a>
+                fait la conversion. Et après la séance, votre canon mérite le même soin :
                 <a href="{{ route('guides.entretien') }}">Entretenir son arme</a>.
             </p>
 

@@ -401,6 +401,9 @@
             </ul>
 
             <p class="glab-more-reading">
+                Ce qui vous attend lors de cette première séance, de la pièce d'identité au
+                cessez-le-feu, est le sujet de
+                <a href="{{ route('guides.premiere-seance') }}">Votre première séance au stand</a>.
                 Le régime de votre arme, catégorie par catégorie, est dans notre guide
                 <a href="{{ route('guides.classification') }}">Classer son arme</a> ; le vocabulaire
                 du pas de tir est au <a href="{{ route('guides.glossaire') }}">glossaire</a>. Et sur
