@@ -17,6 +17,9 @@ class ImageThumbnailer
 
     public const MAIN_SIZE = 1000;
 
+    /** Vinted : le plus petit côté d'une photo mise en ligne. */
+    public const MIN_SIDE = 1000;
+
     /**
      * Generates a 400x400 WebP thumbnail for a local image living under
      * public/images/, saved alongside the original in a thumbs/ subfolder.
@@ -105,6 +108,62 @@ class ImageThumbnailer
         }
 
         $resized = self::resizeContain($image, $size, $size);
+        imagewebp($resized, public_path('images/'.$newRelativePath), $quality);
+        imagedestroy($image);
+        imagedestroy($resized);
+
+        if ($newRelativePath !== $relativePath) {
+            @unlink($source);
+        }
+
+        return $newRelativePath;
+    }
+
+    /**
+     * Ramène une image locale à un WebP à ses propres proportions, son plus
+     * petit côté porté à `$minSide` : ni recadrage, ni marges.
+     *
+     * Séparé de `normalizeSquare()` pour la même raison que le paysage : la
+     * fiche produit dépend du carré, et une photo de vitrine dépend de son
+     * cadrage. Vinted affiche la photo telle quelle et demande mille pixels
+     * au minimum ; la carrer revenait à ajouter des bandes transparentes que
+     * la place de marché rend en blanc, et à jeter le cadrage du vendeur.
+     *
+     * Renvoie le nouveau chemin relatif (l'extension peut changer), ou null
+     * pour une image distante ou illisible. Idempotent : une image déjà au
+     * bon format et au bon petit côté est laissée telle quelle.
+     */
+    public static function normalizeMinSide(string $relativePath, int $minSide = self::MIN_SIDE, int $quality = 90): ?string
+    {
+        if ($relativePath === '' || str_starts_with($relativePath, 'http://') || str_starts_with($relativePath, 'https://')) {
+            return null;
+        }
+
+        $source = public_path('images/'.$relativePath);
+
+        if (! is_file($source)) {
+            return null;
+        }
+
+        $info = pathinfo($relativePath);
+        $dir = ($info['dirname'] === '.') ? '' : $info['dirname'].'/';
+        $newRelativePath = $dir.$info['filename'].'.webp';
+
+        if ($relativePath === $newRelativePath) {
+            $imageSize = @getimagesize($source);
+
+            if ($imageSize && min($imageSize[0], $imageSize[1]) === $minSide) {
+                return $relativePath;
+            }
+        }
+
+        $image = self::load($source);
+
+        if ($image === null) {
+            return null;
+        }
+
+        $resized = self::resizeToMinSide($image, $minSide);
         imagewebp($resized, public_path('images/'.$newRelativePath), $quality);
         imagedestroy($image);
         imagedestroy($resized);
@@ -314,6 +373,37 @@ class ImageThumbnailer
      * @param  \GdImage  $image
      * @return \GdImage
      */
+    /**
+     * Met à l'échelle sur le plus petit côté, proportions gardées : le grand
+     * côté suit, et rien n'est ni recadré ni complété.
+     *
+     * Une image dont le petit côté est déjà au-dessus est réduite, celle qui
+     * est en dessous est agrandie. La place de marché pose un plancher, pas
+     * un plafond : lui envoyer six mille pixels de large ne sert personne, et
+     * lui en envoyer huit cents fait refuser la photo.
+     *
+     * @param  \GdImage  $image
+     * @return \GdImage
+     */
+    private static function resizeToMinSide($image, int $minSide)
+    {
+        $srcWidth = imagesx($image);
+        $srcHeight = imagesy($image);
+        $scale = $minSide / min($srcWidth, $srcHeight);
+        $dstWidth = max($minSide, (int) round($srcWidth * $scale));
+        $dstHeight = max($minSide, (int) round($srcHeight * $scale));
+
+        $dst = imagecreatetruecolor($dstWidth, $dstHeight);
+        imagealphablending($dst, false);
+        imagesavealpha($dst, true);
+        $transparent = imagecolorallocatealpha($dst, 0, 0, 0, 127);
+        imagefill($dst, 0, 0, $transparent);
+
+        imagecopyresampled($dst, $image, 0, 0, 0, 0, $dstWidth, $dstHeight, $srcWidth, $srcHeight);
+
+        return $dst;
+    }
+
     private static function resizeContain($image, int $width, int $height)
     {
         $srcWidth = imagesx($image);

@@ -9,6 +9,7 @@ use App\Models\VintedListingImage;
 use App\Support\ImageThumbnailer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 /**
@@ -187,6 +188,52 @@ class VintedListingTest extends TestCase
     }
 
     /**
+     * A photo keeps the shape it was shot in.
+     *
+     * Vinted shows the picture as it is and asks for a thousand pixels on the
+     * smallest side. Squaring it, which is what the catalogue does to a
+     * product shot, added transparent bands the marketplace renders in white
+     * and threw the seller's framing away.
+     */
+    public function test_a_photo_keeps_its_proportions_with_a_thousand_pixels_on_its_short_side(): void
+    {
+        $product = Product::factory()->create();
+
+        $this->actingAs($this->admin())
+            ->put(route('admin.products.vinted.update', $product), [
+                'title' => 'Photos au bon format',
+                'images' => [
+                    UploadedFile::fake()->image('paysage.jpg', 3000, 2000),
+                    UploadedFile::fake()->image('portrait.jpg', 1200, 1600),
+                    // Under the floor on both sides: it is scaled up, not left
+                    // small, because the floor is what the marketplace checks.
+                    UploadedFile::fake()->image('petite.jpg', 800, 600),
+                ],
+            ])
+            ->assertRedirect();
+
+        $listing = $product->fresh()->vintedListing;
+
+        $expected = [
+            'paysage' => [3000 / 2000, 1500, 1000],
+            'portrait' => [1200 / 1600, 1000, 1333],
+            'petite' => [800 / 600, 1333, 1000],
+        ];
+
+        foreach ($listing->images()->get() as $index => $image) {
+            [$ratio, $width, $height] = array_values($expected)[$index];
+
+            [$actualWidth, $actualHeight] = getimagesize(public_path('images/'.$image->image));
+
+            $this->assertSame(1000, min($actualWidth, $actualHeight), $image->image.' is under the floor');
+            $this->assertEqualsWithDelta($ratio, $actualWidth / $actualHeight, 0.002, $image->image.' was reshaped');
+            $this->assertSame([$width, $height], [$actualWidth, $actualHeight], $image->image);
+        }
+
+        $this->forget($listing);
+    }
+
+    /**
      * These files are written into public/, outside the test disk: the
      * database is rebuilt between tests, the images directory is not.
      */
@@ -269,7 +316,7 @@ class VintedListingTest extends TestCase
 
         $this->assertStringContainsString('attachment;', $response->headers->get('content-disposition'));
         // sku_1.jpg: the product's reference, then the photo's rank.
-        $this->assertStringContainsString(\Illuminate\Support\Str::slug($product->sku).'_1.jpg', $response->headers->get('content-disposition'));
+        $this->assertStringContainsString(Str::slug($product->sku).'_1.jpg', $response->headers->get('content-disposition'));
 
         // What comes out is a JPEG, and the original file is untouched.
         $this->assertSame('image/jpeg', (string) getimagesizefromstring($response->getContent())['mime']);

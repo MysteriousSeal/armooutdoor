@@ -238,7 +238,10 @@ class VintedListingController extends Controller
         $name = Str::slug($slug).'-'.Str::lower(Str::random(6)).'.'.$file->getClientOriginalExtension();
         $file->move($directory, $name);
 
-        $relativePath = ImageThumbnailer::normalizeMain('vinted/'.$name) ?? 'vinted/'.$name;
+        // Vinted shows the photo as it was shot. Squaring it added transparent
+        // bands the marketplace renders in white and threw the framing away,
+        // so the ratio is kept and only the smallest side is set.
+        $relativePath = ImageThumbnailer::normalizeMinSide('vinted/'.$name) ?? 'vinted/'.$name;
 
         ImageThumbnailer::generate($relativePath);
 
