@@ -161,16 +161,21 @@ class HomeController extends Controller
     /**
      * What the whole shop scores, for the line beside the testimonials.
      *
-     * Every review on a product a visitor can still open, which is the same
-     * population the section's quotes are drawn from. A review stranded on
-     * a deactivated product would count towards a figure nobody can check.
+     * Every review the shop holds, which is the figure the back office
+     * reports and therefore the only one that can be reconciled with it.
+     * It had counted only reviews on a product still on sale, so the two
+     * pages disagreed by however many were left on a retired one.
+     *
+     * The quotes underneath are a different population on purpose: a
+     * testimonial links the product it judged, and a link to a product
+     * nobody can open reads like an invention. So a retired product's
+     * review counts towards the score and is never quoted.
      *
      * @return array{average: float, count: int, fill: float}|null
      */
     private function reviewSummary(): ?array
     {
-        $reviews = ProductReview::query()
-            ->whereHas('product', fn ($query) => $query->where('is_active', true));
+        $reviews = ProductReview::query();
 
         $count = (clone $reviews)->count();
 
@@ -178,7 +183,7 @@ class HomeController extends Controller
             return null;
         }
 
-        $average = round((float) $reviews->avg('rating'), 1);
+        $average = round((float) $reviews->avg('rating'), 2);
 
         return [
             'average' => $average,

@@ -409,11 +409,11 @@
                         <p class="home-rating" style="--home-rating-fill: {{ $reviewSummary['fill'] }}%">
                             <span class="home-rating-stars" aria-hidden="true"></span>
                             <span class="home-rating-copy">
-                                <span class="home-rating-score" aria-hidden="true">{{ number_format($reviewSummary['average'], 1, ',', '') }}</span>
+                                <span class="home-rating-score" aria-hidden="true">{{ number_format($reviewSummary['average'], 2, ',', '') }}</span>
                                 <span class="home-rating-out" aria-hidden="true">/ 5</span>
                                 <span class="home-rating-count" aria-hidden="true">{{ trans_choice('store.reviews_count', $reviewSummary['count'], ['count' => $reviewSummary['count']]) }}</span>
                             </span>
-                            <span class="sr-only">{{ __('store.reviews_rating_summary', ['rating' => number_format($reviewSummary['average'], 1, ',', ''), 'count' => $reviewSummary['count']]) }}</span>
+                            <span class="sr-only">{{ __('store.reviews_rating_summary', ['rating' => number_format($reviewSummary['average'], 2, ',', ''), 'count' => $reviewSummary['count']]) }}</span>
                         </p>
                     @endif
                 </header>

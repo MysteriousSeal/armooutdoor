@@ -71,9 +71,9 @@ class HomeVoicesAndReadingsTest extends TestCase
         $this->review($product, 4, 'Bien.');
         $this->review($product, 3, 'Correct sans plus.');
 
-        // Four, five and three: an average of 4,0 over three reviews.
+        // Four, five and three: an average of 4,00 over three reviews.
         $this->get('/')->assertOk()
-            ->assertSee('4,0')
+            ->assertSee('>4,00<', false)
             ->assertSee('/ 5')
             ->assertSee('3 avis')
             // Painted to the rounded figure, so the stars cannot say one
@@ -81,21 +81,49 @@ class HomeVoicesAndReadingsTest extends TestCase
             ->assertSee('--home-rating-fill: 80%', false);
     }
 
-    public function test_the_score_counts_only_what_a_visitor_can_open(): void
+    public function test_the_score_is_given_to_the_hundredth(): void
     {
-        $shown = Product::factory()->create(['is_active' => true, 'quantity' => 5]);
-        $hidden = Product::factory()->create(['is_active' => false]);
+        $product = Product::factory()->create(['is_active' => true, 'quantity' => 5]);
 
-        $this->review($shown, 5, 'Excellent.');
-        // Two ones on a product nobody can reach would drag the shop's score
-        // to 2,3 without a single visitor being able to check why.
-        $this->review($hidden, 1, 'Mauvais.');
-        $this->review($hidden, 1, 'Mauvais aussi.');
+        // Nineteen fives and a four: 4,95, which one decimal rounds to 5,0
+        // and the page then printed as « 5 / 5 ». The shop was claiming a
+        // perfect record it does not have, and saying something the back
+        // office contradicted on the very same figure.
+        for ($i = 0; $i < 19; $i++) {
+            $this->review($product, 5, 'Parfait '.$i.'.');
+        }
+
+        $this->review($product, 4, 'Bien.');
 
         $this->get('/')->assertOk()
-            ->assertSee('5,0')
-            ->assertSee('1 avis')
-            ->assertDontSee('3 avis');
+            ->assertSee('>4,95<', false)
+            ->assertDontSee('>5,00<', false)
+            ->assertSee('20 avis');
+    }
+
+    public function test_the_score_counts_every_review_but_quotes_only_what_a_visitor_can_open(): void
+    {
+        $shown = Product::factory()->create(['is_active' => true, 'quantity' => 5]);
+        $retired = Product::factory()->create(['is_active' => false]);
+
+        $this->review($shown, 5, 'Excellent.');
+        $this->review($shown, 4, 'Bien.');
+        // Five stars, so nothing but the retirement keeps it out of the
+        // quotes: a four would have been dropped by the rating filter and
+        // the test would have proved nothing.
+        $this->review($retired, 5, 'Cinq etoiles sur un produit retire.');
+
+        // The score is the shop's whole record, and the same number the back
+        // office reports: counting only what is still on sale made the two
+        // pages disagree by however many reviews sat on a retired product.
+        $this->get('/')->assertOk()
+            ->assertSee('3 avis')
+            ->assertSee('>4,67<', false)
+            // The quote is the other half, and it is not shown: a
+            // testimonial links the product it judged, and a link to a
+            // product nobody can open reads like an invention.
+            ->assertDontSee('Cinq etoiles sur un produit retire.')
+            ->assertSee('Excellent.');
     }
 
     public function test_the_line_carries_no_score_before_the_first_review(): void
