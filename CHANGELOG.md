@@ -2,6 +2,33 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-10 · v1.36.0 · build QHEZ34
+
+### Storefront
+
+- **Two guides, for the two questions the shelf could not answer.** « Régler sa lunette » exists because every French page on the subject converts clicks at a hundred metres, and nobody who buys here shoots at a hundred metres. It is written for ten, twenty five and fifty, where a quarter-MOA click moves the impact by less than two millimetres and a three centimetre correction takes forty crans rather than four. The instrument is a converter: the offset you measured on the carton in, the number of clicks on each turret out, twice, because a scope is turned twice and one number is half a zero. Under it the same click is priced at each of the four distances, which is the whole surprise of the page. The shop sells no riflescope, so the guide says so and links what it does sell: the cibles à grille that turn a group into a measurement, the pastilles that reclaim the carton, the longues-vues that save the walk downrange, the télémètres that replace a guessed distance.
+- **« Votre première séance au stand » exists because what stops a beginner is not the law, it is not knowing what happens at the door.** The déroulé with its durations, the pièce d'identité and why it is asked for, the four règles in the fédération's own terms, the three commandements, and the four things a circulaire de sécurité says are never done on a pas de tir. Its selector fills the bag from two answers, and for a séance de découverte the answer is « almost nothing »: the club lends the arme, the munitions, the cibles and the protections, and will refuse yours until the licence is delivered. The page says that rather than selling into the one visit where the honest advice is to buy nothing.
+- Both cite their sources in a block of their own, seventeen between them, declared to search engines as citations the way the guide on where one may shoot already did. The shelf is nine guides now, and the two new pages are reachable from the two that lead to them rather than from the index alone.
+
+### Admin
+
+- **A review the shop typed in itself can be corrected.** Copying one over from a marketplace goes wrong the ordinary ways typing goes wrong: a name misspelt, a star short, the whole thing filed against the wrong product. The only repair was to delete it and type it again, which threw away the date it was published on. There is an Edit form now, carrying the product, the name, the stars, the words, the marketplace and the date, and a refused submission reopens it with what was typed still in it. Leaving the date blank leaves the review where it already sorts, because reading a blank as « today » would push a two year old review to the top of a product page every time somebody fixed a typo in it. Only the hand-typed ones: a customer's review is that customer's words under a name the shop reads back to them on the product page, and the back office keeps exactly one power over those, which is to take them down.
+- **The page says where the reviews came from.** It counted eighteen without saying that seventeen were earned on the shop's own pages and one was borrowed, which is the number that decides whether to go and fetch more. A card splits them by channel: direct first or by weight, then each marketplace by name, then the hand-typed ones nobody wrote a source on. Ties break by name and the unnamed one always sits last, so the order does not shuffle between two loads of the same page.
+- **Both breakdowns are the filters as well as the counts.** You click the number you were already reading, and clicking the one already on takes it off. Channel composes with rating and with the search, and one button drops all three. That retired the row of subtabs under the cards, which was a second copy of the same five figures. A filter bookmarked on a marketplace the shop has since left shows everything rather than stranding the page on an empty list with no way back, and the cards above keep describing the whole shop whatever the list below is showing.
+- **The average is given to the hundredth, over a catalogue that is mostly still silent.** One decimal moves in visible jumps and hides the direction the figure is drifting in. Beside it, the three numbers the average cannot carry: how many products have anything said about them at all, how many there are, and the share that gives.
+- **The band around all this was four boxes of unrelated shapes.** It is three cards on the grid every other admin page uses. The review rows underneath had their stars inline after the product name, so the rating landed at a different place on every row and nothing could be read down the page; the rating has a column of its own now, the words are set as a quote against a rule at reading size rather than as the smallest type on the card, the reviewer is the only part of the meta line in the page's own colour, and Delete stops wearing the same button as the two actions that can be undone.
+
+### Fixed
+
+- **The shop's own search could not find the reviews the shop writes itself.** It joined products and it joined customers, and a hand-typed review has no customer row, so searching for the name printed on one returned nothing. It searches the author and the marketplace now, which is also how you find every review copied from one place at once.
+- **An empty star was drawn as a washed-out full one**, which read as a rendering fault rather than as a rating, and could not have shown a 4.44 in any case. A rating is now two layers of the same five glyphs with the amber one clipped to the score, so four and a bit stars are drawn as four and a bit. Written once and used by the reviews page, the customer page and the rows on both.
+
+### Under the hood
+
+- **What a guide corrects and the receipts it shows moved into the shared chrome.** Both were filed under the fence of the guide that first needed them, though neither was scoped to it, and three guides read them now. The rule that a guide asks for the shared script at most once let two pages ship with an instrument on them and nothing behind it: it says that a page carrying an instrument carries the script exactly once, and that a page with no instrument asks for no script.
+
+**No migration.**
+
 ## 2026-09-09 · v1.35.0 · build A5W84P
 
 ### Storefront
