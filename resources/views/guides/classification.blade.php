@@ -62,6 +62,16 @@
             'tags' => ['D', 'C', 'B', 'A'],
         ])
 
+        <nav class="glab-plan" aria-label="Plan du guide">
+            <p class="glab-plan-kicker">Plan</p>
+            <div class="glab-plan-links">
+                <a href="#glab-selector-title">Le sélecteur</a>
+                <a href="#glab-table-title">Le tableau</a>
+                <a href="#glab-guide-title">Les seuils</a>
+                <a href="#glab-faq-title">Questions</a>
+            </div>
+        </nav>
+
         <p class="glab-warning">
             Ceci décrit l'état du droit à la date de publication et n'est pas un conseil
             juridique. Pour une arme, un chargeur ou une situation précise, le service des
@@ -150,7 +160,7 @@
             </div>
         </section>
 
-        <section class="glab-panel" aria-labelledby="glab-table-title">
+        <section class="glab-section" aria-labelledby="glab-table-title">
             <h2 class="glab-title" id="glab-table-title">Cinq régimes, <span class="glab-title-accent">un seul tableau</span></h2>
 
             <div class="glab-table-wrap">
@@ -199,7 +209,7 @@
             </div>
         </section>
 
-        <section class="glab-panel glab-detail" aria-labelledby="glab-guide-title">
+        <section class="glab-section glab-detail" aria-labelledby="glab-guide-title">
             <h2 class="glab-title" id="glab-guide-title">Les seuils <span class="glab-title-accent">en détail</span></h2>
 
             <div class="glab-prose">

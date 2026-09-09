@@ -55,6 +55,10 @@
             'tags' => [$entries->count().' entrées'],
         ])
 
+        {{-- The whole glossary is one part of the guide, so it sits on the same
+             sheet every other part does: the index, the filter and the entries
+             are one apparatus and are read as one. --}}
+        <section class="glab-section" aria-label="Le glossaire">
         {{-- The index tabs. Letters that open nothing are shown dead rather
              than hidden: an index that quietly skips G reads as broken. --}}
         <nav class="gloss-rail" aria-label="Index alphabétique">
@@ -115,6 +119,7 @@
 
             <p class="gloss-empty" data-gloss-empty hidden>Aucun mot ne correspond. Essayez une autre orthographe, ou parcourez l'index.</p>
         </div>
+        </section>
 
         <section class="glab-section" aria-labelledby="gloss-more-title">
             <h2 class="glab-title" id="gloss-more-title">Un mot <span class="glab-title-accent">manque ?</span></h2>
