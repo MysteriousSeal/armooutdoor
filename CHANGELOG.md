@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-09 · v1.32.3 · build 7RDMYS
+
+### Storefront
+
+- **The category hero fills with its photograph again.** The hero is two columns, and the copy is the taller of them as soon as the title wraps onto a second line, so the copy set the height of the row and the picture, centred inside it, floated with white above and below. Measured on the clothing category: a panel 330 pixels tall holding a picture of 296, seventeen either side. The picture stretches to the row now, and the ratio it carries is not lost by that, since a row is never shorter than the item that sizes it: 21/9 still governs wherever the picture is the taller column, and on a phone where the two are stacked and there is nothing to stretch against. It is the floor rather than the height. Its width is pinned to the column as well, because a stretched picture has a definite height and the ratio would otherwise work backwards from it and run 765 pixels wide inside a column of 691, which the panel clipped on the right. Only the picture stretches, not the grid, so the copy stays centred in the panel rather than riding at the top of it.
+
+**No migration.** Where the copy is the taller column the picture is drawn a little squarer than 21/9 and the crop takes about five percent from each side, which is the price of filling the height and a good deal less than the half of every hero the full bleed version used to throw away.
+
 ## 2026-09-09 · v1.32.2 · build 9L5PWX
 
 ### Storefront
