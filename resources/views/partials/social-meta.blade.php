@@ -17,8 +17,12 @@
 <meta property="og:site_name" content="{{ config('app.name') }}">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:type" content="@yield('og_type', 'website')">
-<meta property="og:title" content="{{ $socialTitle }}">
-<meta property="og:description" content="{{ $socialDescription }}">
+{{-- Printed raw, like the <title> and the description in the layout head.
+     Laravel escapes the string form of @@section itself, so yieldContent hands
+     back content that is already escaped exactly once: echoing it with {{ }}
+     escaped it twice, and a shared link read "d&amp;#039;Armo Outdoor". --}}
+<meta property="og:title" content="{!! $socialTitle !!}">
+<meta property="og:description" content="{!! $socialDescription !!}">
 <meta property="og:url" content="{{ $socialUrl }}">
 <meta property="og:image" content="{{ $socialImage }}">
 @hasSection('og_image_alt')

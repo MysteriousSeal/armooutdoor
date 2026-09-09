@@ -122,7 +122,7 @@
     <link rel="stylesheet" href="{{ versioned_asset('css/guides/camouflage.css') }}">
     <script type="application/ld+json">
         {!! json_encode([
-            '@context' => 'https://schema.org',
+            '@@context' => 'https://schema.org',
             '@type' => 'Article',
             'headline' => 'Choisir son camouflage : les cinq signes, les sept familles',
             'description' => 'Le mouvement, la brillance, la silhouette, l\'ombre et la peau vous trahissent avant le motif. Les sept familles de camouflage, et laquelle tient sur quel terrain français, saison par saison.',
@@ -136,7 +136,7 @@
     </script>
     <script type="application/ld+json">
         {!! json_encode([
-            '@context' => 'https://schema.org',
+            '@@context' => 'https://schema.org',
             '@type' => 'FAQPage',
             'mainEntity' => collect($faq)->map(fn (array $qa): array => [
                 '@type' => 'Question',
@@ -147,7 +147,7 @@
     </script>
     <script type="application/ld+json">
         {!! json_encode([
-            '@context' => 'https://schema.org',
+            '@@context' => 'https://schema.org',
             '@type' => 'BreadcrumbList',
             'itemListElement' => [
                 ['@type' => 'ListItem', 'position' => 1, 'name' => __('store.breadcrumb_home'), 'item' => localized_route('home')],

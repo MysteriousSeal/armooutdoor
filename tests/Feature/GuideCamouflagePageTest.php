@@ -103,6 +103,36 @@ class GuideCamouflagePageTest extends TestCase
         }
     }
 
+    /**
+     * Every guide's structured data must carry @context.
+     *
+     * Blade owns the at sign: a bare '@context' key in a Blade file compiles
+     * as a directive, and this guide shipped three JSON-LD blocks whose first
+     * key was a fragment of PHP source. Google discards a block without a
+     * context, so the page had an Article, a FAQPage and a BreadcrumbList that
+     * no crawler could read. Checked across the shelf, since the mistake is
+     * one keystroke away on any of them.
+     */
+    public function test_every_guides_structured_data_declares_its_context(): void
+    {
+        $urls = array_merge([route('guides.index')], array_column(Guides::all(), 'url'));
+
+        foreach ($urls as $url) {
+            $html = $this->get($url)->assertOk()->getContent();
+
+            preg_match_all('#<script type="application/ld\+json">(.*?)</script>#s', $html, $blocks);
+
+            $this->assertNotEmpty($blocks[1], $url.' publishes no structured data');
+
+            foreach ($blocks[1] as $block) {
+                $decoded = json_decode($block, true);
+
+                $this->assertIsArray($decoded, $url.' has structured data that is not valid JSON');
+                $this->assertSame('https://schema.org', $decoded['@context'] ?? null, $url);
+            }
+        }
+    }
+
     public function test_the_shelf_knows_about_it(): void
     {
         $urls = collect(Guides::all())->pluck('url');

@@ -29,6 +29,23 @@ class SocialMetaTest extends TestCase
         $page->assertSee('<meta name="twitter:card" content="summary_large_image">', false);
     }
 
+    /**
+     * An apostrophe reached a preview card as "d&#039;Armo Outdoor".
+     *
+     * Laravel escapes the string form of @section itself, so yieldContent
+     * hands back content that is already escaped exactly once. The head prints
+     * the title and the description raw for that reason; the og: tags were
+     * echoing the same content through {{ }} and escaping it a second time.
+     * Guarded on the blog index, whose description carries one.
+     */
+    public function test_an_apostrophe_is_escaped_once_and_not_twice(): void
+    {
+        $html = $this->get('/blog')->assertOk()->getContent();
+
+        $this->assertStringContainsString('d&#039;Armo Outdoor', $html);
+        $this->assertStringNotContainsString('&amp;#039;', $html);
+    }
+
     public function test_the_brand_is_not_printed_twice_in_one_card(): void
     {
         // og:site_name already carries it, so the title suffix comes off.
