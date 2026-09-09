@@ -1235,6 +1235,16 @@
     gap: 0.85rem;
 }
 
+/*
+ * An aisle of the shop, as a card.
+ *
+ * They carried a shadow each and a circle around every icon, which is the
+ * softest thing left on a page that squares everything else and drops its
+ * shadows. What marks a card now is an olive edge down its left, the way a
+ * divider marks a drawer of index cards: faint at rest, full olive under the
+ * pointer, so the grid keeps an olive rhythm without eight filled panels
+ * shouting at once.
+ */
 .home .home-cat {
     position: relative;
     display: flex;
@@ -1242,76 +1252,96 @@
     align-items: center;
     gap: 1.05rem;
     min-height: 7.5rem;
-    padding: 1.2rem 1.25rem;
+    padding: 1.2rem 1.35rem 1.2rem 1.25rem;
     background: var(--surface);
     border: 1px solid var(--border);
-    box-shadow: var(--shadow);
+    border-left: 3px solid color-mix(in srgb, var(--accent-heading) 30%, var(--border));
     color: inherit;
     overflow: hidden;
     text-decoration: none;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease, background 0.15s ease;
+    transition: border-color 0.15s ease, background 0.15s ease;
 }
 
-.home .home-cat:hover {
-    border-color: color-mix(in srgb, #5b5c3b 35%, var(--border));
-    box-shadow: var(--shadow-hover);
-    transform: translateY(-1px);
-    background: color-mix(in srgb, var(--bg) 35%, var(--surface));
+.home .home-cat:hover,
+.home .home-cat:focus-visible {
+    border-color: color-mix(in srgb, var(--accent-heading) 32%, var(--border));
+    border-left-color: var(--accent-heading);
+    background: color-mix(in srgb, var(--accent-heading) 4%, var(--surface));
 }
 
+/* The mark, in a square well rather than a circle: everything else on this
+   page is square, and the circle was the one thing that was not. */
 .home .home-cat-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    width: 3.75rem;
-    height: 3.75rem;
-    color: #5b5c3b;
-    background: color-mix(in srgb, var(--bg) 70%, var(--surface));
-    border: 1.5px solid color-mix(in srgb, #5b5c3b 28%, var(--border));
-    border-radius: 50%;
-    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+    width: 3.5rem;
+    height: 3.5rem;
+    color: var(--accent-heading);
+    background: color-mix(in srgb, var(--accent-heading) 8%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 20%, var(--border));
+    transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .home .home-cat-icon svg {
-    width: 2.15rem;
-    height: 2.15rem;
+    width: 2.05rem;
+    height: 2.05rem;
 }
 
 .home .home-cat:hover .home-cat-icon {
-    color: #35372a;
-    border-color: color-mix(in srgb, #5b5c3b 50%, var(--border));
-    background: var(--surface);
+    background: color-mix(in srgb, var(--accent-heading) 14%, var(--surface));
+    border-color: color-mix(in srgb, var(--accent-heading) 34%, var(--border));
 }
 
 .home .home-cat-copy {
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.3rem;
     min-width: 0;
     flex: 1;
     padding-right: 1.25rem;
 }
 
+/* Out of eight hundred weight: eight names in capitals at that weight read as
+   a row of shouting rather than as labels. */
 .home .home-cat-name {
-    font-size: 0.9rem;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    line-height: 1.2;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    line-height: 1.25;
     text-transform: uppercase;
+    color: var(--text);
+    transition: color 0.15s ease;
+}
+
+.home .home-cat:hover .home-cat-name {
+    color: var(--accent-heading);
 }
 
 .home .home-cat-desc {
     font-size: 0.8125rem;
     line-height: 1.45;
     color: var(--text-muted);
-    /* Deux lignes puis l'ellipse : une description ne doit pas déformer
-       sa carte face aux voisines. */
+    /* Two lines then the ellipsis: a description must not deform its card
+       against its neighbours. */
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
     line-clamp: 2;
     overflow: hidden;
+}
+
+/* The figure the aisle is worth walking down for. Tabular so eight of them
+   line up rather than wobbling with their digits. */
+.home .home-cat-count {
+    margin-top: 0.15rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+    color: color-mix(in srgb, var(--accent-heading) 75%, var(--text-muted));
 }
 
 .home .home-cat-arrow {
@@ -1321,17 +1351,41 @@
     transform: translateY(-50%) translateX(0);
     font-size: 1rem;
     font-weight: 600;
-    color: color-mix(in srgb, var(--text-muted) 65%, transparent);
+    color: color-mix(in srgb, var(--text-muted) 55%, transparent);
     transition: color 0.15s ease, transform 0.15s ease;
 }
 
 .home .home-cat:hover .home-cat-arrow {
-    color: #5b5c3b;
+    color: var(--accent-heading);
     transform: translateY(-50%) translateX(3px);
 }
 
+@media (prefers-reduced-motion: reduce) {
+    .home .home-cat:hover .home-cat-arrow {
+        transform: translateY(-50%);
+    }
+}
+
+/* Dark: the olive reads muddy on a near black ground, so the edge and the
+   marks take the accent instead, as they do everywhere else in that theme. */
 [data-theme='dark'] .home .home-cat {
     background: var(--surface);
+    border-left-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+}
+
+[data-theme='dark'] .home .home-cat:hover,
+[data-theme='dark'] .home .home-cat:focus-visible {
+    border-left-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 7%, var(--surface));
+}
+
+[data-theme='dark'] .home .home-cat:hover .home-cat-name,
+[data-theme='dark'] .home .home-cat:hover .home-cat-arrow {
+    color: var(--accent-hover);
+}
+
+[data-theme='dark'] .home .home-cat-count {
+    color: color-mix(in srgb, var(--accent) 75%, var(--text-muted));
 }
 
 [data-theme='dark'] .home .home-cat:hover {

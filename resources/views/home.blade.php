@@ -318,6 +318,10 @@
                             <span class="home-cat-copy">
                                 <span class="home-cat-name">{{ $category->localizedName() }}</span>
                                 <span class="home-cat-desc">{{ $blurb }}</span>
+                                {{-- How much is behind the door. The blurb says
+                                     what the aisle holds; the count says
+                                     whether it is worth walking down. --}}
+                                <span class="home-cat-count">{{ trans_choice('store.products_count', $category->listingCount(), ['count' => $category->listingCount()]) }}</span>
                             </span>
                             <span class="home-cat-arrow" aria-hidden="true">→</span>
                         </a>

@@ -98,4 +98,44 @@ class HomeCategoryCountsTest extends TestCase
         $this->assertNull($loaded->products_count);
         $this->assertSame(2, $loaded->listingCount());
     }
+
+    /**
+     * The card shows that number rather than only counting it.
+     *
+     * The blurb says what an aisle holds; the count says whether it is worth
+     * walking down. It used to be a fallback shown only when a category had
+     * neither a written blurb nor a description, which meant the categories
+     * best described were the ones that said least about their size.
+     */
+    public function test_the_card_shows_how_much_is_behind_the_door(): void
+    {
+        $category = Category::factory()->create([
+            'parent_id' => null,
+            'description' => ['fr' => 'Une description bien à elle.'],
+        ]);
+        Product::factory()->count(3)->create([
+            'category_id' => $category->id,
+            'is_active' => true,
+        ]);
+
+        $this->get('/')->assertOk()
+            ->assertSee('home-cat-count', false)
+            ->assertSee('Une description bien à elle.', false)
+            ->assertSee(trans_choice('store.products_count', 3, ['count' => 3]), false);
+    }
+
+    /**
+     * The cards carry an olive edge down their left and no shadow. Both
+     * matter: the shadow was the last of the soft styling on a page that had
+     * dropped it everywhere else, and the edge is what replaced it.
+     */
+    public function test_the_cards_are_marked_by_an_edge_and_not_by_a_shadow(): void
+    {
+        $css = file_get_contents(public_path('css/home.css'));
+        $start = strpos($css, '.home .home-cat {');
+        $rule = substr($css, $start, strpos($css, '}', $start) - $start);
+
+        $this->assertMatchesRegularExpression('/border-left:\s*3px solid/', $rule);
+        $this->assertStringNotContainsString('box-shadow', $rule);
+    }
 }
