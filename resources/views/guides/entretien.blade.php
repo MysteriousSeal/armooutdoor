@@ -16,8 +16,9 @@
             'description' => 'Corde de nettoyage ou kit à tiges : quel matériel pour quel calibre, du 4,5 mm au calibre 12, dans quel sens nettoyer son canon et à quelle fréquence.',
             'mainEntityOfPage' => route('guides.entretien'),
             'inLanguage' => 'fr-FR',
-            'datePublished' => '2026-09-04',
-            'dateModified' => '2026-09-06',
+            'image' => versioned_asset(\App\Support\Guides::byRoute('guides.entretien')['image'] ?? 'images/hero.webp'),
+            'datePublished' => \App\Support\Guides::byRoute('guides.entretien')['published'],
+            'dateModified' => \App\Support\Guides::byRoute('guides.entretien')['updated'],
             'author' => \App\Support\OrganizationSchema::reference(),
             'publisher' => \App\Support\OrganizationSchema::reference(),
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}

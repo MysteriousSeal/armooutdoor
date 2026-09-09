@@ -101,10 +101,22 @@ class SitemapController extends Controller
     public function guides(): Response
     {
         // Read off the same shelf the index and the home page read, so a new
-        // guide is listed here without anyone remembering to list it.
-        $urls = collect([['loc' => route('guides.index'), 'changefreq' => 'monthly', 'priority' => '0.5']])
-            ->concat(collect(Guides::all())->map(fn (array $guide): array => [
+        // guide is listed here without anyone remembering to list it. The
+        // dates come from that shelf too, which is where each guide's own
+        // structured data reads them: a crawler was being told a guide had
+        // never changed, and revising one told it nothing.
+        $guides = collect(Guides::all());
+
+        $urls = collect([[
+            'loc' => route('guides.index'),
+            // The shelf is as fresh as the most recently revised guide on it.
+            'lastmod' => $guides->max('updated'),
+            'changefreq' => 'monthly',
+            'priority' => '0.5',
+        ]])
+            ->concat($guides->map(fn (array $guide): array => [
                 'loc' => $guide['url'],
+                'lastmod' => $guide['updated'],
                 'changefreq' => 'monthly',
                 'priority' => '0.5',
             ]))

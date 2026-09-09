@@ -121,6 +121,10 @@
 @section('title', 'Choisir son camouflage : les cinq signes, les sept familles — Armo Outdoor')
 @section('meta_description', 'Le mouvement, la brillance, la silhouette, l\'ombre et la peau vous trahissent avant le motif. Les sept familles de camouflage, et laquelle tient sur quel terrain français, saison par saison.')
 @section('og_type', 'article')
+{{-- The one guide with photographs of its own stops borrowing the shop's
+     generic hero for the card a shared link draws. --}}
+@section('og_image', versioned_asset(\App\Support\Guides::byRoute('guides.camouflage')['image']))
+@section('og_image_alt', 'Tissu au motif CE : larges taches vert olive, brun et noir sur fond kaki clair.')
 @section('canonical', route('guides.camouflage'))
 
 @push('head')
@@ -134,8 +138,9 @@
             'description' => 'Le mouvement, la brillance, la silhouette, l\'ombre et la peau vous trahissent avant le motif. Les sept familles de camouflage, et laquelle tient sur quel terrain français, saison par saison.',
             'mainEntityOfPage' => route('guides.camouflage'),
             'inLanguage' => 'fr-FR',
-            'datePublished' => '2026-09-09',
-            'dateModified' => '2026-09-09',
+            'image' => versioned_asset(\App\Support\Guides::byRoute('guides.camouflage')['image'] ?? 'images/hero.webp'),
+            'datePublished' => \App\Support\Guides::byRoute('guides.camouflage')['published'],
+            'dateModified' => \App\Support\Guides::byRoute('guides.camouflage')['updated'],
             'author' => \App\Support\OrganizationSchema::reference(),
             'publisher' => \App\Support\OrganizationSchema::reference(),
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}

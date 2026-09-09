@@ -255,6 +255,55 @@ class GuideCiblesPageTest extends TestCase
     }
 
     /**
+     * A guide's dates and its picture live on the shelf, not in the page.
+     *
+     * The page prints them in its structured data and the sitemap prints the
+     * same dates as lastmod. Written in the page they would be written twice,
+     * and the two copies would drift the first time a guide was revised.
+     */
+    public function test_a_guide_declares_a_picture_and_dates_that_match_the_sitemap(): void
+    {
+        $shelf = collect(Guides::all())->keyBy('url');
+
+        $sitemap = $this->get('/sitemap-guides.xml')->assertOk()->getContent();
+
+        foreach ($shelf as $url => $guide) {
+            // Every guide is in the sitemap with the date the shelf holds.
+            $this->assertMatchesRegularExpression(
+                '#<loc>'.preg_quote($url, '#').'</loc>\s*<lastmod>'.$guide['updated'].'</lastmod>#',
+                $sitemap,
+                $guide['route'].' has no lastmod, or not the shelf\'s',
+            );
+        }
+
+        // The shelf itself is as fresh as its most recently revised guide.
+        $this->assertStringContainsString(
+            '<lastmod>'.$shelf->max('updated').'</lastmod>',
+            $sitemap,
+        );
+
+        // And every Article says which picture it is about, which Google asks
+        // for and none of them carried.
+        foreach ($shelf as $url => $guide) {
+            $html = $this->get($url)->assertOk()->getContent();
+
+            preg_match_all('#<script type="application/ld\+json">(.*?)</script>#s', $html, $blocks);
+
+            foreach ($blocks[1] as $block) {
+                $decoded = json_decode($block, true);
+
+                if (($decoded['@type'] ?? null) !== 'Article') {
+                    continue;
+                }
+
+                $this->assertNotEmpty($decoded['image'] ?? null, $guide['route'].' publishes an Article with no image');
+                $this->assertSame($guide['published'], $decoded['datePublished'], $guide['route']);
+                $this->assertSame($guide['updated'], $decoded['dateModified'], $guide['route']);
+            }
+        }
+    }
+
+    /**
      * Four selectors, one engine.
      *
      * Three guides name a handful of products and the camouflage guide ranks

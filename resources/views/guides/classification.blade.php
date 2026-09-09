@@ -16,8 +16,9 @@
             'description' => 'Sous 2 joules, de 2 à 20, dès 20, puis l\'autorisation : ce que la loi française range en D, C, B et A, ce qu\'il faut pour acheter, et le piège du chargeur.',
             'mainEntityOfPage' => route('guides.classification'),
             'inLanguage' => 'fr-FR',
-            'datePublished' => '2026-09-06',
-            'dateModified' => '2026-09-06',
+            'image' => versioned_asset(\App\Support\Guides::byRoute('guides.classification')['image'] ?? 'images/hero.webp'),
+            'datePublished' => \App\Support\Guides::byRoute('guides.classification')['published'],
+            'dateModified' => \App\Support\Guides::byRoute('guides.classification')['updated'],
             'author' => \App\Support\OrganizationSchema::reference(),
             'publisher' => \App\Support\OrganizationSchema::reference(),
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}

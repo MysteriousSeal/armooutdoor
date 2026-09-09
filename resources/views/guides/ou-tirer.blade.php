@@ -39,8 +39,9 @@
             'description' => 'Chez soi, sur un terrain d\'airsoft ou en stand homologué : ce qui décide vraiment du lieu où l\'on peut tirer, la direction plutôt que la distance, et les deux textes que tout le monde cite de travers.',
             'mainEntityOfPage' => route('guides.ou-tirer'),
             'inLanguage' => 'fr-FR',
-            'datePublished' => '2026-09-07',
-            'dateModified' => '2026-09-07',
+            'image' => versioned_asset(\App\Support\Guides::byRoute('guides.ou-tirer')['image'] ?? 'images/hero.webp'),
+            'datePublished' => \App\Support\Guides::byRoute('guides.ou-tirer')['published'],
+            'dateModified' => \App\Support\Guides::byRoute('guides.ou-tirer')['updated'],
             'author' => \App\Support\OrganizationSchema::reference(),
             'publisher' => \App\Support\OrganizationSchema::reference(),
             'citation' => collect($sources)->map(fn (array $source): array => [

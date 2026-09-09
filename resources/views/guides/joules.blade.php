@@ -50,8 +50,9 @@
             'description' => 'Convertir des FPS en joules et l\'inverse : la formule, une calculette bille par bille, le tableau de 280 à 500 FPS, les seuils de 2 et 20 joules et les limites de terrain.',
             'mainEntityOfPage' => route('guides.joules'),
             'inLanguage' => 'fr-FR',
-            'datePublished' => '2026-09-07',
-            'dateModified' => '2026-09-07',
+            'image' => versioned_asset(\App\Support\Guides::byRoute('guides.joules')['image'] ?? 'images/hero.webp'),
+            'datePublished' => \App\Support\Guides::byRoute('guides.joules')['published'],
+            'dateModified' => \App\Support\Guides::byRoute('guides.joules')['updated'],
             'author' => \App\Support\OrganizationSchema::reference(),
             'publisher' => \App\Support\OrganizationSchema::reference(),
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}

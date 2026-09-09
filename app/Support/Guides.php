@@ -18,7 +18,7 @@ class Guides
      * Ordered as the index page presents them: the law first, then the two
      * rayons it applies to.
      *
-     * @return list<array{topic: string, title: string, url: string, teaser: string, summary: string}>
+     * @return list<array{topic: string, title: string, url: string, route: string, published: string, updated: string, image?: string, teaser: string, summary: string}>
      */
     public static function all(): array
     {
@@ -27,6 +27,9 @@ class Guides
                 'topic' => 'Réglementation',
                 'title' => 'Classer son arme',
                 'url' => route('guides.classification'),
+                'route' => 'guides.classification',
+                'published' => '2026-09-06',
+                'updated' => '2026-09-06',
                 'teaser' => 'Sous 2 joules, de 2 à 20, dès 20 : ce que la loi range en D, C, B et A.',
                 'summary' => 'Sous 2 joules, de 2 à 20, dès 20, puis l\'autorisation : ce que la loi range en D, C, B et A, et le piège du chargeur.',
             ],
@@ -34,6 +37,9 @@ class Guides
                 'topic' => 'Lieux',
                 'title' => 'Où tirer légalement',
                 'url' => route('guides.ou-tirer'),
+                'route' => 'guides.ou-tirer',
+                'published' => '2026-09-07',
+                'updated' => '2026-09-07',
                 'teaser' => 'Chez soi, sur un terrain, en stand : ce qui décide vraiment, et les textes cités de travers.',
                 'summary' => 'Chez soi, sur un terrain d\'airsoft ou en stand homologué : la direction plutôt que la distance, le bruit, l\'arrêté du maire, et les deux textes que le web recopie de travers.',
             ],
@@ -41,6 +47,9 @@ class Guides
                 'topic' => 'Vocabulaire',
                 'title' => 'Le glossaire',
                 'url' => route('guides.glossaire'),
+                'route' => 'guides.glossaire',
+                'published' => '2026-09-05',
+                'updated' => '2026-09-06',
                 'teaser' => 'AEG, hop-up, diabolo, MED : les mots du rayon, et où chacun se rencontre.',
                 'summary' => 'AEG, hop-up, joule, MED, diabolo, grille graduée, témoin de chambre vide : les mots que portent les fiches et les filtres, définis un par un, chacun menant au rayon ou au guide où on le rencontre.',
             ],
@@ -48,6 +57,9 @@ class Guides
                 'topic' => 'Énergie',
                 'title' => 'Joules et FPS',
                 'url' => route('guides.joules'),
+                'route' => 'guides.joules',
+                'published' => '2026-09-07',
+                'updated' => '2026-09-07',
                 'teaser' => 'La conversion, la calculette, et pourquoi la même réplique ne chrone pas deux fois pareil.',
                 'summary' => 'Le magasin annonce des FPS, la loi compte en joules et le terrain aussi : la formule, une calculette, le tableau bille par bille, et pourquoi la même réplique ne chrone pas deux fois pareil.',
             ],
@@ -55,6 +67,9 @@ class Guides
                 'topic' => 'Cibles',
                 'title' => 'Bien choisir sa cible',
                 'url' => route('guides.cibles'),
+                'route' => 'guides.cibles',
+                'published' => '2026-09-04',
+                'updated' => '2026-09-06',
                 'teaser' => 'Réactives, planches, carton ou métal : quel format pour quelle distance, et ce qu\'on lit après le tir.',
                 'summary' => 'Réactives autocollantes, planches, carton ou métal basculant : quel format pour quelle distance, ce qu\'on lit après le tir, et combien de feuilles prévoir.',
             ],
@@ -62,6 +77,10 @@ class Guides
                 'topic' => 'Camouflage',
                 'title' => 'Choisir son camouflage',
                 'url' => route('guides.camouflage'),
+                'route' => 'guides.camouflage',
+                'published' => '2026-09-09',
+                'updated' => '2026-09-09',
+                'image' => 'images/guides/camouflage/ce.webp',
                 'teaser' => 'Le motif est la dernière des cinq choses qui vous trahissent. Les quatre autres, puis les familles.',
                 'summary' => 'Le mouvement, la brillance, la silhouette, l\'ombre, la peau : le motif ne vient qu\'après. Les sept familles de motifs, ce que chacune vaut sur un terrain français, et un sélecteur par terrain et par saison.',
             ],
@@ -69,10 +88,34 @@ class Guides
                 'topic' => 'Entretien',
                 'title' => 'Entretenir son arme',
                 'url' => route('guides.entretien'),
+                'route' => 'guides.entretien',
+                'published' => '2026-09-04',
+                'updated' => '2026-09-06',
                 'teaser' => 'Corde ou kit à tiges, calibre par calibre, dans quel sens nettoyer et à quelle fréquence.',
                 'summary' => 'Corde de nettoyage ou kit à tiges : quel matériel pour quel calibre, du 4,5 mm au calibre 12, dans quel sens nettoyer et à quelle fréquence.',
             ],
         ];
+    }
+
+    /**
+     * One guide, by the route it answers to.
+     *
+     * A guide page needs the dates and the picture the shelf already holds,
+     * and the sitemap needs the same dates: written in the page they would be
+     * written twice, and the two copies would drift the first time a guide
+     * was revised.
+     *
+     * @return array{topic: string, title: string, url: string, route: string, published: string, updated: string, image?: string, teaser: string, summary: string}
+     */
+    public static function byRoute(string $route): array
+    {
+        foreach (self::all() as $guide) {
+            if ($guide['route'] === $route) {
+                return $guide;
+            }
+        }
+
+        throw new \InvalidArgumentException('No guide answers to the route '.$route.'.');
     }
 
     /**
@@ -86,7 +129,7 @@ class Guides
      * It is read off the date, so every visitor of a given day sees the
      * same pair, and it turns over at French midnight rather than UTC's.
      *
-     * @return Collection<int, array{topic: string, title: string, url: string, teaser: string, summary: string}>
+     * @return Collection<int, array{topic: string, title: string, url: string, route: string, published: string, updated: string, image?: string, teaser: string, summary: string}>
      */
     public static function ofTheDay(int $count = 2): Collection
     {

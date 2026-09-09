@@ -16,8 +16,9 @@
             'description' => 'Réactives autocollantes, planches, carton ou métal basculant : quel format pour quelle distance, ce qu\'on lit après le tir, et combien de feuilles prévoir.',
             'mainEntityOfPage' => route('guides.cibles'),
             'inLanguage' => 'fr-FR',
-            'datePublished' => '2026-09-04',
-            'dateModified' => '2026-09-06',
+            'image' => versioned_asset(\App\Support\Guides::byRoute('guides.cibles')['image'] ?? 'images/hero.webp'),
+            'datePublished' => \App\Support\Guides::byRoute('guides.cibles')['published'],
+            'dateModified' => \App\Support\Guides::byRoute('guides.cibles')['updated'],
             'author' => \App\Support\OrganizationSchema::reference(),
             'publisher' => \App\Support\OrganizationSchema::reference(),
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
