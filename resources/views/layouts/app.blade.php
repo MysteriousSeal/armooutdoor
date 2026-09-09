@@ -309,7 +309,7 @@
                 @if (filled($footerFreeShipping ?? null))
                     <li class="site-footer-promise">
                         <span class="site-footer-promise-mark" aria-hidden="true">
-                            @include('partials.icon', ['name' => 'truck-fast', 'size' => 20])
+                            @include('partials.icon', ['name' => 'truck-fast', 'size' => 28])
                         </span>
                         <strong>{!! __('store.footer_ship_title', ['amount' => '<b>'.e($footerFreeShipping).'</b>']) !!}</strong>
                         <span>{{ __('store.footer_ship_note') }}</span>
@@ -317,14 +317,14 @@
                 @endif
                 <li class="site-footer-promise">
                     <span class="site-footer-promise-mark" aria-hidden="true">
-                        @include('partials.icon', ['name' => 'shield-halved', 'size' => 20])
+                        @include('partials.icon', ['name' => 'shield-halved', 'size' => 28])
                     </span>
                     <strong>{{ __('store.home_hero_pay_title') }}</strong>
                     <span>{{ __('store.home_hero_pay_text') }}</span>
                 </li>
                 <li class="site-footer-promise">
                     <span class="site-footer-promise-mark" aria-hidden="true">
-                        @include('partials.icon', ['name' => 'box-open', 'size' => 20])
+                        @include('partials.icon', ['name' => 'box-open', 'size' => 28])
                     </span>
                     <strong>{{ __('store.footer_returns_title') }}</strong>
                     <span>{{ __('store.footer_returns_note') }}</span>

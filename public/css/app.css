@@ -784,9 +784,15 @@ body.has-menu-open {
 
 .site-footer-promise {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
+    /* The copy takes its own measure rather than a share of the cell, so the
+       mark and the words are one group with space either side of it. As a
+       fraction the second column swallowed the leftover width and the group
+       had nothing to centre in. It may still shrink and wrap: the minimum is
+       zero, not the text's width. */
+    grid-template-columns: auto minmax(0, max-content);
+    justify-content: center;
     align-items: baseline;
-    column-gap: 0.7rem;
+    column-gap: 1.15rem;
     row-gap: 0.15rem;
     padding: 1.4rem 1.25rem 1.45rem;
     background: var(--surface);
@@ -797,12 +803,14 @@ body.has-menu-open {
    count, since which cell opens a row changes with the count and the rule
    cannot know. A small even inset holds whatever the row does. */
 
+/* The mark spans both lines and centres against them, rather than sitting on
+   the first line's baseline with the second hanging below it. */
 .site-footer-promise-mark {
-    grid-row: 1;
+    grid-row: 1 / span 2;
+    align-self: center;
     display: inline-flex;
     align-items: center;
     color: var(--accent-heading);
-    transform: translateY(0.2rem);
 }
 
 .site-footer-promise strong {
