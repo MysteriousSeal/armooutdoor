@@ -149,7 +149,7 @@
         {{-- The calculator. Hidden until the page knows it has JavaScript:
              the reference table below is the answer for everyone else, so
              nothing here promises a control that cannot work. --}}
-        <section class="glab-panel" data-glab-joules hidden aria-labelledby="glab-calc-title">
+        <section class="glab-section" data-glab-joules hidden aria-labelledby="glab-calc-title">
             <h2 class="glab-title" id="glab-calc-title">La <span class="glab-title-accent">calculette</span></h2>
             <p class="glab-lede">
                 Le poids de la bille et la vitesse au chronographe. Le reste se lit tout seul.
@@ -263,7 +263,7 @@
             </p>
         </section>
 
-        <section class="glab-panel" aria-labelledby="glab-table-title">
+        <section class="glab-section" aria-labelledby="glab-table-title">
             <h2 class="glab-title" id="glab-table-title">Le <span class="glab-title-accent">tableau</span></h2>
             <p class="glab-lede">
                 Quarante-neuf réponses, sans rien calculer. Plus la case fonce, plus elle approche
@@ -302,7 +302,7 @@
             </div>
         </section>
 
-        <section class="glab-panel" aria-labelledby="glab-thresholds-title">
+        <section class="glab-section" aria-labelledby="glab-thresholds-title">
             <h2 class="glab-title" id="glab-thresholds-title">Les <span class="glab-title-accent">seuils</span></h2>
             <p class="glab-lede">
                 2 joules, 20 joules. Tout le droit français des armes à air tient sur ces deux nombres.
@@ -377,19 +377,16 @@
             </ol>
         </section>
 
-        <section class="glab-panel" aria-labelledby="glab-faq-title">
+        <section class="glab-faq" aria-labelledby="glab-faq-title">
             <h2 class="glab-title" id="glab-faq-title">Questions <span class="glab-title-accent">fréquentes</span></h2>
-
-            <div class="glab-faq">
-                @foreach ($faq as $qa)
-                    <details>
-                        <summary>{{ $qa[0] }}</summary>
-                        <div>
-                            <p>{{ $qa[1] }}</p>
-                        </div>
-                    </details>
-                @endforeach
-            </div>
+            @foreach ($faq as $qa)
+                <details>
+                    <summary>{{ $qa[0] }}</summary>
+                    <div>
+                        <p>{{ $qa[1] }}</p>
+                    </div>
+                </details>
+            @endforeach
 
             <p class="glab-more-reading">
                 Et pour la séance qui suit, de quoi occuper la ligne :

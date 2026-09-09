@@ -212,7 +212,7 @@
         {{-- The selector. Revealed by the script rather than shipped open, so a
              page without JavaScript promises no control it cannot honour: the
              families below carry their terrains and their seasons in words. --}}
-        <section class="glab-panel cam-picker" data-cam-picker hidden aria-labelledby="cam-picker-title">
+        <section class="glab-section" data-glab-selector="camouflage" hidden aria-labelledby="cam-picker-title">
             <h2 class="glab-title" id="cam-picker-title">Votre terrain, <span class="glab-title-accent">votre saison</span></h2>
             <p class="glab-prose">
                 Deux réponses, et les familles se rangent : ce qui tient, ce qui passe, ce qui
@@ -220,44 +220,46 @@
                 comme une règle.
             </p>
 
-            {{-- Pills rather than dropdowns: ten choices in all, few enough to
-                 show at once, and a control you can see is a control you use.
-                 Buttons in a group rather than radios, since nothing here is
-                 submitted anywhere. --}}
-            <div class="cam-picker-fields">
-                <div class="cam-picker-field" role="group" aria-labelledby="cam-terrain-legend">
-                    <span class="glab-reco-label" id="cam-terrain-legend">Terrain</span>
-                    <div class="glab-chips cam-options" data-cam-terrain>
+            {{-- The same two-answer selector the other guides carry. Pills
+                 rather than dropdowns: ten choices in all, few enough to show
+                 at once, and a control you can see is a control you use. The
+                 turn of phrase travels with the button, so French grammar
+                 stays in the French file rather than being glued together in
+                 the script. --}}
+            <div class="glab-steps">
+                <fieldset class="glab-step">
+                    <legend>01 · Votre terrain</legend>
+                    <div class="glab-chips" data-glab-group="terrain">
                         @foreach ($terrains as $key => $terrain)
                             <button
                                 type="button"
-                                class="cam-option"
-                                value="{{ $key }}"
-                                data-phrase="{{ $terrain[1] }}"
-                                aria-pressed="{{ $key === 'sous-bois' ? 'true' : 'false' }}"
+                                data-glab-value="{{ $key }}"
+                                data-glab-phrase="{{ $terrain[1] }}"
+                                class="{{ $key === 'sous-bois' ? 'is-active' : '' }}"
                             >{{ $terrain[0] }}</button>
                         @endforeach
                     </div>
-                </div>
-                <div class="cam-picker-field" role="group" aria-labelledby="cam-season-legend">
-                    <span class="glab-reco-label" id="cam-season-legend">Saison</span>
-                    <div class="glab-chips cam-options" data-cam-season>
+                </fieldset>
+                <fieldset class="glab-step">
+                    <legend>02 · Votre saison</legend>
+                    <div class="glab-chips" data-glab-group="season">
                         @foreach ($seasons as $key => $season)
                             <button
                                 type="button"
-                                class="cam-option"
-                                value="{{ $key }}"
-                                data-phrase="{{ $season[1] }}"
-                                aria-pressed="{{ $key === 'ete' ? 'true' : 'false' }}"
+                                data-glab-value="{{ $key }}"
+                                data-glab-phrase="{{ $season[1] }}"
+                                class="{{ $key === 'ete' ? 'is-active' : '' }}"
                             >{{ $season[0] }}</button>
                         @endforeach
                     </div>
-                </div>
+                </fieldset>
             </div>
 
-            <p class="glab-reco-resume cam-picker-verdict" data-cam-verdict role="status"></p>
-
-            <ol class="glab-reco-list cam-picker-results" data-cam-results></ol>
+            <div class="glab-reco">
+                <p class="glab-reco-label">Ce qui tient chez vous</p>
+                <p class="glab-reco-resume" data-glab-resume role="status"></p>
+                <ol class="glab-reco-list" data-glab-results></ol>
+            </div>
         </section>
 
         <section class="glab-section" aria-labelledby="cam-families-title">

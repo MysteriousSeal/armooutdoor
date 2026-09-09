@@ -92,10 +92,13 @@ class GuideJoulesPageTest extends TestCase
     {
         $html = $this->get('/guides/joules-et-fps')->assertOk()->getContent();
 
-        // The calculator, the table, the seuils and the questions are boxed;
-        // the three prose sections are not, so the tools read as tools.
-        $this->assertSame(4, substr_count($html, '<section class="glab-panel'));
-        $this->assertSame(3, substr_count($html, '<section class="glab-section"'));
+        // Every part of a guide is the same block now: a sheet with its number
+        // on it. The panel and the section had rendered identically since the
+        // guides took the shape of a document, so keeping two names for one
+        // thing only gave a reader two ways to be lost.
+        $this->assertSame(0, substr_count($html, 'glab-panel'));
+        $this->assertSame(6, substr_count($html, '<section class="glab-section"'));
+        $this->assertSame(1, substr_count($html, '<section class="glab-faq"'));
     }
 
     public function test_the_page_declares_itself_to_search_engines(): void

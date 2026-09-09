@@ -84,12 +84,6 @@
             'tags' => ['Chez soi', 'Terrain', 'Stand'],
         ])
 
-        <p class="glab-warning">
-            <strong class="glab-warning-label">Pas un conseil juridique</strong>
-            Ceci décrit l'état du droit à la date de publication. Pour un lieu précis, la
-            mairie et la préfecture du département sont les interlocutrices compétentes :
-            les arrêtés locaux priment sur ce que dit une page générale.
-        </p>
 
         <nav class="glab-plan" aria-label="Plan du guide">
             <p class="glab-plan-kicker">Plan</p>
@@ -105,6 +99,13 @@
                 <a href="#ou-sources-title">Sources</a>
             </div>
         </nav>
+
+        <p class="glab-warning">
+            <strong class="glab-warning-label">Pas un conseil juridique</strong>
+            Ceci décrit l'état du droit à la date de publication. Pour un lieu précis, la
+            mairie et la préfecture du département sont les interlocutrices compétentes :
+            les arrêtés locaux priment sur ce que dit une page générale.
+        </p>
 
         <section class="glab-section" aria-labelledby="ou-question-title">
             <h2 class="glab-title" id="ou-question-title">La seule question <span class="glab-title-accent">qui compte</span></h2>
@@ -131,7 +132,7 @@
             </div>
         </section>
 
-        <section class="glab-panel" aria-labelledby="ou-places-title">
+        <section class="glab-section" aria-labelledby="ou-places-title">
             <h2 class="glab-title" id="ou-places-title">Trois lieux, <span class="glab-title-accent">trois régimes</span></h2>
             <p class="glab-lede">
                 Ce qui change d'un lieu à l'autre, ce n'est pas la physique : c'est qui répond de
@@ -163,7 +164,7 @@
             </dl>
         </section>
 
-        <section class="glab-panel" aria-labelledby="ou-categories-title">
+        <section class="glab-section" aria-labelledby="ou-categories-title">
             <h2 class="glab-title" id="ou-categories-title">Chaque catégorie, <span class="glab-title-accent">et où elle a le droit de servir</span></h2>
             <p class="glab-lede">
                 Le lieu ne se décide pas seulement par ce qu'il y a derrière la cible : il se
@@ -268,7 +269,7 @@
             </ol>
         </section>
 
-        <section class="glab-panel" aria-labelledby="ou-myths-title">
+        <section class="glab-section" aria-labelledby="ou-myths-title">
             <h2 class="glab-title" id="ou-myths-title">Trois choses <span class="glab-title-accent">que le web répète</span></h2>
             <p class="glab-lede">
                 Elles sont fausses, et elles sont partout, y compris sous la plume d'armureries.
@@ -405,24 +406,17 @@
             </p>
         </section>
 
-        <section class="glab-panel" aria-labelledby="ou-faq-title">
+        <section class="glab-faq" aria-labelledby="ou-faq-title">
             <h2 class="glab-title" id="ou-faq-title">Questions <span class="glab-title-accent">fréquentes</span></h2>
+            @foreach ($faq as $qa)
+                <details>
+                    <summary>{{ $qa[0] }}</summary>
+                    <div>
+                        <p>{{ $qa[1] }}</p>
+                    </div>
+                </details>
+            @endforeach
 
-            <div class="glab-faq">
-                @foreach ($faq as $qa)
-                    <details>
-                        <summary>{{ $qa[0] }}</summary>
-                        <div>
-                            <p>{{ $qa[1] }}</p>
-                        </div>
-                    </details>
-                @endforeach
-            </div>
-
-            <p class="glab-ctas">
-                <a href="{{ route('categories.show', 'cibles-carton-metal') }}" class="btn btn-primary">Cibles et points d'arrêt</a>
-                <a href="{{ route('guides.index') }}" class="btn btn-secondary">Tous les guides</a>
-            </p>
         </section>
 
         <section class="glab-section" aria-labelledby="ou-sources-title">
@@ -446,5 +440,10 @@
                 @endforeach
             </ul>
         </section>
+
+        <p class="glab-ctas">
+                <a href="{{ route('categories.show', 'cibles-carton-metal') }}" class="btn btn-primary">Cibles et points d'arrêt</a>
+                <a href="{{ route('guides.index') }}" class="btn btn-secondary">Tous les guides</a>
+            </p>
     </div>
 @endsection

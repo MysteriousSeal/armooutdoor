@@ -60,11 +60,6 @@
             'lede' => 'Deux outils font tout l\'entretien courant : la corde de nettoyage, qui fait l\'essentiel en deux minutes au stand, et le kit à tiges, qui fait le nettoyage complet à l\'établi. Ce guide dit lequel prendre pour quel calibre, dans quel sens s\'en servir, et à quelle fréquence.',
         ])
 
-        <p class="glab-warning">
-            <strong class="glab-warning-label">Avant tout entretien</strong>
-            Arme déchargée, chambre vérifiée vide, munitions à l'écart de la table. Un
-            drapeau de chambre vide rend l'état de l'arme visible d'un coup d'œil.
-        </p>
 
         <nav class="glab-plan" aria-label="Plan du guide">
             <p class="glab-plan-kicker">Plan</p>
@@ -77,8 +72,14 @@
             </div>
         </nav>
 
+        <p class="glab-warning">
+            <strong class="glab-warning-label">Avant tout entretien</strong>
+            Arme déchargée, chambre vérifiée vide, munitions à l'écart de la table. Un
+            drapeau de chambre vide rend l'état de l'arme visible d'un coup d'œil.
+        </p>
+
         {{-- The selector: calibre and place, a ranked kit. --}}
-        <section class="glab-panel" data-glab-selector aria-labelledby="glab-selector-title">
+        <section class="glab-section" data-glab-selector="entretien" aria-labelledby="glab-selector-title">
             <h2 class="glab-title" id="glab-selector-title">Deux réponses, <span class="glab-title-accent">votre trousse</span></h2>
             <p class="glab-lede">
                 Répondez et le rayon se réduit à l'essentiel.
@@ -288,35 +289,32 @@
         </section>
 
         {{-- The questions people actually ask. --}}
-        <section class="glab-panel" aria-labelledby="glab-faq-title">
+        <section class="glab-faq" aria-labelledby="glab-faq-title">
             <h2 class="glab-title" id="glab-faq-title">Questions <span class="glab-title-accent">fréquentes</span></h2>
-
-            <div class="glab-faq">
-                <details>
-                    <summary>La corde remplace-t-elle le kit à tiges ?</summary>
-                    <div>
-                        <p>Non, elle le complète. La corde fait l'essentiel en deux minutes au stand ; les tiges, brosses et écouvillons du kit font le nettoyage complet à l'établi, chambre comprise. Le kit couvre les calibres .22, 9 mm, .40 et .357 ; hors de ces calibres, la corde du calibre reste l'outil principal.</p>
-                    </div>
-                </details>
-                <details>
-                    <summary>Quelle corde pour un airgun à plombs 4,5 mm ?</summary>
-                    <div>
-                        <p>La corde .17 / .177 / 4,5 mm : c'est le même diamètre de canon. Un airgun s'encrasse moins qu'une arme à feu, mais un canon propre reste plus régulier.</p>
-                    </div>
-                </details>
-                <details>
-                    <summary>Dans quel sens nettoyer le canon ?</summary>
-                    <div>
-                        <p>De la chambre vers la bouche, dans le sens du projectile. On protège ainsi le couronnement, le dernier point d'appui de la balle : abîmé, il coûte de la précision qu'aucun nettoyage ne rendra.</p>
-                    </div>
-                </details>
-                <details>
-                    <summary>À quelle fréquence nettoyer ?</summary>
-                    <div>
-                        <p>Un passage de corde après chaque séance suffit pour l'entretien courant ; un nettoyage complet à l'établi de temps en temps, et toujours avant un stockage prolongé. La corde elle-même se lave à l'eau savonneuse et se réutilise.</p>
-                    </div>
-                </details>
-            </div>
+            <details>
+                <summary>La corde remplace-t-elle le kit à tiges ?</summary>
+                <div>
+                    <p>Non, elle le complète. La corde fait l'essentiel en deux minutes au stand ; les tiges, brosses et écouvillons du kit font le nettoyage complet à l'établi, chambre comprise. Le kit couvre les calibres .22, 9 mm, .40 et .357 ; hors de ces calibres, la corde du calibre reste l'outil principal.</p>
+                </div>
+            </details>
+            <details>
+                <summary>Quelle corde pour un airgun à plombs 4,5 mm ?</summary>
+                <div>
+                    <p>La corde .17 / .177 / 4,5 mm : c'est le même diamètre de canon. Un airgun s'encrasse moins qu'une arme à feu, mais un canon propre reste plus régulier.</p>
+                </div>
+            </details>
+            <details>
+                <summary>Dans quel sens nettoyer le canon ?</summary>
+                <div>
+                    <p>De la chambre vers la bouche, dans le sens du projectile. On protège ainsi le couronnement, le dernier point d'appui de la balle : abîmé, il coûte de la précision qu'aucun nettoyage ne rendra.</p>
+                </div>
+            </details>
+            <details>
+                <summary>À quelle fréquence nettoyer ?</summary>
+                <div>
+                    <p>Un passage de corde après chaque séance suffit pour l'entretien courant ; un nettoyage complet à l'établi de temps en temps, et toujours avant un stockage prolongé. La corde elle-même se lave à l'eau savonneuse et se réutilise.</p>
+                </div>
+            </details>
 
             <p class="glab-more-reading">
                 Et pour la prochaine séance, de quoi occuper la ligne :

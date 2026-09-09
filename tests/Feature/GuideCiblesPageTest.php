@@ -254,6 +254,65 @@ class GuideCiblesPageTest extends TestCase
         }
     }
 
+    /**
+     * Four selectors, one engine.
+     *
+     * Three guides name a handful of products and the camouflage guide ranks
+     * seven motifs, but the chips, the state, the pressed class and the
+     * rendering are the same work. Each guide supplies only what it knows:
+     * a function turning two answers into a sentence and a list of cards.
+     */
+    public function test_every_selector_runs_on_the_shared_engine(): void
+    {
+        $js = file_get_contents(public_path('js/guides.js'));
+
+        $this->assertStringContainsString('var GlabSelector = (function () {', $js);
+
+        foreach (['classification', 'cibles', 'entretien', 'camouflage'] as $guide) {
+            $this->assertStringContainsString(
+                'GlabSelector.mount(\'[data-glab-selector="'.$guide.'"]\'',
+                $js,
+                $guide.' does not use the shared engine',
+            );
+        }
+
+        // The card is built once. Four copies of this were what the engine
+        // replaced, and a second would mean a guide has gone back to doing
+        // its own rendering.
+        $this->assertSame(1, substr_count($js, "'glab-reco-rank'"));
+        $this->assertSame(1, substr_count($js, "'glab-reco-head'"));
+    }
+
+    /**
+     * Each selector says which guide it belongs to.
+     *
+     * Three guides run a two-answer selector, and while they had a script
+     * each in a file each, every one of them could look for a nameless
+     * attribute and find its own. Once the six scripts became one file they
+     * all ran on every guide, every one of them found the same nameless
+     * root, and the last to run painted its own recommendations over the
+     * others: the targets guide answered with cleaning rods.
+     */
+    public function test_a_selector_is_named_for_the_guide_it_belongs_to(): void
+    {
+        $js = file_get_contents(public_path('js/guides.js'));
+
+        // Nothing mounts on an unqualified attribute any more.
+        $this->assertStringNotContainsString("'[data-glab-selector]'", $js);
+
+        foreach (['classification' => 'classer-son-arme',
+            'cibles' => 'bien-choisir-sa-cible',
+            'entretien' => 'entretenir-son-arme'] as $name => $slug) {
+            $this->assertStringContainsString('[data-glab-selector="'.$name.'"]', $js, $name.' has no named mount');
+
+            $this->assertStringContainsString(
+                'data-glab-selector="'.$name.'"',
+                $this->get('/guides/'.$slug)->assertOk()->getContent(),
+                $slug.' does not name its selector',
+            );
+        }
+    }
+
     public function test_a_guide_hero_without_a_photograph_does_not_keep_the_empty_height(): void
     {
         $css = file_get_contents(public_path('css/guides.css'));

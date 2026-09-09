@@ -71,7 +71,7 @@
         </nav>
 
         {{-- The selector: two answers, a ranked recommendation. --}}
-        <section class="glab-panel" data-glab-selector aria-labelledby="glab-selector-title">
+        <section class="glab-section" data-glab-selector="cibles" aria-labelledby="glab-selector-title">
             <h2 class="glab-title" id="glab-selector-title">Deux réponses, <span class="glab-title-accent">votre cible</span></h2>
             <p class="glab-lede">
                 Répondez et le rayon se réduit à l'essentiel.
@@ -234,37 +234,34 @@
         </section>
 
         {{-- The questions people actually ask. --}}
-        <section class="glab-panel" aria-labelledby="glab-faq-title">
+        <section class="glab-faq" aria-labelledby="glab-faq-title">
             <h2 class="glab-title" id="glab-faq-title">Questions <span class="glab-title-accent">fréquentes</span></h2>
-
-            <div class="glab-faq">
-                <details>
-                    <summary>Quel diamètre pour quelle distance ?</summary>
-                    <div>
-                        <p><strong>76 mm</strong> : le format d'entraînement de référence. À 10 ou 25 mètres, il oblige à un vrai travail de précision, et les lots de 100 à 250 pièces suivent le rythme des séances.</p>
-                        <p><strong>10 cm</strong> : pardonne davantage. Distances plus longues, calibres plus remuants, ou premiers tirs d'un débutant qui a besoin de voir ses réussites.</p>
-                        <p><strong>Carrées à grille</strong> : pour régler une optique. La grille donne la correction en clics, ligne par ligne, colonne par colonne, en 51 mm, 76 mm ou 10 cm. C'est la cible du zérotage, pas celle du score.</p>
-                    </div>
-                </details>
-                <details>
-                    <summary>Sur quoi coller une cible réactive ?</summary>
-                    <div>
-                        <p>Sur n'importe quel support qui tient : un carton usé, une vieille planche, le dos d'une cible finie. C'est tout l'intérêt : on recharge la ligne sans racheter de porte-cible.</p>
-                    </div>
-                </details>
-                <details>
-                    <summary>Le métal convient-il à mon calibre ?</summary>
-                    <div>
-                        <p>Notre cible basculante est réservée aux armes à air comprimé de 4,5 et 5,5 mm : pas d'arme à feu, les plaques de 2,5 mm ne l'encaisseraient pas. Distance 10 à 25 m, protection oculaire obligatoire. Un acier sollicité au-delà de sa classe peut renvoyer des fragments.</p>
-                    </div>
-                </details>
-                <details>
-                    <summary>Combien de feuilles prévoir par séance ?</summary>
-                    <div>
-                        <p>Comptez une feuille par série de 10 à 20 impacts si vous voulez garder un score lisible. Un lot de 100 couvre une saison d'entraînement hebdomadaire ; au-delà, les lots de 200 à 250 baissent nettement le prix à l'unité, et les pastilles de réparation prolongent chaque feuille.</p>
-                    </div>
-                </details>
-            </div>
+            <details>
+                <summary>Quel diamètre pour quelle distance ?</summary>
+                <div>
+                    <p><strong>76 mm</strong> : le format d'entraînement de référence. À 10 ou 25 mètres, il oblige à un vrai travail de précision, et les lots de 100 à 250 pièces suivent le rythme des séances.</p>
+                    <p><strong>10 cm</strong> : pardonne davantage. Distances plus longues, calibres plus remuants, ou premiers tirs d'un débutant qui a besoin de voir ses réussites.</p>
+                    <p><strong>Carrées à grille</strong> : pour régler une optique. La grille donne la correction en clics, ligne par ligne, colonne par colonne, en 51 mm, 76 mm ou 10 cm. C'est la cible du zérotage, pas celle du score.</p>
+                </div>
+            </details>
+            <details>
+                <summary>Sur quoi coller une cible réactive ?</summary>
+                <div>
+                    <p>Sur n'importe quel support qui tient : un carton usé, une vieille planche, le dos d'une cible finie. C'est tout l'intérêt : on recharge la ligne sans racheter de porte-cible.</p>
+                </div>
+            </details>
+            <details>
+                <summary>Le métal convient-il à mon calibre ?</summary>
+                <div>
+                    <p>Notre cible basculante est réservée aux armes à air comprimé de 4,5 et 5,5 mm : pas d'arme à feu, les plaques de 2,5 mm ne l'encaisseraient pas. Distance 10 à 25 m, protection oculaire obligatoire. Un acier sollicité au-delà de sa classe peut renvoyer des fragments.</p>
+                </div>
+            </details>
+            <details>
+                <summary>Combien de feuilles prévoir par séance ?</summary>
+                <div>
+                    <p>Comptez une feuille par série de 10 à 20 impacts si vous voulez garder un score lisible. Un lot de 100 couvre une saison d'entraînement hebdomadaire ; au-delà, les lots de 200 à 250 baissent nettement le prix à l'unité, et les pastilles de réparation prolongent chaque feuille.</p>
+                </div>
+            </details>
 
             <p class="glab-more-reading">
                 Pour aller plus loin, notre article

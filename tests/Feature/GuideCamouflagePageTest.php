@@ -45,7 +45,7 @@ class GuideCamouflagePageTest extends TestCase
     {
         $html = $this->get(route('guides.camouflage'))->assertOk()->getContent();
 
-        $this->assertStringContainsString('data-cam-picker hidden', $html);
+        $this->assertStringContainsString('data-glab-selector="camouflage" hidden', $html);
         $this->assertStringContainsString('js/guides.js', $html);
     }
 
@@ -78,9 +78,9 @@ class GuideCamouflagePageTest extends TestCase
     {
         $html = $this->get(route('guides.camouflage'))->assertOk()->getContent();
 
-        $this->assertStringContainsString('data-phrase="en sous-bois dense"', $html);
-        $this->assertStringContainsString('data-phrase="en été"', $html);
-        $this->assertStringContainsString('data-phrase="au printemps"', $html);
+        $this->assertStringContainsString('data-glab-phrase="en sous-bois dense"', $html);
+        $this->assertStringContainsString('data-glab-phrase="en été"', $html);
+        $this->assertStringContainsString('data-glab-phrase="au printemps"', $html);
     }
 
     public function test_the_guide_answers_for_snow_rather_than_ranking_seven_wrong_answers(): void

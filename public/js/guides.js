@@ -9,22 +9,156 @@
  * ES5 throughout, like the rest of public/js.
  */
 
-/* ============================== classification ==============================
+/* ============================== selector ==============================
  *
- * Classer son arme: the two-answer selector
+ * The two-answer selector every guide shares
  */
 
 /*
- * The classification guide's selector: an energy band and a question,
- * four doors into the shop's own articles on categories D, C, B and A.
+ * Four guides ask a reader two questions and answer them: three name a
+ * handful of products, and the camouflage guide ranks seven motifs. They had
+ * a script each, and three of those differed only in their data and in the
+ * sentence they wrote.
+ *
+ * What differs between them is the guide's own knowledge, so that is all a
+ * guide supplies: a function turning the two answers into a sentence and a
+ * list of cards. The chips, the state, the pressed class and the rendering
+ * are written once here.
+ *
+ * The answer a guide returns is { resume, cards }, and a card is
+ * { rank, title, meta, body, href, cta, tone }. Every field is optional
+ * except the title, which is what lets one shape carry both a product the
+ * shop sells and a verdict on a motif.
  */
-(function () {
-    var root = document.querySelector('[data-glab-selector]');
+var GlabSelector = (function () {
+    function fill(parent, tag, className, text) {
+        if (!text) {
+            return null;
+        }
 
-    if (!root) {
-        return;
+        var el = document.createElement(tag);
+
+        if (className) {
+            el.className = className;
+        }
+
+        el.textContent = text;
+        parent.appendChild(el);
+
+        return el;
     }
 
+    function card(entry, index) {
+        var item = document.createElement('li');
+
+        if (entry.tone) {
+            item.className = 'is-' + entry.tone;
+        }
+
+        // The rank is a number where the guide ranks, and a verdict where it
+        // judges: the same small uppercase label either way.
+        fill(item, 'span', 'glab-reco-rank', entry.rank || String(index + 1).padStart(2, '0'));
+
+        var head = document.createElement('div');
+        head.className = 'glab-reco-head';
+        fill(head, 'h3', '', entry.title);
+        fill(head, 'span', 'glab-reco-meta', entry.meta);
+        item.appendChild(head);
+
+        fill(item, 'p', '', entry.body);
+
+        if (entry.href) {
+            var link = document.createElement('a');
+            link.href = entry.href;
+            link.textContent = entry.cta || 'Voir';
+            item.appendChild(link);
+        }
+
+        return item;
+    }
+
+    /**
+     * Wires one selector. `resolve` receives the reader's answers, keyed by
+     * the name of each group, with the turn of phrase the markup carries
+     * beside it: French grammar stays in the Blade file, where it can be
+     * written as a sentence rather than glued together here.
+     */
+    function mount(selector, resolve, after) {
+        var root = document.querySelector(selector);
+
+        if (!root) {
+            return;
+        }
+
+        var resume = root.querySelector('[data-glab-resume]');
+        var results = root.querySelector('[data-glab-results]');
+        var groups = Array.prototype.slice.call(root.querySelectorAll('[data-glab-group]'));
+
+        if (!resume || !results || groups.length === 0) {
+            return;
+        }
+
+        var state = {};
+
+        function read(group) {
+            var name = group.getAttribute('data-glab-group');
+            var button = group.querySelector('button.is-active') || group.querySelector('button');
+
+            state[name] = button.getAttribute('data-glab-value');
+            state[name + 'Phrase'] = button.getAttribute('data-glab-phrase') || '';
+        }
+
+        function render() {
+            var answer = resolve(state) || {};
+
+            resume.replaceChildren();
+            resume.appendChild(document.createTextNode(answer.resume || ''));
+            results.replaceChildren();
+
+            (answer.cards || []).forEach(function (entry, index) {
+                results.appendChild(card(entry, index));
+            });
+
+            if (after) {
+                after(state, answer);
+            }
+        }
+
+        groups.forEach(function (group) {
+            read(group);
+
+            group.addEventListener('click', function (event) {
+                var button = event.target.closest('button[data-glab-value]');
+
+                if (!button) {
+                    return;
+                }
+
+                group.querySelectorAll('button').forEach(function (other) {
+                    other.classList.toggle('is-active', other === button);
+                });
+
+                read(group);
+                render();
+            });
+        });
+
+        render();
+        root.hidden = false;
+
+        return render;
+    }
+
+    return { mount: mount };
+})();
+
+
+/* ============================== classification ==============================
+ *
+ * Classer son arme: which regime, and what it asks of you
+ */
+
+(function () {
     var CATALOG = {
         airsoft: {
             title: 'Hors catégorie : sous 2 joules',
@@ -98,79 +232,19 @@
         risque: 'sur les peines',
     };
 
-    var state = { arme: 'd', but: 'acheter' };
-    var results = root.querySelector('[data-glab-results]');
-    var resume = root.querySelector('[data-glab-resume]');
-
-    function render() {
-        var keys = RULES[state.arme + ':' + state.but] || [];
-
-        resume.textContent = 'Pour ' + ARME_LABELS[state.arme] + ', '
-            + BUT_LABELS[state.but] + ' :';
-        results.textContent = '';
-
-        keys.forEach(function (key, index) {
-            var entry = CATALOG[key];
-            var item = document.createElement('li');
-
-            var rank = document.createElement('span');
-            rank.className = 'glab-reco-rank';
-            rank.textContent = String(index + 1).padStart(2, '0');
-
-            var head = document.createElement('div');
-            head.className = 'glab-reco-head';
-
-            var title = document.createElement('h3');
-            title.textContent = entry.title;
-
-            var meta = document.createElement('span');
-            meta.className = 'glab-reco-meta';
-            meta.textContent = entry.meta;
-
-            head.appendChild(title);
-            head.appendChild(meta);
-
-            var body = document.createElement('p');
-            body.textContent = entry.body;
-
-            var link = document.createElement('a');
-            link.href = entry.href;
-            link.textContent = entry.cta;
-
-            item.appendChild(rank);
-            item.appendChild(head);
-            item.appendChild(body);
-            item.appendChild(link);
-            results.appendChild(item);
-        });
-    }
-
-    root.querySelectorAll('[data-glab-group]').forEach(function (group) {
-        var name = group.getAttribute('data-glab-group');
-
-        group.addEventListener('click', function (event) {
-            var button = event.target.closest('button[data-glab-value]');
-
-            if (!button) {
-                return;
-            }
-
-            state[name] = button.getAttribute('data-glab-value');
-            group.querySelectorAll('button').forEach(function (other) {
-                other.classList.toggle('is-active', other === button);
-            });
-            render();
-        });
+    GlabSelector.mount('[data-glab-selector="classification"]', function (state) {
+        return {
+            resume: 'Pour ' + ARME_LABELS[state.arme] + ', ' + BUT_LABELS[state.but] + ' :',
+            cards: (RULES[state.arme + ':' + state.but] || []).map(function (key) {
+                return CATALOG[key];
+            }),
+        };
     });
-
-    render();
 })();
-
 /* ============================== joules ==============================
  *
  * Joules et FPS: the calculator
  */
-
 /*
  * The joules guide's calculator: a bille, a chronograph reading, and the
  * energy that follows. Revealed by this script rather than shipped open,
@@ -323,22 +397,10 @@
 
 /* ============================== cibles ==============================
  *
- * Bien choisir sa cible: the two-answer selector
+ * Bien choisir sa cible: which target, at which distance
  */
 
-/*
- * The lab page's 1c selector: two answers, a ranked recommendation.
- * The catalogue entries say only what the shop actually sells - one
- * basculating metal target, boards up to 42 stickers, carton in lots
- * of 20 - and every card links a real category.
- */
 (function () {
-    var root = document.querySelector('[data-glab-selector]');
-
-    if (!root) {
-        return;
-    }
-
     var CATALOG = {
         reactive: {
             title: 'Cibles réactives autocollantes',
@@ -408,136 +470,50 @@
 
     var DIST_LABELS = { court: 'à 10 mètres', moyen: 'à 25 mètres', long: 'à 50 mètres et plus' };
 
-    var state = { dist: 'moyen', but: 'impact' };
-    var results = root.querySelector('[data-glab-results]');
-    var resume = root.querySelector('[data-glab-resume]');
-
-    function render() {
-        var keys = RULES[state.but + ':' + state.dist] || [];
-
-        resume.textContent = RESUMES[state.but] + ' ' + DIST_LABELS[state.dist] + ' :';
-        results.textContent = '';
-
-        keys.forEach(function (key, index) {
-            var entry = CATALOG[key];
-            var item = document.createElement('li');
-
-            var rank = document.createElement('span');
-            rank.className = 'glab-reco-rank';
-            rank.textContent = String(index + 1).padStart(2, '0');
-
-            var head = document.createElement('div');
-            head.className = 'glab-reco-head';
-
-            var title = document.createElement('h3');
-            title.textContent = entry.title;
-
-            var meta = document.createElement('span');
-            meta.className = 'glab-reco-meta';
-            meta.textContent = entry.meta;
-
-            head.appendChild(title);
-            head.appendChild(meta);
-
-            var body = document.createElement('p');
-            body.textContent = entry.body;
-
-            var link = document.createElement('a');
-            link.href = entry.href;
-            link.textContent = entry.cta;
-
-            item.appendChild(rank);
-            item.appendChild(head);
-            item.appendChild(body);
-            item.appendChild(link);
-            results.appendChild(item);
-        });
-    }
-
-    root.querySelectorAll('[data-glab-group]').forEach(function (group) {
-        var name = group.getAttribute('data-glab-group');
-
-        group.addEventListener('click', function (event) {
-            var button = event.target.closest('button[data-glab-value]');
-
-            if (!button) {
-                return;
-            }
-
-            state[name] = button.getAttribute('data-glab-value');
-            group.querySelectorAll('button').forEach(function (other) {
-                other.classList.toggle('is-active', other === button);
-            });
-            render();
-        });
+    GlabSelector.mount('[data-glab-selector="cibles"]', function (state) {
+        return {
+            resume: RESUMES[state.but] + ' ' + DIST_LABELS[state.dist] + ' :',
+            cards: (RULES[state.but + ':' + state.dist] || []).map(function (key) {
+                return CATALOG[key];
+            }),
+        };
     });
-
-    render();
 })();
-
 /* ============================== camouflage ==============================
  *
- * Choisir son camouflage: the terrain and season picker
+ * Choisir son camouflage: which motif, on which ground, in which season
  */
 
 /*
- * The camouflage guide's selector: a terrain, a season, and the seven
- * families ranked against them. Revealed by this script rather than shipped
- * open, so a page without JavaScript shows every family with its terrains and
- * its seasons written out and promises no control it cannot honour.
+ * The same selector the other three guides carry, answering a different kind
+ * of question: it ranks the seven families rather than naming three products.
+ * That is why a card's rank is a word here and a number there, and why the
+ * engine treats every field but the title as optional.
+ *
+ * The families are read off the page rather than repeated in the script: the
+ * markup already prints each one with its terrains and its seasons, which is
+ * what a reader without JavaScript gets, and a family added to the guide is
+ * added to the ranking by the same edit.
  */
 (function () {
-    var root = document.querySelector('[data-cam-picker]');
-
-    if (!root) {
-        return;
-    }
-
-    var terrainField = root.querySelector('[data-cam-terrain]');
-    var seasonField = root.querySelector('[data-cam-season]');
-    var verdictEl = root.querySelector('[data-cam-verdict]');
-    var resultsEl = root.querySelector('[data-cam-results]');
     var families = Array.prototype.slice.call(document.querySelectorAll('[data-cam-family]'));
 
-    if (!terrainField || !seasonField || !verdictEl || !resultsEl || families.length === 0) {
+    if (families.length === 0) {
         return;
     }
 
-    // Snow is the honest exception: none of the seven is a winter pattern, and
-    // the page says so rather than ranking seven wrong answers.
+    // Snow is the honest exception: none of the seven is a winter pattern,
+    // and the page says so rather than ranking seven wrong answers.
     var SNOW = 'neige';
 
-    /** The pressed pill of a group. */
-    function chosen(group) {
-        return group.querySelector('[aria-pressed="true"]') || group.querySelector('.cam-option');
-    }
-
-    function valueOf(group) {
-        return chosen(group).getAttribute('value');
-    }
-
-    /** The turn of phrase the markup carries, not a label glued to a word. */
-    function phraseOf(group) {
-        return chosen(group).getAttribute('data-phrase') || '';
-    }
-
-    /** One pressed at a time, and the group says which for a screen reader. */
-    function press(group, button) {
-        Array.prototype.forEach.call(group.querySelectorAll('.cam-option'), function (option) {
-            option.setAttribute('aria-pressed', option === button ? 'true' : 'false');
+    function listOf(el, name) {
+        return (el.getAttribute(name) || '').split(' ').filter(function (value) {
+            return value !== '';
         });
     }
 
     function capitalise(sentence) {
         return sentence.charAt(0).toUpperCase() + sentence.slice(1);
-    }
-
-    function listOf(el, name) {
-        var raw = el.getAttribute(name) || '';
-
-        return raw.split(' ').filter(function (value) {
-            return value !== '';
-        });
     }
 
     /** Two matches, one, or none: the ranking has three steps and no more. */
@@ -546,151 +522,83 @@
         var inSeason = listOf(family, 'data-seasons').indexOf(season) !== -1;
 
         if (onTerrain && inSeason) {
-            return { rank: 2, verdict: 'Tient', why: 'Le motif et la saison vont avec ce terrain.' };
+            return { tier: 2, rank: 'Tient', body: 'Le motif et la saison vont avec ce terrain.', tone: 'good' };
         }
 
         if (onTerrain) {
-            return { rank: 1, verdict: 'Passe', why: 'Bon terrain, mais la saison ne joue pas pour lui.' };
+            return { tier: 1, rank: 'Passe', body: 'Bon terrain, mais la saison ne joue pas pour lui.' };
         }
 
         if (inSeason) {
-            return { rank: 1, verdict: 'Passe', why: 'Bonne saison, mais il n’est pas fait pour ce terrain.' };
+            return { tier: 1, rank: 'Passe', body: 'Bonne saison, mais il n\u2019est pas fait pour ce terrain.' };
         }
 
-        return { rank: 0, verdict: 'Peu adapté', why: 'Ni le terrain ni la saison ne sont les siens.' };
+        return { tier: 0, rank: 'Peu adapté', body: 'Ni le terrain ni la saison ne sont les siens.', tone: 'poor' };
     }
 
-    function row(name, result) {
-        var li = document.createElement('li');
-        li.className = 'cam-result' + (result.rank === 2 ? ' is-good' : '') + (result.rank === 0 ? ' is-poor' : '');
+    GlabSelector.mount('[data-glab-selector="camouflage"]', function (state) {
+        var setting = capitalise(state.terrainPhrase) + ' ' + state.seasonPhrase + ', ';
 
-        var copy = document.createElement('span');
-        copy.className = 'cam-result-name';
-        copy.textContent = name;
+        if (state.terrain === SNOW) {
+            return {
+                resume: capitalise(state.terrainPhrase)
+                    + ', aucune de ces sept familles ne vaut. Un sur-vêtement blanc par-dessus '
+                    + 'la tenue habituelle fait le travail, et ne sert que quelques jours par an '
+                    + 'sous nos latitudes.',
+                cards: [],
+            };
+        }
 
-        var why = document.createElement('span');
-        why.className = 'cam-result-why';
-        why.textContent = result.why;
-        copy.appendChild(why);
+        var scored = families.map(function (family) {
+            var result = score(family, state.terrain, state.season);
 
-        var verdict = document.createElement('span');
-        verdict.className = 'cam-result-verdict';
-        verdict.textContent = result.verdict;
+            result.el = family;
+            result.title = family.getAttribute('data-name');
 
-        li.appendChild(copy);
-        li.appendChild(verdict);
+            return result;
+        }).sort(function (a, b) {
+            return b.tier - a.tier;
+        });
 
-        return li;
-    }
+        var kept = scored.filter(function (entry) {
+            return entry.tier === 2;
+        }).map(function (entry) {
+            return entry.title;
+        });
 
-    function render() {
-        var terrain = valueOf(terrainField);
-        var season = valueOf(seasonField);
+        var verdict = kept.length === 0
+            ? setting + 'aucune famille ne coche les deux cases. Prenez celle qui tient le terrain et cassez la silhouette avec le relief.'
+            // "CE, Woodland tiennent" is a list; "CE et Woodland tiennent" is
+            // a sentence, and the verdict is written as one.
+            : setting + (kept.length > 1
+                ? kept.slice(0, -1).join(', ') + ' et ' + kept[kept.length - 1] + ' tiennent le mieux.'
+                : kept[0] + ' tient le mieux.');
 
-        // replaceChildren rather than innerHTML: nothing here is markup, and
-        // the shop keeps user-shaped strings out of the parser on principle.
-        resultsEl.replaceChildren();
+        return { resume: verdict, cards: scored };
+    }, function (state, answer) {
+        // The cards on the page follow the ranking, so the answer is readable
+        // on the shelf of families as well as in the list.
+        (answer.cards.length === 0 ? [] : answer.cards).forEach(function (entry) {
+            entry.el.classList.toggle('is-picked', entry.tier === 2);
+            entry.el.classList.toggle('is-dimmed', entry.tier === 0);
+        });
 
-        if (terrain === SNOW) {
-            verdictEl.replaceChildren();
-            verdictEl.appendChild(document.createTextNode(capitalise(phraseOf(terrainField)) + ', '));
-
-            var strong = document.createElement('strong');
-            strong.textContent = 'aucune de ces sept familles ne vaut';
-            verdictEl.appendChild(strong);
-            verdictEl.appendChild(document.createTextNode(
-                '. Un sur-vêtement blanc par-dessus la tenue habituelle fait le travail, '
-                + 'et ne sert que quelques jours par an sous nos latitudes.'
-            ));
-
+        if (state.terrain === SNOW) {
             families.forEach(function (family) {
                 family.classList.remove('is-picked');
                 family.classList.add('is-dimmed');
             });
-
-            return;
         }
-
-        var scored = families.map(function (family) {
-            return { el: family, name: family.getAttribute('data-name'), result: score(family, terrain, season) };
-        });
-
-        scored.sort(function (a, b) {
-            return b.result.rank - a.result.rank;
-        });
-
-        scored.forEach(function (entry) {
-            resultsEl.appendChild(row(entry.name, entry.result));
-            entry.el.classList.toggle('is-picked', entry.result.rank === 2);
-            entry.el.classList.toggle('is-dimmed', entry.result.rank === 0);
-        });
-
-        var kept = scored.filter(function (entry) {
-            return entry.result.rank === 2;
-        });
-
-        verdictEl.replaceChildren();
-
-        var setting = capitalise(phraseOf(terrainField)) + ' ' + phraseOf(seasonField) + ', ';
-
-        if (kept.length === 0) {
-            verdictEl.appendChild(document.createTextNode(
-                setting + 'aucune famille ne coche les deux cases. Prenez celle qui tient le '
-                + 'terrain et cassez la silhouette avec le relief.'
-            ));
-
-            return;
-        }
-
-        var names = kept.map(function (entry) {
-            return entry.name;
-        });
-
-        verdictEl.appendChild(document.createTextNode(setting));
-
-        var picked = document.createElement('strong');
-        // "CE, Woodland tiennent" is a list; "CE et Woodland tiennent" is a
-        // sentence, and the verdict is written as one.
-        picked.textContent = names.length > 1
-            ? names.slice(0, -1).join(', ') + ' et ' + names[names.length - 1]
-            : names[0];
-        verdictEl.appendChild(picked);
-
-        verdictEl.appendChild(document.createTextNode(
-            names.length > 1 ? ' tiennent le mieux.' : ' tient le mieux.'
-        ));
-    }
-
-    [terrainField, seasonField].forEach(function (group) {
-        group.addEventListener('click', function (event) {
-            var button = event.target.closest('.cam-option');
-
-            if (!button || button.getAttribute('aria-pressed') === 'true') {
-                return;
-            }
-
-            press(group, button);
-            render();
-        });
     });
-
-    root.hidden = false;
-    render();
 })();
 
 /* ============================== entretien ==============================
  *
- * Entretenir son arme: the two-answer selector
+ * Entretenir son arme: which kit, for which calibre and which bench
  */
 
-/*
- * The entretien guide's selector: a calibre and a place, a ranked kit.
- * Every entry is something the shop actually sells, checked against the
- * production catalogue - one rope per calibre family, one 16-piece rod
- * kit covering .22 to .357, and the bench-side companions.
- */
 (function () {
-    var root = document.querySelector('[data-glab-selector]');
+    var root = document.querySelector('[data-glab-selector="entretien"]');
 
     if (!root) {
         return;
@@ -740,10 +648,6 @@
         },
     };
 
-    var state = { cal: '22', lieu: 'stand' };
-    var results = root.querySelector('[data-glab-results]');
-    var resume = root.querySelector('[data-glab-resume]');
-
     function ropeCard(cal) {
         var rope = ROPES[cal];
 
@@ -756,82 +660,25 @@
         };
     }
 
-    function cards() {
-        if (state.lieu === 'stand') {
-            return [ropeCard(state.cal), EXTRAS.etiquette, EXTRAS.recuperateur];
-        }
+    GlabSelector.mount('[data-glab-selector="entretien"]', function (state) {
+        var cards = state.lieu === 'stand'
+            ? [ropeCard(state.cal), EXTRAS.etiquette, EXTRAS.recuperateur]
+            : KIT_COVERS.indexOf(state.cal) !== -1
+                ? [ropeCard(state.cal), EXTRAS.kit, EXTRAS.tapis]
+                : [ropeCard(state.cal), EXTRAS.tapis, EXTRAS.etiquette];
 
-        return KIT_COVERS.indexOf(state.cal) !== -1
-            ? [ropeCard(state.cal), EXTRAS.kit, EXTRAS.tapis]
-            : [ropeCard(state.cal), EXTRAS.tapis, EXTRAS.etiquette];
-    }
-
-    function render() {
-        resume.textContent = 'Pour votre ' + ROPES[state.cal].label + ', '
-            + (state.lieu === 'stand' ? 'au stand' : "à l'établi") + ' :';
-        results.textContent = '';
-
-        cards().forEach(function (entry, index) {
-            var item = document.createElement('li');
-
-            var rank = document.createElement('span');
-            rank.className = 'glab-reco-rank';
-            rank.textContent = String(index + 1).padStart(2, '0');
-
-            var head = document.createElement('div');
-            head.className = 'glab-reco-head';
-
-            var title = document.createElement('h3');
-            title.textContent = entry.title;
-
-            var meta = document.createElement('span');
-            meta.className = 'glab-reco-meta';
-            meta.textContent = entry.meta;
-
-            head.appendChild(title);
-            head.appendChild(meta);
-
-            var body = document.createElement('p');
-            body.textContent = entry.body;
-
-            var link = document.createElement('a');
-            link.href = entry.href;
-            link.textContent = entry.cta;
-
-            item.appendChild(rank);
-            item.appendChild(head);
-            item.appendChild(body);
-            item.appendChild(link);
-            results.appendChild(item);
-        });
-    }
-
-    root.querySelectorAll('[data-glab-group]').forEach(function (group) {
-        var name = group.getAttribute('data-glab-group');
-
-        group.addEventListener('click', function (event) {
-            var button = event.target.closest('button[data-glab-value]');
-
-            if (!button) {
-                return;
-            }
-
-            state[name] = button.getAttribute('data-glab-value');
-            group.querySelectorAll('button').forEach(function (other) {
-                other.classList.toggle('is-active', other === button);
-            });
-            render();
-        });
+        return {
+            resume: 'Pour votre ' + ROPES[state.cal].label + ', '
+                + (state.lieu === 'stand' ? 'au stand' : "à l'établi") + ' :',
+            cards: cards,
+        };
     });
-
-    render();
 })();
 
 /* ============================== glossaire ==============================
  *
  * Le glossaire: the filter and the tally
  */
-
 /*
  * The glossary's filter: type, and the entries that do not answer step
  * back. Revealed by this script rather than shipped open, because a
@@ -915,3 +762,4 @@
     search.hidden = false;
     render();
 })();
+

@@ -78,7 +78,7 @@
             armes de votre préfecture est l'interlocuteur compétent.
         </p>
 
-        <section class="glab-panel" data-glab-selector aria-labelledby="glab-selector-title">
+        <section class="glab-section" data-glab-selector="classification" aria-labelledby="glab-selector-title">
             <h2 class="glab-title" id="glab-selector-title">Deux réponses, <span class="glab-title-accent">votre régime</span></h2>
             <p class="glab-lede">
                 Répondez et les quatre articles se réduisent à l'essentiel.
@@ -347,41 +347,38 @@
             </div>
         </section>
 
-        <section class="glab-panel" aria-labelledby="glab-faq-title">
+        <section class="glab-faq" aria-labelledby="glab-faq-title">
             <h2 class="glab-title" id="glab-faq-title">Questions <span class="glab-title-accent">fréquentes</span></h2>
-
-            <div class="glab-faq">
-                <details>
-                    <summary>À 20 joules exactement, catégorie D ou C ?</summary>
-                    <div>
-                        <p>Catégorie C. Le texte dit « supérieure ou égale à 20 joules ». Un modèle annoncé 20 J n'est plus en vente libre : c'est la première arme soumise à déclaration. Les fabricants qui visent le marché français calibrent à 19,9 J.</p>
-                    </div>
-                </details>
-                <details>
-                    <summary>Une réplique d'airsoft, c'est quelle catégorie ?</summary>
-                    <div>
-                        <p>Aucune. Sous 2 joules, l'objet n'est pas juridiquement une arme. Les répliques du commerce français sont conçues pour rester sous cette barre. La vente aux mineurs est interdite dès 0,08 J.</p>
-                    </div>
-                </details>
-                <details>
-                    <summary>Vente libre, donc transport libre ?</summary>
-                    <div>
-                        <p>Non. En catégorie D, l'achat est libre pour un majeur ; le port et le transport exigent un motif légitime. Sans ce motif : un an et 15 000 euros. En catégorie C : deux ans et 30 000 euros, sans amende forfaitaire.</p>
-                    </div>
-                </details>
-                <details>
-                    <summary>Comment obtenir une autorisation de catégorie B ?</summary>
-                    <div>
-                        <p>Par le tir sportif, sur le compte SIA : licence FFT, avis fédéral lié à une pratique régulière, extrait d'acte de naissance de moins de trois mois. Un titre unique, collé à la personne, vaut cinq ans. Six armes la première fois, quinze au renouvellement. Trois mois sans réponse, c'est un refus.</p>
-                    </div>
-                </details>
-                <details>
-                    <summary>Un chargeur peut-il changer la catégorie ?</summary>
-                    <div>
-                        <p>Oui. Une carabine semi-automatique à percussion centrale est en B avec un chargeur de 10 cartouches, en A1 dès qu'un chargeur de plus de 10 y est inséré. Le chargeur lui-même peut déjà être classé en A1.</p>
-                    </div>
-                </details>
-            </div>
+            <details>
+                <summary>À 20 joules exactement, catégorie D ou C ?</summary>
+                <div>
+                    <p>Catégorie C. Le texte dit « supérieure ou égale à 20 joules ». Un modèle annoncé 20 J n'est plus en vente libre : c'est la première arme soumise à déclaration. Les fabricants qui visent le marché français calibrent à 19,9 J.</p>
+                </div>
+            </details>
+            <details>
+                <summary>Une réplique d'airsoft, c'est quelle catégorie ?</summary>
+                <div>
+                    <p>Aucune. Sous 2 joules, l'objet n'est pas juridiquement une arme. Les répliques du commerce français sont conçues pour rester sous cette barre. La vente aux mineurs est interdite dès 0,08 J.</p>
+                </div>
+            </details>
+            <details>
+                <summary>Vente libre, donc transport libre ?</summary>
+                <div>
+                    <p>Non. En catégorie D, l'achat est libre pour un majeur ; le port et le transport exigent un motif légitime. Sans ce motif : un an et 15 000 euros. En catégorie C : deux ans et 30 000 euros, sans amende forfaitaire.</p>
+                </div>
+            </details>
+            <details>
+                <summary>Comment obtenir une autorisation de catégorie B ?</summary>
+                <div>
+                    <p>Par le tir sportif, sur le compte SIA : licence FFT, avis fédéral lié à une pratique régulière, extrait d'acte de naissance de moins de trois mois. Un titre unique, collé à la personne, vaut cinq ans. Six armes la première fois, quinze au renouvellement. Trois mois sans réponse, c'est un refus.</p>
+                </div>
+            </details>
+            <details>
+                <summary>Un chargeur peut-il changer la catégorie ?</summary>
+                <div>
+                    <p>Oui. Une carabine semi-automatique à percussion centrale est en B avec un chargeur de 10 cartouches, en A1 dès qu'un chargeur de plus de 10 y est inséré. Le chargeur lui-même peut déjà être classé en A1.</p>
+                </div>
+            </details>
 
             <p class="glab-more-reading">
                 Les quatre articles, dans l'ordre des seuils :

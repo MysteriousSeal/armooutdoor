@@ -472,7 +472,6 @@
 @media (max-width: 900px) {
     /* A sheet keeps its margins on a phone by giving up most of them. */
     .glab-section,
-    .glab-panel,
     .glab-faq {
         padding: 1.6rem 1.25rem 1.7rem;
     }
@@ -542,13 +541,11 @@
  * a stack of parts read as one document.
  */
 .glab > .glab-section,
-.glab > .glab-panel,
 .glab > .glab-faq {
     counter-increment: glab-part;
 }
 
 .glab > .glab-section::before,
-.glab > .glab-panel::before,
 .glab > .glab-faq::before {
     content: counter(glab-part, decimal-leading-zero);
     display: block;
@@ -570,7 +567,6 @@
  * document in several parts rather than as boxes and not-boxes.
  */
 .glab-section,
-.glab-panel,
 .glab-faq {
     margin-bottom: 1.65rem;
     padding: 2.35rem 2.6rem 2.5rem;
@@ -586,7 +582,7 @@
  * air here rather than each in its own rule, and only after a sibling, so the
  * first thing a part says still starts where the heading left it.
  */
-.glab > :is(.glab-section, .glab-panel, .glab-faq) > * + :is(.glab-prose, .glab-families, .glab-rules) {
+.glab > :is(.glab-section, .glab-faq) > * + :is(.glab-prose, .glab-families, .glab-rules, .glab-steps) {
     margin-top: 1.6rem;
 }
 
@@ -595,7 +591,7 @@
    above it: shorter, it lost on specificity and the paragraph kept both
    margins. A grid of cards after a heading still takes the air, since a card
    needs more room off a title than a line of prose does. */
-.glab > :is(.glab-section, .glab-panel, .glab-faq) > .glab-title + .glab-prose {
+.glab > :is(.glab-section, .glab-faq) > .glab-title + .glab-prose {
     margin-top: 0;
 }
 
@@ -1080,8 +1076,7 @@
  * does the reading: a plan, three places, four conditions, three rumours.
  */
 .glab--ou-tirer .glab-title,
-.glab--ou-tirer .glab-section,
-.glab--ou-tirer .glab-panel {
+.glab--ou-tirer .glab-section {
     scroll-margin-top: 5.5rem;
 }
 
@@ -2030,8 +2025,7 @@
 /* ============ the page's own reading order ============ */
 
 .glab--joules .glab-title,
-.glab--joules .glab-section,
-.glab--joules .glab-panel {
+.glab--joules .glab-section {
     scroll-margin-top: 5.5rem;
 }
 
@@ -2221,8 +2215,7 @@
  */
 
 .glab--cibles .glab-title,
-.glab--cibles .glab-section,
-.glab--cibles .glab-panel {
+.glab--cibles .glab-section {
     scroll-margin-top: 5.5rem;
 }
 
@@ -2403,75 +2396,6 @@
 
 /* ---- the ranking the selector prints ------------------------------------- */
 
-.glab--cam .cam-picker-fields {
-    display: grid;
-    gap: 1.25rem;
-    margin: 1.35rem 0 0;
-}
-
-.glab--cam .cam-picker-verdict {
-    margin: 1.6rem 0 0;
-    padding-top: 1.35rem;
-    border-top: 1px solid color-mix(in srgb, var(--accent-heading) 16%, var(--border));
-}
-
-.glab--cam .cam-picker-results {
-    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
-    margin-top: 1.2rem;
-}
-
-.glab--cam .cam-result {
-    animation: cam-rise 0.25s ease both;
-}
-
-@keyframes cam-rise {
-    from { opacity: 0; transform: translateY(4px); }
-    to { opacity: 1; transform: none; }
-}
-
-.glab--cam .cam-result.is-good {
-    border-color: var(--accent-heading);
-}
-
-.glab--cam .cam-result.is-poor {
-    opacity: 0.55;
-}
-
-.glab--cam .cam-result-verdict {
-    order: -1;
-    font-size: 0.625rem;
-    font-weight: 800;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-}
-
-.glab--cam .cam-result.is-good .cam-result-verdict {
-    color: var(--accent-heading);
-}
-
-.glab--cam .cam-result-name {
-    display: block;
-    font-size: 0.9375rem;
-    font-weight: 700;
-    color: var(--text);
-}
-
-.glab--cam .cam-result-why {
-    display: block;
-    margin-top: 0.3rem;
-    font-size: 0.8125rem;
-    font-weight: 400;
-    line-height: 1.5;
-    color: var(--text-muted);
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .glab--cam .cam-result {
-        animation: none;
-    }
-}
-
 /* ============================== entretien ==============================
  *
  * Entretenir son arme
@@ -2484,8 +2408,7 @@
  */
 
 .glab--entretien .glab-title,
-.glab--entretien .glab-section,
-.glab--entretien .glab-panel {
+.glab--entretien .glab-section {
     scroll-margin-top: 5.5rem;
 }
 
