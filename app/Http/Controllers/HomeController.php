@@ -44,13 +44,9 @@ class HomeController extends Controller
             ->orderBy('sort_order')
             ->get();
 
-        $freeShippingAmount = null;
-        if ($thresholdCents !== null && $thresholdCents > 0) {
-            $euros = $thresholdCents / 100;
-            $freeShippingAmount = fmod($euros, 1.0) === 0.0
-                ? number_format($euros, 0, ',', ' ').'€'
-                : format_euros($thresholdCents);
-        }
+        // The same rule the footer reads, so the two cannot promise different
+        // thresholds on one page.
+        $freeShippingAmount = $shipping->freeShippingLabel();
 
         // The strip above the categories: only what is genuinely reduced, and
         // nothing at all when nothing is.

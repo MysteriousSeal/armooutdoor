@@ -67,13 +67,19 @@ class GuideCiblesPageTest extends TestCase
             ->assertSee(route('guides.cibles'));
     }
 
-    public function test_the_footer_reading_column_links_guides_and_blog(): void
+    /**
+     * The two reading links used to have a column of their own, headed
+     * "Conseils". They sit under Aide & infos now, since two links left the
+     * grid ragged and both errands are the same one. What matters here is
+     * that the footer still reaches them.
+     */
+    public function test_the_footer_links_guides_and_blog(): void
     {
         $this->get('/')->assertOk()
-            ->assertSee('Conseils')
             ->assertSee('Les guides')
             ->assertSee('Le blog')
-            ->assertSee(route('guides.index'));
+            ->assertSee(route('guides.index'))
+            ->assertSee(route('blog.index'));
     }
 
     public function test_both_pages_are_published(): void

@@ -298,6 +298,39 @@
 
     <footer class="site-footer">
         <div class="site-footer-inner">
+            {{-- Three promises, ruled apart, at the head of the footer.
+                 Somebody reading here has scrolled past everything the page
+                 had to sell and is deciding whether to leave; these are the
+                 three facts worth repeating at that moment. The threshold is
+                 read from the same setting the home page strip uses, so the
+                 two can never name different figures, and its cell is absent
+                 entirely when the shop is not promising one. --}}
+            <ul class="site-footer-promises">
+                @if (filled($footerFreeShipping ?? null))
+                    <li class="site-footer-promise">
+                        <span class="site-footer-promise-mark" aria-hidden="true">
+                            @include('partials.icon', ['name' => 'truck-fast', 'size' => 20])
+                        </span>
+                        <strong>{!! __('store.footer_ship_title', ['amount' => '<b>'.e($footerFreeShipping).'</b>']) !!}</strong>
+                        <span>{{ __('store.footer_ship_note') }}</span>
+                    </li>
+                @endif
+                <li class="site-footer-promise">
+                    <span class="site-footer-promise-mark" aria-hidden="true">
+                        @include('partials.icon', ['name' => 'shield-halved', 'size' => 20])
+                    </span>
+                    <strong>{{ __('store.home_hero_pay_title') }}</strong>
+                    <span>{{ __('store.home_hero_pay_text') }}</span>
+                </li>
+                <li class="site-footer-promise">
+                    <span class="site-footer-promise-mark" aria-hidden="true">
+                        @include('partials.icon', ['name' => 'box-open', 'size' => 20])
+                    </span>
+                    <strong>{{ __('store.footer_returns_title') }}</strong>
+                    <span>{{ __('store.footer_returns_note') }}</span>
+                </li>
+            </ul>
+
             <div class="site-footer-top">
                 <div class="site-footer-brand">
                     <a href="{{ localized_route('home') }}" class="site-footer-brand-name">
@@ -314,6 +347,18 @@
                         <p class="site-footer-about">{{ __('store.footer_about') }}</p>
                         <p class="site-footer-about">{{ __('store.footer_about_more') }}</p>
                     </div>
+
+                    {{-- Where else the shop sells. The addresses are already
+                         declared in the structured data; this is the first
+                         place a customer can click one. --}}
+                    @if (($footerMarketplaces ?? []) !== [])
+                        <p class="site-footer-elsewhere">
+                            <span class="site-footer-elsewhere-label">{{ __('store.footer_elsewhere') }}</span>
+                            @foreach ($footerMarketplaces as $marketplace)
+                                <a href="{{ $marketplace['url'] }}" target="_blank" rel="noopener noreferrer nofollow">{{ $marketplace['label'] }}</a>
+                            @endforeach
+                        </p>
+                    @endif
                 </div>
 
                 <nav class="site-footer-col" aria-labelledby="footer-shop-heading">
@@ -336,6 +381,9 @@
                     </ul>
                 </nav>
 
+                {{-- Reading was two links in a column of its own, which left
+                     the grid ragged. Help and reading are the same errand:
+                     somebody looking something up rather than buying. --}}
                 <nav class="site-footer-col" aria-labelledby="footer-help-heading">
                     <h2 id="footer-help-heading" class="site-footer-heading">{{ __('store.footer_help') }}</h2>
                     <ul class="site-footer-links">
@@ -344,19 +392,20 @@
                         <li><a href="{{ route('help.secure-payment') }}">{{ __('store.footer_help_secure_payment') }}</a></li>
                         <li><a href="{{ route('about') }}">{{ __('store.footer_help_about') }}</a></li>
                         <li><a href="{{ localized_route('contact.show') }}">{{ __('store.footer_help_contact') }}</a></li>
-                    </ul>
-                </nav>
-
-                <nav class="site-footer-col" aria-labelledby="footer-reading-heading">
-                    <h2 id="footer-reading-heading" class="site-footer-heading">{{ __('store.footer_reading') }}</h2>
-                    <ul class="site-footer-links">
                         <li><a href="{{ route('guides.index') }}">{{ __('store.footer_reading_guides') }}</a></li>
                         <li><a href="{{ route('blog.index') }}">{{ __('store.footer_reading_blog') }}</a></li>
                     </ul>
                 </nav>
             </div>
 
-            <div class="site-footer-bottom">
+        </div>
+
+        {{-- The small print runs the full width of the page, so it is a band
+             outside the container with a container of its own inside it. The
+             rule above it has to reach both edges, and a background stretched
+             past the container with a shadow leaves its border behind. --}}
+        <div class="site-footer-bottom">
+            <div class="site-footer-bottom-inner">
                 <p class="site-footer-copy">
                     &copy; {{ date('Y') }}
                     <a href="{{ localized_route('home') }}">Armo Outdoor</a>

@@ -57,4 +57,24 @@ class MarketplaceSetting extends Model
             && $this->naturabuy_rating_tenths !== null
             && $this->naturabuy_reviews !== null;
     }
+
+    /**
+     * Where else the shop sells, for the footer to list.
+     *
+     * Only the addresses that have been filled in: a footer link to nothing
+     * is worse than no link, and these same rows already declare the shop's
+     * other pages in the structured data.
+     *
+     * @return list<array{label: string, url: string}>
+     */
+    public function footerLinks(): array
+    {
+        return collect([
+            ['label' => 'NaturaBuy', 'url' => trim((string) $this->naturabuy_url)],
+            ['label' => 'Vinted', 'url' => trim((string) $this->vinted_url)],
+        ])
+            ->filter(fn (array $row): bool => $row['url'] !== '')
+            ->values()
+            ->all();
+    }
 }

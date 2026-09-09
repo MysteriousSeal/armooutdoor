@@ -6,8 +6,10 @@ use App\Models\Category;
 use App\Models\CompanySetting;
 use App\Models\Conversation;
 use App\Models\IdentityDocument;
+use App\Models\MarketplaceSetting;
 use App\Models\Order;
 use App\Models\PurchaseOrder;
+use App\Models\ShippingSetting;
 use App\Models\User;
 use App\Models\WishlistItem;
 use App\Services\VintedCopywriter;
@@ -60,6 +62,11 @@ class AppServiceProvider extends ServiceProvider
 
         View::composer('layouts.app', function ($view): void {
             $view->with([
+                // The footer promises free shipping on every page, and lists
+                // where else the shop sells. Both are settings rows, resolved
+                // once per request like everything else here.
+                'footerFreeShipping' => ShippingSetting::current()->freeShippingLabel(),
+                'footerMarketplaces' => MarketplaceSetting::current()->footerLinks(),
                 'navCategories' => Category::query()
                     ->whereNull('parent_id')
                     ->with(['children' => fn ($query) => $query->orderBy('sort_order')->withCount(['products as products_count' => fn ($q) => $q->active()])])

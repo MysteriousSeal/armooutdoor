@@ -736,16 +736,95 @@ body.has-menu-open {
     padding: 0 0 3rem;
 }
 
+/*
+ * The footer is the floor of the page, not more of it.
+ *
+ * It kept the surface colour and read as one last white band with links in
+ * it, so the eye ran off the bottom of the site rather than arriving
+ * somewhere. It stays light, and what closes the page instead is structure:
+ * an olive rule across the top the way a category hero carries one, three
+ * promises ruled apart under it, then the columns, then a tinted strip for
+ * the small print.
+ */
 .site-footer {
     margin-top: auto;
     background: var(--surface);
-    border-top: 1px solid var(--border);
+    border-top: 2px solid var(--accent-heading);
 }
 
 .site-footer-inner {
     max-width: 1280px;
     margin: 0 auto;
-    padding: 2rem 1.5rem 1.25rem;
+    padding: 0 1.5rem;
+}
+
+/*
+ * The three promises.
+ *
+ * The same three facts the strip under the hero makes, restated where
+ * somebody is deciding whether to leave: the page opens and closes on them.
+ * Ruled apart rather than boxed, since a row of boxes inside a footer is a
+ * panel inside a panel, and the hairlines are enough to say these are three
+ * things and not one sentence.
+ */
+.site-footer-promises {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    /* The rule between neighbours is the grid's own gap with the border
+       colour showing through, so it falls correctly at three columns, at two
+       and at one without a divider having to know where it sits. A border on
+       one side cannot: stacked, it drew a stray line down the left. */
+    gap: 1px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    background: var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+.site-footer-promise {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: baseline;
+    column-gap: 0.7rem;
+    row-gap: 0.15rem;
+    padding: 1.4rem 1.25rem 1.45rem;
+    background: var(--surface);
+}
+
+/* Every cell is padded alike, the outer two included. Exempting them aligned
+   the row with the container at three columns and staggered it at every other
+   count, since which cell opens a row changes with the count and the rule
+   cannot know. A small even inset holds whatever the row does. */
+
+.site-footer-promise-mark {
+    grid-row: 1;
+    display: inline-flex;
+    align-items: center;
+    color: var(--accent-heading);
+    transform: translateY(0.2rem);
+}
+
+.site-footer-promise strong {
+    grid-column: 2;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    line-height: 1.3;
+    color: var(--text);
+}
+
+/* The threshold is the figure being counted on. */
+.site-footer-promise strong b {
+    font-weight: 700;
+    color: var(--accent-heading);
+}
+
+.site-footer-promise span:not(.site-footer-promise-mark) {
+    grid-column: 2;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: var(--text-muted);
 }
 
 /* The brand takes its share; the link columns size to their words and
@@ -753,34 +832,86 @@ body.has-menu-open {
    the container's right edge instead of where its text happens to. */
 .site-footer-top {
     display: grid;
-    grid-template-columns: minmax(0, 1.35fr) repeat(4, auto);
+    /* The brand is sized by its own measure rather than given a share of the
+       row: as a fraction it took a cell far wider than the text inside it and
+       left a hole between the blurb and the first column. */
+    grid-template-columns: minmax(0, 26rem) repeat(3, auto);
     justify-content: space-between;
-    gap: 2rem 4rem;
+    gap: 2rem 3rem;
+    padding: 2.4rem 0 2.6rem;
 }
 
 .site-footer-brand-name {
     display: inline-block;
-    font-size: 1rem;
+    font-size: 1.125rem;
     font-weight: 500;
     letter-spacing: -0.01em;
     line-height: 1.3;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.7rem;
 }
 
 .site-footer-about {
+    margin: 0;
     font-size: 0.8125rem;
     color: var(--text-muted);
     line-height: 1.65;
-    max-width: 24rem;
+    max-width: 26rem;
 }
 
-.site-footer-heading {
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
+/* Two sentences about two different things, so they read as two paragraphs
+   rather than as one that happens to wrap. */
+.site-footer-about + .site-footer-about {
+    margin-top: 0.7rem;
+}
+
+/* Where else the shop sells. Set apart from the blurb by a rule rather than
+   by space alone, since it is a different kind of fact. */
+.site-footer-elsewhere {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.3rem 0.9rem;
+    margin: 1.2rem 0 0;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.8125rem;
+    max-width: 26rem;
+}
+
+.site-footer-elsewhere-label {
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--text);
-    margin: 0 0 0.75rem;
+    color: var(--text-muted);
+}
+
+.site-footer-elsewhere a {
+    color: var(--accent-heading);
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--accent-heading) 35%, transparent);
+    transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.site-footer-elsewhere a:hover,
+.site-footer-elsewhere a:focus-visible {
+    color: var(--accent-hover);
+    border-bottom-color: currentColor;
+}
+
+/* The house micro-label, and a short rule under it: the columns had no edge
+   of their own, so four lists of links read as one field of text. */
+.site-footer-heading {
+    display: inline-block;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-heading);
+    margin: 0 0 1rem;
+    padding-bottom: 0.55rem;
+    border-bottom: 2px solid color-mix(in srgb, var(--accent-heading) 30%, transparent);
 }
 
 .site-footer-heading--spaced {
@@ -793,7 +924,7 @@ body.has-menu-open {
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 0.5rem;
 }
 
 .site-footer-links li,
@@ -803,27 +934,45 @@ body.has-menu-open {
     line-height: 1.45;
 }
 
+/* The underline arrives on hover rather than sitting there: four columns of
+   permanently underlined links is a wall of rules. */
 .site-footer-links a {
-    transition: color 0.15s;
+    text-decoration: none;
+    transition: color 0.15s ease;
 }
 
-.site-footer-links a:hover {
-    color: var(--text);
+.site-footer-links a:hover,
+.site-footer-links a:focus-visible {
+    color: var(--accent-heading);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
 }
 
+/*
+ * The small print, on a tint of its own.
+ *
+ * Copyright, version and the legal links are a different register from the
+ * rest: they are not what anybody came for. The band runs the full width of
+ * the page, rule included, while its contents stay on the container's grid.
+ */
 .site-footer-bottom {
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+}
+
+.site-footer-bottom-inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
+    gap: 0.75rem 1.5rem;
     flex-wrap: wrap;
-    margin-top: 1.75rem;
-    padding-top: 1.25rem;
-    border-top: 1px solid var(--border);
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 1rem 1.5rem 1.1rem;
 }
 
 .site-footer-copy {
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
     color: var(--text-muted);
     /*
      * The line is set at the size the legal links beside it are, and on a
@@ -839,32 +988,39 @@ body.has-menu-open {
 
 .site-footer-copy a {
     color: var(--text-muted);
-    transition: color 0.15s;
+    transition: color 0.15s ease;
 }
 
-.site-footer-copy a:hover {
-    color: var(--text);
+.site-footer-copy a:hover,
+.site-footer-copy a:focus-visible {
+    color: var(--accent-heading);
 }
 
 .site-footer-copy-sep {
     margin: 0 0.35rem;
-    opacity: 0.6;
+    opacity: 0.55;
+}
+
+.site-footer-version {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
 }
 
 .site-footer-legal {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.35rem 1rem;
+    gap: 0.35rem 1.15rem;
 }
 
 .site-footer-legal a {
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
     color: var(--text-muted);
-    transition: color 0.15s;
+    transition: color 0.15s ease;
 }
 
-.site-footer-legal a:hover {
-    color: var(--text);
+.site-footer-legal a:hover,
+.site-footer-legal a:focus-visible {
+    color: var(--accent-heading);
 }
 
 .home-kicker {
