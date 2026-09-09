@@ -1,11 +1,16 @@
 /*
- * The chrome every guide wears: the page hero, the olive panel, the
- * titles and ledes, the prose, the table, the FAQ and the selector the
- * three oldest guides share.
+ * Every guide, in one sheet.
  *
- * What belongs to a single guide lives in its own file beside this one,
- * loaded after it. This file grew to nineteen hundred lines because
- * everything landed here; a rule used by one page does not.
+ * The shared chrome first: the page hero, the olive panel, the titles and
+ * ledes, the prose, the table, the FAQ and the selector the guides share.
+ * Then one section per guide, in the order the shelf presents them, holding
+ * only what that guide alone needs.
+ *
+ * Eight files became one because eight files was eight requests and eight
+ * places to look for a rule, for a total under three thousand lines that a
+ * single page never used more than a fifth of. The sections are fenced and
+ * named below so a rule can still be found by the page it belongs to, and a
+ * rule used by more than one guide belongs in the shared part above them.
  */
 
 .glab {
@@ -187,10 +192,29 @@
     margin: 0 0 0.85rem;
 }
 
-.glab-specs > div {
-    padding: 0.9rem 1rem;
+/*
+ * The square of paper every guide's cards are cut from: a surface and a
+ * hairline in the shop's olive. Twelve rules were declaring this pair; they
+ * describe their own shape now, and nothing else.
+ */
+.glab-specs > div,
+.glab-family,
+.glab-step,
+.glab-takeaways li,
+.glab-rules > li,
+.glab-chapter,
+.glab-myth,
+.glab-place-cards > div,
+.glab-square article,
+.glab-unit,
+.glab-calibres a,
+.glab--cam .cam-family {
     background: var(--surface);
     border: 1px solid color-mix(in srgb, var(--accent-heading) 16%, var(--border));
+}
+
+.glab-specs > div {
+    padding: 0.9rem 1rem;
 }
 
 .glab-specs dt {
@@ -255,12 +279,6 @@
     white-space: nowrap;
 }
 
-.glab-faq-label {
-    margin: 0 0 0.7rem;
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: var(--accent-heading);
-}
 
 .glab-faq details {
     background: var(--surface);
@@ -323,8 +341,6 @@
 .glab-step {
     margin: 0;
     padding: 1rem 1.1rem 1.2rem;
-    background: var(--surface);
-    border: 1px solid color-mix(in srgb, var(--accent-heading) 16%, var(--border));
 }
 
 .glab-step legend {
@@ -402,7 +418,8 @@
     color: var(--accent-heading);
 }
 
-.glab-reco-list {
+.glab-reco-list,
+.glab-calibres {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.8rem;
@@ -475,8 +492,15 @@
     }
 }
 
+/* One link, wherever a guide writes prose: the same olive, the same
+   underline, the same offset. Five rules said this identically. */
 .glab-prose a,
-.glab-more-reading a {
+.glab-more-reading a,
+.glab-family a,
+.glab-takeaways a,
+.glab-chapter a,
+.glab-chapter-more a,
+.glab--joules .glab-rules a {
     color: var(--accent-heading);
     font-weight: 600;
     text-decoration: underline;
@@ -552,12 +576,16 @@
     gap: 0.5rem;
     min-width: 0;
     padding: 1.25rem 1.3rem 1.3rem;
-    background: var(--surface);
-    border: 1px solid color-mix(in srgb, var(--accent-heading) 16%, var(--border));
     border-top: 2px solid var(--accent-heading);
 }
 
-.glab-family-kicker {
+/* The uppercase micro-label a guide prints above a card's name, a
+   specification, a worked step or a pair. Seven rules said this identically. */
+.glab-family-kicker,
+.glab-unit-kicker,
+.glab-worked-kicker,
+.glab-joules-pair-kicker,
+.glab-spec-kicker {
     margin: 0;
     font-size: 0.625rem;
     font-weight: 700;
@@ -566,7 +594,8 @@
     color: var(--text-muted);
 }
 
-.glab-family h3 {
+.glab-family h3,
+.glab--cam .cam-family-copy h3 {
     margin: 0;
     font-size: 1.12rem;
     font-weight: 700;
@@ -575,7 +604,8 @@
     color: var(--accent-heading);
 }
 
-.glab-family-read {
+.glab-family-read,
+.glab--cam .cam-family-read {
     margin: 0;
     font-size: 0.95rem;
     font-weight: 600;
@@ -583,19 +613,15 @@
     color: var(--text);
 }
 
-.glab-family p {
+.glab-family p,
+.glab-unit p,
+.glab-place-cards dd,
+.glab--cam .cam-family-copy p {
     margin: 0;
     font-size: 0.9rem;
     line-height: 1.65;
 }
 
-.glab-family a {
-    color: var(--accent-heading);
-    font-weight: 600;
-    text-decoration: underline;
-    text-decoration-color: color-mix(in srgb, var(--accent-heading) 45%, transparent);
-    text-underline-offset: 2px;
-}
 
 .glab-family a:hover {
     text-decoration-color: var(--accent-heading);
@@ -620,8 +646,6 @@
 .glab-rules > li {
     position: relative;
     padding: 1.2rem 1.3rem 1.15rem 4.4rem;
-    background: var(--surface);
-    border: 1px solid color-mix(in srgb, var(--accent-heading) 16%, var(--border));
     counter-increment: glab-rule;
 }
 
@@ -668,8 +692,6 @@
     gap: 0.85rem;
     align-items: baseline;
     padding: 0.7rem 0.9rem;
-    background: var(--surface);
-    border: 1px solid color-mix(in srgb, var(--accent-heading) 16%, var(--border));
 }
 
 .glab-takeaway-label {
@@ -685,13 +707,6 @@
     line-height: 1.5;
 }
 
-.glab-takeaways a {
-    color: var(--accent-heading);
-    font-weight: 600;
-    text-decoration: underline;
-    text-decoration-color: color-mix(in srgb, var(--accent-heading) 45%, transparent);
-    text-underline-offset: 2px;
-}
 
 @media (max-width: 900px) {
     .glab-families {
@@ -711,4 +726,1956 @@
         grid-template-columns: minmax(0, 1fr);
         gap: 0.25rem;
     }
+}
+
+/* ============================== classification ==============================
+ *
+ * Classer son arme
+ */
+
+/*
+ * « Classer son arme » : the five legal chapters, which need a wider
+ * measure than the shared prose gives.
+ */
+
+/* Classification guide: five legal chapters, not a single cramped column. */
+.glab-detail .glab-prose {
+    max-width: none;
+}
+
+.glab-detail .glab-prose h3 {
+    margin-bottom: 0.75rem;
+}
+
+.glab-detail .glab-prose p {
+    max-width: 46rem;
+    margin-bottom: 1.1rem;
+    line-height: 1.7;
+}
+
+
+.glab-detail .glab-specs > div {
+    padding: 1.2rem 1.25rem 1.3rem;
+}
+
+.glab-detail .glab-specs dd {
+    line-height: 1.65;
+}
+
+.glab-chapters {
+    display: grid;
+    gap: 1.2rem;
+    margin-top: 1.85rem;
+}
+
+.glab-chapter {
+    padding: 1.55rem 1.7rem 1.5rem;
+}
+
+.glab-chapter h3 {
+    margin: 0 0 0.9rem;
+    padding-bottom: 0.55rem;
+    font-size: 1.12rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+    color: var(--accent-heading);
+    background: linear-gradient(var(--accent-heading), var(--accent-heading)) left bottom / 2rem 2px no-repeat;
+}
+
+.glab-chapter p {
+    max-width: 46rem;
+    margin: 0 0 1.05rem;
+    font-size: 0.95rem;
+    line-height: 1.72;
+}
+
+.glab-chapter p:last-child {
+    margin-bottom: 0;
+}
+
+.glab-chapter-more {
+    margin-top: 0.25rem;
+    padding-top: 0.95rem;
+    border-top: 1px solid color-mix(in srgb, var(--accent-heading) 14%, var(--border));
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+}
+
+
+.glab-chapter a:hover {
+    text-decoration-color: var(--accent-heading);
+}
+
+@media (max-width: 900px) {
+    .glab-chapter {
+            padding: 1.25rem 1.15rem 1.2rem;
+        }
+}
+
+/* ============================== ou-tirer ==============================
+ *
+ * Ou tirer legalement
+ */
+
+/*
+ * « Où tirer légalement » : the lane seen from above, the claims the web
+ * repeats, the four conditions numbered, and the receipts.
+ */
+
+/* ============ où tirer : the lane seen from above ============ */
+
+/* The whole page is one question drawn: what stands behind the target.
+   Flat, plan view, in the shop's own inks rather than a photograph. */
+.glab-lane {
+    max-width: 46rem;
+    margin: 0 0 1.5rem;
+    padding: 1.2rem 1.3rem 1rem;
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 20%, var(--border));
+    border-top: 2px solid var(--accent-heading);
+}
+
+/* Below about thirty-two rem the plan's labels shrink past reading size,
+   so it scrolls inside its own frame rather than becoming a picture of
+   text nobody can read. The page itself never scrolls sideways. */
+.glab-lane-frame {
+    overflow-x: auto;
+}
+
+.glab-lane svg {
+    display: block;
+    width: 100%;
+    min-width: 32rem;
+    height: auto;
+}
+
+/* What the projectile can still reach past the target. */
+.glab-lane-cone {
+    fill: color-mix(in srgb, #7a4a45 14%, transparent);
+}
+
+/* And the part of it the point d'arrêt closes off. */
+.glab-lane-safe {
+    fill: color-mix(in srgb, var(--accent-heading) 20%, transparent);
+}
+
+.glab-lane-axis {
+    stroke: color-mix(in srgb, var(--text) 40%, transparent);
+    stroke-width: 1.5;
+}
+
+.glab-lane-fence {
+    stroke: color-mix(in srgb, var(--text) 45%, transparent);
+    stroke-width: 2;
+    stroke-dasharray: 3 5;
+}
+
+.glab-lane-shooter {
+    fill: var(--text);
+}
+
+.glab-lane-target {
+    fill: color-mix(in srgb, var(--text) 55%, transparent);
+}
+
+.glab-lane-stop {
+    fill: var(--accent-heading);
+}
+
+.glab-lane-house {
+    fill: none;
+    stroke: #7a4a45;
+    stroke-width: 2;
+    stroke-linejoin: round;
+}
+
+.glab-lane-path {
+    stroke: #7a4a45;
+    stroke-width: 2.5;
+}
+
+.glab-lane-label {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    fill: var(--text-muted);
+}
+
+.glab-lane-label--key {
+    font-weight: 800;
+    fill: var(--accent-heading);
+}
+
+.glab-lane figcaption {
+    margin-top: 0.9rem;
+    padding-top: 0.8rem;
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+}
+
+[data-theme='dark'] .glab-lane-house,
+[data-theme='dark'] .glab-lane-path {
+    stroke: #e08585;
+}
+
+[data-theme='dark'] .glab-lane-cone {
+    fill: color-mix(in srgb, #e08585 16%, transparent);
+}
+
+/* ============ où tirer : what the web repeats ============ */
+
+.glab-myths {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 0.8rem;
+}
+
+.glab-myth {
+    padding: 1rem 1.1rem;
+}
+
+/* The claim is struck through: it is quoted to be corrected, not repeated. */
+.glab-myth-claim {
+    margin: 0 0 0.6rem;
+    padding-bottom: 0.6rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-style: italic;
+    line-height: 1.45;
+    color: #7a4a45;
+    text-decoration: line-through;
+    text-decoration-color: color-mix(in srgb, #7a4a45 45%, transparent);
+    border-bottom: 1px solid var(--border);
+}
+
+.glab-myth-truth {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+}
+
+[data-theme='dark'] .glab-myth-claim {
+    color: #e08585;
+    text-decoration-color: color-mix(in srgb, #e08585 45%, transparent);
+}
+
+/* ============ où tirer : the receipts ============ */
+
+.glab-sources {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.glab-sources a {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    height: 100%;
+    padding: 0.75rem 0.9rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.glab-sources a:hover {
+    border-color: var(--accent-heading);
+}
+
+.glab-source-num {
+    font-size: 0.72rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent-heading);
+}
+
+.glab-source-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+}
+
+.glab-source-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--text);
+}
+
+.glab-source-host {
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+}
+
+/* ============ où tirer : making a legal page scannable ============ */
+
+/*
+ * This guide is the one people open with a yes/no in mind. The rest of the
+ * guides can afford a long column; this one has to be jumped, ticked, and
+ * corrected. The olive ticket language of the shop stays, but the structure
+ * does the reading: a plan, three places, four conditions, three rumours.
+ */
+.glab--ou-tirer .glab-title,
+.glab--ou-tirer .glab-section,
+.glab--ou-tirer .glab-panel {
+    scroll-margin-top: 5.5rem;
+}
+
+
+
+/* The one sentence a section is really about. Both guides that print it had
+   written it out. */
+.glab-lede--thesis {
+    max-width: 36rem;
+    font-size: clamp(1.15rem, 2vw, 1.35rem);
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: -0.015em;
+    color: var(--accent-heading);
+}
+
+
+.glab--ou-tirer .glab-prose p {
+    margin-bottom: 1.05rem;
+}
+
+/* A place or a diameter: a kicker, the thing itself, and what it demands.
+   Two guides had written this out separately and identically. */
+.glab-place-cards {
+    gap: 1rem;
+    margin: 0;
+}
+
+.glab-place-cards > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    padding: 1.2rem 1.25rem 1.25rem;
+    border-top: 2px solid var(--accent-heading);
+}
+
+.glab-place-cards dt {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin: 0;
+    font-size: 1.12rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    color: var(--accent-heading);
+}
+
+
+
+.glab--ou-tirer .glab-myth {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 1.15rem 1.2rem 1.2rem;
+    border-top: 2px solid color-mix(in srgb, #7a4a45 70%, var(--accent-heading));
+}
+
+.glab-myth-flag {
+    margin: 0;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #7a4a45;
+}
+
+.glab-myth-flag--truth {
+    margin-top: 0.55rem;
+    padding-top: 0.65rem;
+    border-top: 1px solid var(--border);
+    color: var(--accent-heading);
+}
+
+.glab--ou-tirer .glab-myth-claim {
+    margin: 0;
+    padding: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    font-style: normal;
+    line-height: 1.4;
+    letter-spacing: -0.015em;
+    color: var(--text);
+    text-decoration: none;
+    border-bottom: 0;
+}
+
+
+[data-theme='dark'] .glab-myth-flag {
+    color: #e08585;
+}
+
+[data-theme='dark'] .glab--ou-tirer .glab-myth {
+    border-top-color: #e08585;
+}
+
+
+.glab--ou-tirer .glab-faq summary {
+    line-height: 1.4;
+}
+
+/* ============================== glossaire ==============================
+ *
+ * Le glossaire
+ */
+
+/*
+ * « Le glossaire » : the letter index, the filter, and the entry laid
+ * out as the word on the left and the place it lives on the right.
+ */
+
+/* ============ the glossary ============ */
+
+/* The index tabs. Letters that open nothing stay in place, spent: an
+   index that quietly skips G reads as broken rather than complete. */
+.gloss-rail {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1px;
+    margin: 0 0 1.5rem;
+    background: color-mix(in srgb, var(--accent-heading) 18%, var(--border));
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 18%, var(--border));
+}
+
+.gloss-rail a,
+.gloss-rail span {
+    flex: 1 0 auto;
+    min-width: 2rem;
+    padding: 0.45rem 0.2rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-align: center;
+    background: var(--surface);
+}
+
+.gloss-rail a {
+    font-weight: 800;
+    color: var(--surface);
+    background: var(--accent-heading);
+}
+
+.gloss-rail a:hover {
+    background: var(--accent-hover);
+}
+
+.gloss-rail span {
+    color: color-mix(in srgb, var(--text-muted) 55%, transparent);
+    background: color-mix(in srgb, var(--border) 45%, var(--surface));
+}
+
+.gloss-search {
+    display: grid;
+    gap: 0.35rem;
+    max-width: 26rem;
+    margin: 0 0 2rem;
+}
+
+.gloss-search label,
+.glab-calc-field label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.gloss-search input {
+    width: 100%;
+    min-height: 2.6rem;
+    padding: 0.5rem 0.7rem;
+    font: inherit;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 25%, var(--border));
+}
+
+
+.gloss-search-count {
+    min-height: 1rem;
+    margin: 0;
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+}
+
+/* The letter sits in the margin, the entries beside it, so the page reads
+   as an index rather than as a stack of headings. */
+.gloss-group {
+    display: grid;
+    grid-template-columns: 3.5rem minmax(0, 1fr);
+    gap: 0 1.5rem;
+    padding-top: 1.4rem;
+    border-top: 1px solid var(--border);
+}
+
+.gloss-group + .gloss-group {
+    margin-top: 1.4rem;
+}
+
+.gloss-letter {
+    position: sticky;
+    top: 1.5rem;
+    align-self: start;
+    margin: 0;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--accent-heading);
+}
+
+/* A rule under the letter, so the margin reads as a tab rather than as a
+   character that happened to be left there. */
+.gloss-letter::after {
+    content: '';
+    display: block;
+    width: 1.6rem;
+    height: 3px;
+    margin-top: 0.4rem;
+    background: var(--accent-heading);
+}
+
+.gloss-entries {
+    margin: 0;
+}
+
+/* The word on the left, the place it lives on the right. The right column
+   is the same width all the way down, so the counts read as a column of
+   figures rather than as forty separate afterthoughts. */
+.gloss-entry {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 16rem;
+    column-gap: 2.5rem;
+    align-items: start;
+}
+
+.gloss-entry + .gloss-entry {
+    margin-top: 1.4rem;
+    padding-top: 1.4rem;
+    border-top: 1px solid color-mix(in srgb, var(--accent-heading) 30%, var(--border));
+}
+
+.gloss-term {
+    grid-column: 1;
+    margin: 0 0 0.35rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--accent-heading);
+}
+
+.gloss-definition {
+    grid-column: 1;
+    max-width: 44rem;
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.62;
+}
+
+/* The destination, coloured by what kind of place it is: stock you can
+   filter, a shelf, or the shop's own writing. The palette is the one the
+   catalogue already uses for meaning rather than three new hues. */
+.gloss-where {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    padding: 0.7rem 0.85rem;
+    background: var(--gk-wash);
+    border: 1px solid var(--gk-line);
+    border-left: 3px solid var(--gk-ink);
+}
+
+.gloss-where.is-filtre {
+    --gk-ink: #3d6b4e;
+    --gk-wash: #eef4ef;
+    --gk-line: #d5e4d8;
+}
+
+.gloss-where.is-rayon {
+    --gk-ink: #5b5c3b;
+    --gk-wash: #f2f2e8;
+    --gk-line: #dcdcc6;
+}
+
+.gloss-where.is-lecture {
+    --gk-ink: #2f5d8a;
+    --gk-wash: #eef3f8;
+    --gk-line: #c6d8e8;
+}
+
+/* A word the shop sells nothing for: no colour to spend, so it keeps the
+   column's shape in the page's own greys. */
+.gloss-where.is-notion {
+    --gk-ink: #5f5c56;
+    --gk-wash: #f2f1ee;
+    --gk-line: #e0ded9;
+}
+
+[data-theme='dark'] .gloss-where.is-filtre {
+    --gk-ink: #8fc9a5;
+    --gk-wash: #23312a;
+    --gk-line: #3a5344;
+}
+
+[data-theme='dark'] .gloss-where.is-rayon {
+    --gk-ink: #a9ab77;
+    --gk-wash: #2c2d22;
+    --gk-line: #4a4b36;
+}
+
+[data-theme='dark'] .gloss-where.is-lecture {
+    --gk-ink: #86b6e0;
+    --gk-wash: #212f3b;
+    --gk-line: #3a5570;
+}
+
+[data-theme='dark'] .gloss-where.is-notion {
+    --gk-ink: #b6b1a9;
+    --gk-wash: #2a2825;
+    --gk-line: #423f3a;
+}
+
+/* Where the word is met: the thing a dictionary cannot say. */
+.gloss-source {
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--gk-ink);
+}
+
+.gloss-goto {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.45rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--gk-ink);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--gk-ink) 35%, transparent);
+    text-underline-offset: 0.2em;
+}
+
+.gloss-goto::before {
+    content: '\2192';
+    font-weight: 400;
+}
+
+.gloss-goto:hover {
+    text-decoration-color: var(--gk-ink);
+}
+
+/* The tally, tabular so the figures line up down the page. */
+.gloss-count {
+    margin: 0.1rem 0 0;
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.gloss-count strong {
+    font-size: 1.3rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--gk-ink);
+}
+
+/* Clear of whatever closes the page: the rule that opens the next section
+   sat flush against the last entry. */
+.gloss-list {
+    margin-bottom: 3rem;
+}
+
+.gloss-empty {
+    margin: 1.5rem 0 0;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+@media (max-width: 62rem) {
+    /* The right column has nowhere to go, so the place a word lives is
+           said under its definition instead of beside it. */
+        .gloss-entry {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+    .gloss-where {
+            grid-column: 1;
+            grid-row: auto;
+            margin-top: 0.7rem;
+        }
+}
+
+@media (max-width: 46rem) {
+    .gloss-group {
+            grid-template-columns: minmax(0, 1fr);
+            gap: 0.6rem;
+        }
+
+    .gloss-letter {
+            position: static;
+        }
+}
+
+/* ============================== joules ==============================
+ *
+ * Joules et FPS
+ */
+
+/*
+ * « Joules et FPS » : the energy axis the page is built on, the
+ * calculator that rides a needle along it, the formula set as a formula,
+ * and the reference table shaded towards the legal line.
+ */
+
+/* ============ the energy scale ============ */
+
+/* Logarithmic: the regimes run from eight hundredths of a joule to twenty,
+   and a linear axis would crush everything an airsofter cares about into
+   the first two per cent of the width. */
+.glab-scale {
+    margin: 1.5rem 0 0;
+}
+
+.glab-scale-marks {
+    position: relative;
+    height: 1.05rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+}
+
+.glab-scale-marks span {
+    position: absolute;
+    left: var(--glab-mark-at);
+    transform: translateX(-50%);
+    white-space: nowrap;
+}
+
+/* The first mark is the axis's own left edge, so it hangs from it rather
+   than straddling it. */
+.glab-scale-marks span:first-child {
+    transform: none;
+}
+
+.glab-scale-track {
+    position: relative;
+    display: flex;
+    height: 0.95rem;
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 35%, var(--border));
+}
+
+.glab-scale-zone {
+    width: var(--glab-zone-width);
+}
+
+/* One hue, three densities: the axis darkens as the energy climbs. */
+.glab-scale-zone.is-free {
+    background: color-mix(in srgb, var(--accent-heading) 14%, var(--surface));
+}
+
+.glab-scale-zone.is-d {
+    background: color-mix(in srgb, var(--accent-heading) 42%, var(--surface));
+    border-left: 1px solid color-mix(in srgb, var(--accent-heading) 60%, var(--border));
+}
+
+.glab-scale-zone.is-c {
+    background: var(--accent-heading);
+    border-left: 1px solid color-mix(in srgb, var(--accent-heading) 60%, var(--border));
+}
+
+/* What the terrains cap at: three hairlines crowded into the last sliver
+   before the legal line, which is the whole point of showing them. */
+.glab-scale-cap {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--glab-cap-at);
+    width: 1px;
+    /* Read against the ink, not against the wash: all three ticks fall in
+       the palest zone, where a surface-coloured hairline disappears the
+       moment the page turns dark. */
+    background: color-mix(in srgb, var(--text) 55%, transparent);
+}
+
+/* The needle runs through the axis, its head above it: a reading taken on
+   the line rather than a marker resting near it. */
+.glab-scale-needle {
+    position: absolute;
+    top: -0.3rem;
+    bottom: -0.3rem;
+    left: var(--glab-scale-at, 0%);
+    width: 2px;
+    margin-left: -1px;
+    background: var(--text);
+    transition: left 0.18s ease;
+}
+
+.glab-scale-needle::before {
+    content: '';
+    position: absolute;
+    top: -0.32rem;
+    left: 50%;
+    width: 0;
+    height: 0;
+    transform: translateX(-50%);
+    border-left: 0.32rem solid transparent;
+    border-right: 0.32rem solid transparent;
+    border-top: 0.36rem solid var(--text);
+}
+
+/* ============ the terrain caps ============ */
+
+/* One brace for the three of them: they sit within seven per cent of each
+   other, so three labels would collide, and unlabelled ticks are three
+   scratches nobody can read. */
+.glab-scale-caps {
+    position: relative;
+    height: 1.5rem;
+    /* Clear of the needle's tail, which hangs below the track. */
+    margin-top: 0.55rem;
+}
+
+.glab-scale-caps-brace {
+    position: absolute;
+    top: 0;
+    left: var(--glab-caps-from);
+    width: calc(var(--glab-caps-to) - var(--glab-caps-from));
+    height: 0.32rem;
+    border: 1px solid color-mix(in srgb, var(--text) 40%, transparent);
+    border-top: 0;
+}
+
+.glab-scale-caps-label {
+    position: absolute;
+    top: 0.5rem;
+    left: var(--glab-caps-mid);
+    transform: translateX(-50%);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--text-muted);
+}
+
+.glab-scale-legend {
+    display: flex;
+    margin: 0.45rem 0 0;
+}
+
+.glab-scale-name {
+    width: var(--glab-zone-width);
+    padding: 0 0.2rem;
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--text-muted);
+    transition: color 0.18s ease;
+}
+
+/* The band the current result falls in, named as well as pointed at. */
+.glab-scale-name.is-current {
+    font-weight: 800;
+    color: var(--accent-heading);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .glab-scale-needle,
+        .glab-scale-name {
+            transition: none;
+        }
+}
+
+/* ============ the formula ============ */
+
+.glab-formula {
+    max-width: 46rem;
+    margin: 0 0 1.4rem;
+    padding: 1.5rem 1.2rem 1.1rem;
+    text-align: center;
+    background: color-mix(in srgb, var(--accent-heading) 7%, var(--surface));
+    border-top: 2px solid var(--accent-heading);
+    border-bottom: 1px solid color-mix(in srgb, var(--accent-heading) 18%, var(--border));
+}
+
+.glab-formula-line {
+    margin: 0;
+    font-size: clamp(1.75rem, 4.5vw, 2.5rem);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    color: var(--accent-heading);
+}
+
+/* Quantities in italic, constants upright: the way an equation is set. */
+.glab-formula-line em {
+    font-weight: 500;
+    font-style: italic;
+}
+
+.glab-formula-line sup {
+    font-size: 0.55em;
+    vertical-align: super;
+}
+
+.glab-formula figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.35rem 1.3rem;
+    margin-top: 1rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.glab-formula figcaption em {
+    font-style: italic;
+    text-transform: none;
+    color: var(--accent-heading);
+}
+
+/* The worked example under the formula: three substitutions, then the
+   square that actually moves the number. */
+.glab-worked {
+    display: grid;
+    gap: 0.55rem;
+    max-width: 46rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.glab-worked li {
+    display: grid;
+    grid-template-columns: 6.5rem minmax(0, 1fr) auto;
+    gap: 0.75rem;
+    align-items: baseline;
+    padding: 0.7rem 0.95rem;
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 16%, var(--border));
+}
+
+
+
+.glab-worked-from {
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+}
+
+.glab-worked-to {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    color: var(--accent-heading);
+}
+
+.glab-worked li.is-result .glab-worked-to {
+    font-size: 1.25rem;
+}
+
+.glab-worked-note {
+    max-width: 46rem;
+    margin: 0.45rem 0 1.35rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.glab-square {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1rem;
+    max-width: 46rem;
+}
+
+.glab-square article {
+    padding: 1.2rem 1.25rem 1.15rem;
+}
+
+
+.glab-square-kicker {
+    margin: 0 0 0.35rem;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.glab-square article.is-key .glab-square-kicker {
+    color: var(--accent-heading);
+}
+
+.glab-square-result {
+    margin: 0;
+    font-size: clamp(1.35rem, 2.4vw, 1.7rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    color: var(--accent-heading);
+}
+
+.glab-square-note {
+    max-width: 46rem;
+    margin: 0.85rem 0 0;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+}
+
+/* ============ the reference table ============ */
+
+/* The bille stays readable while the speeds scroll past it. */
+.glab-table th[scope='row'] {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    font-size: 0.8125rem;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+/* The cell darkens as it approaches two joules, and states plainly the
+   pairs that have crossed the line. */
+.glab-table td.is-mid {
+    background: color-mix(in srgb, var(--accent-heading) 8%, transparent);
+}
+
+.glab-table td.is-near {
+    background: color-mix(in srgb, var(--accent-heading) 18%, transparent);
+}
+
+.glab-table td.is-over {
+    font-weight: 700;
+    color: var(--accent-heading);
+    background: color-mix(in srgb, var(--accent-heading) 32%, transparent);
+}
+
+/* ============ the calculator ============ */
+
+.glab-calc-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1rem;
+    align-items: stretch;
+}
+
+.glab-calc-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem 1.1rem;
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 16%, var(--border));
+}
+
+.glab-calc-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+
+.glab-calc-field select,
+.glab-calc-field input {
+    width: 100%;
+    min-height: 2.5rem;
+    padding: 0.45rem 0.6rem;
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.glab-calc-field select:focus-visible,
+.glab-calc-field input:focus-visible,
+.gloss-search input:focus-visible {
+    outline: 2px solid var(--accent-heading);
+    outline-offset: 1px;
+}
+
+/* The unit rides beside the number it qualifies, not under it. */
+.glab-calc-speed {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.glab-calc-speed input {
+    flex: 1;
+    min-width: 0;
+}
+
+.glab-calc-speed select {
+    flex: 0 0 5.5rem;
+}
+
+.glab-calc-result {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 1.1rem 1.2rem;
+    text-align: center;
+    background: color-mix(in srgb, var(--accent-heading) 8%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 30%, var(--border));
+}
+
+.glab-calc-energy {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+}
+
+.glab-calc-energy strong {
+    display: block;
+    font-size: clamp(2.4rem, 6vw, 3.4rem);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.03em;
+    color: var(--accent-heading);
+}
+
+.glab-calc-equiv {
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+}
+
+.glab-calc-band {
+    padding-top: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--text);
+    border-top: 1px solid color-mix(in srgb, var(--accent-heading) 22%, var(--border));
+}
+
+.glab-calc-limits {
+    margin-top: 1.6rem;
+    padding-top: 1.3rem;
+    border-top: 1px solid color-mix(in srgb, var(--accent-heading) 18%, var(--border));
+}
+
+.glab-calc-limits h3 {
+    margin: 0 0 0.6rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.glab-calc-limits ul {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin: 0 0 0.7rem;
+    padding: 0;
+    list-style: none;
+}
+
+.glab-calc-limits li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.6rem 0.7rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.glab-calc-limits li span {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.glab-calc-limits li strong {
+    font-size: 1.05rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+}
+
+/* The only one of the four that is written in the code rather than in a
+   club's own rules. */
+.glab-calc-limits li.is-law {
+    background: color-mix(in srgb, var(--accent-heading) 9%, var(--surface));
+    border-color: color-mix(in srgb, var(--accent-heading) 32%, var(--border));
+}
+
+.glab-calc-limits li.is-law strong,
+.glab-calc-limits li.is-law span {
+    color: var(--accent-heading);
+}
+
+.glab-calc-note {
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+}
+
+@media (max-width: 46rem) {
+    .glab-calc-grid {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+    .glab-calc-limits ul {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+    .glab-scale-name {
+            font-size: 0.58rem;
+            letter-spacing: 0;
+        }
+
+    .glab-units,
+    .glab-joules-pair,
+    .glab-square {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .glab-worked li {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.2rem;
+    }
+}
+
+/* ============ the page's own reading order ============ */
+
+.glab--joules .glab-title,
+.glab--joules .glab-section,
+.glab--joules .glab-panel {
+    scroll-margin-top: 5.5rem;
+}
+
+
+.glab--joules .glab-prose,
+.glab--ou-tirer .glab-prose {
+    font-size: 1rem;
+    line-height: 1.72;
+}
+
+/* FPS faces the joule: one is a reading, the other is the law. */
+.glab-units {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1rem;
+    margin: 0 0 1rem;
+}
+
+.glab-unit {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1.25rem 1.3rem 1.3rem;
+}
+
+/* The row that carries the answer, wherever a guide works one out. */
+.glab-unit.is-key,
+.glab-worked li.is-result,
+.glab-square article.is-key {
+    background: color-mix(in srgb, var(--accent-heading) 9%, var(--surface));
+    border-color: color-mix(in srgb, var(--accent-heading) 28%, var(--border));
+    border-top: 2px solid var(--accent-heading);
+}
+
+
+.glab-unit.is-key .glab-unit-kicker {
+    color: var(--accent-heading);
+}
+
+.glab-unit h3 {
+    margin: 0;
+    font-size: clamp(1.6rem, 3vw, 2.1rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: var(--accent-heading);
+}
+
+.glab-unit-read {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+
+/* Same energy, two speeds: the sentence the rest of the page is about. */
+.glab-joules-pair {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0.8rem 1rem;
+    margin: 0;
+    padding: 1.15rem 1.25rem 1.1rem;
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 16%, var(--border));
+    border-top: 2px solid var(--accent-heading);
+}
+
+.glab-joules-pair > p {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin: 0;
+}
+
+
+.glab-joules-pair strong {
+    font-size: clamp(1.6rem, 3vw, 2rem);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    color: var(--accent-heading);
+}
+
+.glab-joules-pair-note {
+    grid-column: 1 / -1;
+    padding-top: 0.7rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+    border-top: 1px solid color-mix(in srgb, var(--accent-heading) 18%, var(--border));
+}
+
+.glab--joules .glab-calc-result {
+    border-top: 2px solid var(--accent-heading);
+}
+
+.glab--joules .glab-calc-limits li.is-law {
+    border-top: 2px solid var(--accent-heading);
+}
+
+.glab-table-key {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.35rem;
+    margin: 0 0 0.9rem;
+    padding: 0;
+    list-style: none;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+}
+
+.glab-table-key i {
+    display: inline-block;
+    width: 0.7rem;
+    height: 0.7rem;
+    margin-right: 0.4rem;
+    vertical-align: -0.1em;
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 22%, var(--border));
+}
+
+.glab-table-key .is-mid {
+    background: color-mix(in srgb, var(--accent-heading) 8%, transparent);
+}
+
+.glab-table-key .is-near {
+    background: color-mix(in srgb, var(--accent-heading) 18%, transparent);
+}
+
+.glab-table-key .is-over {
+    background: color-mix(in srgb, var(--accent-heading) 32%, transparent);
+}
+
+.glab--joules .glab-specs,
+.glab-detail .glab-specs {
+    gap: 1rem;
+    margin: 1.35rem 0 0;
+}
+
+.glab--joules .glab-specs > div {
+    padding: 1.2rem 1.25rem 1.25rem;
+    border-top: 2px solid var(--accent-heading);
+}
+
+.glab--joules .glab-specs dt {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+    margin-bottom: 0.55rem;
+    font-size: 1.2rem;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+.glab--joules .glab-specs dt em {
+    margin-left: 0;
+    font-size: 0.625rem;
+    letter-spacing: 0.14em;
+}
+
+.glab--joules .glab-specs dd,
+.glab--ou-tirer .glab-myth-truth {
+    font-size: 0.9rem;
+    line-height: 1.65;
+}
+
+
+.glab--joules .glab-rules a:hover {
+    text-decoration-color: var(--accent-heading);
+}
+
+
+/* ============================== cibles ==============================
+ *
+ * Bien choisir sa cible
+ */
+
+/*
+ * « Bien choisir sa cible »: a selector, then four families you can
+ * actually read, then three diameters. The common trunk already has the
+ * plan strip, the chips and the recommendation block; this file is the
+ * page's own hierarchy, so a phone does not meet a five-column table.
+ */
+
+.glab--cibles .glab-title,
+.glab--cibles .glab-section,
+.glab--cibles .glab-panel {
+    scroll-margin-top: 5.5rem;
+}
+
+/* Distance is a range, not a row of leftover buttons. */
+/* Three distances, six calibres: a range rather than a row of leftover
+   buttons, so the chips take equal thirds. Two guides asked for the same. */
+.glab-chips--range {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.45rem;
+}
+
+.glab-chips--range button {
+    align-items: center;
+    justify-content: center;
+    min-height: 2.7rem;
+    padding: 0.45rem 0.5rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.glab-chips--range button.is-active {
+    color: var(--bg);
+    background: var(--accent-heading);
+    border-color: var(--accent-heading);
+}
+
+.glab--cibles .glab-reco {
+    border-top: 2px solid var(--accent-heading);
+}
+
+
+
+
+.glab-family .glab-warning {
+    max-width: none;
+    margin: 0.15rem 0 0;
+    padding: 0.55rem 0.7rem;
+    font-size: 0.8rem;
+}
+
+
+
+.glab-place-cards--figures dt {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    color: var(--accent-heading);
+}
+
+
+
+
+/* ============================== camouflage ==============================
+ *
+ * Choisir son camouflage
+ */
+
+/*
+ * Choisir son camouflage: only what this guide alone needs.
+ *
+ * The ground, the hero, the sections, the pills, the numbered list, the
+ * questions and the link cards all come from guides.css, in the shop's own
+ * olive. This page spent a while in a palette of its own, a dark band and a
+ * blaze accent, which read as a different site rather than as a guide the
+ * shop publishes. What is left here is the one thing no other guide has:
+ * seven motifs, photographed, and the cards built to show them.
+ */
+
+/* ---- the family cards ---------------------------------------------------- */
+
+.glab--cam .cam-families {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+    gap: 1rem;
+    margin: 1.6rem 0 0;
+}
+
+/*
+ * The pattern gets the top of the card at full strength and the copy gets
+ * paper underneath. The same square of paper the shared cards wear, with a
+ * band of cloth above it.
+ */
+.glab--cam .cam-family {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 0;
+    overflow: hidden;
+    border-top: 2px solid var(--accent-heading);
+    transition: opacity 0.2s ease, border-color 0.2s ease;
+}
+
+.glab--cam .cam-family.is-dimmed {
+    opacity: 0.45;
+}
+
+/* The selector's answer, said on the card as well as in the list: a ring in
+   the shop's olive rather than a glow, since the house casts no shadows. */
+.glab--cam .cam-family.is-picked {
+    box-shadow: inset 0 0 0 2px var(--accent-heading);
+}
+
+/*
+ * A photograph of the weave, cropped to a band. It replaces seven patterns
+ * drawn in gradients, which held their scale honestly but could only ever
+ * suggest a palette and the size of a blob: a motif is a surface, and a
+ * reader deciding what to wear is entitled to see the cloth.
+ */
+.glab--cam .cam-swatch {
+    display: block;
+    flex: none;
+    width: 100%;
+    height: 9rem;
+    object-fit: cover;
+    border: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--accent-heading) 16%, var(--border));
+    background: var(--bg);
+}
+
+.glab--cam .cam-family-copy {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1.25rem 1.3rem 1.3rem;
+}
+
+
+.glab--cam .cam-family-aka {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    color: var(--text-muted);
+}
+
+
+
+/* The terrains and the seasons become tags: the same facts, at the weight of
+   a caption rather than of a table. */
+.glab--cam .cam-family-facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: auto 0 0;
+    padding: 0.85rem 0 0;
+    border: 0;
+}
+
+.glab--cam .cam-family-facts > div {
+    display: block;
+}
+
+.glab--cam .cam-family-facts dt {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.glab--cam .cam-family-facts dd {
+    margin: 0;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--text);
+    background: color-mix(in srgb, var(--accent-heading) 8%, var(--surface));
+}
+
+/* ---- the ranking the selector prints ------------------------------------- */
+
+.glab--cam .cam-picker-fields {
+    display: grid;
+    gap: 1.25rem;
+    margin: 1.35rem 0 0;
+}
+
+.glab--cam .cam-picker-verdict {
+    margin: 1.6rem 0 0;
+    padding-top: 1.35rem;
+    border-top: 1px solid color-mix(in srgb, var(--accent-heading) 16%, var(--border));
+}
+
+.glab--cam .cam-picker-results {
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    margin-top: 1.2rem;
+}
+
+.glab--cam .cam-result {
+    animation: cam-rise 0.25s ease both;
+}
+
+@keyframes cam-rise {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: none; }
+}
+
+.glab--cam .cam-result.is-good {
+    border-color: var(--accent-heading);
+}
+
+.glab--cam .cam-result.is-poor {
+    opacity: 0.55;
+}
+
+.glab--cam .cam-result-verdict {
+    order: -1;
+    font-size: 0.625rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.glab--cam .cam-result.is-good .cam-result-verdict {
+    color: var(--accent-heading);
+}
+
+.glab--cam .cam-result-name {
+    display: block;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.glab--cam .cam-result-why {
+    display: block;
+    margin-top: 0.3rem;
+    font-size: 0.8125rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .glab--cam .cam-result {
+        animation: none;
+    }
+}
+
+/* ============================== entretien ==============================
+ *
+ * Entretenir son arme
+ */
+
+/*
+ * « Entretenir son arme »: a selector, two tools, then six calibres.
+ * Families, rules and takeaways come from the common trunk; this file
+ * is the calibre grid and the range of six chips.
+ */
+
+.glab--entretien .glab-title,
+.glab--entretien .glab-section,
+.glab--entretien .glab-panel {
+    scroll-margin-top: 5.5rem;
+}
+
+
+
+
+.glab--entretien .glab-reco {
+    border-top: 2px solid var(--accent-heading);
+}
+
+.glab--entretien .glab-reco-list li,
+.glab--cibles .glab-reco-list li {
+    border-top: 2px solid var(--accent-heading);
+    padding: 1.1rem 1.15rem 1.2rem;
+}
+
+.glab--entretien .glab-reco-rank,
+.glab--cibles .glab-reco-rank {
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+}
+
+.glab--entretien .glab-reco-head h3,
+.glab--cibles .glab-reco-head h3 {
+    font-size: 1rem;
+    letter-spacing: -0.015em;
+    color: var(--accent-heading);
+}
+
+
+.glab-calibres a {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    height: 100%;
+    padding: 1.15rem 1.2rem 1.2rem;
+    color: var(--text);
+    border-top: 2px solid var(--accent-heading);
+}
+
+.glab-calibres a:hover {
+    border-color: var(--accent-heading);
+}
+
+.glab-calibre-size {
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    color: var(--accent-heading);
+}
+
+.glab-calibre-use {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+/* An answer is read, not skimmed: four guides asked for the same measure. */
+.glab--entretien .glab-faq details > div,
+.glab--ou-tirer .glab-faq details > div,
+.glab--joules .glab-faq details > div,
+.glab--cibles .glab-faq details > div {
+    font-size: 0.9375rem;
+    line-height: 1.7;
+}
+
+@media (max-width: 900px) {
+    .glab-chips--range {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .glab-calibres {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* ============================== index ==============================
+ *
+ * The guides index
+ */
+
+/*
+ * The guides index: the shelf itself, and the card each guide wears on
+ * it. Nothing here is used by a guide page.
+ */
+
+.glab-head {
+    margin: 1.5rem 0 2.5rem;
+}
+
+.glab-head-kicker {
+    margin: 0 0 0.35rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.glab-head-title {
+    margin: 0;
+    font-size: clamp(1.5rem, 2.4vw, 2rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.glab-head-lede {
+    margin: 0.5rem 0 0;
+    color: var(--text-muted);
+}
+
+/* ============ the guides index ============ */
+
+.glab-index .glab-head {
+    margin: 0 0 1.75rem;
+    padding: 2.4rem 2.35rem 2.15rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.glab-index .glab-head-kicker {
+    margin: 0 0 0.75rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--accent-heading);
+}
+
+.glab-index .glab-head-title {
+    position: relative;
+    z-index: 0;
+    font-size: clamp(1.85rem, 3.6vw, 2.7rem);
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    line-height: 1.02;
+    text-transform: uppercase;
+}
+
+.glab-index .glab-title-accent {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+    color: var(--accent-heading);
+    background-image: none;
+}
+
+.glab-index .glab-title-accent::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0.06em;
+    height: 0.18em;
+    background: color-mix(in srgb, var(--accent-heading) 22%, transparent);
+    z-index: -1;
+}
+
+.glab-index .glab-head-lede {
+    margin: 1rem 0 0;
+    max-width: 36rem;
+    font-size: 1.02rem;
+    line-height: 1.6;
+}
+
+.glab-index-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+    gap: 1.15rem;
+}
+
+.glab-index-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1.5rem 1.55rem 1.45rem;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.glab-index-card:hover {
+    border-color: var(--accent-heading);
+    background: color-mix(in srgb, var(--accent-heading) 6%, var(--surface));
+}
+
+.glab-index-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.glab-index-num {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent-heading);
+}
+
+.glab-index-kicker {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent-heading);
+}
+
+.glab-index-card h2 {
+    margin: 0.15rem 0 0;
+    font-size: 1.28rem;
+    font-weight: 750;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    color: var(--text);
+}
+
+.glab-index-card p {
+    flex: 1;
+    margin: 0.15rem 0 0;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+}
+
+.glab-index-more {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    align-self: flex-start;
+    min-height: 2.15rem;
+    margin-top: 0.65rem;
+    padding: 0 0.9rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent-heading);
+    background: var(--bg);
+    border: 1px solid var(--accent-heading);
+}
+
+.glab-index-card:hover .glab-index-more {
+    color: var(--surface);
+    background: var(--accent-heading);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .glab-index-card {
+            transition: none;
+        }
 }

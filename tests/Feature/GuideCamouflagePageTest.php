@@ -46,7 +46,7 @@ class GuideCamouflagePageTest extends TestCase
         $html = $this->get(route('guides.camouflage'))->assertOk()->getContent();
 
         $this->assertStringContainsString('data-cam-picker hidden', $html);
-        $this->assertStringContainsString('js/guides/camouflage.js', $html);
+        $this->assertStringContainsString('js/guides/guides.js', $html);
     }
 
     /**
@@ -161,6 +161,23 @@ class GuideCamouflagePageTest extends TestCase
     }
 
     /**
+     * One sheet holds every guide, fenced into a named section each. This
+     * reads back one guide's fence, so an assertion about what this page
+     * declares cannot be satisfied by a rule another guide wrote.
+     */
+    private function cssSection(string $slug): string
+    {
+        $css = file_get_contents(public_path('css/guides/guides.css'));
+
+        $start = strpos($css, '/* ============================== '.$slug.' ');
+        $this->assertNotFalse($start, 'guides.css has no section for '.$slug);
+
+        $next = strpos($css, '/* ============================== ', $start + 1);
+
+        return $next === false ? substr($css, $start) : substr($css, $start, $next - $start);
+    }
+
+    /**
      * The guide reads in the shop's colours, like every other guide.
      *
      * It spent a while in a palette of its own, a dark band and a blaze
@@ -170,7 +187,7 @@ class GuideCamouflagePageTest extends TestCase
      */
     public function test_it_declares_no_palette_of_its_own(): void
     {
-        $css = file_get_contents(public_path('css/guides/camouflage.css'));
+        $css = $this->cssSection('camouflage');
 
         // No hex, no theme block, and no band giving up the shop's container.
         $this->assertDoesNotMatchRegularExpression('/#[0-9a-fA-F]{3,6}/', $css);

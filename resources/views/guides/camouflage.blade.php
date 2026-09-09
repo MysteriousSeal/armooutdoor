@@ -126,7 +126,6 @@
 @push('head')
     <link rel="stylesheet" href="{{ versioned_asset('css/categories.css') }}">
     <link rel="stylesheet" href="{{ versioned_asset('css/guides/guides.css') }}">
-    <link rel="stylesheet" href="{{ versioned_asset('css/guides/camouflage.css') }}">
     <script type="application/ld+json">
         {!! json_encode([
             '@@context' => 'https://schema.org',
@@ -188,7 +187,7 @@
 
         <section class="glab-section" aria-labelledby="cam-tells-title">
             <h2 class="glab-title" id="cam-tells-title">Cinq choses vous trahissent. <span class="glab-title-accent">Le motif est la cinquième</span></h2>
-            <p class="glab-lede glab-lede--thesis">
+            <p class="glab-lede">
                 On achète un motif parce que c'est la seule des cinq qui se vend. Les quatre
                 autres sont gratuites et décident davantage.
             </p>
@@ -388,5 +387,5 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ versioned_asset('js/guides/camouflage.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/guides/guides.js') }}" defer></script>
 @endpush

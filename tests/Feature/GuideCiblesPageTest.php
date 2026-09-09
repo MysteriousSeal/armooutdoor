@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Support\Guides;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
@@ -223,6 +224,36 @@ class GuideCiblesPageTest extends TestCase
         }
 
         $this->assertSame(5, substr_count($html, 'class="glab-chapter"'));
+    }
+
+    /**
+     * One sheet and one script for the whole shelf.
+     *
+     * There were eight of each: eight requests, and eight places to look for
+     * a rule, for a total no single page used more than a fifth of. They are
+     * fenced into named sections inside one file now, and every guide asks
+     * for that file and nothing else. A ninth file appearing beside them is
+     * what this catches.
+     */
+    public function test_the_shelf_is_served_from_one_sheet_and_one_script(): void
+    {
+        $this->assertSame(
+            ['guides.css'],
+            array_map('basename', glob(public_path('css/guides/*.css'))),
+        );
+        $this->assertSame(
+            ['guides.js'],
+            array_map('basename', glob(public_path('js/guides/*.js'))),
+        );
+
+        $urls = array_merge([route('guides.index')], array_column(Guides::all(), 'url'));
+
+        foreach ($urls as $url) {
+            $html = $this->get($url)->assertOk()->getContent();
+
+            $this->assertSame(1, substr_count($html, 'css/guides/'), $url.' asks for more than one sheet');
+            $this->assertLessThanOrEqual(1, substr_count($html, 'js/guides/'), $url.' asks for more than one script');
+        }
     }
 
     public function test_a_guide_hero_without_a_photograph_does_not_keep_the_empty_height(): void

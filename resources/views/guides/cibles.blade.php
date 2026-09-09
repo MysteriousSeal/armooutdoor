@@ -8,7 +8,6 @@
 @push('head')
     <link rel="stylesheet" href="{{ versioned_asset('css/categories.css') }}">
     <link rel="stylesheet" href="{{ versioned_asset('css/guides/guides.css') }}">
-    <link rel="stylesheet" href="{{ versioned_asset('css/guides/cibles.css') }}">
     <script type="application/ld+json">
         {!! json_encode([
             '@@context' => 'https://schema.org',
@@ -81,7 +80,7 @@
             <div class="glab-steps">
                 <fieldset class="glab-step">
                     <legend>01 · Votre distance</legend>
-                    <div class="glab-chips" data-glab-group="dist">
+                    <div class="glab-chips glab-chips--range" data-glab-group="dist">
                         <button type="button" data-glab-value="court">10 m</button>
                         <button type="button" data-glab-value="moyen" class="is-active">25 m</button>
                         <button type="button" data-glab-value="long">50 m et +</button>
@@ -209,7 +208,7 @@
                 Trois formats, et ce n'est pas une question de goût : c'est la distance et ce que vous voulez lire.
             </p>
 
-            <dl class="glab-specs glab-place-cards">
+            <dl class="glab-specs glab-place-cards glab-place-cards--figures">
                 <div>
                     <dt>
                         76 mm
@@ -287,5 +286,5 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ versioned_asset('js/guides/cibles.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/guides/guides.js') }}" defer></script>
 @endpush

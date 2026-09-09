@@ -8,7 +8,6 @@
 @push('head')
     <link rel="stylesheet" href="{{ versioned_asset('css/categories.css') }}">
     <link rel="stylesheet" href="{{ versioned_asset('css/guides/guides.css') }}">
-    <link rel="stylesheet" href="{{ versioned_asset('css/guides/entretien.css') }}">
     <script type="application/ld+json">
         {!! json_encode([
             '@@context' => 'https://schema.org',
@@ -88,7 +87,7 @@
             <div class="glab-steps">
                 <fieldset class="glab-step">
                     <legend>01 · Votre calibre</legend>
-                    <div class="glab-chips" data-glab-group="cal">
+                    <div class="glab-chips glab-chips--range" data-glab-group="cal">
                         <button type="button" data-glab-value="45">.17 · 4,5 mm</button>
                         <button type="button" data-glab-value="22" class="is-active">.22 LR · 5,56 mm</button>
                         <button type="button" data-glab-value="25">.25 · 6,35 mm</button>
@@ -333,5 +332,5 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ versioned_asset('js/guides/entretien.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/guides/guides.js') }}" defer></script>
 @endpush
