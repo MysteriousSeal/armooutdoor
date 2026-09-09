@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-09 · v1.31.2 · build 5J9DF0
+
+### Admin
+
+- **A manual order records how it was actually paid.** The payment method was hardcoded in the code that saves one, so every order typed in by hand, marketplace sales included, was stored as a card payment. The request had no rule for the field and the form had no box, which left neither the back office nor the API able to say anything else. The field is now optional in validation, present on the create form, and read where the value used to be fixed. Creating and updating go through the same method, so an absent field cannot mean the same thing in both: what is submitted wins, failing that the order keeps the method it already carries, and only a genuinely new order falls back to card. This is an accuracy and reporting fix. The orders list and the order page show the right thing, the invoice never showed it, and payment fees are stored separately, so no total moves.
+
+**No migration.** One limit worth knowing before correcting orders already recorded: the list of methods holds card and PayPal only, so a Naturapay payment or a four-instalment card cannot yet be described as itself.
+
 ## 2026-09-08 — v1.31.1 — build ZTU2K5
 
 ### Storefront
