@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-09 · v1.33.0 · build OMAPHH
+
+### Storefront
+
+- **The footer became the floor of the page.** It kept the surface colour and read as one last white band with links in it, so the eye ran off the bottom of the site rather than arriving somewhere. It stays light, and what closes the page instead is structure. An olive rule opens it, the same device a category hero carries. Under it, three promises ruled apart: free shipping, secure payment, returns. The page now opens and closes on the same three facts, since those are the ones the strip below the hero makes, and the threshold is read from the setting that strip reads rather than written out a second time, so the two cannot name different figures on one page. The column headings gained an edge, a micro label over a short rule, because four lists of links read as one field of grey text without one. The small print moved onto a tinted band outside the container, so its rule reaches both edges rather than stopping where the container does.
+- **Where else the shop sells is finally clickable.** The NaturaBuy and Vinted addresses were already declared in the structured data and shown to nobody. They sit under the blurb now, and only when an address has been filled in, since a footer link to nothing is worse than no link at all. Conseils held two links and left the grid ragged, so the guides and the blog moved in with Aide & infos, which is the same errand.
+- **A category card is marked by its edge rather than its shadow.** The cards carried a shadow each and a circle around every icon, the last of the soft styling on a page that squares everything else. What marks one now is an olive edge down its left, faint at rest and full olive under the pointer, the way a divider marks a drawer of index cards. Each says how many pieces are behind it, a count that already existed and was shown only where a category had neither a written blurb nor a description, so the aisles described best were the ones that said least about their size. The name has the card's full width above the mark, where the longest of them used to take two lines and leave its copy sitting lower than its neighbours'. Eight aisles now lie four across, which fills the grid exactly.
+
+**No migration.**
+
 ## 2026-09-09 · v1.32.3 · build 7RDMYS
 
 ### Storefront
