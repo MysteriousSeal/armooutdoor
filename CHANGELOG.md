@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-09 · v1.32.2 · build 9L5PWX
+
+### Storefront
+
+- **The footer blurb no longer speaks for the category pages in Google.** Searching for the clothing category returned its own title, and under it the sentence from the site footer, the one that sits on every page of the shop, in place of the description that page sets for itself. The description was being served correctly all along, in the head, in the Open Graph tags and in the structured data: Google was simply choosing the footer instead, as it does whenever it judges page text a better answer than the description offered. The blurb is now withheld from snippets, which leaves it on the page and leaves the page indexed exactly as before. It is wrapped rather than marked in place because the attribute counts on a div, a span or a section only, and on a paragraph it would have been ignored without a word.
+
+**No migration.** Two things worth expecting: a snippet is chosen per query and per crawl, so this takes days rather than minutes, and withholding one candidate does not install another. The category pages carry a single sentence of prose each, which is the same sentence as their description, so the lasting fix is the buying guide the template already renders and forty of the fifty-four categories have yet to be given.
+
 ## 2026-09-09 · v1.32.1 · build U6NMI6
 
 ### Admin
