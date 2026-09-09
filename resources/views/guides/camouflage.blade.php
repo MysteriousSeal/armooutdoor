@@ -30,6 +30,7 @@
     $families = [
         [
             'key' => 'ce',
+            'alt' => 'Tissu au motif CE : larges taches vert olive, brun et noir sur fond kaki clair.',
             'name' => 'CE',
             'aka' => 'Centre-Europe',
             'read' => 'Le motif des forces françaises depuis les années 1990, dessiné pour la forêt tempérée.',
@@ -39,6 +40,7 @@
         ],
         [
             'key' => 'woodland',
+            'alt' => 'Tissu au motif Woodland : grandes taches vert soutenu, brun et noir sur fond vert clair.',
             'name' => 'Woodland',
             'aka' => 'M81 et dérivés',
             'read' => 'Le cousin américain du CE, plus vert, plus contrasté encore.',
@@ -48,6 +50,7 @@
         ],
         [
             'key' => 'multicam',
+            'alt' => 'Tissu au motif Multicam : beiges, verts tendres et bruns fondus les uns dans les autres, sans contour net.',
             'name' => 'Multicam',
             'aka' => 'et ses copies',
             'read' => 'Le plus polyvalent : des transitions douces au lieu de taches franches.',
@@ -57,6 +60,7 @@
         ],
         [
             'key' => 'atacs',
+            'alt' => 'Tissu au motif A-TACS : amas de petits pixels vert olive et gris fondus en une texture sans arête.',
             'name' => 'A-TACS',
             'aka' => 'AU et FG',
             'read' => 'Un motif flou, sans arête, pensé pour la distance moyenne.',
@@ -66,6 +70,7 @@
         ],
         [
             'key' => 'digital',
+            'alt' => 'Tissu au motif numérique : pixels carrés vert olive, brun et noir en damier serré.',
             'name' => 'Numérique',
             'aka' => 'EMR, pixel',
             'read' => 'Des pixels carrés qui se fondent à quinze mètres et se voient à trois.',
@@ -75,6 +80,7 @@
         ],
         [
             'key' => 'desert',
+            'alt' => 'Tissu au motif désert : larges taches sable, beige et brun clair, sans vert.',
             'name' => 'Désert',
             'aka' => 'aride, sable',
             'read' => 'Pour la roche sèche et la garrigue, pas pour la forêt.',
@@ -84,6 +90,7 @@
         ],
         [
             'key' => 'python',
+            'alt' => 'Tissu au motif peau de python : écailles beiges et brunes en rangées serrées.',
             'name' => 'Mimétique animal',
             'aka' => 'python, écailles',
             'read' => 'Une texture serrée plutôt qu\'un camouflage de terrain.',
@@ -186,14 +193,11 @@
                 autres sont gratuites et décident davantage.
             </p>
 
-            <ol class="cam-tells">
-                @foreach ($tells as $index => $tell)
-                    <li class="cam-tell {{ $index === 0 ? 'is-first' : '' }}">
-                        <span class="cam-tell-rank" aria-hidden="true">{{ $index + 1 }}</span>
-                        <div class="cam-tell-copy">
-                            <h3>{{ $tell[0] }}</h3>
-                            <p>{{ $tell[1] }}</p>
-                        </div>
+            <ol class="glab-rules">
+                @foreach ($tells as $tell)
+                    <li>
+                        <h3>{{ $tell[0] }}</h3>
+                        <p>{{ $tell[1] }}</p>
                     </li>
                 @endforeach
             </ol>
@@ -223,8 +227,8 @@
                  submitted anywhere. --}}
             <div class="cam-picker-fields">
                 <div class="cam-picker-field" role="group" aria-labelledby="cam-terrain-legend">
-                    <span class="cam-picker-legend" id="cam-terrain-legend">Terrain</span>
-                    <div class="cam-options" data-cam-terrain>
+                    <span class="glab-reco-label" id="cam-terrain-legend">Terrain</span>
+                    <div class="glab-chips cam-options" data-cam-terrain>
                         @foreach ($terrains as $key => $terrain)
                             <button
                                 type="button"
@@ -237,8 +241,8 @@
                     </div>
                 </div>
                 <div class="cam-picker-field" role="group" aria-labelledby="cam-season-legend">
-                    <span class="cam-picker-legend" id="cam-season-legend">Saison</span>
-                    <div class="cam-options" data-cam-season>
+                    <span class="glab-reco-label" id="cam-season-legend">Saison</span>
+                    <div class="glab-chips cam-options" data-cam-season>
                         @foreach ($seasons as $key => $season)
                             <button
                                 type="button"
@@ -252,18 +256,18 @@
                 </div>
             </div>
 
-            <p class="cam-picker-verdict" data-cam-verdict role="status"></p>
+            <p class="glab-reco-resume cam-picker-verdict" data-cam-verdict role="status"></p>
 
-            <ol class="cam-picker-results" data-cam-results></ol>
+            <ol class="glab-reco-list cam-picker-results" data-cam-results></ol>
         </section>
 
         <section class="glab-section" aria-labelledby="cam-families-title">
             <h2 class="glab-title" id="cam-families-title">Sept familles, <span class="glab-title-accent">et ce que chacune vaut</span></h2>
             <p class="glab-prose">
                 Les motifs se comptent par centaines et se rangent en quelques familles. Chaque
-                vignette ci-dessous est dessinée à la palette de sa famille : ce n'est pas une
-                photographie de tissu, c'est ce que l'œil retient d'un motif à vingt mètres,
-                c'est-à-dire ses couleurs et la taille de ses taches.
+                vignette ci-dessous montre le tissu de près. Sur le terrain, à vingt mètres, il
+                n'en reste que deux choses : les couleurs, et la taille des taches. Ce sont
+                elles qui décident, pas le nom imprimé sur l'étiquette.
             </p>
 
             <div class="cam-families" data-cam-families>
@@ -275,7 +279,19 @@
                         data-seasons="{{ implode(' ', $family['seasons']) }}"
                         data-name="{{ $family['name'] }}"
                     >
-                        <span class="cam-swatch cam-swatch--{{ $family['key'] }}" aria-hidden="true"></span>
+                        {{-- The alt says what the photograph shows, which is the
+                             colours and the shape of the blobs: someone who
+                             cannot see it is choosing a motif on the same two
+                             facts as someone who can. --}}
+                        <img
+                            class="cam-swatch"
+                            src="{{ versioned_asset('images/guides/camouflage/'.$family['key'].'.webp') }}"
+                            alt="{{ $family['alt'] }}"
+                            width="900"
+                            height="600"
+                            loading="lazy"
+                            decoding="async"
+                        >
                         <div class="cam-family-copy">
                             <h3>{{ $family['name'] }} <span class="cam-family-aka">{{ $family['aka'] }}</span></h3>
                             <p class="cam-family-read">{{ $family['read'] }}</p>
@@ -312,26 +328,26 @@
                 Ce sont les deux dernières choses qu'on couvre et les deux premières qu'on voit.
             </p>
 
-            <div class="cam-kit">
-                <a class="cam-kit-item" href="{{ localized_route('categories.show', ['category' => 'cache-cou']) }}">
-                    <span class="cam-kit-label">Le cou et le bas du visage</span>
-                    <span class="cam-kit-name">Cache-cou</span>
-                    <span class="cam-kit-note">Se monte et se descend d'une main, se porte toute l'année.</span>
+            <div class="glab-families cam-kit">
+                <a class="glab-family" href="{{ localized_route('categories.show', ['category' => 'cache-cou']) }}">
+                    <p class="glab-family-kicker">Le cou et le bas du visage</p>
+                    <h3>Cache-cou</h3>
+                    <p>Se monte et se descend d'une main, se porte toute l'année.</p>
                 </a>
-                <a class="cam-kit-item" href="{{ localized_route('categories.show', ['category' => 'cagoules']) }}">
-                    <span class="cam-kit-label">Le visage entier</span>
-                    <span class="cam-kit-name">Cagoules</span>
-                    <span class="cam-kit-note">Couvre ce que la peinture faciale couvrait, sans le démaquillage.</span>
+                <a class="glab-family" href="{{ localized_route('categories.show', ['category' => 'cagoules']) }}">
+                    <p class="glab-family-kicker">Le visage entier</p>
+                    <h3>Cagoules</h3>
+                    <p>Couvre ce que la peinture faciale couvrait, sans le démaquillage.</p>
                 </a>
-                <a class="cam-kit-item" href="{{ localized_route('categories.show', ['category' => 'gants']) }}">
-                    <span class="cam-kit-label">Les mains</span>
-                    <span class="cam-kit-name">Gants</span>
-                    <span class="cam-kit-note">Deux taches mobiles, donc les plus repérables de la tenue.</span>
+                <a class="glab-family" href="{{ localized_route('categories.show', ['category' => 'gants']) }}">
+                    <p class="glab-family-kicker">Les mains</p>
+                    <h3>Gants</h3>
+                    <p>Deux taches mobiles, donc les plus repérables de la tenue.</p>
                 </a>
-                <a class="cam-kit-item" href="{{ localized_route('categories.show', ['category' => 'casquettes']) }}">
-                    <span class="cam-kit-label">La tête et l'ombre du regard</span>
-                    <span class="cam-kit-name">Casquettes</span>
-                    <span class="cam-kit-note">La visière casse la ligne du front et éteint le reflet des yeux.</span>
+                <a class="glab-family" href="{{ localized_route('categories.show', ['category' => 'casquettes']) }}">
+                    <p class="glab-family-kicker">La tête et l'ombre du regard</p>
+                    <h3>Casquettes</h3>
+                    <p>La visière casse la ligne du front et éteint le reflet des yeux.</p>
                 </a>
             </div>
 
@@ -345,22 +361,29 @@
         <section class="glab-faq" aria-labelledby="cam-faq-title">
             <h2 class="glab-title" id="cam-faq-title">Questions <span class="glab-title-accent">fréquentes</span></h2>
             @foreach ($faq as $qa)
-                <details class="glab-faq-item">
+                <details>
                     <summary>{{ $qa[0] }}</summary>
-                    <p>{{ $qa[1] }}</p>
+                    <div>
+                        <p>{{ $qa[1] }}</p>
+                    </div>
                 </details>
             @endforeach
         </section>
 
-        <nav class="glab-more-reading" aria-label="À lire ensuite">
-            <p class="glab-plan-kicker">À lire ensuite</p>
-            <div class="glab-plan-links">
-                <a href="{{ localized_route('categories.show', ['category' => 'vetements']) }}">Le rayon vêtements</a>
-                <a href="{{ route('guides.ou-tirer') }}">Où tirer légalement</a>
-                <a href="{{ route('guides.glossaire') }}">Le glossaire</a>
-                <a href="{{ route('guides.index') }}">Tous les guides</a>
-            </div>
-        </nav>
+        {{-- Said as a sentence, like every other guide's tail: a row of bare
+             links needed a separator the shared sheet only draws in the plan. --}}
+        <p class="glab-more-reading">
+            Les motifs de ce guide se portent au
+            <a href="{{ localized_route('categories.show', ['category' => 'vetements']) }}">rayon vêtements</a> ;
+            l'endroit où l'on peut s'en servir est le sujet de
+            <a href="{{ route('guides.ou-tirer') }}">Où tirer légalement</a>, et le vocabulaire du
+            rayon est au <a href="{{ route('guides.glossaire') }}">glossaire</a>.
+        </p>
+
+        <p class="glab-ctas">
+            <a href="{{ route('guides.index') }}" class="btn btn-primary">Tous les guides</a>
+            <a href="{{ localized_route('categories.show', ['category' => 'vetements']) }}" class="btn btn-secondary">Voir le rayon vêtements</a>
+        </p>
     </div>
 @endsection
 

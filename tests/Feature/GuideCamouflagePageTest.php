@@ -133,6 +133,54 @@ class GuideCamouflagePageTest extends TestCase
         }
     }
 
+    /**
+     * Every family shows the cloth. The page used to draw its own patterns in
+     * gradients, which could suggest a palette and a blob size and no more; a
+     * family whose photograph is missing would now render an empty band, and
+     * the reader would be asked to choose a motif without seeing one.
+     */
+    public function test_every_family_shows_a_photograph_of_its_cloth(): void
+    {
+        $html = $this->get(route('guides.camouflage'))->assertOk()->getContent();
+
+        $keys = ['ce', 'woodland', 'multicam', 'atacs', 'digital', 'desert', 'python'];
+
+        foreach ($keys as $key) {
+            $path = 'images/guides/camouflage/'.$key.'.webp';
+
+            $this->assertStringContainsString($path, $html, $key.' has no swatch on the page');
+            $this->assertFileExists(public_path($path));
+        }
+
+        // Seven families, seven photographs, none of them decorative: the
+        // whole point of the page is what a motif looks like, so a reader who
+        // cannot see it is owed the colours and the shape of the blobs.
+        $this->assertSame(count($keys), substr_count($html, 'class="cam-swatch"'));
+        $this->assertSame(count($keys), substr_count($html, 'loading="lazy"'));
+        $this->assertSame(count($keys), preg_match_all('/alt="Tissu au motif [^"]{20,}"/', $html));
+    }
+
+    /**
+     * The guide reads in the shop's colours, like every other guide.
+     *
+     * It spent a while in a palette of its own, a dark band and a blaze
+     * accent, which made it look like a different site rather than like one
+     * more thing the shop publishes. Its sheet describes the shapes no other
+     * guide has and decides none of their colours.
+     */
+    public function test_it_declares_no_palette_of_its_own(): void
+    {
+        $css = file_get_contents(public_path('css/guides/camouflage.css'));
+
+        // No hex, no theme block, and no band giving up the shop's container.
+        $this->assertDoesNotMatchRegularExpression('/#[0-9a-fA-F]{3,6}/', $css);
+        $this->assertStringNotContainsString('data-theme', $css);
+        $this->assertStringNotContainsString('max-width: none', $css);
+
+        // The colours it does use are the ones every guide uses.
+        $this->assertStringContainsString('var(--accent-heading)', $css);
+    }
+
     public function test_the_shelf_knows_about_it(): void
     {
         $urls = collect(Guides::all())->pluck('url');

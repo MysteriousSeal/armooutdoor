@@ -373,7 +373,8 @@
     border-color: var(--accent-heading);
 }
 
-.glab-chips button.is-active {
+.glab-chips button.is-active,
+.glab-chips button[aria-pressed='true'] {
     color: var(--accent-heading);
     background: color-mix(in srgb, var(--accent-heading) 10%, var(--surface));
     border-color: var(--accent-heading);
