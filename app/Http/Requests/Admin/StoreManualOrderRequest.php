@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\PaymentMethod;
 use App\Models\Carrier;
 use App\Models\Product;
 use Illuminate\Foundation\Http\FormRequest;
@@ -51,6 +52,9 @@ class StoreManualOrderRequest extends FormRequest
             'relay.city' => ['nullable', 'string', 'max:80'],
             'shipping_price' => ['nullable', 'numeric', 'min:0'],
             'marketplace_id' => ['nullable', 'exists:marketplaces,id'],
+            // Optional on purpose: an update that leaves it out keeps the
+            // method the order already carries, rather than resetting it.
+            'payment_method' => ['nullable', Rule::enum(PaymentMethod::class)],
 
             'discount_type' => ['nullable', Rule::in(['percentage', 'fixed'])],
             'discount_value' => [

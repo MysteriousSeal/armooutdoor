@@ -444,6 +444,34 @@
                             @error('marketplace_id') <p class="form-error">{{ $message }}</p> @enderror
                         </div>
                     </section>
+
+                    <section class="order-panel">
+                        <h3 class="order-panel-title">Payment</h3>
+                        {{-- An order being edited keeps the method it already
+                             carries; a new one opens on card, which is what
+                             most manual orders are. --}}
+                        @php($selectedPaymentMethod = (string) old('payment_method', $isEdit ? ($order->payment_method?->value ?? '') : \App\Enums\PaymentMethod::Card->value))
+                        <div class="form-group">
+                            <label>Paid by</label>
+                            <input type="hidden" id="payment_method" name="payment_method" value="{{ $selectedPaymentMethod }}">
+                            <div class="admin-choice-row">
+                                @foreach (\App\Enums\PaymentMethod::cases() as $method)
+                                    <label class="admin-choice">
+                                        <input
+                                            type="radio"
+                                            name="payment_method_choice"
+                                            value="{{ $method->value }}"
+                                            data-sync-field="payment_method"
+                                            @checked($selectedPaymentMethod === $method->value)
+                                        >
+                                        <span class="admin-table-strong">{{ $method->label() }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                            @error('payment_method') <p class="form-error">{{ $message }}</p> @enderror
+                        </div>
+                        <p class="form-hint">How the customer actually paid. It is recorded for reporting and does not change the payment fee, which is entered on the order itself.</p>
+                    </section>
                 </div>
 
                 <aside class="admin-order-create-aside">

@@ -2,8 +2,10 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Enums\PaymentMethod;
 use App\Models\Carrier;
 use App\Models\Category;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
 use Database\Seeders\ShippingSeeder;
@@ -133,6 +135,38 @@ class AdminApiTest extends TestCase
             ->assertJsonPath('data.status', 'draft');
 
         $this->assertDatabaseHas('orders', ['status' => 'draft']);
+    }
+
+    /**
+     * StoreDraftOrderRequest spreads the admin request's rules, so the payment
+     * method reaches the API without a line of its own. That is worth a test
+     * rather than a reading: the inheritance is what would break silently if
+     * either request stopped spreading the other.
+     */
+    public function test_draft_order_records_how_it_was_paid(): void
+    {
+        $product = Product::factory()->create(['price_cents' => 2000, 'quantity' => 10]);
+
+        $this->postJson(
+            '/api/admin/orders',
+            [...$this->draftOrderPayload($product, 1), 'payment_method' => 'paypal'],
+            $this->headers(),
+        )->assertStatus(201);
+
+        $this->assertSame(PaymentMethod::PayPal, Order::query()->latest('id')->first()->payment_method);
+    }
+
+    public function test_draft_order_refuses_an_unknown_payment_method(): void
+    {
+        $product = Product::factory()->create(['price_cents' => 2000, 'quantity' => 10]);
+
+        $this->postJson(
+            '/api/admin/orders',
+            [...$this->draftOrderPayload($product, 1), 'payment_method' => 'bitcoin'],
+            $this->headers(),
+        )
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('payment_method');
     }
 
     public function test_draft_order_creation_fails_with_insufficient_stock(): void

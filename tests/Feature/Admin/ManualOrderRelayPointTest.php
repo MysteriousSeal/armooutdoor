@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Enums\PaymentMethod;
 use App\Models\Carrier;
 use App\Models\Order;
 use App\Models\Product;
@@ -176,6 +177,87 @@ class ManualOrderRelayPointTest extends TestCase
             ->get(route('admin.orders.edit', $order))
             ->assertOk()
             ->assertSee('Consigne Intermarché Sainte-Marie-de-Cuines', false);
+    }
+
+    /**
+     * How the customer paid, on an order typed in by hand.
+     *
+     * Every manual order was stored as a card payment, whatever had actually
+     * happened: the value was hardcoded and no field could reach it. Real
+     * orders paid another way were reported as card, which is the only thing
+     * these four tests are about.
+     */
+    public function test_a_manual_order_records_how_it_was_paid(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->post('/admin/orders', $this->payload(['payment_method' => 'paypal']))
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame(PaymentMethod::PayPal, Order::query()->latest('id')->first()->payment_method);
+    }
+
+    public function test_a_manual_order_without_a_payment_method_is_a_card_order(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        // The field is optional, and a new order that does not name a method
+        // is a card order: that is what the shop takes by default.
+        $this->actingAs($admin)->post('/admin/orders', $this->payload())->assertSessionHasNoErrors();
+
+        $this->assertSame(PaymentMethod::Card, Order::query()->latest('id')->first()->payment_method);
+    }
+
+    /**
+     * The guard on the fallback. Creating and updating share one method, so an
+     * absent field cannot mean the same thing in both: on an update it means
+     * "leave it alone", and resetting a PayPal order to card would lose the
+     * only record of how it was actually paid.
+     */
+    public function test_updating_a_draft_without_the_field_keeps_its_payment_method(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        // One payload, reused: a second call would build a second carrier on
+        // the same slug.
+        $payload = $this->payload(['payment_method' => 'paypal']);
+
+        $this->actingAs($admin)->post('/admin/orders', $payload)->assertSessionHasNoErrors();
+
+        $order = Order::query()->latest('id')->first();
+
+        // The edit form is submitted whole, and this payload carries no
+        // payment_method at all, exactly like a form that predates the field.
+        unset($payload['payment_method']);
+
+        $this->actingAs($admin)
+            ->put('/admin/orders/'.$order->number, [...$payload, 'city' => 'Chambéry'])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame(PaymentMethod::PayPal, $order->fresh()->payment_method);
+    }
+
+    public function test_an_unknown_payment_method_is_refused(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->post('/admin/orders', $this->payload(['payment_method' => 'bitcoin']))
+            ->assertSessionHasErrors('payment_method');
+
+        $this->assertSame(0, Order::query()->count());
+    }
+
+    public function test_the_payment_choice_is_on_the_form(): void
+    {
+        // Both halves matter: the API alone would leave the web admin unable
+        // to set the field it validates.
+        $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/orders/create')
+            ->assertOk()
+            ->assertSee('name="payment_method"', false)
+            ->assertSee('value="paypal"', false);
     }
 
     public function test_two_lines_of_the_same_product_become_one(): void

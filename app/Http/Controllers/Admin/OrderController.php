@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\PaymentMethod;
 use App\Enums\StockMovementReason;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\BulkOrderActionRequest;
@@ -466,7 +467,18 @@ class OrderController extends Controller
         $discountType = $request->input('discount_type');
         $discountValue = $request->input('discount_value');
 
-        return DB::transaction(function () use ($order, $customer, $carrier, $shippingSnapshot, $billingSnapshot, $relaySnapshot, $items, $shippingPrice, $marketplace, $discountType, $discountValue, $finalize, $allocator): Order {
+        // This method both creates and updates, so an absent field cannot mean
+        // the same thing in both cases. Submitted wins; otherwise the order
+        // keeps what it already carries, which is what stops an update that
+        // does not mention payment from quietly resetting a PayPal order to
+        // card. Only a genuinely new order falls back to card.
+        $paymentMethod = match (true) {
+            $request->filled('payment_method') => PaymentMethod::from($request->input('payment_method')),
+            $order !== null => $order->payment_method,
+            default => PaymentMethod::Card,
+        };
+
+        return DB::transaction(function () use ($order, $customer, $carrier, $shippingSnapshot, $billingSnapshot, $relaySnapshot, $items, $shippingPrice, $marketplace, $discountType, $discountValue, $paymentMethod, $finalize, $allocator): Order {
             $productsQuery = Product::query()->whereIn('id', $items->pluck('product_id'));
             $products = $finalize
                 ? $productsQuery->lockForUpdate()->get()->keyBy('id')
@@ -537,7 +549,7 @@ class OrderController extends Controller
                 'discount_code_snapshot' => $discountSnapshot,
                 'discount_cents' => $discountCents,
                 'total_cents' => $subtotal - $discountCents + $shipping,
-                'payment_method' => 'card',
+                'payment_method' => $paymentMethod,
                 'marketplace_id' => $marketplace?->id,
                 'marketplace_name' => $marketplace?->name,
                 'marketplace_note' => $marketplace?->note,
