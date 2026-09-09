@@ -4,6 +4,8 @@ All notable changes to this project since the initial commit are documented here
 
 ## 2026-09-09 · v1.34.1 · build 1K1PIU
 
+**There is no v1.34.0.** That release was cut, pushed and served in production, then withdrawn: its commits were reset off the remote and the work in it was rebuilt rather than restored. The number is skipped instead of reused, so a build reporting v1.34.0 is the withdrawn release and not an ancestor of this one. The two bugs it fixed, the double-escaped Open Graph tags and the structured data no crawler could read, were fixed again and are listed under Fixed below.
+
 ### Storefront
 
 - **A seventh guide: choosing a camouflage.** The shop sells clothing and had written nothing about which motif to wear. The guide opens on the argument that the motif is the fifth of the five things that give a shooter away, and that the four ahead of it, movement, shine, silhouette and shadow, are free while the fifth is the only one that is sold. Then the seven families, each photographed rather than described, with what each is worth on French ground. Between the two sits a selector: a terrain and a season, ten choices in all, few enough to show as pressed pills rather than hidden in two dropdowns, which ranks the seven in three steps and says the answer as a sentence. Snow is the honest exception and is written as one, since none of the seven is a winter pattern and a page that ranked seven wrong answers would be worse than a page that admits it. The panel is revealed by its script rather than shipped open, so a visitor without JavaScript still finds every family listed with its terrains and its seasons in words, and the page promises no control it cannot honour.
