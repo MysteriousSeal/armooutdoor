@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-09 · v1.34.2 · build 8M2A2W
+
+### Admin
+
+- **A photo added to a Vinted listing keeps the shape it was shot in.** The upload squared every one of them to a thousand by a thousand, which is what the catalogue does to a product shot and the wrong thing to do to a listing: Vinted shows the picture as it is, so squaring added transparent bands the marketplace renders in white and threw away the framing the seller had chosen. The proportions are kept now, with the smallest side set to a thousand pixels, which is what the marketplace actually asks for. That floor is a floor and not a ceiling: a photo already above it is scaled down, one below it is scaled up, since six thousand pixels of width help nobody and eight hundred get the photo refused. Written as a normaliser of its own rather than as a ratio passed to the square one, because the product pages depend on that square and a shared ratio finds its way onto them sooner or later.
+
+**No migration.** The photos already uploaded keep the square they were saved in; only new ones take the listing's own shape. Re-uploading a listing's photos is enough to bring the old ones over.
+
 ## 2026-09-09 · v1.34.1 · build 1K1PIU
 
 **There is no v1.34.0.** That release was cut, pushed and served in production, then withdrawn: its commits were reset off the remote and the work in it was rebuilt rather than restored. The number is skipped instead of reused, so a build reporting v1.34.0 is the withdrawn release and not an ancestor of this one. The two bugs it fixed, the double-escaped Open Graph tags and the structured data no crawler could read, were fixed again and are listed under Fixed below.
