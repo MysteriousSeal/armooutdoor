@@ -6,6 +6,7 @@ use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use App\Models\Product;
 use App\Models\User;
+use App\Support\ImageThumbnailer;
 use Database\Seeders\BlogCategorySeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -183,6 +184,95 @@ class BlogAdminTest extends TestCase
             ->get('/admin/blog?tab=published')
             ->assertOk()
             ->assertDontSee($scheduled->localizedTitle(), false);
+    }
+
+    /**
+     * The cover in the list.
+     *
+     * An article is recognised by its picture before its title, and the list
+     * is where one goes looking for a particular one.
+     */
+    public function test_the_list_shows_the_cover_of_a_post(): void
+    {
+        $post = BlogPost::factory()->create(['image' => 'blog/cover.webp']);
+
+        $this->actingAs($this->admin())
+            ->get('/admin/blog')
+            ->assertOk()
+            ->assertSee('class="admin-blog-thumb"', false)
+            ->assertSee($post->cardUrl(), false);
+    }
+
+    /**
+     * The card thumbnail, not the hero.
+     *
+     * The full image is a banner, and twenty of them would be fetched to be
+     * drawn four rems wide. A real thumbnail file has to exist for this to
+     * mean anything: without one the thumbnailer falls back to the full
+     * image, and both URLs are the same string.
+     */
+    public function test_the_list_asks_for_the_thumbnail_and_not_the_full_image(): void
+    {
+        $post = BlogPost::factory()->create(['image' => 'blog/list-cover-test.webp']);
+
+        $thumbnail = ImageThumbnailer::absoluteThumbnailPath($post->image);
+
+        if (! is_dir(dirname($thumbnail))) {
+            mkdir(dirname($thumbnail), 0755, true);
+        }
+
+        file_put_contents($thumbnail, 'not a real image, only a file that exists');
+
+        try {
+            $this->assertNotSame($post->heroUrl(), $post->cardUrl(), 'The fixture failed to make the two URLs differ.');
+
+            $this->actingAs($this->admin())
+                ->get('/admin/blog')
+                ->assertOk()
+                ->assertSee($post->cardUrl(), false)
+                ->assertDontSee('src="'.$post->heroUrl().'"', false);
+        } finally {
+            @unlink($thumbnail);
+        }
+    }
+
+    /**
+     * A post with no cover says so rather than leaving a hole. cardUrl()
+     * answers an empty string when there is no image, so an unguarded img tag
+     * would render as a broken picture on every coverless row.
+     */
+    public function test_a_post_without_a_cover_says_so_rather_than_breaking(): void
+    {
+        BlogPost::factory()->create(['image' => null]);
+
+        $html = $this->actingAs($this->admin())->get('/admin/blog')->assertOk()->getContent();
+
+        $this->assertStringContainsString('admin-blog-thumb is-empty', $html);
+        $this->assertStringNotContainsString('<img', $this->coverColumn($html));
+    }
+
+    public function test_the_cover_opens_the_post_like_its_title(): void
+    {
+        $post = BlogPost::factory()->create(['image' => 'blog/cover.webp']);
+
+        // The picture is the other half of the same target: clicking it and
+        // clicking the title next to it have to do the same thing.
+        $this->actingAs($this->admin())
+            ->get('/admin/blog')
+            ->assertOk()
+            ->assertSeeInOrder([
+                route('admin.blog.edit', $post),
+                'class="admin-blog-thumb"',
+            ], false);
+    }
+
+    /** The first cell of the first row, which is where the cover lives. */
+    private function coverColumn(string $html): string
+    {
+        $start = strpos($html, '<tbody>');
+        $end = strpos($html, '</td>', $start);
+
+        return substr($html, $start, $end - $start);
     }
 
     public function test_a_customer_cannot_reach_the_blog_admin(): void

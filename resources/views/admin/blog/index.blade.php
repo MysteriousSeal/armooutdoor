@@ -58,6 +58,7 @@
                 <table class="admin-table">
                     <thead>
                         <tr>
+                            <th></th>
                             <th>Title</th>
                             <th>Category</th>
                             <th>Status</th>
@@ -72,6 +73,25 @@
                     <tbody>
                         @foreach ($posts as $post)
                             <tr>
+                                {{-- The cover, at the size the list can spare.
+                                     An article is recognised by its picture
+                                     faster than by its title, and a post
+                                     without one says so rather than leaving a
+                                     hole in the column. --}}
+                                <td>
+                                    <a href="{{ route('admin.blog.edit', $post) }}">
+                                        @if ($post->image)
+                                            <img
+                                                class="admin-blog-thumb"
+                                                src="{{ $post->cardUrl() }}"
+                                                alt=""
+                                                loading="lazy"
+                                            >
+                                        @else
+                                            <span class="admin-blog-thumb is-empty" title="No cover image">No cover</span>
+                                        @endif
+                                    </a>
+                                </td>
                                 <td>
                                     <a href="{{ route('admin.blog.edit', $post) }}">{{ $post->localizedTitle() }}</a>
                                 </td>

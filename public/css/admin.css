@@ -4003,6 +4003,36 @@ a.admin-stat-card:hover {
     border-color: color-mix(in srgb, #e08585 32%, var(--border));
 }
 
+/* The cover of an article, in the list. Landscape rather than square: a blog
+   cover is composed wide, and cropping it to a square in a table throws away
+   the half that says which article it is. */
+.admin-blog-thumb {
+    display: block;
+    width: 4.25rem;
+    height: 2.75rem;
+    object-fit: cover;
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+/* An article without a cover says so. An empty cell reads as a broken image
+   rather than as a picture nobody has chosen yet. */
+.admin-blog-thumb.is-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.5625rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    background: repeating-linear-gradient(
+        -45deg,
+        var(--bg) 0 5px,
+        color-mix(in srgb, var(--border) 45%, var(--bg)) 5px 6px
+    );
+}
+
 .admin-product-thumb {
     width: 2.75rem;
     height: 2.75rem;
