@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-09 · v1.32.1 · build U6NMI6
+
+### Admin
+
+- **The blog list shows each article's cover.** An article is recognised by its picture before its title, and the list is where one goes looking for a particular one. The column carries the card thumbnail rather than the hero, since the full image is a banner and twenty of them would be fetched to be drawn four rems wide, and it is landscape rather than the square the product list uses, a cover being composed wide and a square crop throwing away the half that says which article it is. A post with no cover says so instead of leaving a hole: the thumbnail helper answers an empty string when there is no image, so an unguarded picture would draw as broken on every coverless row, and three posts have no cover today.
+
+**No migration.**
+
 ## 2026-09-09 · v1.32.0 · build 4UR8TB
 
 ### Admin
