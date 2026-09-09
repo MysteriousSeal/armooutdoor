@@ -59,6 +59,13 @@ class Guides
                 'summary' => 'Réactives autocollantes, planches, carton ou métal basculant : quel format pour quelle distance, ce qu\'on lit après le tir, et combien de feuilles prévoir.',
             ],
             [
+                'topic' => 'Camouflage',
+                'title' => 'Choisir son camouflage',
+                'url' => route('guides.camouflage'),
+                'teaser' => 'Le motif est la dernière des cinq choses qui vous trahissent. Les quatre autres, puis les familles.',
+                'summary' => 'Le mouvement, la brillance, la silhouette, l\'ombre, la peau : le motif ne vient qu\'après. Les sept familles de motifs, ce que chacune vaut sur un terrain français, et un sélecteur par terrain et par saison.',
+            ],
+            [
                 'topic' => 'Entretien',
                 'title' => 'Entretenir son arme',
                 'url' => route('guides.entretien'),

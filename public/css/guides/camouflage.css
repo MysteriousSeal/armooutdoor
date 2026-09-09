@@ -1,0 +1,830 @@
+/*
+ * Choisir son camouflage.
+ *
+ * The page keeps the shop's paper and its square corners, and spends its one
+ * liberty on the cards: a motif is a surface, so each family fills its tile
+ * edge to edge and the copy sits on a wash over the lower half. The single
+ * accent is blaze orange, the one colour in this world that exists to be
+ * seen, on a page about not being seen.
+ *
+ * Every value is a token, so the dark theme is one block at the top rather
+ * than a second sheet. Everything is scoped under .glab--cam.
+ */
+
+.glab--cam.container {
+    /* Everything neutral is warmed off grey. The swatches below are khaki,
+       sand and olive, and a true grey next to them reads as a mistake rather
+       than as a background. */
+    --cam-ground: #f6f3ea;
+    --cam-ground-2: #fdfcf8;
+    --cam-panel: #ffffff;
+    --cam-ink: #23261b;
+    --cam-muted: #5f6355;
+    --cam-blaze: #d1450f;
+    --cam-blaze-soft: color-mix(in srgb, var(--cam-blaze) 8%, #fff);
+    --cam-hair: #e3ddcd;
+    --cam-fill: #efebdf;
+    --cam-fill-hover: #e6e0d0;
+    --cam-fill-line: #cec7b4;
+    --cam-rank: #ddd6c3;
+    --cam-on-blaze: #fff6f1;
+
+    /* This element is the shop's container itself, so the band only has to
+       give up the container's own cap: its parent already spans the page. The
+       content is re-centred with padding instead. A subject made of surfaces
+       cannot be shown in a column. */
+    max-width: none;
+    padding: 0 max(1.25rem, calc(50vw - 34rem)) 5rem;
+    /* The band is the page's ground, so it has to meet the header and the
+       footer. .site-main keeps 3rem of floor under its content, which showed
+       as a strip of the site's own background below the band. */
+    margin-bottom: -3rem;
+    background:
+        radial-gradient(110% 50% at 50% 0%, #ece5d2 0%, transparent 66%),
+        var(--cam-ground);
+    color: var(--cam-ink);
+}
+
+[data-theme='dark'] .glab--cam.container {
+    --cam-ground: #14160f;
+    --cam-ground-2: #1c1f16;
+    --cam-panel: #22261b;
+    --cam-ink: #f3f1e7;
+    --cam-muted: #9ea38f;
+    --cam-blaze: #ff5c1a;
+    --cam-blaze-soft: color-mix(in srgb, var(--cam-blaze) 14%, transparent);
+    --cam-hair: rgb(243 241 231 / 12%);
+    --cam-fill: rgb(243 241 231 / 6%);
+    --cam-fill-hover: rgb(243 241 231 / 12%);
+    --cam-fill-line: rgb(243 241 231 / 22%);
+    --cam-rank: rgb(243 241 231 / 16%);
+    --cam-on-blaze: #16170f;
+
+    background:
+        radial-gradient(120% 60% at 50% 0%, #232a1a 0%, transparent 60%),
+        var(--cam-ground);
+}
+
+/* ---- the hero ------------------------------------------------------------ */
+
+/*
+ * The shop's hero partial, taken over: no panel, no hairline, just the title
+ * at a size the rest of the site never uses.
+ */
+.glab--cam .breadcrumbs,
+.glab--cam .breadcrumbs a,
+.glab--cam .breadcrumbs span {
+    color: var(--cam-muted);
+}
+
+/* The shared breadcrumbs carry a top margin, and with no padding above them
+   it escaped the band and pushed it 20px clear of the header. Traded for
+   padding, which cannot collapse out. */
+.glab--cam .breadcrumbs {
+    margin-top: 0;
+    padding-top: 2rem;
+}
+
+.glab--cam .cat-hero {
+    min-height: 0;
+    margin: 1.5rem 0 3.5rem;
+    padding: 0;
+    background: none;
+    border: 0;
+    box-shadow: none;
+}
+
+.glab--cam .cat-hero-copy {
+    max-width: 46rem;
+    padding: 0;
+    background: none;
+    backdrop-filter: none;
+}
+
+.glab--cam .cat-hero-kicker {
+    /* A flex item is blockified, so inline-block alone leaves the pill the
+       width of the column. It has to be told where to stop. */
+    align-self: flex-start;
+    margin-bottom: 1.1rem;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--cam-blaze);
+    background: var(--cam-blaze-soft);
+}
+
+.glab--cam .cat-hero-title {
+    margin: 0;
+    font-size: clamp(2.6rem, 7vw, 5.25rem);
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    line-height: 0.95;
+    color: var(--cam-ink);
+}
+
+/* The span carries its own olive and its own highlighter from the category
+   sheet, and a colour set on the heading around it never reaches it. The
+   highlighter is a pseudo-element, so hiding it takes its own rule. */
+.glab--cam .cat-hero-title-accent {
+    background: none;
+    color: inherit;
+}
+
+.glab--cam .cat-hero-title-accent::after {
+    content: none;
+}
+
+.glab--cam .cat-hero-desc {
+    margin-top: 1.5rem;
+    max-width: 40rem;
+    font-size: clamp(1rem, 1.5vw, 1.1875rem);
+    line-height: 1.6;
+    color: var(--cam-muted);
+}
+
+.glab--cam .cat-hero-tags {
+    margin-top: 1.75rem;
+    gap: 0.5rem;
+}
+
+.glab--cam .cat-hero-tags li {
+    padding: 0.45rem 0.9rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--cam-ink);
+    background: var(--cam-fill);
+    border: 0;
+}
+
+/* ---- shared chrome, rewritten ------------------------------------------- */
+
+.glab--cam .glab-plan {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 4rem;
+    padding: 0;
+    background: none;
+    border: 0;
+}
+
+.glab--cam .glab-plan-kicker {
+    margin: 0 0.5rem 0 0;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--cam-muted);
+}
+
+.glab--cam .glab-plan-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.glab--cam .glab-plan a {
+    padding: 0.5rem 0.95rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--cam-ink);
+    text-decoration: none;
+    background: var(--cam-panel);
+    border: 1px solid var(--cam-hair);
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.glab--cam .glab-plan a::before {
+    content: none;
+}
+
+.glab--cam .glab-plan a:hover,
+.glab--cam .glab-plan a:focus-visible {
+    color: var(--cam-blaze);
+    background: var(--cam-blaze-soft);
+    border-color: color-mix(in srgb, var(--cam-blaze) 40%, transparent);
+}
+
+.glab--cam .glab-section,
+.glab--cam .glab-faq {
+    margin: 0 0 4.5rem;
+    padding: 1.6rem 0 0;
+    background: none;
+    border: 0;
+}
+
+/* The shared sheet marks a section with a short olive rule sitting on the
+   section's top border. Here there is no border for it to sit on, so it is
+   given its own place above the heading and drawn in the page's own accent. */
+.glab--cam .glab-faq {
+    position: relative;
+}
+
+.glab--cam .glab-section::before,
+.glab--cam .glab-faq::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 2.25rem;
+    height: 3px;
+    background: var(--cam-blaze);
+}
+
+.glab--cam .glab-title {
+    margin: 0 0 1.25rem;
+    font-size: clamp(1.75rem, 3.4vw, 2.75rem);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+    color: var(--cam-ink);
+}
+
+/* The accent word is written in blaze rather than underlined in olive. */
+.glab--cam .glab-title-accent {
+    background: none;
+    color: var(--cam-blaze);
+}
+
+.glab--cam .glab-lede,
+.glab--cam .glab-prose {
+    max-width: 44rem;
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    color: var(--cam-muted);
+}
+
+.glab--cam .glab-lede--thesis {
+    font-size: clamp(1.125rem, 2vw, 1.375rem);
+    line-height: 1.5;
+    color: var(--cam-ink);
+}
+
+/* ---- what gives you away ------------------------------------------------ */
+
+.glab--cam .cam-tells {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 1rem;
+    margin: 2.5rem 0 2rem;
+    padding: 0;
+    list-style: none;
+    background: none;
+    border: 0;
+}
+
+.glab--cam .cam-tell {
+    display: block;
+    padding: 1.5rem 1.4rem 1.6rem;
+    background: var(--cam-panel);
+    border: 1px solid var(--cam-hair);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.glab--cam .cam-tell:hover {
+    transform: translateY(-2px);
+    border-color: var(--cam-fill-line);
+}
+
+/* The first is the one nobody can buy, so it is the one wearing the blaze. */
+.glab--cam .cam-tell.is-first {
+    background: linear-gradient(160deg, color-mix(in srgb, var(--cam-blaze) 12%, transparent), var(--cam-panel) 58%);
+    border-color: color-mix(in srgb, var(--cam-blaze) 34%, transparent);
+}
+
+.glab--cam .cam-tell-rank {
+    display: block;
+    margin-bottom: 0.85rem;
+    font-size: 2.75rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.05em;
+    font-variant-numeric: tabular-nums;
+    color: var(--cam-rank);
+    -webkit-text-stroke: 0;
+}
+
+.glab--cam .cam-tell.is-first .cam-tell-rank {
+    color: var(--cam-blaze);
+}
+
+.glab--cam .cam-tell-copy h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    color: var(--cam-ink);
+}
+
+.glab--cam .cam-tell-copy p {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--cam-muted);
+}
+
+/* ---- the selector -------------------------------------------------------- */
+
+.glab--cam .cam-picker {
+    margin: 0 0 4.5rem;
+    padding: 2rem 1.75rem 2.25rem;
+    background: linear-gradient(180deg, var(--cam-ground-2), var(--cam-panel));
+    border: 1px solid var(--cam-hair);
+}
+
+.glab--cam .cam-picker-fields {
+    display: grid;
+    gap: 1.5rem;
+    margin: 1.75rem 0 0;
+}
+
+.glab--cam .cam-picker-legend {
+    display: block;
+    margin-bottom: 0.75rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--cam-muted);
+}
+
+/* Segmented pills rather than dropdowns: six terrains and four seasons are
+   few enough to show, and a control you can see is a control you use. */
+.glab--cam .cam-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.glab--cam .cam-option {
+    padding: 0.6rem 1.05rem;
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--cam-ink);
+    background: var(--cam-fill);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.glab--cam .cam-option:hover {
+    background: var(--cam-fill-hover);
+}
+
+.glab--cam .cam-option[aria-pressed='true'] {
+    color: var(--cam-on-blaze);
+    background: var(--cam-blaze);
+    border-color: var(--cam-blaze);
+    font-weight: 600;
+}
+
+.glab--cam .cam-option:focus-visible {
+    outline: 2px solid var(--cam-blaze);
+    outline-offset: 2px;
+}
+
+.glab--cam .cam-picker-verdict {
+    margin: 2rem 0 0;
+    padding-top: 1.75rem;
+    border-top: 1px solid var(--cam-hair);
+    font-size: clamp(1.125rem, 2.2vw, 1.5rem);
+    font-weight: 500;
+    line-height: 1.45;
+    letter-spacing: -0.015em;
+    color: var(--cam-ink);
+}
+
+.glab--cam .cam-picker-verdict strong {
+    font-weight: 800;
+    color: var(--cam-blaze);
+}
+
+.glab--cam .cam-picker-results {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 0.65rem;
+    margin: 1.5rem 0 0;
+    padding: 0;
+    list-style: none;
+    background: none;
+    border: 0;
+}
+
+.glab--cam .cam-result {
+    display: block;
+    padding: 0.95rem 1.1rem 1.05rem;
+    background: var(--cam-fill);
+    border: 1px solid transparent;
+    animation: cam-rise 0.25s ease both;
+}
+
+@keyframes cam-rise {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .glab--cam .cam-result {
+        animation: none;
+    }
+
+    .glab--cam .cam-tell:hover,
+    .glab--cam .cam-family:hover,
+    .glab--cam .cam-kit-item:hover {
+        transform: none;
+    }
+}
+
+.glab--cam .cam-result.is-good {
+    background: var(--cam-blaze-soft);
+    border-color: color-mix(in srgb, var(--cam-blaze) 40%, transparent);
+}
+
+.glab--cam .cam-result.is-poor {
+    opacity: 0.5;
+}
+
+.glab--cam .cam-result-verdict {
+    display: inline-block;
+    margin-bottom: 0.45rem;
+    font-size: 0.625rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--cam-muted);
+}
+
+.glab--cam .cam-result.is-good .cam-result-verdict {
+    color: var(--cam-blaze);
+}
+
+.glab--cam .cam-result-name {
+    display: block;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    color: var(--cam-ink);
+}
+
+.glab--cam .cam-result-why {
+    display: block;
+    margin-top: 0.3rem;
+    font-size: 0.8125rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--cam-muted);
+}
+
+/* ---- the families -------------------------------------------------------- */
+
+.glab--cam .cam-families {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+    gap: 1rem;
+    margin: 2.5rem 0 2rem;
+}
+
+/*
+ * The pattern gets the top third of the card at full strength, and the copy
+ * gets paper underneath. An earlier pass floated the text on a wash over the
+ * whole tile, which reads on a dark ground and turns every motif into pastel
+ * on a light one: a swatch that has been faded is no longer a swatch.
+ */
+.glab--cam .cam-family {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+    background: var(--cam-panel);
+    border: 1px solid var(--cam-hair);
+    transition: transform 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+}
+
+.glab--cam .cam-family:hover {
+    transform: translateY(-3px);
+    border-color: var(--cam-fill-line);
+}
+
+.glab--cam .cam-family.is-dimmed {
+    opacity: 0.4;
+}
+
+/* A hard ring rather than a glow: the house casts no shadows, and a blurred
+   halo on a square card is the one thing here that would look borrowed. */
+.glab--cam .cam-family.is-picked {
+    border-color: var(--cam-blaze);
+    box-shadow: inset 0 0 0 2px var(--cam-blaze);
+}
+
+.glab--cam .cam-swatch {
+    display: block;
+    flex: none;
+    width: 100%;
+    height: 10rem;
+    border: 0;
+    border-bottom: 1px solid var(--cam-hair);
+}
+
+.glab--cam .cam-family-copy {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: 1.4rem 1.35rem 1.5rem;
+}
+
+.glab--cam .cam-family-copy h3 {
+    margin: 0 0 0.4rem;
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--cam-ink);
+}
+
+.glab--cam .cam-family-aka {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    color: var(--cam-muted);
+}
+
+.glab--cam .cam-family-read {
+    margin: 0 0 0.6rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--cam-blaze);
+}
+
+.glab--cam .cam-family-copy p {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--cam-muted);
+}
+
+/* The terrains and the seasons become tags: the same facts, at the weight of
+   a caption rather than of a table. */
+.glab--cam .cam-family-facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: auto 0 0;
+    padding: 1rem 0 0;
+    border: 0;
+}
+
+.glab--cam .cam-family-facts > div {
+    display: block;
+}
+
+.glab--cam .cam-family-facts dt {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.glab--cam .cam-family-facts dd {
+    margin: 0;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--cam-ink);
+    background: var(--cam-fill-hover);
+}
+
+/* ---- the swatches -------------------------------------------------------- */
+
+/*
+ * Drawn rather than photographed: a photograph is one garment under one light,
+ * and what a reader needs is what the eye keeps of a motif at twenty metres,
+ * which is its palette and the size of its blobs. Sizes are in pixels so the
+ * pattern keeps its scale whatever the card's width.
+ */
+.glab--cam .cam-swatch--ce {
+    background-color: #7d7f52;
+    background-image:
+        radial-gradient(ellipse 90px 42px at 18% 12%, #3f4429 0 100%, transparent 100%),
+        radial-gradient(ellipse 76px 34px at 72% 26%, #6d5535 0 100%, transparent 100%),
+        radial-gradient(ellipse 68px 32px at 26% 44%, #2b2c1f 0 100%, transparent 100%),
+        radial-gradient(ellipse 84px 38px at 78% 58%, #3f4429 0 100%, transparent 100%),
+        radial-gradient(ellipse 62px 30px at 34% 76%, #6d5535 0 100%, transparent 100%),
+        radial-gradient(ellipse 72px 34px at 80% 88%, #2b2c1f 0 100%, transparent 100%);
+}
+
+.glab--cam .cam-swatch--woodland {
+    background-color: #6f7d4e;
+    background-image:
+        radial-gradient(ellipse 96px 44px at 22% 14%, #33421f 0 100%, transparent 100%),
+        radial-gradient(ellipse 72px 32px at 74% 28%, #1e2016 0 100%, transparent 100%),
+        radial-gradient(ellipse 80px 36px at 30% 48%, #5c4a2c 0 100%, transparent 100%),
+        radial-gradient(ellipse 88px 40px at 76% 64%, #33421f 0 100%, transparent 100%),
+        radial-gradient(ellipse 60px 28px at 36% 82%, #1e2016 0 100%, transparent 100%);
+}
+
+/* Soft stops rather than hard: the family is defined by having no contour. */
+.glab--cam .cam-swatch--multicam {
+    background-color: #b3a179;
+    background-image:
+        radial-gradient(ellipse 120px 62px at 20% 14%, #8d8a56 0 42%, transparent 100%),
+        radial-gradient(ellipse 108px 56px at 76% 30%, #6f5f3f 0 42%, transparent 100%),
+        radial-gradient(ellipse 116px 58px at 30% 52%, #9aa06a 0 42%, transparent 100%),
+        radial-gradient(ellipse 100px 52px at 74% 70%, #7c6a46 0 42%, transparent 100%),
+        radial-gradient(ellipse 92px 46px at 22% 88%, #8d8a56 0 42%, transparent 100%);
+}
+
+/* Smaller, denser, softer still: read as a texture rather than a drawing. */
+.glab--cam .cam-swatch--atacs {
+    background-color: #9a9578;
+    background-image:
+        radial-gradient(ellipse 46px 24px at 14% 10%, #6b6a4e 0 58%, transparent 100%),
+        radial-gradient(ellipse 40px 20px at 54% 18%, #7f7a5c 0 58%, transparent 100%),
+        radial-gradient(ellipse 52px 26px at 28% 34%, #5a5942 0 58%, transparent 100%),
+        radial-gradient(ellipse 38px 20px at 76% 44%, #6b6a4e 0 58%, transparent 100%),
+        radial-gradient(ellipse 46px 24px at 18% 58%, #7f7a5c 0 58%, transparent 100%),
+        radial-gradient(ellipse 44px 22px at 62% 70%, #5a5942 0 58%, transparent 100%),
+        radial-gradient(ellipse 36px 18px at 32% 86%, #6b6a4e 0 58%, transparent 100%),
+        radial-gradient(ellipse 42px 22px at 82% 92%, #7f7a5c 0 58%, transparent 100%);
+}
+
+/*
+ * Squares, and squares rather than diamonds: a 45 degree linear gradient tiles
+ * into lozenges, which is a different family altogether. A conic gradient
+ * quartered at the centre gives a true checker, and three at different sizes
+ * break the regularity one alone would have.
+ */
+.glab--cam .cam-swatch--digital {
+    background-color: #7c8259;
+    background-image:
+        conic-gradient(from 0deg at 50% 50%, #2c3020 0 25%, transparent 0 50%, #2c3020 0 75%, transparent 0),
+        conic-gradient(from 0deg at 50% 50%, #5f5236 0 25%, transparent 0 50%, #5f5236 0 75%, transparent 0),
+        conic-gradient(from 0deg at 50% 50%, #454b30 0 25%, transparent 0 50%, #454b30 0 75%, transparent 0);
+    background-size: 14px 14px, 26px 26px, 40px 40px;
+    background-position: 0 0, 7px 11px, 3px 5px;
+}
+
+.glab--cam .cam-swatch--desert {
+    background-color: #c4b391;
+    background-image:
+        radial-gradient(ellipse 92px 42px at 20% 14%, #9b8763 0 100%, transparent 100%),
+        radial-gradient(ellipse 74px 34px at 74% 28%, #7d7259 0 100%, transparent 100%),
+        radial-gradient(ellipse 84px 38px at 28% 48%, #ab9871 0 100%, transparent 100%),
+        radial-gradient(ellipse 88px 40px at 76% 66%, #9b8763 0 100%, transparent 100%),
+        radial-gradient(ellipse 62px 30px at 34% 84%, #7d7259 0 100%, transparent 100%);
+}
+
+/*
+ * A skin rather than a terrain: fine, repeating, ordered. Ellipses wider than
+ * they are tall and offset by half a tile, so the rows read as scales laid
+ * over each other rather than as a sheet of dots.
+ */
+.glab--cam .cam-swatch--python {
+    background-color: #9b8b6c;
+    background-image:
+        radial-gradient(ellipse 62% 46% at 50% 50%, #5c5140 0 58%, transparent 62%),
+        radial-gradient(ellipse 62% 46% at 50% 50%, #b4a888 0 58%, transparent 62%);
+    background-size: 20px 15px, 20px 15px;
+    background-position: 0 0, 10px 7px;
+}
+
+/* ---- what is left to cover ---------------------------------------------- */
+
+.glab--cam .cam-kit {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 0.85rem;
+    margin: 2.5rem 0;
+    background: none;
+    border: 0;
+}
+
+.glab--cam .cam-kit-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1.4rem 1.3rem 1.5rem;
+    background: var(--cam-panel);
+    border: 1px solid var(--cam-hair);
+    text-decoration: none;
+    transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.glab--cam .cam-kit-item:hover,
+.glab--cam .cam-kit-item:focus-visible {
+    transform: translateY(-2px);
+    background: linear-gradient(160deg, color-mix(in srgb, var(--cam-blaze) 10%, transparent), var(--cam-panel) 62%);
+    border-color: color-mix(in srgb, var(--cam-blaze) 36%, transparent);
+}
+
+.glab--cam .cam-kit-label {
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--cam-muted);
+}
+
+.glab--cam .cam-kit-name {
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: var(--cam-ink);
+    transition: color 0.2s ease;
+}
+
+.glab--cam .cam-kit-item:hover .cam-kit-name {
+    color: var(--cam-blaze);
+}
+
+.glab--cam .cam-kit-note {
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--cam-muted);
+}
+
+/* ---- the warning and the questions --------------------------------------- */
+
+.glab--cam .glab-warning {
+    margin: 2rem 0 0;
+    padding: 1.5rem 1.4rem;
+    background: linear-gradient(160deg, color-mix(in srgb, var(--cam-blaze) 10%, transparent), var(--cam-panel) 62%);
+    border: 1px solid color-mix(in srgb, var(--cam-blaze) 32%, transparent);
+    color: var(--cam-muted);
+}
+
+.glab--cam .glab-warning-label {
+    margin: 0 0 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--cam-blaze);
+}
+
+.glab--cam .glab-warning p:last-child {
+    margin: 0;
+    line-height: 1.6;
+}
+
+.glab--cam .glab-faq-item {
+    margin: 0 0 0.65rem;
+    padding: 0;
+    background: var(--cam-panel);
+    border: 1px solid var(--cam-hair);
+    overflow: hidden;
+}
+
+.glab--cam .glab-faq-item summary {
+    padding: 1.15rem 1.3rem;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--cam-ink);
+    cursor: pointer;
+}
+
+.glab--cam .glab-faq-item summary::marker {
+    color: var(--cam-blaze);
+}
+
+.glab--cam .glab-faq-item[open] summary {
+    color: var(--cam-blaze);
+}
+
+.glab--cam .glab-faq-item p {
+    margin: 0;
+    padding: 0 1.3rem 1.3rem;
+    font-size: 0.9375rem;
+    line-height: 1.65;
+    color: var(--cam-muted);
+}
+
+.glab--cam .glab-more-reading {
+    margin: 0;
+    padding-top: 2.5rem;
+    border-top: 1px solid var(--cam-hair);
+    background: none;
+}
+
+@media (max-width: 640px) {
+    .glab--cam {
+        padding-bottom: 3.5rem;
+    }
+
+    .glab--cam .cam-swatch {
+        height: 8rem;
+    }
+
+    .glab--cam .cam-picker {
+        padding: 1.5rem 1.15rem 1.75rem;
+    }
+}
