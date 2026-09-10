@@ -2430,24 +2430,28 @@
 
 
 
-.glab--entretien .glab-reco {
+.glab--entretien .glab-reco,
+.glab--seance .glab-reco {
     border-top: 2px solid var(--accent-heading);
 }
 
 .glab--entretien .glab-reco-list li,
-.glab--cibles .glab-reco-list li {
+.glab--cibles .glab-reco-list li,
+.glab--seance .glab-reco-list li {
     border-top: 2px solid var(--accent-heading);
     padding: 1.1rem 1.15rem 1.2rem;
 }
 
 .glab--entretien .glab-reco-rank,
-.glab--cibles .glab-reco-rank {
+.glab--cibles .glab-reco-rank,
+.glab--seance .glab-reco-rank {
     font-size: 0.68rem;
     letter-spacing: 0.08em;
 }
 
 .glab--entretien .glab-reco-head h3,
-.glab--cibles .glab-reco-head h3 {
+.glab--cibles .glab-reco-head h3,
+.glab--seance .glab-reco-head h3 {
     font-size: 1rem;
     letter-spacing: -0.015em;
     color: var(--accent-heading);
