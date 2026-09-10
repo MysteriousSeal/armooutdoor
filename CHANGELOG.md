@@ -2,6 +2,20 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-10 · v1.37.0 · build N7QXD2
+
+### Storefront
+
+- **A tenth guide, « Transporter son arme et ses munitions ».** Category B has one real rule, article R315-4: not immediately usable, by a locked case or a removed part. Categories C and D are comparatively silent, and the page says so rather than inventing a requirement, while correcting a genuine mix-up of its own: the two shipments twenty four hours apart of article R315-13 govern a carrier's parcel, not a personal drive to the club. Seven sources, cross-linked from « Votre première séance au stand » and to « Classer son arme » and « Où tirer légalement » rather than repeating either.
+
+### Fixed
+
+- **The three footer promises stacked oddly on a phone.** Icon on the left, two lines of text on the right, worked as one of three columns but read off centre alone in a single narrow one, since nothing sat on the icon's left to balance it. Under 640px the mark sits above the words now, both centred on the same line.
+- **The « Dans le sac » panel on the first session guide nested a border inside a border.** It already sat inside the section's own bordered card, and drew a second, near identical rectangle one step in, which read as a mistake rather than a layer. It takes the accent top border treatment « Entretenir son arme » and « Bien choisir sa cible » already use instead, and the numbered items are the only boxes left.
+- **The admin changelog page had stopped reading the date, version and build off every release since v1.31.2.** The heading's separator changed from an em dash to a middle dot, in the same pass that took the em dashes out of the changelog's prose, and the parser was never told: eleven releases printed their whole heading as the date, with no version and no build. It reads either separator now, and a heading written with a middle dot has a test of its own.
+
+**No migration.**
+
 ## 2026-09-10 · v1.36.1 · build 4ABV25
 
 ### Fixed

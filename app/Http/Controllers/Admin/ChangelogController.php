@@ -15,7 +15,8 @@ class ChangelogController extends Controller
     }
 
     /**
-     * Parses this project's CHANGELOG.md ("## date — vX.Y.Z — build XXXXXX" releases,
+     * Parses this project's CHANGELOG.md ("## date — vX.Y.Z — build XXXXXX", or the
+     * same with "·" in place of "—" from v1.31.2 on, releases,
      * "### Category" sections, "- " items with optional "  - " nested notes) into a
      * plain structure for the admin changelog page. Item text is pre-rendered to safe
      * HTML (bold/code).
@@ -45,12 +46,12 @@ class ChangelogController extends Controller
                 $version = null;
                 $build = null;
 
-                if (preg_match('/^(.*) — build (\S+)$/u', $date, $bm)) {
+                if (preg_match('/^(.*) [—·] build (\S+)$/u', $date, $bm)) {
                     $date = trim($bm[1]);
                     $build = trim($bm[2]);
                 }
 
-                if (preg_match('/^(.*) — v(\S+)$/u', $date, $hm)) {
+                if (preg_match('/^(.*) [—·] v(\S+)$/u', $date, $hm)) {
                     $date = trim($hm[1]);
                     $version = trim($hm[2]);
                 }

@@ -50,6 +50,38 @@ class AdminChangelogTest extends TestCase
         }
     }
 
+    public function test_parses_a_release_header_that_uses_the_middle_dot_separator(): void
+    {
+        // v1.31.2 through v1.36.1 wrote headers with "·" instead of "—", and
+        // the parser went on matching only the em dash for eleven releases
+        // before anyone noticed the admin page had stopped reading their
+        // date, version and build off the heading.
+        $original = File::get(base_path('CHANGELOG.md'));
+
+        File::put(base_path('CHANGELOG.md'), <<<'MD'
+        # Changelog
+
+        ## 2026-08-20 · v9.9.9 · build ABC123
+
+        ### Admin
+
+        - Did a thing.
+        MD);
+
+        try {
+            $admin = User::factory()->admin()->create();
+
+            $this->actingAs($admin)
+                ->get(route('admin.changelog'))
+                ->assertOk()
+                ->assertSee('v9.9.9')
+                ->assertSee('ABC123')
+                ->assertSee('Did a thing.');
+        } finally {
+            File::put(base_path('CHANGELOG.md'), $original);
+        }
+    }
+
     public function test_parses_a_release_header_with_only_a_build_number(): void
     {
         $original = File::get(base_path('CHANGELOG.md'));
