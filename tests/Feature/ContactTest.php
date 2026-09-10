@@ -98,6 +98,18 @@ class ContactTest extends TestCase
         $this->assertStringNotContainsString('cat-hero-overlay', $content);
     }
 
+    public function test_the_message_field_carries_a_wired_character_counter(): void
+    {
+        $content = $this->get('/contact')->assertOk()->getContent();
+
+        $this->assertMatchesRegularExpression(
+            '/<textarea[^>]*id="message"[^>]*data-char-counter="message-counter"[^>]*data-char-limit="5000"/',
+            $content,
+        );
+        $this->assertStringContainsString('id="message-counter"', $content);
+        $this->assertStringContainsString('js/admin-char-counter.js', $content);
+    }
+
     public function test_contact_form_is_wired_for_dynamic_submission(): void
     {
         $this->get('/contact')

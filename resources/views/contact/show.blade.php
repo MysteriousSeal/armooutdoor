@@ -12,6 +12,7 @@
 @endpush
 
 @push('scripts')
+    <script src="{{ versioned_asset('js/admin-char-counter.js') }}" defer></script>
     <script src="{{ versioned_asset('js/contact-form.js') }}" defer></script>
 @endpush
 
@@ -53,6 +54,7 @@
                             class="form-control"
                             value="{{ old('name', $prefillName) }}"
                             maxlength="120"
+                            autocomplete="name"
                             @if ($identityLocked) disabled @else required data-validate @endif
                         >
                         @if ($identityLocked)
@@ -70,6 +72,7 @@
                             class="form-control"
                             value="{{ old('email', $prefillEmail) }}"
                             maxlength="255"
+                            autocomplete="email"
                             @if ($identityLocked) disabled @else required data-validate @endif
                         >
                         @if ($identityLocked)
@@ -102,7 +105,10 @@
 
                 <div class="form-group">
                     <label for="message">{{ __('store.contact_message') }}</label>
-                    <textarea id="message" name="message" class="form-control" rows="7" maxlength="5000" required data-validate>{{ old('message') }}</textarea>
+                    <textarea id="message" name="message" class="form-control" rows="7" maxlength="5000" required data-validate
+                        data-char-counter="message-counter" data-char-limit="5000"
+                        data-char-note-good="" data-char-note-over=" : message trop long, merci de le raccourcir">{{ old('message') }}</textarea>
+                    <p class="form-char-counter" id="message-counter" aria-live="polite" hidden></p>
                     @error('message') <p class="form-error">{{ $message }}</p> @enderror
                 </div>
 
