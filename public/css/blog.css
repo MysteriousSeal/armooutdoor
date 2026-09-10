@@ -303,7 +303,7 @@
     grid-row: 1;
     max-width: none;
     margin: 0;
-    padding: 1.9rem 2.1rem;
+    padding: 2.35rem 2.6rem 2.5rem;
     background: none;
     backdrop-filter: none;
 }
@@ -313,7 +313,7 @@
     font-size: clamp(1.7rem, 3.2vw, 2.45rem);
     font-weight: 800;
     letter-spacing: -0.045em;
-    line-height: 0.94;
+    line-height: 1.05;
     text-transform: uppercase;
 }
 
@@ -355,53 +355,34 @@
     background: color-mix(in srgb, var(--surface) 88%, transparent);
 }
 
-.blog-article-byline {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
-    gap: 0.75rem 1.25rem;
-    margin: 0 0 1rem;
-    padding: 0 0 1rem;
-    border-bottom: 1px solid color-mix(in srgb, var(--border) 80%, var(--accent));
-}
-
-.blog-article-byline-cell {
+.blog-article-meta {
     display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-    min-width: 0;
-}
-
-.blog-article-byline-cell + .blog-article-byline-cell {
-    padding-left: 1.25rem;
-    border-left: 1px solid color-mix(in srgb, var(--border) 80%, var(--accent));
-}
-
-.blog-article-byline dt {
-    font-size: 0.6875rem;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin: 0 0 0.9rem;
+    font-size: 0.78rem;
     font-weight: 700;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--accent);
+    color: var(--text-muted);
 }
 
-.blog-article-byline dd {
-    margin: 0;
-    font-size: 0.98rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    color: var(--text);
+.blog-article-meta-category {
+    color: #5b5c3b;
+    text-decoration: none;
 }
 
-.blog-article-byline a {
-    color: inherit;
-}
-
-.blog-article-byline a:hover {
+.blog-article-meta-category:hover {
     color: var(--accent-hover);
 }
 
-.blog-article-byline time {
+.blog-article-meta-date {
     font-variant-numeric: tabular-nums;
+}
+
+[data-theme='dark'] .blog-article-meta-category {
+    color: var(--accent);
 }
 
 /* Même largeur que le hero, sur le fond blanc de la boutique. */
@@ -698,7 +679,7 @@
     }
 
     .blog-article-banner.has-image .blog-article-banner-copy {
-        padding: 1.35rem 1.2rem 1.4rem;
+        padding: 1.6rem 1.25rem 1.75rem;
     }
 
     .blog-article-title {
@@ -714,15 +695,15 @@
     .blog-article-main {
         padding: 2.6rem 3rem 2.85rem;
     }
+
+    .blog-article-banner.has-image .blog-article-banner-copy {
+        padding: 2.6rem 3rem 2.85rem;
+    }
 }
 
 @media (max-width: 640px) {
     .blog-article-title {
         font-size: 1.7rem;
-    }
-
-    .blog-article-byline-cell + .blog-article-byline-cell {
-        padding-left: 0.9rem;
     }
 
     /* No floor here any more. The copy sits under the picture rather than

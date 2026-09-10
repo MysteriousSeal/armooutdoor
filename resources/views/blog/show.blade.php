@@ -74,33 +74,18 @@
                 @endif
                 <div class="blog-article-banner-copy">
                     @if ($post->category || $post->published_at)
-                        <dl class="blog-article-byline">
+                        <p class="blog-article-meta">
                             @if ($post->category)
-                                <div class="blog-article-byline-cell">
-                                    <dt>{{ __('store.blog_category_label') }}</dt>
-                                    <dd>
-                                        <a href="{{ route('blog.category', $post->category->slug) }}">
-                                            {{ $post->category->localizedName() }}
-                                        </a>
-                                    </dd>
-                                </div>
+                                <a href="{{ route('blog.category', $post->category->slug) }}" class="blog-article-meta-category">
+                                    {{ $post->category->localizedName() }}
+                                </a>
                             @endif
                             @if ($post->published_at)
-                                <div class="blog-article-byline-cell">
-                                    <dt>{{ __('store.blog_published_label') }}</dt>
-                                    <dd>
-                                        <time datetime="{{ $post->published_at->toDateString() }}">
-                                            {{ $post->published_at->translatedFormat('j F Y') }}
-                                        </time>
-                                    </dd>
-                                </div>
+                                <time class="blog-article-meta-date" datetime="{{ $post->published_at->toDateString() }}">
+                                    {{ $post->published_at->translatedFormat('j F Y') }}
+                                </time>
                             @endif
-                            <div class="blog-article-byline-cell">
-                                <dt>{{ __('store.blog_read_time_label') }}</dt>
-                                <dd>{{ __('store.blog_read_time', ['min' => $post->readingMinutes()]) }}</dd>
-                            </div>
-
-                        </dl>
+                        </p>
                     @endif
                     <h1 class="blog-article-title">
                         <span class="blog-article-title-accent">{{ $post->localizedTitle() }}</span>
@@ -118,6 +103,13 @@
                                 <circle cx="12" cy="12" r="2.6" fill="none" stroke="currentColor" stroke-width="2"/>
                             </svg>
                             {{ trans_choice('store.blog_views_count', $viewCount ?? 0, ['count' => number_format($viewCount ?? 0, 0, ',', ' ')]) }}
+                        </span>
+                        <span class="blog-article-stat">
+                            <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                                <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
+                                <path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            {{ __('store.blog_read_time', ['min' => $post->readingMinutes()]) }}
                         </span>
                         <a href="#commentaires" class="blog-article-stat">
                             <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">

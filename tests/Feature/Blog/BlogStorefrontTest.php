@@ -164,7 +164,6 @@ class BlogStorefrontTest extends TestCase
 
         $this->get('/blog')->assertOk()->assertSee('3 min de lecture');
         $this->get('/blog/'.$post->slug)->assertOk()
-            ->assertSee('Lecture')
             ->assertSee('3 min de lecture');
     }
 
