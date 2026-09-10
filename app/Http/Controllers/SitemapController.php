@@ -36,7 +36,9 @@ class SitemapController extends Controller
 
         $blogCategories = BlogCategory::query()->orderBy('sort_order')->get();
 
-        return view('sitemap.html', compact('categories', 'products', 'posts', 'blogCategories'));
+        $guides = collect(Guides::all());
+
+        return view('sitemap.html', compact('categories', 'products', 'posts', 'blogCategories', 'guides'));
     }
 
     public function robots(): Response
@@ -89,10 +91,12 @@ class SitemapController extends Controller
             ['loc' => route('about'), 'changefreq' => 'monthly', 'priority' => '0.5'],
             ['loc' => route('help.shipping-returns'), 'changefreq' => 'monthly', 'priority' => '0.5'],
             ['loc' => route('help.secure-payment'), 'changefreq' => 'monthly', 'priority' => '0.5'],
-            ['loc' => route('legal.terms'), 'changefreq' => 'yearly', 'priority' => '0.3'],
-            ['loc' => route('legal.notice'), 'changefreq' => 'yearly', 'priority' => '0.3'],
-            ['loc' => route('legal.privacy'), 'changefreq' => 'yearly', 'priority' => '0.3'],
-            ['loc' => route('legal.withdrawal'), 'changefreq' => 'yearly', 'priority' => '0.3'],
+            // The date each legal page states to a visitor as its own "last
+            // updated" line, so the sitemap cannot claim a different one.
+            ['loc' => route('legal.terms'), 'lastmod' => config('shop.legal_updated.terms'), 'changefreq' => 'yearly', 'priority' => '0.3'],
+            ['loc' => route('legal.notice'), 'lastmod' => config('shop.legal_updated.notice'), 'changefreq' => 'yearly', 'priority' => '0.3'],
+            ['loc' => route('legal.privacy'), 'lastmod' => config('shop.legal_updated.privacy'), 'changefreq' => 'yearly', 'priority' => '0.3'],
+            ['loc' => route('legal.withdrawal'), 'lastmod' => config('shop.legal_updated.withdrawal'), 'changefreq' => 'yearly', 'priority' => '0.3'],
         ];
 
         return $this->xml('sitemap.urlset', compact('urls'));

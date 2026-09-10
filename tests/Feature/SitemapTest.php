@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\BlogPost;
 use App\Models\Product;
+use App\Support\Guides;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -78,12 +79,48 @@ class SitemapTest extends TestCase
         $this->assertStringNotContainsString('Guides d&#039;achat', $plan);
     }
 
+    public function test_the_html_plan_lists_every_guide_on_the_shelf(): void
+    {
+        // The Guides section once had three guides typed into the view by
+        // hand, so the shelf outgrew it silently: a 4th guide was never
+        // linked from the one page meant to link everything. Reading off
+        // Guides::all() here, the way the guide's own test reads it, means
+        // an 11th guide is covered without anyone remembering to list it.
+        $plan = $this->get('/plan-du-site')->assertOk()->getContent();
+
+        foreach (Guides::all() as $guide) {
+            $this->assertStringContainsString($guide['url'], $plan);
+        }
+    }
+
     public function test_the_contact_page_and_the_html_plan_are_listed(): void
     {
         $xml = $this->get('/sitemap-pages.xml')->assertOk()->getContent();
 
         $this->assertStringContainsString('<loc>'.route('contact.show').'</loc>', $xml);
         $this->assertStringContainsString('<loc>'.route('sitemap.html').'</loc>', $xml);
+    }
+
+    public function test_the_legal_pages_carry_the_date_they_show_a_visitor(): void
+    {
+        // The four legal pages state their own "last updated" date to a
+        // reader, from config('shop.legal_updated'), and the sitemap wrote
+        // no lastmod at all for any of the sixteen pages in this file: a
+        // date already sitting on the page was never read into the one
+        // place a crawler looks for it.
+        $xml = $this->get('/sitemap-pages.xml')->assertOk()->getContent();
+
+        foreach ([
+            'legal.terms' => 'terms',
+            'legal.notice' => 'notice',
+            'legal.privacy' => 'privacy',
+            'legal.withdrawal' => 'withdrawal',
+        ] as $route => $key) {
+            $this->assertStringContainsString(
+                '<loc>'.route($route).'</loc>'."\n".'<lastmod>'.config('shop.legal_updated.'.$key).'</lastmod>',
+                preg_replace('/[ \t]+/', '', $xml),
+            );
+        }
     }
 
     public function test_a_product_carries_its_photographs_into_the_sitemap(): void

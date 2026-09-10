@@ -41,9 +41,9 @@
                 <h2 class="sitemap-heading" id="sitemap-guides-heading">{{ __('store.sitemap_guides') }}</h2>
                 <ul class="sitemap-pages">
                     <li><a href="{{ route('guides.index') }}">{{ __('store.footer_reading_guides') }}</a></li>
-                    <li><a href="{{ route('guides.classification') }}">Classer son arme</a></li>
-                    <li><a href="{{ route('guides.cibles') }}">Bien choisir sa cible</a></li>
-                    <li><a href="{{ route('guides.entretien') }}">Entretenir son arme</a></li>
+                    @foreach ($guides as $guide)
+                        <li><a href="{{ $guide['url'] }}">{{ $guide['title'] }}</a></li>
+                    @endforeach
                 </ul>
             </nav>
         </section>
