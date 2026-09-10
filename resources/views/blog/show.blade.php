@@ -134,7 +134,7 @@
                         <p class="blog-article-plan-kicker">{{ __('store.blog_plan') }}</p>
                         <div class="blog-article-plan-links">
                             @foreach ($article['headings'] as $heading)
-                                <a href="#{{ $heading['id'] }}">{{ $heading['text'] }}</a>
+                                <a href="#{{ $heading['id'] }}"><span class="blog-article-plan-num" aria-hidden="true">{{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>{{ $heading['text'] }}</a>
                             @endforeach
                         </div>
                     </nav>

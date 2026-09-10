@@ -45,11 +45,16 @@ class BlogArticlePlanTest extends TestCase
         }
 
         // The heading text comes through with its accents, in the nav and in
-        // the body alike, with no Latin-1 misreading of the fragment.
-        foreach (['Réglage de la lunette', 'À quelle distance', 'Cœur de cible'] as $text) {
-            $this->assertStringContainsString('>'.$text.'</a>', $nav);
+        // the body alike, with no Latin-1 misreading of the fragment. Each
+        // pill opens with its zero-padded rank, in reading order, hidden from
+        // the link's accessible name; the heading itself carries no number,
+        // the section counter is CSS.
+        foreach (['Réglage de la lunette', 'À quelle distance', 'Cœur de cible'] as $i => $text) {
+            $this->assertStringContainsString('>0'.($i + 1).'</span>'.$text.'</a>', $nav);
             $this->assertStringContainsString('">'.$text.'</h2>', $html);
         }
+        preg_match_all('/<span class="blog-article-plan-num" aria-hidden="true">(\d+)<\/span>/', $nav, $numbers);
+        $this->assertSame(['01', '02', '03'], $numbers[1]);
         $this->assertStringNotContainsString('Ã', $html);
         $this->assertStringNotContainsString('&Atilde;', $html);
         $this->assertStringNotContainsString('&Aring;', $html);

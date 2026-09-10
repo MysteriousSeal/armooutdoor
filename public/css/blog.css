@@ -444,6 +444,18 @@
     outline-offset: 2px;
 }
 
+/* The same figure as on the heading it points to, muted so the title
+   stays the pill's word. Hidden from the link's name: the order is the
+   list's already. */
+.blog-article-plan-num {
+    margin-right: 0.45em;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    font-variant-numeric: tabular-nums;
+    color: color-mix(in srgb, var(--accent-heading) 70%, var(--surface));
+}
+
 /* The prose column. The card keeps the hero's width, the text does not:
    a 1783-word read at 130 characters a line is a wall, at 82 it is a page.
    44rem rather than the guides' 46rem because this type runs larger. */
@@ -452,54 +464,76 @@
     margin: 0 auto;
     font-size: 1.025rem;
     line-height: 1.75;
+    counter-reset: section;
 }
 
 .blog-article-body > * + * {
-    margin-top: 1.15rem;
+    margin-top: 1.25rem;
 }
 
 .blog-article-body p:empty {
     display: none;
 }
 
+/* An empty heading would still take a number. */
+.blog-article-body h2:empty {
+    display: none;
+}
+
+.blog-article-body p,
+.blog-article-body li {
+    text-wrap: pretty;
+}
+
 .blog-article-body > p:first-child {
-    font-size: 1.1rem;
-    line-height: 1.7;
-    color: var(--text);
+    font-size: 1.15rem;
+    line-height: 1.65;
 }
 
 .blog-article-body h2,
 .blog-article-body h3,
 .blog-article-body h4 {
     line-height: 1.25;
+    text-wrap: balance;
 }
 
+/* The section's number over its title, the figure the plan strip and the
+   guides index already use: the plan promised an order, the heading
+   confirms it. Above rather than beside so a two-line title wraps flush
+   with the prose. The top rule stays as the boundary; the accent bar
+   that used to sit under the title is gone, the number does its job. */
 .blog-article-body h2 {
     scroll-margin-top: 5.5rem;
-    margin-top: 2.6rem;
-    padding-top: 1.45rem;
-    font-size: 1.28rem;
+    margin-top: 2.75rem;
+    padding-top: 1.15rem;
+    font-size: 1.4rem;
     font-weight: 750;
     letter-spacing: -0.03em;
     color: #5b5c3b;
     border-top: 1px solid color-mix(in srgb, #5b5c3b 22%, var(--border));
+    counter-increment: section;
 }
 
-.blog-article-body h2::after {
-    content: '';
+.blog-article-body h2::before {
+    content: counter(section, decimal-leading-zero);
+    /* Same figure, hidden from the accessible name where the slash syntax
+       is understood; older engines keep the line above. */
+    content: counter(section, decimal-leading-zero) / '';
     display: block;
-    width: 2.35rem;
-    height: 0.16em;
-    margin-top: 0.55rem;
-    background: color-mix(in srgb, #5b5c3b 42%, transparent);
+    margin-bottom: 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    font-variant-numeric: tabular-nums;
 }
 
 .blog-article-body h3 {
-    margin-top: 1.7rem;
-    padding-left: 0.8rem;
-    font-size: 1.02rem;
+    margin-top: 2.1rem;
+    padding-left: 0.85rem;
+    font-size: 1.15rem;
     font-weight: 650;
-    letter-spacing: -0.015em;
+    letter-spacing: -0.02em;
     color: #5b5c3b;
     border-left: 2px solid color-mix(in srgb, #5b5c3b 55%, var(--border));
 }
@@ -507,6 +541,25 @@
 .blog-article-body h3 + figure,
 .blog-article-body h3 + img {
     margin-top: 1.75rem;
+}
+
+/* A heading sits closer to what it announces than to what it follows. */
+.blog-article-body h2 + * {
+    margin-top: 0.9rem;
+}
+
+.blog-article-body h3 + * {
+    margin-top: 0.7rem;
+}
+
+.blog-article-body h2 + h3 {
+    margin-top: 1.5rem;
+}
+
+/* A sentence ending in a colon and the list it announces are one thing. */
+.blog-article-body p + ul,
+.blog-article-body p + ol {
+    margin-top: 0.8rem;
 }
 
 .blog-article-body h4 {
@@ -525,12 +578,12 @@
     border-top-color: color-mix(in srgb, var(--accent) 28%, var(--border));
 }
 
-[data-theme='dark'] .blog-article-body h2::after {
-    background: color-mix(in srgb, var(--accent) 42%, transparent);
-}
-
 [data-theme='dark'] .blog-article-body h3 {
     border-left-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+}
+
+[data-theme='dark'] .blog-article-body li::marker {
+    color: var(--accent);
 }
 
 /* Inline links in the prose, most of them to products: the same recipe as
@@ -554,11 +607,20 @@
     padding-left: 1.2rem;
 }
 
-.blog-article-body li + li {
-    margin-top: 0.55rem;
+.blog-article-body ul {
+    list-style: square;
 }
 
-.blog-article-body li strong {
+.blog-article-body li::marker {
+    color: #5b5c3b;
+}
+
+.blog-article-body li + li {
+    margin-top: 0.6rem;
+}
+
+/* 600 is what the loaded Inter faces render for any bold; declare it. */
+.blog-article-body strong {
     font-weight: 600;
 }
 
