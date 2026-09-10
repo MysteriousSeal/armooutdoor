@@ -619,7 +619,8 @@
     margin-top: 0.6rem;
 }
 
-/* 600 is what the loaded Inter faces render for any bold; declare it. */
+/* Semi-bold, not bold: seven of these in a 1.025rem body, and 700 shouts
+   now that the font actually has it. */
 .blog-article-body strong {
     font-weight: 600;
 }

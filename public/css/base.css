@@ -1,23 +1,12 @@
+/* One face for the whole weight axis. The file is Inter's variable font,
+   wght 100 to 900, and it was declared as three fixed faces at 400, 500
+   and 600: every weight the stylesheets asked for above 600, the 700 and
+   750 and 800 on headings and bold, snapped to the 600 face, so nothing
+   on the site was ever bolder than semi-bold. */
 @font-face {
     font-family: 'Inter';
     font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url('../fonts/inter-latin.woff2') format('woff2');
-}
-
-@font-face {
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 500;
-    font-display: swap;
-    src: url('../fonts/inter-latin.woff2') format('woff2');
-}
-
-@font-face {
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 600;
+    font-weight: 100 900;
     font-display: swap;
     src: url('../fonts/inter-latin.woff2') format('woff2');
 }
