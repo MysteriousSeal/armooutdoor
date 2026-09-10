@@ -827,10 +827,49 @@
 @media (min-width: 960px) {
     .blog-article-main {
         padding: 2.6rem 3rem 2.85rem;
+        display: grid;
+        grid-template-columns: 14rem minmax(0, 1fr);
+        column-gap: 2.5rem;
     }
 
     .blog-article-banner.has-image .blog-article-banner-copy {
         padding: 2.6rem 3rem 2.85rem;
+    }
+
+    /* The plan becomes a left sidebar here: a sticky rail beside the prose
+       rather than a strip above it. Its own grid-item box stretches to the
+       row height (the body's height), so a sticky nav inside it naturally
+       stops scrolling once the article ends, no manual height math needed. */
+    .blog-article-plan {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        border-bottom: 0;
+        position: sticky;
+        top: 5.5rem;
+        max-height: calc(100vh - 5.5rem - 2rem);
+        overflow-y: auto;
+    }
+
+    .blog-article-plan-links {
+        display: block;
+    }
+
+    .blog-article-plan a {
+        display: block;
+        padding: 0.55rem 0 0.55rem 0.85rem;
+        border: 0;
+        border-left: 2px solid color-mix(in srgb, var(--accent-heading) 22%, var(--border));
+        background: none;
+    }
+
+    .blog-article-plan a:hover {
+        background: color-mix(in srgb, var(--accent-heading) 8%, transparent);
+        border-left-color: var(--accent-heading);
+    }
+
+    .blog-article-body {
+        margin: 0;
     }
 }
 
