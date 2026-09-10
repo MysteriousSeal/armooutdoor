@@ -2781,3 +2781,24 @@
             transition: none;
         }
 }
+
+/* ============================== transport ==============================
+ *
+ * Transporter son arme et ses munitions
+ */
+
+.glab--transport .glab-title,
+.glab--transport .glab-section {
+    scroll-margin-top: 5.5rem;
+}
+
+.glab--transport .glab-place-cards > div {
+    border-top: 2px solid var(--accent-heading);
+}
+
+/* The one myth to correct here is about a parcel, not a car trip: a
+   dashed edge reads as a shipping label rather than the site's usual card. */
+.glab--transport .glab-myth {
+    border-style: dashed;
+    border-width: 1.5px;
+}

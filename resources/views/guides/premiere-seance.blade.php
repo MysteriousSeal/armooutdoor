@@ -452,7 +452,9 @@
                 <a href="{{ route('guides.classification') }}">Classer son arme</a>. Les mots que
                 vous entendrez au comptoir sont au
                 <a href="{{ route('guides.glossaire') }}">glossaire</a>, et le nettoyage du soir
-                dans <a href="{{ route('guides.entretien') }}">Entretenir son arme</a>.
+                dans <a href="{{ route('guides.entretien') }}">Entretenir son arme</a>. Le trajet
+                lui-même est le sujet de
+                <a href="{{ route('guides.transport') }}">Transporter son arme et ses munitions</a>.
             </p>
         </section>
 

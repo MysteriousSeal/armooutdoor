@@ -103,6 +103,7 @@ Route::view('/guides/choisir-son-camouflage', 'guides.camouflage')->name('guides
 Route::view('/guides/ou-tirer-legalement', 'guides.ou-tirer')->name('guides.ou-tirer');
 Route::view('/guides/regler-sa-lunette', 'guides.optique')->name('guides.optique');
 Route::view('/guides/premiere-seance-au-stand', 'guides.premiere-seance')->name('guides.premiere-seance');
+Route::view('/guides/transporter-son-arme', 'guides.transport')->name('guides.transport');
 
 /*
 |--------------------------------------------------------------------------

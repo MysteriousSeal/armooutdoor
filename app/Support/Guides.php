@@ -57,6 +57,17 @@ class Guides
                 'summary' => 'Le déroulé heure par heure, les quatre règles, les trois commandements du pas de tir, ce qu\'on ne fait jamais, et un sélecteur qui remplit le sac selon votre visite et votre discipline.',
             ],
             [
+                'topic' => 'Transport',
+                'title' => 'Transporter son arme et ses munitions',
+                'url' => route('guides.transport'),
+                'route' => 'guides.transport',
+                'categories' => ['poches-etuis', 'etuis-a-munitions', 'boites-munitions'],
+                'published' => '2026-09-10',
+                'updated' => '2026-09-10',
+                'teaser' => 'Le seul texte qui décide vraiment, la confusion sur les envois par transporteur, et la D qu\'on oublie.',
+                'summary' => 'Ce que la loi impose vraiment pour transporter une arme entre le domicile, le club ou la chasse, catégorie par catégorie, et pourquoi les deux envois séparés de 24 heures ne concernent pas votre trajet en voiture.',
+            ],
+            [
                 'topic' => 'Vocabulaire',
                 'title' => 'Le glossaire',
                 'url' => route('guides.glossaire'),

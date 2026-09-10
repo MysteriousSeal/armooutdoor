@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Guides du tir et de l\'airsoft : loi, énergie, matériel — Armo Outdoor')
-@section('meta_description', 'Neuf guides écrits par la boutique : les catégories D, C, B et A, les joules et les FPS, où l\'on peut tirer, la première séance au stand, le réglage d\'une lunette, les cibles, l\'entretien, le camouflage et le glossaire.')
+@section('meta_description', 'Dix guides écrits par la boutique : les catégories D, C, B et A, le transport de l\'arme et des munitions, les joules et les FPS, où l\'on peut tirer, la première séance au stand, le réglage d\'une lunette, les cibles, l\'entretien, le camouflage et le glossaire.')
 @section('canonical', route('guides.index'))
 
 @php
@@ -62,7 +62,7 @@
             <p class="glab-head-kicker">La boutique conseille</p>
             <h1 class="glab-head-title">Les guides du tir <span class="glab-title-accent">et de l'airsoft</span></h1>
             <p class="glab-head-lede">
-                Neuf pages écrites par la boutique, d'après ce qu'elle vend et ce qu'on lui
+                Dix pages écrites par la boutique, d'après ce qu'elle vend et ce qu'on lui
                 demande au comptoir. La loi d'abord, parce qu'elle décide de ce que vous avez
                 le droit d'acheter et d'emporter. L'énergie ensuite, parce qu'elle décide de
                 presque tout le reste. Puis le matériel, rayon par rayon.
