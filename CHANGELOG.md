@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-10 · v1.38.1 · build M6TPXV
+
+### Storefront
+
+- **The contact message field counts down now.** The textarea's five thousand character limit was enforced only by the browser refusing to take another key, with no warning on the way there. It carries a live, quiet count now, the same mechanism the admin's product form already uses, given its own French wording rather than the admin's search-preview copy. Name and e-mail also fill in faster, with autocomplete turned on.
+
+**No migration.**
+
 ## 2026-09-10 · v1.38.0 · build R2FYQ8
 
 ### Storefront
