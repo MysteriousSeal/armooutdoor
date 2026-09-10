@@ -2,6 +2,17 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-10 · v1.37.1 · build W3KDX9
+
+### Fixed
+
+- **The site plan linked three guides out of ten.** They were typed into the page by hand, so the shelf outgrew it in silence: seven guides, including the newest, were never reachable from the one page meant to link everything, though every one of them was always in the XML sitemap and in the ordinary guide index. It reads the shelf itself now, the way the XML sitemap already did, so an eleventh guide will not repeat the mistake.
+- **The sitemap wrote no date for any of its sixteen static pages.** Most have no single moment that counts as their own, and naming one would have been a guess. The four legal pages are the exception: each already states its own last updated date to a reader, and the sitemap reports that same date now rather than staying silent about pages that do have one.
+- **The blog article hero's picture left white above and below itself whenever the title ran to two lines.** Centred in a row its own copy had made taller than its 16:9 box, the picture floated rather than filled it, the same bug the category hero had already been through. It stretches to the row now and keeps the ratio only as a floor, the fix the category hero already carries.
+- **The same hero read as cramped once the picture stopped leaving it room to be short.** Its byline was a bordered grid of labelled cells the rest of the blog does not use, set in a panel with less padding than the plain article text sitting under it. The byline reads as one quiet line now, the way a blog card already states its category and date, reading time moved down beside the view and comment counts, and the panel's padding catches up to the body below it.
+
+**No migration.**
+
 ## 2026-09-10 · v1.37.0 · build N7QXD2
 
 ### Storefront
