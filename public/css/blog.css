@@ -446,14 +446,19 @@
 
 /* The same figure as on the heading it points to, muted so the title
    stays the pill's word. Hidden from the link's name: the order is the
-   list's already. */
+   list's already. Warm to match the heading it announces, not the olive
+   the pill itself borrows from the guides. */
 .blog-article-plan-num {
     margin-right: 0.45em;
     font-size: 0.7rem;
     font-weight: 700;
     letter-spacing: 0.08em;
     font-variant-numeric: tabular-nums;
-    color: color-mix(in srgb, var(--accent-heading) 70%, var(--surface));
+    color: color-mix(in srgb, #cc5010 70%, var(--surface));
+}
+
+[data-theme='dark'] .blog-article-plan-num {
+    color: color-mix(in srgb, #ff9450 70%, var(--surface));
 }
 
 /* The prose column. The card keeps the hero's width, the text does not:
@@ -501,7 +506,12 @@
    guides index already use: the plan promised an order, the heading
    confirms it. Above rather than beside so a two-line title wraps flush
    with the prose. The top rule stays as the boundary; the accent bar
-   that used to sit under the title is gone, the number does its job. */
+   that used to sit under the title is gone, the number does its job.
+   Warm rather than the site's usual olive: a vivid orange, darkened off
+   #ff7000 rather than used at it, since that value is NaturaBuy's own
+   and this heading is not a marketplace badge. Scoped to the article's
+   own headings, not the shared --accent-heading token dozens of other
+   places read. */
 .blog-article-body h2 {
     scroll-margin-top: 5.5rem;
     margin-top: 2.75rem;
@@ -509,8 +519,8 @@
     font-size: 1.4rem;
     font-weight: 750;
     letter-spacing: -0.03em;
-    color: #5b5c3b;
-    border-top: 1px solid color-mix(in srgb, #5b5c3b 22%, var(--border));
+    color: #cc5010;
+    border-top: 1px solid color-mix(in srgb, #cc5010 22%, var(--border));
     counter-increment: section;
 }
 
@@ -534,8 +544,8 @@
     font-size: 1.15rem;
     font-weight: 650;
     letter-spacing: -0.02em;
-    color: #5b5c3b;
-    border-left: 2px solid color-mix(in srgb, #5b5c3b 55%, var(--border));
+    color: #cc5010;
+    border-left: 2px solid color-mix(in srgb, #cc5010 55%, var(--border));
 }
 
 .blog-article-body h3 + figure,
@@ -571,19 +581,19 @@
 
 [data-theme='dark'] .blog-article-body h2,
 [data-theme='dark'] .blog-article-body h3 {
-    color: var(--accent);
+    color: #ff9450;
 }
 
 [data-theme='dark'] .blog-article-body h2 {
-    border-top-color: color-mix(in srgb, var(--accent) 28%, var(--border));
+    border-top-color: color-mix(in srgb, #ff9450 28%, var(--border));
 }
 
 [data-theme='dark'] .blog-article-body h3 {
-    border-left-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+    border-left-color: color-mix(in srgb, #ff9450 55%, var(--border));
 }
 
 [data-theme='dark'] .blog-article-body li::marker {
-    color: var(--accent);
+    color: #ff9450;
 }
 
 /* Inline links in the prose, most of them to products: the same recipe as
@@ -612,7 +622,7 @@
 }
 
 .blog-article-body li::marker {
-    color: #5b5c3b;
+    color: #cc5010;
 }
 
 .blog-article-body li + li {
