@@ -835,6 +835,28 @@ body.has-menu-open {
     color: var(--text-muted);
 }
 
+/* Icon-left, text-right reads fine as one of three columns, but stacked
+   alone in a single narrow column the icon has no text on its left to
+   balance it, so the group looks shifted off-centre. Stacking the mark
+   above the text instead keeps everything on one true centre line. */
+@media (max-width: 640px) {
+    .site-footer-promise {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        text-align: center;
+        row-gap: 0.3rem;
+    }
+
+    .site-footer-promise-mark {
+        grid-row: 1;
+    }
+
+    .site-footer-promise strong,
+    .site-footer-promise span:not(.site-footer-promise-mark) {
+        grid-column: 1;
+    }
+}
+
 /* The brand takes its share; the link columns size to their words and
    the leftover space spreads between them, so the last column ends at
    the container's right edge instead of where its text happens to. */
