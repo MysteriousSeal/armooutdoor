@@ -448,6 +448,8 @@ return [
     'category_guide_kicker' => 'Guide',
     'category_guide_title' => 'Bien choisir : :category',
     'blog_sources' => 'Sources',
+    'blog_plan' => 'Plan',
+    'blog_plan_label' => 'Plan de l\'article',
     'blog_comments' => 'Commentaires',
     'blog_comments_count' => ':count commentaire|:count commentaires',
     'blog_comments_empty' => 'Aucun commentaire pour le moment. Lancez la discussion !',

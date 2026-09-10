@@ -121,9 +121,26 @@
                 </div>
             </header>
 
+            @php
+                // One parse: the id-annotated body and the headings for the plan.
+                $article = $post->annotatedBody();
+            @endphp
             <div class="blog-article-main">
+                @if (count($article['headings']) >= 2)
+                    {{-- The article's plan, the same jump strip the guides use:
+                         a long read needs a way to see where it goes. One
+                         heading is not a plan, so the strip needs two. --}}
+                    <nav class="blog-article-plan" aria-label="{{ __('store.blog_plan_label') }}">
+                        <p class="blog-article-plan-kicker">{{ __('store.blog_plan') }}</p>
+                        <div class="blog-article-plan-links">
+                            @foreach ($article['headings'] as $heading)
+                                <a href="#{{ $heading['id'] }}">{{ $heading['text'] }}</a>
+                            @endforeach
+                        </div>
+                    </nav>
+                @endif
                 <div class="blog-article-body">
-                    {!! $post->localizedBody() !!}
+                    {!! $article['html'] !!}
                 </div>
             </div>
 
@@ -150,40 +167,6 @@
                             </li>
                         @endforeach
                     </ul>
-                </section>
-            @endif
-
-            <aside class="blog-article-ask">
-                <div class="blog-article-ask-copy">
-                    <p class="blog-article-ask-kicker">{{ __('store.blog_title') }}</p>
-                    <p class="blog-article-ask-title">{{ __('store.blog_question') }}</p>
-                </div>
-                <a href="{{ route('contact.show') }}" class="btn btn-primary">{{ __('store.blog_contact_us') }}</a>
-            </aside>
-
-            @if ($post->products->isNotEmpty())
-                <section class="blog-article-products" aria-labelledby="blog-products-title">
-                    <header class="blog-article-section-head">
-                        <h2 class="blog-section-title" id="blog-products-title">{{ __('store.blog_related_products') }}</h2>
-                    </header>
-                    <div class="product-grid">
-                        @foreach ($post->products as $product)
-                            @include('partials.product-card', ['product' => $product, 'lazy' => true, 'headingLevel' => 'h3'])
-                        @endforeach
-                    </div>
-                </section>
-            @endif
-
-            @if ($related->isNotEmpty())
-                <section class="blog-article-related" aria-labelledby="blog-related-title">
-                    <header class="blog-article-section-head">
-                        <h2 class="blog-section-title" id="blog-related-title">{{ __('store.blog_related_posts') }}</h2>
-                    </header>
-                    <div class="blog-grid">
-                        @foreach ($related as $other)
-                            @include('blog.partials.card', ['post' => $other, 'lazy' => true])
-                        @endforeach
-                    </div>
                 </section>
             @endif
 
@@ -252,6 +235,40 @@
                     <button type="submit" class="btn btn-primary">{{ __('store.blog_comment_send') }}</button>
                 </form>
             </section>
+
+            <aside class="blog-article-ask">
+                <div class="blog-article-ask-copy">
+                    <p class="blog-article-ask-kicker">{{ __('store.blog_title') }}</p>
+                    <p class="blog-article-ask-title">{{ __('store.blog_question') }}</p>
+                </div>
+                <a href="{{ route('contact.show') }}" class="btn btn-primary">{{ __('store.blog_contact_us') }}</a>
+            </aside>
+
+            @if ($post->products->isNotEmpty())
+                <section class="blog-article-products" aria-labelledby="blog-products-title">
+                    <header class="blog-article-section-head">
+                        <h2 class="blog-section-title" id="blog-products-title">{{ __('store.blog_related_products') }}</h2>
+                    </header>
+                    <div class="product-grid">
+                        @foreach ($post->products as $product)
+                            @include('partials.product-card', ['product' => $product, 'lazy' => true, 'headingLevel' => 'h3'])
+                        @endforeach
+                    </div>
+                </section>
+            @endif
+
+            @if ($related->isNotEmpty())
+                <section class="blog-article-related" aria-labelledby="blog-related-title">
+                    <header class="blog-article-section-head">
+                        <h2 class="blog-section-title" id="blog-related-title">{{ __('store.blog_related_posts') }}</h2>
+                    </header>
+                    <div class="blog-grid">
+                        @foreach ($related as $other)
+                            @include('blog.partials.card', ['post' => $other, 'lazy' => true])
+                        @endforeach
+                    </div>
+                </section>
+            @endif
 
             <p class="blog-article-back">
                 <a href="{{ route('blog.index') }}">← {{ __('store.blog_back_to_list') }}</a>

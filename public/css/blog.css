@@ -395,7 +395,61 @@
     box-shadow: var(--shadow);
 }
 
+/* The article's plan: the guides' jump strip (.glab-plan) in the same
+   olive, the same pills, so a reader who has seen a guide knows what it
+   is. The kicker sits above the links rather than beside them: six long
+   headings wrap, and a kicker at the head of a wrapping row reads as one
+   more pill. Same column as the prose. */
+.blog-article-plan {
+    max-width: 44rem;
+    margin: 0 auto 2.2rem;
+    padding: 0 0 1.5rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--accent-heading) 22%, var(--border));
+}
+
+.blog-article-plan-kicker {
+    margin: 0 0 0.6rem;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent-heading);
+}
+
+.blog-article-plan-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    min-width: 0;
+}
+
+.blog-article-plan a {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--accent-heading);
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 22%, var(--border));
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.blog-article-plan a:hover {
+    background: color-mix(in srgb, var(--accent-heading) 9%, var(--surface));
+    border-color: var(--accent-heading);
+}
+
+.blog-article-plan a:focus-visible {
+    outline: 2px solid var(--accent-heading);
+    outline-offset: 2px;
+}
+
+/* The prose column. The card keeps the hero's width, the text does not:
+   a 1783-word read at 130 characters a line is a wall, at 82 it is a page.
+   44rem rather than the guides' 46rem because this type runs larger. */
 .blog-article-body {
+    max-width: 44rem;
+    margin: 0 auto;
     font-size: 1.025rem;
     line-height: 1.75;
 }
@@ -421,6 +475,7 @@
 }
 
 .blog-article-body h2 {
+    scroll-margin-top: 5.5rem;
     margin-top: 2.6rem;
     padding-top: 1.45rem;
     font-size: 1.28rem;
@@ -478,15 +533,20 @@
     border-left-color: color-mix(in srgb, var(--accent) 55%, var(--border));
 }
 
+/* Inline links in the prose, most of them to products: the same recipe as
+   the guides. A quiet underline at rest so a paragraph with three of them
+   is not striped, full strength under the pointer, the text colour held. */
 .blog-article-body a {
     color: var(--accent-hover);
     text-decoration: underline;
     text-decoration-thickness: 1px;
+    text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
     text-underline-offset: 0.18em;
+    transition: text-decoration-color 0.15s ease;
 }
 
 .blog-article-body a:hover {
-    color: var(--text);
+    text-decoration-color: currentColor;
 }
 
 .blog-article-body ul,

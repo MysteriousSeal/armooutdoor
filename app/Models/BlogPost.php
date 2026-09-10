@@ -3,12 +3,14 @@
 namespace App\Models;
 
 use App\Support\ImageThumbnailer;
+use DOMDocument;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Str;
 
 #[Fillable([
     'blog_category_id',
@@ -135,6 +137,84 @@ class BlogPost extends Model
     public function localizedBody(): string
     {
         return $this->body[app()->getLocale()] ?? $this->body['fr'] ?? '';
+    }
+
+    /** Memo for annotatedBody(): the body it was built from, and the result. */
+    private ?array $annotatedBodyMemo = null;
+
+    /**
+     * The body with an id on every h2, plus the list of those headings in
+     * order, so the page can draw a jump nav without a second parse.
+     *
+     * The admin sanitizer strips ids on save on purpose, so they are added
+     * here at render time from the heading text. DOMDocument rather than a
+     * regex: the body is trusted sanitized HTML, and a parser keeps the
+     * accented French text and the inline links exactly as stored. The
+     * `<?xml encoding="UTF-8">` prologue is what stops libxml from reading
+     * the fragment as Latin-1; only the wrapper div's children are written
+     * back out, never a synthetic html/body document.
+     *
+     * Memoized against the body string itself, so a changed body or locale
+     * is never served a stale parse, and the view can ask twice for free.
+     *
+     * @return array{html: string, headings: array<int, array{id: string, text: string}>}
+     */
+    public function annotatedBody(): array
+    {
+        $body = $this->localizedBody();
+
+        if ($this->annotatedBodyMemo !== null && $this->annotatedBodyMemo['body'] === $body) {
+            return $this->annotatedBodyMemo['result'];
+        }
+
+        $result = ['html' => $body, 'headings' => []];
+
+        if (trim($body) !== '') {
+            $document = new DOMDocument('1.0', 'UTF-8');
+            $internalErrors = libxml_use_internal_errors(true);
+            $document->loadHTML('<?xml encoding="UTF-8"><div id="blog-annotate-root">'.$body.'</div>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+            libxml_clear_errors();
+            libxml_use_internal_errors($internalErrors);
+
+            $wrapper = $document->getElementById('blog-annotate-root');
+
+            if ($wrapper !== null) {
+                // Ids already used elsewhere on the article page: a heading
+                // that slugs to one of these gets a numeric suffix instead.
+                $taken = ['commentaires' => true];
+
+                foreach ($document->getElementsByTagName('h2') as $heading) {
+                    $text = trim($heading->textContent);
+
+                    if ($text === '') {
+                        continue;
+                    }
+
+                    $base = Str::slug($text) ?: 'section';
+                    $id = $base;
+
+                    for ($n = 2; isset($taken[$id]); $n++) {
+                        $id = $base.'-'.$n;
+                    }
+
+                    $taken[$id] = true;
+                    $heading->setAttribute('id', $id);
+                    $result['headings'][] = ['id' => $id, 'text' => $text];
+                }
+
+                $html = '';
+
+                foreach ($wrapper->childNodes as $child) {
+                    $html .= $document->saveHTML($child);
+                }
+
+                $result['html'] = $html;
+            }
+        }
+
+        $this->annotatedBodyMemo = ['body' => $body, 'result' => $result];
+
+        return $result;
     }
 
     public function metaTitle(): string
