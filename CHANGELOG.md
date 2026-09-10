@@ -2,6 +2,22 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-10 · v1.38.0 · build R2FYQ8
+
+### Storefront
+
+- **A blog article now opens on a plan, not a wall of prose.** A long read had no way to say where it went. Each section heading gets an id at render time, since the sanitiser strips ids on save, and a jump strip lists them, one numbered link per section, in the same recipe the guides already use. On a screen wide enough to hold it the plan moves to a sticky sidebar beside the article instead of a strip above it, bounded by the article's own height so it can never run past the footer. Below that width the strip stays where it was.
+- **The article gained a measure and a hand.** The prose was set the full width of its card, near a hundred and thirty characters a line; it reads at a column now, about seventy. Each heading carries the same number as its line in the plan, the accent bar that used to sit under it is gone, and the number does that job instead. A heading sits closer to the text it introduces than to what came before, a sentence ending in a colon hugs the list it announces, and lists take square markers instead of the browser's round ones.
+- **The section headings and the plan's numbers took a colour of their own.** Warmer than the olive the rest of the page speaks in, an orange darkened off the value NaturaBuy uses for itself, since a heading is not a marketplace badge.
+- **Comments moved up to sit right after the article and its sources**, ahead of the contact box and the related products and posts, rather than at the bottom of the page past all of it.
+- **The blog article hero's picture stretches to its row now**, the same fix the category hero already carried: centred, it used to float in a row its own copy had made taller than its 16:9 box, leaving white above and below it whenever a title ran to two lines. Its byline is one quiet line now, matching a blog card's, in place of a bordered grid of labelled cells with less padding than the article text sitting under it.
+
+### Fixed
+
+- **Bold text across the site was never actually bold.** The font file is Inter's variable weight axis, a hundred to nine hundred, declared as three fixed faces at four hundred, five hundred and six hundred: every heavier weight the stylesheets asked for, the seven fifty on an h2, the eight hundred on a hero title, snapped to the six hundred face. One face declared over the whole axis now, and the weights that were written render.
+
+**No migration.**
+
 ## 2026-09-10 · v1.37.1 · build W3KDX9
 
 ### Fixed
