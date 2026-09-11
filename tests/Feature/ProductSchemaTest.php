@@ -2,13 +2,16 @@
 
 namespace Tests\Feature;
 
-use App\Models\Discount;
 use App\Models\Carrier;
+use App\Models\Discount;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductReview;
 use App\Models\ProductVariant;
+use App\Models\ShippingSetting;
+use App\Models\Supplier;
 use App\Models\User;
+use App\Support\OrganizationSchema;
 use App\Support\ProductSchema;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -111,6 +114,55 @@ class ProductSchemaTest extends TestCase
         );
     }
 
+    public function test_the_offer_states_when_it_became_valid(): void
+    {
+        // No discount, so the listing's own creation date is when its
+        // (only) price became valid.
+        $product = $this->product();
+
+        $this->assertSame(
+            $product->created_at->toDateString(),
+            $this->schema($product)['offers']['validFrom'],
+        );
+    }
+
+    public function test_a_discounts_own_start_date_is_when_the_price_became_valid(): void
+    {
+        $product = $this->product();
+        $discount = Discount::query()->create([
+            'product_id' => $product->id,
+            'type' => 'percentage',
+            'value' => 20,
+            'starts_at' => now()->subDay(),
+            'ends_at' => now()->addWeek(),
+        ]);
+
+        $this->assertSame(
+            $discount->starts_at->toDateString(),
+            $this->schema($product)['offers']['validFrom'],
+        );
+    }
+
+    public function test_an_open_ended_discount_falls_back_to_when_it_was_added(): void
+    {
+        // Active but with no starts_at of its own: nothing marks when the
+        // discounted price actually began, so the discount's own creation
+        // date stands in, not the (possibly much older) listing's own date.
+        $product = $this->product();
+        $discount = Discount::query()->create([
+            'product_id' => $product->id,
+            'type' => 'percentage',
+            'value' => 20,
+            'starts_at' => null,
+            'ends_at' => now()->addWeek(),
+        ]);
+
+        $this->assertSame(
+            $discount->created_at->toDateString(),
+            $this->schema($product)['offers']['validFrom'],
+        );
+    }
+
     public function test_the_product_names_its_node_its_page_and_its_seller(): void
     {
         $product = $this->product();
@@ -119,7 +171,7 @@ class ProductSchemaTest extends TestCase
 
         $this->assertSame($url.'#product', $schema['@id']);
         $this->assertSame($url, $schema['url']);
-        $this->assertSame(\App\Support\OrganizationSchema::id(), $schema['offers']['seller']['@id']);
+        $this->assertSame(OrganizationSchema::id(), $schema['offers']['seller']['@id']);
     }
 
     public function test_an_empty_stock_is_declared_as_such(): void
@@ -143,6 +195,7 @@ class ProductSchemaTest extends TestCase
         $this->assertSame('15.00', $offers['lowPrice']);
         $this->assertSame('25.00', $offers['highPrice']);
         $this->assertSame(2, $offers['offerCount']);
+        $this->assertSame($product->created_at->toDateString(), $offers['validFrom']);
     }
 
     public function test_variants_at_one_price_stay_a_single_offer(): void
@@ -225,7 +278,7 @@ class ProductSchemaTest extends TestCase
     public function test_shipping_is_free_once_the_product_alone_crosses_the_threshold(): void
     {
         $carrier = Carrier::query()->create(['slug' => 'mondial-relay', 'name' => ['fr' => 'Mondial Relay'], 'description' => ['fr' => ''], 'eta' => ['fr' => '3–5 jours'], 'method' => 'relay', 'price_cents' => 390, 'active' => true]);
-        \App\Models\ShippingSetting::current()->update([
+        ShippingSetting::current()->update([
             'free_shipping_threshold_cents' => 4900,
             'free_shipping_carrier_ids' => [$carrier->id],
         ]);
@@ -257,7 +310,7 @@ class ProductSchemaTest extends TestCase
     {
         Carrier::query()->create(['slug' => 'colissimo-home', 'name' => ['fr' => 'Colissimo'], 'description' => ['fr' => ''], 'eta' => ['fr' => '2–4 jours'], 'method' => 'home', 'price_cents' => 690, 'active' => true]);
 
-        $supplier = \App\Models\Supplier::query()->create(['name' => 'Fournisseur', 'lead_time_days' => 5]);
+        $supplier = Supplier::query()->create(['name' => 'Fournisseur', 'lead_time_days' => 5]);
         $product = $this->product([
             'quantity' => 0,
             'available_at_supplier' => true,

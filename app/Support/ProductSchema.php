@@ -165,6 +165,16 @@ class ProductSchema
             'priceValidUntil' => $product->hasDiscount() && $product->discount->ends_at !== null
                 ? $product->discount->ends_at->toDateString()
                 : now()->addYear()->toDateString(),
+            // When the current price became valid: a discount's own start
+            // date takes priority, since that is when today's price began;
+            // one with no explicit start falls back to when it was added,
+            // and a product with no discount at all falls back to its own
+            // creation date.
+            'validFrom' => match (true) {
+                $product->hasDiscount() && $product->discount->starts_at !== null => $product->discount->starts_at->toDateString(),
+                $product->hasDiscount() => $product->discount->created_at->toDateString(),
+                default => $product->created_at->toDateString(),
+            },
             'hasMerchantReturnPolicy' => self::returnPolicy(),
         ];
 
