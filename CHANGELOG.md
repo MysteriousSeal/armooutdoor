@@ -2,6 +2,19 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-11 · v1.38.4 · build J8RTC2
+
+### Storefront
+
+- **The blog shows thirteen articles on its first page, then twelve a page.** The newest article keeps its place on top as the large card, with twelve in the grid beneath it, and every later page is a plain grid of twelve. The newest post is left out of the paged list on every page rather than only the first, so page two starts at the fourteenth article instead of repeating or skipping one at the seam. A rubrique such as Conseils follows the same rule.
+
+### Fixed
+
+- **Page two of the blog opened on a featured card it had no reason to have.** The large card was drawn by a first-child rule, so whichever post happened to open a page got enlarged, on every page. It is drawn from an explicit featured flag now, which only the newest post on page one carries.
+- **The blog's pager counted articles as products.** Its status line read « Produits 1 à 12 sur 18 », the wording shared with the shop's listings. It reads « Articles 1 à 13 sur 18 » now, with the featured article counted back in, while the product and category listings keep their own line unchanged.
+
+**No migration.**
+
 ## 2026-09-11 · v1.38.3 · build Q7MWZ4
 
 ### Storefront
