@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-11 · v1.38.3 · build Q7MWZ4
+
+### Storefront
+
+- **The notice under a product's photos is hard to miss now.** On a product whose photo may not match what ships, it used to be a small grey chip the size of its own text, its border barely darker than the page, easy to scroll past on exactly the products where it mattered. It spans the photo column now as an amber band, with a thick orange left rule, a warning triangle, bold amber text and colours of its own in the dark theme. The text holds at least 5.7:1 contrast in both themes. The triangle joins the shared icon registry, taken from the official Font Awesome 7 Free Solid set like the site's other icons.
+- **Its wording says what actually varies.** It reads « Visuel non contractuel, la couleur du produit livré peut légèrement varier selon l’approvisionnement. » now. It used to say the product itself might vary, when what changes from one batch to the next is the colour, and only slightly.
+
+**No migration.**
+
 ## 2026-09-11 · v1.38.2 · build H4JQNX
 
 ### Fixed
