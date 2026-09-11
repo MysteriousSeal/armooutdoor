@@ -318,7 +318,7 @@
                                  the card taller than its neighbours. --}}
                             <span class="home-cat-name">{{ $category->localizedName() }}</span>
                             <span class="home-cat-icon">
-                                @include('partials.icon', ['name' => $category->iconName(), 'size' => 30])
+                                @include('partials.icon', ['name' => $category->iconName().'-color', 'size' => 30])
                             </span>
                             <span class="home-cat-copy">
                                 <span class="home-cat-desc">{{ $blurb }}</span>

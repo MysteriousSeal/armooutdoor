@@ -28,6 +28,13 @@
      * working and this does not.
      */
     --accent-heading: #5b5c3b;
+    /*
+     * The illustrated category heroes' palette: the forest in shadow, the
+     * sunset sky and the sun. The colour icons are drawn in these.
+     */
+    --hero-teal: #0d484e;
+    --hero-orange: #e45e39;
+    --hero-amber: #f89c30;
     --shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
     --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.08);
     --radius: 0;
@@ -44,6 +51,10 @@
     --accent: #b0a396;
     --accent-hover: #c8bdb0;
     --accent-heading: #a9ab77;
+    /* The teal lifted: at its light value it disappears on a dark ground. */
+    --hero-teal: #5fa39b;
+    --hero-orange: #ee7650;
+    --hero-amber: #f9ac36;
     --shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
     --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.35);
 }
@@ -1594,4 +1605,17 @@ button.admin-table-icon-btn:hover {
     font-weight: 600;
     background: var(--bg);
     border-left-color: var(--accent);
+}
+
+/* The tones of the colour icons in partials/icon.blade.php. */
+.icon-tone-primary {
+    fill: var(--hero-teal);
+}
+
+.icon-tone-accent {
+    fill: var(--hero-orange);
+}
+
+.icon-tone-highlight {
+    fill: var(--hero-amber);
 }

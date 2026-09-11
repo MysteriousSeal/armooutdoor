@@ -79,7 +79,7 @@
                 <article class="cat-index-card">
                     <a href="{{ localized_route('categories.show', ['category' => $category->slug]) }}" class="cat-index-head">
                         <span class="cat-index-icon" aria-hidden="true">
-                            @include('partials.icon', ['name' => $category->iconName(), 'size' => 28])
+                            @include('partials.icon', ['name' => $category->iconName().'-color', 'size' => 28])
                         </span>
                         <span class="cat-index-copy">
                             <h2 class="cat-index-name">{{ $category->localizedName() }}</h2>

@@ -1284,8 +1284,10 @@
     width: 3.5rem;
     height: 3.5rem;
     color: var(--accent-heading);
-    background: color-mix(in srgb, var(--accent-heading) 8%, var(--surface));
-    border: 1px solid color-mix(in srgb, var(--accent-heading) 20%, var(--border));
+    /* A warm ground under the colour icons, the sky of the category heroes
+       rather than the olive the marks used to be drawn in. */
+    background: color-mix(in srgb, var(--hero-amber) 7%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--hero-orange) 20%, var(--border));
     transition: background 0.15s ease, border-color 0.15s ease;
 }
 
@@ -1295,8 +1297,8 @@
 }
 
 .home .home-cat:hover .home-cat-icon {
-    background: color-mix(in srgb, var(--accent-heading) 14%, var(--surface));
-    border-color: color-mix(in srgb, var(--accent-heading) 34%, var(--border));
+    background: color-mix(in srgb, var(--hero-amber) 13%, var(--surface));
+    border-color: color-mix(in srgb, var(--hero-orange) 36%, var(--border));
 }
 
 .home .home-cat-copy {
@@ -1402,13 +1404,13 @@
 
 [data-theme='dark'] .home .home-cat-icon {
     color: var(--accent);
-    border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+    border-color: color-mix(in srgb, var(--hero-teal) 30%, var(--border));
     background: color-mix(in srgb, var(--bg) 55%, var(--surface));
 }
 
 [data-theme='dark'] .home .home-cat:hover .home-cat-icon {
     color: var(--accent-hover);
-    border-color: color-mix(in srgb, var(--accent) 48%, var(--border));
+    border-color: color-mix(in srgb, var(--hero-teal) 48%, var(--border));
     background: var(--surface);
 }
 
