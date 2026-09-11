@@ -2,6 +2,21 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-11 · v1.39.2 · build M0TD0X
+
+### Storefront
+
+- **The rest of the home page takes the illustrated heroes' colours.** After the category marks, five more blocks trade their single olive for the palette of the category illustrations: forest teal, sunset orange and sun amber. In « Nos engagements », the numbers 01 to 04 are a teal outline over a wash of amber and the Armo Outdoor stamp is pressed in orange ink. In « À propos », the three points are marked with a three-colour target and held by an orange rule. The guide cards name their kind in teal, with an orange dash and an orange underline under « Lire le guide ». The reviews carry amber stars, a teal edge and a teal score. The catalogue band sits on a warm amber ground, with teal figures and button and orange target rings behind the count. Section headings keep the site's olive.
+- **Every new colour was checked for legibility, in both themes.** « Plus de » above the catalogue count is a deeper orange in the light theme, where the plain orange was too faint for text that small. The dark theme gets lighter amber washes, so the catalogue band, the review monograms and the rating chip stay warm without turning brown, and the band's thin orange lines read as orange rather than brick.
+- **The shop's score shows a partial star.** The unearned part of the stars beside the score is a pale grey now, so 4,44 reads as four stars and a bit, including for visitors who do not see colour well.
+- **A reviewer signing with a single word wears two letters.** A username such as « lynxronin » put a lone L in the review's monogram; it shows LY now. A name in two words still takes one letter from each, so « Yvon P. » stays YP.
+
+### Fixed
+
+- **The outlined 1 and 4 of « Nos engagements » had a stray line inside them.** The outline was also drawn where the digit's own strokes overlap. The fill now covers the inside of the outline, so each digit shows only its outer edge.
+
+**No migration.**
+
 ## 2026-09-11 · v1.39.1 · build 57Q2YK
 
 ### Storefront
