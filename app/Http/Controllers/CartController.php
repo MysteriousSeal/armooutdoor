@@ -193,6 +193,10 @@ class CartController extends Controller
             'quantity' => ['required', 'integer', 'min:0', 'max:'.Cart::MAX_QUANTITY],
         ]);
 
+        if (! $product->is_active) {
+            abort(404);
+        }
+
         $variant = isset($validated['variant_id'])
             ? ProductVariant::query()->find($validated['variant_id'])
             : null;

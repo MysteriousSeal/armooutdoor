@@ -66,7 +66,23 @@ class Cart
 
     public function quantity(): int
     {
-        return $this->entries()->sum('quantity');
+        $entries = $this->entries();
+
+        if ($entries->isEmpty()) {
+            return 0;
+        }
+
+        // The header badge asks for this on every page, so only product ids
+        // are checked here; lines() would load the products and their relations.
+        $activeProductIds = Product::query()
+            ->active()
+            ->whereIn('id', $entries->pluck('product_id')->unique())
+            ->pluck('id')
+            ->flip();
+
+        return $entries
+            ->filter(fn (array $entry): bool => $activeProductIds->has($entry['product_id']))
+            ->sum('quantity');
     }
 
     public function quantityOf(Product $product, ?ProductVariant $variant = null): int
@@ -177,14 +193,19 @@ class Cart
 
     public function isEmpty(): bool
     {
-        return $this->quantity() === 0;
+        return $this->lines()->isEmpty();
     }
 
     public function claimFor(User $user): void
     {
         $items = $this->sessionItems();
+        $activeProductIds = Product::query()->active()->whereIn('id', array_keys($items))->pluck('id')->flip();
 
         foreach ($items as $productId => $variants) {
+            if (! $activeProductIds->has($productId)) {
+                continue;
+            }
+
             foreach ($variants as $variantKey => $quantity) {
                 $item = CartItem::query()->firstOrNew([
                     'user_id' => $user->id,
