@@ -761,15 +761,6 @@
  * The four undertakings, written out.
  *
  * They were four bordered cards inside a bordered panel, each with a circled
- * icon and a number from one to four — frames within a frame, and a sequence
- * claimed over four things that happen in no order. What the block actually
- * is is a statement the shop makes about itself, so it is set as one: each
- * clause opened by a rule, nothing boxed, and the shop's stamp closing them.
- */
-/*
- * The four undertakings, written out.
- *
- * They were four bordered cards inside a bordered panel, each with a circled
  * icon — frames within a frame. What the block actually is is a statement the
  * shop makes about itself, so it is set as one: numbered clauses, nothing
  * boxed and nothing ruled, and the shop's stamp closing them. The numbering
@@ -813,9 +804,15 @@
     letter-spacing: -0.045em;
     line-height: 1;
     font-variant-numeric: tabular-nums;
-    /* The fill stands alone where the stroke is not supported. */
-    color: color-mix(in srgb, var(--accent-heading) 12%, transparent);
-    -webkit-text-stroke: 1.1px color-mix(in srgb, var(--accent-heading) 85%, transparent);
+    /* In the illustrated heroes' palette, like the category marks: a teal
+       outline over a wash of sun amber. The fill stands alone where the
+       stroke is not supported. */
+    color: color-mix(in srgb, var(--hero-amber) 26%, var(--surface));
+    -webkit-text-stroke: 2.2px var(--hero-teal);
+    /* The fill is painted over the stroke, hiding its inner half: the
+       outline shows at half the width above, and the seams where a glyph's
+       contours overlap (inside the 1 and the 4) no longer draw a line. */
+    paint-order: stroke fill;
 }
 
 .home .home-why-item strong {
@@ -852,7 +849,8 @@
     gap: 0.22rem;
     margin: 0.35rem 0.25rem 0 0;
     padding: 0.6rem 1.15rem 0.65rem;
-    color: color-mix(in srgb, var(--accent-heading) 70%, transparent);
+    /* Sunset orange, the ink a rubber stamp is pressed in. */
+    color: var(--hero-orange);
     border: 2px solid currentColor;
     box-shadow: 0 0 0 1px currentColor inset;
     transform: rotate(-3.5deg);
@@ -884,13 +882,10 @@
     color: var(--accent);
 }
 
+/* A thinner wash on a dark ground: at the light theme's share the amber
+   turns to a muddy olive over the dark surface. */
 [data-theme='dark'] .home .home-why-index {
-    color: color-mix(in srgb, var(--accent) 18%, transparent);
-    -webkit-text-stroke-color: color-mix(in srgb, var(--accent) 66%, transparent);
-}
-
-[data-theme='dark'] .home .home-why-stamp {
-    color: color-mix(in srgb, var(--accent) 72%, transparent);
+    color: color-mix(in srgb, var(--hero-teal) 22%, var(--surface));
 }
 
 .home .home-about {
@@ -957,7 +952,8 @@
     content: '';
     width: 1.35rem;
     height: 1.5px;
-    background: #5b5c3b;
+    /* Sunset orange, from the illustration beside it. */
+    background: var(--hero-orange);
 }
 
 .home .home-about-title {
@@ -979,11 +975,11 @@
 }
 
 /*
- * The two principles. Each in its own grey box, they read like two form
- * messages — something the page answers back, not something the house says.
- * They are held by an olive rule down the left, separated by a hairline,
- * and have no fill at all: a note in the margin of a catalogue rather than
- * an alert.
+ * The shop's principles. Each in its own grey box, they used to read like
+ * form messages: something the page answers back, not something the house
+ * says. They are held by an orange rule down the left, separated by a
+ * hairline, and have no fill at all: a note in the margin of a catalogue
+ * rather than an alert.
  */
 .home .home-about-points {
     display: flex;
@@ -992,7 +988,7 @@
     padding: 0.15rem 0 0.15rem 1.15rem;
     list-style: none;
     max-width: 34rem;
-    border-left: 2px solid color-mix(in srgb, #5b5c3b 55%, transparent);
+    border-left: 2px solid color-mix(in srgb, var(--hero-orange) 75%, transparent);
 }
 
 .home .home-about-points li {
@@ -1019,7 +1015,6 @@
     flex-shrink: 0;
     height: 1.5em;
     font-size: 0.9375rem;
-    color: #5b5c3b;
 }
 
 .home .home-about-points span:last-child {
@@ -1065,18 +1060,6 @@
 
 [data-theme='dark'] .home .home-about-kicker {
     color: var(--accent);
-}
-
-[data-theme='dark'] .home .home-about-kicker::before {
-    background: var(--accent);
-}
-
-[data-theme='dark'] .home .home-about-point-mark {
-    color: var(--accent);
-}
-
-[data-theme='dark'] .home .home-about-points {
-    border-left-color: color-mix(in srgb, var(--accent) 55%, transparent);
 }
 
 .home .home-ship-banner {
@@ -1746,9 +1729,12 @@
     /* The rhythm the other sections keep between them: the band sits
        between two of them now rather than under the promises strip. */
     margin-top: 2.75rem;
-    background: color-mix(in srgb, var(--accent-heading) 8%, var(--bg));
-    border: 1px solid color-mix(in srgb, var(--accent-heading) 22%, var(--border));
-    border-top: 2px solid var(--accent-heading);
+    /* The illustrated heroes' palette, as on the category marks: a ground
+       warmed with sun amber, forest teal for the figures and the way in,
+       sunset orange for the rings and the rules. */
+    background: color-mix(in srgb, var(--hero-amber) 7%, var(--bg));
+    border: 1px solid color-mix(in srgb, var(--hero-orange) 22%, var(--border));
+    border-top: 2px solid var(--hero-teal);
 }
 
 .home .home-stock-stats {
@@ -1770,9 +1756,9 @@
  *
  * The count wanted a ground, and the ground had to belong to this trade
  * rather than to statistics: every discipline the shop equips is scored on
- * concentric rings, and the numeral lands in the ten. Drawn at a tenth of the
- * olive, it is texture — read it and it is a target, glance at it and the
- * figure is still the only thing on the panel.
+ * concentric rings, and the numeral lands in the ten. Drawn in a faint
+ * sunset orange, it is texture: read it and it is a target, glance at it and
+ * the figure is still the only thing on the panel.
  */
 .home .home-stock-stats::before {
     content: '';
@@ -1789,7 +1775,7 @@
     background: repeating-radial-gradient(
         circle at center,
         transparent 0 1.5rem,
-        color-mix(in srgb, var(--accent-heading) 20%, transparent) 1.5rem 1.56rem
+        color-mix(in srgb, var(--hero-orange) 26%, transparent) 1.5rem 1.56rem
     );
     /* Fading outward keeps the rings from ending on a hard circle where the
        panel still has ground left to give, and stops stray arcs from
@@ -1808,7 +1794,7 @@
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--bg);
-    background: var(--accent-heading);
+    background: var(--hero-teal);
 }
 
 .home .home-stock-figure {
@@ -1826,7 +1812,9 @@
     font-weight: 600;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--accent);
+    /* Sunset orange in shadow: the raw orange is too faint for text this
+       small on the warm ground. */
+    color: color-mix(in srgb, var(--hero-orange) 70%, var(--text));
 }
 
 .home .home-stock-count {
@@ -1837,7 +1825,7 @@
     font-weight: 700;
     letter-spacing: -0.055em;
     line-height: 0.88;
-    color: var(--accent-heading);
+    color: var(--hero-teal);
     font-variant-numeric: tabular-nums;
 }
 
@@ -1858,7 +1846,7 @@
     align-items: flex-start;
     gap: 1rem;
     padding: 1.55rem 2rem;
-    border-left: 1px solid color-mix(in srgb, var(--accent-heading) 22%, var(--border));
+    border-left: 1px solid color-mix(in srgb, var(--hero-orange) 22%, var(--border));
 }
 
 /* Read after the figure and before the button, so it is set at reading size
@@ -1875,10 +1863,10 @@
 /* The first clause names the range, so it is the half worth weighting. */
 .home .home-stock-text strong {
     font-weight: 600;
-    color: var(--accent-heading);
+    color: var(--hero-teal);
 }
 
-/* The olive stub the score chip already uses, given a job to do. */
+/* The forest teal stub the score badge already uses, given a job to do. */
 .home .home-stock-link {
     display: inline-flex;
     align-items: center;
@@ -1888,18 +1876,18 @@
     font-weight: 600;
     letter-spacing: 0.01em;
     color: var(--bg);
-    background: var(--accent-heading);
+    background: var(--hero-teal);
     text-decoration: none;
     transition: background-color 0.15s ease;
 }
 
 .home .home-stock-link:hover,
 .home .home-stock-link:focus-visible {
-    background: color-mix(in srgb, var(--accent-heading) 82%, var(--text));
+    background: color-mix(in srgb, var(--hero-teal) 82%, var(--text));
 }
 
 .home .home-stock-link:focus-visible {
-    outline: 2px solid var(--accent-heading);
+    outline: 2px solid var(--hero-teal);
     outline-offset: 2px;
 }
 
@@ -1935,7 +1923,7 @@
    holds nothing. */
 .home .home-stock-split {
     padding: 0.1rem 0 0.1rem 1.6rem;
-    border-left: 1px solid color-mix(in srgb, var(--accent-heading) 30%, var(--border));
+    border-left: 1px solid color-mix(in srgb, var(--hero-orange) 35%, var(--border));
 }
 
 .home .home-stock-split + .home-stock-split {
@@ -1947,7 +1935,7 @@
     font-weight: 700;
     letter-spacing: -0.03em;
     line-height: 1;
-    color: var(--accent-heading);
+    color: var(--hero-teal);
     font-variant-numeric: tabular-nums;
 }
 
@@ -1968,7 +1956,7 @@
     .home .home-stock-aside {
         padding: 1.25rem 2rem 1.5rem;
         border-left: 0;
-        border-top: 1px solid color-mix(in srgb, var(--accent-heading) 22%, var(--border));
+        border-top: 1px solid color-mix(in srgb, var(--hero-orange) 22%, var(--border));
     }
 }
 
@@ -1999,7 +1987,7 @@
     .home .home-stock-spread {
         width: 100%;
         padding-top: 1.1rem;
-        border-top: 1px solid color-mix(in srgb, var(--accent-heading) 22%, var(--border));
+        border-top: 1px solid color-mix(in srgb, var(--hero-orange) 22%, var(--border));
     }
 
     .home .home-stock-split {
@@ -2011,7 +1999,7 @@
     .home .home-stock-split + .home-stock-split {
         margin-left: 0;
         padding-left: 1.25rem;
-        border-left: 1px solid color-mix(in srgb, var(--accent-heading) 22%, var(--border));
+        border-left: 1px solid color-mix(in srgb, var(--hero-orange) 22%, var(--border));
     }
 
     .home .home-stock-aside {
@@ -2019,11 +2007,34 @@
     }
 }
 
+/* On a dark ground the amber wash turns brown: about half the light theme's
+   share keeps it warm without the mud. */
+[data-theme='dark'] .home .home-stock {
+    background: color-mix(in srgb, var(--hero-amber) 4%, var(--bg));
+    border-color: color-mix(in srgb, var(--hero-orange) 55%, var(--border));
+    /* Set again: the line above would repaint the teal top rule. */
+    border-top-color: var(--hero-teal);
+}
+
+/* The hairlines as well: at the light theme's share the orange sinks into
+   the dark border as brown. Past half it reads as orange ink again. Only
+   the sides that have a width draw, so one colour covers every layout. */
+[data-theme='dark'] .home .home-stock-aside,
+[data-theme='dark'] .home .home-stock-spread,
+[data-theme='dark'] .home .home-stock-split {
+    border-color: color-mix(in srgb, var(--hero-orange) 55%, var(--border));
+}
+
+/* The raw orange: mixed toward this theme's light text it turns pale pink. */
+[data-theme='dark'] .home .home-stock-more {
+    color: var(--hero-orange);
+}
+
 /* ============ what customers said ============ */
 
 /* Three range tickets, each still pointing at the product it judged: a
-   testimonial nobody can trace reads as an invention. The olive stub is
-   the same mark the shipping strip uses — they ordered, they said this. */
+   testimonial nobody can trace reads as an invention. The forest teal stub
+   matches the score above them: they ordered, they said this. */
 .home .home-voices {
     margin-top: 3rem;
 }
@@ -2045,7 +2056,9 @@
     padding: 1.2rem 1.3rem 1.15rem;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-top: 2px solid var(--accent-heading);
+    /* The illustrated heroes' palette, as on the category marks: forest
+       teal for the frame and the figures, sun amber for the stars. */
+    border-top: 2px solid var(--hero-teal);
 }
 
 .home-voice-stars {
@@ -2059,7 +2072,7 @@
     flex-shrink: 0;
     width: 1.05rem;
     height: 1.05rem;
-    background: var(--accent-heading);
+    background: var(--hero-amber);
     -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 2.2l2.65 5.7 6.25.7-4.7 4.25 1.3 6.15L12 16.3 6.5 19l1.3-6.15L3.1 8.6l6.25-.7z'/%3E%3C/svg%3E") center / contain no-repeat;
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 2.2l2.65 5.7 6.25.7-4.7 4.25 1.3 6.15L12 16.3 6.5 19l1.3-6.15L3.1 8.6l6.25-.7z'/%3E%3C/svg%3E") center / contain no-repeat;
 }
@@ -2071,7 +2084,7 @@
     flex: 1 1 auto;
     height: 1px;
     margin-left: 0.35rem;
-    background: color-mix(in srgb, var(--accent-heading) 28%, var(--border));
+    background: color-mix(in srgb, var(--hero-amber) 35%, var(--border));
 }
 
 /*
@@ -2092,11 +2105,11 @@
     margin: 0 0 -0.67rem;
     padding: 0.42rem 0.72rem;
     white-space: nowrap;
-    /* A tag at the end of the rule: hairline and sharp corners, the shop's
-       own language, with the olive tinted far enough back that the stars
-       stay the brightest thing inside it. */
-    border: 1px solid color-mix(in srgb, var(--accent-heading) 45%, var(--border));
-    background: color-mix(in srgb, var(--accent-heading) 10%, var(--surface));
+    /* A tag at the end of the rule: an orange hairline and sharp corners,
+       the shop's own language, with the amber wash kept faint enough that
+       the stars stay the brightest thing inside it. */
+    border: 1px solid color-mix(in srgb, var(--hero-orange) 30%, var(--border));
+    background: color-mix(in srgb, var(--hero-amber) 8%, var(--surface));
 }
 
 /* The rule keeps the place it holds in every other header, low against the
@@ -2117,11 +2130,12 @@
     height: 0.95rem;
     /* The unearned part of the row is mixed into the border colour rather
        than faded to transparent: an alpha that low left the fifth star
-       almost invisible against the page, so a 4,4 read as a flat four. */
+       almost invisible against the page, so a 4,4 read as a flat four. In
+       grey, so the fraction reads against the amber. */
     background: linear-gradient(
         90deg,
-        var(--accent-heading) 0 var(--home-rating-fill, 100%),
-        color-mix(in srgb, var(--accent-heading) 38%, var(--border)) var(--home-rating-fill, 100%) 100%
+        var(--hero-amber) 0 var(--home-rating-fill, 100%),
+        color-mix(in srgb, var(--text-muted) 20%, var(--border)) var(--home-rating-fill, 100%) 100%
     );
     -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 2.2l2.65 5.7 6.25.7-4.7 4.25 1.3 6.15L12 16.3 6.5 19l1.3-6.15L3.1 8.6l6.25-.7z'/%3E%3C/svg%3E") 0 50% / 0.95rem 0.95rem space;
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 2.2l2.65 5.7 6.25.7-4.7 4.25 1.3 6.15L12 16.3 6.5 19l1.3-6.15L3.1 8.6l6.25-.7z'/%3E%3C/svg%3E") 0 50% / 0.95rem 0.95rem space;
@@ -2141,14 +2155,14 @@
     letter-spacing: -0.01em;
     line-height: 1.2;
     color: var(--bg);
-    background: var(--accent-heading);
+    background: var(--hero-teal);
     font-variant-numeric: tabular-nums;
 }
 
 .home .home-rating-out {
     font-size: 0.8125rem;
     font-weight: 600;
-    color: var(--accent-heading);
+    color: var(--hero-teal);
 }
 
 .home .home-rating-count {
@@ -2197,7 +2211,7 @@
     gap: 0.7rem;
     margin: 0;
     padding-top: 0.85rem;
-    border-top: 1px solid color-mix(in srgb, var(--accent-heading) 18%, var(--border));
+    border-top: 1px solid color-mix(in srgb, var(--hero-amber) 22%, var(--border));
     font-size: 0.8125rem;
 }
 
@@ -2213,9 +2227,9 @@
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.04em;
-    color: var(--accent-heading);
-    background: color-mix(in srgb, var(--accent-heading) 10%, var(--surface));
-    border: 1px solid color-mix(in srgb, var(--accent-heading) 28%, var(--border));
+    color: var(--hero-teal);
+    background: color-mix(in srgb, var(--hero-amber) 10%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--hero-orange) 28%, var(--border));
 }
 
 .home-voice-byline {
@@ -2241,11 +2255,18 @@
 }
 
 .home-voice-product:hover {
-    color: var(--accent-heading);
+    color: var(--hero-teal);
 }
 
 [data-theme='dark'] .home-voice {
-    background: color-mix(in srgb, var(--accent-heading) 6%, var(--surface));
+    background: color-mix(in srgb, var(--hero-teal) 6%, var(--surface));
+}
+
+/* On a dark ground the amber wash turns brown: half the light theme's share
+   keeps it warm without the mud, and the teal on it readable. */
+[data-theme='dark'] .home-voice-avatar,
+[data-theme='dark'] .home .home-rating {
+    background: color-mix(in srgb, var(--hero-amber) 5%, var(--surface));
 }
 
 /* ============ what the shop wrote ============ */
@@ -2273,8 +2294,14 @@
 }
 
 .home-reading:hover {
-    border-color: var(--accent-heading);
-    background: color-mix(in srgb, var(--accent-heading) 6%, var(--surface));
+    border-color: color-mix(in srgb, var(--hero-orange) 70%, var(--border));
+    background: color-mix(in srgb, var(--hero-amber) 6%, var(--surface));
+}
+
+/* On a dark ground the amber wash turns khaki: half the share keeps the
+   warmth, and the orange frame still says the card is under the pointer. */
+[data-theme='dark'] .home-reading:hover {
+    background: color-mix(in srgb, var(--hero-amber) 3%, var(--surface));
 }
 
 .home-reading-kicker {
@@ -2285,7 +2312,9 @@
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--accent);
+    /* The illustrated heroes' palette, as on the category marks: the kind
+       in forest teal, the rule before the shelf in sunset orange. */
+    color: var(--hero-teal);
 }
 
 /* What it is, then which shelf it advises on: the second half is the
@@ -2301,8 +2330,8 @@
 .home-reading-topic::before {
     content: '';
     width: 0.9rem;
-    height: 1px;
-    background: var(--border);
+    height: 1.5px;
+    background: var(--hero-orange);
 }
 
 .home-reading-title {
@@ -2327,7 +2356,9 @@
     font-weight: 600;
     color: var(--accent-heading);
     text-decoration: underline;
-    text-underline-offset: 2px;
+    text-decoration-color: var(--hero-orange);
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 3px;
 }
 
 /* ============ the marketplace the shop also sells on ============ */

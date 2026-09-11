@@ -585,13 +585,13 @@
                 <ul class="home-about-points">
                     <li>
                         <span class="home-about-point-mark" aria-hidden="true">
-                            @include('partials.icon', ['name' => 'bullseye', 'size' => 13])
+                            @include('partials.icon', ['name' => 'bullseye-about-color', 'size' => 14])
                         </span>
                         <span>{{ __('store.home_about_quality') }}</span>
                     </li>
                     <li>
                         <span class="home-about-point-mark" aria-hidden="true">
-                            @include('partials.icon', ['name' => 'bullseye', 'size' => 13])
+                            @include('partials.icon', ['name' => 'bullseye-about-color', 'size' => 14])
                         </span>
                         <span>{{ __('store.home_about_goal') }}</span>
                     </li>
@@ -601,7 +601,7 @@
                          words people type to find it. --}}
                     <li>
                         <span class="home-about-point-mark" aria-hidden="true">
-                            @include('partials.icon', ['name' => 'bullseye', 'size' => 13])
+                            @include('partials.icon', ['name' => 'bullseye-about-color', 'size' => 14])
                         </span>
                         <span>{{ __('store.home_about_shipping') }}</span>
                     </li>
