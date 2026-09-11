@@ -25,9 +25,20 @@ class ReviewerInitialsTest extends TestCase
         $this->assertSame('CD', $review->reviewerInitials());
     }
 
-    public function test_a_one_word_name_wears_one_letter(): void
+    public function test_a_one_word_name_wears_its_first_two_letters(): void
     {
-        $this->assertSame('J', $this->guest('jean')->reviewerInitials());
+        // A marketplace username: a lone L said less than the name does.
+        $this->assertSame('LY', $this->guest('lynxronin')->reviewerInitials());
+    }
+
+    public function test_a_one_letter_name_wears_that_letter(): void
+    {
+        $this->assertSame('J', $this->guest('j')->reviewerInitials());
+    }
+
+    public function test_a_one_word_accented_name_keeps_its_accent(): void
+    {
+        $this->assertSame('ÉL', $this->guest('élodie')->reviewerInitials());
     }
 
     public function test_a_longer_name_stops_at_two(): void

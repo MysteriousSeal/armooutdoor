@@ -65,11 +65,16 @@ class ProductReview extends Model
     /**
      * The reviewer's monogram: the first letter of each of the first two
      * words of the name they sign with, so « Colas D. » wears CD. A one-word
-     * name wears one letter rather than borrowing a second from somewhere.
+     * name, such as a marketplace username, wears its first two letters
+     * instead, so « lynxronin » wears LY rather than a lone L.
      */
     public function reviewerInitials(): string
     {
         $words = preg_split('/\s+/u', trim($this->reviewerName()), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+        if (count($words) === 1) {
+            return mb_strtoupper(mb_substr($words[0], 0, 2));
+        }
 
         return mb_strtoupper(collect($words)
             ->take(2)
