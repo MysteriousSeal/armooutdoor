@@ -156,13 +156,13 @@
                     <span
                         class="badge badge-active cart-line-discount-badge"
                         id="product-detail-discount-badge"
-                        @if ($variantHasOwnPrice || ! $product->hasDiscount()) hidden @endif
+                        @if (! $product->is_active || $variantHasOwnPrice || ! $product->hasDiscount()) hidden @endif
                     >{{ $product->hasDiscount() ? $product->discount->label() : '' }}</span>
                     <p class="product-detail-price" id="product-detail-price">
                         <span
                             class="product-detail-price-original"
                             id="product-detail-price-original"
-                            @if ($variantHasOwnPrice || ! $product->hasDiscount()) hidden @endif
+                            @if (! $product->is_active || $variantHasOwnPrice || ! $product->hasDiscount()) hidden @endif
                         >{{ $product->formattedOriginalPrice() }}</span>
                         <span id="product-detail-price-current">{{ ($displayVariant ?? $product)->formattedPrice() }}</span>
                     </p>
@@ -174,12 +174,26 @@
                             ? ($activeVariants->isNotEmpty() && $activeVariants->every(fn ($variant) => ! $variant->inStock()) && $backorderableVariant !== null)
                             : (! $product->inStock() && $product->supplier_id !== null && $product->available_at_supplier);
                         $supplierForLeadTime = $backorderableVariant?->supplier ?? $product->supplier;
-                        $stockState = $product->availabilityState();
+                        $stockState = $product->is_active ? $product->availabilityState() : 'out_of_stock';
                     @endphp
                     <span class="stock-badge is-{{ str_replace('_', '-', $stockState) }}" id="product-stock-badge">
-                        {{ __('store.'.($stockState === 'at_supplier' ? 'available_at_supplier' : $stockState)) }}
+                        {{ $product->is_active ? __('store.'.($stockState === 'at_supplier' ? 'available_at_supplier' : $stockState)) : __('store.product_unavailable_badge') }}
                     </span>
                 </div>
+
+                @unless ($product->is_active)
+                    <div class="product-unavailable-notice" role="note">
+                        <p class="product-unavailable-title">{{ __('store.product_unavailable_title') }}</p>
+                        <p class="product-unavailable-text">
+                            {{ __('store.product_unavailable_text') }}
+                            @if ($product->category && $related->isNotEmpty())
+                                <a href="{{ localized_route('categories.show', ['category' => $product->category->slug]) }}">{{ __('store.product_unavailable_category', ['category' => $product->category->localizedName()]) }}</a>
+                            @else
+                                <a href="{{ localized_route('products.all') }}">{{ __('store.product_unavailable_all') }}</a>
+                            @endif
+                        </p>
+                    </div>
+                @endunless
 
                 {{-- Ce qu'on vérifie avant de cliquer, à côté du prix. Le
                      tableau complet reste en bas : ici on répond aux trois ou
@@ -196,9 +210,9 @@
                 @endif
                 @php
                     $displayLeadTimeSource = $product->hasVariants() ? $displayVariant : $product;
-                    $displayLeadTimeVisible = $product->hasVariants()
+                    $displayLeadTimeVisible = $product->is_active && ($product->hasVariants()
                         ? ($displayLeadTimeSource !== null && ! $displayLeadTimeSource->inStock() && $displayLeadTimeSource->isBackorderable())
-                        : $availableAtSupplier;
+                        : $availableAtSupplier);
                     $displayLeadTimeSupplier = $product->hasVariants() ? $displayLeadTimeSource?->supplier : $supplierForLeadTime;
                 @endphp
                 {{-- Placée avant le délai : on dit d'abord pourquoi il y en a un. --}}
@@ -244,12 +258,12 @@
                 <div
                     class="discount-countdown"
                     id="discount-countdown"
-                    data-ends-at="{{ (! $variantHasOwnPrice && $product->hasDiscount() && $product->discount->ends_at) ? $product->discount->ends_at->toIso8601String() : '' }}"
+                    data-ends-at="{{ ($product->is_active && ! $variantHasOwnPrice && $product->hasDiscount() && $product->discount->ends_at) ? $product->discount->ends_at->toIso8601String() : '' }}"
                     data-label-days="{{ __('store.discount_countdown_days') }}"
                     data-label-hours="{{ __('store.discount_countdown_hours') }}"
                     data-label-minutes="{{ __('store.discount_countdown_minutes') }}"
                     data-label-seconds="{{ __('store.discount_countdown_seconds') }}"
-                    @if ($variantHasOwnPrice || ! $product->hasDiscount() || ! $product->discount->ends_at) hidden @endif
+                    @if (! $product->is_active || $variantHasOwnPrice || ! $product->hasDiscount() || ! $product->discount->ends_at) hidden @endif
                 >
                     <p class="discount-countdown-label">{{ __('store.discount_ends_in') }}</p>
                     <div class="discount-countdown-timer" id="discount-countdown-timer" aria-live="off"></div>
@@ -257,10 +271,12 @@
 
                 @if ($product->age_restricted)
                     <p class="age-restricted-notice">{{ __('store.age_restricted_notice') }}</p>
-                    <p class="age-restricted-notice">{{ __('store.age_restricted_proof_notice') }}</p>
+                    @if ($product->is_active)
+                        <p class="age-restricted-notice">{{ __('store.age_restricted_proof_notice') }}</p>
+                    @endif
                 @endif
 
-                @if ($product->isPurchasable() || $product->hasVariants())
+                @if ($product->is_active && ($product->isPurchasable() || $product->hasVariants()))
                     <form
                         method="POST"
                         action="{{ localized_route('cart.add') }}"
@@ -361,24 +377,26 @@
                     </form>
                 @endif
 
-                <form
-                    method="POST"
-                    action="{{ $inWishlist ? localized_route('wishlist.destroy', ['product' => $product->slug]) : localized_route('wishlist.store') }}"
-                    class="product-detail-wishlist-form"
-                >
-                    @csrf
-                    @if ($inWishlist)
-                        @method('DELETE')
-                    @else
-                        <input type="hidden" name="product_id" value="{{ $product->id }}">
-                    @endif
-                    <button type="submit" class="btn btn-secondary product-wishlist-btn {{ $inWishlist ? 'is-active' : '' }}">
-                        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-                            <path d="M12 20s-7.5-4.6-7.5-10A4.4 4.4 0 0 1 12 6.8 4.4 4.4 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z" fill="{{ $inWishlist ? 'currentColor' : 'none' }}" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-                        </svg>
-                        <span>{{ $inWishlist ? __('store.remove_from_wishlist') : __('store.add_to_wishlist') }}</span>
-                    </button>
-                </form>
+                @if ($product->is_active)
+                    <form
+                        method="POST"
+                        action="{{ $inWishlist ? localized_route('wishlist.destroy', ['product' => $product->slug]) : localized_route('wishlist.store') }}"
+                        class="product-detail-wishlist-form"
+                    >
+                        @csrf
+                        @if ($inWishlist)
+                            @method('DELETE')
+                        @else
+                            <input type="hidden" name="product_id" value="{{ $product->id }}">
+                        @endif
+                        <button type="submit" class="btn btn-secondary product-wishlist-btn {{ $inWishlist ? 'is-active' : '' }}">
+                            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                                <path d="M12 20s-7.5-4.6-7.5-10A4.4 4.4 0 0 1 12 6.8 4.4 4.4 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z" fill="{{ $inWishlist ? 'currentColor' : 'none' }}" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                            </svg>
+                            <span>{{ $inWishlist ? __('store.remove_from_wishlist') : __('store.add_to_wishlist') }}</span>
+                        </button>
+                    </form>
+                @endif
 
                 {{-- Un titre, puis ses lignes. Répété une fois par mode de
                      livraison, « Livraison France » se lisait deux fois de

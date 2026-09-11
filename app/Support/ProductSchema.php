@@ -131,7 +131,7 @@ class ProductSchema
     /** @return array<int, string> */
     private static function images(Product $product): array
     {
-        return collect([$product->imageUrl()])
+        return collect($product->image !== '' ? [$product->imageUrl()] : [])
             ->concat($product->images->map(fn ($image): string => $image->imageUrl()))
             ->filter(fn (string $url): bool => $url !== '')
             ->unique()
@@ -316,6 +316,11 @@ class ProductSchema
      */
     private static function availability(Product $product): string
     {
+        // Taken off sale, the page stays up but nothing on it can be bought.
+        if (! $product->is_active) {
+            return 'https://schema.org/OutOfStock';
+        }
+
         return 'https://schema.org/'.match ($product->availabilityState()) {
             'in_stock', 'low_stock' => 'InStock',
             'at_supplier' => 'BackOrder',

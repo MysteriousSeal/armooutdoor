@@ -25,9 +25,7 @@ class ProductController extends Controller
 
         $product = $retired->product;
 
-        // Le produit peut avoir été retiré de la vente depuis : la page
-        // d'arrivée répondrait 404, autant le dire ici.
-        abort_unless($product !== null && $product->is_active, 404);
+        abort_if($product === null, 404);
 
         // 301 : le déménagement est définitif, et le référencement suit.
         return redirect()->route('products.show', $product, 301);
@@ -35,8 +33,8 @@ class ProductController extends Controller
 
     public function show(Product $product): View
     {
-        abort_unless($product->is_active, 404);
-
+        // An inactive product keeps its page, shown as unavailable, so search
+        // engines keep the address instead of dropping it as a 404.
         $product->load('category.parent', 'images', 'variants.supplier', 'reviews.user', 'discount', 'supplier');
 
         $related = Product::query()

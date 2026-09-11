@@ -2286,6 +2286,33 @@ body.has-menu-open {
     color: #ff9450;
 }
 
+.product-unavailable-notice {
+    margin: 1rem 0 1.1rem;
+    padding: 0.85rem 1rem 0.9rem 0.9rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--text);
+}
+
+.product-unavailable-title {
+    margin: 0 0 0.3rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.product-unavailable-text {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+.product-unavailable-text a {
+    color: var(--text);
+    font-weight: 600;
+}
+
 .discount-countdown {
     display: flex;
     flex-direction: column;

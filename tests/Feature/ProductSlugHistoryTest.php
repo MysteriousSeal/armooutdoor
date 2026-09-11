@@ -77,14 +77,16 @@ class ProductSlugHistoryTest extends TestCase
         $this->get('/products/jamais-vu')->assertNotFound();
     }
 
-    public function test_an_old_address_of_a_retired_product_is_a_404(): void
+    public function test_an_old_address_of_a_retired_product_still_leads_to_its_page(): void
     {
         $product = Product::factory()->create(['slug' => 'ancien', 'is_active' => true]);
         $product->update(['slug' => 'nouveau']);
         $product->update(['is_active' => false]);
 
-        // Rediriger vers une page qui répond 404 ne vaut pas mieux que 404.
-        $this->get('/products/ancien')->assertNotFound();
+        // The retired product keeps its page, shown as unavailable.
+        $this->get('/products/ancien')
+            ->assertStatus(301)
+            ->assertRedirect('/products/nouveau');
     }
 
     public function test_the_history_goes_with_the_product(): void

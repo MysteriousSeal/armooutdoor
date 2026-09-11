@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Discount;
 use App\Models\Product;
+use App\Support\ProductSchema;
 use Database\Seeders\CatalogSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -208,11 +209,29 @@ class StorefrontDiscoveryTest extends TestCase
         $this->get('/categories/does-not-exist')->assertNotFound();
     }
 
-    public function test_inactive_product_page_is_not_found(): void
+    public function test_an_inactive_product_keeps_its_page_shown_as_unavailable(): void
     {
         $product = Product::query()->where('slug', 'ridge-tent')->firstOrFail();
         $product->update(['is_active' => false]);
 
-        $this->get('/products/'.$product->slug)->assertNotFound();
+        $this->get('/products/'.$product->slug)
+            ->assertOk()
+            ->assertSee($product->localizedName())
+            ->assertSee(__('store.product_unavailable_title'))
+            ->assertSee(__('store.product_unavailable_badge'))
+            ->assertDontSee('class="add-to-cart-form"', false)
+            ->assertDontSee('class="product-detail-wishlist-form"', false);
+
+        $this->assertSame('https://schema.org/OutOfStock', ProductSchema::for($product->fresh())['offers']['availability']);
+    }
+
+    public function test_an_active_product_shows_no_unavailable_notice(): void
+    {
+        $product = Product::query()->where('slug', 'ridge-tent')->firstOrFail();
+
+        $this->get('/products/'.$product->slug)
+            ->assertOk()
+            ->assertDontSee(__('store.product_unavailable_title'))
+            ->assertSee('class="product-detail-wishlist-form"', false);
     }
 }

@@ -29,12 +29,16 @@ class WishlistController extends Controller
             'product_id' => ['required', 'integer', 'exists:products,id'],
         ]);
 
+        $product = Product::query()->findOrFail($validated['product_id']);
+
+        if (! $product->is_active) {
+            abort(404);
+        }
+
         WishlistItem::query()->firstOrCreate([
             'user_id' => $request->user()->id,
-            'product_id' => $validated['product_id'],
+            'product_id' => $product->id,
         ]);
-
-        $product = Product::query()->findOrFail($validated['product_id']);
 
         return back()->with('status', __('store.added_to_wishlist', [
             'product' => $product->localizedName(),
