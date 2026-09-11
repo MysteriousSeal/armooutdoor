@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-11 · v1.39.3 · build PPDGBP
+
+### Storefront
+
+- **The light and dark switch is set aside for now.** The storefront header no longer shows the sun and moon button, neither on desktop nor in the mobile row beside the contact icon, and every storefront page renders in the light theme. A visitor who had picked the dark theme before gets the light one too, rather than being left in a theme with no way back out. Nothing is removed: setting `theme_switch` back to true in `config/shop.php` restores both buttons and each visitor's remembered choice. The back office keeps its own switch.
+
+**No migration.**
+
 ## 2026-09-11 · v1.39.2 · build M0TD0X
 
 ### Storefront
