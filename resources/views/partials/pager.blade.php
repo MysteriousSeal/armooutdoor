@@ -51,7 +51,7 @@
         @endif
 
         <p class="store-pager-status">
-            {{ __('store.pagination_status', ['first' => $paginator->firstItem(), 'last' => $paginator->lastItem(), 'total' => $paginator->total()]) }}
+            {{ $statusLine ?? __('store.pagination_status', ['first' => $paginator->firstItem(), 'last' => $paginator->lastItem(), 'total' => $paginator->total()]) }}
         </p>
     </nav>
 @endif

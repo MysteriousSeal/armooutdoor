@@ -474,6 +474,7 @@ return [
     'blog_all' => 'Tous les articles',
     'blog_empty' => 'Aucun article pour le moment.',
     'blog_empty_category' => 'Aucun article dans cette rubrique pour le moment.',
+    'blog_pagination_status' => 'Articles :first à :last sur :total',
     'blog_published_on' => 'Publié le :date',
     'blog_category_label' => 'Rubrique',
     'blog_published_label' => 'Publié',

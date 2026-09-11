@@ -36,7 +36,7 @@
 
 @section('content')
     @php
-        $listingCount = $activeCategory ? (int) $activeCategory->posts_count : $posts->total();
+        $listingCount = $activeCategory ? (int) $activeCategory->posts_count : $posts->total() + $lead;
     @endphp
     <div class="container blog-index">
         <nav class="breadcrumbs" aria-label="breadcrumb">
@@ -75,16 +75,30 @@
             @endforeach
         </nav>
 
-        @if ($posts->isEmpty())
+        @if ($posts->isEmpty() && ! $featuredPost)
             <p class="empty-state">{{ $activeCategory ? __('store.blog_empty_category') : __('store.blog_empty') }}</p>
         @else
             <div class="blog-grid blog-grid--index">
+                @if ($featuredPost)
+                    @include('blog.partials.card', ['post' => $featuredPost, 'lazy' => false, 'featured' => true])
+                @endif
+                {{-- Two eager pictures a page, as before: on page one the
+                     featured card takes the first of them. --}}
                 @foreach ($posts as $index => $post)
-                    @include('blog.partials.card', ['post' => $post, 'lazy' => $index > 1])
+                    @include('blog.partials.card', ['post' => $post, 'lazy' => $index > ($featuredPost ? 0 : 1)])
                 @endforeach
             </div>
 
-            @include('partials.pager', ['paginator' => $posts])
+            {{-- The featured post sits outside the paginator, so the status
+                 line counts it back in: 1 to 13 of 18, then 14 to 18. --}}
+            @include('partials.pager', [
+                'paginator' => $posts,
+                'statusLine' => __('store.blog_pagination_status', [
+                    'first' => $posts->onFirstPage() ? 1 : $posts->firstItem() + $lead,
+                    'last' => $posts->lastItem() + $lead,
+                    'total' => $posts->total() + $lead,
+                ]),
+            ])
         @endif
     </div>
 @endsection

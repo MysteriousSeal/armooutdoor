@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BlogCategory;
 use App\Models\BlogPost;
+use App\Models\SiteVisit;
 use Illuminate\View\View;
 
 class BlogController extends Controller
@@ -39,17 +40,31 @@ class BlogController extends Controller
             $activeCategory = $categories->firstWhere('id', $activeCategory->id) ?? $activeCategory;
         }
 
-        $posts = BlogPost::query()
+        $query = BlogPost::query()
             ->visible()
             ->with('category')
             ->withCount(['comments' => fn ($query) => $query->visible()])
             ->when($activeCategory, fn ($query) => $query->where('blog_category_id', $activeCategory->id))
             ->orderByDesc('published_at')
-            ->orderByDesc('id')
+            ->orderByDesc('id');
+
+        // Page one shows the newest post above its twelve; every page leaves
+        // it out of the paginated rows, so page two starts at the fourteenth
+        // post instead of repeating or skipping one at the seam.
+        $newest = (clone $query)->first();
+
+        $posts = $query
+            ->when($newest, fn ($query) => $query->whereKeyNot($newest->id))
             ->paginate(12)
             ->withQueryString();
 
-        return view('blog.index', compact('posts', 'categories', 'activeCategory'));
+        return view('blog.index', [
+            'posts' => $posts,
+            'featuredPost' => $posts->onFirstPage() ? $newest : null,
+            'lead' => $newest ? 1 : 0,
+            'categories' => $categories,
+            'activeCategory' => $activeCategory,
+        ]);
     }
 
     public function show(string $slug): View
@@ -88,10 +103,10 @@ class BlogController extends Controller
      */
     private function viewCount(BlogPost $post): int
     {
-        return (int) cache()->remember('blog-views:'.$post->id, 600, fn (): int => \App\Models\SiteVisit::query()
+        return (int) cache()->remember('blog-views:'.$post->id, 600, fn (): int => SiteVisit::query()
             ->where('path', '/blog/'.$post->slug)
             ->get(['user_agent'])
-            ->reject(fn (\App\Models\SiteVisit $visit): bool => $visit->is_bot)
+            ->reject(fn (SiteVisit $visit): bool => $visit->is_bot)
             ->count());
     }
 

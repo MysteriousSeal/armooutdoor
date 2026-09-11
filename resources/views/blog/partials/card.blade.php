@@ -1,4 +1,4 @@
-<article class="blog-card">
+<article @class(['blog-card', 'blog-card--featured' => $featured ?? false])>
     <a href="{{ route('blog.show', $post->slug) }}" class="blog-card-link">
         <span class="blog-card-media">
             @if ($post->image)
