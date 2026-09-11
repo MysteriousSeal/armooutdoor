@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-11 · v1.39.1 · build 57Q2YK
+
+### Storefront
+
+- **The category marks are drawn in the colours of the illustrated heroes.** The eight icons on the home page tiles and on the « Toutes les catégories » page were a single olive, a colour the category illustrations never use. They take the illustrations' own palette now: deep forest teal for the main shape, sunset orange for a second part such as the shirt's sleeves or the airsoft pistol's muzzle tip, and sun amber for small highlights such as the centre of the target or the tent's lit doorway. The shapes are still the Font Awesome 7 Free Solid ones, kept as colour copies in the shared icon registry beside the plain ones, which the header menu still uses. The squares behind them take a light warm tint instead of the olive one, and the teal is lightened in the dark theme so it stays legible on a dark background.
+
+### Fixed
+
+- **Google Ads page-view pings were blocked by the site's security policy.** The Ads tag sends them to pagead2.googlesyndication.com, a host the Content Security Policy did not list, so the browser refused every one. The host is allowed now alongside the other Google Ads hosts, and only when a Google Ads ID is configured. Consent still decides whether the tag runs at all.
+
+**No migration.**
+
 ## 2026-09-11 · v1.39.0 · build P5VHDM
 
 ### Storefront
