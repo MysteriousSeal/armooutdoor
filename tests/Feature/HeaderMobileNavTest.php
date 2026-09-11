@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class HeaderMobileNavTest extends TestCase
@@ -18,8 +19,8 @@ class HeaderMobileNavTest extends TestCase
         $this->assertStringContainsString('sort-tab--in-menu-on-mobile', $html);
         $this->assertStringContainsString('site-cat-menu-shortcuts', $html);
 
-        $shortcuts = \Illuminate\Support\Str::before(
-            \Illuminate\Support\Str::after($html, 'site-cat-menu-shortcuts'),
+        $shortcuts = Str::before(
+            Str::after($html, 'site-cat-menu-shortcuts'),
             '</nav>'
         );
 
@@ -33,12 +34,12 @@ class HeaderMobileNavTest extends TestCase
     {
         $html = $this->get('/')->getContent();
 
-        $subheaderNav = \Illuminate\Support\Str::before(
-            \Illuminate\Support\Str::after($html, 'class="sort-tabs"'),
+        $subheaderNav = Str::before(
+            Str::after($html, 'class="sort-tabs"'),
             '</nav>'
         );
-        $blogLink = \Illuminate\Support\Str::before(
-            \Illuminate\Support\Str::after($subheaderNav, route('blog.index')),
+        $blogLink = Str::before(
+            Str::after($subheaderNav, route('blog.index')),
             '</a>'
         );
 
@@ -49,8 +50,8 @@ class HeaderMobileNavTest extends TestCase
     {
         $html = $this->get('/')->getContent();
 
-        $subheaderNav = \Illuminate\Support\Str::before(
-            \Illuminate\Support\Str::after($html, 'class="sort-tabs"'),
+        $subheaderNav = Str::before(
+            Str::after($html, 'class="sort-tabs"'),
             '</nav>'
         );
 
@@ -92,10 +93,14 @@ class HeaderMobileNavTest extends TestCase
 
     public function test_theme_toggle_sits_right_of_the_contact_icon_on_mobile(): void
     {
+        // The switch is set aside for now (shop.theme_switch); where it sits
+        // in the row is still worth guarding for the day it comes back.
+        config(['shop.theme_switch' => true]);
+
         $html = $this->get('/')->getContent();
 
-        $subheaderNav = \Illuminate\Support\Str::before(
-            \Illuminate\Support\Str::after($html, 'class="sort-tabs"'),
+        $subheaderNav = Str::before(
+            Str::after($html, 'class="sort-tabs"'),
             '</nav>'
         );
 
@@ -141,8 +146,8 @@ class HeaderMobileNavTest extends TestCase
     {
         $html = $this->get('/')->getContent();
 
-        $subheaderNav = \Illuminate\Support\Str::before(
-            \Illuminate\Support\Str::after($html, 'class="sort-tabs"'),
+        $subheaderNav = Str::before(
+            Str::after($html, 'class="sort-tabs"'),
             '</nav>'
         );
 
@@ -156,8 +161,8 @@ class HeaderMobileNavTest extends TestCase
         $user = User::factory()->create(['first_name' => 'Jean']);
         $html = $this->actingAs($user)->get('/')->getContent();
 
-        $subheaderNav = \Illuminate\Support\Str::before(
-            \Illuminate\Support\Str::after($html, 'class="sort-tabs"'),
+        $subheaderNav = Str::before(
+            Str::after($html, 'class="sort-tabs"'),
             '</nav>'
         );
 
@@ -259,8 +264,8 @@ class HeaderMobileNavTest extends TestCase
     {
         $css = (string) file_get_contents(public_path('css/app.css'));
 
-        $rule = \Illuminate\Support\Str::before(
-            \Illuminate\Support\Str::after($css, '.site-cat-menu-shortcuts {'),
+        $rule = Str::before(
+            Str::after($css, '.site-cat-menu-shortcuts {'),
             '}'
         );
 

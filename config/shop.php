@@ -13,6 +13,12 @@ return [
     // removed: everything it offers is still written in the view, and
     // turning this flag back to true puts it back, header cell included.
     'admin_row_actions' => false,
+    // The storefront's light/dark switch. Set aside, not removed: with this
+    // false the header shows no switch and every storefront page renders
+    // light, whatever theme a visitor picked before, so nobody is left in a
+    // dark theme with no way back. Turning it back to true restores the
+    // buttons and the remembered choice. The back office keeps its own.
+    'theme_switch' => false,
     // Prévenu à chaque commande devenue réelle — boutique comme manuelle.
     // Vide : personne n'est prévenu.
     'order_notification_email' => env('ORDER_NOTIFICATION_EMAIL'),

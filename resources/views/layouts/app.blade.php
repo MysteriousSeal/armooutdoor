@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 @php
-    $theme = \App\Support\ThemePreference::resolve(request());
+    // Light for everyone while the switch is set aside (shop.theme_switch).
+    $themeSwitch = (bool) config('shop.theme_switch');
+    $theme = $themeSwitch ? \App\Support\ThemePreference::resolve(request()) : 'light';
     $locale = app()->getLocale();
 @endphp
 <html lang="{{ str_replace('_', '-', $locale) }}" data-theme="{{ $theme }}">
@@ -10,10 +12,12 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script>
         (function () {
+            @if ($themeSwitch)
             var match = document.cookie.match(/(?:^|; )theme=(light|dark)/);
             if (match) {
                 document.documentElement.setAttribute('data-theme', match[1]);
             }
+            @endif
             // Set before first paint, unlike the deferred scripts: what should
             // only collapse with JavaScript can be born collapsed instead of
             // appearing open and then snapping shut.
@@ -154,9 +158,29 @@
                             </span>
                             <span class="sort-tab-label">{{ __('store.footer_help_contact') }}</span>
                         </a>
+                        @if ($themeSwitch)
+                            <button
+                                type="button"
+                                class="theme-toggle-btn theme-toggle-btn--subheader-mobile"
+                                data-theme="{{ $theme }}"
+                                title="{{ __('store.theme_toggle') }}"
+                                aria-label="{{ __('store.theme_toggle') }}"
+                            >
+                                <span class="theme-toggle-icon theme-toggle-icon-sun" aria-hidden="true">☀</span>
+                                <span class="theme-toggle-icon theme-toggle-icon-moon" aria-hidden="true">☾</span>
+                            </button>
+                        @endif
+                    </nav>
+                </div>
+
+                <span class="site-header-divider" aria-hidden="true"></span>
+
+                <div class="site-auth">
+                    @if ($themeSwitch)
                         <button
                             type="button"
-                            class="theme-toggle-btn theme-toggle-btn--subheader-mobile"
+                            class="theme-toggle-btn"
+                            id="theme-toggle"
                             data-theme="{{ $theme }}"
                             title="{{ __('store.theme_toggle') }}"
                             aria-label="{{ __('store.theme_toggle') }}"
@@ -164,23 +188,7 @@
                             <span class="theme-toggle-icon theme-toggle-icon-sun" aria-hidden="true">☀</span>
                             <span class="theme-toggle-icon theme-toggle-icon-moon" aria-hidden="true">☾</span>
                         </button>
-                    </nav>
-                </div>
-
-                <span class="site-header-divider" aria-hidden="true"></span>
-
-                <div class="site-auth">
-                    <button
-                        type="button"
-                        class="theme-toggle-btn"
-                        id="theme-toggle"
-                        data-theme="{{ $theme }}"
-                        title="{{ __('store.theme_toggle') }}"
-                        aria-label="{{ __('store.theme_toggle') }}"
-                    >
-                        <span class="theme-toggle-icon theme-toggle-icon-sun" aria-hidden="true">☀</span>
-                        <span class="theme-toggle-icon theme-toggle-icon-moon" aria-hidden="true">☾</span>
-                    </button>
+                    @endif
 
                     @include('partials.cart-button', ['class' => 'cart-btn--nav'])
 
@@ -433,7 +441,9 @@
     @include('partials.analytics')
     <script src="{{ versioned_asset('js/pretty-select.js') }}" defer></script>
     <script src="{{ versioned_asset('js/site-menu-toggle.js') }}" defer></script>
-    <script src="{{ versioned_asset('js/theme-toggle.js') }}" defer></script>
+    @if ($themeSwitch)
+        <script src="{{ versioned_asset('js/theme-toggle.js') }}" defer></script>
+    @endif
     <script src="{{ versioned_asset('js/cart-modal.js') }}" defer></script>
     <script src="{{ versioned_asset('js/cart-quantity-toast.js') }}" defer></script>
     @stack('scripts')
