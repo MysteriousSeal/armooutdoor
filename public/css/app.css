@@ -2251,28 +2251,39 @@ body.has-menu-open {
     border-color: #4d3f28;
 }
 
+/* Amber panel and text, like the age notice but deeper so the band stands
+   off the page; the rule and icon take the blog's warmer orange, which is
+   too light for text on this panel but carries the warning at a glance. */
 .image-may-vary-notice {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    width: fit-content;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
     margin: 0.75rem 0 0;
-    padding: 0.5rem 0.75rem;
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: var(--text-muted);
-    background: var(--bg);
-    border: 1px solid var(--border);
+    padding: 0.75rem 0.9rem 0.75rem 0.8rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.45;
+    color: #7a4e0d;
+    background: #f8e3bd;
+    border: 1px solid #ebcd96;
+    border-left: 4px solid #cc5010;
 }
 
-.image-may-vary-notice::before {
-    content: 'ⓘ';
-    font-size: 0.9rem;
-    line-height: 1;
+.image-may-vary-notice svg {
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+    color: #cc5010;
 }
 
 [data-theme='dark'] .image-may-vary-notice {
-    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    color: #eec27e;
+    background: #443316;
+    border-color: #5e4722;
+    border-left-color: #ff9450;
+}
+
+[data-theme='dark'] .image-may-vary-notice svg {
+    color: #ff9450;
 }
 
 .discount-countdown {

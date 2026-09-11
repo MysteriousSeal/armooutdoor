@@ -102,7 +102,10 @@
                     </div>
                 @endif
                 @if ($product->image_may_vary)
-                    <p class="image-may-vary-notice">{{ __('store.image_may_vary_notice') }}</p>
+                    <p class="image-may-vary-notice" role="note">
+                        @include('partials.icon', ['name' => 'triangle-exclamation', 'size' => 16])
+                        {{ __('store.image_may_vary_notice') }}
+                    </p>
                 @endif
             </div>
 
