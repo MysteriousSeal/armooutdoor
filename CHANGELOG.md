@@ -2,6 +2,20 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-11 · v1.39.0 · build P5VHDM
+
+### Storefront
+
+- **A product taken off sale keeps its page.** Deactivating a product used to turn its address into a 404, so search engines dropped it and every link to it went dead. The page stays up now as an unavailable page: photos, description and specifications are all still there, marked « Indisponible », with a notice that the product is no longer offered for sale and a link to the rest of its category, or to all products when that category has nothing else on sale. There is no add to cart, no wishlist button, no supplier lead time, no discount badge or countdown, and the structured data declares it out of stock. An address the product carried before a rename now redirects to this page instead of ending in a 404. The sitemap, the Merchant feed, search and listings still leave inactive products out.
+
+### Fixed
+
+- **A cart could still reach checkout holding nothing buyable.** A product deactivated while it sat in a guest's cart stayed in that cart, was carried into the account at login, and still counted as an item, so checkout opened and could place an order with no items that charged shipping alone. The cart now checks only products still on sale before checkout, the header badge counts only those, a guest cart merged into an account at login leaves inactive products behind, and a quantity change on an inactive product is refused.
+- **The wishlist accepted inactive products.** A hand-built request could save one, in a row the wishlist then hid. It is refused now, the same way the cart refuses it, while removing a product that went inactive after being saved still works.
+- **A product without a photo published a broken image address in its structured data.** It pointed search engines at the image folder itself. A product with no photo now simply declares no image.
+
+**No migration.**
+
 ## 2026-09-11 · v1.38.4 · build J8RTC2
 
 ### Storefront
