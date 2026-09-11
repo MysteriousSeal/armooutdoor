@@ -7,6 +7,7 @@ All notable changes to this project since the initial commit are documented here
 ### Storefront
 
 - **The light and dark switch is set aside for now.** The storefront header no longer shows the sun and moon button, neither on desktop nor in the mobile row beside the contact icon, and every storefront page renders in the light theme. A visitor who had picked the dark theme before gets the light one too, rather than being left in a theme with no way back out. Nothing is removed: setting `theme_switch` back to true in `config/shop.php` restores both buttons and each visitor's remembered choice. The back office keeps its own switch.
+- **New banners for Nouveautés, Promotions and Meilleures ventes.** The three listing pages open on new hero images.
 
 **No migration.**
 
