@@ -72,6 +72,7 @@ class SecurityHeaders
                 'https://www.googleadservices.com',
                 'https://googleads.g.doubleclick.net',
                 'https://www.google.com',
+                'https://pagead2.googlesyndication.com',
             ];
             $connects = array_merge($connects, $adsHosts);
             $images = $adsHosts;

@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Http\Middleware\SecurityHeaders;
+use App\Models\Order;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -163,7 +165,7 @@ class AnalyticsTest extends TestCase
         // tag is fetched, or the tag starts having assumed it could store.
         $this->assertStringContainsString("window.gtag('consent', 'default', consent(granted));", $js);
         $this->assertLessThan(
-            strpos($js, "googletagmanager.com/gtag/js"),
+            strpos($js, 'googletagmanager.com/gtag/js'),
             strpos($js, "window.gtag('consent', 'default'"),
             'The consent default has to be queued before the tag is requested.'
         );
@@ -184,7 +186,7 @@ class AnalyticsTest extends TestCase
         // The one signal the banner cannot grant: the shop measures its own
         // advertising and does not build audiences out of its visitors.
         $this->assertStringContainsString("ad_personalization: 'denied',", $js);
-        $this->assertStringNotContainsString("ad_personalization: granted", $js);
+        $this->assertStringNotContainsString('ad_personalization: granted', $js);
         $this->assertStringContainsString('allow_ad_personalization_signals: false', $js);
         $this->assertStringContainsString('allow_google_signals: false', $js);
 
@@ -287,9 +289,9 @@ class AnalyticsTest extends TestCase
 
         // And the confirmation page hands the conversion payload, dedupe
         // key included.
-        $user = \App\Models\User::factory()->create();
-        $order = \App\Models\Order::query()->create([
-            'number' => \App\Models\Order::generateNumber(),
+        $user = User::factory()->create();
+        $order = Order::query()->create([
+            'number' => Order::generateNumber(),
             'user_id' => $user->id,
             'status' => 'paid',
             'address_snapshot' => ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'x', 'postal_code' => '75000', 'city' => 'Paris', 'country' => 'FR'],
@@ -309,9 +311,9 @@ class AnalyticsTest extends TestCase
 
         // The CSP opens the Ads doors only when the id is configured.
         $this->get('/')->assertHeader('Content-Security-Policy');
-        $this->assertStringContainsString(
-            'googleadservices.com',
-            $this->get('/')->headers->get('Content-Security-Policy'),
-        );
+        $csp = $this->get('/')->headers->get('Content-Security-Policy');
+        $this->assertStringContainsString('googleadservices.com', $csp);
+        // The tag's page-view hit goes to ccm/collect on this host.
+        $this->assertStringContainsString('https://pagead2.googlesyndication.com', $csp);
     }
 }
