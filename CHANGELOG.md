@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-11 · v1.38.2 · build H4JQNX
+
+### Fixed
+
+- **Every product page was missing `validFrom` in its offer.** Google Merchant Center flagged it across the whole catalogue: the JSON-LD block stated when a price stops being valid (`priceValidUntil`) but never when it started. It states one now, an active discount's own start date first, that discount's own creation date when it was never given a start, and the product's own creation date when there is no discount at all.
+
+**No migration.**
+
 ## 2026-09-10 · v1.38.1 · build M6TPXV
 
 ### Storefront
