@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-13 · v1.39.7 · build KJ94MX
+
+### Storefront
+
+- **La première bannière de l'accueil montre un nouveau paysage.** Le panneau d'ouverture affichait une scène de matériel, une cible sur pied accompagnée d'un bidon et d'un sac. Il montre désormais une illustration de lac au couchant, dans laquelle une cible se compose sur la droite de l'image. Le cadrage du panneau ne bouge pas : même format et même poids que les trois autres vues du carrousel, et la cible reste entière sur téléphone comme sur écran large.
+- **Cette image ne sert pas qu'à l'accueil.** C'est aussi l'image par défaut du partage sur les réseaux sociaux, celle de la fiche d'organisation transmise à Google, et celle qui sert de repli aux dix guides qui n'ont pas encore la leur. Les aperçus de liens montrent donc un paysage là où ils montraient du matériel.
+
+**No migration.**
+
 ## 2026-09-13 · v1.39.6 · build M99CNM
 
 ### Storefront
