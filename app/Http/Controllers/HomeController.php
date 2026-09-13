@@ -29,8 +29,8 @@ class HomeController extends Controller
      */
     private const HERO_CATEGORIES = [
         'cibles' => null,
-        'stand-de-tir' => 'store.home_hero_tag_accessories',
-        'vetements' => null,
+        'accessoires-de-l-arme' => 'store.home_hero_tag_accessories',
+        'vetements' => 'store.home_hero_tag_clothing',
     ];
 
     public function __invoke(): View

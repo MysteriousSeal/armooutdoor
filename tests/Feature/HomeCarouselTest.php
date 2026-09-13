@@ -321,8 +321,8 @@ class HomeCarouselTest extends TestCase
 
     public function test_the_leading_panel_links_the_categories_that_exist(): void
     {
-        Category::factory()->create(['slug' => 'vetements', 'name' => ['fr' => 'Vêtements', 'en' => 'Clothing']]);
-        Category::factory()->create(['slug' => 'stand-de-tir', 'name' => ['fr' => 'Stand', 'en' => 'Range']]);
+        Category::factory()->create(['slug' => 'vetements', 'name' => ['fr' => 'Vêtements et accessoires', 'en' => 'Clothing']]);
+        Category::factory()->create(['slug' => 'accessoires-de-l-arme', 'name' => ['fr' => 'Accessoires de l’arme', 'en' => 'Gun accessories']]);
         Category::factory()->create(['slug' => 'repliques-airsoft', 'name' => ['fr' => 'Répliques airsoft', 'en' => 'Airsoft']]);
 
         $html = $this->get('/')->assertOk()->getContent();
@@ -334,10 +334,11 @@ class HomeCarouselTest extends TestCase
         // here, so they are skipped rather than linked to a 404, and airsoft
         // is not one of the hero's aisles at all.
         $this->assertSame([
-            localized_route('categories.show', ['category' => 'stand-de-tir']),
+            localized_route('categories.show', ['category' => 'accessoires-de-l-arme']),
             localized_route('categories.show', ['category' => 'vetements']),
         ], $links[1]);
-        // The range aisle holds the shooting accessories, and is named for them.
+        // The chips keep short names of their own: beside « Accessoires »,
+        // « Vêtements et accessoires » would say accessories twice.
         $this->assertSame(['Accessoires', 'Vêtements'], $links[2]);
     }
 

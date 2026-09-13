@@ -24,6 +24,7 @@ return [
     'home_hero_kicker' => 'Stand · Chasse · Outdoor',
     'home_hero_tags_label' => 'Rayons',
     'home_hero_tag_accessories' => 'Accessoires',
+    'home_hero_tag_clothing' => 'Vêtements',
     'home_carousel_label' => 'Mises en avant',
     'home_carousel_slide' => 'Panneau',
     'home_carousel_prev' => 'Panneau précédent',
