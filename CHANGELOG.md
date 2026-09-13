@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-13 · v1.39.14 · build F6UXYW
+
+### Storefront
+
+- **The homepage sale slide gives a figure for euro discounts too.** It only read percentage discounts, so a shop whose promotions are all taken off in euros fell back to « Des prix réduits » with no number. A euro discount is now measured against the price it comes off and rounded down, so « Jusqu'à » never promises more than the shop gives: 2,00 € off 16,90 € reads « Jusqu'à -11% ». The largest reduction of either kind sets the figure, and one under 1% sets none.
+
+**No migration.**
+
 ## 2026-09-13 · v1.39.13 · build MS0Z3C
 
 ### Storefront
