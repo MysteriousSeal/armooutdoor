@@ -57,8 +57,11 @@ class OrganizationSchema
         ];
     }
 
-    /** @return array<string, mixed> */
-    public static function for(CompanySetting $company): array
+    /**
+     * @param array{average: float, count: int, fill: float}|null $reviewSummary
+     * @return array<string, mixed>
+     */
+    public static function for(CompanySetting $company, ?array $reviewSummary = null): array
     {
         return array_filter([
             '@context' => 'https://schema.org',
@@ -89,6 +92,14 @@ class OrganizationSchema
             // the difference between a name it recognises and a string it
             // has only ever seen here.
             'sameAs' => self::profiles(),
+            // The same average and count the home page prints beside the
+            // testimonials — a search engine that already shows the shop's
+            // name can show its score next to it, but only once told.
+            'aggregateRating' => $reviewSummary === null ? null : [
+                '@type' => 'AggregateRating',
+                'ratingValue' => $reviewSummary['average'],
+                'reviewCount' => $reviewSummary['count'],
+            ],
         ], fn ($value): bool => $value !== null && $value !== '' && $value !== []);
     }
 

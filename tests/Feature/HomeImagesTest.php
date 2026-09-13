@@ -60,7 +60,7 @@ class HomeImagesTest extends TestCase
         $html = $this->get('/')->assertOk()->getContent();
 
         preg_match('#<link[^>]*rel="preload"[^>]*as="image"[^>]*href="([^"]+)"#s', $html, $preload);
-        preg_match('#--hero-image:\s*url\(\W*([^\)\x27"]+)#', $html, $panel);
+        preg_match('#class="home-hero-photo"\s+src="([^"]+)"#', $html, $panel);
 
         // A preload whose URL differs by so much as a query string fetches the
         // photograph a second time: slower than not preloading at all.

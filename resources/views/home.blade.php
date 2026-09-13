@@ -41,6 +41,7 @@
                 [
                     'image' => versioned_asset('images/hero.webp'),
                     'focus' => '78%',
+                    'alt' => 'Illustration d’une cible de tir se détachant devant un lac et des montagnes au coucher du soleil',
                     'kicker' => __('store.home_hero_kicker'),
                     // The h1 of the whole site: it names the aisles rather
                     // than shouting an imperative, because it is the strongest
@@ -55,6 +56,7 @@
                 [
                     'image' => versioned_asset('images/hero-2.webp'),
                     'focus' => '28%',
+                    'alt' => 'Illustration d’une caisse en bois débordant de colis colorés, devant un lac au coucher du soleil',
                     'kicker' => __('store.home_slide_new_kicker'),
                     'lines' => ['Les dernières', 'nouveautés', 'en rayon'],
                     'accent' => 1,
@@ -66,6 +68,7 @@
                 [
                     'image' => versioned_asset('images/hero-3.webp'),
                     'focus' => '75%',
+                    'alt' => 'Illustration d’une étiquette de prix rouge et de colis empilés, devant un lac au coucher du soleil',
                     'kicker' => __('store.home_slide_sale_kicker'),
                     'lines' => ['Des prix', 'en baisse', 'cette semaine'],
                     'accent' => 1,
@@ -77,6 +80,7 @@
                 [
                     'image' => versioned_asset('images/hero-4.webp'),
                     'focus' => '28%',
+                    'alt' => 'Illustration de quatre randonneurs en file devant un lac au coucher du soleil',
                     'kicker' => __('store.home_slide_best_kicker'),
                     'lines' => ['Ce que les', 'tireurs', 'achètent le plus'],
                     'accent' => 1,
@@ -103,14 +107,30 @@
                     @foreach ($slides as $index => $slide)
                         <article
                             class="home-hero home-carousel-panel {{ $index % 2 === 1 ? 'home-hero--mirrored' : '' }}"
-                            style="--hero-image: url('{{ $slide['image'] }}'); --hero-focus: {{ $slide['focus'] }}"
+                            style="--hero-focus: {{ $slide['focus'] }}"
                             role="group"
                             aria-roledescription="{{ __('store.home_carousel_slide') }}"
                             aria-label="{{ $index + 1 }} / {{ count($slides) }}"
                             @if ($index > 0) aria-hidden="true" @endif
                             data-carousel-panel
                         >
-                            <div class="home-hero-overlay" aria-hidden="true"></div>
+                            <div class="home-hero-media">
+                                {{-- Real content rather than a CSS background: the
+                                     photo it names is now the one Google Images can
+                                     actually find, and the one a screen reader can
+                                     describe. --}}
+                                <img
+                                    class="home-hero-photo"
+                                    src="{{ $slide['image'] }}"
+                                    alt="{{ $slide['alt'] }}"
+                                    width="1600"
+                                    height="686"
+                                    loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
+                                    @if ($index === 0) fetchpriority="high" @endif
+                                    draggable="false"
+                                >
+                                <div class="home-hero-overlay" aria-hidden="true"></div>
+                            </div>
                             <div class="home-hero-copy">
                                 <p class="home-hero-kicker">{{ $slide['kicker'] }}</p>
                                 @php
@@ -664,13 +684,23 @@
             // Named rather than restated: the site and the business that runs
             // it are two things, and this is what joins them.
             'publisher' => ['@id' => \App\Support\OrganizationSchema::id()],
+            // The header's own search form, named so Google can offer it as
+            // a search box under the result instead of only a list of links.
+            'potentialAction' => [
+                '@type' => 'SearchAction',
+                'target' => [
+                    '@type' => 'EntryPoint',
+                    'urlTemplate' => localized_route('search').'?q={search_term_string}',
+                ],
+                'query-input' => 'required name=search_term_string',
+            ],
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
     </script>
     <script type="application/ld+json">
         {{-- Google reads the business off the home page, so it is declared
              here rather than on every page of the shop. --}}
         {!! json_encode(
-            \App\Support\OrganizationSchema::for(\App\Models\CompanySetting::current()),
+            \App\Support\OrganizationSchema::for(\App\Models\CompanySetting::current(), $reviewSummary),
             JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
         ) !!}
     </script>

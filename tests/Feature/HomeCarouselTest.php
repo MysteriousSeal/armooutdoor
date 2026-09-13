@@ -96,19 +96,57 @@ class HomeCarouselTest extends TestCase
         // Coque et panneaux partagent la feuille du hero : une classe
         // différente les ferait diverger à la première retouche.
         $this->assertSame(4, substr_count($html, 'home-hero home-carousel-panel'));
-        $this->assertSame(4, substr_count($html, '--hero-image'));
+        $this->assertSame(4, substr_count($html, 'home-hero-photo'));
     }
 
     public function test_every_panel_has_its_own_image(): void
     {
         $html = $this->get('/')->assertOk()->getContent();
 
-        preg_match_all('/--hero-image:\s*url\(\W*([^\)\x27"]+)/', $html, $images);
+        preg_match_all('/class="home-hero-photo"\s+src="([^"]+)"/', $html, $images);
 
         // Four panels sharing one photo made the carousel look stuck: the
         // copy changed, the picture behind it did not.
         $this->assertCount(4, $images[1]);
         $this->assertCount(4, array_unique($images[1]));
+    }
+
+    public function test_every_panel_names_its_photo(): void
+    {
+        $html = $this->get('/')->assertOk()->getContent();
+
+        // A background-image had no alt text at all; a real <img> is the
+        // difference between the photo existing for Google Images and a
+        // screen reader, and existing only for a sighted visitor.
+        preg_match_all('/class="home-hero-photo"[^>]*\salt="([^"]*)"/', $html, $alts);
+
+        $this->assertCount(4, $alts[1]);
+
+        foreach ($alts[1] as $index => $alt) {
+            $this->assertNotSame('', $alt, 'panneau '.($index + 1).' devrait décrire sa photo');
+        }
+    }
+
+    public function test_only_the_first_photo_loads_eagerly(): void
+    {
+        $html = $this->get('/')->assertOk()->getContent();
+
+        preg_match_all(
+            '/<img\s+class="home-hero-photo"[^>]*>/',
+            $html,
+            $photos
+        );
+
+        $this->assertCount(4, $photos[0]);
+
+        // The leading panel is the LCP candidate and is visible without
+        // scripting; the three behind it are off-screen until the carousel
+        // script runs, so their weight can wait.
+        foreach ($photos[0] as $index => $tag) {
+            $this->assertSame($index === 0, str_contains($tag, 'fetchpriority="high"'), 'panneau '.($index + 1));
+            $this->assertSame($index === 0, str_contains($tag, 'loading="eager"'), 'panneau '.($index + 1));
+            $this->assertSame($index !== 0, str_contains($tag, 'loading="lazy"'), 'panneau '.($index + 1));
+        }
     }
 
     public function test_every_panel_names_where_its_subject_sits(): void

@@ -5,7 +5,10 @@ namespace Tests\Feature;
 use App\Models\Category;
 use App\Models\CompanySetting;
 use App\Models\MarketplaceSetting;
+use App\Models\Order;
 use App\Models\Product;
+use App\Models\ProductReview;
+use App\Models\User;
 use App\Support\OrganizationSchema;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -152,5 +155,81 @@ class OrganizationSchemaTest extends TestCase
             [MarketplaceSetting::current()->naturabuy_url],
             OrganizationSchema::for($this->company())['sameAs'],
         );
+    }
+
+    /**
+     * The same average and count the home page prints beside the
+     * testimonials, so a search engine that already shows the shop's name
+     * can show its score next to it.
+     */
+    public function test_the_shops_rating_is_declared_alongside_the_business(): void
+    {
+        $schema = OrganizationSchema::for($this->company(), ['average' => 4.83, 'count' => 137, 'fill' => 96.6]);
+
+        $this->assertSame([
+            '@type' => 'AggregateRating',
+            'ratingValue' => 4.83,
+            'reviewCount' => 137,
+        ], $schema['aggregateRating']);
+    }
+
+    public function test_a_shop_with_no_reviews_declares_no_rating(): void
+    {
+        // No testimonial to point at yet: an invented score would be worse
+        // than none at all.
+        $schema = OrganizationSchema::for($this->company(), null);
+
+        $this->assertArrayNotHasKey('aggregateRating', $schema);
+    }
+
+    private function review(Product $product, int $rating): ProductReview
+    {
+        $user = User::factory()->create();
+
+        $order = Order::query()->create([
+            'number' => Order::generateNumber(),
+            'user_id' => $user->id,
+            'status' => 'delivered',
+            'address_snapshot' => ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'x', 'postal_code' => '75000', 'city' => 'Paris', 'country' => 'FR'],
+            'billing_address_snapshot' => ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'x', 'postal_code' => '75000', 'city' => 'Paris', 'country' => 'FR'],
+            'carrier_method' => 'home',
+            'carrier_snapshot' => ['name' => ['fr' => 'Colissimo']],
+            'subtotal_cents' => 1000, 'shipping_cents' => 0, 'discount_cents' => 0,
+            'total_cents' => 1000, 'payment_method' => 'card',
+        ]);
+
+        return ProductReview::query()->create([
+            'product_id' => $product->id,
+            'user_id' => $user->id,
+            'order_id' => $order->id,
+            'rating' => $rating,
+            'comment' => 'Avis.',
+        ]);
+    }
+
+    public function test_the_home_page_declares_its_own_score(): void
+    {
+        $this->company();
+        $product = Product::factory()->create(['is_active' => true, 'quantity' => 5]);
+        $this->review($product, 5);
+        $this->review($product, 4);
+
+        // Five and four: an average of 4,5 over two reviews.
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('"aggregateRating":{"@type":"AggregateRating","ratingValue":4.5,"reviewCount":2}', false);
+    }
+
+    /**
+     * The header's own search form, named so Google can offer it as a search
+     * box under the result instead of only a list of links.
+     */
+    public function test_the_home_page_offers_its_search_as_a_site_search_box(): void
+    {
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('"@type":"SearchAction"', false)
+            ->assertSee('"urlTemplate":"'.localized_route('search').'?q={search_term_string}"', false)
+            ->assertSee('"query-input":"required name=search_term_string"', false);
     }
 }

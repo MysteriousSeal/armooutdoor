@@ -34,7 +34,7 @@ class HeroImageCacheTest extends TestCase
         $html = $this->get('/')->assertOk()->getContent();
 
         preg_match('#<link\s+rel="preload"\s+as="image"\s+href="([^"]+)"#s', $html, $preload);
-        preg_match("#--hero-image: url\('([^']+)'\)#", $html, $panel);
+        preg_match('#class="home-hero-photo"\s+src="([^"]+)"#', $html, $panel);
 
         $this->assertNotEmpty($preload, 'The first panel is no longer preloaded.');
         $this->assertNotEmpty($panel, 'No panel is painting a photograph.');
