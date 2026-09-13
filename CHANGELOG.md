@@ -6,7 +6,7 @@ All notable changes to this project since the initial commit are documented here
 
 ### Storefront
 
-- **La bannière d'accueil ne délave plus la photo.** Un voile blanc couvrait la quasi-totalité de l'image derrière le carrousel, du bord du texte jusqu'à 84 % de la largeur, avec en plus une teinte en haut et en bas. Il ne reste plus que derrière la carte de texte : le reste de la photo se voit à pleine intensité.
+- **The homepage hero photo no longer looks washed out.** A white scrim covered nearly the whole image behind the carousel, from the text card's edge out to 84% of the width, plus a tint top and bottom. It now sits only behind the text card, leaving the rest of the photo at full contrast.
 
 **No migration.**
 
