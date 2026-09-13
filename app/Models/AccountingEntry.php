@@ -41,7 +41,7 @@ class AccountingEntry extends Model
 
     /** The same kinds in French, since the accounting documents are. */
     public const TYPES_FR = [
-        'stock_sale' => 'Vente sur stock',
+        'stock_sale' => 'Vente stock',
         'prestation' => 'Prestation',
         'repair' => 'Réparation',
         'other' => 'Autre',

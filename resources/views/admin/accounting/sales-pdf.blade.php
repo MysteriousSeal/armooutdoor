@@ -10,7 +10,7 @@
 @section('title', 'Journal des ventes')
 
 @push('styles')
-        /* The journal itself. Column widths total 98%, leaving a margin; they
+        /* The journal itself. Column widths total 99%, leaving a margin; they
            are set per column because the renderer will otherwise share the
            width by content and wrap a long client name. */
         table.journal { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
@@ -33,20 +33,22 @@
            eye, and the footer falls right underneath. */
         .num { text-align: right; white-space: nowrap; }
         .col-date { width: 8%; white-space: nowrap; }
-        .col-invoice { width: 13%; }
+        /* Wide enough for a full invoice number: it must not wrap. */
+        .col-invoice { width: 15%; }
         .col-client { width: 15%; }
-        .col-channel { width: 11%; }
-        .col-type { width: 10%; }
-        .col-money { width: 9%; }
+        .col-channel { width: 8%; }
+        .col-type { width: 8%; }
+        /* Three columns share this width: the total, the fees and the bonus. */
+        .col-money { width: 8%; }
         /* The perceived figure is the one you come looking for: a little
            wider than its neighbours. */
-        .col-money-wide { width: 11%; }
+        .col-money-wide { width: 10%; }
         /* The payment ends at the right edge of the table, the way the date
            starts at the left one. That alignment is what sets it apart from
            the perceived figure — widening that column only pushed its number
            closer to the word, and dompdf ignores padding declared on a table
            cell, with or without !important. */
-        .col-payment { width: 12%; text-align: right; }
+        .col-payment { width: 11%; text-align: right; }
 
         /* A refunded line stays in the journal — it happened — but adds to
            nothing. The struck-through invoice says so; a label beside the
@@ -77,7 +79,7 @@
 
 @section('table')
     <table class="journal">
-        {{-- Date, invoice, client, channel, kind, the three amounts, payment. --}}
+        {{-- Date, invoice, client, channel, kind, the four amounts, payment. --}}
         <thead>
             <tr>
                 <td class="col-date">Date</td>
@@ -87,6 +89,7 @@
                 <td class="col-type">Nature</td>
                 <td class="col-money num">Total</td>
                 <td class="col-money num">Frais</td>
+                <td class="col-money num">Bonus</td>
                 <td class="col-money-wide num">Perçu</td>
                 <td class="col-payment">Règlement</td>
             </tr>
@@ -107,7 +110,8 @@
                     <td class="col-type">{{ $row['type_fr'] }}</td>
                     <td class="col-money num">{{ format_euros($row['total_cents']) }}</td>
                     <td class="col-money num">{{ $row['fees_cents'] > 0 ? '−'.format_euros($row['fees_cents']) : '—' }}</td>
-                    <td class="col-money-wide num">{{ format_euros($row['total_cents'] - $row['fees_cents']) }}</td>
+                    <td class="col-money num">{{ $row['bonus_cents'] > 0 ? '+'.format_euros($row['bonus_cents']) : '—' }}</td>
+                    <td class="col-money-wide num">{{ format_euros($row['total_cents'] - $row['fees_cents'] + $row['bonus_cents']) }}</td>
                     <td class="col-payment">{{ $row['payment_fr'] }}</td>
                 </tr>
             @endforeach
@@ -125,7 +129,8 @@
                      bottom of the table reads without going back up. --}}
                 <td class="num"><span class="foot-label">Total</span>{{ format_euros($totalCents) }}</td>
                 <td class="num"><span class="foot-label">Frais</span>{{ $feesCents > 0 ? '−'.format_euros($feesCents) : '—' }}</td>
-                <td class="num perceived col-money-wide"><span class="foot-label">Perçu</span>{{ format_euros($totalCents - $feesCents) }}</td>
+                <td class="num"><span class="foot-label">Bonus</span>{{ $bonusCents > 0 ? '+'.format_euros($bonusCents) : '—' }}</td>
+                <td class="num perceived col-money-wide"><span class="foot-label">Perçu</span>{{ format_euros($totalCents - $feesCents + $bonusCents) }}</td>
                 <td></td>
             </tr>
         </tfoot>
@@ -133,5 +138,5 @@
 @endsection
 
 @section('note')
-    Les frais retenus sont la commission de la place de marché et les frais d'encaissement. Le port payé par la boutique est une dépense propre et n'est pas déduit ici. Les commandes remboursées figurent au journal mais n'entrent dans aucun total.
+    Les frais retenus sont la commission de la place de marché et les frais d'encaissement. Le port payé par la boutique est une dépense propre et n'est pas déduit ici. Un bonus est une somme versée par la place de marché en plus de la vente : il s'ajoute au perçu. Les commandes remboursées figurent au journal mais n'entrent dans aucun total.
 @endsection

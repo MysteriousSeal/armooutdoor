@@ -133,6 +133,19 @@ class AccountingSalesPdfTest extends TestCase
         $this->assertStringContainsString('325,00', $html);
     }
 
+    public function test_a_bonus_prints_and_lifts_what_was_perceived(): void
+    {
+        $this->order('2026-03-02 09:00:00', ['marketplace_bonus_cents' => 320]);
+
+        $html = $this->render();
+
+        // 100 € taken, 3,20 € paid on top, 103,20 € perceived.
+        $this->assertStringContainsString('>Bonus<', $html);
+        $this->assertStringContainsString('+3,20', $html);
+        $this->assertStringContainsString('103,20', $html);
+        $this->assertStringContainsString('il s\'ajoute au perçu', $html);
+    }
+
     public function test_a_refund_is_written_down_but_left_out_of_the_total(): void
     {
         $refunded = $this->order('2026-03-05 09:00:00', ['status' => 'refunded', 'total_cents' => 4000]);
@@ -242,9 +255,10 @@ class AccountingSalesPdfTest extends TestCase
         $foot = substr($html, strpos($html, '<tfoot>'));
 
         // On a long page, the bottom of the table reads without going back up.
-        $this->assertSame(3, substr_count($foot, 'foot-label'));
+        $this->assertSame(4, substr_count($foot, 'foot-label'));
         $this->assertStringContainsString('>Total<', $foot);
         $this->assertStringContainsString('>Frais<', $foot);
+        $this->assertStringContainsString('>Bonus<', $foot);
         $this->assertStringContainsString('>Perçu<', $foot);
     }
 
@@ -260,7 +274,7 @@ class AccountingSalesPdfTest extends TestCase
         // The month carries a capital: it is a title, not a sentence.
         $this->assertStringContainsString('Mars 2026', $html);
         $this->assertStringNotContainsString('mars 2026', $html);
-        $this->assertStringContainsString('Vente sur stock', $html);
+        $this->assertStringContainsString('Vente stock', $html);
         $this->assertStringContainsString('Réparation', $html);
         $this->assertStringContainsString('Chèque', $html);
 
@@ -291,9 +305,11 @@ class AccountingSalesPdfTest extends TestCase
 
         preg_match_all('/\.col-[a-z-]+\s*\{[^}]*width:\s*(\d+)%/s', $html, $matches);
 
-        // `col-money` serves two columns: its width counts twice.
+        // `col-money` serves three columns (total, fees, bonus): its width
+        // counts three times, so the two extra copies are added back.
         $widths = array_map('intval', $matches[1]);
-        $total = array_sum($widths) + 9;
+        preg_match('/\.col-money\s*\{[^}]*width:\s*(\d+)%/s', $html, $money);
+        $total = array_sum($widths) + 2 * (int) $money[1];
 
         $this->assertLessThanOrEqual(100, $total, 'Les colonnes débordent de la page.');
     }

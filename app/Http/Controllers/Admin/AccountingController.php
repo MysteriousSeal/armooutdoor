@@ -361,10 +361,10 @@ class AccountingController extends Controller
     /**
      * A signature of the lines a journal prints.
      *
-     * Only the printed values go in: touching a tracking number or an internal
-     * note leaves it unchanged, while a total, a fee, a status or a deleted
-     * entry moves it. A date could not say as much — a removed line touches
-     * nothing at all.
+     * Only the figures the month shows go in: touching a tracking number or an
+     * internal note leaves it unchanged, while a total, a fee, a bonus, a
+     * status or a deleted entry moves it. A date could not say as much: a
+     * removed line touches nothing at all.
      *
      * @param  Collection<int, array<string, mixed>>  $rows
      */
@@ -378,6 +378,7 @@ class AccountingController extends Controller
             $row['type'],
             $row['total_cents'],
             $row['fees_cents'],
+            $row['bonus_cents'],
             $row['payment'],
             $row['remark'],
             $row['counts'] ? '1' : '0',
@@ -548,6 +549,7 @@ class AccountingController extends Controller
             'refunded' => $rows->count() - $counted->count(),
             'totalCents' => $counted->sum('total_cents'),
             'feesCents' => $counted->sum('fees_cents'),
+            'bonusCents' => $counted->sum('bonus_cents'),
             'company' => CompanySetting::current(),
         ];
     }

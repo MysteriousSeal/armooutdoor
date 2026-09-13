@@ -191,6 +191,29 @@ class AccountingDownloadLogTest extends TestCase
             ->assertSee('download it again');
     }
 
+    public function test_a_bonus_recorded_later_makes_the_filed_copy_out_of_date(): void
+    {
+        $order = $this->order('2026-04-12 09:00:00');
+        $owner = User::factory()->admin()->create();
+
+        $this->actingAs($owner)->get('/admin/accounting/sales/2026-04/pdf')->assertOk();
+
+        // The marketplace paid on top after the copy was filed: the month no
+        // longer says what the filed sheet says.
+        $order->update(['marketplace_bonus_cents' => 320]);
+
+        $this->actingAs($owner)
+            ->get('/admin/accounting/sales/2026-04')
+            ->assertOk()
+            ->assertSee('Changed since the copy of')
+            ->assertSee('download it again');
+
+        // And the month's card in the list carries the same warning.
+        $html = $this->actingAs($owner)->get('/admin/accounting/sales')->assertOk()->getContent();
+
+        $this->assertMatchesRegularExpression('#2026-04.*?accounting-month-filed is-stale#s', $html);
+    }
+
     public function test_a_deleted_entry_counts_as_a_change(): void
     {
         $this->order('2026-04-12 09:00:00');
