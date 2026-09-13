@@ -104,8 +104,11 @@ class BlogCommentsTest extends TestCase
         $this->get('/blog/'.$post->slug)->assertOk()
             ->assertSee('"commentCount":1', false)
             ->assertSee('"timeRequired":"PT1M"', false)
-            ->assertSee('"interactionType":"https://schema.org/ReadAction"', false)
-            ->assertSee('"userInteractionCount":1', false)
+            // The visit above is counted on the page, never in the schema:
+            // a read counter draws no rich result, and a young article is
+            // better saying nothing than publishing a handful of reads.
+            ->assertDontSee('ReadAction', false)
+            ->assertDontSee('userInteractionCount', false)
             ->assertSee('"@type":"Comment"', false)
             ->assertSee('Lecteur');
     }

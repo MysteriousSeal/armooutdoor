@@ -32,6 +32,37 @@ class SitemapTest extends TestCase
         }
     }
 
+    public function test_the_blog_parent_rows_are_never_older_than_the_articles_they_list(): void
+    {
+        // An article is written days before it appears, so its raw updated_at
+        // predates publication. The index and the rubriques used to take that
+        // raw column, and claimed to be older than the pages they point at,
+        // which tells a crawler to come back later than it should.
+        $post = BlogPost::factory()->create();
+        $post->forceFill([
+            'published_at' => now()->subDay(),
+            'updated_at' => now()->subDays(6),
+        ])->save();
+
+        $xml = $this->get('/sitemap-blog.xml')->assertOk()->getContent();
+
+        preg_match_all('/<url>\s*<loc>([^<]+)<\/loc>\s*<lastmod>([^<]+)<\/lastmod>/', $xml, $rows, PREG_SET_ORDER);
+
+        $dates = [];
+
+        foreach ($rows as $row) {
+            $dates[$row[1]] = $row[2];
+        }
+
+        $article = $dates[route('blog.show', $post->slug)] ?? null;
+        $index = $dates[route('blog.index')] ?? null;
+
+        $this->assertNotNull($article);
+        $this->assertNotNull($index);
+        $this->assertSame($post->fresh()->published_at->toAtomString(), $article);
+        $this->assertGreaterThanOrEqual($article, $index);
+    }
+
     public function test_robots_txt_points_to_the_current_sitemap_url(): void
     {
         $response = $this->get('/robots.txt');

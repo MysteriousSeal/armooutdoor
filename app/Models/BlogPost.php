@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 #[Fillable([
@@ -220,6 +221,25 @@ class BlogPost extends Model
     public function metaTitle(): string
     {
         return $this->meta_title ?: $this->localizedTitle();
+    }
+
+    /**
+     * When the article was last actually touched, never before it existed.
+     *
+     * An article is written, then scheduled: the row's last write lands days
+     * before `published_at` arrives, so the raw column would have the page
+     * claim it was modified before it was published. Schema, Open Graph and
+     * the sitemap all read this one rule rather than each inventing it.
+     */
+    public function lastModifiedAt(): ?Carbon
+    {
+        if ($this->published_at === null) {
+            return $this->updated_at;
+        }
+
+        return $this->updated_at !== null && $this->updated_at->gt($this->published_at)
+            ? $this->updated_at
+            : $this->published_at;
     }
 
     public function metaDescription(): string

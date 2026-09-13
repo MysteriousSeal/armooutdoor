@@ -5,10 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use App\Models\SiteVisit;
+use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 class BlogController extends Controller
 {
+    /** How many articles the "à lire aussi" block holds. */
+    private const RELATED_COUNT = 3;
+
     public function index(): View
     {
         return $this->listing(null);
@@ -80,20 +84,54 @@ class BlogController extends Controller
             ->where('slug', $slug)
             ->firstOrFail();
 
-        $related = BlogPost::query()
-            ->visible()
-            ->with('category')
-            ->where('blog_category_id', $post->blog_category_id)
-            ->whereKeyNot($post->id)
-            ->orderByDesc('published_at')
-            ->limit(3)
-            ->get();
+        $related = $this->relatedPosts($post);
 
         return view('blog.show', [
             'post' => $post,
             'related' => $related,
             'viewCount' => $this->viewCount($post),
         ]);
+    }
+
+    /**
+     * Three articles to read next, the nearest first.
+     *
+     * The rubric comes first: an article in the same rubric is the closest
+     * thing to the one being read. A thin rubric cannot fill three on its
+     * own, though, and « essais » holds a single article, which left that
+     * page with no block at all and no way onward. Whatever the rubric
+     * cannot supply is topped up from the rest of the blog, newest first,
+     * so every article ends on somewhere to go.
+     *
+     * @return Collection<int, BlogPost>
+     */
+    private function relatedPosts(BlogPost $post): Collection
+    {
+        $related = BlogPost::query()
+            ->visible()
+            ->with('category')
+            ->where('blog_category_id', $post->blog_category_id)
+            ->whereKeyNot($post->id)
+            ->orderByDesc('published_at')
+            ->limit(self::RELATED_COUNT)
+            ->get();
+
+        if ($related->count() >= self::RELATED_COUNT) {
+            return $related;
+        }
+
+        // Excluded by key rather than by rubric: a post filed under no
+        // rubric at all would slip past a `!=` comparison on the column.
+        return $related->concat(
+            BlogPost::query()
+                ->visible()
+                ->with('category')
+                ->whereKeyNot($post->id)
+                ->whereNotIn('id', $related->modelKeys())
+                ->orderByDesc('published_at')
+                ->limit(self::RELATED_COUNT - $related->count())
+                ->get()
+        );
     }
 
     /**
@@ -122,14 +160,7 @@ class BlogController extends Controller
     {
         $post->load(['category', 'products' => fn ($query) => $query->active()->with('discount', 'variants.supplier')]);
 
-        $related = BlogPost::query()
-            ->visible()
-            ->with('category')
-            ->where('blog_category_id', $post->blog_category_id)
-            ->whereKeyNot($post->id)
-            ->orderByDesc('published_at')
-            ->limit(3)
-            ->get();
+        $related = $this->relatedPosts($post);
 
         return view('blog.show', [
             'post' => $post,

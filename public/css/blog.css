@@ -276,10 +276,11 @@
     align-self: stretch;
     width: 100%;
     aspect-ratio: 16 / 9;
-    background-image: var(--blog-hero-image);
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
+    /* The picture is an <img> now, so the stretched row is filled by the
+       element itself rather than by a background. cover crops nothing at
+       16/9, which is the shape every hero on disk already is. */
+    height: 100%;
+    object-fit: cover;
 }
 
 .blog-article-banner-copy {

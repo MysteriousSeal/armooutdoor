@@ -1,16 +1,31 @@
 @extends('layouts.app')
 
 @section('title', paginated_title($activeCategory ? $activeCategory->localizedName().' — '.__('store.blog_title') : __('store.blog_meta_title'), $posts).' — '.config('app.name'))
-@section('meta_description', $activeCategory?->localizedDescription() ?: __('store.blog_meta_description'))
+@section('meta_description', paginated_description($activeCategory?->localizedDescription() ?: __('store.blog_meta_description'), $posts))
 @section('canonical', paginated_canonical($activeCategory ? route('blog.category', $activeCategory->slug) : route('blog.index'), $posts))
+
+{{-- The picture the page itself leads with. Only page one carries the
+     featured post, so the later pages keep the site image the layout
+     falls back to rather than promising a photo they never show. --}}
+@if ($featuredPost?->image)
+    @section('og_image', $featuredPost->heroUrl())
+    @section('og_image_alt', $featuredPost->localizedTitle())
+@endif
 
 @push('head')
     <link rel="stylesheet" href="{{ versioned_asset('css/categories.css') }}">
     <link rel="stylesheet" href="{{ versioned_asset('css/blog.css') }}">
     {{-- The posts each declare themselves; this is the shelf they sit on,
          belonging to the same site node as every other listing page. --}}
+    @php
+        // The cards this page really renders, in the order a reader meets
+        // them. The featured post sits outside the paginator: page one
+        // opens at 1 with it, page two opens at 14 without it.
+        $listedPosts = collect($featuredPost ? [$featuredPost] : [])->concat($posts->items());
+        $listedFrom = $featuredPost ? 1 : $posts->firstItem() + $lead;
+    @endphp
     <script type="application/ld+json">
-        {!! json_encode([
+        {!! json_encode(array_filter([
             '@@context' => 'https://schema.org',
             '@@type' => 'Blog',
             'name' => $activeCategory ? $activeCategory->localizedName().' — '.__('store.blog_title') : __('store.blog_title'),
@@ -19,7 +34,20 @@
             'inLanguage' => 'fr-FR',
             'isPartOf' => ['@@id' => \App\Support\OrganizationSchema::websiteId()],
             'publisher' => \App\Support\OrganizationSchema::reference(),
-        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+            // The posts shown here, not the whole blog: a list naming
+            // articles this page does not display would describe a page
+            // that does not exist.
+            'mainEntity' => $listedPosts->isEmpty() ? null : [
+                '@@type' => 'ItemList',
+                'numberOfItems' => $listedPosts->count(),
+                'itemListElement' => $listedPosts->values()->map(fn ($post, $index): array => [
+                    '@@type' => 'ListItem',
+                    'position' => $listedFrom + $index,
+                    'name' => $post->localizedTitle(),
+                    'url' => route('blog.show', $post->slug),
+                ])->all(),
+            ],
+        ], fn ($value): bool => $value !== null), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
     </script>
     <script type="application/ld+json">
         {!! json_encode([

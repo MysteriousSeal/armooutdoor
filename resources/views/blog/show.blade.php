@@ -13,7 +13,7 @@
     {{-- The og counterparts of the JSON-LD dates: search reads the schema,
          the social previews read these. --}}
     <meta property="article:published_time" content="{{ $post->published_at?->toAtomString() }}">
-    <meta property="article:modified_time" content="{{ ($post->updated_at ?? $post->published_at)?->toAtomString() }}">
+    <meta property="article:modified_time" content="{{ $post->lastModifiedAt()?->toAtomString() }}">
 @endpush
 @section('og_image', $post->heroUrl())
 @section('og_image_alt', $post->localizedTitle())
@@ -21,7 +21,7 @@
 @push('head')
     <link rel="stylesheet" href="{{ versioned_asset('css/blog.css') }}">
     <script type="application/ld+json">
-        {!! json_encode(\App\Support\ArticleSchema::for($post, $viewCount ?? null), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+        {!! json_encode(\App\Support\ArticleSchema::for($post), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
     </script>
     <script type="application/ld+json">
         {!! json_encode([
@@ -59,12 +59,21 @@
         </nav>
 
         <article class="blog-article">
-            <header
-                class="blog-article-banner{{ $post->image ? ' has-image' : '' }}"
-                @if ($post->image) style="--blog-hero-image: url('{{ $post->heroUrl() }}')" @endif
-            >
+            <header class="blog-article-banner{{ $post->image ? ' has-image' : '' }}">
+                {{-- An element, not a CSS background. The picture the schema
+                     and the social card both name was nowhere in the page, so
+                     an image crawler had nothing to find and the alt text had
+                     nowhere to live. It is also the largest thing painted
+                     here, which is why it is fetched early and never lazily. --}}
                 @if ($post->image)
-                    <div class="blog-article-banner-overlay" aria-hidden="true"></div>
+                    <img
+                        class="blog-article-banner-overlay"
+                        src="{{ $post->heroUrl() }}"
+                        alt="{{ $post->localizedTitle() }}"
+                        width="1600"
+                        height="900"
+                        fetchpriority="high"
+                    >
                 @endif
 
                 {{-- Le crédit accompagne l'image : sans visuel, il ne crédite

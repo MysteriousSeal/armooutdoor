@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Support\Guides;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 class SitemapController extends Controller
@@ -156,28 +157,51 @@ class SitemapController extends Controller
             ->filter(fn (BlogCategory $category): bool => $category->posts_count > 0)
             ->map(fn (BlogCategory $category): array => [
                 'loc' => route('blog.category', $category->slug),
-                // max() rend la chaîne brute de la base, pas un Carbon : sans
-                // reformatage W3C, Search Console rejette la date.
-                'lastmod' => self::atom($category->posts()->visible()->max('updated_at')),
+                // The same rule as the article rows below: a parent row that
+                // reads the raw column ends up older than the children it
+                // lists, since a scheduled post is written before it appears.
+                'lastmod' => self::blogLastModified($category->posts()->visible()->get()),
                 'changefreq' => 'weekly',
                 'priority' => '0.6',
             ]);
 
         $posts = BlogPost::query()->visible()->get()->map(fn (BlogPost $post): array => [
             'loc' => route('blog.show', $post->slug),
-            'lastmod' => $post->updated_at?->toAtomString(),
+            'lastmod' => $post->lastModifiedAt()?->toAtomString(),
             'changefreq' => 'monthly',
             'priority' => '0.6',
+            // The hero the article actually shows. An empty string is what
+            // a post without one hands back, and it is dropped rather than
+            // published as a blank image row.
+            'images' => array_filter([$post->heroUrl()]),
         ]);
 
         $urls = collect([[
             'loc' => route('blog.index'),
-            'lastmod' => self::atom(BlogPost::query()->visible()->max('updated_at')),
+            'lastmod' => self::blogLastModified(BlogPost::query()->visible()->get()),
             'changefreq' => 'weekly',
             'priority' => '0.7',
         ]])->concat($categories)->concat($posts)->all();
 
         return $this->xml('sitemap.urlset', compact('urls'));
+    }
+
+    /**
+     * The newest date a set of articles will admit to.
+     *
+     * Read through the model's own rule rather than off the column: an
+     * article written on Tuesday and published on Friday last changed on
+     * Friday, and a listing row claiming Tuesday would send a crawler back
+     * later than the pages it points at.
+     *
+     * @param  Collection<int, BlogPost>  $posts
+     */
+    private static function blogLastModified(Collection $posts): ?string
+    {
+        return $posts
+            ->map(fn (BlogPost $post): ?Carbon => $post->lastModifiedAt())
+            ->filter()
+            ->max()?->toAtomString();
     }
 
     /** La chaîne datetime de la base, au format W3C qu'exige le protocole. */

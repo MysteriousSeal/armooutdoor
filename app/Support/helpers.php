@@ -175,6 +175,26 @@ if (! function_exists('paginated_title')) {
     }
 }
 
+if (! function_exists('paginated_description')) {
+    /**
+     * A listing description that names the page it is on.
+     *
+     * The title already says which page this is, but the description
+     * repeated page one's word for word, so a search result showed the two
+     * as copies of each other even though each canonicalises to itself.
+     */
+    function paginated_description(string $description, LengthAwarePaginator $paginator): string
+    {
+        $page = $paginator->currentPage();
+
+        if ($page <= 1 || $page > $paginator->lastPage()) {
+            return $description;
+        }
+
+        return $description.' '.__('store.pagination_page', ['page' => $page]).'.';
+    }
+}
+
 if (! function_exists('meta_description')) {
     /**
      * A description that stops where a sentence does.

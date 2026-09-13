@@ -49,4 +49,34 @@ class ArticleSchemaTest extends TestCase
 
         $this->assertSame($schema['datePublished'], $schema['dateModified']);
     }
+
+    public function test_a_scheduled_article_never_claims_to_predate_itself(): void
+    {
+        // Written on the 10th, published on the 17th: `updated_at` is real but
+        // earlier than publication, and a modification date before the
+        // publication date is a contradiction a crawler reads badly.
+        $post = BlogPost::factory()->create();
+        $post->forceFill([
+            'published_at' => now()->addDays(4),
+            'updated_at' => now()->subDays(3),
+        ])->save();
+
+        $schema = ArticleSchema::for($post->fresh());
+
+        $this->assertSame($schema['datePublished'], $schema['dateModified']);
+    }
+
+    public function test_a_genuine_later_edit_is_still_reported(): void
+    {
+        $post = BlogPost::factory()->create();
+        $post->forceFill([
+            'published_at' => now()->subDays(5),
+            'updated_at' => now()->subDay(),
+        ])->save();
+
+        $schema = ArticleSchema::for($post->fresh());
+
+        $this->assertSame($post->fresh()->updated_at->toAtomString(), $schema['dateModified']);
+        $this->assertNotSame($schema['datePublished'], $schema['dateModified']);
+    }
 }

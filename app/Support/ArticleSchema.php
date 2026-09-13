@@ -26,7 +26,7 @@ class ArticleSchema
     private const MAX_COMMENTS = 5;
 
     /** @return array<string, mixed> */
-    public static function for(BlogPost $post, ?int $viewCount = null): array
+    public static function for(BlogPost $post): array
     {
         // The page eager-loads top-level comments with their replies; the
         // count says the whole thread, like the figure under the title.
@@ -42,8 +42,11 @@ class ArticleSchema
             'datePublished' => $post->published_at?->toAtomString(),
             // The date a reader should judge the advice by. It falls back to
             // publication rather than to nothing: an article that has never
-            // been touched was last correct on the day it went up.
-            'dateModified' => ($post->updated_at ?? $post->published_at)?->toAtomString(),
+            // been touched was last correct on the day it went up. Never
+            // earlier than publication either: an article written on Tuesday
+            // and scheduled for Friday was last touched before it existed,
+            // and saying so out loud contradicts the line above it.
+            'dateModified' => $post->lastModifiedAt()?->toAtomString(),
             // The sources shown at the article's foot, said in schema too -
             // as works with a name, not bare URLs, so the label travels.
             'citation' => collect($post->sourcesList())->map(fn (array $source): array => [
@@ -68,11 +71,6 @@ class ArticleSchema
                 'dateCreated' => $comment->created_at->toAtomString(),
                 'text' => Str::limit($comment->body, 500),
             ])->values()->all() ?: null,
-            'interactionStatistic' => $viewCount !== null && $viewCount > 0 ? [
-                '@type' => 'InteractionCounter',
-                'interactionType' => 'https://schema.org/ReadAction',
-                'userInteractionCount' => $viewCount,
-            ] : null,
         ], fn ($value): bool => $value !== null && $value !== '' && $value !== []);
     }
 }
