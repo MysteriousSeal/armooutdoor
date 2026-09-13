@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-13 · v1.39.13 · build MS0Z3C
+
+### Storefront
+
+- **The homepage's « Accessoires » chip opens the gun accessories.** It led to the range category, while the accessories now have a category of their own.
+- **The clothing chip says « Vêtements ».** Beside « Accessoires », the category's full name, « Vêtements et accessoires », said accessories twice. Only the chip is shorter: the category keeps its name everywhere else.
+
+**No migration.**
+
 ## 2026-09-13 · v1.39.12 · build Q0XM7S
 
 ### Storefront
