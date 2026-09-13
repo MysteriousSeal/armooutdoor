@@ -2,6 +2,21 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-13 · v1.39.4 · build JCKUKO
+
+### Admin
+
+- **A marketplace order can record what the marketplace paid on top of it.** An order placed by hand on a marketplace sometimes brings in more than the order itself is worth. The Marketplace panel of an order now takes that figure in euros, beside the commission and the shipping paid, and an empty field clears it. It is money received, never a cost: it is left out of the recorded costs and added to what the order actually brought in.
+- **The figure follows the money wherever it is counted.** The orders list shows it under the total, beside the commission and shipping lines, and counts it in the perceived total and in the profit. The monthly sales page gives it a column of its own, adds it to the month's perceived figure, and says so under the table. The sales journal prints it in the same column and counts it in « Perçu ». The dashboard carries it inside the revenue term of « What the shop kept », where the note says how much of the revenue is bonus.
+- **A bonus typed on a month already filed marks that month as changed.** The month's copy is compared on what the journal prints, so a bonus recorded after the fact asks for the sheet again, on the month's own page and on its card in the list. A month that has no bonus is untouched, so nothing already filed is disturbed.
+- **The French journal says « Vente stock » where it said « Vente sur stock ».**
+
+### Fixed
+
+- **The « Total perceived » figure on the orders page disagreed with the column beneath it.** It counted the costs but not what a marketplace had paid on top, so the card and its own rows told different stories. The dashboard had the same gap in its ledger, where the profit counted a bonus its revenue did not, leaving the bar's three shares adding up to more than the bar itself.
+
+**No migration for existing data.** The bonus column is created on deploy and starts empty.
+
 ## 2026-09-11 · v1.39.3 · build PPDGBP
 
 ### Storefront
