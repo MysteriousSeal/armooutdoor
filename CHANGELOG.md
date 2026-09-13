@@ -2,6 +2,20 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-13 · v1.39.11 · build 55MS5H
+
+### Storefront
+
+- **The home page can now turn up in a Google search box.** The site's own search form went undeclared to search engines, so Google had no way to offer it as a shortcut under the listing. The WebSite data now names it.
+- **The shop's own rating now travels with its business listing**, the same average and count already shown beside the customer quotes, so a search engine that already names the shop can show its score next to it.
+- **The hero carousel's photos actually exist in the page.** They were CSS backgrounds: the pictures search engines are told about elsewhere on the page appeared nowhere in its actual content, and no screen reader could describe them. They are now real images, each with its own description, sized and loaded the way the largest one on the page should be.
+
+### Housekeeping
+
+- **The changelog is now entirely in English.** A handful of entries drifted into French; they're translated back, without touching the quoted French UI copy, legal wording, and product names the rest of the file already carried correctly.
+
+**No migration.**
+
 ## 2026-09-13 · v1.39.10 · build 2VOLWK
 
 ### Storefront
