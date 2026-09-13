@@ -239,7 +239,7 @@
                     @else
                         <div class="product-grid">
                             @foreach ($products as $index => $product)
-                                @include('partials.product-card', ['product' => $product, 'lazy' => $index > 1])
+                                @include('partials.product-card', ['product' => $product, 'lazy' => $index > 7])
                             @endforeach
                         </div>
 

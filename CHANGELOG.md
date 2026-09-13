@@ -2,6 +2,25 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-13 · v1.39.8 · build CHMBQW
+
+### Storefront
+
+- **Une carte qui ne peut pas être achetée propose enfin quelque chose.** Un produit épuisé n'avait ni bouton ni lien : juste un trou là où les autres cartes ont une action. Elle mène désormais à la fiche produit, comme le fait déjà une carte à déclinaisons. Dans les meilleures ventes, ces produits passent aussi derrière tout ce qui est réellement en vente, en gardant leur ordre de vente entre eux.
+- **Une carte dit maintenant quand certaines déclinaisons manquent.** Un article disponible en cinq tailles dont une seule en stock affichait « En stock », ce qui est vrai du produit et faux de la taille voulue. Il affiche « Stock partiel ».
+- **La bannière d'une page de liste se charge sans attendre la feuille de style.** C'est l'image la plus grande de la page, et le navigateur ne la découvrait qu'après avoir lu le CSS. Les huit premières vignettes de la grille se chargent également tout de suite, au lieu de deux, ce qui correspond à ce qu'un écran large montre avant défilement.
+- **« Derniers stocks disponibles »** s'écrivait au singulier.
+- **Les listes décrivent leurs produits avec leur image** dans les données structurées envoyées aux moteurs de recherche, et la liste des nouveautés donne enfin le nom de chaque produit, qu'elle omettait.
+- **La note d'un produit se lit à voix haute.** Les étoiles sont décoratives : un lecteur d'écran n'entendait qu'un nombre entre parenthèses. Il entend désormais « Noté 4,5 sur 5, 13 avis », ou « Pas encore d'avis ». Le nom du produit, qui était annoncé deux fois par carte, ne l'est plus qu'une.
+
+### Fixed
+
+- **Les grilles de produits demandaient les avis une carte à la fois.** Une liste de cinquante-neuf cartes dépensait cinquante-neuf paires de requêtes pour des chiffres que deux agrégats donnent d'un coup, et la page d'accueil la payait trois fois pour ses trois grilles. Mesuré sur vingt-cinq cartes : cinquante requêtes en trop avant, aucune après. Les neuf endroits qui construisent des grilles de cartes demandent désormais les totaux.
+- **Le libellé du stock partiel débordait de la ligne du prix.** La pastille ne se comprime pas, et le texte était plus long que tout ce que cette ligne a jamais porté.
+- **Une carte en rupture n'avait plus la place de son bouton**, qui venait de lui être rendu.
+
+**No migration.**
+
 ## 2026-09-13 · v1.39.7 · build KJ94MX
 
 ### Storefront

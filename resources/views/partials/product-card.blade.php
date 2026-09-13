@@ -13,6 +13,11 @@
     $cardRestocking = ! $product->inStock() && ($product->hasVariants()
         ? $activeCardVariants->contains(fn ($variant) => ! $variant->inStock() && $variant->isRestocking())
         : $product->isRestocking());
+    // Some declinations in stock and some not: "En stock" is true of the
+    // product and false of the size the visitor wants.
+    $cardPartialStock = $product->hasVariants()
+        && $activeCardVariants->contains(fn ($variant) => $variant->inStock())
+        && $activeCardVariants->contains(fn ($variant) => ! $variant->inStock());
     $fiveColumn = $fiveColumn ?? false;
 @endphp
 <article class="masonry-card product-card {{ $product->inStock() || $availableAtSupplier ? '' : 'is-out-of-stock' }}">
@@ -20,7 +25,7 @@
         <div class="masonry-card-media">
             <img
                 src="{{ $product->thumbnailUrl() }}"
-                alt="{{ $product->localizedName() }}"
+                alt=""
                 width="{{ \App\Support\ImageThumbnailer::SIZE }}"
                 height="{{ \App\Support\ImageThumbnailer::SIZE }}"
                 loading="{{ $lazy ?? true ? 'lazy' : 'eager' }}"
@@ -46,7 +51,7 @@
                 </p>
                 {{-- Les cartes ont leurs propres libellés, plus courts, et une
                      variante encore plus courte sur cinq colonnes. --}}
-                <span class="card-stock-chip {{ $product->lowStock() ? 'is-low-stock' : ($product->inStock() ? 'is-in-stock' : ($cardRestocking ? 'is-restocking' : ($availableAtSupplier ? 'is-at-supplier' : 'is-out-of-stock'))) }}">
+                <span class="card-stock-chip {{ $product->lowStock() ? 'is-low-stock' : ($cardPartialStock ? 'is-partial' : ($product->inStock() ? 'is-in-stock' : ($cardRestocking ? 'is-restocking' : ($availableAtSupplier ? 'is-at-supplier' : 'is-out-of-stock')))) }}">
                     @if ($product->lowStock() && ! $fiveColumn)
                         {{-- Below 640px the full label wraps and crowds the price, so the short one takes over there. --}}
                         <span class="card-stock-chip-full">{{ __('store.low_stock') }}</span><span class="card-stock-chip-short">{{ __('store.low_stock_short') }}</span>
@@ -55,13 +60,19 @@
                     @elseif (! $product->lowStock() && ! $product->inStock() && $cardRestocking && ! $fiveColumn)
                         <span class="card-stock-chip-full">{{ __('store.card_restocking') }}</span><span class="card-stock-chip-short">{{ __('store.card_restocking_short') }}</span>
                     @else
-                        {{ $product->lowStock() ? __('store.low_stock_short') : ($product->inStock() ? __('store.in_stock') : ($cardRestocking ? __($fiveColumn ? 'store.card_restocking_short' : 'store.card_restocking') : ($availableAtSupplier ? __($fiveColumn ? 'store.card_available_at_supplier_short' : 'store.card_available_at_supplier') : __('store.out_of_stock')))) }}
+                        {{ $product->lowStock() ? __('store.low_stock_short') : ($cardPartialStock ? __('store.partial_stock_short') : ($product->inStock() ? __('store.in_stock') : ($cardRestocking ? __($fiveColumn ? 'store.card_restocking_short' : 'store.card_restocking') : ($availableAtSupplier ? __($fiveColumn ? 'store.card_available_at_supplier_short' : 'store.card_available_at_supplier') : __('store.out_of_stock'))))) }}
                     @endif
                 </span>
             </div>
+            {{-- The row stays on every card, judged or not, so the grid keeps
+                 one rhythm. The stars carry no meaning of their own: what a
+                 screen reader gets is spelled out beside them. --}}
             <div class="card-rating">
                 <span class="star-rating" aria-hidden="true">{{ str_repeat('★', (int) round($product->averageRating() ?? 0)) }}{{ str_repeat('☆', 5 - (int) round($product->averageRating() ?? 0)) }}</span>
                 <span class="card-rating-count">({{ $product->reviewsCount() }})</span>
+                <span class="sr-only">{{ $product->reviewsCount() > 0
+                    ? __('store.card_rating_summary', ['rating' => $product->averageRating(), 'count' => $product->reviewsCount()])
+                    : __('store.card_rating_none') }}</span>
             </div>
         </div>
     </a>

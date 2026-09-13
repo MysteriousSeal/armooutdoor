@@ -43,6 +43,7 @@
                     'position' => $index + 1,
                     'name' => $product->localizedName(),
                     'url' => localized_route('products.show', ['product' => $product->slug]),
+                    'image' => $product->thumbnailUrl(),
                 ])->all(),
             ],
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
@@ -71,7 +72,7 @@
         @else
             <div class="product-grid">
                 @foreach ($products as $index => $product)
-                    @include('partials.product-card', ['product' => $product, 'lazy' => $index > 1])
+                    @include('partials.product-card', ['product' => $product, 'lazy' => $index > 7])
                 @endforeach
             </div>
         @endif

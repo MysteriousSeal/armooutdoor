@@ -1751,8 +1751,11 @@ body.has-menu-open {
     }
 }
 
+/* The caption's deep bottom padding clears the cart button hanging off the
+   card. An unbuyable card used to have no button and gave the room back; it
+   now offers the product page instead, so it needs the room again. */
 .product-card.is-out-of-stock .card-caption {
-    padding-bottom: 1rem;
+    padding-bottom: 2.05rem;
 }
 
 .card-cart {
@@ -2208,7 +2211,8 @@ body.has-menu-open {
 }
 
 .stock-badge.is-low-stock,
-.card-stock-chip.is-low-stock {
+.card-stock-chip.is-low-stock,
+.card-stock-chip.is-partial {
     color: #8a5a12;
     background: #faf1e2;
     border-color: #edddb8;
@@ -4863,7 +4867,8 @@ body.has-menu-open {
 }
 
 [data-theme='dark'] .stock-badge.is-low-stock,
-[data-theme='dark'] .card-stock-chip.is-low-stock {
+[data-theme='dark'] .card-stock-chip.is-low-stock,
+[data-theme='dark'] .card-stock-chip.is-partial {
     color: #e0b673;
     background: #362c1c;
     border-color: #4d3f28;
