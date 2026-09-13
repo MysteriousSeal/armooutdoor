@@ -146,6 +146,67 @@ class AdminOrderLifecycleTest extends TestCase
         $this->assertSame(210, $order->fresh()->marketplace_commission_cents);
     }
 
+    public function test_the_marketplace_section_offers_a_bonus_field(): void
+    {
+        $marketplace = Marketplace::query()->create(['name' => 'Vinted']);
+        $order = $this->order();
+        $order->update(['is_manual' => true, 'marketplace_id' => $marketplace->id, 'marketplace_bonus_cents' => 320]);
+
+        $html = $this->actingAs($this->admin())
+            ->get('/admin/orders/'.$order->number)
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('Bonus (EUR)', $html);
+        $this->assertStringContainsString('value="3.20"', $html);
+    }
+
+    public function test_admin_can_record_a_marketplace_bonus(): void
+    {
+        $marketplace = Marketplace::query()->create(['name' => 'Vinted']);
+        $order = $this->order();
+        $order->update(['is_manual' => true, 'marketplace_id' => $marketplace->id]);
+
+        $this->actingAs($this->admin())
+            ->patch('/admin/orders/'.$order->number.'/marketplace-bonus', ['marketplace_bonus' => '3.20'])
+            ->assertRedirect();
+        $this->assertSame(320, $order->fresh()->marketplace_bonus_cents);
+
+        // Emptied again, the order simply has no bonus recorded.
+        $this->actingAs($this->admin())
+            ->patch('/admin/orders/'.$order->number.'/marketplace-bonus', ['marketplace_bonus' => ''])
+            ->assertRedirect();
+        $this->assertNull($order->fresh()->marketplace_bonus_cents);
+    }
+
+    public function test_every_marketplace_gets_the_bonus_field(): void
+    {
+        $marketplace = Marketplace::query()->create(['name' => 'Ebay']);
+        $order = $this->order();
+        $order->update(['is_manual' => true, 'marketplace_id' => $marketplace->id]);
+
+        $html = $this->actingAs($this->admin())
+            ->get('/admin/orders/'.$order->number)
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('Bonus (EUR)', $html);
+
+        $this->actingAs($this->admin())
+            ->patch('/admin/orders/'.$order->number.'/marketplace-bonus', ['marketplace_bonus' => '3.20'])
+            ->assertRedirect();
+        $this->assertSame(320, $order->fresh()->marketplace_bonus_cents);
+    }
+
+    public function test_marketplace_bonus_is_rejected_for_a_non_marketplace_order(): void
+    {
+        $order = $this->order();
+
+        $this->actingAs($this->admin())
+            ->patch('/admin/orders/'.$order->number.'/marketplace-bonus', ['marketplace_bonus' => '3.20'])
+            ->assertNotFound();
+    }
+
     public function test_shipping_paid_is_rejected_for_a_non_marketplace_order(): void
     {
         $order = $this->order();

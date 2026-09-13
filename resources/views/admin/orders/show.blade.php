@@ -557,6 +557,28 @@
                             </div>
                             <button type="submit" class="btn btn-secondary btn-block">Save shipping paid</button>
                         </form>
+
+                        {{-- Money the marketplace paid on top of the order. --}}
+                        <form method="POST" action="{{ route('admin.orders.marketplace-bonus.update', $order) }}" class="order-shipping-form">
+                            @csrf
+                            @method('PATCH')
+                            <div class="order-shipping-field">
+                                <label for="marketplace_bonus">Bonus (EUR)</label>
+                                <input
+                                    type="number"
+                                    id="marketplace_bonus"
+                                    name="marketplace_bonus"
+                                    class="order-shipping-input"
+                                    value="{{ old('marketplace_bonus', $order->marketplace_bonus_cents !== null ? number_format($order->marketplace_bonus_cents / 100, 2, '.', '') : '') }}"
+                                    min="0"
+                                    max="99999.99"
+                                    step="0.01"
+                                    placeholder="e.g. 5.00"
+                                >
+                                @error('marketplace_bonus') <p class="form-error">{{ $message }}</p> @enderror
+                            </div>
+                            <button type="submit" class="btn btn-secondary btn-block">Save bonus</button>
+                        </form>
                     </section>
                 @endif
 

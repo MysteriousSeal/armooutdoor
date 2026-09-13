@@ -1136,6 +1136,33 @@ class OrderController extends Controller
     }
 
     /**
+     * What the marketplace paid on top of the order itself.
+     *
+     * A marketplace sale sometimes brings in more than the order is worth,
+     * and the figure lives nowhere the shop can read: it is taken off the
+     * statement and typed in. Recorded only for now, so it touches no payout
+     * and no cost until somebody decides where it belongs.
+     */
+    public function updateMarketplaceBonus(Request $request, Order $order): RedirectResponse
+    {
+        abort_unless($order->is_manual && $order->marketplace_id, 404);
+
+        $validated = $request->validate([
+            'marketplace_bonus' => ['nullable', 'numeric', 'min:0', 'max:99999.99'],
+        ]);
+
+        $bonus = $validated['marketplace_bonus'] ?? null;
+
+        $order->update([
+            'marketplace_bonus_cents' => $bonus === null || $bonus === ''
+                ? null
+                : (int) round(((float) $bonus) * 100),
+        ]);
+
+        return back()->with('status', 'Marketplace bonus saved.');
+    }
+
+    /**
      * What PayPal kept on an order typed in by hand.
      *
      * A Stripe order gets its fee from Stripe, which knows the real figure and
