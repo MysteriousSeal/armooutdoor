@@ -2,6 +2,19 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-13 · v1.39.12 · build Q0XM7S
+
+### Storefront
+
+- **The homepage headline now names what the shop actually sells.** It promised « entretien » and « airgun » while clothing, the largest part of the catalogue, went unmentioned. It now reads « Cibles de tir, accessoires et camouflage pour le stand et le terrain », and the text under it lists the aisles that sell.
+- **The first slide's chips are links.** They looked clickable and did nothing. Cibles, Accessoires and Vêtements now open their categories, and a category that is renamed or removed drops out rather than leading to a missing page. The second button, which repeated the next slide's « Voir les nouveautés », now offers every category.
+- **The sale slide no longer claims a deadline it does not have.** « Des prix en baisse cette semaine » ran over discounts that mostly have no end date. It now states the deepest percentage currently on offer, and only appears while something is actually reduced, so it can no longer open an empty promotions page.
+- **With nothing on sale, that slide offers free shipping instead.** It gives the live threshold and names the carriers the offer covers, since it does not extend to every one of them.
+- **The new arrivals slide counts only when the count flatters.** It gives the number of products added in the last 30 days from ten upward, and describes the page below that.
+- **The best sellers slide quotes the customer rating** in place of a claim about products proven « au stand comme sur le terrain » that nothing backed up.
+
+**No migration.**
+
 ## 2026-09-13 · v1.39.11 · build 55MS5H
 
 ### Storefront
