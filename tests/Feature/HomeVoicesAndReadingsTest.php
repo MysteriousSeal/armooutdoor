@@ -206,6 +206,23 @@ class HomeVoicesAndReadingsTest extends TestCase
 
     public function test_the_h1_names_the_aisles(): void
     {
-        $this->get('/')->assertOk()->assertSee('Cibles, entretien', false);
+        $this->get('/')->assertOk()->assertSee('Cibles de tir,', false);
+    }
+
+    public function test_the_best_sellers_panel_quotes_the_customer_score(): void
+    {
+        $product = Product::factory()->create(['is_active' => true, 'quantity' => 5]);
+        $this->review($product, 5, 'Parfait.');
+        $this->review($product, 4, 'Bien.');
+
+        $this->get('/')->assertOk()
+            ->assertSee('Note moyenne des avis clients : 4,50 / 5.');
+    }
+
+    public function test_the_best_sellers_panel_claims_no_score_without_reviews(): void
+    {
+        $this->get('/')->assertOk()
+            ->assertSee('Classés par quantités vendues')
+            ->assertDontSee('Note moyenne des avis clients');
     }
 }

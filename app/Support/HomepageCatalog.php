@@ -46,6 +46,22 @@ class HomepageCatalog
             ->values();
     }
 
+    /**
+     * The largest percentage off among the products onSale() would show, or
+     * null when none of them is reduced by a percentage.
+     */
+    public static function deepestPercentageOff(): ?int
+    {
+        return Product::query()
+            ->active()
+            ->notOutOfStock()
+            ->whereHas('discount', fn ($query) => $query->where('type', 'percentage'))
+            ->with('discount')
+            ->get()
+            ->filter(fn (Product $product): bool => $product->hasDiscount())
+            ->max(fn (Product $product): int => $product->discount->value);
+    }
+
     public static function featured(int $limit = 4): EloquentCollection
     {
         $roots = Category::query()

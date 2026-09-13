@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BlogPost;
+use App\Models\Carrier;
 use App\Models\Category;
 use App\Models\MarketplaceSetting;
 use App\Models\Product;
@@ -18,6 +19,19 @@ class HomeController extends Controller
 {
     /** The catalogue figure is rounded down to a multiple of this. */
     private const REFERENCE_STEP = 50;
+
+    /** Below this, a count of recent products advertises a quiet shop. */
+    private const NEW_ARRIVALS_FIGURE_MIN = 10;
+
+    /**
+     * Root categories the hero links to, in this order: slug => translation
+     * key for the chip, or null to use the category's own name.
+     */
+    private const HERO_CATEGORIES = [
+        'cibles' => null,
+        'stand-de-tir' => 'store.home_hero_tag_accessories',
+        'vetements' => null,
+    ];
 
     public function __invoke(): View
     {
@@ -77,10 +91,57 @@ class HomeController extends Controller
             // catalogue cannot say about itself.
             'testimonials' => $this->testimonials(),
             'reviewSummary' => $this->reviewSummary(),
+            'heroTags' => $this->heroTags($categories),
+            'newArrivalsCount' => $this->newArrivalsFigure(),
+            'deepestDiscount' => $onSale->isEmpty() ? null : HomepageCatalog::deepestPercentageOff(),
+            'freeShippingCarriers' => $onSale->isEmpty() && $freeShippingAmount ? $this->freeShippingCarriers($shipping) : [],
             'catalogue' => $this->catalogueSize(),
             'readings' => $this->readings(),
             'marketplace' => MarketplaceSetting::current(),
         ]);
+    }
+
+    /**
+     * The active carriers free shipping covers, by name: the offer does not
+     * extend to every carrier, so the hero names the ones it does.
+     *
+     * @return list<string>
+     */
+    private function freeShippingCarriers(ShippingSetting $shipping): array
+    {
+        return Carrier::query()
+            ->whereIn('id', $shipping->free_shipping_carrier_ids ?? [])
+            ->where('active', true)
+            ->orderBy('sort_order')
+            ->get()
+            ->map(fn (Carrier $carrier): string => $carrier->localizedName())
+            ->all();
+    }
+
+    private function newArrivalsFigure(): ?int
+    {
+        $count = Product::query()->active()->where('created_at', '>=', now()->subDays(30))->count();
+
+        return $count >= self::NEW_ARRIVALS_FIGURE_MIN ? $count : null;
+    }
+
+    /**
+     * A renamed or deleted category is skipped rather than linked to a 404.
+     *
+     * @return list<array{label: string, url: string}>
+     */
+    private function heroTags(Collection $categories): array
+    {
+        $bySlug = $categories->keyBy('slug');
+
+        return collect(self::HERO_CATEGORIES)
+            ->map(fn (?string $label, string $slug): ?array => $bySlug->has($slug) ? [
+                'label' => $label === null ? $bySlug[$slug]->localizedName() : __($label),
+                'url' => localized_route('categories.show', ['category' => $slug]),
+            ] : null)
+            ->filter()
+            ->values()
+            ->all();
     }
 
     /**

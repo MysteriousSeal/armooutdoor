@@ -37,59 +37,86 @@
         @php
             // Trois panneaux figés : le premier reprend le hero d'origine, les
             // deux autres pointent vers les rayons qui bougent le plus.
-            $slides = [
+            $bestText = __('store.home_slide_best_text');
+
+            if ($reviewSummary) {
+                $bestText .= ' '.__('store.home_slide_best_rating', ['rating' => number_format($reviewSummary['average'], 2, ',', '')]);
+            }
+
+            $slides = array_values(array_filter([
                 [
                     'image' => versioned_asset('images/hero.webp'),
                     'focus' => '78%',
                     'alt' => 'Illustration d’une cible de tir se détachant devant un lac et des montagnes au coucher du soleil',
                     'kicker' => __('store.home_hero_kicker'),
-                    // The h1 of the whole site: it names the aisles rather
-                    // than shouting an imperative, because it is the strongest
-                    // on-page signal there is.
-                    'lines' => ['Cibles, entretien', 'et équipement', 'pour le stand et le terrain'],
+                    // The h1 of the whole site: it names what actually sells
+                    // (targets, shooting accessories, camouflage clothing)
+                    // rather than shouting an imperative, because it is the
+                    // strongest on-page signal there is.
+                    'lines' => ['Cibles de tir,', 'accessoires et camouflage', 'pour le stand et le terrain'],
                     'accent' => 1,
-                    'text' => 'Équipement sélectionné pour le tir sportif, la chasse, l’airgun et l’aventure en plein air.',
-                    'tags' => [__('store.home_hero_tag_range'), __('store.home_hero_tag_hunt'), __('store.home_hero_tag_outdoor')],
+                    'text' => 'Cibles réactives, entretien de l’arme, boîtes à munitions, casquettes et cagoules camouflage. Livraison en France, à domicile ou en point relais.',
+                    'tags' => $heroTags,
                     'cta' => ['label' => __('store.hero_cta'), 'url' => $shopUrl],
-                    'ghost' => ['label' => __('store.home_browse'), 'url' => localized_route('products.new-arrivals')],
+                    'ghost' => ['label' => __('store.home_hero_categories_cta'), 'url' => localized_route('categories.index')],
                 ],
                 [
                     'image' => versioned_asset('images/hero-2.webp'),
                     'focus' => '28%',
                     'alt' => 'Illustration d’une caisse en bois débordant de colis colorés, devant un lac au coucher du soleil',
                     'kicker' => __('store.home_slide_new_kicker'),
-                    'lines' => ['Les dernières', 'nouveautés', 'en rayon'],
-                    'accent' => 1,
-                    'text' => __('store.home_slide_new_text'),
+                    'lines' => ['Nouveautés', 'tout juste', 'arrivées en rayon'],
+                    'accent' => 0,
+                    'text' => $newArrivalsCount
+                        ? __('store.home_slide_new_text', ['count' => $newArrivalsCount])
+                        : __('store.home_slide_new_text_plain'),
                     'tags' => [],
                     'cta' => ['label' => __('store.home_slide_new_cta'), 'url' => localized_route('products.new-arrivals')],
                     'ghost' => null,
                 ],
-                [
+                // Promotions only with something reduced, the same rule as the
+                // deals row (otherwise it would open an empty page); failing
+                // that, the free-shipping offer; failing both, no third panel.
+                $onSale->isNotEmpty() ? [
                     'image' => versioned_asset('images/hero-3.webp'),
                     'focus' => '75%',
                     'alt' => 'Illustration d’une étiquette de prix rouge et de colis empilés, devant un lac au coucher du soleil',
                     'kicker' => __('store.home_slide_sale_kicker'),
-                    'lines' => ['Des prix', 'en baisse', 'cette semaine'],
-                    'accent' => 1,
+                    'lines' => $deepestDiscount
+                        ? ['Jusqu’à -'.$deepestDiscount.'%', 'sur une sélection', 'd’articles']
+                        : ['Des prix', 'réduits', 'sur une sélection'],
+                    'accent' => $deepestDiscount ? 0 : 1,
                     'text' => __('store.home_slide_sale_text'),
                     'tags' => [],
                     'cta' => ['label' => __('store.home_slide_sale_cta'), 'url' => localized_route('products.promotions')],
                     'ghost' => null,
-                ],
+                ] : ($freeShippingAmount ? [
+                    'image' => versioned_asset('images/hero-3.webp'),
+                    'focus' => '75%',
+                    'alt' => 'Illustration d’une étiquette de prix rouge et de colis empilés, devant un lac au coucher du soleil',
+                    'kicker' => __('store.home_slide_ship_kicker'),
+                    'lines' => ['Livraison offerte', 'dès '.$freeShippingAmount, 'd’achat'],
+                    'accent' => 1,
+                    'text' => $freeShippingCarriers
+                        ? __('store.home_slide_ship_text', ['carriers' => \Illuminate\Support\Arr::join($freeShippingCarriers, ', ', ' ou ')])
+                        : __('store.home_slide_ship_text_plain'),
+                    'tags' => [],
+                    'cta' => ['label' => __('store.home_slide_ship_cta'), 'url' => $shopUrl],
+                    'ghost' => null,
+                ] : null),
                 [
                     'image' => versioned_asset('images/hero-4.webp'),
                     'focus' => '28%',
                     'alt' => 'Illustration de quatre randonneurs en file devant un lac au coucher du soleil',
                     'kicker' => __('store.home_slide_best_kicker'),
-                    'lines' => ['Ce que les', 'tireurs', 'achètent le plus'],
+                    'lines' => ['Les plus', 'vendus', 'de la boutique'],
                     'accent' => 1,
-                    'text' => __('store.home_slide_best_text'),
+                    'text' => $bestText,
                     'tags' => [],
                     'cta' => ['label' => __('store.home_slide_best_cta'), 'url' => localized_route('products.best-sellers')],
                     'ghost' => null,
                 ],
-            ];
+            ]));
         @endphp
 
         {{-- data-carousel est le point d'accroche du script. Sans JavaScript
@@ -148,7 +175,7 @@
                                 @if ($slide['tags'])
                                     <ul class="home-hero-tags" aria-label="{{ __('store.home_hero_tags_label') }}">
                                         @foreach ($slide['tags'] as $tag)
-                                            <li>{{ $tag }}</li>
+                                            <li><a href="{{ $tag['url'] }}">{{ $tag['label'] }}</a></li>
                                         @endforeach
                                     </ul>
                                 @endif

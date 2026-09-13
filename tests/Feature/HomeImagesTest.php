@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\Discount;
+use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -78,6 +80,10 @@ class HomeImagesTest extends TestCase
 
     public function test_the_four_panels_and_the_about_photo_are_all_there(): void
     {
+        // The sale panel only exists while something is reduced.
+        $product = Product::factory()->create(['is_active' => true, 'quantity' => 5]);
+        Discount::query()->create(['product_id' => $product->id, 'type' => 'percentage', 'value' => 20]);
+
         $paths = $this->imagePaths();
 
         // Counted, not just existing: a reference silently dropped would

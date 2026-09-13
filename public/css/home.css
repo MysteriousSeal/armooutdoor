@@ -519,7 +519,6 @@
 }
 
 .home .home-hero-tags li {
-    padding: 0.35rem 0.65rem;
     font-size: 0.68rem;
     font-weight: 700;
     letter-spacing: 0.06em;
@@ -527,6 +526,19 @@
     color: #5b5c3b;
     background: color-mix(in srgb, #5b5c3b 8%, var(--surface));
     border: 1px solid color-mix(in srgb, #5b5c3b 28%, var(--border));
+}
+
+/* The padding sits on the link so the whole chip is the click target. */
+.home .home-hero-tags a {
+    display: block;
+    padding: 0.35rem 0.65rem;
+    color: inherit;
+    text-decoration: none;
+}
+
+.home .home-hero-tags a:hover,
+.home .home-hero-tags a:focus-visible {
+    background: color-mix(in srgb, #5b5c3b 18%, var(--surface));
 }
 
 .home .home-hero-actions {
@@ -569,6 +581,11 @@
 [data-theme='dark'] .home .home-hero-tags li {
     background: color-mix(in srgb, var(--accent) 10%, var(--surface));
     border-color: color-mix(in srgb, var(--accent) 28%, var(--border));
+}
+
+[data-theme='dark'] .home .home-hero-tags a:hover,
+[data-theme='dark'] .home .home-hero-tags a:focus-visible {
+    background: color-mix(in srgb, var(--accent) 20%, var(--surface));
 }
 
 [data-theme='dark'] .home .home-hero-copy {

@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\Discount;
+use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -18,6 +20,10 @@ class HeroImageCacheTest extends TestCase
 
     public function test_the_home_photographs_are_stamped(): void
     {
+        // The sale panel, and its photograph, only exist while something is reduced.
+        $product = Product::factory()->create(['is_active' => true, 'quantity' => 5]);
+        Discount::query()->create(['product_id' => $product->id, 'type' => 'percentage', 'value' => 20]);
+
         $html = $this->get('/')->assertOk()->getContent();
 
         foreach (['hero.webp', 'hero-2.webp', 'hero-3.webp', 'hero-4.webp', 'about.webp'] as $file) {
