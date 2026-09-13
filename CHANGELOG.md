@@ -14,15 +14,15 @@ All notable changes to this project since the initial commit are documented here
 
 ### Storefront
 
-- **Les garanties légales disent enfin ce qu'elles valent.** L'article 9 des CGV nommait la garantie de conformité et celle des vices cachés sans dire combien de temps elles durent, ce qui n'apprend rien à l'acheteur. Il donne désormais les deux ans à compter de la délivrance pour la conformité, les deux ans à compter de la découverte pour le vice caché, le choix entre réparation et remplacement, et l'adresse où les faire jouer.
-- **La livraison a une date limite et un recours.** Les délais étaient « donnés à titre indicatif », sans rien derrière. À défaut d'indication, la livraison intervient au plus tard trente jours après la commande ; passé ce terme, l'article explique la mise en demeure puis la résolution, et dit à quel moment le risque passe au Client. Une réserve est ajoutée pour les articles que tous les transporteurs n'acceptent pas, comme les cartouches de gaz.
-- **Les prix ne disent plus contenir une TVA qui n'est pas facturée.** La boutique relève de la franchise en base : les CGV parlaient pourtant de prix « toutes taxes comprises ». Elles reprennent maintenant la même mention que les mentions légales, au même endroit, pour que les deux pages ne puissent plus diverger.
-- **Le paiement nomme le prestataire.** Les CGV renvoyaient aux « moyens de paiement proposés au checkout » ; elles disent la carte bancaire via Stripe, et que la boutique ne conserve aucune donnée bancaire. L'article sur la commande décrit aussi le récapitulatif affiché avant de payer et l'archivage des contrats au-delà de 120 euros.
-- **La rétractation reprend les mots de la loi.** « Quatorze jours » remplace « 14 jours francs », qui n'est pas le terme du code et ne se compte pas pareil. La page ajoute le point de départ quand une commande arrive en plusieurs colis, la retenue possible pour dépréciation, et dit clairement que les frais de retour sont à la charge du Client, ce que la loi n'autorise qu'à condition de l'avoir annoncé avant la commande.
-- **Une exception qui ne concernait rien a été retirée.** La page excluait les produits « susceptibles de se périmer rapidement », ce que la boutique ne vend pas. Les exceptions restantes sont présentées pour ce qu'elles sont : la liste fermée de l'article L221-28.
-- **La politique de confidentialité décrit les avis et détaille les cookies.** Publier un avis signé sous son nom est un traitement, et la page n'en disait rien. Elle le décrit, et donne un tableau des cookies avec leur émetteur, leur finalité et leur durée, là où le texte se contentait d'un paragraphe. Elle précise aussi où Stripe et Sendcloud traitent les données, concilie le droit à l'effacement avec les dix ans de conservation comptable, et fixe l'âge minimum du compte.
-- **La liste des transporteurs se lit dans la base.** Elle était écrite à la main et en nommait trois sur cinq. Elle est désormais construite à partir des transporteurs actifs, et ne peut plus se démoder le jour où l'un d'eux change.
-- **Le téléphone de l'hébergeur est annoncé comme tel** dans les mentions légales, au lieu de suivre l'adresse comme un nombre sans étiquette.
+- **The legal warranties finally say what they are worth.** Article 9 of the terms and conditions named the conformity warranty and the hidden defects warranty without saying how long they last, which tells the buyer nothing. It now gives two years from delivery for conformity, two years from discovery for a hidden defect, the choice between repair and replacement, and the address where to invoke them.
+- **Delivery now has a deadline and a remedy.** Delivery times used to be « donnés à titre indicatif », with nothing behind that. Failing any other indication, delivery now happens at the latest thirty days after the order; past that point, the article explains the formal notice and then contract termination, and states the moment risk passes to the Customer. An exception is added for items not every carrier accepts, such as gas cartridges.
+- **Prices no longer claim to include a VAT that is not charged.** The shop falls under the VAT exemption for small businesses (franchise en base), yet the terms and conditions spoke of prices « toutes taxes comprises ». They now carry the same wording as the legal notice page, in the same place, so the two pages can no longer disagree.
+- **Payment now names the provider.** The terms and conditions used to point to « moyens de paiement proposés au checkout »; they now state card payment via Stripe, and that the shop keeps no banking data. The article on orders also describes the summary shown before payment and the archiving of contracts above 120 euros.
+- **The right of withdrawal now uses the law's own wording.** « Quatorze jours » replaces « 14 jours francs », which is not the term used in the code and is not counted the same way. The page adds the starting point for when an order arrives in several parcels, the possible deduction for depreciation, and clearly states that return costs are borne by the Customer, which the law only allows when this was stated before the order was placed.
+- **An exception that applied to nothing was removed.** The page excluded products « susceptibles de se périmer rapidement », which the shop does not sell. The remaining exceptions are now presented for what they are: the closed list in article L221-28.
+- **The privacy policy now describes reviews and details cookies.** Publishing a review signed under one's own name is a form of data processing, and the page said nothing about it. It now describes that, and gives a table of cookies with their issuer, purpose and duration, where the text used to make do with a paragraph. It also states where Stripe and Sendcloud process data, reconciles the right to erasure with the ten years of accounting retention, and sets the minimum age for an account.
+- **The list of carriers is now read from the database.** It used to be written by hand and named three out of five. It is now built from the active carriers, and can no longer go stale the day one of them changes.
+- **The host's phone number is now labelled as such** in the legal notice, instead of following the address as an unlabelled number.
 
 **No migration.**
 
@@ -30,18 +30,18 @@ All notable changes to this project since the initial commit are documented here
 
 ### Storefront
 
-- **Une carte qui ne peut pas être achetée propose enfin quelque chose.** Un produit épuisé n'avait ni bouton ni lien : juste un trou là où les autres cartes ont une action. Elle mène désormais à la fiche produit, comme le fait déjà une carte à déclinaisons. Dans les meilleures ventes, ces produits passent aussi derrière tout ce qui est réellement en vente, en gardant leur ordre de vente entre eux.
-- **Une carte dit maintenant quand certaines déclinaisons manquent.** Un article disponible en cinq tailles dont une seule en stock affichait « En stock », ce qui est vrai du produit et faux de la taille voulue. Il affiche « Stock partiel ».
-- **La bannière d'une page de liste se charge sans attendre la feuille de style.** C'est l'image la plus grande de la page, et le navigateur ne la découvrait qu'après avoir lu le CSS. Les huit premières vignettes de la grille se chargent également tout de suite, au lieu de deux, ce qui correspond à ce qu'un écran large montre avant défilement.
-- **« Derniers stocks disponibles »** s'écrivait au singulier.
-- **Les listes décrivent leurs produits avec leur image** dans les données structurées envoyées aux moteurs de recherche, et la liste des nouveautés donne enfin le nom de chaque produit, qu'elle omettait.
-- **La note d'un produit se lit à voix haute.** Les étoiles sont décoratives : un lecteur d'écran n'entendait qu'un nombre entre parenthèses. Il entend désormais « Noté 4,5 sur 5, 13 avis », ou « Pas encore d'avis ». Le nom du produit, qui était annoncé deux fois par carte, ne l'est plus qu'une.
+- **A card that cannot be bought now offers something.** An out-of-stock product had neither button nor link: just a gap where other cards have an action. It now leads to the product page, the way a card with variants already does. In the best sellers, these products also now sink behind everything actually on sale, while keeping their own sales order among themselves.
+- **A card now says when some variants are missing.** An item available in five sizes with only one in stock used to show « En stock », which is true of the product and false of the size wanted. It shows « Stock partiel » instead.
+- **A listing page's banner now loads without waiting for the stylesheet.** It is the largest image on the page, and the browser used to discover it only after reading the CSS. The first eight thumbnails of the grid also now load immediately, instead of two, matching what a wide screen shows before scrolling.
+- **« Derniers stocks disponibles »** used to be written in the singular.
+- **Listings now describe their products with an image** in the structured data sent to search engines, and the new arrivals listing now finally gives the name of each product, which it used to omit.
+- **A product's rating can now be read aloud.** The stars are decorative: a screen reader used to hear only a number in parentheses. It now hears « Noté 4,5 sur 5, 13 avis », or « Pas encore d'avis ». The product name, which used to be announced twice per card, is now announced only once.
 
 ### Fixed
 
-- **Les grilles de produits demandaient les avis une carte à la fois.** Une liste de cinquante-neuf cartes dépensait cinquante-neuf paires de requêtes pour des chiffres que deux agrégats donnent d'un coup, et la page d'accueil la payait trois fois pour ses trois grilles. Mesuré sur vingt-cinq cartes : cinquante requêtes en trop avant, aucune après. Les neuf endroits qui construisent des grilles de cartes demandent désormais les totaux.
-- **Le libellé du stock partiel débordait de la ligne du prix.** La pastille ne se comprime pas, et le texte était plus long que tout ce que cette ligne a jamais porté.
-- **Une carte en rupture n'avait plus la place de son bouton**, qui venait de lui être rendu.
+- **Product grids were requesting reviews one card at a time.** A list of fifty-nine cards spent fifty-nine pairs of queries for figures that two aggregate queries give at once, and the homepage paid that cost three times over for its three grids. Measured on twenty-five cards: fifty extra queries before, none after. The nine places that build card grids now request the totals.
+- **The partial stock label overflowed the price line.** The pill does not compress, and the text was longer than anything that line had ever carried.
+- **An out-of-stock card no longer had room for its button**, which had just been given back to it.
 
 **No migration.**
 
@@ -49,8 +49,8 @@ All notable changes to this project since the initial commit are documented here
 
 ### Storefront
 
-- **La première bannière de l'accueil montre un nouveau paysage.** Le panneau d'ouverture affichait une scène de matériel, une cible sur pied accompagnée d'un bidon et d'un sac. Il montre désormais une illustration de lac au couchant, dans laquelle une cible se compose sur la droite de l'image. Le cadrage du panneau ne bouge pas : même format et même poids que les trois autres vues du carrousel, et la cible reste entière sur téléphone comme sur écran large.
-- **Cette image ne sert pas qu'à l'accueil.** C'est aussi l'image par défaut du partage sur les réseaux sociaux, celle de la fiche d'organisation transmise à Google, et celle qui sert de repli aux dix guides qui n'ont pas encore la leur. Les aperçus de liens montrent donc un paysage là où ils montraient du matériel.
+- **The homepage's first banner now shows a new landscape.** The opening panel used to show a scene of gear: a standing target beside a jerrycan and a bag. It now shows an illustration of a lake at sunset, with a target composed into the right side of the image. The panel's framing is unchanged: same format and same weight as the carousel's three other views, and the target stays whole on both phone and wide screens.
+- **This image is not only used on the homepage.** It is also the default image for social sharing, the one sent to Google in the organization data, and the fallback used by the ten guides that do not yet have their own. Link previews now show a landscape where they used to show gear.
 
 **No migration.**
 
@@ -58,15 +58,15 @@ All notable changes to this project since the initial commit are documented here
 
 ### Storefront
 
-- **L'image d'un article existe enfin dans la page.** La bannière d'un article du blog était une image de fond CSS : la photo annoncée aux moteurs de recherche et aux réseaux sociaux ne figurait nulle part dans le contenu de la page. Elle est maintenant une vraie image, avec son texte de remplacement, ses dimensions et la priorité de chargement qui va avec, ce qui la rend visible dans Google Images et évite que la page saute pendant le chargement. L'affichage ne bouge pas, sur mobile comme sur écran large.
-- **Un article isolé ne mène plus à une impasse.** Les articles suggérés en bas de page se limitaient à la même rubrique, si bien qu'une rubrique d'un seul article n'en proposait aucun. Ils se complètent maintenant avec le reste du blog quand la rubrique n'en a pas assez.
-- **Les descriptions trop longues sont retaillées.** Sept articles, dont les quatre sur les catégories d'armes, avaient une description que Google coupait en plein milieu d'une phrase dans ses résultats. Elles tiennent désormais dans la place disponible, sans perdre les chiffres et les dates qui donnent envie de cliquer.
-- **Deux titres de section disent enfin leurs chiffres.** « Deux seuils de puissance » devient « Deux seuils de puissance : 0,5 et 2 joules », et « Quelle corde pour quel calibre » devient « Quelle corde pour quel calibre : du .17 au calibre 12 », qui est ce que les lecteurs tapent réellement dans un moteur de recherche.
+- **A blog article's image now actually exists in the page.** A blog article's banner was a CSS background image: the photo announced to search engines and social networks appeared nowhere in the page's actual content. It is now a real image, with its alt text, its dimensions and the loading priority that goes with them, which makes it visible in Google Images and stops the page jumping while it loads. The display is unchanged, on both mobile and wide screens.
+- **A lone article no longer leads to a dead end.** The suggested articles at the bottom of the page were limited to the same category, so a category with only one article suggested none at all. They now fill in with the rest of the blog when the category does not have enough.
+- **Descriptions that ran too long are now trimmed.** Seven articles, including the four on weapon categories, had a description Google cut off mid-sentence in its results. They now fit within the space available, without losing the figures and dates that make people want to click.
+- **Two section titles finally state their numbers.** « Deux seuils de puissance » becomes « Deux seuils de puissance : 0,5 et 2 joules », and « Quelle corde pour quel calibre » becomes « Quelle corde pour quel calibre : du .17 au calibre 12 », which is what readers actually type into a search engine.
 
 ### Fixed
 
-- **Le blog annonçait à Google des articles modifiés avant leur publication.** Un article écrit le mardi et programmé pour le vendredi déclarait le mardi comme date de dernière modification, soit une date antérieure à sa propre parution. Quatre articles en ligne et les trois programmés étaient concernés. La règle est désormais écrite à un seul endroit et vaut pour les données structurées, le partage sur les réseaux sociaux et le plan du site, dont les rubriques ne se disent plus plus anciennes que les articles qu'elles listent.
-- **Le plan du site n'indiquait pas les images des articles**, et la page 2 du blog reprenait mot pour mot la description de la page 1.
+- **The blog was announcing to Google articles modified before they were even published.** An article written on Tuesday and scheduled for Friday declared Tuesday as its last-modified date, a date earlier than its own publication. Four live articles and the three scheduled ones were affected. The rule is now written in a single place and applies to the structured data, social sharing and the sitemap, whose categories no longer claim to be older than the articles they list.
+- **The sitemap did not list articles' images**, and page 2 of the blog repeated page 1's description word for word.
 
 **No migration.**
 
