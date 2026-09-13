@@ -54,6 +54,10 @@
                     Si vous l'acceptez via le bandeau cookies, l'identifiant de session déjà nécessaire au
                     fonctionnement du site (voir « Cookies » ci-dessous) sert aussi à regrouper les pages d'une
                     même visite ; en cas de refus, la mesure se poursuit sans cet identifiant.</li>
+                <li>Avis sur les produits : si vous publiez un avis, la note, le texte et le nom d'affichage que
+                    vous choisissez sont publiés sur la fiche du produit et visibles de tous. Un avis reste publié
+                    tant que vous ne demandez pas son retrait ; vous pouvez en demander la suppression à tout moment
+                    à l'adresse ci-dessous.</li>
                 <li>Pièce d'identité : uniquement si vous en déposez une depuis « Mes documents », pour prouver
                     votre majorité lorsque votre commande contient un article qui y est réservé. Le fichier est
                     chiffré dès sa réception, conservé hors de toute zone accessible depuis le site, et supprimé
@@ -89,6 +93,7 @@
             <ul>
                 <li>Traitement et suivi des commandes, livraison, facturation.</li>
                 <li>Gestion du compte client (adresses, liste de souhaits, historique).</li>
+                <li>Publication des avis sur les produits, sur la base de votre consentement.</li>
                 <li>Réponse aux demandes de contact et service après-vente.</li>
                 <li>Vérification de la majorité du Client avant l'expédition d'un article qui y est réservé,
                     lorsqu'une pièce d'identité a été déposée.</li>
@@ -107,9 +112,14 @@
             <p>
                 Les données sont destinées à {{ $company->value('company_name') }} et, le cas échéant, à ses prestataires techniques,
                 dans la stricte limite nécessaire à l'exécution de la commande : le prestataire de paiement (Stripe),
-                les transporteurs choisis à la commande (La Poste/Colissimo, Chronopost, Mondial Relay), le service
+                les transporteurs choisis à la commande ({{ $carriers }}), le service
                 de points relais (Sendcloud), la mesure d'audience (PostHog et Google Analytics, si vous l'avez acceptée) et l'hébergeur du
                 site. Aucune donnée n'est vendue à des tiers.
+            </p>
+            <p>
+                Stripe et Sendcloud traitent les données qui leur sont transmises au sein de l'Union européenne.
+                Lorsqu'un transfert hors de l'Union européenne est nécessaire, il repose sur les clauses
+                contractuelles types de la Commission européenne ou sur une décision d'adéquation.
             </p>
             <p>
                 Les pièces d'identité font exception : elles ne sont transmises à aucun prestataire. Elles sont
@@ -134,7 +144,19 @@
             <p>
                 Conformément au Règlement Général sur la Protection des Données (RGPD), vous disposez d'un droit
                 d'accès, de rectification, d'effacement, de limitation, d'opposition et de portabilité de vos données.
-                Vous pouvez exercer ces droits en écrivant à {{ $company->value('contact_email') }}.
+                Vous pouvez exercer ces droits en écrivant à {{ $company->value('contact_email') }}. Une pièce
+                justificative d'identité peut vous être demandée en cas de doute raisonnable sur l'identité du
+                demandeur, et elle est détruite dès la demande traitée.
+            </p>
+            <p>
+                Le droit à l'effacement s'exerce sous réserve de nos obligations légales : les documents comptables
+                liés à une commande sont conservés jusqu'à dix ans, conformément à l'article L123-22 du Code de
+                commerce. Pendant cette durée, les données concernées sont archivées et ne servent plus qu'à
+                répondre à ces obligations.
+            </p>
+            <p>
+                La boutique ne s'adresse pas aux mineurs de moins de quinze ans : la création d'un compte est
+                réservée aux personnes d'au moins quinze ans, et certains articles sont réservés aux majeurs.
             </p>
             <p>
                 Vous disposez également du droit d'introduire une réclamation auprès de la Commission Nationale de
@@ -156,6 +178,25 @@
                 ces cookies n'est déposé : PostHog n'est pas chargé du tout, et la balise Google fonctionne
                 dans un mode sans consentement, sans rien écrire ni lire sur votre appareil. Vous pouvez
                 revenir sur votre choix à tout moment via le lien « Cookies » en pied de page.
+            </p>
+            <div class="legal-table-wrap">
+            <table class="legal-table">
+                <caption>Cookies déposés par le site et ses sous-traitants</caption>
+                <thead>
+                    <tr><th scope="col">Cookie</th><th scope="col">Émetteur</th><th scope="col">Finalité</th><th scope="col">Durée</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Session</td><td>Armo Outdoor</td><td>Panier, connexion, préférence d'affichage</td><td>Durée de la session</td></tr>
+                    <tr><td>Choix cookies</td><td>Armo Outdoor</td><td>Mémorise votre acceptation ou votre refus</td><td>6 mois</td></tr>
+                    <tr><td>ph_*</td><td>PostHog (Union européenne)</td><td>Mesure d'audience</td><td>13 mois au maximum</td></tr>
+                    <tr><td>_ga, _ga_*</td><td>Google Analytics (Google LLC)</td><td>Mesure d'audience</td><td>13 mois au maximum</td></tr>
+                    <tr><td>_gcl_*</td><td>Google Ads (Google LLC)</td><td>Mesure des conversions publicitaires</td><td>90 jours</td></tr>
+                </tbody>
+            </table>
+            </div>
+            <p>
+                Aucun de ces cookies n'est déposé avant votre consentement, à l'exception de ceux strictement
+                nécessaires au fonctionnement du site. Les durées indiquées sont des durées maximales.
             </p>
 
             <h2>Sécurité</h2>

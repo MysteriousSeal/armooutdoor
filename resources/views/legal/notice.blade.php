@@ -81,8 +81,8 @@
 
             <h2>Hébergement</h2>
             <p>
-                Le site est hébergé par {{ $company->value('host_name') }}, {{ $company->value('host_address') }},
-                {{ $company->value('host_phone') }}.
+                Le site est hébergé par {{ $company->value('host_name') }}, {{ $company->value('host_address') }}.
+                Téléphone : {{ $company->value('host_phone') }}.
             </p>
 
             <h2>Propriété intellectuelle</h2>

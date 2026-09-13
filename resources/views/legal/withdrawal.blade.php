@@ -40,8 +40,13 @@
             <h2>Délai de rétractation</h2>
             <p>
                 Conformément aux articles L221-18 et suivants du Code de la consommation, le Client dispose d'un
-                délai de 14 jours francs à compter de la réception du produit par le Client, ou par un tiers qu'il a désigné, pour exercer son droit de rétractation,
-                sans avoir à justifier de motif ni à payer de pénalité.
+                délai de quatorze jours à compter de la réception du produit par le Client, ou par un tiers qu'il a désigné,
+                pour exercer son droit de rétractation, sans avoir à justifier de motif ni à payer de pénalité.
+            </p>
+            <p>
+                Lorsque la commande porte sur plusieurs produits livrés séparément, ou sur un produit composé de
+                plusieurs lots livrés sur une période donnée, le délai court à compter de la réception du dernier
+                produit ou du dernier lot.
             </p>
 
             <h2>Exercice du droit de rétractation</h2>
@@ -54,9 +59,16 @@
 
             <h2>Modalités de retour</h2>
             <p>
-                Le Client dispose de 14 jours à compter de la communication de sa décision de rétractation pour
-                renvoyer ou restituer le produit, en l'état, dans son emballage d'origine si possible. Les frais de
-                retour restent à la charge du Client, sauf mention contraire.
+                Le Client dispose de quatorze jours à compter de la communication de sa décision de rétractation pour
+                renvoyer ou restituer le produit, en l'état, dans son emballage d'origine si possible. Conformément à
+                l'article L221-23 du Code de la consommation, et le Client en étant informé par la présente avant sa
+                commande, les frais directs de renvoi sont à sa charge.
+            </p>
+            <p>
+                La responsabilité du Client ne peut être engagée qu'en cas de dépréciation du produit résultant de
+                manipulations autres que celles nécessaires pour en établir la nature, les caractéristiques et le bon
+                fonctionnement. Le Vendeur peut alors déduire du remboursement un montant correspondant à cette
+                dépréciation.
             </p>
 
             <h2>Remboursement</h2>
@@ -67,12 +79,14 @@
             </p>
 
             <h2>Exceptions au droit de rétractation</h2>
-            <p>Le droit de rétractation ne peut être exercé, notamment, pour :</p>
+            <p>
+                Les seules exceptions au droit de rétractation sont celles que fixe l'article L221-28 du Code de la
+                consommation. Parmi celles-ci, deux peuvent concerner les produits de la boutique :
+            </p>
             <ul>
                 <li>les produits scellés ne pouvant être renvoyés pour des raisons d'hygiène ou de protection de la
                     santé, et qui ont été descellés après la livraison ;</li>
-                <li>les produits personnalisés ou confectionnés selon les spécifications du Client ;</li>
-                <li>les produits susceptibles de se détériorer ou de se périmer rapidement.</li>
+                <li>les produits personnalisés ou confectionnés selon les spécifications du Client.</li>
             </ul>
 
             <h2>Formulaire type de rétractation</h2>

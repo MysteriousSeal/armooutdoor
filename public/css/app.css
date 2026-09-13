@@ -5700,6 +5700,53 @@ body.has-menu-open {
     border: 1px solid var(--border);
 }
 
+/* The cookie table is the only table the legal pages carry. It borrows the
+   guides' table pattern rather than inventing a second one, and scrolls
+   inside its own box so a four-column table cannot push the page sideways
+   on a phone. */
+.legal-table-wrap {
+    overflow-x: auto;
+    margin: 0 0 1.4rem;
+    border: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.legal-table {
+    width: 100%;
+    min-width: 32rem;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+}
+
+.legal-table caption {
+    padding: 0.7rem 0.9rem;
+    font-size: 0.75rem;
+    text-align: left;
+    color: var(--text-muted);
+}
+
+.legal-table th {
+    padding: 0.6rem 0.9rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-align: left;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+}
+
+.legal-table td {
+    padding: 0.65rem 0.9rem;
+    border-top: 1px solid var(--border);
+    vertical-align: top;
+}
+
+.legal-table td:first-child {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
 .legal-form-lede {
     margin: 0 0 0.85rem;
     font-size: 0.8125rem;

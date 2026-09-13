@@ -2,6 +2,22 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-13 · v1.39.9 · build X040LP
+
+### Storefront
+
+- **Les garanties légales disent enfin ce qu'elles valent.** L'article 9 des CGV nommait la garantie de conformité et celle des vices cachés sans dire combien de temps elles durent, ce qui n'apprend rien à l'acheteur. Il donne désormais les deux ans à compter de la délivrance pour la conformité, les deux ans à compter de la découverte pour le vice caché, le choix entre réparation et remplacement, et l'adresse où les faire jouer.
+- **La livraison a une date limite et un recours.** Les délais étaient « donnés à titre indicatif », sans rien derrière. À défaut d'indication, la livraison intervient au plus tard trente jours après la commande ; passé ce terme, l'article explique la mise en demeure puis la résolution, et dit à quel moment le risque passe au Client. Une réserve est ajoutée pour les articles que tous les transporteurs n'acceptent pas, comme les cartouches de gaz.
+- **Les prix ne disent plus contenir une TVA qui n'est pas facturée.** La boutique relève de la franchise en base : les CGV parlaient pourtant de prix « toutes taxes comprises ». Elles reprennent maintenant la même mention que les mentions légales, au même endroit, pour que les deux pages ne puissent plus diverger.
+- **Le paiement nomme le prestataire.** Les CGV renvoyaient aux « moyens de paiement proposés au checkout » ; elles disent la carte bancaire via Stripe, et que la boutique ne conserve aucune donnée bancaire. L'article sur la commande décrit aussi le récapitulatif affiché avant de payer et l'archivage des contrats au-delà de 120 euros.
+- **La rétractation reprend les mots de la loi.** « Quatorze jours » remplace « 14 jours francs », qui n'est pas le terme du code et ne se compte pas pareil. La page ajoute le point de départ quand une commande arrive en plusieurs colis, la retenue possible pour dépréciation, et dit clairement que les frais de retour sont à la charge du Client, ce que la loi n'autorise qu'à condition de l'avoir annoncé avant la commande.
+- **Une exception qui ne concernait rien a été retirée.** La page excluait les produits « susceptibles de se périmer rapidement », ce que la boutique ne vend pas. Les exceptions restantes sont présentées pour ce qu'elles sont : la liste fermée de l'article L221-28.
+- **La politique de confidentialité décrit les avis et détaille les cookies.** Publier un avis signé sous son nom est un traitement, et la page n'en disait rien. Elle le décrit, et donne un tableau des cookies avec leur émetteur, leur finalité et leur durée, là où le texte se contentait d'un paragraphe. Elle précise aussi où Stripe et Sendcloud traitent les données, concilie le droit à l'effacement avec les dix ans de conservation comptable, et fixe l'âge minimum du compte.
+- **La liste des transporteurs se lit dans la base.** Elle était écrite à la main et en nommait trois sur cinq. Elle est désormais construite à partir des transporteurs actifs, et ne peut plus se démoder le jour où l'un d'eux change.
+- **Le téléphone de l'hébergeur est annoncé comme tel** dans les mentions légales, au lieu de suivre l'adresse comme un nombre sans étiquette.
+
+**No migration.**
+
 ## 2026-09-13 · v1.39.8 · build CHMBQW
 
 ### Storefront

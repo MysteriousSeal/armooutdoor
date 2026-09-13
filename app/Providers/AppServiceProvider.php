@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Category;
+use App\Models\Carrier;
 use App\Models\CompanySetting;
 use App\Models\Conversation;
 use App\Models\IdentityDocument;
@@ -87,7 +88,15 @@ class AppServiceProvider extends ServiceProvider
 
         View::composer(
             ['legal.terms', 'legal.notice', 'legal.privacy', 'legal.withdrawal'],
-            fn ($view) => $view->with('company', CompanySetting::current()),
+            fn ($view) => $view->with([
+                'company' => CompanySetting::current(),
+                // The policy has to name the carriers that actually receive an
+                // address. Spelling them out by hand meant the list was wrong
+                // the day a carrier was added.
+                'carriers' => Carrier::query()->active()->get()
+                    ->map(fn (Carrier $carrier): string => $carrier->localizedName())
+                    ->implode(', '),
+            ]),
         );
 
         View::composer(

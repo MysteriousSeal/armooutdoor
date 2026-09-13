@@ -120,6 +120,95 @@ class LegalPagesComplianceTest extends TestCase
         $notice->assertSee(route('legal.privacy'), false);
     }
 
+    public function test_the_terms_state_both_legal_guarantees_with_their_duration(): void
+    {
+        // Naming the guarantees without saying how long they last tells a
+        // buyer nothing, which is the state the compliance review found.
+        $this->get('/cgv')->assertOk()
+            ->assertSee('garantie légale de conformité', false)
+            ->assertSee('deux ans à compter de la délivrance', false)
+            ->assertSee('L217-3', false)
+            ->assertSee('vices cachés', false)
+            ->assertSee('deux ans à compter de la découverte du vice', false)
+            ->assertSee('1641', false);
+    }
+
+    public function test_the_terms_give_a_delivery_deadline_and_a_remedy(): void
+    {
+        $this->get('/cgv')->assertOk()
+            ->assertSee('trente jours', false)
+            ->assertSee('L216-1', false)
+            ->assertSee('L216-4', false)
+            ->assertDontSee('à titre indicatif');
+    }
+
+    public function test_the_terms_name_the_payment_provider_without_promising_paypal(): void
+    {
+        $this->get('/cgv')->assertOk()
+            ->assertSee('Stripe', false)
+            ->assertDontSee('PayPal');
+    }
+
+    public function test_the_terms_do_not_claim_a_vat_the_shop_does_not_charge(): void
+    {
+        $this->get('/cgv')->assertOk()
+            ->assertSee('aucune TVA', false)
+            ->assertDontSee('toutes taxes comprises (TTC)');
+    }
+
+    public function test_the_withdrawal_page_uses_the_statute_wording_and_covers_split_deliveries(): void
+    {
+        $this->get('/droit-de-retractation')->assertOk()
+            ->assertSee('quatorze jours', false)
+            ->assertSee('dernier lot', false)
+            ->assertSee('dépréciation', false)
+            ->assertSee('L221-23', false)
+            // "jours francs" is not the term the statute uses and computes
+            // differently.
+            ->assertDontSee('jours francs');
+    }
+
+    public function test_the_withdrawal_page_claims_no_exception_it_cannot_use(): void
+    {
+        // A catalogue of targets and clothing has nothing perishable, and
+        // citing an exception that fits nothing invites the suspicion the
+        // others were invented too.
+        $this->get('/droit-de-retractation')->assertOk()
+            ->assertSee('L221-28', false)
+            ->assertDontSee('se périmer rapidement');
+    }
+
+    public function test_the_privacy_policy_describes_the_reviews_it_publishes(): void
+    {
+        $this->get('/confidentialite')->assertOk()
+            ->assertSee('Avis sur les produits', false)
+            ->assertSee('visibles de tous', false);
+    }
+
+    public function test_the_privacy_policy_carries_a_cookie_table_with_durations(): void
+    {
+        $this->get('/confidentialite')->assertOk()
+            ->assertSee('<table class="legal-table">', false)
+            ->assertSee('13 mois au maximum', false)
+            ->assertSee('_ga', false)
+            ->assertSee('PostHog', false);
+    }
+
+    public function test_the_privacy_policy_reconciles_erasure_with_the_accounting_retention(): void
+    {
+        $this->get('/confidentialite')->assertOk()
+            ->assertSee('L123-22', false)
+            ->assertSee('quinze ans', false);
+    }
+
+    public function test_the_legal_notice_labels_the_host_phone_number(): void
+    {
+        // "OVH SAS, 2 rue Kellermann, 59100 Roubaix, France, 1007" left the
+        // number reading as part of the address.
+        $this->get('/mentions-legales')->assertOk()
+            ->assertSee('Téléphone :', false);
+    }
+
     public function test_both_pages_still_say_nothing_is_dropped_without_consent(): void
     {
         $this->get('/mentions-legales')
