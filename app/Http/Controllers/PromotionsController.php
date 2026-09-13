@@ -13,6 +13,8 @@ class PromotionsController extends Controller
             ->active()
             ->whereHas('discount')
             ->with('category', 'discount', 'variants.supplier')
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating')
             ->orderBy('sort_order')
             ->orderBy('id')
             ->get()

@@ -25,8 +25,15 @@ class BestSellersController extends Controller
             ->active()
             ->whereIn('id', $soldQuantities->keys())
             ->with('category', 'discount', 'variants.supplier')
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating')
             ->get()
-            ->sortByDesc(fn (Product $product): int => $soldQuantities[$product->id])
+            // A product nobody can buy is still a past best seller, but it
+            // earns its rank behind everything that is actually for sale.
+            ->sortByDesc(fn (Product $product): array => [
+                $product->isPurchasable() ? 1 : 0,
+                $soldQuantities[$product->id],
+            ])
             ->values();
 
         return view('products.best-sellers', compact('products'));

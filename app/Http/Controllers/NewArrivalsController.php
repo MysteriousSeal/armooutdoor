@@ -14,6 +14,8 @@ class NewArrivalsController extends Controller
         $products = Product::query()
             ->active()
             ->with('category', 'discount', 'variants.supplier')
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating')
             ->latest()
             ->limit(self::LIMIT)
             ->get();

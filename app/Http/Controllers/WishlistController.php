@@ -16,6 +16,8 @@ class WishlistController extends Controller
             ->active()
             ->whereHas('wishlistItems', fn ($query) => $query->where('user_id', $request->user()->id))
             ->with('category', 'variants.supplier')
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating')
             ->get();
 
         return view('account.wishlist', [

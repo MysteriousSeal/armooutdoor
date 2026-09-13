@@ -77,7 +77,7 @@ class BlogController extends Controller
         // sinon un brouillon reste lisible pour qui connaît son adresse.
         $post = BlogPost::query()
             ->visible()
-            ->with(['category', 'products' => fn ($query) => $query->active()->with('discount', 'variants.supplier')])
+            ->with(['category', 'products' => fn ($query) => $query->active()->with('discount', 'variants.supplier')->withCount('reviews')->withAvg('reviews', 'rating')])
             ->with(['comments' => fn ($query) => $query->visible()->whereNull('parent_id')
                 ->with(['replies' => fn ($replies) => $replies->visible()->with('user'), 'user'])
                 ->orderBy('created_at')])
@@ -158,7 +158,7 @@ class BlogController extends Controller
      */
     public function preview(BlogPost $post): View
     {
-        $post->load(['category', 'products' => fn ($query) => $query->active()->with('discount', 'variants.supplier')]);
+        $post->load(['category', 'products' => fn ($query) => $query->active()->with('discount', 'variants.supplier')->withCount('reviews')->withAvg('reviews', 'rating')]);
 
         $related = $this->relatedPosts($post);
 

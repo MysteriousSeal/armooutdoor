@@ -32,6 +32,8 @@ class AllProductsController extends Controller
             Product::query()
                 ->active()
                 ->with('category', 'discount', 'variants.supplier')
+                ->withCount('reviews')
+                ->withAvg('reviews', 'rating')
                 ->get(),
             $sort,
         );

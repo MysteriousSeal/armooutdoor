@@ -359,6 +359,12 @@ class Product extends Model
 
     public function reviewsCount(): int
     {
+        // `withCount('reviews')` on a listing query leaves the total here, so a
+        // grid of cards costs one aggregate instead of one query per card.
+        if (array_key_exists('reviews_count', $this->attributes)) {
+            return (int) $this->attributes['reviews_count'];
+        }
+
         return $this->relationLoaded('reviews') ? $this->reviews->count() : $this->reviews()->count();
     }
 
@@ -383,6 +389,14 @@ class Product extends Model
 
     public function averageRating(): ?float
     {
+        // Same bargain as reviewsCount(): `withAvg('reviews', 'rating')` leaves
+        // the average here, and the card reads it without touching the table.
+        if (array_key_exists('reviews_avg_rating', $this->attributes)) {
+            $aggregate = $this->attributes['reviews_avg_rating'];
+
+            return $aggregate !== null ? round((float) $aggregate, 1) : null;
+        }
+
         $average = $this->relationLoaded('reviews')
             ? $this->reviews->avg('rating')
             : $this->reviews()->avg('rating');

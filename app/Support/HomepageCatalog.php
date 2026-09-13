@@ -36,6 +36,8 @@ class HomepageCatalog
             ->notOutOfStock()
             ->whereHas('discount')
             ->with('category', 'discount', 'variants.supplier')
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating')
             ->orderBy('sort_order')
             ->orderBy('id')
             ->get()
@@ -49,9 +51,9 @@ class HomepageCatalog
         $roots = Category::query()
             ->whereNull('parent_id')
             ->with([
-                'products' => fn ($query) => $query->active()->notOutOfStock(),
+                'products' => fn ($query) => $query->active()->notOutOfStock()->withCount('reviews')->withAvg('reviews', 'rating'),
                 'products.variants.supplier',
-                'children.products' => fn ($query) => $query->active()->notOutOfStock(),
+                'children.products' => fn ($query) => $query->active()->notOutOfStock()->withCount('reviews')->withAvg('reviews', 'rating'),
                 'children.products.variants.supplier',
             ])
             ->orderBy('sort_order')
@@ -93,6 +95,8 @@ class HomepageCatalog
             ->active()
             ->notOutOfStock()
             ->with('category', 'variants.supplier')
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating')
             // pluck() plutôt que modelKeys() : une catégorie racine sans
             // produit fait renvoyer null au map() de featured(), ce qui
             // dégrade la collection Eloquent en collection de base — et

@@ -24,10 +24,10 @@ class CategoryController extends Controller
         $categories = Category::query()
             ->whereNull('parent_id')
             ->with([
-                'products' => fn ($query) => $query->active(),
+                'products' => fn ($query) => $query->active()->withCount('reviews')->withAvg('reviews', 'rating'),
                 'products.variants.supplier',
                 'children' => fn ($query) => $query->orderBy('sort_order'),
-                'children.products' => fn ($query) => $query->active(),
+                'children.products' => fn ($query) => $query->active()->withCount('reviews')->withAvg('reviews', 'rating'),
                 'children.products.variants.supplier',
             ])
             ->orderBy('sort_order')
@@ -62,9 +62,9 @@ class CategoryController extends Controller
         $request->route()->setParameter('category', $category);
 
         $category->load([
-            'parent.children.products' => fn ($query) => $query->active(),
-            'children.products' => fn ($query) => $query->active(),
-            'products' => fn ($query) => $query->active(),
+            'parent.children.products' => fn ($query) => $query->active()->withCount('reviews')->withAvg('reviews', 'rating'),
+            'children.products' => fn ($query) => $query->active()->withCount('reviews')->withAvg('reviews', 'rating'),
+            'products' => fn ($query) => $query->active()->withCount('reviews')->withAvg('reviews', 'rating'),
             'products.category',
             'products.discount',
             'products.variants.supplier',

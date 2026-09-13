@@ -103,5 +103,13 @@
                 <button type="submit" class="btn btn-sm btn-primary">{{ __('store.add_to_cart') }}</button>
             </form>
         @endif
+    @else
+        {{-- Nothing to add to the cart, but a card with no action at all reads
+             as broken. The product page still has the detail worth reading. --}}
+        <div class="card-cart">
+            <a href="{{ localized_route('products.show', ['product' => $product->slug]) }}" class="btn btn-sm btn-primary">
+                {{ __('store.view_product') }}
+            </a>
+        </div>
     @endif
 </article>

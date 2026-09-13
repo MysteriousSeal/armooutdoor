@@ -253,6 +253,7 @@ return [
     'stock_limit_message' => 'Il n’y a pas assez de quantité disponible.',
     'add_to_cart' => 'Ajouter au panier',
     'view_options' => 'Voir les options',
+    'view_product' => 'Voir le produit',
     'quantity' => 'Quantité',
     'related' => 'Aussi dans cette catégorie',
     'product_description' => 'Description',

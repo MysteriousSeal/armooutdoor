@@ -17,6 +17,8 @@ class SearchController extends Controller
             : Product::query()
                 ->active()
                 ->with('category', 'variants.supplier')
+                ->withCount('reviews')
+                ->withAvg('reviews', 'rating')
                 ->where(function ($q) use ($query): void {
                     $q->where('name', 'like', '%'.$query.'%')
                         ->orWhere('sku', 'like', '%'.$query.'%');

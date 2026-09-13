@@ -40,6 +40,8 @@ class ProductController extends Controller
         $related = Product::query()
             ->active()
             ->with('category', 'discount', 'variants.supplier')
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating')
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
             ->orderBy('sort_order')
