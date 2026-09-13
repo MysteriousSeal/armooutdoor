@@ -334,4 +334,80 @@ class BlogListingPaginationTest extends TestCase
         $this->assertSame($productStatus(25, 30), $this->statusLine($this->get('/categories/'.$category->slug.'?page=2')->assertOk()));
         $this->assertStringNotContainsString('Articles ', (string) $this->statusLine($this->get('/produits')));
     }
+
+    /**
+     * The ItemList of the page's Blog node, parsed rather than matched, so
+     * a wrong position fails with a number instead of a missing string.
+     *
+     * @return array<string, mixed>
+     */
+    private function itemList(TestResponse $response): array
+    {
+        preg_match_all('~<script type="application/ld\+json">\s*(.*?)\s*</script>~s', $response->getContent(), $blocks);
+
+        foreach ($blocks[1] as $block) {
+            $data = json_decode($block, true);
+
+            $this->assertNotNull($data, 'A JSON-LD block on the page does not parse.');
+
+            if (($data['@type'] ?? null) === 'Blog') {
+                return $data['mainEntity'] ?? [];
+            }
+        }
+
+        return [];
+    }
+
+    /**
+     * The schema's numbering describes the page it is on.
+     *
+     * The featured post sits outside the paginator, so the positions have
+     * to step over a card the paginator never counted. An off-by-one there
+     * would publish a list naming the right articles at the wrong places,
+     * and nothing on the rendered page would look wrong.
+     */
+    public function test_the_item_list_positions_run_unbroken_across_the_seam(): void
+    {
+        $slugs = $this->posts(18)->pluck('slug')->all();
+
+        $first = $this->itemList($this->get('/blog')->assertOk());
+        $second = $this->itemList($this->get('/blog?page=2')->assertOk());
+
+        $this->assertSame(range(1, 13), array_column($first['itemListElement'], 'position'));
+        $this->assertSame(range(14, 18), array_column($second['itemListElement'], 'position'));
+
+        // The count says the page, never the whole blog: a list that counts
+        // one thing and enumerates another describes neither.
+        $this->assertSame(13, $first['numberOfItems']);
+        $this->assertSame(5, $second['numberOfItems']);
+
+        // No repeat and no gap: every article once, newest first, in the
+        // order the cards themselves render.
+        $this->assertSame(
+            array_map(fn (string $slug): string => route('blog.show', $slug), $slugs),
+            array_merge(
+                array_column($first['itemListElement'], 'url'),
+                array_column($second['itemListElement'], 'url'),
+            ),
+        );
+    }
+
+    /** A rubrique numbers its own articles, not the blog's. */
+    public function test_a_category_item_list_starts_at_one(): void
+    {
+        $this->posts(14, ['blog_category_id' => BlogCategory::query()->where('slug', 'conseils')->value('id')]);
+
+        $list = $this->itemList($this->get('/blog/conseils')->assertOk());
+
+        $this->assertSame(range(1, 13), array_column($list['itemListElement'], 'position'));
+        $this->assertSame(14, $this->itemList($this->get('/blog/conseils?page=2')->assertOk())['itemListElement'][0]['position']);
+    }
+
+    /** Nothing listed, nothing claimed: the key is dropped, not emptied. */
+    public function test_a_page_past_the_end_claims_no_list_at_all(): void
+    {
+        $this->posts(18);
+
+        $this->assertSame([], $this->itemList($this->get('/blog?page=9')->assertOk()));
+    }
 }
