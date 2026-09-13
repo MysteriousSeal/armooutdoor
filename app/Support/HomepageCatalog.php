@@ -47,19 +47,42 @@ class HomepageCatalog
     }
 
     /**
-     * The largest percentage off among the products onSale() would show, or
-     * null when none of them is reduced by a percentage.
+     * The largest reduction among the products onSale() would show, as a
+     * percentage of the price, or null below 1%.
      */
     public static function deepestPercentageOff(): ?int
     {
-        return Product::query()
+        $deepest = Product::query()
             ->active()
             ->notOutOfStock()
-            ->whereHas('discount', fn ($query) => $query->where('type', 'percentage'))
+            ->whereHas('discount')
             ->with('discount')
             ->get()
             ->filter(fn (Product $product): bool => $product->hasDiscount())
-            ->max(fn (Product $product): int => $product->discount->value);
+            ->map(fn (Product $product): int => self::percentageOff($product))
+            ->max();
+
+        return $deepest >= 1 ? $deepest : null;
+    }
+
+    /**
+     * A fixed amount is measured against the product's own price, the one it
+     * is taken off, and rounded down: "jusqu'à" must never promise more than
+     * the shop gives.
+     */
+    private static function percentageOff(Product $product): int
+    {
+        $discount = $product->discount;
+
+        if ($discount->type === 'percentage') {
+            return $discount->value;
+        }
+
+        if ($product->price_cents <= 0) {
+            return 0;
+        }
+
+        return min(100, intdiv($discount->value * 100, $product->price_cents));
     }
 
     public static function featured(int $limit = 4): EloquentCollection

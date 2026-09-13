@@ -23,9 +23,9 @@ class HomeCarouselTest extends TestCase
     use RefreshDatabase;
 
     /** The sale panel only exists while something is reduced. */
-    private function putOnSale(int $value = 20, string $type = 'percentage'): Product
+    private function putOnSale(int $value = 20, string $type = 'percentage', int $priceCents = 5000): Product
     {
-        $product = Product::factory()->create(['is_active' => true, 'quantity' => 5]);
+        $product = Product::factory()->create(['is_active' => true, 'quantity' => 5, 'price_cents' => $priceCents]);
 
         Discount::query()->create([
             'product_id' => $product->id,
@@ -308,9 +308,44 @@ class HomeCarouselTest extends TestCase
             ->assertDontSee('Jusqu’à -60%');
     }
 
-    public function test_fixed_amount_discounts_alone_claim_no_percentage(): void
+    public function test_a_euro_discount_is_stated_as_a_percentage_of_its_price(): void
     {
-        $this->putOnSale(500, 'fixed');
+        // 10 € off 40 €.
+        $this->putOnSale(1000, 'fixed', 4000);
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('Jusqu’à -25%')
+            ->assertDontSee('Des prix réduits');
+    }
+
+    public function test_a_euro_discount_rounds_its_percentage_down(): void
+    {
+        // 5 € off 30 € is 16.67%: rounding up would promise more than it gives.
+        $this->putOnSale(500, 'fixed', 3000);
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('Jusqu’à -16%')
+            ->assertDontSee('Jusqu’à -17%');
+    }
+
+    public function test_euro_and_percentage_discounts_compete_for_the_headline(): void
+    {
+        $this->putOnSale(10);
+        // 15 € off 50 €.
+        $this->putOnSale(1500, 'fixed', 5000);
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('Jusqu’à -30%')
+            ->assertDontSee('Jusqu’à -10%');
+    }
+
+    public function test_a_discount_under_one_percent_claims_no_figure(): void
+    {
+        // 1 cent off 300 €.
+        $this->putOnSale(1, 'fixed', 30000);
 
         $this->get('/')
             ->assertOk()
