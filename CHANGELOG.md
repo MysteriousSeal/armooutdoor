@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-13 · v1.39.5 · build X9M4DK
+
+### Storefront
+
+- **A cart line reads as one card on a phone.** The price, the discount chip and the « Retirer » button used to fall one under the other against the right edge, each on a line of its own, while the quantity sat on the left: two columns arguing over a card the width of a thumb. They share one footer row now, under a hairline: the chip, the old price and the unit price on the left, the line total in bold, and « Retirer » holding the right edge. Where the four figures of a discounted line would not fit, they compress and the unit price gives way first, since the total beside it already says what is owed. The button never drops to a line of its own. The desktop cart is untouched.
+
+**No migration.**
+
 ## 2026-09-13 · v1.39.4 · build JCKUKO
 
 ### Admin
