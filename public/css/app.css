@@ -5150,9 +5150,98 @@ body.has-menu-open {
         grid-template-columns: auto minmax(0, 1fr);
     }
 
-.cart-line-total-slot {
-        grid-column: 2;
+    /*
+     * The money and the buttons sit on one footer row rather than stacking
+     * against the right edge. The desktop line keeps them in a column of
+     * their own, and dropping that column under the text left every figure
+     * stranded on a line of its own: price, chip, then Retirer, three ragged
+     * rows where one reads better.
+     */
+    .cart-line-total-slot {
+        grid-column: 1 / -1;
+        flex-direction: row;
+        /* No wrapping: the row would rather push the button onto a line of
+           its own than squeeze the figures, which is the stranding this
+           layout exists to remove. The figures shrink instead. */
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        height: auto;
+        margin-top: 0.85rem;
+        padding-top: 0.85rem;
+        border-top: 1px solid var(--border);
         text-align: left;
+    }
+
+    /* The chip belongs beside the price it explains, not above it. */
+    .cart-line-discount-badge {
+        order: 1;
+        margin: 0;
+    }
+
+    .cart-line-unit-price {
+        order: 2;
+        margin: 0;
+    }
+
+    .cart-line-total {
+        order: 3;
+        margin-right: auto;
+        font-size: 1.0625rem;
+        font-weight: 600;
+    }
+
+    /*
+     * The button holds the right edge and never wraps: it is the only
+     * control here, and a discounted line carries enough figures (chip,
+     * old price, unit price, total) to fill the row on its own. The money
+     * wraps among itself instead, which keeps the prices together and the
+     * button where the thumb expects it.
+     */
+    .cart-line-remove {
+        order: 4;
+        flex: 0 0 auto;
+        margin: 0 0 0 auto;
+    }
+
+    /*
+     * The figures shrink before the row breaks. A discounted line carries
+     * four of them (chip, old price, unit price, total) and they would
+     * otherwise push the button onto a line of its own, which is the
+     * stranding this layout exists to remove.
+     */
+    .cart-line-discount-badge,
+    .cart-line-unit-price {
+        flex: 0 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .cart-line-total {
+        flex: 0 0 auto;
+    }
+
+    /* The unit price is the first thing to go when the row is tight: the
+       total beside it already says what is owed. */
+    .cart-line-unit-price {
+        font-size: 0.7rem;
+    }
+
+    /* The quantity row keeps the text column, above the footer. */
+    .cart-line-actions {
+        margin-top: 0.75rem;
+    }
+
+    .cart-qty-form {
+        flex: 1 1 auto;
+        gap: 0.5rem;
+    }
+
+    .cart-qty-input {
+        width: 4.25rem;
     }
 
 }
