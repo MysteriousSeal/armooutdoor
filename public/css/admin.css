@@ -3820,6 +3820,14 @@ a.admin-stat-card:hover {
     color: var(--text-muted);
 }
 
+/* Money added rather than taken off, set like the deductions beside it: the
+   sign says which way it goes, so the line needs no colour of its own. */
+.admin-order-addition {
+    font-size: 0.6875rem;
+    line-height: 1.2;
+    color: var(--text-muted);
+}
+
 .admin-order-perceived {
     display: inline-flex;
     align-items: center;

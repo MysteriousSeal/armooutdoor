@@ -219,7 +219,7 @@ class AccountingController extends Controller
      * - `kind`, `order`, `entry`: which source it came from, and the model
      *   behind it when a link or an edit button is needed.
      * - the printed columns: `invoice`, `client`, `channel`, `type`,
-     *   `total_cents`, `fees_cents`, `payment`, `remark`.
+     *   `total_cents`, `fees_cents`, `bonus_cents`, `payment`, `remark`.
      * - `type_fr`, `payment_fr`: the same two labels in French, for the PDF.
      * - `counts`: whether the line joins the totals. False for a refund.
      * - `refunded`: whether to strike it through.
@@ -243,6 +243,9 @@ class AccountingController extends Controller
             'type_fr' => AccountingEntry::TYPES_FR['stock_sale'],
             'total_cents' => $order->total_cents,
             'fees_cents' => ($order->marketplace_commission_cents ?? 0) + ($order->payment_fee_cents ?? 0),
+            // Money the marketplace paid on top of the sale. Shown in its own
+            // column, and no part of the fees, which only ever come off.
+            'bonus_cents' => $order->marketplace_bonus_cents ?? 0,
             'payment' => 'Bank wire',
             'payment_fr' => AccountingEntry::PAYMENT_METHODS_FR['bank_wire'],
             'remark' => $order->number,
@@ -269,6 +272,8 @@ class AccountingController extends Controller
                 'type_fr' => $entry->typeLabelFr(),
                 'total_cents' => $entry->total_cents,
                 'fees_cents' => $entry->fees_cents,
+                // A hand-written line has no marketplace to pay one.
+                'bonus_cents' => 0,
                 'payment' => $entry->paymentLabel(),
                 'payment_fr' => $entry->paymentLabelFr(),
                 'remark' => $entry->remark ?: '',

@@ -113,6 +113,28 @@ class AccountingSalesTableTest extends TestCase
             ->assertDontSee('14,50', false);
     }
 
+    public function test_a_bonus_shows_in_its_own_column_and_adds_up(): void
+    {
+        $this->order('2026-03-05 09:00:00', ['total_cents' => 10000, 'marketplace_bonus_cents' => 320]);
+        $this->order('2026-03-06 09:00:00', ['total_cents' => 10000, 'marketplace_bonus_cents' => 180]);
+
+        $this->page()
+            ->assertSee('Bonus')
+            ->assertSee('+3,20', false)
+            ->assertSee('+1,80', false)
+            // The month's own line: 3,20 and 1,80 together.
+            ->assertSee('+5,00', false)
+            // And the bonus lands in what was perceived: 200 € plus 5 €.
+            ->assertSee('205,00', false);
+    }
+
+    public function test_a_sale_without_a_bonus_shows_a_dash(): void
+    {
+        $this->order('2026-03-05 09:00:00', ['total_cents' => 10000]);
+
+        $this->page()->assertSee('Bonus')->assertDontSee('+0,00', false);
+    }
+
     public function test_the_footer_adds_up_the_month(): void
     {
         $this->order('2026-03-02 09:00:00', ['total_cents' => 10000, 'payment_fee_cents' => 250]);

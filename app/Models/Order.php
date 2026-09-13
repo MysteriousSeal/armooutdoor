@@ -276,14 +276,16 @@ class Order extends Model
     /**
      * What actually lands in the bank after the marketplace's cut, what
      * was paid out of pocket for shipping, and the card/PayPal processor's
-     * fee are all taken off the order total.
+     * fee are all taken off the order total, and whatever the marketplace
+     * paid on top of the order is added back on.
      */
     public function perceivedTotalCents(): int
     {
         return $this->total_cents
             - ($this->marketplace_commission_cents ?? 0)
             - ($this->shipping_paid_cents ?? 0)
-            - ($this->payment_fee_cents ?? 0);
+            - ($this->payment_fee_cents ?? 0)
+            + ($this->marketplace_bonus_cents ?? 0);
     }
 
     public function formattedPerceivedTotal(): string

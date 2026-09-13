@@ -111,6 +111,55 @@ class OrderRecordedCostsTest extends TestCase
             ->assertDontSee('title="Shipping paid"', false);
     }
 
+    public function test_a_bonus_is_listed_beside_the_deductions(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $this->order(['marketplace_bonus_cents' => 320]);
+
+        $this->actingAs($admin)
+            ->get('/admin/orders')
+            ->assertOk()
+            ->assertSee('title="Bonus"', false)
+            ->assertSee('+'.format_euros(320).' bonus', false)
+            // A bonus is no cost: the costs column keeps its dash.
+            ->assertDontSee('stripe-fee-chip', false);
+    }
+
+    public function test_a_bonus_at_zero_is_listed_too(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $this->order(['marketplace_bonus_cents' => 0]);
+
+        $this->actingAs($admin)
+            ->get('/admin/orders')
+            ->assertOk()
+            ->assertSee('title="Bonus"', false);
+    }
+
+    public function test_a_bonus_left_empty_is_not_listed(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $this->order(['marketplace_commission_cents' => 0]);
+
+        $this->actingAs($admin)
+            ->get('/admin/orders')
+            ->assertOk()
+            ->assertSee('title="Commission"', false)
+            ->assertDontSee('title="Bonus"', false);
+    }
+
+    public function test_a_bonus_lifts_the_perceived_total(): void
+    {
+        // Money received on top of the order, so it goes on rather than off.
+        $this->assertSame(1320, $this->order(['marketplace_bonus_cents' => 320])->perceivedTotalCents());
+
+        // And it lands on the same line as the costs it is weighed against.
+        $this->assertSame(
+            870,
+            $this->order(['marketplace_bonus_cents' => 320, 'marketplace_commission_cents' => 450])->perceivedTotalCents()
+        );
+    }
+
     public function test_the_perceived_total_is_unaffected(): void
     {
         // Zéro et null se valent pour le calcul : seul l'affichage change.

@@ -41,6 +41,7 @@
             $refunded = $rows->count() - $counted->count();
             $totalCents = $counted->sum('total_cents');
             $feesCents = $counted->sum('fees_cents');
+            $bonusCents = $counted->sum('bonus_cents');
         @endphp
 
         @if ($rows->isEmpty())
@@ -57,7 +58,7 @@
                 </div>
                 <div class="admin-stat-card">
                     <span class="admin-stat-label">Perceived</span>
-                    <span class="admin-stat-value accounting-perceived">{{ format_euros($totalCents - $feesCents) }}</span>
+                    <span class="admin-stat-value accounting-perceived">{{ format_euros($totalCents - $feesCents + $bonusCents) }}</span>
                 </div>
             </div>
 
@@ -73,6 +74,7 @@
                             <th>Type</th>
                             <th class="admin-table-num">Total</th>
                             <th class="admin-table-num">Fees</th>
+                            <th class="admin-table-num">Bonus</th>
                             <th class="admin-table-num">Perceived</th>
                             <th>Payment</th>
                             <th>Remark</th>
@@ -98,7 +100,8 @@
                                 <td><span class="order-chip">{{ $row['type'] }}</span></td>
                                 <td class="admin-table-num">{{ format_euros($row['total_cents']) }}</td>
                                 <td class="admin-table-num">{{ $row['fees_cents'] > 0 ? '−'.format_euros($row['fees_cents']) : '—' }}</td>
-                                <td class="admin-table-num">{{ format_euros($row['total_cents'] - $row['fees_cents']) }}</td>
+                                <td class="admin-table-num">{{ $row['bonus_cents'] > 0 ? '+'.format_euros($row['bonus_cents']) : '—' }}</td>
+                                <td class="admin-table-num">{{ format_euros($row['total_cents'] - $row['fees_cents'] + $row['bonus_cents']) }}</td>
                                 <td><span class="order-chip">{{ $row['payment'] }}</span></td>
                                 <td class="accounting-remark">{{ $row['remark'] }}</td>
                                 {{-- Edit and delete, on hand-written lines only:
@@ -139,7 +142,8 @@
                             </td>
                             <td class="admin-table-num">{{ format_euros($totalCents) }}</td>
                             <td class="admin-table-num">{{ $feesCents > 0 ? '−'.format_euros($feesCents) : '—' }}</td>
-                            <td class="admin-table-num accounting-perceived">{{ format_euros($totalCents - $feesCents) }}</td>
+                            <td class="admin-table-num">{{ $bonusCents > 0 ? '+'.format_euros($bonusCents) : '—' }}</td>
+                            <td class="admin-table-num accounting-perceived">{{ format_euros($totalCents - $feesCents + $bonusCents) }}</td>
                             <td colspan="3"></td>
                         </tr>
                     </tfoot>
@@ -149,7 +153,7 @@
             {{-- Says out loud what the figures leave out, so the totals are
                  not taken for something they are not. --}}
             <p class="accounting-note">
-                Fees are the marketplace commission and the payment charge. Shipping paid out of pocket is a cost of its own and is not deducted here. Refunded orders are listed but left out of every total.
+                Fees are the marketplace commission and the payment charge. Shipping paid out of pocket is a cost of its own and is not deducted here. A bonus is money the marketplace paid on top of a sale, and is added to the perceived figure. Refunded orders are listed but left out of every total.
             </p>
         @endif
 

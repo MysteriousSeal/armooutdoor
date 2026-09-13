@@ -396,7 +396,9 @@
                                 </td>
                                 <td class="admin-table-num">
                                     <span class="admin-order-total">{{ $order->formattedTotal() }}</span>
-                                    @if ($order->hasRecordedCosts())
+                                    {{-- The bonus rides in this list too, though it is no cost:
+                                         it is money the marketplace added to the same order. --}}
+                                    @if ($order->hasRecordedCosts() || $order->marketplace_bonus_cents !== null)
                                         <span class="admin-order-deductions">
                                             {{-- !== null et non pas « non vide » : un coût saisi à
                                                  zéro doit s'afficher, sinon il ressemble à un champ
@@ -409,6 +411,9 @@
                                             @endif
                                             @if ($order->payment_fee_cents !== null)
                                                 <span class="admin-order-deduction" title="{{ $order->payment_method?->label() }} fee">−{{ format_euros($order->payment_fee_cents) }} fee</span>
+                                            @endif
+                                            @if ($order->marketplace_bonus_cents !== null)
+                                                <span class="admin-order-addition" title="Bonus">+{{ format_euros($order->marketplace_bonus_cents) }} bonus</span>
                                             @endif
                                         </span>
                                     @endif
