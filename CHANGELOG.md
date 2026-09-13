@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-13 · v1.39.10 · build 2VOLWK
+
+### Storefront
+
+- **La bannière d'accueil ne délave plus la photo.** Un voile blanc couvrait la quasi-totalité de l'image derrière le carrousel, du bord du texte jusqu'à 84 % de la largeur, avec en plus une teinte en haut et en bas. Il ne reste plus que derrière la carte de texte : le reste de la photo se voit à pleine intensité.
+
+**No migration.**
+
 ## 2026-09-13 · v1.39.9 · build X040LP
 
 ### Storefront
