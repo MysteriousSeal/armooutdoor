@@ -366,24 +366,38 @@ class AccountingController extends Controller
      * status or a deleted entry moves it. A date could not say as much: a
      * removed line touches nothing at all.
      *
+     * The bonus is appended only when there is one, rather than taking a
+     * field of its own in the list. A month filed before bonuses existed must
+     * keep the signature it was filed with, or every month already in the
+     * book would ask to be downloaded again on the day this ships, and a
+     * warning that cries wolf is one nobody reads. A line with no bonus
+     * prints the same dash as before, so it has nothing new to say.
+     *
      * @param  Collection<int, array<string, mixed>>  $rows
      */
     private function fingerprint(Collection $rows): string
     {
-        return hash('sha256', $rows->map(fn (array $row): string => implode('|', [
-            $row['date']->format('Y-m-d'),
-            $row['invoice'],
-            $row['client'],
-            $row['channel'],
-            $row['type'],
-            $row['total_cents'],
-            $row['fees_cents'],
-            $row['bonus_cents'],
-            $row['payment'],
-            $row['remark'],
-            $row['counts'] ? '1' : '0',
-            $row['refunded'] ? '1' : '0',
-        ]))->join("\n"));
+        return hash('sha256', $rows->map(function (array $row): string {
+            $fields = [
+                $row['date']->format('Y-m-d'),
+                $row['invoice'],
+                $row['client'],
+                $row['channel'],
+                $row['type'],
+                $row['total_cents'],
+                $row['fees_cents'],
+                $row['payment'],
+                $row['remark'],
+                $row['counts'] ? '1' : '0',
+                $row['refunded'] ? '1' : '0',
+            ];
+
+            if ($row['bonus_cents'] > 0) {
+                $fields[] = 'bonus:'.$row['bonus_cents'];
+            }
+
+            return implode('|', $fields);
+        })->join("\n"));
     }
 
     /**

@@ -392,6 +392,206 @@ class DashboardTest extends TestCase
         $this->assertEqualsWithDelta(1.0, $shares, 0.0001);
     }
 
+    /**
+     * The profit counts what the marketplace paid on top, so the money that
+     * came in has to count it too, or the printed subtraction stops
+     * balancing by exactly the bonus.
+     */
+    public function test_a_bonus_stands_on_the_revenue_side_of_the_ledger(): void
+    {
+        $product = Product::factory()->create();
+        $this->receive($product, 10, 100); // 1,20 € TTC l'unité
+
+        // 15,00 € taken, 1,00 € paid on top, 3,00 € of costs, 2,40 € of
+        // goods: 15,00 + 1,00 − 3,00 − 2,40 = 10,60 € of profit.
+        $order = $this->order([
+            'total_cents' => 1500,
+            'shipping_paid_cents' => 100,
+            'marketplace_commission_cents' => 150,
+            'payment_fee_cents' => 50,
+            'marketplace_bonus_cents' => 100,
+        ]);
+        OrderItem::query()->create([
+            'order_id' => $order->id, 'product_id' => $product->id, 'product_slug' => $product->slug,
+            'name' => ['fr' => 'X'], 'image' => '', 'quantity' => 2,
+            'unit_price_cents' => 750, 'line_cents' => 1500,
+        ]);
+
+        $money = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->money();
+
+        $this->assertSame(1500, $money['revenue_cents']);
+        $this->assertSame(100, $money['bonus_cents']);
+        // A bonus is received, so it must never swell the selling costs.
+        $this->assertSame(300, $money['order_costs_cents']);
+        $this->assertSame(240, $money['product_cost_cents']);
+        $this->assertSame(1060, $money['profit_cents']);
+
+        // The line the dashboard prints, read back as the subtraction it is.
+        $this->assertSame(
+            $money['profit_cents'],
+            $money['revenue_cents'] + $money['bonus_cents'] - $money['order_costs_cents'] - $money['product_cost_cents'],
+        );
+
+        // 1060 / (1500 + 100), not 1060 / 1500, or the margin would promise
+        // more than the bar draws.
+        $this->assertSame(66.3, $money['margin_percent']);
+    }
+
+    public function test_the_ledger_bar_still_sums_to_one_with_a_bonus(): void
+    {
+        $product = Product::factory()->create();
+        $this->receive($product, 10, 100);
+
+        // 15,00 € taken plus 1,00 € on top, 0,60 € of fees, 2,40 € of goods:
+        // the three shares still cover the whole bar and no more.
+        $priced = $this->order([
+            'total_cents' => 1500,
+            'payment_fee_cents' => 60,
+            'marketplace_bonus_cents' => 100,
+        ]);
+        OrderItem::query()->create([
+            'order_id' => $priced->id, 'product_id' => $product->id, 'product_slug' => $product->slug,
+            'name' => ['fr' => 'X'], 'image' => '', 'quantity' => 2,
+            'unit_price_cents' => 750, 'line_cents' => 1500,
+        ]);
+
+        // A second sale that cannot be priced, carrying a bonus of its own.
+        // The bar must use the priced orders' bonus, not the window's: with
+        // the two figures deliberately different, reaching for the wrong one
+        // stops the shares adding up.
+        $unpriced = $this->order([
+            'total_cents' => 5000,
+            'payment_fee_cents' => 200,
+            'marketplace_bonus_cents' => 50,
+        ]);
+        OrderItem::query()->create([
+            'order_id' => $unpriced->id, 'product_id' => Product::factory()->create()->id,
+            'product_slug' => 'y', 'name' => ['fr' => 'Y'], 'image' => '', 'quantity' => 1,
+            'unit_price_cents' => 5000, 'line_cents' => 5000,
+        ]);
+
+        $money = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->money();
+
+        // The window sees both bonuses, the bar only the priced one.
+        $this->assertSame(150, $money['bonus_cents']);
+        $this->assertSame(1500, $money['priced_revenue_cents']);
+        $this->assertSame(100, $money['priced_bonus_cents']);
+        $this->assertSame(60, $money['priced_costs_cents']);
+
+        // The base the view uses: what the priced orders brought in, bonus
+        // included, since the profit above counts it.
+        $base = $money['priced_revenue_cents'] + $money['priced_bonus_cents'];
+        $shares = ($money['priced_costs_cents'] + $money['product_cost_cents'] + $money['profit_cents']) / $base;
+
+        $this->assertEqualsWithDelta(1.0, $shares, 0.0001);
+    }
+
+    /**
+     * The bonus rides inside the revenue term instead of taking one of its
+     * own. The row is a grid of four term slots and three operators: a fifth
+     * term wraps, dropping the profit onto a second line and stranding the
+     * equals sign. The count below is what pins that.
+     */
+    public function test_a_bonus_rides_inside_the_revenue_term(): void
+    {
+        $this->order(['total_cents' => 1500]);
+        $this->order(['total_cents' => 1500, 'marketplace_bonus_cents' => 100]);
+
+        $html = $this->dashboard()->getContent();
+
+        // 30,00 € taken over the two sales, 1,00 € paid on top: 31,00 €.
+        $this->assertStringContainsString(format_euros(3100), $html);
+        $this->assertStringContainsString('includes '.format_euros(100).' bonus', $html);
+
+        $line = substr($html, strpos($html, 'dash-ledger-line'));
+        $line = substr($line, 0, strpos($line, 'dash-ledger-bar'));
+
+        // Four terms, never five, or the row wraps.
+        $this->assertSame(4, substr_count($line, '<div class="dash-term '));
+    }
+
+    /** With no bonus the line says nothing about one. */
+    public function test_the_revenue_term_stays_silent_without_a_bonus(): void
+    {
+        $this->order(['total_cents' => 1500]);
+
+        $html = $this->dashboard()->getContent();
+
+        $this->assertStringNotContainsString('bonus', $html);
+        $this->assertStringContainsString(format_euros(1500), $html);
+    }
+
+    /**
+     * The bonus has to be summed through the page's own scope, like every
+     * other figure on it. Summed loosely it would carry in the orders this
+     * page deliberately leaves out, and the ledger would stop describing the
+     * sales it names.
+     */
+    public function test_a_bonus_outside_the_dashboard_scope_never_reaches_the_ledger(): void
+    {
+        $this->order(['total_cents' => 1500, 'marketplace_bonus_cents' => 100]);
+
+        // None of these three is a sale this page counts, so neither is the
+        // bonus sitting on it.
+        $this->order(['total_cents' => 9999, 'marketplace_bonus_cents' => 500, 'test_marked_at' => now()]);
+        $this->order(['total_cents' => 9999, 'marketplace_bonus_cents' => 700, 'status' => 'draft']);
+        $this->order(['total_cents' => 9999, 'marketplace_bonus_cents' => 900, 'status' => 'refunded']);
+
+        $money = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->money();
+
+        $this->assertSame(1500, $money['revenue_cents']);
+        $this->assertSame(100, $money['bonus_cents']);
+    }
+
+    /**
+     * The two bonus figures answer different questions: one covers the whole
+     * window, the other only the sales whose goods could be priced. The bar
+     * base and the margin run on the priced one, and swapping them would
+     * look almost right, so the two perimeters are pinned apart here.
+     */
+    public function test_the_window_bonus_and_the_priced_bonus_keep_their_own_perimeters(): void
+    {
+        $product = Product::factory()->create();
+        $this->receive($product, 10, 100); // 1,20 € TTC l'unité
+
+        // 15,00 € taken, 1,00 € on top, 0,60 € de frais, 2,40 € de marchandise.
+        $priced = $this->order([
+            'total_cents' => 1500,
+            'payment_fee_cents' => 60,
+            'marketplace_bonus_cents' => 100,
+        ]);
+        OrderItem::query()->create([
+            'order_id' => $priced->id, 'product_id' => $product->id, 'product_slug' => $product->slug,
+            'name' => ['fr' => 'X'], 'image' => '', 'quantity' => 2,
+            'unit_price_cents' => 750, 'line_cents' => 1500,
+        ]);
+
+        // A far larger bonus on a sale whose goods cannot be priced: loud
+        // enough that reaching for it by mistake could not pass unnoticed.
+        $unpriced = $this->order(['total_cents' => 5000, 'marketplace_bonus_cents' => 900]);
+        OrderItem::query()->create([
+            'order_id' => $unpriced->id, 'product_id' => Product::factory()->create()->id,
+            'product_slug' => 'y', 'name' => ['fr' => 'Y'], 'image' => '', 'quantity' => 1,
+            'unit_price_cents' => 5000, 'line_cents' => 5000,
+        ]);
+
+        $money = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->money();
+
+        // The ledger line counts both bonuses, the bar only the priced one.
+        $this->assertSame(1000, $money['bonus_cents']);
+        $this->assertSame(100, $money['priced_bonus_cents']);
+
+        // 13,00 € left on the 16,00 € that priced sale brought in, bonus
+        // included: the margin follows the priced figure, not the window's.
+        $this->assertSame(1300, $money['profit_cents']);
+        $this->assertSame(81.3, $money['margin_percent']);
+
+        $base = $money['priced_revenue_cents'] + $money['priced_bonus_cents'];
+        $shares = ($money['priced_costs_cents'] + $money['product_cost_cents'] + $money['profit_cents']) / $base;
+
+        $this->assertEqualsWithDelta(1.0, $shares, 0.0001);
+    }
+
     public function test_the_warehouse_values_the_shelves_at_average_purchase_cost(): void
     {
         $priced = Product::factory()->create(['is_active' => true, 'quantity' => 4]);

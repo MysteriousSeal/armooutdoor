@@ -6,10 +6,10 @@ use App\Models\Conversation;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
-use App\Models\ProductVariant;
-use App\Models\PurchaseOrderItem;
 use App\Models\ProductSetting;
+use App\Models\ProductVariant;
 use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderItem;
 use App\Models\StockMovement;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -236,6 +236,7 @@ class DashboardMetrics
             .' coalesce(sum(shipping_paid_cents), 0) as shipping_cents,'
             .' coalesce(sum(marketplace_commission_cents), 0) as commission_cents,'
             .' coalesce(sum(payment_fee_cents), 0) as fee_cents,'
+            .' coalesce(sum(marketplace_bonus_cents), 0) as bonus_cents,'
             .' count(*) as orders'
         )->first();
 
@@ -267,6 +268,13 @@ class DashboardMetrics
         // total it would mix a partial profit with sales it does not
         // cover.
         $pricedRevenueCents = (int) $priced->sum('total_cents');
+        // The profit above already counts what the marketplace paid on top,
+        // so the money that came in has to count it too. Kept on the priced
+        // perimeter like the costs beside it, or the shares stop adding up.
+        $pricedBonusCents = (int) $priced->sum(
+            fn (Order $order): int => (int) $order->marketplace_bonus_cents,
+        );
+        $pricedTakenCents = $pricedRevenueCents + $pricedBonusCents;
 
         $orderCostsCents = (int) $recorded->shipping_cents
             + (int) $recorded->commission_cents
@@ -277,13 +285,17 @@ class DashboardMetrics
             'shipping_cents' => (int) $recorded->shipping_cents,
             'commission_cents' => (int) $recorded->commission_cents,
             'fee_cents' => (int) $recorded->fee_cents,
+            // Money received, never a cost: it is kept out of
+            // `order_costs_cents` and added to the revenue side instead.
+            'bonus_cents' => (int) $recorded->bonus_cents,
             'order_costs_cents' => $orderCostsCents,
             'product_cost_cents' => $productCostCents,
             'profit_cents' => $profitCents,
             'priced_revenue_cents' => $pricedRevenueCents,
+            'priced_bonus_cents' => $pricedBonusCents,
             'priced_costs_cents' => $pricedCostsCents,
-            'margin_percent' => $pricedRevenueCents > 0
-                ? round($profitCents / $pricedRevenueCents * 100, 1)
+            'margin_percent' => $pricedTakenCents > 0
+                ? round($profitCents / $pricedTakenCents * 100, 1)
                 : null,
             'markup_percent' => $productCostCents > 0
                 ? round($profitCents / $productCostCents * 100, 1)
@@ -511,7 +523,6 @@ class DashboardMetrics
     {
         $buckets = $this->dailyBuckets($this->period->start, $this->period->end);
         $chunkSize = max(1, (int) ceil($buckets->count() / 12));
-
 
         $revenue = $buckets->chunk($chunkSize)
             ->map(fn (Collection $chunk): int => (int) $chunk->sum('revenue_cents'))->values();

@@ -9,8 +9,9 @@ return new class extends Migration
     /**
      * What a marketplace paid on top of the order itself.
      *
-     * Recorded, not yet counted: nothing reads this figure, so it changes no
-     * payout and no cost until somebody decides where it belongs.
+     * The figure lives nowhere the shop can read, so it is taken off the
+     * statement and typed in. It counts as money received, never as a cost:
+     * it lifts what the order perceived and stays out of the recorded costs.
      */
     public function up(): void
     {

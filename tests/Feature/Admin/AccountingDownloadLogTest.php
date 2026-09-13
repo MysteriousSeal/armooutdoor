@@ -214,6 +214,103 @@ class AccountingDownloadLogTest extends TestCase
         $this->assertMatchesRegularExpression('#2026-04.*?accounting-month-filed is-stale#s', $html);
     }
 
+    /**
+     * A month with no bonus must hash exactly as it did before bonuses
+     * existed, or every month already filed would turn stale on the day this
+     * ships and ask for a second identical copy.
+     *
+     * The expected hash is built here in the old format rather than copied
+     * from a run, so inserting another field into the row string later fails
+     * this test instead of quietly reprinting the whole accounting book.
+     */
+    public function test_a_month_without_a_bonus_keeps_the_signature_it_was_filed_with(): void
+    {
+        $order = $this->order('2026-04-12 09:00:00');
+        $owner = User::factory()->admin()->create();
+
+        $this->actingAs($owner)->get('/admin/accounting/sales/2026-04/pdf')->assertOk();
+
+        // The eleven fields the journal hashed before the bonus column, in
+        // the order it hashed them.
+        $legacy = implode('|', [
+            '2026-04-12',
+            'INV-'.$order->number,
+            $order->user->name,
+            'Direct',
+            'Stock sale',
+            10000,
+            0,
+            'Bank wire',
+            $order->number,
+            '1',
+            '0',
+        ]);
+
+        $this->assertSame(
+            hash('sha256', $legacy),
+            AccountingJournalDownload::query()->sole()->fingerprint,
+        );
+    }
+
+    public function test_clearing_a_bonus_again_returns_the_month_to_its_filed_signature(): void
+    {
+        $order = $this->order('2026-04-12 09:00:00');
+        $owner = User::factory()->admin()->create();
+
+        $this->actingAs($owner)->get('/admin/accounting/sales/2026-04/pdf')->assertOk();
+
+        // Typed in, then taken back out: the month says again what the filed
+        // sheet says, so the warning has to go away with it.
+        $order->update(['marketplace_bonus_cents' => 320]);
+        $this->actingAs($owner)
+            ->get('/admin/accounting/sales/2026-04')
+            ->assertOk()
+            ->assertSee('Changed since the copy of');
+
+        $order->update(['marketplace_bonus_cents' => null]);
+        $this->actingAs($owner)
+            ->get('/admin/accounting/sales/2026-04')
+            ->assertOk()
+            ->assertDontSee('Changed since the copy of');
+    }
+
+    /**
+     * A refunded line joins no total, but it is printed, and the signature
+     * covers what the journal prints. So a bonus typed on a refunded order
+     * does move the month, and the filed copy is genuinely out of date.
+     */
+    public function test_a_bonus_on_a_refunded_order_still_moves_the_signature(): void
+    {
+        $order = $this->order('2026-04-12 09:00:00');
+        $order->update(['status' => 'refunded']);
+        $owner = User::factory()->admin()->create();
+
+        $this->actingAs($owner)->get('/admin/accounting/sales/2026-04/pdf')->assertOk();
+
+        $order->update(['marketplace_bonus_cents' => 320]);
+
+        $this->actingAs($owner)
+            ->get('/admin/accounting/sales/2026-04')
+            ->assertOk()
+            ->assertSee('Changed since the copy of');
+    }
+
+    /** A bonus of zero prints the same dash as none, so it moves nothing. */
+    public function test_a_bonus_of_zero_leaves_the_filed_copy_alone(): void
+    {
+        $order = $this->order('2026-04-12 09:00:00');
+        $owner = User::factory()->admin()->create();
+
+        $this->actingAs($owner)->get('/admin/accounting/sales/2026-04/pdf')->assertOk();
+
+        $order->update(['marketplace_bonus_cents' => 0]);
+
+        $this->actingAs($owner)
+            ->get('/admin/accounting/sales/2026-04')
+            ->assertOk()
+            ->assertDontSee('Changed since the copy of');
+    }
+
     public function test_a_deleted_entry_counts_as_a_change(): void
     {
         $this->order('2026-04-12 09:00:00');

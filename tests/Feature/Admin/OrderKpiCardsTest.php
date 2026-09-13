@@ -41,7 +41,7 @@ class OrderKpiCardsTest extends TestCase
         return $next === false ? $rest : substr($rest, 0, $next);
     }
 
-    private function orderWorth(int $totalCents): void
+    private function orderWorth(int $totalCents, array $overrides = []): void
     {
         Order::query()->create([
             'number' => Order::generateNumber(),
@@ -53,6 +53,7 @@ class OrderKpiCardsTest extends TestCase
             'carrier_snapshot' => ['name' => ['fr' => 'Colissimo']],
             'subtotal_cents' => $totalCents, 'shipping_cents' => 0, 'discount_cents' => 0,
             'total_cents' => $totalCents, 'payment_method' => 'card',
+            ...$overrides,
         ]);
     }
 
@@ -124,6 +125,51 @@ class OrderKpiCardsTest extends TestCase
         foreach (['is-cost', 'is-kept', 'is-profit'] as $tone) {
             $this->assertStringContainsString('admin-stat-part-value '.$tone, $block);
         }
+    }
+
+    /**
+     * The card sits directly above the column that says the same word, and
+     * the Profit beside it already counts the bonus. All three have to agree.
+     */
+    public function test_a_bonus_lifts_the_perceived_figure_without_becoming_a_cost(): void
+    {
+        // 100,00 € taken, 3,20 € paid on top, nothing spent: 103,20 €.
+        $this->orderWorth(10000, ['marketplace_bonus_cents' => 320]);
+
+        $block = $this->block('Results');
+
+        $this->assertStringContainsString(format_euros(10320), $block);
+        // Total costs stays empty: money received is not money spent.
+        $this->assertStringContainsString('admin-stat-part-value is-cost">'.format_euros(0), $block);
+    }
+
+    /**
+     * The card's bonus must be summed through the page's own scope, the same
+     * builder as the amount beside it. Summed loosely it would drag in the
+     * orders every other figure here leaves out.
+     */
+    public function test_a_bonus_on_a_test_order_or_a_draft_stays_out_of_the_card(): void
+    {
+        $this->orderWorth(10000, ['marketplace_bonus_cents' => 320]);
+        $this->orderWorth(50000, ['marketplace_bonus_cents' => 900, 'test_marked_at' => now()]);
+        $this->orderWorth(50000, ['marketplace_bonus_cents' => 700, 'status' => 'draft']);
+
+        // Only the real sale counts: 100,00 € plus its 3,20 €.
+        $this->assertStringContainsString(format_euros(10320), $this->block('Results'));
+    }
+
+    /**
+     * The card sits above a column headed with the same word, so the one has
+     * to be the sum of the other. That is the defect this began with: the
+     * rows counted a bonus the card knew nothing about.
+     */
+    public function test_the_perceived_card_equals_the_sum_of_the_perceived_column(): void
+    {
+        // 103,20 € on the first row, 48,00 € on the second.
+        $this->orderWorth(10000, ['marketplace_bonus_cents' => 320]);
+        $this->orderWorth(5000, ['marketplace_commission_cents' => 200]);
+
+        $this->assertStringContainsString(format_euros(15120), $this->block('Results'));
     }
 
     public function test_each_cost_part_keeps_both_percentages(): void

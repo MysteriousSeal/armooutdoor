@@ -95,6 +95,10 @@ class OrderController extends Controller
         $commissionCostCents = (clone $salesOrders)->sum('marketplace_commission_cents');
         $paymentFeeCents = (clone $salesOrders)->sum('payment_fee_cents');
         $totalCostsCents = $shippingCostCents + $commissionCostCents + $paymentFeeCents;
+        // Money the marketplace paid on top of the sale, so it lifts what was
+        // perceived and never joins the costs above. Counted here as well as
+        // on each row, or the card and its own column disagree.
+        $bonusCents = (int) (clone $salesOrders)->sum('marketplace_bonus_cents');
 
         $percentOf = fn (int $part, int $whole): ?float => $whole > 0 ? round($part / $whole * 100, 2) : null;
 
@@ -127,8 +131,8 @@ class OrderController extends Controller
                 'payment_fee_pct_costs' => $percentOf($paymentFeeCents, $totalCostsCents),
                 'total_costs_cents' => $totalCostsCents,
                 'total_costs_pct_amount' => $percentOf($totalCostsCents, $amountCents),
-                'perceived_total_cents' => $amountCents - $totalCostsCents,
-                'perceived_total_pct_amount' => $percentOf($amountCents - $totalCostsCents, $amountCents),
+                'perceived_total_cents' => $amountCents - $totalCostsCents + $bonusCents,
+                'perceived_total_pct_amount' => $percentOf($amountCents - $totalCostsCents + $bonusCents, $amountCents),
                 // Ventilation par statut sur le même périmètre que le total :
                 // les trois chiffres doivent pouvoir se recouper avec lui.
                 'shipped_count' => (clone $salesOrders)->where('status', 'shipped')->count(),
@@ -1140,8 +1144,12 @@ class OrderController extends Controller
      *
      * A marketplace sale sometimes brings in more than the order is worth,
      * and the figure lives nowhere the shop can read: it is taken off the
-     * statement and typed in. Recorded only for now, so it touches no payout
-     * and no cost until somebody decides where it belongs.
+     * statement and typed in.
+     *
+     * It is money received, never a cost: it lifts what the order perceived
+     * (see Order::perceivedTotalCents()) and is left out of the recorded
+     * costs. From there it reaches the orders list, the monthly sales screen
+     * and the French journal, and it moves that month's signature.
      */
     public function updateMarketplaceBonus(Request $request, Order $order): RedirectResponse
     {

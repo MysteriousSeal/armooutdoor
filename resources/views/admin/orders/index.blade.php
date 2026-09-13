@@ -119,7 +119,7 @@
                         </span>
                     </li>
                     <li class="admin-stat-part">
-                        <span class="admin-stat-part-name" title="Order totals after all costs">Total perceived</span>
+                        <span class="admin-stat-part-name" title="Order totals, less the recorded costs, plus anything a marketplace paid on top">Total perceived</span>
                         <span class="admin-stat-part-value is-kept">{{ format_euros($kpis['perceived_total_cents']) }}</span>
                         <span class="admin-stat-part-pcts">
                             <span class="admin-stat-pct">{{ number_format($kpis['perceived_total_pct_amount'] ?? 0, 2) }} % of amount</span>

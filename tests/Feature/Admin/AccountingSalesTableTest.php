@@ -132,7 +132,29 @@ class AccountingSalesTableTest extends TestCase
     {
         $this->order('2026-03-05 09:00:00', ['total_cents' => 10000]);
 
-        $this->page()->assertSee('Bonus')->assertDontSee('+0,00', false);
+        $response = $this->page()->assertSee('Bonus')->assertDontSee('+0,00', false);
+
+        $content = $response->getContent();
+        $body = substr($content, strpos($content, '<tbody>'), strpos($content, '</tbody>') - strpos($content, '<tbody>'));
+
+        // The cell itself, not merely the absence of a figure: empty, or a
+        // bare 0,00 with no sign, would satisfy the assertion above. Pinned
+        // by position, since the fees cell beside it prints the same
+        // placeholder and nothing in the text tells the two apart: total,
+        // then the fees dash, then the bonus dash.
+        //
+        // What sits between the cells is left free. Written out with the
+        // table's own indentation, reindenting that table would fail this
+        // test and point at the bonus over a change that never touched it.
+        $dash = "\u{2014}";
+        $cell = '<td class="admin-table-num">';
+
+        $this->assertMatchesRegularExpression(
+            '#'.preg_quote($cell.format_euros(10000).'</td>', '#').'\s*'
+                .preg_quote($cell.$dash.'</td>', '#').'\s*'
+                .preg_quote($cell.$dash.'</td>', '#').'#u',
+            $body,
+        );
     }
 
     public function test_the_footer_adds_up_the_month(): void
@@ -184,6 +206,39 @@ class AccountingSalesTableTest extends TestCase
         $this->assertStringContainsString('97,50', $foot);
         $this->assertStringNotContainsString('140,00', $foot);
         $this->assertStringNotContainsString('3,50', $foot);
+    }
+
+    public function test_a_refunded_bonus_is_printed_but_left_out_of_the_totals(): void
+    {
+        // A bonus is money like any other on a refunded line: it is printed,
+        // because it happened, and it adds to nothing, because the sale went
+        // back out. The counts flag already rules the total and the fees, and
+        // the bonus has to follow them rather than sit apart.
+        $refunded = $this->order('2026-03-05 09:00:00', [
+            'status' => 'refunded',
+            'total_cents' => 4000,
+            'marketplace_bonus_cents' => 700,
+        ]);
+        $this->order('2026-03-06 09:00:00', ['total_cents' => 10000, 'marketplace_bonus_cents' => 320]);
+
+        $response = $this->page()
+            ->assertSee($refunded->number)
+            ->assertSee('is-refunded', false)
+            // Its own cell is still filled in: the row says what happened.
+            ->assertSee('+7,00', false)
+            ->assertSee('1 refund left out');
+
+        $content = $response->getContent();
+        $foot = substr($content, strpos($content, '<tfoot>'));
+
+        // 100 € taken and 3,20 € paid on top: 103,20 € perceived. Neither the
+        // 40 € nor its 7 € of bonus reaches the foot of the month.
+        $this->assertStringContainsString('100,00', $foot);
+        $this->assertStringContainsString('+3,20', $foot);
+        $this->assertStringContainsString('103,20', $foot);
+        $this->assertStringNotContainsString('+10,20', $foot);
+        $this->assertStringNotContainsString('140,00', $foot);
+        $this->assertStringNotContainsString('150,20', $foot);
     }
 
     public function test_drafts_and_test_orders_stay_out(): void

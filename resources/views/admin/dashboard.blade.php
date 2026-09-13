@@ -17,7 +17,11 @@
         // The bar is a share of the revenue of the priced orders only, like
         // the margin: against the total, its three parts would cover sales
         // the goods cost never reached, and would add up to nothing.
-        $ledgerBase = max(1, $money['priced_revenue_cents']);
+        // A marketplace bonus is money that came in, and the profit already
+        // counts it, so it joins the base too. Left out, the three segments
+        // would add up to more than the bar and spill over it.
+        $ledgerTakenCents = $money['priced_revenue_cents'] + $money['priced_bonus_cents'];
+        $ledgerBase = max(1, $ledgerTakenCents);
         $ledgerShare = fn (int $cents): float => round(min(100, max(0, $cents / $ledgerBase * 100)), 2);
         $ledgerIsPartial = $money['priced_orders'] < $money['total_orders'];
 
@@ -98,7 +102,10 @@
             {{-- The ledger line. Four terms and two operators: what came in,
                  what went out of it, what the goods cost, what is left.
                  Written as the subtraction it is, and because revenue alone
-                 does not say whether the shop makes money. --}}
+                 does not say whether the shop makes money. What a marketplace
+                 paid on top rides inside the revenue term: the row has four
+                 term slots, and a fifth one wraps the profit onto a line of
+                 its own. --}}
             <section class="dash-ledger" aria-labelledby="dash-ledger-title">
                 <div class="dash-ledger-head">
                     <h3 class="order-panel-title" id="dash-ledger-title">What the shop kept</h3>
@@ -106,12 +113,19 @@
                 </div>
 
                 <div class="dash-ledger-line">
+                    {{-- Money a marketplace paid on top counts as money that
+                         came in, and the profit at the end of the line
+                         already includes it, so it is carried here rather
+                         than in a term of its own. --}}
                     <div class="dash-term dash-term--revenue">
                         <span class="dash-term-label">Revenue</span>
-                        <span class="dash-term-value">{{ format_euros($money['revenue_cents']) }}</span>
+                        <span class="dash-term-value">{{ format_euros($money['revenue_cents'] + $money['bonus_cents']) }}</span>
                         <span class="dash-term-note">
                             @include('admin.partials.delta', ['delta' => $headline['revenue_delta'], 'upIsGood' => true])
                             {{ number_format($money['total_orders']) }} {{ \Illuminate\Support\Str::plural('order', $money['total_orders']) }}
+                            @if ($money['bonus_cents'] > 0)
+                                · includes {{ format_euros($money['bonus_cents']) }} bonus
+                            @endif
                         </span>
                     </div>
 
@@ -169,7 +183,7 @@
                     <li><span class="dash-swatch is-goods"></span>Goods {{ number_format($ledgerShare($money['product_cost_cents']), 1) }}%</li>
                     <li><span class="dash-swatch is-profit"></span>Profit {{ number_format($ledgerShare(max(0, $money['profit_cents'])), 1) }}%</li>
                     @if ($ledgerIsPartial)
-                        <li>shares of the {{ format_euros($money['priced_revenue_cents']) }} that could be priced</li>
+                        <li>shares of the {{ format_euros($ledgerTakenCents) }} that could be priced</li>
                     @endif
                     @if ($money['markup_percent'] !== null)
                         <li class="dash-ledger-key-note">{{ number_format($money['markup_percent'], 1) }}% return on every euro of stock sold</li>
