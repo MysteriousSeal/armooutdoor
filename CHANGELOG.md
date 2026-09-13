@@ -2,6 +2,22 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-13 · v1.39.6 · build M99CNM
+
+### Storefront
+
+- **L'image d'un article existe enfin dans la page.** La bannière d'un article du blog était une image de fond CSS : la photo annoncée aux moteurs de recherche et aux réseaux sociaux ne figurait nulle part dans le contenu de la page. Elle est maintenant une vraie image, avec son texte de remplacement, ses dimensions et la priorité de chargement qui va avec, ce qui la rend visible dans Google Images et évite que la page saute pendant le chargement. L'affichage ne bouge pas, sur mobile comme sur écran large.
+- **Un article isolé ne mène plus à une impasse.** Les articles suggérés en bas de page se limitaient à la même rubrique, si bien qu'une rubrique d'un seul article n'en proposait aucun. Ils se complètent maintenant avec le reste du blog quand la rubrique n'en a pas assez.
+- **Les descriptions trop longues sont retaillées.** Sept articles, dont les quatre sur les catégories d'armes, avaient une description que Google coupait en plein milieu d'une phrase dans ses résultats. Elles tiennent désormais dans la place disponible, sans perdre les chiffres et les dates qui donnent envie de cliquer.
+- **Deux titres de section disent enfin leurs chiffres.** « Deux seuils de puissance » devient « Deux seuils de puissance : 0,5 et 2 joules », et « Quelle corde pour quel calibre » devient « Quelle corde pour quel calibre : du .17 au calibre 12 », qui est ce que les lecteurs tapent réellement dans un moteur de recherche.
+
+### Fixed
+
+- **Le blog annonçait à Google des articles modifiés avant leur publication.** Un article écrit le mardi et programmé pour le vendredi déclarait le mardi comme date de dernière modification, soit une date antérieure à sa propre parution. Quatre articles en ligne et les trois programmés étaient concernés. La règle est désormais écrite à un seul endroit et vaut pour les données structurées, le partage sur les réseaux sociaux et le plan du site, dont les rubriques ne se disent plus plus anciennes que les articles qu'elles listent.
+- **Le plan du site n'indiquait pas les images des articles**, et la page 2 du blog reprenait mot pour mot la description de la page 1.
+
+**No migration.**
+
 ## 2026-09-13 · v1.39.5 · build X9M4DK
 
 ### Storefront
