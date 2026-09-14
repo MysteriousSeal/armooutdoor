@@ -2,6 +2,22 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-14 · v1.41.0 · build AB2Y54
+
+### Storefront
+
+- **An eleventh guide answers the worries of a weapon holder whose data has leaked.** Four files touching French shooters and hunters leaked in a year: the FFTir, the SIA, Armurerie Lavaux and NaturaBuy. « Détenteur d'arme : protéger ses données et son domicile » says what each one exposed, field by field, why an address matters more than the weapons behind it, how fake police officers have used these files, and which reflexes stay under the reader's control. It opens on a plain warning: the police never call or come to collect weapons after a leak, and the number to ring is the 17.
+- **The guide carries a « Suis-je concerné ? » checker.** The reader ticks their accounts and a record of their own data fills in, each field marked exposed, not exposed or « Non précisé » where the sources say nothing, with the checklist that applies beneath it. Nothing is sent anywhere, and the page reads in full without JavaScript.
+- **Its facts were checked against the sources before publishing**, which corrected the post it grew from: the FFTir leak also held e-mail addresses and dates and places of birth, the SIA extraction covered exactly 62 511 weapons, and Lavaux's e-mail addresses did not leak. The guide says plainly that the shop also sells on NaturaBuy, cites eleven sources, and is linked from the transport guide, the guides index, the sitemap and the home page.
+- **The home page's guides now change every hour, at random.** The two guides beside the latest article used to slide one step along the shelf each day, so a returning visitor saw the same pair all day and could guess the next. They are now drawn at random each hour: every visitor of that hour sees the same pair, and every guide comes up within two days.
+
+### Fixed
+
+- **The questions panel no longer loses its bottom edge** on the four guides that follow their questions with further reading and buttons: cibles, classification, entretien and joules.
+- **The guides index description fits a results page.** It had grown to 303 characters, twice what a search result shows; it now reads in 149.
+
+**No migration.**
+
 ## 2026-09-14 · v1.40.2 · build S2GILD
 
 ### Storefront
