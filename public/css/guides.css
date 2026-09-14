@@ -283,7 +283,10 @@
     border-bottom: none;
 }
 
-.glab-faq details:last-child {
+/* The last question, not the last child: four guides follow the questions
+   with further reading and buttons, and :last-child left their final
+   question without a bottom edge. */
+.glab-faq details:last-of-type {
     border-bottom: 1px solid color-mix(in srgb, var(--accent-heading) 16%, var(--border));
 }
 
