@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-14 · v1.41.1 · build M4RQ7T
+
+### Storefront
+
+- **A guide's illustration now shows whole in its hero.** The picture used to sit behind the title as a background, cropped to the height of the text beside it, so most of it was cut away on a computer. It is now a real image at its own proportions. On a computer the kicker and title sit on its left and the introduction runs beneath it with the tags. On a phone the title comes first, then the picture, then the introduction. Guides without a picture keep their hero as it was.
+- **The data protection guide opens on its illustration**, an identity record linked by a dotted line to the door of a house, which is also the picture shown when the page is shared.
+- **The classification guide gets an illustration too**: four steps climbing a hill, D to A, from an open padlock to a no-entry sign. It shows in the hero and on shared links.
+
+**No migration.**
+
 ## 2026-09-14 · v1.41.0 · build AB2Y54
 
 ### Storefront
