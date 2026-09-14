@@ -76,6 +76,8 @@
 @section('title', 'Détenteur d\'arme : protéger ses données et son domicile - Armo Outdoor')
 @section('meta_description', $description)
 @section('og_type', 'article')
+@section('og_image', versioned_asset(\App\Support\Guides::byRoute('guides.donnees')['image']))
+@section('og_image_alt', 'Illustration : une fiche d\'identité reliée par un trait pointillé à la porte d\'une maison, au coucher du soleil.')
 @section('canonical', route('guides.donnees'))
 
 @push('head')
@@ -133,6 +135,8 @@
             'title' => 'Détenteur d\'arme : protéger ses données et son domicile',
             'lede' => 'En moins d\'un an, quatre fichiers qui touchent les tireurs, les chasseurs et les détenteurs d\'armes ont fuité : la Fédération française de tir, le SIA, l\'Armurerie Lavaux et NaturaBuy. On ne rattrape pas un fichier qui a fuité. Ce guide dit ce qui en est sorti, pourquoi c\'est votre adresse plus que vos armes qui intéresse, et ce qui reste sous votre contrôle : cochez vos comptes, la page vous dit quoi faire.',
             'tags' => ['FFTir', 'SIA', 'NaturaBuy'],
+            'imageUrl' => versioned_asset(\App\Support\Guides::byRoute('guides.donnees')['image']),
+            'imageAlt' => 'Illustration : une fiche d\'identité reliée par un trait pointillé à la porte d\'une maison, au coucher du soleil.',
         ])
 
         <nav class="glab-plan" aria-label="Plan du guide">

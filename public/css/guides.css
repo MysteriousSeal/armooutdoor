@@ -30,6 +30,122 @@
     max-width: 34rem;
 }
 
+/*
+ * A guide hero with an illustration: the picture is a plate, shown whole.
+ *
+ * The picture is an <img> at its own ratio, so its height follows its width
+ * and nothing is ever cut, whatever the title or the lede weigh. The copy
+ * that sets a column's height is split off: the kicker and the title sit
+ * beside the plate, the lede and the tags run under both in a ruled rail, so
+ * the tall part of the copy no longer stretches the picture. Kept after the
+ * rule above, whose specificity it matches.
+ */
+.cat-hero--plate {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+    min-height: 0;
+    padding: 0;
+}
+
+.cat-hero--plate .cat-hero-copy {
+    max-width: none;
+    width: auto;
+    padding: 1.35rem 1.15rem 1.2rem;
+    background: none;
+    backdrop-filter: none;
+}
+
+.cat-hero--plate .cat-hero-title {
+    font-size: clamp(1.9rem, 7.4vw, 2.4rem);
+}
+
+.cat-hero-plate {
+    margin: 0;
+    border-block: 1px solid var(--border);
+    background: var(--bg);
+}
+
+.cat-hero-plate img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.cat-hero-rail {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 0.9rem 2.5rem;
+    padding: 1.15rem 1.15rem 1.3rem;
+}
+
+.cat-hero--plate .cat-hero-desc {
+    flex: 1 1 32rem;
+    max-width: 44rem;
+    margin: 0;
+}
+
+.cat-hero--plate .cat-hero-tags {
+    flex: 0 0 auto;
+    margin: 0;
+}
+
+@media (min-width: 1100px) {
+    /* Side by side the plate takes three fifths, which keeps it a good
+       size while the column beside it still holds the title in four or
+       five lines. The kicker is pinned to the top of that column and the
+       title rests on the rail, so a short title leaves air in the middle
+       rather than an empty band under it. */
+    .cat-hero--plate {
+        grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    }
+
+    .cat-hero--plate .cat-hero-copy {
+        justify-content: space-between;
+        padding: 1.9rem 2.1rem 1.8rem;
+    }
+
+    .cat-hero--plate .cat-hero-title {
+        font-size: clamp(2.1rem, 2.9vw, 2.6rem);
+    }
+
+    .cat-hero-plate {
+        align-self: start;
+        border-block: 0;
+        border-left: 1px solid var(--border);
+    }
+
+    /* The rail keeps the two columns above it: the tags stay under the
+       title they belong to, the lede reads as the plate's caption, and the
+       plate's hairline runs on down between them. */
+    .cat-hero-rail {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+        gap: 0;
+        padding: 0;
+        border-top: 1px solid var(--border);
+    }
+
+    .cat-hero--plate .cat-hero-desc {
+        grid-column: 2;
+        grid-row: 1;
+        max-width: none;
+        padding: 1.3rem 2.1rem 1.45rem;
+        border-left: 1px solid var(--border);
+    }
+
+    .cat-hero--plate .cat-hero-tags {
+        grid-column: 1;
+        grid-row: 1;
+        align-self: start;
+        align-content: flex-start;
+        padding: 1.35rem 2.1rem;
+    }
+}
+
 /* Each section of the guide lives in the olive panel the category
    guides wear. */
 

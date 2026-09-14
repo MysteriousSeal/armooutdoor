@@ -3,6 +3,8 @@
 @section('title', 'Classer son arme : catégories D, C, B et A — Armo Outdoor')
 @section('meta_description', 'Sous 2 joules, de 2 à 20, dès 20, puis l\'autorisation : ce que la loi française range en D, C, B et A, ce qu\'il faut pour acheter, et le piège du chargeur.')
 @section('og_type', 'article')
+@section('og_image', versioned_asset(\App\Support\Guides::byRoute('guides.classification')['image']))
+@section('og_image_alt', 'Illustration : quatre marches D, C, B et A gravissent une colline au coucher du soleil, d\'un cadenas ouvert à un panneau d\'interdiction.')
 @section('canonical', route('guides.classification'))
 
 @push('head')
@@ -61,6 +63,8 @@
             'title' => 'Classer son arme',
             'lede' => 'Sous 2 joules, de 2 à 20, dès 20, puis l\'autorisation : quatre régimes. Ce guide relie ce que la boutique a écrit sur les catégories D, C, B et A, pour savoir où se situe la vôtre avant d\'ouvrir le panier.',
             'tags' => ['D', 'C', 'B', 'A'],
+            'imageUrl' => versioned_asset(\App\Support\Guides::byRoute('guides.classification')['image']),
+            'imageAlt' => 'Illustration : quatre marches D, C, B et A gravissent une colline au coucher du soleil, d\'un cadenas ouvert à un panneau d\'interdiction.',
         ])
 
         <nav class="glab-plan" aria-label="Plan du guide">

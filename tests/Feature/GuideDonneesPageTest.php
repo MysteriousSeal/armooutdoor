@@ -114,6 +114,24 @@ class GuideDonneesPageTest extends TestCase
         $this->assertStringContainsString('<meta property="og:type" content="article">', $html);
     }
 
+    public function test_the_hero_carries_its_picture_and_shares_it(): void
+    {
+        $html = $this->get('/guides/proteger-ses-donnees')->assertOk()->getContent();
+        $image = Guides::byRoute('guides.donnees')['image'] ?? null;
+
+        $this->assertNotNull($image);
+        $this->assertFileExists(public_path($image));
+
+        // The picture shown whole as a real image, stamped so a replacement
+        // reaches returning visitors, described, loaded first, and the same
+        // one on a shared link.
+        $this->assertStringContainsString('cat-hero cat-hero--plate', $html);
+        $this->assertStringContainsString('src="'.versioned_asset($image).'"', $html);
+        $this->assertStringContainsString('alt="Illustration : une fiche', $html);
+        $this->assertStringContainsString('fetchpriority="high"', $html);
+        $this->assertStringContainsString('<meta property="og:image" content="'.versioned_asset($image).'">', $html);
+    }
+
     public function test_the_guide_joins_the_shelf_the_index_and_the_sitemap(): void
     {
         $this->assertContains(route('guides.donnees'), array_column(Guides::all(), 'url'));
