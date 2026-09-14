@@ -193,31 +193,30 @@ class Guides
     }
 
     /**
-     * The guides the home page offers today.
+     * The guides the home page offers this hour.
      *
-     * The strip has room for two and the shelf holds more, so the two that
-     * showed were simply the two that had been typed in: the rest were
-     * advertised nowhere but the footer. The window slides by one guide a
-     * day instead of drawing at random, which is the only way a shelf this
-     * small changes every morning rather than merely changing on average.
-     * It is read off the date, so every visitor of a given day sees the
-     * same pair, and it turns over at French midnight rather than UTC's.
+     * The strip has room for two and the shelf holds more. The pair used to
+     * slide one guide along each day, which a returning visitor could
+     * predict; it is now drawn at random every hour. The draw is seeded by
+     * the hour rather than taken from PHP's generator: every visitor of a
+     * given hour sees the same pair, and nothing else in the request has its
+     * random numbers disturbed.
      *
      * @return Collection<int, array{topic: string, title: string, url: string, route: string, categories: list<string>, published: string, updated: string, image?: string, teaser: string, summary: string}>
      */
-    public static function ofTheDay(int $count = 2): Collection
+    public static function ofTheHour(int $count = 2): Collection
     {
         $guides = self::all();
-        $total = count($guides);
 
-        if ($total === 0 || $count >= $total) {
+        if ($count >= count($guides)) {
             return collect($guides);
         }
 
-        $day = intdiv(now('Europe/Paris')->startOfDay()->getTimestamp(), 86400);
+        $hour = intdiv(now()->startOfHour()->getTimestamp(), 3600);
 
-        return collect(range(0, $count - 1))
-            ->map(fn (int $offset): array => $guides[($day + $offset) % $total])
+        return collect($guides)
+            ->sortBy(fn (array $guide): string => hash('xxh3', $hour.'|'.$guide['route']))
+            ->take($count)
             ->values();
     }
 }

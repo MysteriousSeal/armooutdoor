@@ -18,18 +18,12 @@ class GuidesTest extends TestCase
         parent::tearDown();
     }
 
-    private function topicsOn(string $date): string
+    /** @return list<string> */
+    private function titlesAt(string $moment): array
     {
-        Carbon::setTestNow($date.' 12:00:00');
+        Carbon::setTestNow($moment);
 
-        return Guides::ofTheDay()->pluck('topic')->implode(', ');
-    }
-
-    private function titlesOn(string $date): string
-    {
-        Carbon::setTestNow($date.' 12:00:00');
-
-        return Guides::ofTheDay()->pluck('title')->implode(', ');
+        return Guides::ofTheHour()->pluck('title')->all();
     }
 
     public function test_every_guide_is_named_priced_and_linked(): void
@@ -45,54 +39,60 @@ class GuidesTest extends TestCase
         }
     }
 
-    public function test_the_pair_changes_every_day(): void
+    public function test_the_pair_is_two_different_guides(): void
     {
-        $seen = [];
+        $titles = $this->titlesAt('2026-09-14 14:10:00');
 
-        for ($day = 0; $day < 6; $day++) {
-            $topics = $this->topicsOn(Carbon::parse('2026-09-06')->addDays($day)->toDateString());
+        $this->assertCount(2, $titles);
+        $this->assertCount(2, array_unique($titles));
+    }
 
-            $this->assertNotSame(end($seen) ?: null, $topics);
+    public function test_an_hour_shows_every_visitor_the_same_pair(): void
+    {
+        $this->assertSame(
+            $this->titlesAt('2026-09-14 14:02:00'),
+            $this->titlesAt('2026-09-14 14:58:00'),
+        );
+    }
 
-            $seen[] = $topics;
+    public function test_the_pair_is_drawn_again_on_the_hour(): void
+    {
+        $this->assertNotSame(
+            $this->titlesAt('2026-09-14 14:59:00'),
+            $this->titlesAt('2026-09-14 15:01:00'),
+        );
+    }
+
+    public function test_a_day_brings_many_different_pairs_not_a_sliding_window(): void
+    {
+        $pairs = [];
+        $slides = 0;
+        $order = array_column(Guides::all(), 'title');
+
+        for ($hour = 0; $hour < 24; $hour++) {
+            $titles = $this->titlesAt(Carbon::parse('2026-09-14 00:30:00')->addHours($hour)->toDateTimeString());
+            $pairs[] = implode(' | ', $titles);
+
+            // A daily-style window shows two guides that neighbour each other
+            // on the shelf; a draw only does so now and then.
+            $positions = array_map(fn (string $title): int => array_search($title, $order, true), $titles);
+            $slides += abs($positions[0] - $positions[1]) === 1 ? 1 : 0;
         }
+
+        $this->assertGreaterThanOrEqual(12, count(array_unique($pairs)));
+        $this->assertLessThan(12, $slides);
     }
 
-    public function test_a_day_shows_every_visitor_the_same_pair(): void
-    {
-        // Both of these are the sixth of September in Paris.
-        Carbon::setTestNow('2026-09-06 06:00:00');
-        $morning = Guides::ofTheDay()->pluck('topic')->implode(', ');
-
-        Carbon::setTestNow('2026-09-06 21:00:00');
-
-        $this->assertSame($morning, Guides::ofTheDay()->pluck('topic')->implode(', '));
-    }
-
-    public function test_the_window_turns_over_at_french_midnight(): void
-    {
-        // Half past midnight in Paris, still the sixth by the clock the app
-        // runs on: the shop's readers have already turned the page.
-        Carbon::setTestNow('2026-09-06 21:00:00');
-        $before = Guides::ofTheDay()->pluck('topic')->implode(', ');
-
-        Carbon::setTestNow('2026-09-06 22:30:00');
-
-        $this->assertNotSame($before, Guides::ofTheDay()->pluck('topic')->implode(', '));
-    }
-
-    public function test_every_guide_comes_up_within_a_cycle(): void
+    public function test_every_guide_comes_up_within_two_days(): void
     {
         $shown = [];
 
-        foreach (range(0, count(Guides::all()) - 1) as $day) {
-            $date = Carbon::parse('2026-09-06')->addDays($day)->toDateString();
-
-            $shown = array_merge($shown, explode(', ', $this->titlesOn($date)));
+        for ($hour = 0; $hour < 48; $hour++) {
+            $shown = array_merge($shown, $this->titlesAt(Carbon::parse('2026-09-14 00:30:00')->addHours($hour)->toDateTimeString()));
         }
 
         // Compared on the title, which is unique: two guides may well cover
-        // the same rayon, and did as soon as a second one covered the law.
+        // the same rayon.
         $this->assertEqualsCanonicalizing(
             array_column(Guides::all(), 'title'),
             array_values(array_unique($shown)),
@@ -101,6 +101,6 @@ class GuidesTest extends TestCase
 
     public function test_asking_for_more_than_the_shelf_holds_returns_the_shelf(): void
     {
-        $this->assertCount(count(Guides::all()), Guides::ofTheDay(99));
+        $this->assertCount(count(Guides::all()), Guides::ofTheHour(99));
     }
 }

@@ -274,7 +274,7 @@ class HomeController extends Controller
      */
     private function readings(): array
     {
-        $readings = Guides::ofTheDay()
+        $readings = Guides::ofTheHour()
             ->map(fn (array $guide): array => [
                 'kind' => 'Guide',
                 'topic' => $guide['topic'],

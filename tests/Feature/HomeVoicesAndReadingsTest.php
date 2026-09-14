@@ -156,13 +156,17 @@ class HomeVoicesAndReadingsTest extends TestCase
         // The factory files its posts under « Conseils ».
         BlogPost::factory()->create();
 
+        // The pair is drawn per hour: frozen, the page and the assertion
+        // below cannot straddle the turn of an hour.
+        $this->travelTo(now()->startOfHour()->addMinutes(10));
+
         $html = $this->get('/')->assertOk()->getContent();
 
         // « Guide » alone did not say which shelf, and « Conseils » alone did
         // not say the article came from the blog.
         $this->assertSame(2, substr_count($html, '<span class="home-reading-kind">Guide</span>'));
 
-        foreach (Guides::ofTheDay() as $guide) {
+        foreach (Guides::ofTheHour() as $guide) {
             $this->assertStringContainsString('<span class="home-reading-topic">'.$guide['topic'].'</span>', $html);
         }
 
