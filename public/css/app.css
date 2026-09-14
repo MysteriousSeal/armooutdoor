@@ -6974,3 +6974,225 @@ body.lightbox-open {
         padding-top: 0.1rem;
     }
 }
+
+/*
+ * Headings, lists, quotes and links inside a description, in the blog
+ * article's voice (blog.css, .blog-article-body): the same warm orange
+ * headings, square orange bullets, quote rule and quiet link underline, so
+ * a product written as a short article reads like the shop's own articles.
+ * Plain paragraph descriptions have none of these and are untouched.
+ */
+.product-sheet .product-detail-text :where(h2, h3, h4) {
+    margin: 0;
+    line-height: 1.25;
+    text-wrap: balance;
+}
+
+/* An h2 is the article's own title: the blog's section heading without its
+   number, since a description has no plan for the number to count against. */
+.product-sheet .product-detail-text h2 {
+    margin: 0 0 0.9rem;
+    font-size: 1.3rem;
+    font-weight: 750;
+    letter-spacing: -0.03em;
+    color: #cc5010;
+}
+
+.product-sheet .product-detail-text h3 {
+    margin: 2.1rem 0 0.7rem;
+    padding-left: 0.85rem;
+    font-size: 1.125rem;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    color: #cc5010;
+    border-left: 2px solid color-mix(in srgb, #cc5010 55%, var(--border));
+}
+
+.product-sheet .product-detail-text h4 {
+    margin: 1.45rem 0 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+}
+
+.product-sheet .product-detail-text :where(h2, h3, h4):first-child {
+    margin-top: 0;
+}
+
+/* A sentence ending in a colon and the list it announces are one thing. */
+.product-sheet .product-detail-text p:has(+ :where(ul, ol)) {
+    margin-bottom: 0.8rem;
+}
+
+.product-sheet .product-detail-text :where(ul, ol) {
+    padding-left: 1.2rem;
+}
+
+.product-sheet .product-detail-text ul {
+    list-style: square;
+}
+
+.product-sheet .product-detail-text li {
+    text-wrap: pretty;
+}
+
+.product-sheet .product-detail-text li::marker {
+    color: #cc5010;
+}
+
+.product-sheet .product-detail-text li + li {
+    margin-top: 0.6rem;
+}
+
+.product-sheet .product-detail-text blockquote {
+    margin-left: 0;
+    padding: 0.35rem 0 0.35rem 1.05rem;
+    border-left: 3px solid var(--accent);
+    color: var(--text-muted);
+}
+
+/* A quiet underline at rest so a paragraph with several links is not
+   striped, full strength under the pointer. */
+.product-sheet .product-detail-text a {
+    color: var(--accent-hover);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+    text-underline-offset: 0.18em;
+    transition: text-decoration-color 0.15s ease;
+}
+
+.product-sheet .product-detail-text a:hover {
+    text-decoration-color: currentColor;
+}
+
+/* Some descriptions arrive wrapped in a single div: its last element must
+   not leave a trailing margin either. */
+.product-sheet .product-detail-text > div > :last-child {
+    margin-bottom: 0;
+}
+
+/* Plain descriptions, most of the catalogue: the blog's paragraph rhythm,
+   and the opening sentence carries the orange bar the section headings
+   use, so a description written without headings still opens like one of
+   the shop's articles. */
+.product-sheet .product-detail-text :where(p, ul, ol, blockquote) {
+    margin-bottom: 1.25rem;
+}
+
+.product-sheet .product-detail-text p {
+    text-wrap: pretty;
+}
+
+.product-sheet .product-detail-text > p:first-child {
+    padding-left: 0.95rem;
+    border-left: 2px solid color-mix(in srgb, #cc5010 55%, var(--border));
+}
+
+[data-theme='dark'] .product-sheet .product-detail-text > p:first-child {
+    border-left-color: color-mix(in srgb, #ff9450 55%, var(--border));
+}
+
+[data-theme='dark'] .product-sheet .product-detail-text :where(h2, h3) {
+    color: #ff9450;
+}
+
+[data-theme='dark'] .product-sheet .product-detail-text h3 {
+    border-left-color: color-mix(in srgb, #ff9450 55%, var(--border));
+}
+
+[data-theme='dark'] .product-sheet .product-detail-text li::marker {
+    color: #ff9450;
+}
+
+/*
+ * The characteristics as a spec sheet in the description's warm orange.
+ * Rows are banded instead of ruled: every other one carries a trace of the
+ * orange, and the band reaches a little past the text on both sides so the
+ * labels still line up with the section heading. Each label opens on the
+ * square the description's bullets use. The labels take a darker orange
+ * than the headings (#b8470c, above 4.5:1 even on the band) because they
+ * are small text. Selectors carry the section class so they win over the
+ * earlier ledger rules, first and last rows and the two-column layout
+ * included.
+ */
+/* Width auto, not the base rule's 100%: a fixed width only shifts the list
+   left, and the bands stopped short on the right. */
+.product-sheet .product-specs .product-specs-list {
+    width: auto;
+    margin-inline: -0.85rem;
+}
+
+.product-sheet .product-specs .product-specs-row {
+    padding: 0.62rem 0.85rem;
+    border: 0;
+}
+
+.product-sheet .product-specs .product-specs-row:nth-child(odd) {
+    background: color-mix(in srgb, #cc5010 5%, var(--surface));
+}
+
+.product-sheet .product-specs .product-specs-row dt {
+    display: flex;
+    align-items: baseline;
+    gap: 0.55rem;
+    color: #b8470c;
+}
+
+/* An empty box sits on the baseline by its bottom edge: lifted by a fifth
+   of an em, the square centres on the lowercase letters. */
+.product-sheet .product-specs .product-specs-row dt::before {
+    content: '';
+    flex: none;
+    width: 0.375rem;
+    height: 0.375rem;
+    margin-bottom: 0.2em;
+    background: #cc5010;
+}
+
+/* Under a pointer the row a shopper is reading lights up, which carries the
+   eye from a label across to its value. */
+@media (hover: hover) {
+    .product-sheet .product-specs .product-specs-row:hover {
+        background: color-mix(in srgb, #cc5010 11%, var(--surface));
+    }
+}
+
+[data-theme='dark'] .product-sheet .product-specs .product-specs-row:nth-child(odd) {
+    background: color-mix(in srgb, #ff9450 7%, var(--surface));
+}
+
+[data-theme='dark'] .product-sheet .product-specs .product-specs-row dt {
+    color: #ff9450;
+}
+
+[data-theme='dark'] .product-sheet .product-specs .product-specs-row dt::before {
+    background: #ff9450;
+}
+
+@media (hover: hover) {
+    [data-theme='dark'] .product-sheet .product-specs .product-specs-row:hover {
+        background: color-mix(in srgb, #ff9450 13%, var(--surface));
+    }
+}
+
+@media (max-width: 559px) {
+    .product-sheet .product-specs .product-specs-list {
+        margin-inline: -0.75rem;
+    }
+
+    .product-sheet .product-specs .product-specs-row {
+        padding: 0.6rem 0.75rem;
+    }
+}
+
+@media (max-width: 759px) {
+    .product-sheet .product-detail-text h2 {
+        font-size: 1.15rem;
+    }
+
+    .product-sheet .product-detail-text h3 {
+        margin-top: 1.75rem;
+        font-size: 1.05rem;
+    }
+}
