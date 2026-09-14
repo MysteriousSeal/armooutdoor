@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-14 · v1.40.2 · build S2GILD
+
+### Storefront
+
+- **Product descriptions written as a short article now read like the blog.** Their headings were barely bigger than the text and their bullets were plain black dots. They now take the blog article's styling: a warm orange title, section headings with the orange bar beside them, square orange bullets, and the blog's link underline and quote rule.
+- **Plain descriptions, most of the catalogue, open like an article too.** The opening sentence carries the same orange bar as the section headings, and paragraphs get the blog's spacing and more even line endings.
+- **The characteristics answer in the same orange.** Rows are banded instead of ruled, every other one carrying a soft orange tint, and each label opens on the description's square bullet. On a computer the row under the pointer lights up, carrying the eye from a label to its value. Labels use a darker orange than the headings so small text stays readable, above 4.5:1 contrast.
+
+**No migration.**
+
 ## 2026-09-14 · v1.40.1 · build XFY7HO
 
 ### Storefront
