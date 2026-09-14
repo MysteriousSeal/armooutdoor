@@ -31,7 +31,7 @@
                 loading="{{ $lazy ?? true ? 'lazy' : 'eager' }}"
             >
             @if ($product->hasDiscount())
-                <span class="card-discount-chip">{{ $product->discount->label() }}</span>
+                <span class="card-discount-chip">{{ $product->discount->percentageLabel($product->price_cents) }}</span>
             @endif
             @if ($variantCount > 0)
                 <span class="card-variant-chip">{{ trans_choice('store.variants_count', $variantCount, ['count' => $variantCount]) }}</span>

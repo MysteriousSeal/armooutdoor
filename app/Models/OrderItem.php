@@ -141,6 +141,27 @@ class OrderItem extends Model
         return $this->fullLineCents() - $this->line_cents;
     }
 
+    /**
+     * The saved discount label, shown as a percentage. A euro amount is
+     * measured from the two prices the line kept and rounded down, the way
+     * the shop states it elsewhere. A saved percentage is kept as is, since
+     * the rounded prices can put it a point lower; under 1% the saved label
+     * stands.
+     */
+    public function discountPercentageLabel(): ?string
+    {
+        $label = $this->discount_label;
+        $original = $this->original_unit_price_cents;
+
+        if (! $this->hasDiscount() || $original <= 0 || ($label !== null && str_ends_with($label, '%'))) {
+            return $label;
+        }
+
+        $percent = min(100, intdiv(($original - $this->unit_price_cents) * 100, $original));
+
+        return $percent >= 1 ? '-'.$percent.'%' : $label;
+    }
+
     public function imageUrl(): string
     {
         if (str_starts_with($this->image, 'https://') || str_starts_with($this->image, 'http://')) {

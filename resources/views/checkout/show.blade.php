@@ -509,7 +509,7 @@
                                     </p>
                                 @endif
                                 @if ($line->hasDiscount())
-                                    <span class="badge badge-active cart-line-discount-badge">{{ $line->product->discount->label() }}</span>
+                                    <span class="badge badge-active cart-line-discount-badge">{{ $line->product->discount->percentageLabel($line->product->price_cents) }}</span>
                                 @endif
                                 <p class="checkout-line-meta">
                                     × {{ $line->quantity }} ·

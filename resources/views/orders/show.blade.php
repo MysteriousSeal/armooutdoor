@@ -91,7 +91,7 @@
                                     @endif
                                     @if ($item->hasDiscount() && $item->discount_label)
                                         <div class="order-item-discount">
-                                            <span class="order-discount-badge">{{ $item->discount_label }}</span>
+                                            <span class="order-discount-badge">{{ $item->discountPercentageLabel() }}</span>
                                         </div>
                                     @endif
                                 </div>
@@ -148,7 +148,7 @@
                                     <li class="order-reductions-row">
                                         <div class="order-reductions-copy">
                                             <p class="order-reductions-name">{{ $item->localizedName() }}</p>
-                                            <span class="order-discount-badge">{{ $item->discount_label }}</span>
+                                            <span class="order-discount-badge">{{ $item->discountPercentageLabel() }}</span>
                                         </div>
                                         <p class="order-reductions-amount">−{{ format_euros($item->discountCents()) }}</p>
                                     </li>

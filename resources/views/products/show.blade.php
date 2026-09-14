@@ -157,7 +157,7 @@
                         class="badge badge-active cart-line-discount-badge"
                         id="product-detail-discount-badge"
                         @if (! $product->is_active || $variantHasOwnPrice || ! $product->hasDiscount()) hidden @endif
-                    >{{ $product->hasDiscount() ? $product->discount->label() : '' }}</span>
+                    >{{ $product->hasDiscount() ? $product->discount->percentageLabel($product->price_cents) : '' }}</span>
                     <p class="product-detail-price" id="product-detail-price">
                         <span
                             class="product-detail-price-original"
@@ -311,7 +311,7 @@
                                                 data-variant-label="{{ $variantLabel }}"
                                                 data-variant-price="{{ $variant->formattedPrice() }}"
                                                 data-variant-original-price="{{ ($variant->price_cents === null && $product->hasDiscount()) ? $product->formattedOriginalPrice() : '' }}"
-                                                data-variant-discount-label="{{ ($variant->price_cents === null && $product->hasDiscount()) ? $product->discount->label() : '' }}"
+                                                data-variant-discount-label="{{ ($variant->price_cents === null && $product->hasDiscount()) ? $product->discount->percentageLabel($product->price_cents) : '' }}"
                                                 data-variant-discount-ends-at="{{ ($variant->price_cents === null && $product->hasDiscount() && $product->discount->ends_at) ? $product->discount->ends_at->toIso8601String() : '' }}"
                                                 data-variant-max="{{ $variant->maxPurchasable() }}"
                                                 data-variant-sku="{{ $variant->sku ?: $product->sku }}"

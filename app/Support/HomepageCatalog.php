@@ -59,30 +59,12 @@ class HomepageCatalog
             ->with('discount')
             ->get()
             ->filter(fn (Product $product): bool => $product->hasDiscount())
-            ->map(fn (Product $product): int => self::percentageOff($product))
+            // The same rounded-down figure the product cards print, so the
+            // slide's "jusqu'à" can never exceed a chip it leads to.
+            ->map(fn (Product $product): int => $product->discount->percentageOf($product->price_cents) ?? 0)
             ->max();
 
         return $deepest >= 1 ? $deepest : null;
-    }
-
-    /**
-     * A fixed amount is measured against the product's own price, the one it
-     * is taken off, and rounded down: "jusqu'à" must never promise more than
-     * the shop gives.
-     */
-    private static function percentageOff(Product $product): int
-    {
-        $discount = $product->discount;
-
-        if ($discount->type === 'percentage') {
-            return $discount->value;
-        }
-
-        if ($product->price_cents <= 0) {
-            return 0;
-        }
-
-        return min(100, intdiv($discount->value * 100, $product->price_cents));
     }
 
     public static function featured(int $limit = 4): EloquentCollection

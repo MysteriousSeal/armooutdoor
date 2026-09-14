@@ -69,6 +69,33 @@ class Discount extends Model
     }
 
     /**
+     * The reduction as a whole percentage of the price it is taken off,
+     * rounded down so it never claims more than it gives; null below 1%.
+     */
+    public function percentageOf(int $priceCents): ?int
+    {
+        if ($this->type === 'percentage') {
+            return $this->value >= 1 ? $this->value : null;
+        }
+
+        if ($priceCents <= 0) {
+            return null;
+        }
+
+        $percent = min(100, intdiv($this->value * 100, $priceCents));
+
+        return $percent >= 1 ? $percent : null;
+    }
+
+    /** label(), always as a percentage, except for an amount worth under 1%. */
+    public function percentageLabel(int $priceCents): string
+    {
+        $percent = $this->percentageOf($priceCents);
+
+        return $percent === null ? $this->label() : '-'.$percent.'%';
+    }
+
+    /**
      * Admin-facing status. Separate from isActive() so a future window
      * can be labelled Scheduled instead of just "not active".
      */
