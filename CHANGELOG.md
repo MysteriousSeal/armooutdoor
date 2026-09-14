@@ -2,6 +2,17 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-14 · v1.40.1 · build XFY7HO
+
+### Storefront
+
+- **A product's description and characteristics now share one sheet.** They were two full-width panels: the text stopped two thirds of the way across and left the rest empty, a rule between every paragraph chopped it into separate notices, and the characteristics were thirteen identical grey boxes. On a wide screen the description now reads on the left and the characteristics sit on the right, on the same split as the photo and the buy box above, with one rule under both headings and a divider between them.
+- **The description reads as one text.** Paragraphs are separated by space instead of rules, and the opening sentence is set larger so a shopper who reads nothing else still reads what the product is. Bold words keep the size and colour of their sentence, where they used to shrink to small grey text.
+- **The characteristics read as a list, not a wall of boxes.** Each row pairs an olive label with its value on a thin rule, so the eye runs down the labels and across to the answer. When the description runs longer, the list stays in view on screens tall enough to show it whole.
+- **Tablets and phones get their own layout.** Below 1024px the characteristics follow the description, both on one comfortable reading width; on a phone each label sits above its value, so a long value keeps the full width.
+
+**No migration.**
+
 ## 2026-09-14 · v1.40.0 · build UQCU2O
 
 ### Admin
