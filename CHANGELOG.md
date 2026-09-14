@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-14 · v1.39.15 · build 2QEZ40
+
+### Storefront
+
+- **Euro discounts now read as a percentage wherever a shopper sees them.** A fixed discount showed « -2,00 € » on product cards, the product page, the cart, checkout and the order page, while the homepage sale slide spoke in percentages. Each badge now states the share of the price the discount comes off: 2,00 € off 16,90 € reads « -11% ».
+- **The figure is rounded down**, so a badge never claims more than the shopper saves. The homepage slide uses the same calculation, so its « Jusqu'à » can never exceed a badge it leads to. A discount worth under 1% keeps its euro amount rather than reading « -0% ».
+- **Orders placed before the change read the same way.** The order page works the percentage out from the two prices each line kept. A discount saved as a percentage is shown as it was, since the rounded prices can put it a point lower.
+
+The admin order page still shows the label saved at checkout.
+
+**No migration.**
+
 ## 2026-09-13 · v1.39.14 · build F6UXYW
 
 ### Storefront
