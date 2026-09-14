@@ -49,6 +49,9 @@ class ProductController extends Controller
         $search = trim((string) $request->query('search', ''));
         $categorySlug = (string) $request->query('category', '');
         $supplierId = $request->filled('supplier') ? (int) $request->query('supplier') : null;
+        $ai = in_array($request->query('ai'), ['reviewed', 'pending'], true)
+            ? (string) $request->query('ai')
+            : '';
         $tab = in_array($request->query('tab'), ['active', 'disabled', 'in-stock', 'restocking', 'at-supplier', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight', 'no-image', 'no-seo'], true)
             ? (string) $request->query('tab')
             : 'active';
@@ -59,7 +62,7 @@ class ProductController extends Controller
             ? (string) $request->query('sort')
             : (in_array($request->cookie(self::SORT_COOKIE), self::SORTS, true) ? $request->cookie(self::SORT_COOKIE) : self::DEFAULT_SORT);
 
-        $products = $this->filteredProductsQuery($search, $categorySlug, $tab, $supplierId)
+        $products = $this->filteredProductsQuery($search, $categorySlug, $tab, $supplierId, $ai)
             // The discount rides along: the list prints it on every row that
             // has one, and asking per row is twenty queries a page.
             ->with('category', 'supplier', 'discount', 'variants.supplier')
@@ -89,6 +92,7 @@ class ProductController extends Controller
             'search' => $search,
             'categorySlug' => $categorySlug,
             'supplierId' => $supplierId,
+            'ai' => $ai,
         ])->cookie(self::SORT_COOKIE, $sort, 60 * 24 * 365);
     }
 
@@ -97,11 +101,14 @@ class ProductController extends Controller
         $search = trim((string) $request->query('search', ''));
         $categorySlug = (string) $request->query('category', '');
         $supplierId = $request->filled('supplier') ? (int) $request->query('supplier') : null;
+        $ai = in_array($request->query('ai'), ['reviewed', 'pending'], true)
+            ? (string) $request->query('ai')
+            : '';
         $tab = in_array($request->query('tab'), ['active', 'disabled', 'in-stock', 'at-supplier', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight', 'no-image', 'no-seo'], true)
             ? (string) $request->query('tab')
             : 'active';
 
-        $products = $this->filteredProductsQuery($search, $categorySlug, $tab, $supplierId)
+        $products = $this->filteredProductsQuery($search, $categorySlug, $tab, $supplierId, $ai)
             ->with('category', 'supplier')
             ->orderBy('id')
             ->get();
@@ -124,7 +131,7 @@ class ProductController extends Controller
         );
     }
 
-    private function filteredProductsQuery(string $search, string $categorySlug, string $tab, ?int $supplierId = null): Builder
+    private function filteredProductsQuery(string $search, string $categorySlug, string $tab, ?int $supplierId = null, string $ai = ''): Builder
     {
         return Product::query()
             ->tap(fn ($query) => $this->applyProductTab($query, $tab))
@@ -145,7 +152,9 @@ class ProductController extends Controller
                         ->orWhereHas('parent', fn ($query) => $query->where('slug', $categorySlug));
                 });
             })
-            ->when($supplierId !== null, fn ($query) => $query->where('supplier_id', $supplierId));
+            ->when($supplierId !== null, fn ($query) => $query->where('supplier_id', $supplierId))
+            ->when($ai === 'reviewed', fn ($query) => $query->where('ai_validated', true))
+            ->when($ai === 'pending', fn ($query) => $query->where('ai_validated', false));
     }
 
     public function create(): View

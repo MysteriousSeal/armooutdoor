@@ -49,4 +49,85 @@ class ProductAiValidatedColumnTest extends TestCase
         // entendre l'état, pas un dessin.
         $this->assertMatchesRegularExpression('#sr-only">Reviewed<#', $this->list());
     }
+
+    public function test_the_list_can_be_narrowed_to_reviewed_products(): void
+    {
+        Product::factory()->create([
+            'ai_validated' => true,
+            'name' => ['fr' => 'Gants revus', 'en' => 'Reviewed gloves'],
+        ]);
+        Product::factory()->create([
+            'ai_validated' => false,
+            'name' => ['fr' => 'Gants bruts', 'en' => 'Raw gloves'],
+        ]);
+
+        $html = $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/products?ai=reviewed')
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('Gants revus', $html);
+        $this->assertStringNotContainsString('Gants bruts', $html);
+        $this->assertStringContainsString('AI · Reviewed', $html);
+    }
+
+    public function test_the_list_can_be_narrowed_to_products_not_yet_reviewed(): void
+    {
+        Product::factory()->create([
+            'ai_validated' => true,
+            'name' => ['fr' => 'Gants revus', 'en' => 'Reviewed gloves'],
+        ]);
+        Product::factory()->create([
+            'ai_validated' => false,
+            'name' => ['fr' => 'Gants bruts', 'en' => 'Raw gloves'],
+        ]);
+
+        $html = $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/products?ai=pending')
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('Gants bruts', $html);
+        $this->assertStringNotContainsString('Gants revus', $html);
+        $this->assertStringContainsString('AI · Not reviewed', $html);
+    }
+
+    public function test_an_unknown_ai_filter_is_ignored(): void
+    {
+        Product::factory()->create([
+            'ai_validated' => true,
+            'name' => ['fr' => 'Gants revus', 'en' => 'Raw gloves'],
+        ]);
+        Product::factory()->create([
+            'ai_validated' => false,
+            'name' => ['fr' => 'Gants bruts', 'en' => 'Raw gloves two'],
+        ]);
+
+        $html = $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/products?ai=maybe')
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('Gants revus', $html);
+        $this->assertStringContainsString('Gants bruts', $html);
+        $this->assertStringNotContainsString('AI · Reviewed', $html);
+    }
+
+    public function test_the_ai_filter_survives_a_tab(): void
+    {
+        Product::factory()->create([
+            'ai_validated' => false,
+            'name' => ['fr' => 'Gants bruts', 'en' => 'Raw gloves'],
+        ]);
+
+        $html = $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/products?tab=in-stock&ai=pending')
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('name="ai"', $html);
+        $this->assertStringContainsString('value="pending" selected', $html);
+        $this->assertStringContainsString('tab=in-stock', $html);
+        $this->assertStringContainsString('ai=pending', $html);
+    }
 }
