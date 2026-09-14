@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-14 · v1.42.1 · build B6QT9L
+
+### Admin
+
+- **A fully received purchase order now offers its labels from the line.** Once every unit has arrived, each row carries two buttons at the end. Edit label opens Catalog › Labels in a new tab, already filtered on that product. Download label prints the sheet when the article has a title, a subtitle, a reference and a barcode — the same four Catalog › Labels checks before it offers the button.
+- **A size ordered as a variant downloads that size's sheet.** An article still short of something keeps the download button in place but switched off, so the row does not rearrange. A line whose product has since been deleted keeps the column and says nothing.
+
+**No migration.**
+
 ## 2026-09-14 · v1.42.0 · build Q8LT2V
 
 ### Storefront
