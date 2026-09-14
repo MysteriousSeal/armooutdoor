@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-14 · v1.42.2 · build R7NH4C
+
+### Admin
+
+- **A received line now says what still blocks its label.** Instead of a GTIN chip, each fully received row lists the gaps Catalog › Labels already checks — title, subtitle, SKU, GTIN — named the same way and read from the size when the line is a size, not from the product. A line that can print shows nothing above the buttons.
+- **Download label takes the ready green when it can go.** The live button is tinted like the other ready chips, so it stands out from the grey Edit label beside it. An article still short of something keeps the grey, disabled button.
+
+**No migration.**
+
 ## 2026-09-14 · v1.42.1 · build B6QT9L
 
 ### Admin
