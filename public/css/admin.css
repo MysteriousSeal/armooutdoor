@@ -2580,6 +2580,22 @@ button.supplier-availability-chip:hover {
     font-size: 0.75rem;
 }
 
+/* Printed after the goods have all arrived: two buttons at the end of the
+   line, the same pair Catalog › Labels uses once an article is ready. */
+.po-label-cell {
+    width: 1%;
+    white-space: nowrap;
+    text-align: right;
+}
+
+.po-label-actions {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
 .admin-list-chip {
     display: inline-flex;
     align-items: center;

@@ -79,6 +79,9 @@
                                     @if ($canReceive)
                                         <th class="po-receive-cell">Receive<span class="po-col-note">now</span></th>
                                     @endif
+                                    @if ($purchaseOrder->isReceived())
+                                        <th class="po-label-cell"></th>
+                                    @endif
                                 </tr>
                             </thead>
                             <tbody>
@@ -146,6 +149,24 @@
                                                         max="{{ $item->quantityRemaining() }}"
                                                     >
                                                     @error('lines.'.$item->id) <span class="form-error">{{ $message }}</span> @enderror
+                                                @endif
+                                            </td>
+                                        @endif
+                                        @if ($purchaseOrder->isReceived())
+                                            <td class="po-label-cell">
+                                                @if ($item->product)
+                                                    @php($downloadUrl = $item->labelDownloadUrl())
+                                                    <div class="po-label-actions">
+                                                        <a href="{{ $item->labelEditUrl() }}" class="btn btn-secondary btn-small" target="_blank" rel="noopener">Edit label</a>
+                                                        @if ($downloadUrl)
+                                                            <a href="{{ $downloadUrl }}" class="btn btn-secondary btn-small">Download label</a>
+                                                        @else
+                                                            {{-- Same as Catalog › Labels: the button stays so the row
+                                                                 does not rearrange, and it is off until the article
+                                                                 has its wording and its codes. --}}
+                                                            <span class="btn btn-secondary btn-small is-disabled" aria-disabled="true">Download label</span>
+                                                        @endif
+                                                    </div>
                                                 @endif
                                             </td>
                                         @endif

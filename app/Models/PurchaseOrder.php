@@ -243,6 +243,11 @@ class PurchaseOrder extends Model
         return in_array($this->status, ['sent', 'partially_received'], true);
     }
 
+    public function isReceived(): bool
+    {
+        return $this->status === 'received';
+    }
+
     public function canBeCancelled(): bool
     {
         return in_array($this->status, ['sent', 'partially_received'], true);

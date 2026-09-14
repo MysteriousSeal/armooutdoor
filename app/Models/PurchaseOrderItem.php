@@ -56,6 +56,45 @@ class PurchaseOrderItem extends Model
     }
 
     /**
+     * The Labels page, narrowed to this line's product.
+     *
+     * The wording is edited there, not here: a received order is the moment
+     * the sheets get printed, so the row only needs a way back to the form.
+     * Search is what that page already uses to hold one product.
+     */
+    public function labelEditUrl(): ?string
+    {
+        if ($this->product === null) {
+            return null;
+        }
+
+        $search = filled($this->product->sku)
+            ? $this->product->sku
+            : $this->product->localizedName();
+
+        return route('admin.labels.index', ['search' => $search]);
+    }
+
+    /**
+     * The printed sheet for this line, when the article has everything a
+     * label needs — the same four the Labels page checks before it offers
+     * the button.
+     */
+    public function labelDownloadUrl(): ?string
+    {
+        if ($this->product === null || ! $this->product->labelIsPrintable($this->variant)) {
+            return null;
+        }
+
+        return $this->variant === null
+            ? route('admin.products.label', $this->product)
+            : route('admin.products.variants.label', [
+                'product' => $this->product,
+                'variant' => $this->variant,
+            ]);
+    }
+
+    /**
      * L'image à imprimer sur le bon de commande.
      *
      * Un chemin sur le disque, pas une URL : le générateur de PDF lit le
