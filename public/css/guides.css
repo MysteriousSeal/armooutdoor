@@ -3125,3 +3125,602 @@
         transition: none;
     }
 }
+
+/* ============================== moderateur ==============================
+ *
+ * Modérateur de son
+ */
+
+/*
+ * The calculator reuses the joules guide's grid, fields and result, the
+ * shared chips, and the energy scale's track and brace. What is new is that
+ * the answer is a band rather than a needle: the measurements give a range,
+ * and a needle would claim a precision they do not have.
+ */
+
+/* A chip group is a fieldset, for its legend; the browser's frame goes. */
+.glab--moderateur fieldset.glab-calc-field {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+/* Worded like the calculator's other labels. */
+.glab--moderateur fieldset.glab-calc-field legend {
+    margin: 0 0 0.35rem;
+    padding: 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.glab--moderateur .glab-calc-fields .glab-chips button {
+    flex: 1 1 9rem;
+}
+
+/* A range is twice as long as a joule reading: the figure gives up some size. */
+.glab--moderateur .glab-calc-energy strong {
+    font-size: clamp(2rem, 5vw, 2.9rem);
+}
+
+/* The last mark is the axis's right edge, so it hangs from it inward. */
+.glab-db .glab-scale-marks span:last-child {
+    transform: translateX(-100%);
+}
+
+/* The estimate: an outlined band standing proud of the track, readable over
+   the palest zone and the solid one alike. */
+.glab-db-band {
+    position: absolute;
+    top: -0.35rem;
+    bottom: -0.35rem;
+    left: var(--glab-db-from, 0%);
+    width: calc(var(--glab-db-to, 0%) - var(--glab-db-from, 0%));
+    min-width: 4px;
+    background: color-mix(in srgb, var(--text) 16%, transparent);
+    border: 2px solid var(--text);
+    transition: left 0.18s ease, width 0.18s ease;
+}
+
+.glab-db-refs {
+    margin: 0.35rem 0 0;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .glab-db-band {
+        transition: none;
+    }
+}
+
+
+/* ============================== plombs ==============================
+ *
+ * Quel plomb pour sa carabine à air ?
+ */
+
+/*
+ * « Quel plomb » : a bench that turns a rifle's energy and a tin's weight
+ * into a speed, four pellets drawn in profile, and a floor table. Everything
+ * else is the shared trunk: calculator fields, chips, cards, table, myths.
+ */
+
+.glab--plombs .glab-title,
+.glab--plombs .glab-section {
+    scroll-margin-top: 5.5rem;
+}
+
+/* Three readings, not four: the shared row was cut for the joules caps. */
+.glab--plombs .glab-calc-limits ul {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.glab--plombs .glab-calc-field > span {
+    font-size: inherit;
+}
+
+.glab--plombs .glab-calc-note a {
+    color: var(--accent-heading);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+/* ============ the speed axis ============ */
+
+/*
+ * The page's signature. Linear, unlike the energy scale: speed is what the
+ * reader measures and what the transonic region is defined by, and a
+ * straight axis lets 900 fps sit where the eye expects it. The region past
+ * it is hatched rather than filled, because it is turbulence, not a legal
+ * zone with a hard edge.
+ */
+.glab-speed {
+    margin: 1.5rem 0 0;
+}
+
+.glab-speed-marks {
+    position: relative;
+    height: 1.05rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+}
+
+.glab-speed-marks span {
+    position: absolute;
+    left: var(--glab-mark-at);
+    transform: translateX(-50%);
+    white-space: nowrap;
+}
+
+.glab-speed-marks span:first-child {
+    transform: none;
+}
+
+/* The 900 fps label ends just before its line, over the calm side, so the
+   line never cuts through it and it stays clear of the 1 400 at the end. */
+.glab-speed-marks span:nth-child(2) {
+    padding-right: 0.4rem;
+    transform: translateX(-100%);
+}
+
+.glab-speed-marks span:last-child {
+    transform: translateX(-100%);
+}
+
+.glab-speed-marks {
+    margin-bottom: 0.35rem;
+}
+
+.glab-speed-track {
+    position: relative;
+    height: 0.95rem;
+    background: color-mix(in srgb, var(--accent-heading) 12%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 35%, var(--border));
+}
+
+.glab-speed-zone {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: var(--glab-zone-from);
+    background: repeating-linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--accent-heading) 55%, var(--surface)) 0 5px,
+        color-mix(in srgb, var(--accent-heading) 22%, var(--surface)) 5px 10px
+    );
+    border-left: 2px solid var(--accent-heading);
+}
+
+.glab-speed-needle {
+    position: absolute;
+    top: -0.3rem;
+    bottom: -0.3rem;
+    left: var(--glab-speed-at, 0%);
+    width: 2px;
+    margin-left: -1px;
+    background: var(--text);
+    transition: left 0.18s ease;
+}
+
+.glab-speed-needle::before {
+    content: '';
+    position: absolute;
+    top: -0.32rem;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 0.32rem solid transparent;
+    border-right: 0.32rem solid transparent;
+    border-top: 0.36rem solid var(--text);
+}
+
+.glab-speed-legend {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+/* Past the line, the label of the region the needle stands in lights up. */
+.glab-speed.is-transonic .glab-speed-legend span:last-child {
+    color: var(--accent-heading);
+}
+
+/* ============ the heads ============ */
+
+/* One outline per pellet, drawn in the accent: the nose is the only line
+   that differs from card to card, and the dashed skirt shows the hollow
+   the air pushes into. */
+.glab-pellet {
+    display: block;
+    width: 100%;
+    max-width: 9.5rem;
+    height: auto;
+    margin: 0 0 0.4rem;
+    color: var(--accent-heading);
+}
+
+.glab-pellet path {
+    fill: color-mix(in srgb, var(--accent-heading) 14%, var(--surface));
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+}
+
+.glab-pellet .glab-pellet-skirt {
+    fill: none;
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+}
+
+/* ============ the usage card and the table ============ */
+
+.glab-plombs-usage {
+    margin-top: 1.6rem;
+    border-top: 2px solid var(--accent-heading);
+}
+
+.glab-plombs-usage p:not(.glab-reco-label):not(.glab-reco-resume) {
+    max-width: 46rem;
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.glab--plombs .glab-table th[scope='row'] {
+    white-space: nowrap;
+    color: var(--text);
+    background: none;
+    border-top: 1px solid var(--border);
+    font-size: 0.8125rem;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.glab--plombs .glab-table td.is-transonic {
+    font-weight: 700;
+    color: var(--bg);
+    background: var(--accent-heading);
+}
+
+@media (max-width: 46rem) {
+    .glab--plombs .glab-calc-limits ul {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    /* Three uses, one per line: two abreast broke « Carton à 10 m » in two
+       and left the third alone on its row. */
+    .glab--plombs .glab-chips--range {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .glab-speed-needle {
+        transition: none;
+    }
+}
+
+
+/* ============================== co2 ==============================
+ *
+ * Réplique CO2 et froid: the cartridge gauge
+ */
+
+/*
+ * The instrument of the subject is a manometer, so the page draws one. The
+ * temperature is the only thing the reader moves, and it takes the shop's two
+ * existing weather colours: the hero teal for the cold, the hero orange for
+ * the heat, the olive for the range the replicas are set for. Nothing else
+ * on the page is coloured by temperature, so the colour means one thing.
+ */
+.glab--co2 {
+    --co2-cold: var(--hero-teal);
+    --co2-heat: var(--hero-orange);
+    --co2-tone: var(--accent-heading);
+}
+
+.glab--co2 .glab-title,
+.glab--co2 .glab-section {
+    scroll-margin-top: 5.5rem;
+}
+
+.glab--co2 .glab-prose {
+    font-size: 1rem;
+    line-height: 1.72;
+}
+
+.glab--co2 .glab-joules-pair {
+    margin-top: 1.6rem;
+}
+
+.glab--co2 [data-co2-state='froid'],
+.glab--co2 [data-co2-state='frais'] {
+    --co2-tone: var(--co2-cold);
+}
+
+.glab--co2 [data-co2-state='chaud'],
+.glab--co2 [data-co2-state='danger'] {
+    --co2-tone: var(--co2-heat);
+}
+
+/* ============ the dial ============ */
+
+.glab-co2-dial {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    padding: 1rem 1.1rem 1.1rem;
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 16%, var(--border));
+}
+
+.glab-co2-dial svg {
+    display: block;
+    width: 100%;
+    max-width: 19rem;
+    height: auto;
+    margin: 0 auto;
+    overflow: visible;
+}
+
+.glab-co2-arc,
+.glab-co2-fill {
+    fill: none;
+    stroke-width: 9;
+}
+
+.glab-co2-arc {
+    stroke: color-mix(in srgb, var(--accent-heading) 12%, var(--border));
+}
+
+/* The share of the face the pressure fills, in the colour of its band. */
+.glab-co2-fill {
+    stroke: var(--co2-tone);
+    stroke-dasharray: var(--co2-fill, 71.6) 100;
+    transition: stroke-dasharray 0.25s ease, stroke 0.25s ease;
+}
+
+.glab-co2-tick line {
+    stroke: var(--text-muted);
+    stroke-width: 1.2;
+}
+
+.glab-co2-tick text,
+.glab-co2-mark text,
+.glab-co2-unit {
+    font-family: var(--font);
+    font-size: 10px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    fill: var(--text-muted);
+}
+
+.glab-co2-mark line {
+    stroke: var(--text);
+    stroke-width: 1.5;
+    stroke-dasharray: 2 2;
+}
+
+.glab-co2-mark text {
+    font-size: 9px;
+    letter-spacing: 0.04em;
+    fill: var(--text);
+}
+
+.glab-co2-unit {
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.glab-co2-needle {
+    transform-box: view-box;
+    transform-origin: 120px 120px;
+    transform: rotate(var(--co2-angle, 51.87deg));
+    transition: transform 0.25s ease;
+}
+
+.glab-co2-needle line {
+    stroke: var(--text);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+}
+
+.glab-co2-needle circle {
+    fill: var(--text);
+}
+
+/* Past the critical point the needle rests against the stop, dashed: the
+   table holds no reading there, and the dial should not pretend to one. */
+.is-off-table .glab-co2-needle line {
+    stroke-dasharray: 5 4;
+}
+
+/* ============ the temperature ============ */
+
+.glab-co2-slider-label {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.glab-co2-slider-label output {
+    /* A narrow card broke « 20 °C » between the number and its unit. */
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-size: 1.15rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--co2-tone);
+}
+
+/*
+ * The track is the temperature axis, cut at the bounds of the five bands:
+ * cold to -20..5, cool to 15, the setting range to 31, heat to 49, and the
+ * last sliver where a cartridge can burst.
+ */
+.glab-co2-slider {
+    --co2-track: linear-gradient(
+        to right,
+        var(--co2-cold) 0 35.7%,
+        color-mix(in srgb, var(--co2-cold) 45%, var(--surface)) 35.7% 50%,
+        color-mix(in srgb, var(--accent-heading) 55%, var(--surface)) 50% 72.9%,
+        color-mix(in srgb, var(--co2-heat) 50%, var(--surface)) 72.9% 98.6%,
+        var(--co2-heat) 98.6% 100%
+    );
+    width: 100%;
+    height: 1.6rem;
+    margin: 0;
+    background: transparent;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+}
+
+.glab-co2-slider::-webkit-slider-runnable-track {
+    height: 0.5rem;
+    background: var(--co2-track);
+    border: 1px solid color-mix(in srgb, var(--text) 18%, transparent);
+}
+
+.glab-co2-slider::-moz-range-track {
+    height: 0.5rem;
+    background: var(--co2-track);
+    border: 1px solid color-mix(in srgb, var(--text) 18%, transparent);
+}
+
+.glab-co2-slider::-webkit-slider-thumb {
+    width: 1.1rem;
+    height: 1.1rem;
+    margin-top: -0.35rem;
+    background: var(--surface);
+    border: 2px solid var(--text);
+    border-radius: 50%;
+    -webkit-appearance: none;
+}
+
+.glab-co2-slider::-moz-range-thumb {
+    width: 0.9rem;
+    height: 0.9rem;
+    background: var(--surface);
+    border: 2px solid var(--text);
+    border-radius: 50%;
+}
+
+.glab-co2-slider:focus-visible {
+    outline: 2px solid var(--accent-heading);
+    outline-offset: 3px;
+}
+
+.glab-co2-slider-ends {
+    display: flex;
+    justify-content: space-between;
+    margin: 0;
+    font-size: 0.68rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+}
+
+.glab-co2-presets {
+    margin-top: 0.35rem;
+}
+
+/* ============ the reading ============ */
+
+.glab--co2 .glab-calc-result {
+    border-top: 2px solid var(--co2-tone);
+}
+
+.glab--co2 .glab-calc-energy strong {
+    color: var(--co2-tone);
+}
+
+.glab--co2 .glab-calc-band {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    text-align: left;
+}
+
+.glab-co2-zone-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--co2-tone);
+}
+
+.glab-co2-zone-body {
+    font-weight: 400;
+    line-height: 1.55;
+}
+
+.glab--co2 .glab-calc-note {
+    margin-top: 0.9rem;
+}
+
+/* ============ the table and the bands ============ */
+
+.glab--co2 .glab-table tr.is-current > * {
+    background: color-mix(in srgb, var(--accent-heading) 10%, var(--surface));
+    font-weight: 700;
+}
+
+.glab-co2-zones {
+    margin-top: 1.35rem;
+}
+
+/* Each band keeps its colour on its top edge, so the cards read as the
+   same axis as the slider without the script. */
+.glab-co2-zone {
+    border-top: 2px solid var(--accent-heading);
+}
+
+.glab-co2-zone--froid,
+.glab-co2-zone--frais {
+    border-top-color: var(--co2-cold);
+}
+
+.glab-co2-zone--chaud,
+.glab-co2-zone--danger {
+    border-top-color: var(--co2-heat);
+}
+
+.glab-co2-zone.is-current {
+    background: color-mix(in srgb, var(--accent-heading) 8%, var(--surface));
+}
+
+@media (max-width: 46rem) {
+    .glab--co2 .glab-specs {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .glab-co2-fill,
+    .glab-co2-needle {
+        transition: none;
+    }
+}

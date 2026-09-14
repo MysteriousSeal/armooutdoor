@@ -1038,3 +1038,455 @@ var GlabSelector = (function () {
 
     render();
 })();
+
+
+/* ============================== moderateur ==============================
+ *
+ * Modérateur de son: the level at the ear
+ */
+
+/*
+ * Three answers (the gun, the moderator, the protection) and one estimate:
+ * the peak that reaches the ear, as a range, against the peak thresholds of
+ * the Code du travail, plus how many more shots the same daily dose allows.
+ *
+ * Every number lives in the markup: each button carries the ranges it adds or
+ * removes, so the table the page prints for a reader without JavaScript and
+ * this estimate cannot drift apart. The script only does the arithmetic.
+ */
+(function () {
+    var root = document.querySelector('[data-glab-moderateur]');
+
+    if (!root) {
+        return;
+    }
+
+    // The axis on the page runs from 80 to 180 dB.
+    var AXIS_MIN = 80;
+    var AXIS_SPAN = 100;
+
+    var groups = {};
+
+    Array.prototype.slice.call(root.querySelectorAll('[data-glab-db-group]')).forEach(function (group) {
+        groups[group.getAttribute('data-glab-db-group')] = group;
+    });
+
+    var snrField = root.querySelector('[data-glab-db-snr-field]');
+    var snrSelect = root.querySelector('[data-glab-db-snr]');
+    var result = root.querySelector('[data-glab-db-result]');
+    var peakOut = root.querySelector('[data-glab-db-peak]');
+    var doseOut = root.querySelector('[data-glab-db-dose]');
+    var verdictOut = root.querySelector('[data-glab-db-verdict]');
+    var scale = root.querySelector('[data-glab-db-scale]');
+
+    if (!groups.arme || !groups.moderateur || !groups.protection || !snrSelect || !result || !scale) {
+        return;
+    }
+
+    function pair(button, name) {
+        var parts = (button.getAttribute(name) || '0 0').split(' ');
+
+        return [parseFloat(parts[0]), parseFloat(parts[1])];
+    }
+
+    function active(group) {
+        return group.querySelector('button.is-active') || group.querySelector('button');
+    }
+
+    function position(db) {
+        return Math.max(0, Math.min(100, (db - AXIS_MIN) / AXIS_SPAN * 100));
+    }
+
+    // Ten to the power of a tenth of the decibels: 3 dB doubles, 10 dB is
+    // ten times. Rounded the way a person would say it, never to the unit
+    // past a hundred, since the inputs are ranges measured in whole decibels.
+    function times(db) {
+        var n = Math.pow(10, db / 10);
+
+        // Written to be followed by « coups »: « plus de 10 000 coups ». The
+        // model adds a protector's SNR to an energy reduction, which is only
+        // an order of magnitude; a million shots would read as a measurement.
+        if (n >= 10000) {
+            return 'plus de 10 000';
+        }
+
+        if (n >= 100) {
+            var step = Math.pow(10, Math.floor(Math.log10(n)) - 1);
+
+            n = Math.round(n / step) * step;
+        } else {
+            n = Math.round(n);
+        }
+
+        return '×' + String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    }
+
+    function render() {
+        var arm = pair(active(groups.arme), 'data-peak');
+        var moderator = active(groups.moderateur);
+        var cut = pair(moderator, 'data-peak');
+        var energy = pair(moderator, 'data-energy');
+        var extra = active(groups.protection).getAttribute('data-extra');
+        var snr = parseFloat(snrSelect.value);
+        var protection = [0, 0];
+
+        snrField.hidden = extra === 'none';
+
+        if (extra !== 'none') {
+            var more = extra.split(' ');
+
+            protection = [snr + parseFloat(more[0]), snr + parseFloat(more[1])];
+        }
+
+        // The quietest case takes every best figure, the loudest every worst.
+        var low = arm[0] - cut[1] - protection[1];
+        var high = arm[1] - cut[0] - protection[0];
+
+        peakOut.textContent = low === high ? String(low) : low + ' à ' + high;
+
+        var saved = [energy[0] + protection[0], energy[1] + protection[1]];
+
+        if (saved[1] === 0) {
+            doseOut.textContent = result.getAttribute('data-reference');
+        } else {
+            var from = times(saved[0]);
+            var to = times(saved[1]);
+
+            doseOut.textContent = 'À dose sonore égale : '
+                + (from === to ? from : from + ' à ' + to)
+                + ' coups par rapport aux oreilles nues sans modérateur.';
+        }
+
+        verdictOut.textContent = result.getAttribute(
+            high < 135 ? 'data-under' : (low >= 140 ? 'data-over' : 'data-straddle')
+        );
+
+        scale.style.setProperty('--glab-db-from', position(low).toFixed(1) + '%');
+        scale.style.setProperty('--glab-db-to', position(high).toFixed(1) + '%');
+    }
+
+    Object.keys(groups).forEach(function (name) {
+        var group = groups[name];
+
+        group.addEventListener('click', function (event) {
+            var button = event.target.closest('button[data-glab-db-value]');
+
+            if (!button) {
+                return;
+            }
+
+            group.querySelectorAll('button').forEach(function (other) {
+                other.classList.toggle('is-active', other === button);
+                other.setAttribute('aria-pressed', other === button ? 'true' : 'false');
+            });
+
+            render();
+        });
+    });
+
+    snrSelect.addEventListener('change', render);
+
+    root.hidden = false;
+    render();
+})();
+
+
+/* ============================== plombs ==============================
+ *
+ * Quel plomb pour sa carabine a air : the pellet bench
+ */
+
+/*
+ * The energy a rifle gives and the weight printed on a tin, turned into the
+ * speed the pellet leaves at and the lightest pellet that still leaves under
+ * the transonic region. Revealed by this script rather than shipped open:
+ * the floor table further down the page is the same answer for a reader
+ * without JavaScript.
+ *
+ * It assumes the rifle gives the same energy whatever the pellet. That is an
+ * approximation, and the page says so beside the result.
+ */
+(function () {
+    var root = document.querySelector('[data-glab-plombs]');
+
+    if (!root) {
+        return;
+    }
+
+    // Grams in a grain, exact since the 1959 yard and pound agreement.
+    var GRAIN = 0.06479891;
+    var FOOT = 0.3048;
+
+    // Hard Air Magazine: from 900 fps a diabolo's drag climbs quickly.
+    var TRANSONIC = 900 * FOOT;
+
+    // The speed axis ends here, in fps, matched to the markup's marks.
+    var AXIS_MAX = 1400;
+
+    var energy = root.querySelector('[data-glab-energy]');
+    var weight = root.querySelector('[data-glab-weight]');
+    var unit = root.querySelector('[data-glab-weight-unit]');
+    var fps = root.querySelector('[data-glab-fps]');
+    var mass = root.querySelector('[data-glab-mass]');
+    var zone = root.querySelector('[data-glab-zone]');
+    var axis = root.querySelector('[data-glab-speed]');
+    var floorGrains = root.querySelector('[data-glab-floor-gr]');
+    var floorGrams = root.querySelector('[data-glab-floor-g]');
+    var category = root.querySelector('[data-glab-category]');
+    var usage = root.querySelector('[data-glab-usage]');
+    var cards = Array.prototype.slice.call(root.querySelectorAll('[data-glab-usage-card]'));
+
+    if (!energy || !weight || !unit || !fps || !axis) {
+        return;
+    }
+
+    var shownUnit = unit.value;
+
+    function french(value, decimals) {
+        return value.toFixed(decimals).replace('.', ',');
+    }
+
+    function read(input) {
+        return parseFloat(String(input.value).replace(',', '.'));
+    }
+
+    // Twenty joules exactly is already category C: the text reads
+    // « supérieure ou égale ».
+    function categoryFor(joules) {
+        if (joules < 2) {
+            return 'Sous 2 J';
+        }
+
+        return joules < 20 ? 'Catégorie D' : 'Catégorie C';
+    }
+
+    function render() {
+        var joules = read(energy);
+        var value = read(weight);
+
+        if (!isFinite(joules) || !isFinite(value) || joules <= 0 || value <= 0) {
+            return;
+        }
+
+        var grams = unit.value === 'g' ? value : value * GRAIN;
+        var grains = grams / GRAIN;
+
+        // v = √(2E / m), the mass in kilograms.
+        var metres = Math.sqrt((2 * joules) / (grams / 1000));
+        var feet = metres / FOOT;
+        var over = metres >= TRANSONIC;
+
+        fps.textContent = String(Math.round(feet));
+        mass.textContent = Math.round(metres) + ' m/s · ' + french(grains, 2) + ' gr = ' + french(grams, 3) + ' g';
+        zone.textContent = zone.getAttribute(over ? 'data-glab-over' : 'data-glab-under');
+
+        axis.style.setProperty('--glab-speed-at', Math.min(100, feet / AXIS_MAX * 100).toFixed(2) + '%');
+        axis.classList.toggle('is-transonic', over);
+
+        // m = 2E / v²: the weight at which this rifle reaches 900 fps.
+        var floor = (2 * joules) / (TRANSONIC * TRANSONIC) * 1000;
+
+        floorGrains.textContent = french(floor / GRAIN, 2) + ' gr';
+        floorGrams.textContent = french(floor, 2) + ' g';
+        category.textContent = categoryFor(joules);
+    }
+
+    // Switching the unit converts the figure already typed, so the pellet
+    // stays the same pellet.
+    unit.addEventListener('change', function () {
+        var value = read(weight);
+
+        if (isFinite(value) && value > 0 && unit.value !== shownUnit) {
+            weight.value = unit.value === 'g' ? (value * GRAIN).toFixed(3) : (value / GRAIN).toFixed(2);
+        }
+
+        shownUnit = unit.value;
+        render();
+    });
+
+    [energy, weight].forEach(function (control) {
+        control.addEventListener('input', render);
+        control.addEventListener('change', render);
+    });
+
+    if (usage) {
+        usage.addEventListener('click', function (event) {
+            var button = event.target.closest('button[data-glab-value]');
+
+            if (!button) {
+                return;
+            }
+
+            usage.querySelectorAll('button').forEach(function (other) {
+                var pressed = other === button;
+
+                other.classList.toggle('is-active', pressed);
+                other.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+            });
+
+            cards.forEach(function (card) {
+                card.hidden = card.getAttribute('data-glab-usage-card') !== button.getAttribute('data-glab-value');
+            });
+        });
+    }
+
+    root.hidden = false;
+    render();
+})();
+
+
+/* ============================== co2 ==============================
+ *
+ * Réplique CO2 et froid: the cartridge gauge
+ */
+
+/*
+ * A temperature in, the cartridge's pressure out, read on a dial.
+ *
+ * The figures are not in this script. The table under the gauge prints the
+ * NIST saturation pressures, one row every five degrees, and each row carries
+ * its value; the bands of temperature are printed as cards with their bounds.
+ * The script reads both, so the page without JavaScript holds the same answer
+ * and a corrected figure is corrected in one place.
+ *
+ * Above 31 °C there is no vapour pressure to read: the gauge says so rather
+ * than extrapolating a number the table does not hold.
+ */
+(function () {
+    var root = document.querySelector('[data-glab-co2]');
+
+    if (!root) {
+        return;
+    }
+
+    var slider = root.querySelector('[data-co2-slider]');
+    var tempOut = root.querySelector('[data-co2-temp]');
+    var barOut = root.querySelector('[data-co2-bar]');
+    var barUnit = root.querySelector('[data-co2-bar-unit]');
+    var ratioOut = root.querySelector('[data-co2-ratio]');
+    var zoneTitle = root.querySelector('[data-co2-zone-title]');
+    var zoneBody = root.querySelector('[data-co2-zone-body]');
+    var fill = root.querySelector('[data-co2-fill]');
+    var needle = root.querySelector('[data-co2-needle]');
+    var presets = Array.prototype.slice.call(root.querySelectorAll('[data-co2-preset]'));
+    var rows = Array.prototype.slice.call(document.querySelectorAll('[data-co2-row]'));
+    var zones = Array.prototype.slice.call(document.querySelectorAll('[data-co2-zone]'));
+
+    if (!slider || !barOut || !ratioOut || !fill || !needle || rows.length < 2) {
+        return;
+    }
+
+    // The dial runs from 0 to 80 bar over 240 degrees, as drawn in the view.
+    var GAUGE_MAX = 80;
+    var SWEEP = 240;
+
+    var points = rows.map(function (row) {
+        return { t: parseFloat(row.getAttribute('data-t')), bar: parseFloat(row.getAttribute('data-bar')), row: row };
+    }).sort(function (a, b) {
+        return a.t - b.t;
+    });
+
+    var reference = points.filter(function (point) {
+        return point.t === 20;
+    })[0];
+
+    if (!reference) {
+        return;
+    }
+
+    function french(value, places) {
+        return value.toFixed(places).replace('.', ',');
+    }
+
+    // Straight-line interpolation between two rows of the table; null outside
+    // it, which is above the critical point or below the coldest row.
+    function pressureAt(celsius) {
+        var first = points[0];
+        var last = points[points.length - 1];
+
+        if (celsius < first.t || celsius > last.t) {
+            return null;
+        }
+
+        for (var i = 1; i < points.length; i++) {
+            if (celsius <= points[i].t) {
+                var low = points[i - 1];
+                var high = points[i];
+                var share = (celsius - low.t) / (high.t - low.t);
+
+                return low.bar + share * (high.bar - low.bar);
+            }
+        }
+
+        return last.bar;
+    }
+
+    function zoneFor(celsius) {
+        return zones.filter(function (zone) {
+            return celsius >= parseFloat(zone.getAttribute('data-from'))
+                && celsius <= parseFloat(zone.getAttribute('data-to'));
+        })[0] || null;
+    }
+
+    function render() {
+        var celsius = parseInt(slider.value, 10);
+
+        if (!isFinite(celsius)) {
+            return;
+        }
+
+        var bar = pressureAt(celsius);
+        var zone = zoneFor(celsius);
+        var reading = bar === null ? GAUGE_MAX : Math.min(bar, GAUGE_MAX);
+
+        tempOut.textContent = celsius + ' °C';
+
+        if (bar === null) {
+            barOut.textContent = barOut.getAttribute('data-co2-off');
+            barUnit.hidden = true;
+            ratioOut.textContent = ratioOut.getAttribute('data-co2-off-note');
+        } else {
+            barOut.textContent = french(bar, 1);
+            barUnit.hidden = false;
+            ratioOut.textContent = Math.round(bar / reference.bar * 100) + ' % ' + ratioOut.getAttribute('data-co2-ratio-label');
+        }
+
+        root.classList.toggle('is-off-table', bar === null);
+        fill.style.setProperty('--co2-fill', (reading / GAUGE_MAX * 100).toFixed(1));
+        needle.style.setProperty('--co2-angle', (-SWEEP / 2 + reading / GAUGE_MAX * SWEEP).toFixed(2) + 'deg');
+
+        if (zone) {
+            root.setAttribute('data-co2-state', zone.getAttribute('data-co2-zone'));
+            zoneTitle.textContent = zone.querySelector('dt').firstChild.textContent.trim();
+            zoneBody.textContent = zone.querySelector('dd').textContent.trim();
+        }
+
+        zones.forEach(function (card) {
+            card.classList.toggle('is-current', card === zone);
+        });
+
+        // The row nearest the reading, so the table answers the gauge too.
+        var nearest = Math.round(celsius / 5) * 5;
+
+        points.forEach(function (point) {
+            point.row.classList.toggle('is-current', bar !== null && point.t === nearest);
+        });
+
+        presets.forEach(function (button) {
+            button.classList.toggle('is-active', parseInt(button.getAttribute('data-co2-preset'), 10) === celsius);
+        });
+    }
+
+    slider.addEventListener('input', render);
+    slider.addEventListener('change', render);
+
+    presets.forEach(function (button) {
+        button.addEventListener('click', function () {
+            slider.value = button.getAttribute('data-co2-preset');
+            render();
+        });
+    });
+
+    root.hidden = false;
+    render();
+})();

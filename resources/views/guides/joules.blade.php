@@ -318,7 +318,7 @@
                 </div>
                 <div>
                     <dt>2 à 20 J <em>catégorie D</em></dt>
-                    <dd>Carabines et pistolets à plombs, billes acier. Achat libre pour un majeur, mais port et transport exigent un motif légitime.</dd>
+                    <dd>Carabines et pistolets à plombs, billes acier. Achat libre pour un majeur, mais port et transport exigent un motif légitime. Le poids du plomb à choisir selon l'énergie : <a href="{{ route('guides.plombs') }}">quel plomb pour sa carabine à air</a>.</dd>
                 </div>
                 <div>
                     <dt>Dès 20 J <em>catégorie C</em></dt>
@@ -356,7 +356,9 @@
                         Une réplique à gaz est thermodynamique : le gaz froid se détend moins, et une
                         matinée d'hiver coûte facilement un cinquième de la puissance d'un après-midi
                         d'été. Une réplique électrique s'en moque presque, mais sa batterie non : pleine
-                        charge et fin de charge ne poussent pas le piston de la même façon.
+                        charge et fin de charge ne poussent pas le piston de la même façon. La pression
+                        d'une cartouche degré par degré est dans le guide
+                        <a href="{{ route('guides.co2') }}">réplique CO2 et froid</a>.
                     </p>
                 </li>
                 <li>

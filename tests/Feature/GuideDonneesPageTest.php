@@ -138,7 +138,7 @@ class GuideDonneesPageTest extends TestCase
 
         $this->get('/guides')->assertOk()
             ->assertSee(route('guides.donnees'), false)
-            ->assertSee('Onze pages écrites par la boutique');
+            ->assertSee('Quatorze pages écrites par la boutique');
         $this->get('/sitemap-guides.xml')->assertOk()->assertSee(route('guides.donnees'), false);
     }
 }

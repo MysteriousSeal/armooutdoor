@@ -244,7 +244,9 @@
                         par sa durée, sa répétition ou son intensité, à la tranquillité du voisinage,
                         <em>en lieu public comme en lieu privé</em>. Un seul voisin gêné suffit à
                         caractériser la nuisance. Une séance de plinking un dimanche après-midi coche
-                        la durée et la répétition sans effort.
+                        la durée et la répétition sans effort. Ce qu'un modérateur retire au bruit,
+                        et ce qu'il laisse à vos oreilles, est dans le guide
+                        <a href="{{ route('guides.moderateur') }}">modérateur de son et audition</a>.
                     </p>
                 </li>
                 <li>

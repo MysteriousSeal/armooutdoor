@@ -7,8 +7,8 @@ use Illuminate\Support\Collection;
 /**
  * The shop's own buying guides, written once.
  *
- * The list lived in two places — the guides index and the home page's
- * reading strip — which meant a new guide had to be added twice and the
+ * The list lived in two places, the guides index and the home page's
+ * reading strip, which meant a new guide had to be added twice and the
  * home page could only ever offer the two that were typed into it. Named
  * here, both read the same shelf and the home page can rotate through it.
  */
@@ -79,6 +79,39 @@ class Guides
                 'image' => 'images/guides/donnees/hero.webp',
                 'teaser' => 'Quatre fuites en un an : ce qui est sorti, pourquoi votre adresse intéresse, et quoi faire.',
                 'summary' => 'FFTir, SIA, Armurerie Lavaux, NaturaBuy : ce que chaque fuite a exposé, pourquoi c\'est votre adresse plus que vos armes qui intéresse un cambrioleur, les faux policiers, et un vérificateur qui dresse vos réflexes selon vos comptes.',
+            ],
+            [
+                'topic' => 'Audition',
+                'title' => 'Modérateur de son et audition',
+                'url' => route('guides.moderateur'),
+                'route' => 'guides.moderateur',
+                'categories' => ['accessoires-silencieux-moderateurs'],
+                'published' => '2026-09-14',
+                'updated' => '2026-09-14',
+                'teaser' => 'Pas un silencieux : les décibels qu\'il retire vraiment, ce que dit la loi, et vos oreilles.',
+                'summary' => 'Ce que la loi française permet, les 17 à 24 dB qu\'un modérateur retire à l\'oreille, pourquoi le coup reste autour des seuils de 135 à 140 dB(C), le SNR et la double protection, les filetages, et un calcul du niveau à l\'oreille selon votre arme.',
+            ],
+            [
+                'topic' => 'Munitions',
+                'title' => 'Quel plomb pour sa carabine à air',
+                'url' => route('guides.plombs'),
+                'route' => 'guides.plombs',
+                'categories' => ['plombs-et-billes-d-acier'],
+                'published' => '2026-09-14',
+                'updated' => '2026-09-14',
+                'teaser' => 'Tête plate ou ronde, 4,5 ou 5,5 mm, grains : ce que dit chaque chiffre de la boîte.',
+                'summary' => 'Tête plate, ronde, pointue ou creuse, 4,5 ou 5,5 mm, grains et diamètre de tête : ce que chaque chiffre de la boîte change au tir, le poids sous lequel votre carabine pousse le plomb en zone transsonique, et pourquoi le dernier mot revient à un carton tiré dans votre canon.',
+            ],
+            [
+                'topic' => 'Gaz',
+                'title' => 'Réplique CO2 et froid',
+                'url' => route('guides.co2'),
+                'route' => 'guides.co2',
+                'categories' => ['cartouches-de-co2-12g-et-88g'],
+                'published' => '2026-09-14',
+                'updated' => '2026-09-14',
+                'teaser' => 'La pression d\'une cartouche suit la température, pas ce qu\'il reste dedans. Degré par degré.',
+                'summary' => 'Pourquoi une réplique au CO2 faiblit au froid et en rafale : la pression de la cartouche degré par degré sur un manomètre, les tirs par 12 g selon la culasse, CO2 ou gaz en hiver, et comment huiler, ranger, jeter et transporter une cartouche.',
             ],
             [
                 'topic' => 'Vocabulaire',

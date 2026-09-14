@@ -105,6 +105,9 @@ Route::view('/guides/regler-sa-lunette', 'guides.optique')->name('guides.optique
 Route::view('/guides/premiere-seance-au-stand', 'guides.premiere-seance')->name('guides.premiere-seance');
 Route::view('/guides/transporter-son-arme', 'guides.transport')->name('guides.transport');
 Route::view('/guides/proteger-ses-donnees', 'guides.donnees')->name('guides.donnees');
+Route::view('/guides/moderateur-de-son', 'guides.moderateur')->name('guides.moderateur');
+Route::view('/guides/quel-plomb-carabine-air', 'guides.plombs')->name('guides.plombs');
+Route::view('/guides/co2-et-froid', 'guides.co2')->name('guides.co2');
 
 /*
 |--------------------------------------------------------------------------
