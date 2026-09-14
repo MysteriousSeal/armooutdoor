@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-14 · v1.40.0 · build UQCU2O
+
+### Admin
+
+- **The admin API learns to manage product discounts.** Discounts could only be set in the web admin; the API now lists them (by status or product), creates, fetches and edits them, under the web form's own rules: a percentage up to 100 or an amount in euros, one discount per product, an end date on or after the start. A change of type must restate the value, since the unit changes with it, and deleting stays an owner action in the web admin. Every create and edit lands in the activity log marked (API), and the contract is documented beside the products endpoints.
+- **One call lists every product with its stock and what it really cost.** `GET /api/admin/discounts/products` gives each product's available stock and the « Average paid, incl. VAT » figure of its edit page, from the same calculation, with the units it is drawn from and the product's current discount. A discount can be priced against cost without opening two hundred edit pages.
+- **A runbook puts five random products on sale for a week.** `docs/admin/weekly-discounts.md` picks five active products with more than two in stock and no running discount, draws a 20 to 30 % discount that still leaves the price at three times the average paid, and shows the picks for approval before creating anything. It was run end to end on the local copy.
+
+**No migration.**
+
 ## 2026-09-14 · v1.39.16 · build 0P2RN6
 
 ### Storefront
