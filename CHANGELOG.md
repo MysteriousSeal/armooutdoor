@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-14 · v1.42.3 · build T4KQ8M
+
+### Admin
+
+- **The received purchase orders list now counts valid labels.** After Created, a chip shows how many lines can print, from the same four checks as the order page. Green when every line is ready, amber when some are, red when none are. Open, draft and cancelled tabs stay as they were.
+
+**No migration.**
+
 ## 2026-09-14 · v1.42.2 · build R7NH4C
 
 ### Admin
