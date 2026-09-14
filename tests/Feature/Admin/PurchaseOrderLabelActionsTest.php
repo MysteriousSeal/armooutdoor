@@ -74,6 +74,10 @@ class PurchaseOrderLabelActionsTest extends TestCase
         );
         $this->assertStringContainsString('Download label', $html);
         $this->assertStringContainsString('href="'.e($item->labelDownloadUrl()).'"', $html);
+        $this->assertStringContainsString('po-label-download', $html);
+        $this->assertSame([], $item->missingLabelRequirements());
+        $this->assertStringNotContainsString('GTIN set', $html);
+        $this->assertStringNotContainsString('label-requirements-missing', $html);
         $this->assertSame(
             route('admin.labels.index', ['search' => 'ARM-GLOVE-M']),
             $item->labelEditUrl(),
@@ -103,8 +107,15 @@ class PurchaseOrderLabelActionsTest extends TestCase
         $html = $this->page($po);
 
         $this->assertNull($item->labelDownloadUrl());
+        $this->assertSame(['Subtitle', 'GTIN'], $item->missingLabelRequirements());
         $this->assertStringContainsString('Edit label', $html);
         $this->assertStringContainsString('is-disabled', $html);
+        $this->assertStringNotContainsString('po-label-download', $html);
+        $this->assertStringContainsString('Missing Subtitle', $html);
+        $this->assertStringContainsString('Missing GTIN', $html);
+        $this->assertStringNotContainsString('Missing Title', $html);
+        $this->assertStringNotContainsString('Missing SKU', $html);
+        $this->assertStringNotContainsString('GTIN set', $html);
         $this->assertStringNotContainsString(
             '<a href="'.route('admin.products.label', $item->product).'"',
             $html,
@@ -158,6 +169,53 @@ class PurchaseOrderLabelActionsTest extends TestCase
             $item->labelDownloadUrl(),
         );
         $this->assertStringContainsString('href="'.e($item->labelDownloadUrl()).'"', $html);
+        $this->assertSame([], $item->missingLabelRequirements());
+        $this->assertStringNotContainsString('label-requirements-missing', $html);
+        $this->assertStringNotContainsString('GTIN set', $html);
+    }
+
+    public function test_a_variant_line_lists_its_own_missing_codes_not_the_product_ones(): void
+    {
+        $product = Product::factory()->labelled()->create([
+            'name' => ['en' => 'Breathable tee', 'fr' => 'T-shirt respirant'],
+            'sku' => 'ARM-TS',
+            'gtin' => '4006381333931',
+        ]);
+        $variant = ProductVariant::query()->create([
+            'product_id' => $product->id,
+            'label' => ['en' => 'L', 'fr' => 'L'],
+            'attribute_values' => [['label' => 'Size', 'value' => 'L']],
+            'sku' => 'ARM-TS-L',
+            'gtin' => null,
+            'quantity' => 1,
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+
+        $po = PurchaseOrder::factory()->create([
+            'status' => 'received',
+            'sent_at' => now(),
+            'received_at' => now(),
+        ]);
+        PurchaseOrderItem::query()->create([
+            'purchase_order_id' => $po->id,
+            'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
+            'name' => $product->localizedName(),
+            'sku' => $variant->sku,
+            'quantity_ordered' => 3,
+            'quantity_received' => 3,
+            'unit_cost_cents' => 100,
+        ]);
+        $item = $po->fresh(['items.product.label', 'items.variant'])->items->first();
+
+        $html = $this->page($po);
+
+        $this->assertSame(['GTIN'], $item->missingLabelRequirements());
+        $this->assertTrue(filled($product->gtin));
+        $this->assertStringContainsString('Missing GTIN', $html);
+        $this->assertStringNotContainsString('Missing SKU', $html);
+        $this->assertStringNotContainsString('GTIN set', $html);
     }
 
     public function test_an_open_order_does_not_offer_the_buttons(): void
@@ -229,6 +287,8 @@ class PurchaseOrderLabelActionsTest extends TestCase
         $this->assertStringContainsString('po-label-cell', $html);
         $this->assertStringNotContainsString('Edit label', $html);
         $this->assertStringNotContainsString('Download label', $html);
+        $this->assertStringNotContainsString('GTIN set', $html);
+        $this->assertStringNotContainsString('label-requirements-missing', $html);
         $this->assertStringContainsString('product deleted', $html);
     }
 }

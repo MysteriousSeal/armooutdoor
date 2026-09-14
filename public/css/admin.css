@@ -2590,10 +2590,60 @@ button.supplier-availability-chip:hover {
 
 .po-label-actions {
     display: inline-flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.4rem;
+}
+
+.label-requirements-missing {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.label-requirements-missing .gtin-flag {
+    height: auto;
+    min-height: 1.5rem;
+    padding: 0.18rem 0.45rem;
+    letter-spacing: 0.04em;
+}
+
+.po-label-buttons {
+    display: inline-flex;
     align-items: center;
     justify-content: flex-end;
     gap: 0.4rem;
     flex-wrap: wrap;
+}
+
+/* The live download, tinted like the ready chips so it reads as the action
+   that can go, against the grey Edit beside it. */
+.po-label-download {
+    color: #3d6b4e;
+    background: #eef4ef;
+    border-color: #d5e4d8;
+}
+
+.po-label-download:hover {
+    color: #2f553d;
+    background: color-mix(in srgb, #7ba888 22%, var(--surface));
+    border-color: color-mix(in srgb, #7ba888 42%, var(--border));
+}
+
+[data-theme='dark'] .po-label-download {
+    color: #9dccab;
+    background: color-mix(in srgb, #9dccab 16%, var(--surface));
+    border-color: color-mix(in srgb, #9dccab 36%, var(--border));
+}
+
+[data-theme='dark'] .po-label-download:hover {
+    color: #b7ddc2;
+    background: color-mix(in srgb, #9dccab 24%, var(--surface));
+    border-color: color-mix(in srgb, #9dccab 48%, var(--border));
 }
 
 .admin-list-chip {

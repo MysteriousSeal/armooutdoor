@@ -76,6 +76,20 @@ class PurchaseOrderItem extends Model
     }
 
     /**
+     * What this line still needs before its label can be printed.
+     *
+     * Same four Catalog › Labels checks: wording on the product, codes on
+     * the article — the size when the line is a size, never the product's
+     * own SKU or GTIN in that case.
+     *
+     * @return array<int, string>
+     */
+    public function missingLabelRequirements(): array
+    {
+        return $this->product?->missingLabelRequirements($this->variant) ?? [];
+    }
+
+    /**
      * The printed sheet for this line, when the article has everything a
      * label needs — the same four the Labels page checks before it offers
      * the button.

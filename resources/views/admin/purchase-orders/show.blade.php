@@ -156,16 +156,20 @@
                                             <td class="po-label-cell">
                                                 @if ($item->product)
                                                     @php($downloadUrl = $item->labelDownloadUrl())
+                                                    @php($missing = $item->missingLabelRequirements())
                                                     <div class="po-label-actions">
-                                                        <a href="{{ $item->labelEditUrl() }}" class="btn btn-secondary btn-small" target="_blank" rel="noopener">Edit label</a>
-                                                        @if ($downloadUrl)
-                                                            <a href="{{ $downloadUrl }}" class="btn btn-secondary btn-small">Download label</a>
-                                                        @else
-                                                            {{-- Same as Catalog › Labels: the button stays so the row
-                                                                 does not rearrange, and it is off until the article
-                                                                 has its wording and its codes. --}}
-                                                            <span class="btn btn-secondary btn-small is-disabled" aria-disabled="true">Download label</span>
-                                                        @endif
+                                                        @include('admin.partials.label-missing', ['missing' => $missing])
+                                                        <div class="po-label-buttons">
+                                                            <a href="{{ $item->labelEditUrl() }}" class="btn btn-secondary btn-small" target="_blank" rel="noopener">Edit label</a>
+                                                            @if ($downloadUrl)
+                                                                <a href="{{ $downloadUrl }}" class="btn btn-secondary btn-small po-label-download">Download label</a>
+                                                            @else
+                                                                {{-- Same as Catalog › Labels: the button stays so the row
+                                                                     does not rearrange, and it is off until the article
+                                                                     has its wording and its codes. --}}
+                                                                <span class="btn btn-secondary btn-small is-disabled" aria-disabled="true">Download label</span>
+                                                            @endif
+                                                        </div>
                                                     </div>
                                                 @endif
                                             </td>

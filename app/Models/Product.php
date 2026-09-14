@@ -707,9 +707,10 @@ class Product extends Model
      *
      * The wording lives on the product, the codes on the article — the product
      * itself when it has no variants, each variant when it has. An empty list
-     * means the label can go.
+     * means the label can go. Catalog › Labels and a received purchase order
+     * both read this list.
      *
-     * @return array<int, string>
+     * @return array<int, 'title'|'subtitle'|'reference'|'barcode'>
      */
     public function labelRequirements(?ProductVariant $variant = null): array
     {
@@ -721,6 +722,26 @@ class Product extends Model
             'reference' => filled($article->sku),
             'barcode' => filled($article->gtin),
         ])->reject(fn (bool $present): bool => $present)->keys()->all();
+    }
+
+    /**
+     * The same gaps, named as the two pages print them.
+     *
+     * @return array<int, string>
+     */
+    public function missingLabelRequirements(?ProductVariant $variant = null): array
+    {
+        $names = [
+            'title' => 'Title',
+            'subtitle' => 'Subtitle',
+            'reference' => 'SKU',
+            'barcode' => 'GTIN',
+        ];
+
+        return collect($this->labelRequirements($variant))
+            ->map(fn (string $requirement): string => $names[$requirement])
+            ->values()
+            ->all();
     }
 
     /** Whether a label can be printed for this article as it stands. */
