@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-14 · v1.39.16 · build 0P2RN6
+
+### Storefront
+
+- **The product page price and stock now share one bordered plate.** The row used to line up four boxes of the same weight: the discount chip, the struck price, the price, and a stock chip that read like a second discount. The price now leads, in larger type, with the struck price and a solid olive discount tag on its baseline to the right. Availability fills its own zone in the tint each stock state already has, with a dot for stock on the shelf, a ring for stock on its way and a bar for none.
+- **On a phone the availability zone becomes a strip under the price**, and the discount tag drops onto a second line when a long price runs out of room instead of spilling out of the plate.
+- **Screen readers hear the prices in order**, « 9,81 € 10,90 € -10% », now that the discount tag follows the two prices.
+
+**No migration.**
+
 ## 2026-09-14 · v1.39.15 · build 2QEZ40
 
 ### Storefront
