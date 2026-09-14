@@ -104,6 +104,7 @@ Route::view('/guides/ou-tirer-legalement', 'guides.ou-tirer')->name('guides.ou-t
 Route::view('/guides/regler-sa-lunette', 'guides.optique')->name('guides.optique');
 Route::view('/guides/premiere-seance-au-stand', 'guides.premiere-seance')->name('guides.premiere-seance');
 Route::view('/guides/transporter-son-arme', 'guides.transport')->name('guides.transport');
+Route::view('/guides/proteger-ses-donnees', 'guides.donnees')->name('guides.donnees');
 
 /*
 |--------------------------------------------------------------------------

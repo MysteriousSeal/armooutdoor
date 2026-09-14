@@ -68,6 +68,17 @@ class Guides
                 'summary' => 'Ce que la loi impose vraiment pour transporter une arme entre le domicile, le club ou la chasse, catégorie par catégorie, et pourquoi les deux envois séparés de 24 heures ne concernent pas votre trajet en voiture.',
             ],
             [
+                'topic' => 'Sécurité',
+                'title' => 'Protéger ses données et son domicile',
+                'url' => route('guides.donnees'),
+                'route' => 'guides.donnees',
+                'categories' => [],
+                'published' => '2026-09-14',
+                'updated' => '2026-09-14',
+                'teaser' => 'Quatre fuites en un an : ce qui est sorti, pourquoi votre adresse intéresse, et quoi faire.',
+                'summary' => 'FFTir, SIA, Armurerie Lavaux, NaturaBuy : ce que chaque fuite a exposé, pourquoi c\'est votre adresse plus que vos armes qui intéresse un cambrioleur, les faux policiers, et un vérificateur qui dresse vos réflexes selon vos comptes.',
+            ],
+            [
                 'topic' => 'Vocabulaire',
                 'title' => 'Le glossaire',
                 'url' => route('guides.glossaire'),

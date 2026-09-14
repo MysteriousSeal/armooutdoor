@@ -2802,3 +2802,207 @@
     border-style: dashed;
     border-width: 1.5px;
 }
+
+/* ============================== donnees ==============================
+ *
+ * Détenteur d'arme : protéger ses données et son domicile
+ */
+
+.glab--donnees .glab-title,
+.glab--donnees .glab-section {
+    scroll-margin-top: 5.5rem;
+}
+
+/* Four leaks side by side read as two pairs, not a row of three and a
+   stray. */
+.glab--donnees .glab-place-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.glab--donnees .glab-place-cards > div {
+    border-top: 2px solid var(--accent-heading);
+}
+
+/* Several accounts can be true at once, so they are real checkboxes dressed
+   as the guides' chips, the box itself left visible and in the accent. */
+.glab-checks label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    padding: 0.6rem 0.95rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.glab-checks label small {
+    display: block;
+    margin-top: 0.1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.glab-checks input {
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    margin: 0.1rem 0 0;
+    accent-color: var(--accent-heading);
+}
+
+.glab-checks label:hover {
+    border-color: var(--accent-heading);
+}
+
+.glab-checks label:has(input:checked) {
+    color: var(--accent-heading);
+    background: color-mix(in srgb, var(--accent-heading) 10%, var(--surface));
+    border-color: var(--accent-heading);
+}
+
+.glab-checks label:has(input:focus-visible) {
+    outline: 2px solid var(--accent-heading);
+    outline-offset: 2px;
+}
+
+/*
+ * The page's signature: the reader's record as a leaked file holds it, one
+ * field a line, each marked for the accounts they ticked. Set in the
+ * monospace of the product references, because it is a record and not a
+ * paragraph; the rules between fields are dashed like a printout.
+ */
+.glab-fiche {
+    margin: 0;
+    padding: 0 1.1rem 0.35rem;
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--accent-heading) 20%, var(--border));
+}
+
+.glab-fiche-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0 -1.1rem 0.2rem;
+    padding: 0.6rem 1.1rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-heading);
+    background: color-mix(in srgb, var(--accent-heading) 8%, var(--surface));
+    border-bottom: 1px solid color-mix(in srgb, var(--accent-heading) 20%, var(--border));
+}
+
+.glab-fiche-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 0.15rem 1rem;
+    margin: 0 -1.1rem;
+    padding: 0.5rem 1.1rem;
+    border-top: 1px dashed var(--border);
+    transition: background 0.15s ease;
+}
+
+.glab-fiche-head + .glab-fiche-row {
+    border-top: 0;
+}
+
+.glab-fiche-row dt {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.8125rem;
+    color: var(--text);
+}
+
+.glab-fiche-row dd {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    margin: 0;
+    text-align: right;
+}
+
+.glab-fiche-state {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.glab-fiche-from {
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+}
+
+.glab-fiche-from:empty {
+    display: none;
+}
+
+.glab-fiche-row.is-exposed {
+    background: color-mix(in srgb, #7a4a45 7%, transparent);
+}
+
+.glab-fiche-row.is-exposed .glab-fiche-state,
+.glab--donnees .glab-table td.is-exposed {
+    color: #7a4a45;
+}
+
+.glab-fiche-row.is-safe .glab-fiche-state,
+.glab--donnees .glab-table td.is-safe {
+    color: #3d6b4e;
+}
+
+.glab-fiche-row.is-unknown .glab-fiche-state,
+.glab--donnees .glab-table td.is-unknown {
+    color: #8a5a12;
+}
+
+[data-theme='dark'] .glab-fiche-row.is-exposed {
+    background: color-mix(in srgb, #e08585 10%, transparent);
+}
+
+[data-theme='dark'] .glab-fiche-row.is-exposed .glab-fiche-state,
+[data-theme='dark'] .glab--donnees .glab-table td.is-exposed {
+    color: #e08585;
+}
+
+[data-theme='dark'] .glab-fiche-row.is-safe .glab-fiche-state,
+[data-theme='dark'] .glab--donnees .glab-table td.is-safe {
+    color: #9dccab;
+}
+
+[data-theme='dark'] .glab-fiche-row.is-unknown .glab-fiche-state,
+[data-theme='dark'] .glab--donnees .glab-table td.is-unknown {
+    color: #e0b673;
+}
+
+/* The field names read as labels, left-aligned; the verdicts stay in the
+   table's right-aligned columns. */
+.glab--donnees .glab-table td:first-child {
+    text-align: left;
+}
+
+.glab--donnees .glab-table td:not(:first-child) {
+    font-weight: 600;
+}
+
+@media (max-width: 900px) {
+    .glab--donnees .glab-place-cards {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .glab-checks label,
+    .glab-fiche-row {
+        transition: none;
+    }
+}

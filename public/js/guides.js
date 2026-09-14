@@ -932,3 +932,109 @@ var GlabSelector = (function () {
         };
     });
 })();
+
+
+/* ============================== donnees ==============================
+ *
+ * Protéger ses données: which of the four leaks hold you, and what to do
+ */
+
+/*
+ * Unlike the shared selector, a reader can tick several accounts at once, so
+ * this block keeps its own state. Every fact lives in the markup: each row
+ * of the record says, per leak, whether the field was exposed (x), not
+ * exposed (o) or not stated by the sources (?), and each checklist card
+ * names the leaks it answers. The page reads in full without script; the
+ * script only narrows it to the reader's own case.
+ */
+(function () {
+    var root = document.querySelector('[data-glab-fuites]');
+
+    if (!root) {
+        return;
+    }
+
+    var boxes = Array.prototype.slice.call(root.querySelectorAll('input[data-glab-incident]'));
+    var rows = Array.prototype.slice.call(root.querySelectorAll('[data-glab-field]'));
+    var cards = Array.prototype.slice.call(root.querySelectorAll('[data-glab-for]'));
+    var resume = root.querySelector('[data-glab-resume]');
+
+    var LABELS = { x: 'Exposé', o: 'Pas exposé', '?': 'Non précisé' };
+    var TONES = { x: 'is-exposed', o: 'is-safe', '?': 'is-unknown' };
+
+    function joinFr(items) {
+        if (items.length < 2) {
+            return items.join('');
+        }
+
+        return items.slice(0, -1).join(', ') + ' et ' + items[items.length - 1];
+    }
+
+    function render() {
+        var ticked = boxes.filter(function (box) {
+            return box.checked;
+        });
+        var keys = ticked.map(function (box) {
+            return box.value;
+        });
+
+        if (resume) {
+            resume.textContent = keys.length === 0
+                ? resume.getAttribute('data-glab-empty')
+                : 'Avec ' + joinFr(ticked.map(function (box) {
+                    return box.getAttribute('data-glab-phrase');
+                })) + ' :';
+        }
+
+        rows.forEach(function (row) {
+            var state = row.querySelector('[data-glab-state]');
+            var from = row.querySelector('[data-glab-from]');
+            var exposedBy = [];
+            var unknown = false;
+            var note = '';
+
+            ticked.forEach(function (box) {
+                var value = row.getAttribute('data-' + box.value);
+
+                if (value === 'x') {
+                    exposedBy.push(box.getAttribute('data-glab-short'));
+                    note = note || row.getAttribute('data-note-' + box.value) || '';
+                } else if (value === '?') {
+                    unknown = true;
+                }
+            });
+
+            // One exposure outweighs any number of silences, and a silence
+            // outweighs a reassurance: the record never reads safer than the
+            // worst thing a ticked leak says.
+            var level = keys.length === 0 ? '' : (exposedBy.length ? 'x' : (unknown ? '?' : 'o'));
+
+            row.className = 'glab-fiche-row' + (level ? ' ' + TONES[level] : '');
+            state.textContent = level ? LABELS[level] + (level === 'x' && note ? ', ' + note : '') : '·';
+            from.textContent = exposedBy.join(', ');
+        });
+
+        var rank = 0;
+
+        cards.forEach(function (card) {
+            var targets = card.getAttribute('data-glab-for').split(' ');
+            var shown = targets.indexOf('all') !== -1 || targets.some(function (target) {
+                return keys.indexOf(target) !== -1;
+            });
+
+            card.hidden = !shown;
+
+            // The ranks follow what is shown, so the list never reads 01, 04, 07.
+            if (shown) {
+                rank += 1;
+                card.querySelector('.glab-reco-rank').textContent = String(rank).padStart(2, '0');
+            }
+        });
+    }
+
+    boxes.forEach(function (box) {
+        box.addEventListener('change', render);
+    });
+
+    render();
+})();
