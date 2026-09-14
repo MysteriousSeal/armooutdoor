@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-14 · v1.42.4 · build V8PL2N
+
+### Admin
+
+- **The product list can be narrowed by AI review.** Next to category and supplier, a filter shows only pages already reviewed, or only those still waiting. It holds across tabs.
+- **The same bar now filters by SEO lengths.** OK keeps products whose title sits in 20–60 characters and whose meta description sits in 80–160, the ranges the SEO column already checks. Off keeps the rest.
+
+**No migration.**
+
 ## 2026-09-14 · v1.42.3 · build T4KQ8M
 
 ### Admin
