@@ -4713,7 +4713,7 @@ a.admin-pagination-page:hover {
 }
 
 .admin-filter-row--products {
-    grid-template-columns: minmax(14rem, 1.5fr) minmax(11rem, 1fr) minmax(11rem, 1fr) minmax(9.5rem, 0.85fr) auto;
+    grid-template-columns: minmax(12rem, 1.3fr) minmax(10rem, 1fr) minmax(10rem, 1fr) minmax(8.5rem, 0.75fr) minmax(8rem, 0.7fr) auto;
 }
 
 .admin-filter-row--customers {

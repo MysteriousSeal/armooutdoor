@@ -23,7 +23,7 @@
                 <span class="admin-list-chip">{{ number_format($noSkuCount) }} without SKU</span>
                 <span class="admin-list-chip">{{ number_format($noGtinCount) }} without GTIN</span>
                 <span class="admin-list-chip">{{ number_format($noWeightCount) }} without weight</span>
-                @if ($search !== '' || $categorySlug !== '' || $supplierId !== null || $ai !== '')
+                @if ($search !== '' || $categorySlug !== '' || $supplierId !== null || $ai !== '' || $seo !== '')
                     <span class="admin-list-chip is-filtered">Filtered</span>
                 @endif
             </div>
@@ -37,6 +37,7 @@
                 'category' => array_key_exists('category', $overrides) ? $overrides['category'] : ($categorySlug !== '' ? $categorySlug : null),
                 'supplier' => array_key_exists('supplier', $overrides) ? $overrides['supplier'] : $supplierId,
                 'ai' => array_key_exists('ai', $overrides) ? $overrides['ai'] : ($ai !== '' ? $ai : null),
+                'seo' => array_key_exists('seo', $overrides) ? $overrides['seo'] : ($seo !== '' ? $seo : null),
             ]);
             $tabQuery = fn (string $name) => $listQuery(['tab' => $name]);
             $sortLink = function (string $column) use ($sort, $listQuery): array {
@@ -47,7 +48,7 @@
                     'state' => str_starts_with($sort, $column.'-') ? substr($sort, strlen($column) + 1) : null,
                 ];
             };
-            $hasFilters = $search !== '' || $categorySlug !== '' || $supplierId !== null || $ai !== '';
+            $hasFilters = $search !== '' || $categorySlug !== '' || $supplierId !== null || $ai !== '' || $seo !== '';
             $activeCategory = $categorySlug !== ''
                 ? $categories->firstWhere('slug', $categorySlug)
                 : null;
@@ -144,10 +145,18 @@
                         <option value="pending" @selected($ai === 'pending')>Not reviewed</option>
                     </select>
                 </div>
+                <div class="admin-filter-field">
+                    <label class="admin-field-label" for="product-seo">SEO</label>
+                    <select id="product-seo" name="seo" class="form-control">
+                        <option value="">All</option>
+                        <option value="ok" @selected($seo === 'ok')>OK</option>
+                        <option value="off" @selected($seo === 'off')>Off</option>
+                    </select>
+                </div>
                 <div class="admin-filter-actions">
                     <button type="submit" class="btn btn-primary">Apply</button>
                     @if ($hasFilters)
-                        <a href="{{ route('admin.products.index', $listQuery(['search' => null, 'category' => null, 'supplier' => null, 'ai' => null])) }}" class="btn btn-secondary">Clear</a>
+                        <a href="{{ route('admin.products.index', $listQuery(['search' => null, 'category' => null, 'supplier' => null, 'ai' => null, 'seo' => null])) }}" class="btn btn-secondary">Clear</a>
                     @endif
                 </div>
             </div>
@@ -176,6 +185,12 @@
                 @if ($ai !== '')
                     <a href="{{ route('admin.products.index', $listQuery(['ai' => null])) }}" class="admin-filter-chip">
                         AI · {{ $ai === 'reviewed' ? 'Reviewed' : 'Not reviewed' }}
+                        <span aria-hidden="true">×</span>
+                    </a>
+                @endif
+                @if ($seo !== '')
+                    <a href="{{ route('admin.products.index', $listQuery(['seo' => null])) }}" class="admin-filter-chip">
+                        SEO · {{ $seo === 'ok' ? 'OK' : 'Off' }}
                         <span aria-hidden="true">×</span>
                     </a>
                 @endif

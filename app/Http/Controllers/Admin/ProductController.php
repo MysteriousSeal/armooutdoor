@@ -39,8 +39,8 @@ class ProductController extends Controller
 
     private const DEFAULT_SORT = 'id-desc';
 
-    /** @var list<int>|null Memo for seoFailingIds() — asked twice per request (count, then tab). */
-    private ?array $seoFailingIds = null;
+    /** @var array<string, list<int>> Memo for seoFailingIds() — asked twice per request (count, then tab). */
+    private array $seoFailingIds = [];
 
     private const SORT_COOKIE = 'admin_products_sort_v2';
 
@@ -52,6 +52,9 @@ class ProductController extends Controller
         $ai = in_array($request->query('ai'), ['reviewed', 'pending'], true)
             ? (string) $request->query('ai')
             : '';
+        $seo = in_array($request->query('seo'), ['ok', 'off'], true)
+            ? (string) $request->query('seo')
+            : '';
         $tab = in_array($request->query('tab'), ['active', 'disabled', 'in-stock', 'restocking', 'at-supplier', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight', 'no-image', 'no-seo'], true)
             ? (string) $request->query('tab')
             : 'active';
@@ -62,7 +65,7 @@ class ProductController extends Controller
             ? (string) $request->query('sort')
             : (in_array($request->cookie(self::SORT_COOKIE), self::SORTS, true) ? $request->cookie(self::SORT_COOKIE) : self::DEFAULT_SORT);
 
-        $products = $this->filteredProductsQuery($search, $categorySlug, $tab, $supplierId, $ai)
+        $products = $this->filteredProductsQuery($search, $categorySlug, $tab, $supplierId, $ai, $seo)
             // The discount rides along: the list prints it on every row that
             // has one, and asking per row is twenty queries a page.
             ->with('category', 'supplier', 'discount', 'variants.supplier')
@@ -93,6 +96,7 @@ class ProductController extends Controller
             'categorySlug' => $categorySlug,
             'supplierId' => $supplierId,
             'ai' => $ai,
+            'seo' => $seo,
         ])->cookie(self::SORT_COOKIE, $sort, 60 * 24 * 365);
     }
 
@@ -104,11 +108,14 @@ class ProductController extends Controller
         $ai = in_array($request->query('ai'), ['reviewed', 'pending'], true)
             ? (string) $request->query('ai')
             : '';
+        $seo = in_array($request->query('seo'), ['ok', 'off'], true)
+            ? (string) $request->query('seo')
+            : '';
         $tab = in_array($request->query('tab'), ['active', 'disabled', 'in-stock', 'at-supplier', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight', 'no-image', 'no-seo'], true)
             ? (string) $request->query('tab')
             : 'active';
 
-        $products = $this->filteredProductsQuery($search, $categorySlug, $tab, $supplierId, $ai)
+        $products = $this->filteredProductsQuery($search, $categorySlug, $tab, $supplierId, $ai, $seo)
             ->with('category', 'supplier')
             ->orderBy('id')
             ->get();
@@ -131,7 +138,7 @@ class ProductController extends Controller
         );
     }
 
-    private function filteredProductsQuery(string $search, string $categorySlug, string $tab, ?int $supplierId = null, string $ai = ''): Builder
+    private function filteredProductsQuery(string $search, string $categorySlug, string $tab, ?int $supplierId = null, string $ai = '', string $seo = ''): Builder
     {
         return Product::query()
             ->tap(fn ($query) => $this->applyProductTab($query, $tab))
@@ -154,7 +161,9 @@ class ProductController extends Controller
             })
             ->when($supplierId !== null, fn ($query) => $query->where('supplier_id', $supplierId))
             ->when($ai === 'reviewed', fn ($query) => $query->where('ai_validated', true))
-            ->when($ai === 'pending', fn ($query) => $query->where('ai_validated', false));
+            ->when($ai === 'pending', fn ($query) => $query->where('ai_validated', false))
+            ->when($seo === 'off', fn ($query) => $query->whereIn('id', $this->seoFailingIds(activeOnly: false)))
+            ->when($seo === 'ok', fn ($query) => $query->whereNotIn('id', $this->seoFailingIds(activeOnly: false)));
     }
 
     public function create(): View
@@ -694,17 +703,22 @@ class ProductController extends Controller
     }
 
     /**
-     * Ids of active products whose SEO lengths fail. The verdict lives on
-     * the model — meta fields first, HTML stripped from the fallback — so
-     * SQL cannot ask the question; the catalogue is small enough to ask in
-     * PHP, once per request.
+     * Ids of products whose SEO lengths fail. The verdict lives on the
+     * model — meta fields first, HTML stripped from the fallback — so SQL
+     * cannot ask the question; the catalogue is small enough to ask in PHP,
+     * once per request.
+     *
+     * The Missing SEO tab only wants active products. The filter asks for
+     * every product, so it still works on the Disabled tab.
      *
      * @return list<int>
      */
-    private function seoFailingIds(): array
+    private function seoFailingIds(bool $activeOnly = true): array
     {
-        return $this->seoFailingIds ??= Product::query()
-            ->where('is_active', true)
+        $key = $activeOnly ? 'active' : 'all';
+
+        return $this->seoFailingIds[$key] ??= Product::query()
+            ->when($activeOnly, fn (Builder $query) => $query->where('is_active', true))
             ->get(['id', 'name', 'description', 'meta_title', 'meta_description'])
             ->reject(fn (Product $product): bool => $product->seoContentOk())
             ->pluck('id')
