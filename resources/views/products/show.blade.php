@@ -153,18 +153,18 @@
                     <span class="product-detail-rating-link" aria-hidden="true">{{ __('store.reviews_see_all') }}</span>
                 </a>
                 <div class="product-detail-meta">
-                    <span
-                        class="badge badge-active cart-line-discount-badge"
-                        id="product-detail-discount-badge"
-                        @if (! $product->is_active || $variantHasOwnPrice || ! $product->hasDiscount()) hidden @endif
-                    >{{ $product->hasDiscount() ? $product->discount->percentageLabel($product->price_cents) : '' }}</span>
                     <p class="product-detail-price" id="product-detail-price">
+                        <span id="product-detail-price-current">{{ ($displayVariant ?? $product)->formattedPrice() }}</span>
                         <span
                             class="product-detail-price-original"
                             id="product-detail-price-original"
                             @if (! $product->is_active || $variantHasOwnPrice || ! $product->hasDiscount()) hidden @endif
                         >{{ $product->formattedOriginalPrice() }}</span>
-                        <span id="product-detail-price-current">{{ ($displayVariant ?? $product)->formattedPrice() }}</span>
+                        <span
+                            class="badge badge-active cart-line-discount-badge"
+                            id="product-detail-discount-badge"
+                            @if (! $product->is_active || $variantHasOwnPrice || ! $product->hasDiscount()) hidden @endif
+                        >{{ $product->hasDiscount() ? $product->discount->percentageLabel($product->price_cents) : '' }}</span>
                     </p>
                     @php
                         $backorderableVariant = $product->hasVariants()

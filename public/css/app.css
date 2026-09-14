@@ -6598,3 +6598,137 @@ body.lightbox-open {
         margin: 0 auto;
     }
 }
+
+/*
+ * Product page price plate: price and availability as one hairline module
+ * with two zones. Kept at the end of the file so it wins over the earlier
+ * .product-detail-meta rules, including the 768px override, on source order.
+ *
+ * The price paragraph carries the current price, the original price and the
+ * discount tag on one baseline, and only wraps when a long figure runs out
+ * of room; hidden items simply drop out of the row.
+ */
+.product-detail-meta {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) fit-content(42%);
+    grid-template-areas: "price stock";
+    align-items: center;
+    gap: 0;
+    margin-top: 1rem;
+    padding: 0.8rem 0 0.8rem 1rem;
+    border: 1px solid var(--border);
+}
+
+.product-detail-meta .product-detail-price {
+    grid-area: price;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.2rem 0.6rem;
+    min-width: 0;
+}
+
+.product-detail-meta #product-detail-price-current {
+    font-size: 1.875rem;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: var(--text);
+}
+
+.product-detail-meta .product-detail-price-original {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.3rem;
+    white-space: nowrap;
+}
+
+/* The saving is a solid olive tag, the only filled element in the module,
+   so it reads as the offer rather than as another status chip. */
+.product-detail-meta .cart-line-discount-badge {
+    flex: none;
+    height: 1.3rem;
+    margin: 0;
+    padding: 0 0.4rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    font-variant-numeric: tabular-nums;
+    color: #fff;
+    background: var(--accent-heading);
+    border-color: var(--accent-heading);
+}
+
+/* Availability is a field, not a chip: it fills the right zone edge to edge
+   in the state tint the stock badge already defines, split off by a hairline. */
+.product-detail-meta .stock-badge {
+    grid-area: stock;
+    align-self: stretch;
+    min-width: 10rem;
+    height: auto;
+    margin: -0.8rem 0 -0.8rem 1rem;
+    padding: 0.6rem 0.9rem;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    line-height: 1.3;
+    text-wrap: balance;
+    border-width: 0 0 0 1px;
+}
+
+.product-detail-meta .stock-badge::before {
+    flex: none;
+    width: 0.45rem;
+    height: 0.45rem;
+}
+
+/* Shape backs up colour: a ring for stock that is on its way, a bar for
+   none at all, a dot for stock on the shelf. */
+.product-detail-meta .stock-badge.is-at-supplier::before,
+.product-detail-meta .stock-badge.is-restocking::before {
+    background: transparent;
+    box-shadow: inset 0 0 0 1.5px currentColor;
+}
+
+.product-detail-meta .stock-badge.is-out-of-stock::before {
+    width: 0.55rem;
+    height: 2px;
+    border-radius: 0;
+}
+
+[data-theme='dark'] .product-detail-meta .cart-line-discount-badge {
+    color: var(--bg);
+}
+
+@media (max-width: 768px) {
+    .product-detail-meta {
+        padding: 0.7rem 0 0.7rem 0.85rem;
+    }
+
+    .product-detail-meta .stock-badge {
+        margin: -0.7rem 0 -0.7rem 0.85rem;
+    }
+}
+
+/* On a phone the availability zone becomes the plate's bottom strip. */
+@media (max-width: 560px) {
+    .product-detail-meta {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas:
+            "price"
+            "stock";
+        padding: 0.7rem 0.85rem 0;
+    }
+
+    .product-detail-meta #product-detail-price-current {
+        font-size: 1.75rem;
+    }
+
+    .product-detail-meta .stock-badge {
+        min-width: 0;
+        margin: 0.7rem -0.85rem 0;
+        padding: 0.55rem 0.85rem;
+        border-width: 1px 0 0;
+    }
+}
