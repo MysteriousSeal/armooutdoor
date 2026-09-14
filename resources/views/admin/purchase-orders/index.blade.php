@@ -84,6 +84,9 @@
                             <th>Total (excl. VAT)</th>
                             <th>Expected</th>
                             <th>Created</th>
+                            @if ($tab === 'received')
+                                <th>Valid labels</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -105,6 +108,21 @@
                                 <td>{{ format_euros($po->totalCents()) }}</td>
                                 <td>{{ $po->expected_at?->format('d M Y') ?? '—' }}</td>
                                 <td>{{ $po->created_at->format('d M Y') }}</td>
+                                @if ($tab === 'received')
+                                    @php
+                                        $validLabels = $po->validLabelCount();
+                                        $labelLines = $po->items->count();
+                                        $labelState = $labelLines > 0 && $validLabels === $labelLines
+                                            ? 'is-set'
+                                            : ($validLabels > 0 ? 'is-partial' : 'is-missing');
+                                    @endphp
+                                    <td>
+                                        <span
+                                            class="gtin-flag {{ $labelState }}"
+                                            title="{{ $validLabels }} of {{ $labelLines }} ready to print"
+                                        >{{ $validLabels }}/{{ $labelLines }}</span>
+                                    </td>
+                                @endif
                             </tr>
                         @endforeach
                     </tbody>

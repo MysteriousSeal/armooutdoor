@@ -291,4 +291,86 @@ class PurchaseOrderLabelActionsTest extends TestCase
         $this->assertStringNotContainsString('label-requirements-missing', $html);
         $this->assertStringContainsString('product deleted', $html);
     }
+
+    public function test_the_received_tab_counts_valid_labels_after_created(): void
+    {
+        $this->receivedOrder();
+
+        $html = $this->actingAs(User::factory()->admin()->create())
+            ->get(route('admin.purchase-orders.index', ['tab' => 'received']))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('<th>Valid labels</th>', $html);
+        $this->assertLessThan(
+            strpos($html, 'Valid labels'),
+            strpos($html, '>Created</th>'),
+            'Valid labels must follow Created',
+        );
+        $this->assertStringContainsString('gtin-flag is-set', $html);
+        $this->assertStringContainsString('>1/1</span>', $html);
+    }
+
+    public function test_the_received_tab_marks_an_unprintable_order_red(): void
+    {
+        $this->receivedOrder(['gtin' => null], wording: ['subtitle' => null]);
+
+        $html = $this->actingAs(User::factory()->admin()->create())
+            ->get(route('admin.purchase-orders.index', ['tab' => 'received']))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('gtin-flag is-missing', $html);
+        $this->assertStringContainsString('>0/1</span>', $html);
+    }
+
+    public function test_the_received_tab_marks_a_mixed_order_amber(): void
+    {
+        $po = $this->receivedOrder();
+        $short = Product::factory()->labelled(['subtitle' => null])->create([
+            'sku' => 'ARM-KO',
+            'gtin' => null,
+        ]);
+        PurchaseOrderItem::query()->create([
+            'purchase_order_id' => $po->id,
+            'product_id' => $short->id,
+            'name' => $short->localizedName(),
+            'sku' => $short->sku,
+            'quantity_ordered' => 2,
+            'quantity_received' => 2,
+            'unit_cost_cents' => 100,
+        ]);
+
+        $html = $this->actingAs(User::factory()->admin()->create())
+            ->get(route('admin.purchase-orders.index', ['tab' => 'received']))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertSame(1, $po->fresh(['items.product.label', 'items.variant'])->validLabelCount());
+        $this->assertStringContainsString('gtin-flag is-partial', $html);
+        $this->assertStringContainsString('>1/2</span>', $html);
+    }
+
+    public function test_other_tabs_do_not_show_valid_labels(): void
+    {
+        $product = Product::factory()->labelled()->create([
+            'sku' => 'ARM-OPEN',
+            'gtin' => '4006381333931',
+        ]);
+        $po = PurchaseOrder::factory()->sent()->create();
+        PurchaseOrderItem::query()->create([
+            'purchase_order_id' => $po->id,
+            'product_id' => $product->id,
+            'name' => $product->localizedName(),
+            'sku' => $product->sku,
+            'quantity_ordered' => 5,
+            'quantity_received' => 0,
+            'unit_cost_cents' => 100,
+        ]);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->get(route('admin.purchase-orders.index', ['tab' => 'open']))
+            ->assertOk()
+            ->assertDontSee('Valid labels');
+    }
 }

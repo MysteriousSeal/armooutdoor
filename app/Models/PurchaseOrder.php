@@ -248,6 +248,19 @@ class PurchaseOrder extends Model
         return $this->status === 'received';
     }
 
+    /**
+     * How many lines can print a label as they stand.
+     *
+     * Same four Catalog › Labels checks, and a size uses its own codes.
+     * A line whose product is gone cannot print.
+     */
+    public function validLabelCount(): int
+    {
+        return $this->items->filter(
+            fn (PurchaseOrderItem $item): bool => $item->product?->labelIsPrintable($item->variant) === true,
+        )->count();
+    }
+
     public function canBeCancelled(): bool
     {
         return in_array($this->status, ['sent', 'partially_received'], true);

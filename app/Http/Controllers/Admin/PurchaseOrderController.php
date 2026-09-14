@@ -33,7 +33,9 @@ class PurchaseOrderController extends Controller
         $supplierId = $request->query('supplier_id') ? (int) $request->query('supplier_id') : null;
 
         $purchaseOrders = PurchaseOrder::query()
-            ->with(['supplier', 'items'])
+            ->with($tab === 'received'
+                ? ['supplier', 'items.product.label', 'items.variant']
+                : ['supplier', 'items'])
             ->tap(fn ($query) => $this->applyTab($query, $tab))
             ->when($search !== '', function ($query) use ($search): void {
                 $query->where(function ($query) use ($search): void {
