@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\Admin\AdminUserController as ApiAdminAdminUserContr
 use App\Http\Controllers\Api\Admin\AnalyticsController as ApiAdminAnalyticsController;
 use App\Http\Controllers\Api\Admin\BlogPostController as ApiAdminBlogPostController;
 use App\Http\Controllers\Api\Admin\CategoryController as ApiAdminCategoryController;
+use App\Http\Controllers\Api\Admin\DiscountController as ApiAdminDiscountController;
 use App\Http\Controllers\Api\Admin\OrderController as ApiAdminOrderController;
 use App\Http\Controllers\Api\Admin\ProductController as ApiAdminProductController;
 use Illuminate\Support\Facades\Route;
@@ -22,6 +23,14 @@ Route::middleware(['throttle:admin-api', 'admin.api'])->prefix('admin')->name('a
     Route::post('/products', [ApiAdminProductController::class, 'store'])->name('products.store');
     Route::get('/products/{product}', [ApiAdminProductController::class, 'show'])->name('products.show');
     Route::patch('/products/{product}', [ApiAdminProductController::class, 'update'])->name('products.update');
+
+    // Product discounts
+    Route::get('/discounts', [ApiAdminDiscountController::class, 'index'])->name('discounts.index');
+    Route::post('/discounts', [ApiAdminDiscountController::class, 'store'])->name('discounts.store');
+    // Before /discounts/{discount}, or "products" would be bound as a discount id.
+    Route::get('/discounts/products', [ApiAdminDiscountController::class, 'products'])->name('discounts.products');
+    Route::get('/discounts/{discount}', [ApiAdminDiscountController::class, 'show'])->name('discounts.show');
+    Route::patch('/discounts/{discount}', [ApiAdminDiscountController::class, 'update'])->name('discounts.update');
 
     // Blog
     Route::get('/blog/categories', [ApiAdminBlogPostController::class, 'categories'])->name('blog.categories');
