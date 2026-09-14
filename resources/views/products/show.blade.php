@@ -421,25 +421,31 @@
             </div>
         </article>
 
-        @if ($product->localizedDescription() !== '')
-            <section class="product-desc" aria-labelledby="product-desc-title">
-                <h3 class="product-desc-title" id="product-desc-title">{{ __('store.product_description') }}</h3>
-                <div class="product-detail-text">{!! $product->localizedDescription() !!}</div>
-            </section>
-        @endif
+        {{-- One sheet holds both sections so they can sit side by side; each
+             keeps its own heading and id. --}}
+        @if ($product->localizedDescription() !== '' || ! empty($product->characteristics))
+            <div class="product-sheet">
+                @if ($product->localizedDescription() !== '')
+                    <section class="product-desc" aria-labelledby="product-desc-title">
+                        <h3 class="product-desc-title" id="product-desc-title">{{ __('store.product_description') }}</h3>
+                        <div class="product-detail-text">{!! $product->localizedDescription() !!}</div>
+                    </section>
+                @endif
 
-        @if (! empty($product->characteristics))
-            <section class="product-specs" aria-labelledby="product-specs-title">
-                <h3 class="product-desc-title" id="product-specs-title">{{ __('store.product_characteristics') }}</h3>
-                <dl class="product-specs-list">
-                    @foreach ($product->characteristics as $characteristic)
-                        <div class="product-specs-row">
-                            <dt>{{ $characteristic['label'] }}</dt>
-                            <dd>{{ $characteristic['value'] }}</dd>
-                        </div>
-                    @endforeach
-                </dl>
-            </section>
+                @if (! empty($product->characteristics))
+                    <section class="product-specs" aria-labelledby="product-specs-title">
+                        <h3 class="product-desc-title" id="product-specs-title">{{ __('store.product_characteristics') }}</h3>
+                        <dl class="product-specs-list">
+                            @foreach ($product->characteristics as $characteristic)
+                                <div class="product-specs-row">
+                                    <dt>{{ $characteristic['label'] }}</dt>
+                                    <dd>{{ $characteristic['value'] }}</dd>
+                                </div>
+                            @endforeach
+                        </dl>
+                    </section>
+                @endif
+            </div>
         @endif
 
         <section class="product-reviews" aria-labelledby="product-reviews-title">

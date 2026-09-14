@@ -6732,3 +6732,245 @@ body.lightbox-open {
         border-width: 1px 0 0;
     }
 }
+
+/*
+ * Product page story beside the specs.
+ *
+ * The description and the characteristics share one sheet. On a wide screen
+ * they sit side by side on the same split as the gallery and the buy box
+ * above, so the page keeps its two columns all the way down: the text reads
+ * on the left, the facts wait on the right, and the panel has no empty third.
+ * Each section keeps its own heading; one rule runs under both headings and
+ * one rule divides the columns, and that is the only ornament.
+ *
+ * Scoped to .product-sheet and kept at the end of the file, so it wins over
+ * the earlier .product-desc, .product-specs and .product-detail-text rules.
+ */
+.product-sheet {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    margin: 0 0 2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+/* Inside the sheet the two sections stop being panels of their own. */
+.product-sheet .product-desc,
+.product-sheet .product-specs {
+    min-width: 0;
+    margin: 0;
+    padding: 1.6rem 1.75rem 1.75rem;
+    background: none;
+    border: 0;
+    box-shadow: none;
+}
+
+.product-sheet .product-desc-title {
+    margin: 0 0 1.25rem;
+    padding: 0 0 0.85rem;
+    border-bottom: 1px solid var(--border);
+}
+
+/* Paragraphs are separated by air, not by rules: a line between each one
+   chopped a single story into four notices. */
+.product-sheet .product-detail-text {
+    max-width: 40rem;
+    font-size: 1rem;
+    line-height: 1.72;
+}
+
+.product-sheet .product-detail-text p + p {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+}
+
+.product-sheet .product-detail-text :where(p, ul, ol, blockquote) {
+    margin: 0 0 1.05em;
+}
+
+/* Bold words in a description are the ones the writer wanted read: they keep
+   the size and colour of the sentence around them. */
+.product-sheet .product-detail-text :where(strong, b) {
+    font-size: inherit;
+    font-weight: 600;
+    color: var(--text);
+}
+
+/* The first paragraph says what the product is: it is the one sentence a
+   shopper who reads nothing else should still read. */
+.product-sheet .product-detail-text > p:first-child {
+    margin-bottom: 1.3em;
+    font-size: 1.1875rem;
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+    color: var(--text);
+}
+
+.product-sheet .product-detail-text > :last-child {
+    margin-bottom: 0;
+}
+
+/* A description on its own keeps a reading measure instead of running
+   across the whole sheet. */
+.product-sheet > .product-desc:only-child .product-detail-text {
+    max-width: 36rem;
+}
+
+/* Characteristics as a ledger: label and value on one line, a hairline
+   between rows, so the eye runs down the labels and across to a value. The
+   labels are quiet olive words, not a column of small headings. */
+.product-sheet .product-specs-list {
+    column-count: auto;
+}
+
+.product-sheet .product-specs-row {
+    display: grid;
+    grid-template-columns: 10.5rem minmax(0, 1fr);
+    gap: 0.05rem 1.25rem;
+    align-items: baseline;
+    margin: 0;
+    padding: 0.56rem 0;
+    background: none;
+    border: 0;
+    border-top: 1px solid var(--border);
+}
+
+.product-sheet .product-specs-row:first-child {
+    padding-top: 0.2rem;
+    border-top: 0;
+}
+
+.product-sheet .product-specs-row:last-child {
+    padding-bottom: 0;
+}
+
+.product-sheet .product-specs-row dt {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.45;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--accent-heading);
+}
+
+.product-sheet .product-specs-row dd {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.45;
+    color: var(--text);
+}
+
+/* Side by side once the product header above is itself two columns. The
+   split copies the gallery and buy box (1.05fr / 0.95fr), so the divider
+   falls under the gap between the photo and the price. */
+@media (min-width: 1024px) {
+    .product-sheet {
+        grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    }
+
+    .product-sheet > :only-child {
+        grid-column: 1 / -1;
+    }
+
+    .product-sheet .product-desc {
+        padding-right: 2.25rem;
+    }
+
+    .product-sheet .product-desc + .product-specs {
+        padding-left: 2rem;
+        border-left: 1px solid var(--border);
+    }
+
+    /* The two heading rules reach the divider from either side, so they read
+       as one rule across the sheet rather than two stubs. */
+    .product-sheet .product-desc:has(+ .product-specs) .product-desc-title {
+        margin-right: -2.25rem;
+        padding-right: 2.25rem;
+    }
+
+    .product-sheet .product-desc + .product-specs .product-desc-title {
+        margin-left: -2rem;
+        padding-left: 2rem;
+    }
+
+    /* Alone, the characteristics take the whole width in two ledgers. */
+    .product-sheet .product-specs:only-child .product-specs-list {
+        column-count: 2;
+        column-gap: 3rem;
+    }
+
+    .product-sheet .product-specs:only-child .product-specs-row {
+        break-inside: avoid;
+        padding: 0.56rem 0;
+        border-top: 0;
+        border-bottom: 1px solid var(--border);
+    }
+}
+
+/* On a narrow desktop the ledger column is too slim for a 10.5rem label:
+   long values wrapped to four lines. */
+@media (min-width: 1024px) and (max-width: 1199px) {
+    .product-sheet .product-specs-row {
+        grid-template-columns: 8.5rem minmax(0, 1fr);
+    }
+}
+
+/* When the story runs longer than the facts, the facts follow the reader
+   down under the sticky menu, as the buy box does. Only on screens tall
+   enough to show the whole ledger, or its last rows would never be seen. */
+@media (min-width: 1024px) and (min-height: 820px) {
+    .product-sheet .product-desc + .product-specs .product-specs-list {
+        position: sticky;
+        top: 5.25rem;
+    }
+}
+
+/* Stacked below the desktop split: the story first, then the facts under a
+   full rule, both on one reading measure so they share a right edge. */
+@media (max-width: 1023px) {
+    .product-sheet .product-desc + .product-specs {
+        border-top: 1px solid var(--border);
+    }
+
+    .product-sheet .product-detail-text,
+    .product-sheet .product-specs-list {
+        max-width: 36rem;
+    }
+}
+
+@media (max-width: 759px) {
+    .product-sheet .product-desc,
+    .product-sheet .product-specs {
+        padding: 1.3rem 1.1rem 1.4rem;
+    }
+
+    .product-sheet .product-detail-text {
+        font-size: 0.975rem;
+    }
+
+    .product-sheet .product-detail-text > p:first-child {
+        font-size: 1.0625rem;
+    }
+
+    /* The section rule already opens the characteristics: a second rule
+       under their heading read as a double line this close to it. */
+    .product-sheet .product-desc + .product-specs .product-desc-title {
+        padding-bottom: 0;
+        border-bottom: 0;
+    }
+}
+
+/* On a phone the label goes above its value, so a long value keeps the full
+   width instead of wrapping word by word beside it. */
+@media (max-width: 559px) {
+    .product-sheet .product-specs-row {
+        grid-template-columns: minmax(0, 1fr);
+        padding: 0.55rem 0;
+    }
+
+    .product-sheet .product-specs-row:first-child {
+        padding-top: 0.1rem;
+    }
+}
