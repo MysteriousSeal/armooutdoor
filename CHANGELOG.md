@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-14 · v1.42.0 · build Q8LT2V
+
+### Storefront
+
+- **Three new guides bring the shelf to fourteen**, each on a narrow question shooters actually search for, with an instrument of its own, a questions panel and its sources listed. Every figure was checked against those sources by a domain expert, and each page was then proofread.
+- **« Quel plomb pour sa carabine à air ? »** explains head shapes (flat, round, pointed, hollow), 4,5 or 5,5 mm, grains and grams, and head diameters, and why a pellet has to be tried in your own barrel. Its calculator takes the rifle's energy, the pellet's weight and the use, and returns the muzzle speed on a bar whose zone past 900 FPS is hatched, the lightest pellet worth shooting at that energy, the legal category and the head shape to pick. It says plainly that French law allows neither game nor pest destruction with an air gun, and where the EU lead restriction stands for pellets. 15 sources.
+- **« Réplique CO2 et froid »** explains why a CO2 replica weakens in the cold and in rapid fire: while liquid remains, a cartridge's pressure follows its temperature, not what is left inside. A gauge driven by a temperature slider reads the pressure from the NIST table and says what each range changes. The page also covers shots per 12 g cartridge, CO2 against gas in winter, and how to oil, store, empty, throw away and carry a cartridge, by car or by plane. 14 sources.
+- **« Modérateur de son et audition »** says what French law allows: not a weapon, allowed for hunting since 2018, but bought only with a permit or licence and the gun's own title. It gives the 17 to 24 dB a moderator actually takes off at the ear, and why a shot still sits around the 135 to 140 dB(C) limits. A calculator estimates the peak at the ear by gun, moderator and hearing protection, labelled as an order of magnitude. The page says openly that the shop sells moderator covers, not moderators. 15 sources.
+- **Each new guide answers for its rayon and is linked from the shelf.** The pellets, CO2 cartridges and moderator accessories pages point to their guide. The joules guide links the pellet and CO2 guides, and the where-to-shoot guide links the moderator guide. The guides index now counts fourteen, and all three pages are in the sitemap.
+
+**No migration.**
+
 ## 2026-09-14 · v1.41.1 · build M4RQ7T
 
 ### Storefront
