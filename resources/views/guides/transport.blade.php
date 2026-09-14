@@ -246,6 +246,11 @@
                     munitions</a> dédiée, séparée de l'arme, idéalement dans une armoire ou un
                     meuble fermé.
                 </p>
+                <p>
+                    Ce qui peut désigner votre domicile à un cambrioleur quand vos données de
+                    détenteur ont fuité, et comment s'en protéger, est le sujet de notre guide
+                    <a href="{{ route('guides.donnees') }}">Protéger ses données et son domicile</a>.
+                </p>
             </div>
         </section>
 
