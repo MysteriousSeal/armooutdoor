@@ -262,6 +262,27 @@ class VintedCopyGenerationTest extends TestCase
     }
 
     /**
+     * A balaclava listing was flagged for « airsoft » and for a face covering
+     * worn « sous un casque, un masque »: the word list had no airsoft in it,
+     * and the prompt itself named airsoft as what the shop sells. Vinted's
+     * catalogue rules ban replicas and official uniforms by name, and an item
+     * that is banned outright is said to be, rather than renamed until it
+     * passes.
+     */
+    public function test_the_prompt_follows_vinted_catalogue_rules(): void
+    {
+        $prompt = (new ReflectionClass(VintedCopywriter::class))->getConstant('SYSTEM_PROMPT');
+
+        foreach (['« airsoft »', '« réplique »', '« tir »', '« chasse »', 'uniformes', 'Article interdit sur Vinted', 'ne le maquille pas', 'froid, du vent'] as $rule) {
+            $this->assertStringContainsString($rule, $prompt, "The prompt lost « {$rule} »");
+        }
+
+        // The prompt no longer introduces the shop by the very words it bans.
+        $this->assertStringNotContainsString("d'équipement de tir sportif, chasse, airsoft", $prompt);
+        $this->assertStringNotContainsString("\u{2014}", $prompt);
+    }
+
+    /**
      * @return array{title: string, description: string}
      */
     private function parse(string $text): array
