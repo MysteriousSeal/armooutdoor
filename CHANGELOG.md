@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-15 · v1.42.5 · build H6WN3D
+
+### Admin
+
+- **« Write with Claude » now writes Vinted listings within Vinted's catalogue rules.** A generated balaclava listing was flagged: it named airsoft and described the balaclava worn under a helmet or a mask. Vinted bans replicas such as airsoft and BB guns, and the instruction neither listed those words nor kept them out of how it introduced the shop. It now spells out what Vinted bans (weapons and ammunition, replicas, pointed knives, official army, police or emergency uniforms and insignia), keeps a much longer list of words out of every title and description, describes face coverings as protection against cold, wind, sun or dust, and allows no links, platform names or unrelated brands.
+- **An item Vinted bans outright is no longer renamed until it passes.** The generator titles it « Article interdit sur Vinted », says which rule it breaks, and leaves the price field as it was.
+
+**No migration.**
+
 ## 2026-09-14 · v1.42.4 · build V8PL2N
 
 ### Admin
