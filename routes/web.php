@@ -25,6 +25,10 @@ use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\DiscountCodeController as AdminDiscountCodeController;
 use App\Http\Controllers\Admin\DiscountController as AdminDiscountController;
+use App\Http\Controllers\Admin\FftirAmmunitionController as AdminFftirAmmunitionController;
+use App\Http\Controllers\Admin\FftirController as AdminFftirController;
+use App\Http\Controllers\Admin\FftirSessionController as AdminFftirSessionController;
+use App\Http\Controllers\Admin\FftirWeaponController as AdminFftirWeaponController;
 use App\Http\Controllers\Admin\IdentityDocumentController as AdminIdentityDocumentController;
 use App\Http\Controllers\Admin\InvoiceSettingController as AdminInvoiceSettingController;
 use App\Http\Controllers\Admin\LabelController as AdminLabelController;
@@ -145,6 +149,29 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
             Route::get('/documents', [AdminIdentityDocumentController::class, 'index'])->name('documents.index');
             Route::get('/documents/{document}', [AdminIdentityDocumentController::class, 'show'])->name('documents.show');
             Route::patch('/documents/{document}', [AdminIdentityDocumentController::class, 'review'])->name('documents.review');
+        });
+
+        Route::middleware('admin.owner')->group(function (): void {
+            Route::get('/fftir', AdminFftirController::class)->name('fftir.index');
+
+            Route::get('/fftir/weapons', [AdminFftirWeaponController::class, 'index'])->name('fftir.weapons.index');
+            Route::get('/fftir/weapons/create', [AdminFftirWeaponController::class, 'create'])->name('fftir.weapons.create');
+            Route::post('/fftir/weapons', [AdminFftirWeaponController::class, 'store'])->name('fftir.weapons.store');
+            Route::get('/fftir/weapons/{weapon}/edit', [AdminFftirWeaponController::class, 'edit'])->name('fftir.weapons.edit');
+            Route::put('/fftir/weapons/{weapon}', [AdminFftirWeaponController::class, 'update'])->name('fftir.weapons.update');
+
+            Route::get('/fftir/sessions', [AdminFftirSessionController::class, 'index'])->name('fftir.sessions.index');
+            Route::get('/fftir/sessions/create', [AdminFftirSessionController::class, 'create'])->name('fftir.sessions.create');
+            Route::post('/fftir/sessions', [AdminFftirSessionController::class, 'store'])->name('fftir.sessions.store');
+            Route::delete('/fftir/sessions/{session}', [AdminFftirSessionController::class, 'destroy'])->name('fftir.sessions.destroy');
+
+            Route::get('/fftir/ammunitions', [AdminFftirAmmunitionController::class, 'index'])->name('fftir.ammunitions.index');
+            Route::get('/fftir/ammunitions/create', [AdminFftirAmmunitionController::class, 'create'])->name('fftir.ammunitions.create');
+            Route::post('/fftir/ammunitions', [AdminFftirAmmunitionController::class, 'store'])->name('fftir.ammunitions.store');
+            Route::get('/fftir/ammunitions/{ammunition}/edit', [AdminFftirAmmunitionController::class, 'edit'])->name('fftir.ammunitions.edit');
+            Route::put('/fftir/ammunitions/{ammunition}', [AdminFftirAmmunitionController::class, 'update'])->name('fftir.ammunitions.update');
+            Route::post('/fftir/ammunitions/{ammunition}/stock', [AdminFftirAmmunitionController::class, 'addStock'])->name('fftir.ammunitions.stock.store');
+            Route::get('/fftir/ammunitions/{ammunition}/stock-history', [AdminFftirAmmunitionController::class, 'stockHistory'])->name('fftir.ammunitions.stock-history');
         });
 
         Route::middleware('admin.owner')->group(function (): void {

@@ -1,0 +1,581 @@
+/* FFTIR admin section: a range-card / ballistics-ledger identity.
+   Everything here is scoped under .fftir-page so it cannot leak into,
+   collide with, or override the rest of the admin. */
+
+.fftir-page {
+    --fftir-brass: #8a6d2e;
+    --fftir-brass-strong: #6b5320;
+    --fftir-brass-soft: color-mix(in srgb, #8a6d2e 12%, transparent);
+    --fftir-line: #cabb96;
+    --fftir-up: #4f6b2e;
+    --fftir-down: #a4402c;
+    --fftir-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', 'Roboto Mono', Consolas, 'Liberation Mono', monospace;
+    max-width: 76rem;
+    font-variant-numeric: tabular-nums;
+}
+
+[data-theme='dark'] .fftir-page {
+    --fftir-brass: #d1b568;
+    --fftir-brass-strong: #e8cf85;
+    --fftir-brass-soft: color-mix(in srgb, #d1b568 14%, transparent);
+    --fftir-line: #4a4030;
+    --fftir-up: #9fc36a;
+    --fftir-down: #e8815f;
+}
+
+/* ---------- Hero ---------- */
+
+.fftir-hero {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--fftir-line);
+}
+
+.fftir-hero-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.fftir-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 0.6rem;
+    font-family: var(--fftir-mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fftir-brass);
+}
+
+.fftir-eyebrow::before {
+    content: "";
+    width: 0.5rem;
+    height: 0.5rem;
+    flex: none;
+    background: var(--fftir-brass);
+}
+
+.fftir-eyebrow a {
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+}
+
+.fftir-eyebrow a:hover {
+    border-bottom-color: var(--fftir-brass);
+}
+
+.fftir-title {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+}
+
+.fftir-lede {
+    margin: 0.5rem 0 0;
+    max-width: 38rem;
+    color: var(--text-muted);
+    font-size: 0.9375rem;
+    line-height: 1.55;
+}
+
+.fftir-actions {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.fftir-meta {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.9rem;
+}
+
+.fftir-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.65rem;
+    font-family: var(--fftir-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.03em;
+    color: var(--text-muted);
+    background: var(--fftir-brass-soft);
+    border: 1px solid var(--fftir-line);
+}
+
+/* ---------- Buttons (scoped reskin, base behavior untouched) ---------- */
+
+.fftir-page .btn {
+    border-radius: 0;
+    font-family: inherit;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+}
+
+.fftir-page .btn-primary {
+    background: var(--fftir-brass);
+    border-color: var(--fftir-brass);
+}
+
+.fftir-page .btn-primary:hover:not(:disabled) {
+    background: var(--fftir-brass-strong);
+    border-color: var(--fftir-brass-strong);
+}
+
+.fftir-page .btn-secondary {
+    border-color: var(--fftir-line);
+}
+
+.fftir-page .btn-secondary:hover {
+    border-color: var(--fftir-brass);
+}
+
+/* ---------- Index tiles + signature corner frame ---------- */
+
+.fftir-tile-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.25rem;
+}
+
+.fftir-tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1.75rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: inherit;
+    text-decoration: none;
+    transition: border-color 0.15s, transform 0.15s;
+}
+
+.fftir-tile:hover {
+    border-color: var(--fftir-brass);
+    transform: translateY(-2px);
+}
+
+.fftir-tile-code {
+    font-family: var(--fftir-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--fftir-brass);
+}
+
+.fftir-tile-label {
+    font-size: 1.375rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.fftir-tile-desc {
+    margin-top: auto;
+    padding-top: 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.fftir-tile-arrow {
+    position: absolute;
+    top: 1.6rem;
+    right: 1.5rem;
+    font-family: var(--fftir-mono);
+    color: var(--text-muted);
+    transition: transform 0.15s, color 0.15s;
+}
+
+.fftir-tile:hover .fftir-tile-arrow {
+    color: var(--fftir-brass);
+    transform: translateX(3px);
+}
+
+.fftir-frame {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.fftir-frame-corner {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--fftir-brass);
+    opacity: 0.85;
+}
+
+.fftir-frame-corner--tl {
+    top: -1px;
+    left: -1px;
+    border-right: 0;
+    border-bottom: 0;
+}
+
+.fftir-frame-corner--tr {
+    top: -1px;
+    right: -1px;
+    border-left: 0;
+    border-bottom: 0;
+}
+
+.fftir-frame-corner--br {
+    bottom: -1px;
+    right: -1px;
+    border-left: 0;
+    border-top: 0;
+}
+
+.fftir-frame-corner--bl {
+    bottom: -1px;
+    left: -1px;
+    border-right: 0;
+    border-top: 0;
+}
+
+@media (max-width: 900px) {
+    .fftir-tile-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ---------- Empty state ---------- */
+
+.fftir-empty {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: var(--text-muted);
+    background: var(--surface);
+    border: 1px dashed var(--fftir-line);
+}
+
+.fftir-empty p {
+    margin: 0 0 1rem;
+}
+
+/* ---------- Tables ---------- */
+
+.fftir-table-wrap {
+    overflow-x: auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.fftir-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.fftir-table th,
+.fftir-table td {
+    padding: 0.85rem 1.1rem;
+    text-align: left;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border);
+}
+
+.fftir-table th {
+    font-family: var(--fftir-mono);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fftir-brass);
+    background: var(--fftir-brass-soft);
+    border-bottom: 2px solid var(--fftir-line);
+    white-space: nowrap;
+}
+
+.fftir-table tbody tr {
+    box-shadow: inset 3px 0 0 transparent;
+    transition: box-shadow 0.12s, background 0.12s;
+}
+
+.fftir-table tbody tr:hover {
+    background: color-mix(in srgb, var(--bg) 70%, var(--surface));
+    box-shadow: inset 3px 0 0 var(--fftir-brass);
+}
+
+.fftir-table tr:last-child td {
+    border-bottom: 0;
+}
+
+.fftir-num {
+    font-family: var(--fftir-mono);
+}
+
+.fftir-strong {
+    color: var(--text);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.fftir-strong:hover {
+    color: var(--fftir-brass);
+}
+
+.fftir-sub {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.fftir-row-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+/* Sessions table: rowspan groups read like binder sections. */
+
+.fftir-sessions-table tr.fftir-group-start > td {
+    border-top: 2px solid var(--fftir-line);
+}
+
+.fftir-sessions-table td[rowspan] {
+    font-family: var(--fftir-mono);
+    font-weight: 700;
+    background: var(--fftir-brass-soft);
+}
+
+/* Stock movement history */
+
+.fftir-stock-cell {
+    text-align: right;
+    font-family: var(--fftir-mono);
+}
+
+.fftir-stock-delta {
+    font-weight: 700;
+}
+
+.fftir-stock-delta.is-up {
+    color: var(--fftir-up);
+}
+
+.fftir-stock-delta.is-down {
+    color: var(--fftir-down);
+}
+
+.fftir-stock-balance {
+    font-weight: 700;
+}
+
+.fftir-note-cell {
+    color: var(--text-muted);
+}
+
+/* ---------- Forms ---------- */
+
+.fftir-form {
+    max-width: 34rem;
+    padding: 1.75rem 1.75rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--fftir-brass);
+}
+
+.fftir-page .form-group > label:not(.form-check) {
+    font-family: var(--fftir-mono);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.fftir-page .form-control:focus {
+    border-color: var(--fftir-brass);
+    box-shadow: 0 0 0 3px var(--fftir-brass-soft);
+}
+
+.fftir-page input[type="number"].form-control {
+    font-family: var(--fftir-mono);
+}
+
+.fftir-panel {
+    max-width: 34rem;
+    margin-top: 1rem;
+    padding: 1.25rem 1.5rem;
+    background: var(--fftir-brass-soft);
+    border: 1px solid var(--fftir-line);
+}
+
+.fftir-panel-title {
+    margin: 0 0 0.35rem;
+    font-family: var(--fftir-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fftir-brass);
+}
+
+.fftir-panel-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+}
+
+/* ---------- Session lines (log a session) ---------- */
+
+.fftir-line {
+    position: relative;
+    padding: 1.25rem 3rem 1.25rem 3.5rem;
+    border-bottom: 1px solid var(--fftir-line);
+}
+
+.fftir-line:last-child {
+    border-bottom: 0;
+}
+
+.fftir-line-index {
+    position: absolute;
+    top: 1.35rem;
+    left: 0;
+    font-family: var(--fftir-mono);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--fftir-brass);
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+}
+
+.fftir-line-remove {
+    position: absolute;
+    top: 1rem;
+    right: 0;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    line-height: 1;
+    color: var(--text-muted);
+    background: none;
+    border: 1px solid var(--fftir-line);
+    cursor: pointer;
+}
+
+.fftir-line-remove:hover {
+    color: var(--fftir-down);
+    border-color: var(--fftir-down);
+}
+
+.fftir-line-fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: 0.9rem;
+}
+
+@media (max-width: 640px) {
+    .fftir-line {
+        padding-left: 0.25rem;
+    }
+
+    .fftir-line-index {
+        position: static;
+        display: block;
+        margin-bottom: 0.6rem;
+        writing-mode: horizontal-tb;
+        transform: none;
+    }
+}
+
+/* ---------- Add-stock modal (ticket) ---------- */
+
+dialog.modal.fftir-modal {
+    width: min(26rem, calc(100vw - 2rem));
+    padding: 0;
+    background: var(--surface);
+    border: 1px solid var(--fftir-line);
+}
+
+dialog.modal.fftir-modal::before {
+    content: "";
+    display: block;
+    height: 4px;
+    background: var(--fftir-brass);
+}
+
+.fftir-modal form {
+    padding: 1.6rem 1.75rem 1.5rem;
+}
+
+.fftir-modal-kicker {
+    margin: 0 0 0.4rem;
+    font-family: var(--fftir-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fftir-brass);
+}
+
+.fftir-modal-title {
+    margin: 0 0 0.6rem;
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.fftir-modal-hint {
+    margin: 0 0 1.25rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.fftir-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px dashed var(--fftir-line);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fftir-tile,
+    .fftir-tile-arrow {
+        transition: none;
+    }
+
+    .fftir-tile:hover {
+        transform: none;
+    }
+}
+
+@media (max-width: 560px) {
+    .fftir-title {
+        font-size: 1.5rem;
+    }
+
+    .fftir-form,
+    .fftir-panel {
+        padding-left: 1.1rem;
+        padding-right: 1.1rem;
+    }
+}

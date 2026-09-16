@@ -1529,10 +1529,12 @@
 .admin-nav-group {
     position: relative;
     display: inline-flex;
+    gap: 0.15rem;
 }
 
 /* Le dernier groupe se colle à droite : ce qu'on règle une fois par mois
-   n'a pas à occuper le milieu de la barre. */
+   n'a pas à occuper le milieu de la barre. FFTIR and Accounting nest inside
+   one such group so the pair moves right as a single flush block. */
 .admin-nav-group--end {
     margin-left: auto;
 }

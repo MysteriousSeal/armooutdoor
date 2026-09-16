@@ -2,7 +2,9 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Enums\WeaponType;
 use App\Models\AccountingEntry;
+use App\Models\BlogComment;
 use App\Models\BlogPost;
 use App\Models\Carrier;
 use App\Models\Category;
@@ -10,6 +12,9 @@ use App\Models\Conversation;
 use App\Models\ConversationMessage;
 use App\Models\Discount;
 use App\Models\DiscountCode;
+use App\Models\FftirAmmunition;
+use App\Models\FftirSession;
+use App\Models\FftirWeapon;
 use App\Models\IdentityDocument;
 use App\Models\Marketplace;
 use App\Models\Order;
@@ -97,7 +102,7 @@ class AdminAuthorizationTest extends TestCase
         ]);
 
         $blogPost = BlogPost::factory()->create();
-        $blogComment = \App\Models\BlogComment::query()->create([
+        $blogComment = BlogComment::query()->create([
             'blog_post_id' => $blogPost->id, 'author_name' => 'Sweep', 'body' => 'Fixture.',
         ]);
 
@@ -132,6 +137,14 @@ class AdminAuthorizationTest extends TestCase
             'image' => 'vinted/audit.webp',
             'sort_order' => 1,
         ]);
+
+        $weapon = FftirWeapon::query()->create([
+            'brand' => 'Audit', 'model' => 'Audit', 'caliber' => '9x19mm', 'type' => WeaponType::Pistol,
+        ]);
+        $ammunition = FftirAmmunition::query()->create([
+            'brand' => 'Audit', 'caliber' => '9x19mm', 'denomination' => 'Audit',
+        ]);
+        $fftirSession = FftirSession::query()->create(['date' => '2026-01-01']);
 
         $identityDocument = IdentityDocument::query()->create([
             'user_id' => $customer->id,
@@ -171,6 +184,9 @@ class AdminAuthorizationTest extends TestCase
             'entry' => $accountingEntry->id,
             'document' => $identityDocument->id,
             'image' => $vintedImage->id,
+            'weapon' => $weapon->id,
+            'ammunition' => $ammunition->id,
+            'session' => $fftirSession->id,
         ];
 
         $nonAdmin = User::factory()->create();
