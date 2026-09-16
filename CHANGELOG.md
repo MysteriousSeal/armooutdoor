@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-17 · v1.43.2 · build 7JIMT4
+
+### Admin
+
+- **The ammunitions list now shows stock and price per caliber**, right in the header: total rounds on hand and the weighted average price paid, pooled across every ammunition of that caliber rather than read off a single one.
+- **Clicking a caliber narrows the table to it.** The KPI row itself never filters out, so every caliber's totals stay visible while you're looking at just one of them; clicking the active caliber again clears the filter.
+- **Fixed low-contrast chip text** on the ammunitions pages, which used the muted text color over a near-transparent background.
+
+**No migration.**
+
 ## 2026-09-16 · v1.43.1 · build JUYPTF
 
 ### Admin
