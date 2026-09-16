@@ -145,6 +145,12 @@ class AdminAuthorizationTest extends TestCase
             'brand' => 'Audit', 'caliber' => '9x19mm', 'denomination' => 'Audit',
         ]);
         $fftirSession = FftirSession::query()->create(['date' => '2026-01-01']);
+        $fftirLine = $fftirSession->lines()->create([
+            'fftir_weapon_id' => $weapon->id,
+            'caliber' => $weapon->caliber,
+            'distance' => '25m',
+            'quantity' => 1,
+        ]);
 
         $identityDocument = IdentityDocument::query()->create([
             'user_id' => $customer->id,
@@ -187,6 +193,7 @@ class AdminAuthorizationTest extends TestCase
             'weapon' => $weapon->id,
             'ammunition' => $ammunition->id,
             'session' => $fftirSession->id,
+            'line' => $fftirLine->id,
         ];
 
         $nonAdmin = User::factory()->create();

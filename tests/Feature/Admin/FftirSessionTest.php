@@ -280,4 +280,139 @@ class FftirSessionTest extends TestCase
             ->assertOk()
             ->assertSee(format_euros(110), false);
     }
+
+    private function loggedLine(int $quantity = 50): FftirSessionLine
+    {
+        $weapon = $this->weapon();
+        $ammunition = $this->ammunition(200);
+
+        FftirSession::query()->create(['date' => '2026-01-15'])
+            ->lines()->create([
+                'fftir_weapon_id' => $weapon->id,
+                'fftir_ammunition_id' => $ammunition->id,
+                'caliber' => $weapon->caliber,
+                'distance' => '25m',
+                'quantity' => $quantity,
+            ]);
+
+        $ammunition->update(['quantity' => $ammunition->quantity - $quantity]);
+
+        FftirAmmunitionStockMovement::query()->create([
+            'fftir_ammunition_id' => $ammunition->id,
+            'delta' => -$quantity,
+            'quantity_before' => $ammunition->quantity + $quantity,
+            'quantity_after' => $ammunition->quantity,
+            'note' => 'Used in shooting session on 2026-01-15',
+        ]);
+
+        return FftirSessionLine::query()->sole();
+    }
+
+    public function test_the_edit_page_shows_the_current_values(): void
+    {
+        $owner = User::factory()->admin()->create();
+        $line = $this->loggedLine();
+
+        $this->actingAs($owner)
+            ->get(route('admin.fftir.sessions.lines.edit', [$line->session, $line]))
+            ->assertOk()
+            ->assertSee('value="50"', false);
+    }
+
+    public function test_increasing_a_lines_quantity_deducts_the_difference(): void
+    {
+        $owner = User::factory()->admin()->create();
+        $line = $this->loggedLine(50);
+        $ammunition = $line->ammunition;
+
+        $this->actingAs($owner)
+            ->put(route('admin.fftir.sessions.lines.update', [$line->session, $line]), [
+                'weapon_id' => $line->fftir_weapon_id,
+                'ammunition_id' => $ammunition->id,
+                'distance' => '50m',
+                'quantity' => 70,
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('admin.fftir.sessions.index'));
+
+        $line->refresh();
+        $this->assertSame(70, $line->quantity);
+        $this->assertSame('50m', $line->distance->value);
+        $this->assertSame(130, $ammunition->fresh()->quantity);
+    }
+
+    public function test_removing_the_ammunition_from_a_line_restores_its_stock(): void
+    {
+        $owner = User::factory()->admin()->create();
+        $line = $this->loggedLine(50);
+        $ammunition = $line->ammunition;
+
+        $this->actingAs($owner)
+            ->put(route('admin.fftir.sessions.lines.update', [$line->session, $line]), [
+                'weapon_id' => $line->fftir_weapon_id,
+                'ammunition_id' => null,
+                'distance' => '25m',
+                'quantity' => 50,
+            ])
+            ->assertSessionHasNoErrors();
+
+        $line->refresh();
+        $this->assertNull($line->fftir_ammunition_id);
+        $this->assertSame($line->weapon->caliber, $line->caliber);
+        $this->assertSame(200, $ammunition->fresh()->quantity);
+    }
+
+    public function test_editing_a_line_to_a_wrong_caliber_ammunition_is_refused(): void
+    {
+        $owner = User::factory()->admin()->create();
+        $line = $this->loggedLine(50);
+        $wrongCaliberAmmo = FftirAmmunition::query()->create([
+            'brand' => 'Norma', 'caliber' => '9x19mm', 'denomination' => 'FMJ', 'quantity' => 100,
+        ]);
+
+        $this->actingAs($owner)
+            ->put(route('admin.fftir.sessions.lines.update', [$line->session, $line]), [
+                'weapon_id' => $line->fftir_weapon_id,
+                'ammunition_id' => $wrongCaliberAmmo->id,
+                'distance' => '25m',
+                'quantity' => 10,
+            ])
+            ->assertSessionHasErrors('ammunition_id');
+
+        $line->refresh();
+        $this->assertSame(50, $line->quantity);
+        $this->assertSame(150, $line->ammunition->quantity);
+        $this->assertSame(100, $wrongCaliberAmmo->fresh()->quantity);
+    }
+
+    public function test_editing_a_line_beyond_available_stock_is_refused_and_leaves_stock_untouched(): void
+    {
+        $owner = User::factory()->admin()->create();
+        $line = $this->loggedLine(50);
+        $ammunition = $line->ammunition;
+
+        $this->actingAs($owner)
+            ->put(route('admin.fftir.sessions.lines.update', [$line->session, $line]), [
+                'weapon_id' => $line->fftir_weapon_id,
+                'ammunition_id' => $ammunition->id,
+                'distance' => '25m',
+                'quantity' => 999,
+            ])
+            ->assertSessionHasErrors('quantity');
+
+        $line->refresh();
+        $this->assertSame(50, $line->quantity);
+        $this->assertSame(150, $ammunition->fresh()->quantity);
+    }
+
+    public function test_a_line_cannot_be_edited_through_a_session_it_does_not_belong_to(): void
+    {
+        $owner = User::factory()->admin()->create();
+        $line = $this->loggedLine();
+        $otherSession = FftirSession::query()->create(['date' => '2026-02-01']);
+
+        $this->actingAs($owner)
+            ->get(route('admin.fftir.sessions.lines.edit', [$otherSession, $line]))
+            ->assertNotFound();
+    }
 }

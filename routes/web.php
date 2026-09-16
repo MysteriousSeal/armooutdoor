@@ -164,6 +164,12 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
             Route::get('/fftir/sessions/create', [AdminFftirSessionController::class, 'create'])->name('fftir.sessions.create');
             Route::post('/fftir/sessions', [AdminFftirSessionController::class, 'store'])->name('fftir.sessions.store');
             Route::delete('/fftir/sessions/{session}', [AdminFftirSessionController::class, 'destroy'])->name('fftir.sessions.destroy');
+            Route::get('/fftir/sessions/{session}/lines/{line}/edit', [AdminFftirSessionController::class, 'editLine'])
+                ->scopeBindings()
+                ->name('fftir.sessions.lines.edit');
+            Route::put('/fftir/sessions/{session}/lines/{line}', [AdminFftirSessionController::class, 'updateLine'])
+                ->scopeBindings()
+                ->name('fftir.sessions.lines.update');
 
             Route::get('/fftir/ammunitions', [AdminFftirAmmunitionController::class, 'index'])->name('fftir.ammunitions.index');
             Route::get('/fftir/ammunitions/create', [AdminFftirAmmunitionController::class, 'create'])->name('fftir.ammunitions.create');

@@ -33,6 +33,7 @@
                             <th>Ammunition</th>
                             <th>Distance</th>
                             <th>Ammo used</th>
+                            <th></th>
                             <th>Note</th>
                             <th></th>
                         </tr>
@@ -56,6 +57,9 @@
                                     </td>
                                     <td>{{ $line->distance->value }}</td>
                                     <td class="fftir-num">{{ number_format($line->quantity) }}</td>
+                                    <td>
+                                        <a href="{{ route('admin.fftir.sessions.lines.edit', [$session, $line]) }}" class="btn btn-sm btn-secondary">Edit</a>
+                                    </td>
                                     @if ($loop->first)
                                         <td rowspan="{{ $session->lines->count() }}">{{ $session->note ?: 'N/A' }}</td>
                                         <td rowspan="{{ $session->lines->count() }}">
