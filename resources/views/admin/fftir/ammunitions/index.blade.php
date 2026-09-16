@@ -16,12 +16,33 @@
                     <a href="{{ route('admin.fftir.ammunitions.create') }}" class="btn btn-primary">Add ammunition</a>
                 </div>
             </div>
+
+            @if ($caliberStats->isNotEmpty())
+                <div class="fftir-meta">
+                    @foreach ($caliberStats as $stat)
+                        @php($isActive = $activeCaliber === $stat['caliber'])
+                        <a
+                            href="{{ route('admin.fftir.ammunitions.index', $isActive ? [] : ['caliber' => $stat['caliber']->value]) }}"
+                            class="fftir-chip fftir-num fftir-chip--link {{ $isActive ? 'is-active' : '' }}"
+                            title="{{ $isActive ? 'Clear filter' : 'Show only '.$stat['caliber']->value }}"
+                        >
+                            {{ $stat['caliber']->value }}: {{ number_format($stat['quantity']) }} rounds
+                            &middot; avg {{ $stat['average_price_cents'] !== null ? format_euros($stat['average_price_cents']) : 'N/A' }}
+                        </a>
+                    @endforeach
+                </div>
+            @endif
         </header>
 
         @if ($ammunitions->isEmpty())
             <div class="fftir-empty">
-                <p>No ammunitions logged yet.</p>
-                <a href="{{ route('admin.fftir.ammunitions.create') }}" class="btn btn-primary">Add ammunition</a>
+                @if ($activeCaliber !== null)
+                    <p>No ammunition in {{ $activeCaliber->value }}.</p>
+                    <a href="{{ route('admin.fftir.ammunitions.index') }}" class="btn btn-secondary">Clear filter</a>
+                @else
+                    <p>No ammunitions logged yet.</p>
+                    <a href="{{ route('admin.fftir.ammunitions.create') }}" class="btn btn-primary">Add ammunition</a>
+                @endif
             </div>
         @else
             <div class="fftir-table-wrap">

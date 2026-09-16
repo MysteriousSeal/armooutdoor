@@ -196,4 +196,63 @@ class FftirAmmunitionTest extends TestCase
             ->assertOk()
             ->assertSee(format_euros(1000), false);
     }
+
+    public function test_the_index_shows_quantity_and_average_price_per_caliber(): void
+    {
+        $owner = User::factory()->admin()->create();
+
+        $first22 = FftirAmmunition::query()->create($this->payload(['caliber' => '.22LR']));
+        $this->actingAs($owner)->post(route('admin.fftir.ammunitions.stock.store', $first22), [
+            'delta' => 100, 'total_price' => '10.00',
+        ]);
+
+        $second22 = FftirAmmunition::query()->create($this->payload(['brand' => 'RWS', 'caliber' => '.22LR']));
+        $this->actingAs($owner)->post(route('admin.fftir.ammunitions.stock.store', $second22), [
+            'delta' => 100, 'total_price' => '30.00',
+        ]);
+
+        $nineMil = FftirAmmunition::query()->create($this->payload(['brand' => 'GECO', 'caliber' => '9x19mm']));
+        $this->actingAs($owner)->post(route('admin.fftir.ammunitions.stock.store', $nineMil), [
+            'delta' => 50, 'total_price' => '15.00',
+        ]);
+
+        $response = $this->actingAs($owner)->get(route('admin.fftir.ammunitions.index'))->assertOk();
+
+        // Total rounds per caliber, and the weighted average, not a simple
+        // average of the two per-ammunition prices.
+        $response->assertSee('200 rounds', false);
+        $response->assertSee(format_euros(20), false); // (1000 + 3000) / 200 = 20c/round
+        $response->assertSee('50 rounds', false);
+        $response->assertSee(format_euros(30), false); // 1500 / 50 = 30c/round
+    }
+
+    public function test_clicking_a_caliber_kpi_filters_the_table(): void
+    {
+        $owner = User::factory()->admin()->create();
+
+        $twentyTwo = FftirAmmunition::query()->create($this->payload(['brand' => 'GECKO', 'caliber' => '.22LR']));
+        $nineMil = FftirAmmunition::query()->create($this->payload(['brand' => 'Norma', 'caliber' => '9x19mm']));
+
+        $response = $this->actingAs($owner)
+            ->get(route('admin.fftir.ammunitions.index', ['caliber' => '9x19mm']))
+            ->assertOk();
+
+        $response->assertSee('Norma');
+        $response->assertDontSee('GECKO');
+
+        // The KPI row itself is never filtered out: both calibers still show.
+        $response->assertSee('.22LR:', false);
+        $response->assertSee('9x19mm:', false);
+    }
+
+    public function test_an_invalid_caliber_query_param_is_ignored(): void
+    {
+        $owner = User::factory()->admin()->create();
+        FftirAmmunition::query()->create($this->payload(['brand' => 'GECKO', 'caliber' => '.22LR']));
+
+        $this->actingAs($owner)
+            ->get(route('admin.fftir.ammunitions.index', ['caliber' => 'not-a-real-caliber']))
+            ->assertOk()
+            ->assertSee('GECKO');
+    }
 }

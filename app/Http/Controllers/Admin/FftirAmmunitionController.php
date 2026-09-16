@@ -14,10 +14,43 @@ use Illuminate\View\View;
 
 class FftirAmmunitionController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $ammunitions = FftirAmmunition::query()->with('stockMovements')->orderBy('brand')->orderBy('caliber')->get();
+
+        // Stats always reflect every caliber, whichever one the table is
+        // currently filtered to: a chip should never make its own number
+        // disappear.
+        $caliberStats = $ammunitions
+            ->groupBy(fn (FftirAmmunition $ammunition) => $ammunition->caliber->value)
+            ->map(function ($group) {
+                $priced = $group
+                    ->flatMap(fn (FftirAmmunition $ammunition) => $ammunition->stockMovements)
+                    ->filter(fn ($movement) => $movement->delta > 0 && $movement->total_price_cents !== null);
+
+                $pricedRounds = $priced->sum('delta');
+
+                return [
+                    'caliber' => $group->first()->caliber,
+                    'quantity' => $group->sum('quantity'),
+                    'average_price_cents' => $pricedRounds > 0
+                        ? (int) round($priced->sum('total_price_cents') / $pricedRounds)
+                        : null,
+                ];
+            })
+            ->sortBy(fn (array $stat) => $stat['caliber']->value)
+            ->values();
+
+        $activeCaliber = Caliber::tryFrom((string) $request->query('caliber'));
+
+        if ($activeCaliber !== null) {
+            $ammunitions = $ammunitions->filter(fn (FftirAmmunition $ammunition) => $ammunition->caliber === $activeCaliber)->values();
+        }
+
         return view('admin.fftir.ammunitions.index', [
-            'ammunitions' => FftirAmmunition::query()->with('stockMovements')->orderBy('brand')->orderBy('caliber')->get(),
+            'ammunitions' => $ammunitions,
+            'caliberStats' => $caliberStats,
+            'activeCaliber' => $activeCaliber,
         ]);
     }
 

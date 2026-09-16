@@ -106,10 +106,36 @@
     padding: 0.3rem 0.65rem;
     font-family: var(--fftir-mono);
     font-size: 0.75rem;
+    font-weight: 600;
     letter-spacing: 0.03em;
-    color: var(--text-muted);
+    color: var(--text);
     background: var(--fftir-brass-soft);
     border: 1px solid var(--fftir-line);
+}
+
+/* A chip that doubles as a filter: same look at rest, a clear "clickable"
+   signal on hover, and a solid brass fill when it's the active filter. */
+.fftir-chip--link {
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.fftir-chip--link:hover {
+    background: var(--fftir-brass);
+    border-color: var(--fftir-brass);
+    color: #fff;
+}
+
+.fftir-chip--link.is-active {
+    background: var(--fftir-brass);
+    border-color: var(--fftir-brass);
+    color: #fff;
+}
+
+[data-theme='dark'] .fftir-chip--link:hover,
+[data-theme='dark'] .fftir-chip--link.is-active {
+    color: #1a1608;
 }
 
 /* ---------- Buttons (scoped reskin, base behavior untouched) ---------- */
