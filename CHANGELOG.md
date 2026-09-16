@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-16 · v1.43.1 · build JUYPTF
+
+### Admin
+
+- **A sized product whose variants all have a GTIN no longer sits in the Missing GTIN tab forever.** The tab and its count only checked the product's own `gtin` column, which a sized product never sets since the code lives on each variant instead. It now follows the same rule the Missing SKU tab already uses: a product drops out once nothing is left to fill in, on the product or on its variants.
+
+**No migration.**
+
 ## 2026-09-16 · v1.43.0 · build 59CT66
 
 ### Admin
