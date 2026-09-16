@@ -86,7 +86,7 @@ class ProductController extends Controller
             'atSupplierCount' => Product::query()->tap(fn ($query) => $this->atSupplier($query))->count(),
             'outOfStockCount' => Product::query()->tap(fn ($query) => $this->outOfStock($query))->count(),
             'noSkuCount' => Product::query()->tap(fn ($query) => $this->missingSku($query))->count(),
-            'noGtinCount' => Product::query()->where('is_active', true)->where(fn ($query) => $query->whereNull('gtin')->orWhere('gtin', ''))->count(),
+            'noGtinCount' => Product::query()->tap(fn ($query) => $this->missingGtin($query))->count(),
             'noWeightCount' => Product::query()->where('is_active', true)->where(fn ($query) => $query->whereNull('weight_grams')->orWhere('weight_grams', 0))->count(),
             'oneImageCount' => Product::query()->where('is_active', true)->doesntHave('images')->count(),
             'noSeoCount' => count($this->seoFailingIds()),
@@ -703,6 +703,21 @@ class ProductController extends Controller
     }
 
     /**
+     * Products still owing a GTIN, on the same terms as {@see missingSku()}:
+     * a sized product carries it per variant, so it drops out once every
+     * variant has one, whether or not the product's own column is set.
+     */
+    private function missingGtin(Builder $query): void
+    {
+        $query->where('is_active', true)
+            ->where(fn (Builder $query) => $query->whereNull('gtin')->orWhere('gtin', ''))
+            ->whereNot(function (Builder $query): void {
+                $query->has('variants')
+                    ->whereDoesntHave('variants', fn (Builder $query) => $query->whereNull('gtin')->orWhere('gtin', ''));
+            });
+    }
+
+    /**
      * Ids of products whose SEO lengths fail. The verdict lives on the
      * model — meta fields first, HTML stripped from the fallback — so SQL
      * cannot ask the question; the catalogue is small enough to ask in PHP,
@@ -734,7 +749,7 @@ class ProductController extends Controller
             'at-supplier' => $this->atSupplier($query),
             'out-of-stock' => $this->outOfStock($query),
             'no-sku' => $this->missingSku($query),
-            'no-gtin' => $query->where('is_active', true)->where(fn (Builder $query) => $query->whereNull('gtin')->orWhere('gtin', '')),
+            'no-gtin' => $this->missingGtin($query),
             'no-weight' => $query->where('is_active', true)->where(fn (Builder $query) => $query->whereNull('weight_grams')->orWhere('weight_grams', 0)),
             // The main image is always set, so a product with no gallery row
             // shows exactly one photo: this is the shelf of one-picture
