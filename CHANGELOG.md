@@ -2,6 +2,17 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-16 · v1.43.0 · build 59CT66
+
+### Admin
+
+- **A new FFTIR section tracks weapons, ammunition and range sessions**, reachable from the nav next to Accounting, owner-only. Weapons and ammunition are permanent records — a type or caliber picked from a fixed list, an optional price — that can be corrected but not deleted, so stock and cost figures stay trustworthy over time.
+- **Ammunition keeps a full stock ledger.** Adding stock records the price paid for that batch; the price shown per round is the weighted average across every priced addition rather than a typed-in figure, so it follows what was actually spent rather than what was last entered.
+- **A session logs a range visit as one or more weapon, caliber, distance and quantity lines.** A line can name the exact box of ammunition used, which deducts its stock and refuses ammo of the wrong caliber for the weapon, or be left as "don't know / any" when the box isn't remembered, which records the caliber and rounds fired without touching any box's stock. Deleting a session, or correcting a single line afterward, reverses whatever stock it had deducted and reapplies the new amount — the original ledger entries stay put, and an offsetting one is added rather than history being rewritten.
+- **The weapons list shows rounds fired and price per round fired**, amortizing the weapon's own price over every round tracked through it and adding the ammunition's cost, falling back to the caliber-wide average price for lines that only named a caliber.
+
+**Migration:** thirteen, run with `php artisan migrate`: the `fftir_weapons`, `fftir_ammunitions`, `fftir_ammunition_stock_movements`, `fftir_sessions` and `fftir_session_lines` tables, plus the price, quantity, type and caliber columns added along the way. All start empty, and nothing outside FFTIR reads them.
+
 ## 2026-09-15 · v1.42.5 · build H6WN3D
 
 ### Admin
