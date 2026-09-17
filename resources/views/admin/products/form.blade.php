@@ -117,7 +117,7 @@
                                     data-image-key="main"
                                     tabindex="0"
                                     role="button"
-                                    aria-label="Cover image. Press arrow keys to reorder."
+                                    aria-label="Cover image. Press Enter to view full screen, arrow keys to reorder."
                                 >
                                     <img src="{{ $product->imageUrl() }}" alt="" draggable="false">
                                     <span class="additional-images-badge">Cover</span>
@@ -136,7 +136,7 @@
                                     data-image-key="{{ $galleryImage->id }}"
                                     tabindex="0"
                                     role="button"
-                                    aria-label="Existing image. Press arrow keys to reorder."
+                                    aria-label="Existing image. Press Enter to view full screen, arrow keys to reorder."
                                 >
                                     <img src="{{ $galleryImage->imageUrl() }}" alt="" draggable="false">
                                     <button type="button" class="additional-images-remove" aria-label="Remove this image">&times;</button>
@@ -869,6 +869,7 @@
     <script src="{{ versioned_asset('js/vendor/quill.js') }}"></script>
     <script src="{{ versioned_asset('js/admin-char-counter.js') }}" defer></script>
     <script src="{{ versioned_asset('js/admin-description-editor.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/admin-image-lightbox.js') }}" defer></script>
     <script src="{{ versioned_asset('js/admin-gallery-upload.js') }}" defer></script>
     <script src="{{ versioned_asset('js/admin-product-supplier-save.js') }}" defer></script>
     <script src="{{ versioned_asset('js/admin-product-recommended-price.js') }}" defer></script>
@@ -984,6 +985,27 @@
                     title.textContent = input.value.trim() || 'New variant';
                 });
             }
+
+            // A variant photo opens full screen; the arrows step through the
+            // variant photos only, in their on-screen order, including one just
+            // picked and not saved yet.
+            document.addEventListener('click', function (event) {
+                var clicked = event.target.closest('.variant-card-preview img');
+
+                if (!clicked || !clicked.getAttribute('src') || !window.armoImageLightbox) {
+                    return;
+                }
+
+                var photos = Array.prototype.filter.call(
+                    document.querySelectorAll('#variants-list .variant-card-preview img'),
+                    function (img) { return img.getAttribute('src'); }
+                );
+
+                window.armoImageLightbox.open(
+                    photos.map(function (img) { return img.src; }),
+                    photos.indexOf(clicked)
+                );
+            });
 
             function bindPreview(row) {
                 var file = row.querySelector('input[type="file"]');

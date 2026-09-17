@@ -5648,6 +5648,102 @@ input[type="date"].form-control {
     transform: scale(1.03);
 }
 
+/* A click on a tile or a variant photo opens it full screen. */
+.variant-card-preview img[src] {
+    cursor: zoom-in;
+}
+
+body.admin-lightbox-open {
+    overflow: hidden;
+}
+
+.admin-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 950;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: calc(3.5rem + env(safe-area-inset-top, 0px)) 1rem calc(1rem + env(safe-area-inset-bottom, 0px));
+    background: rgba(20, 18, 16, 0.94);
+}
+
+.admin-lightbox[hidden],
+.admin-lightbox [hidden] {
+    display: none;
+}
+
+.admin-lightbox-stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    margin: 0;
+}
+
+.admin-lightbox-image {
+    max-width: min(92vw, 80rem);
+    max-height: 100%;
+    object-fit: contain;
+    background: #fff;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
+}
+
+.admin-lightbox-close,
+.admin-lightbox-nav {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    color: #f2efe9;
+    background: rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+}
+
+.admin-lightbox-close {
+    top: calc(0.9rem + env(safe-area-inset-top, 0px));
+    right: 1rem;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 999px;
+}
+
+.admin-lightbox-nav {
+    top: 50%;
+    z-index: 1;
+    width: 3rem;
+    height: 5.5rem;
+    transform: translateY(-50%);
+}
+
+.admin-lightbox-prev {
+    left: 0.5rem;
+}
+
+.admin-lightbox-next {
+    right: 0.5rem;
+}
+
+.admin-lightbox-close:hover,
+.admin-lightbox-close:focus-visible,
+.admin-lightbox-nav:hover,
+.admin-lightbox-nav:focus-visible {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.admin-lightbox-counter {
+    margin: 0.9rem 0 0;
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+    color: #cfc8bd;
+}
+
 /* A saved image carries its JPEG link in a strip below the picture: the
    tile stops being square and the picture keeps the square instead. Tiles
    dropped in but not saved yet have nothing to download. */

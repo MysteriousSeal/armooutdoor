@@ -17,6 +17,9 @@
     /** @type {File[]} */
     let selectedFiles = [];
     let drag = null;
+    // A drag ends with a click on the tile it moved: that click must not
+    // open the preview.
+    let suppressNextClick = false;
 
     function attachDocumentDragListeners() {
         document.addEventListener('pointermove', onDocumentPointerMove, true);
@@ -206,7 +209,7 @@
         item.dataset.newIndex = String(index);
         item.tabIndex = 0;
         item.setAttribute('role', 'button');
-        item.setAttribute('aria-label', 'New image. Press arrow keys to reorder.');
+        item.setAttribute('aria-label', 'New image. Press Enter to view full screen, arrow keys to reorder.');
 
         const img = document.createElement('img');
         img.alt = '';
@@ -405,6 +408,10 @@
 
             if (moved) {
                 afterReorder();
+                suppressNextClick = true;
+                setTimeout(() => {
+                    suppressNextClick = false;
+                }, 0);
             }
         } finally {
             removeDocumentDragListeners();
@@ -428,8 +435,45 @@
         endDrag(false);
     }
 
+    // Every tile in its on-screen order, saved or just dropped in, so the
+    // arrows of the preview follow what the admin is looking at.
+    function openPreview(item) {
+        if (!window.armoImageLightbox) {
+            return;
+        }
+
+        const tiles = Array.from(list.querySelectorAll('.additional-images-item:not(.additional-images-placeholder)'))
+            .filter((tile) => tile.querySelector('img')?.src);
+        const index = tiles.indexOf(item);
+
+        if (index === -1) {
+            return;
+        }
+
+        window.armoImageLightbox.open(tiles.map((tile) => tile.querySelector('img').src), index);
+    }
+
+    function onItemClick(event) {
+        if (suppressNextClick) {
+            suppressNextClick = false;
+            return;
+        }
+
+        if (event.target.closest('button, a')) {
+            return;
+        }
+
+        openPreview(event.currentTarget);
+    }
+
     function onKeyDown(event) {
         const item = event.currentTarget;
+
+        if ((event.key === 'Enter' || event.key === ' ') && event.target === item) {
+            event.preventDefault();
+            openPreview(item);
+            return;
+        }
 
         if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
             const sibling = event.key === 'ArrowLeft' ? item.previousElementSibling : item.nextElementSibling;
@@ -457,6 +501,7 @@
         item.addEventListener('pointerup', onPointerUp);
         item.addEventListener('pointercancel', onPointerCancel);
         item.addEventListener('keydown', onKeyDown);
+        item.addEventListener('click', onItemClick);
     }
 
     function bindExistingRemove(item) {
