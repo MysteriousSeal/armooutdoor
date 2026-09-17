@@ -108,8 +108,11 @@ class MarketplaceListingController extends Controller
      * En une requête pour toute la page : une déclinaison renvoie le nom de son
      * parent, puisque c'est lui qui porte le libellé.
      *
+     * The description comes along for the row's copy buttons, as HTML for a
+     * formatted paste and as plain text for editors that refuse it.
+     *
      * @param  array<string, array{product_id: int, quantity: int, exact: bool}>  $matches
-     * @return array<string, array{product_id: int, quantity: int, exact: bool, name: string}>
+     * @return array<string, array{product_id: int, quantity: int, exact: bool, name: string, description: string, description_text: string}>
      */
     private function withProductNames(array $matches): array
     {
@@ -119,13 +122,16 @@ class MarketplaceListingController extends Controller
             return [];
         }
 
-        $names = Product::query()
+        $products = Product::query()
             ->whereIn('id', $ids)
-            ->get(['id', 'name'])
-            ->mapWithKeys(fn (Product $p): array => [$p->id => $p->localizedName()]);
+            ->get(['id', 'name', 'description'])
+            ->keyBy('id');
 
         foreach ($matches as $code => $match) {
-            $matches[$code]['name'] = (string) ($names[$match['product_id']] ?? '');
+            $product = $products->get($match['product_id']);
+            $matches[$code]['name'] = (string) $product?->localizedName();
+            $matches[$code]['description'] = (string) $product?->localizedDescription();
+            $matches[$code]['description_text'] = (string) $product?->localizedDescriptionText();
         }
 
         return $matches;

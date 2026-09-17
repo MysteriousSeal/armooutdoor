@@ -8533,6 +8533,20 @@ a.nb-match:hover {
     color: var(--text-muted);
 }
 
+/* Our product's name and description, ready to paste into NaturaBuy's form. */
+.nb-copy {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.35rem;
+}
+
+.nb-copy .btn.is-copied {
+    color: var(--surface);
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
 .nb-ourname-arrow {
     flex-shrink: 0;
     opacity: 0.7;

@@ -209,6 +209,45 @@ class NaturabuyListingsTest extends TestCase
             ->assertSee(route('admin.products.edit', $product->id), false);
     }
 
+    public function test_a_matched_listing_offers_to_copy_our_title_and_description(): void
+    {
+        Product::factory()->create([
+            'sku' => 'MOLLE-BELT-EVA-KHAKI',
+            'name' => ['fr' => 'Ceinture MOLLE EVA', 'en' => 'MOLLE EVA belt'],
+            'description' => ['fr' => '<p>Rembourrage <strong>EVA</strong>.</p>', 'en' => '<p>EVA padding.</p>'],
+        ]);
+        $this->listing(['internalcode' => 'MOLLE-BELT-EVA-KHAKI']);
+        $this->listing(['internalcode' => 'NOWHERE-HERE', 'title' => 'Annonce orpheline']);
+
+        $response = $this->actingAs($this->admin())
+            ->get('/admin/marketplaces/naturabuy')
+            ->assertOk()
+            ->assertSee('data-copy-text="Ceinture MOLLE EVA"', false)
+            ->assertSee('Copy description')
+            // The formatted copy carries the HTML, escaped into the attribute.
+            ->assertSee('data-copy-html="&lt;p&gt;Rembourrage &lt;strong&gt;EVA&lt;/strong&gt;.&lt;/p&gt;"', false);
+
+        // Only the matched listing has a product to copy from.
+        $this->assertSame(1, substr_count($response->getContent(), 'Copy title'));
+    }
+
+    public function test_the_not_listed_tab_offers_to_copy_too(): void
+    {
+        Product::factory()->create([
+            'sku' => 'NOT-ON-NB',
+            'is_active' => true,
+            'name' => ['fr' => 'Cagoule urbaine', 'en' => 'Urban balaclava'],
+            'description' => ['fr' => '', 'en' => ''],
+        ]);
+
+        $this->actingAs($this->admin())
+            ->get('/admin/marketplaces/naturabuy?tab=missing')
+            ->assertOk()
+            ->assertSee('data-copy-text="Cagoule urbaine"', false)
+            // Nothing to copy, no button.
+            ->assertDontSee('Copy description');
+    }
+
     /** Une déclinaison renvoie vers son produit parent, qui a la fiche. */
     public function test_a_listing_matching_a_variant_links_to_the_parent(): void
     {

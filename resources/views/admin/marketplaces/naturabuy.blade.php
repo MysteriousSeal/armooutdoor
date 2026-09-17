@@ -107,6 +107,11 @@
                                 <tr>
                                     <td>
                                         <a href="{{ route('admin.products.edit', $product) }}">{{ $product->localizedName() }}</a>
+                                        @include('admin.marketplaces.partials.copy-product-text', [
+                                            'name' => $product->localizedName(),
+                                            'description' => $product->localizedDescription(),
+                                            'descriptionText' => $product->localizedDescriptionText(),
+                                        ])
                                     </td>
                                     <td>
                                         @if ($product->sku)
@@ -176,6 +181,14 @@
                                             @endif
                                         </span>
                                     @endif
+
+                                    @if ($matchedProductId)
+                                        @include('admin.marketplaces.partials.copy-product-text', [
+                                            'name' => $match['name'],
+                                            'description' => $match['description'],
+                                            'descriptionText' => $match['description_text'],
+                                        ])
+                                    @endif
                                 </td>
                                 <td>
                                     @if ($listing->internalcode)
@@ -244,4 +257,5 @@
 
 @push('scripts')
     <script src="{{ versioned_asset('js/admin-naturabuy-sync.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/admin-copy-product-text.js') }}" defer></script>
 @endpush
