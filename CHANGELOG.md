@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-17 · v1.43.3 · build MM5PNR
+
+### Admin
+
+- **Every photo on the product edit page can be downloaded as a JPEG.** Each saved tile in the Images panel and each variant's own photo has a JPG link beneath it that hands over the full-size image, converted from the WebP the shop stores. Tiles are named after the SKU (or the slug when there is none) and their saved position, the cover being `_1`; variant photos are named after the variant's SKU. The "Cover as JPG" button stays where it was.
+- **Clicking a photo on the product edit page opens it full screen.** A click without dragging on a tile, saved or just dropped in, or on a variant photo opens a viewer whose arrows, left/right keys and swipes step through the set it came from, in on-screen order. Esc or a click beside the image closes it, and Enter on a focused tile opens it too. Dragging a tile still reorders it.
+- **The NaturaBuy listings offer to copy our title and long description.** Every listing matched to a catalogue product, and every product on the Not listed tab, has "Copy title" and "Copy description" buttons under its title. The description is copied formatted, rewritten for NaturaBuy's basic editor so the bold survives the paste: headings become bold paragraphs, bold and italic use the tags that editor writes, and lists become bulleted lines. Plain text goes along for editors that take nothing else.
+
+**No migration.**
+
 ## 2026-09-17 · v1.43.2 · build 7JIMT4
 
 ### Admin
