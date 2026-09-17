@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-17 · v1.44.1 · build 3VG112
+
+### Admin
+
+- **A product with variants stays in NaturaBuy's Not listed tab until every variant is listed.** It used to leave the tab as soon as one variant matched a listing, so the sizes or colors still missing from NaturaBuy went unnoticed. Every active variant now needs a listing, matched exactly or by code prefix as before, whatever its stock. A variant without a SKU can match nothing and keeps its product in the tab, and inactive variants are ignored. The tab count follows the same rule.
+- **A partly listed product names the variants still missing** under its title, each with its label and SKU, or "no SKU". A product with no variant listed yet keeps its row as it was.
+
+**No migration.**
+
 ## 2026-09-17 · v1.44.0 · build H9ONP2
 
 ### Storefront
