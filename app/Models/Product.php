@@ -868,6 +868,25 @@ class Product extends Model
         return ImageThumbnailer::urlFor($this->image);
     }
 
+    /**
+     * The file name of a photo downloaded as a JPEG: the SKU (or the slug
+     * when there is none) and the photo's position, the cover being 1.
+     * The edit page writes it in the link and the controller in the
+     * response header, so both read it from here.
+     */
+    public function photoDownloadName(int $position): string
+    {
+        return Str::slug(filled($this->sku) ? $this->sku : $this->slug).'_'.$position.'.jpg';
+    }
+
+    /** A gallery image's position in the saved order, counting the cover. */
+    public function galleryPhotoPosition(ProductImage $image): int
+    {
+        $index = $this->images->search(fn (ProductImage $candidate): bool => $candidate->id === $image->id);
+
+        return (is_int($index) ? $index + 1 : 1) + ($this->image !== '' ? 1 : 0);
+    }
+
     private function localized(string $attribute): string
     {
         $value = $this->{$attribute};

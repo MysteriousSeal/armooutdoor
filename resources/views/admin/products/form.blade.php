@@ -124,6 +124,10 @@
                                     <button type="button" class="additional-images-remove" aria-label="Remove this image">&times;</button>
                                     <input type="checkbox" name="remove_main" value="1" id="remove-main-checkbox" hidden>
                                     <span class="upload-images-handle" aria-hidden="true" title="Drag to reorder">⋮⋮</span>
+                                    @include('admin.products.partials.photo-download', [
+                                        'href' => route('admin.products.photos.cover', $product),
+                                        'filename' => $product->photoDownloadName(1),
+                                    ])
                                 </div>
                             @endif
                             @foreach ($product->images as $galleryImage)
@@ -138,6 +142,10 @@
                                     <button type="button" class="additional-images-remove" aria-label="Remove this image">&times;</button>
                                     <input type="checkbox" name="remove_gallery_images[]" value="{{ $galleryImage->id }}" hidden>
                                     <span class="upload-images-handle" aria-hidden="true" title="Drag to reorder">⋮⋮</span>
+                                    @include('admin.products.partials.photo-download', [
+                                        'href' => route('admin.products.photos.gallery', ['product' => $product, 'photo' => $galleryImage]),
+                                        'filename' => $product->photoDownloadName($product->galleryPhotoPosition($galleryImage)),
+                                    ])
                                 </div>
                             @endforeach
                         </div>
@@ -600,6 +608,8 @@
                         'quantity' => $variant->quantity,
                         'is_active' => $variant->is_active,
                         'image_url' => $variant->image ? $variant->imageUrl() : null,
+                        'image_download_url' => $variant->image ? route('admin.products.photos.variant', ['product' => $product, 'variant' => $variant]) : null,
+                        'image_download_name' => $variant->image ? $variant->setRelation('product', $product)->photoDownloadName() : null,
                         'supplier_id' => $variant->supplier_id,
                         'available_at_supplier' => $variant->available_at_supplier,
                         'supplier_reference' => $variant->supplier_reference,
@@ -643,6 +653,12 @@
                                             <img src="{{ $variant['image_url'] }}" alt="">
                                         @endif
                                     </span>
+                                    @if (! empty($variant['image_download_url']))
+                                        @include('admin.products.partials.photo-download', [
+                                            'href' => $variant['image_download_url'],
+                                            'filename' => $variant['image_download_name'],
+                                        ])
+                                    @endif
                                     @if (! empty($variant['image_url']))
                                         <label class="form-check">
                                             <input type="checkbox" name="variants[{{ $index }}][remove_image]" value="1">

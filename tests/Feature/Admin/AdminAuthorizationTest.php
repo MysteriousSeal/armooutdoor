@@ -20,6 +20,7 @@ use App\Models\Marketplace;
 use App\Models\Order;
 use App\Models\PackageType;
 use App\Models\Product;
+use App\Models\ProductImage;
 use App\Models\ProductReview;
 use App\Models\ProductVariant;
 use App\Models\PurchaseOrder;
@@ -138,6 +139,13 @@ class AdminAuthorizationTest extends TestCase
             'sort_order' => 1,
         ]);
 
+        // A gallery photo of the product: same reason as the Vinted one.
+        $productPhoto = ProductImage::query()->create([
+            'product_id' => $product->id,
+            'image' => 'products/audit.webp',
+            'sort_order' => 0,
+        ]);
+
         $weapon = FftirWeapon::query()->create([
             'brand' => 'Audit', 'model' => 'Audit', 'caliber' => '9x19mm', 'type' => WeaponType::Pistol,
         ]);
@@ -190,6 +198,7 @@ class AdminAuthorizationTest extends TestCase
             'entry' => $accountingEntry->id,
             'document' => $identityDocument->id,
             'image' => $vintedImage->id,
+            'photo' => $productPhoto->id,
             'weapon' => $weapon->id,
             'ammunition' => $ammunition->id,
             'session' => $fftirSession->id,

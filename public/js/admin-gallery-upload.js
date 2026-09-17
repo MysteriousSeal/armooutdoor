@@ -267,7 +267,8 @@
     function onPointerDown(event) {
         const item = event.currentTarget;
 
-        if (event.target.closest('button')) {
+        // The JPEG link: capturing the pointer would swallow its click.
+        if (event.target.closest('button, a')) {
             return;
         }
 

@@ -5581,7 +5581,7 @@ input[type="date"].form-control {
     content: counter(upload-image);
     position: absolute;
     right: 0.35rem;
-    bottom: 0.35rem;
+    bottom: calc(0.35rem + var(--photo-download-row, 0px));
     z-index: 2;
     min-width: 1.25rem;
     height: 1.25rem;
@@ -5600,7 +5600,7 @@ input[type="date"].form-control {
 .additional-images-badge {
     position: absolute;
     left: 0.35rem;
-    bottom: 0.35rem;
+    bottom: calc(0.35rem + var(--photo-download-row, 0px));
     z-index: 2;
     padding: 0.2rem 0.4rem;
     font-size: 0.625rem;
@@ -5646,6 +5646,55 @@ input[type="date"].form-control {
 
 .additional-images-item:hover img {
     transform: scale(1.03);
+}
+
+/* A saved image carries its JPEG link in a strip below the picture: the
+   tile stops being square and the picture keeps the square instead. Tiles
+   dropped in but not saved yet have nothing to download. */
+.additional-images-item:has(> .photo-download) {
+    --photo-download-row: 1.75rem;
+    aspect-ratio: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.additional-images-item:has(> .photo-download) img {
+    height: auto;
+    aspect-ratio: 1;
+}
+
+.additional-images-item > .photo-download {
+    position: relative;
+    z-index: 3;
+    justify-content: center;
+    height: var(--photo-download-row);
+    border-width: 1px 0 0;
+}
+
+/* One photo as a JPEG, on the edit page's tiles and variant cards. */
+.photo-download {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.1rem 0.4rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    color: var(--accent-hover);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    cursor: pointer;
+}
+
+.photo-download:hover {
+    color: var(--surface);
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.variant-card-media > .photo-download {
+    align-self: flex-start;
 }
 
 .additional-images-item.is-marked-removed {

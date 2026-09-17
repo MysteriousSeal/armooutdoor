@@ -38,6 +38,7 @@ use App\Http\Controllers\Admin\MarketplaceSettingController as AdminMarketplaceS
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PackageTypeController as AdminPackageTypeController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\ProductPhotoController;
 use App\Http\Controllers\Admin\ProductSettingController as AdminProductSettingController;
 use App\Http\Controllers\Admin\PurchaseOrderController as AdminPurchaseOrderController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
@@ -266,6 +267,15 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         // The cover as a JPEG: the shop stores WebP, which no marketplace form
         // or supplier wants.
         Route::get('/products/{product}/cover.jpg', [AdminProductController::class, 'coverImage'])->name('products.cover');
+        // Each photo of the edit page as a JPEG, named after the SKU and its
+        // position.
+        Route::get('/products/{product}/photos/cover.jpg', [ProductPhotoController::class, 'cover'])
+            ->name('products.photos.cover');
+        Route::get('/products/{product}/photos/{photo}.jpg', [ProductPhotoController::class, 'gallery'])
+            ->whereNumber('photo')
+            ->name('products.photos.gallery');
+        Route::get('/products/{product}/variants/{variant}/photo.jpg', [ProductPhotoController::class, 'variant'])
+            ->name('products.photos.variant');
         Route::get('/products/{product}/stock-history', [AdminProductController::class, 'stockHistory'])->name('products.stock-history');
         // One label per article: a plain product, or one variant of a product
         // that has them.

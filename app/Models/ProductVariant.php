@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 #[ObservedBy(StockMovementObserver::class)]
 #[Fillable([
@@ -201,5 +202,18 @@ class ProductVariant extends Model
     public function thumbnailUrl(): string
     {
         return ImageThumbnailer::urlFor($this->image ?: $this->product->image);
+    }
+
+    /**
+     * The file name of the variant's own photo downloaded as a JPEG: its
+     * SKU, or the product's with the variant id when it has none.
+     */
+    public function photoDownloadName(): string
+    {
+        $name = filled($this->sku)
+            ? $this->sku
+            : (filled($this->product->sku) ? $this->product->sku : $this->product->slug).'-'.$this->id;
+
+        return Str::slug($name).'.jpg';
     }
 }
