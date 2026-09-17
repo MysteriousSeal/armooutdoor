@@ -133,14 +133,18 @@ class VintedCopyGenerationTest extends TestCase
         $this->assertSame('Neuve.', $copy['description']);
     }
 
-    public function test_a_long_title_is_cut_where_vinted_cuts_it(): void
+    public function test_a_long_title_is_cut_at_vinted_s_limit(): void
     {
         $copy = $this->parse(json_encode([
-            'title' => str_repeat('a', 90),
+            'title' => str_repeat('a', 140),
             'description' => 'Neuve.',
         ]));
 
-        $this->assertSame(60, mb_strlen($copy['title']));
+        $this->assertSame(100, mb_strlen($copy['title']));
+
+        // Under the limit, nothing is touched.
+        $ninety = $this->parse(json_encode(['title' => str_repeat('a', 90), 'description' => 'Neuve.']));
+        $this->assertSame(90, mb_strlen($ninety['title']));
     }
 
     public function test_an_answer_missing_a_field_is_refused(): void
@@ -280,6 +284,25 @@ class VintedCopyGenerationTest extends TestCase
         // The prompt no longer introduces the shop by the very words it bans.
         $this->assertStringNotContainsString("d'équipement de tir sportif, chasse, airsoft", $prompt);
         $this->assertStringNotContainsString("\u{2014}", $prompt);
+    }
+
+    /**
+     * A title used to be the catalogue name with its adjectives stacked up.
+     * What a buyer needs in a feed is the item, then what makes it that one.
+     */
+    public function test_the_prompt_asks_for_a_title_that_says_what_the_item_is(): void
+    {
+        $prompt = (new ReflectionClass(VintedCopywriter::class))->getConstant('SYSTEM_PROMPT');
+
+        $this->assertStringContainsString('entre 75 et 100 caractères', $prompt);
+        // The space is there to be used: short titles miss searches.
+        $this->assertStringContainsString('recherche sur Vinted', $prompt);
+        $this->assertStringContainsString("ce qu'est l'article", $prompt);
+        $this->assertStringContainsString('majuscule', $prompt);
+        $this->assertStringContainsString('mots-clés', $prompt);
+        // The camouflage naming rule the catalogue follows holds here too.
+        $this->assertStringContainsString('multi-terrain', $prompt);
+        $this->assertStringContainsString('« CP »', $prompt);
     }
 
     /**

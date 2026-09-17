@@ -25,8 +25,8 @@ class VintedCopywriter
     /** Long enough for a listing, short enough that a runaway answer stops. */
     private const MAX_TOKENS = 1500;
 
-    /** Vinted trims the title around here on a phone. */
-    private const TITLE_LIMIT = 60;
+    /** What Vinted's title field takes. It trims around 60 on a phone. */
+    private const TITLE_LIMIT = 100;
 
     private const SYSTEM_PROMPT = <<<'PROMPT'
         Tu rédiges des annonces Vinted pour une petite boutique française de
@@ -39,9 +39,40 @@ class VintedCopywriter
         de hashtags, pas de listes à puces, pas de gras ni de markdown :
         Vinted n'affiche aucune mise en forme. Pas de tiret long non plus.
 
-        Le titre : 60 caractères maximum, le nom de l'article d'abord, puis la
-        marque, la taille ou le calibre s'ils existent. Pas de prix, pas de
-        "NEUF" en capitales.
+        Le titre : entre 75 et 100 caractères, jamais plus de 100. C'est là
+        que se fait la recherche sur Vinted, alors sers-toi de la place :
+        un titre de 40 caractères laisse passer des acheteurs. Ne descends
+        au-dessous de 75 que si la fiche produit ne dit vraiment rien de
+        plus ; n'invente jamais une précision pour remplir.
+
+        Sur un téléphone, Vinted coupe l'affichage autour de 60 caractères :
+        ce qui fait reconnaître l'article tient donc dans les 60 premiers, et
+        la fin ajoute les précisions cherchées.
+
+        Il commence par ce qu'est l'article, écrit avec une majuscule
+        (Cagoule, Sac à dos, Gants, Housse), puis la marque s'il y en a une.
+        Viennent ensuite les mots par lesquels un acheteur cherche cet
+        article : son autre nom courant s'il en a un (une cagoule se cherche
+        aussi comme cache-cou ou tour de cou, un sac à dos comme sac de
+        randonnée), puis les précisions concrètes de la fiche : matière,
+        motif, taille, coloris, contenance, dimensions, nombre de pièces.
+
+        Un titre se lit comme une phrase de vendeur, pas comme une liste de
+        mots-clés : pas de répétition, pas de ponctuation empilée, et le
+        français reste correct. Écarte tout ce qui ne dit rien de précis
+        (« qualité », « confortable », « pratique », « idéal »,
+        « professionnel ») et tout ce qui appartient à la description : à
+        quoi ça sert, l'état neuf, l'envoi. Pas de prix, pas de « NEUF » en
+        capitales.
+
+        Ainsi la fiche « Sac à Dos Tactique 30L Nylon Renforcé Molle
+        Camouflage Forêt Randonnée » donne « Sac à dos de randonnée 30 L en
+        nylon renforcé, sangles Molle, camouflage forêt » : l'article, le mot
+        cherché, puis les précisions de la fiche.
+
+        Un motif de camouflage se nomme par sa famille : multi-terrain,
+        désert, forêt, neige. N'écris jamais « CP », et ne cite « type
+        Multicam » qu'une seule fois, dans la description.
 
         La description : 4 à 6 lignes courtes séparées par des retours à la
         ligne. Dans l'ordre : ce que c'est et à quoi ça sert, les
@@ -116,7 +147,7 @@ class VintedCopywriter
                 'properties' => [
                     'title' => [
                         'type' => 'string',
-                        'description' => 'Le titre, 60 caractères maximum.',
+                        'description' => "Le titre : ce qu'est l'article, puis la marque, le mot par lequel on le cherche et les précisions de la fiche. Entre 75 et 100 caractères, jamais plus.",
                     ],
                     'description' => [
                         'type' => 'string',

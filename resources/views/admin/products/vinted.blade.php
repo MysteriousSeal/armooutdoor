@@ -126,7 +126,7 @@
                         <span class="vinted-step-number" aria-hidden="true">1</span>
                         <div>
                             <label class="vinted-step-label" for="vinted-title">Title</label>
-                            <p class="vinted-step-hint">Vinted cuts it around 60 characters on a phone.</p>
+                            <p class="vinted-step-hint">Up to 100 characters. Vinted cuts the display around 60 on a phone, so put what matters first.</p>
                         </div>
                         <button type="button" class="btn btn-sm btn-secondary vinted-copy" data-copy-from="vinted-title">Copy</button>
                     </div>
@@ -137,10 +137,10 @@
                         name="title"
                         value="{{ $titleValue }}"
                         maxlength="255"
-                        placeholder="Cagoule camo respirante — taille unique"
+                        placeholder="Cagoule respirante en polyester, camouflage désert"
                         class="form-control vinted-input @error('title') is-invalid @enderror"
                         data-counter-for="vinted-title-count"
-                        data-counter-ideal="60"
+                        data-counter-ideal="100"
                     >
                     <p class="vinted-count"><span id="vinted-title-count"></span></p>
                     @error('title')<p class="form-error">{{ $message }}</p>@enderror
