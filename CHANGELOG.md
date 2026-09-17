@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-17 · v1.44.2 · build 1VBFBO
+
+### Admin
+
+- **« Write with Claude » now writes Vinted titles that say what the article is.** It used to hand back the catalogue name with its adjectives stacked up, which reads as a list of keywords rather than a listing. A title now opens with the article itself, capitalised, then the brand, then the word a buyer actually searches it by when the sheet words it differently (a cagoule is also looked for as a cache-cou), then the sheet's concrete facts: material, pattern, size, colour, capacity, number of pieces. Empty words such as « qualité », « pratique » or « professionnel » are refused, as is anything belonging in the description.
+- **Titles use the room Vinted gives them.** The field takes 100 characters, not 60, and the instruction aims for 75 to 100, since the title is where the search happens and a forty-character one loses buyers. Nothing is invented to fill the space, and the first sixty characters still have to identify the article on their own, because that is where Vinted cuts the display on a phone. The title counter and hint on the listing page follow the same 100.
+- **Camouflage patterns follow the catalogue's naming rule** in the listings too: named by family (multi-terrain, désert, forêt, neige), never « CP », with « type Multicam » kept to a single mention in the description.
+
+**No migration.**
+
 ## 2026-09-17 · v1.44.1 · build 3VG112
 
 ### Admin
