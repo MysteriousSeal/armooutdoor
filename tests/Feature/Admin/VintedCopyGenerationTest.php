@@ -2,8 +2,10 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\User;
+use App\Models\VintedListing;
 use App\Services\VintedCopywriter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use ReflectionClass;
@@ -303,6 +305,62 @@ class VintedCopyGenerationTest extends TestCase
         // The camouflage naming rule the catalogue follows holds here too.
         $this->assertStringContainsString('multi-terrain', $prompt);
         $this->assertStringContainsString('« CP »', $prompt);
+    }
+
+    /**
+     * The shop sells one article in several colourways, a product each, and
+     * three listings that differ by one word read as duplicates on Vinted.
+     * The brief carries what the neighbours already say, so the model can
+     * write something else.
+     */
+    public function test_the_brief_shows_the_listings_of_neighbouring_products(): void
+    {
+        $category = Category::factory()->create();
+        $other = Category::factory()->create();
+
+        $product = Product::factory()->create(['category_id' => $category->id, 'name' => ['fr' => 'Cagoule désert', 'en' => 'Desert balaclava']]);
+
+        $neighbour = Product::factory()->create(['category_id' => $category->id]);
+        VintedListing::query()->create([
+            'product_id' => $neighbour->id,
+            'title' => 'Cagoule cache-cou en polyester, camouflage pixel gris',
+            'description' => "Cagoule intégrale.\nEnvoi rapide.",
+        ]);
+
+        // Its own listing is not a neighbour, nor is another category's.
+        VintedListing::query()->create(['product_id' => $product->id, 'title' => 'Ce que disait la version précédente']);
+        $elsewhere = Product::factory()->create(['category_id' => $other->id]);
+        VintedListing::query()->create(['product_id' => $elsewhere->id, 'title' => 'Sac à dos 30 L en nylon']);
+
+        $brief = (new ReflectionMethod(VintedCopywriter::class, 'brief'))
+            ->invoke(new VintedCopywriter('test-key'), $product);
+
+        $this->assertStringContainsString('Cagoule cache-cou en polyester, camouflage pixel gris', $brief);
+        $this->assertStringContainsString('ne leur ressemblent pas', $brief);
+        $this->assertStringContainsString('Cagoule intégrale.', $brief);
+        $this->assertStringNotContainsString('Ce que disait la version précédente', $brief);
+        $this->assertStringNotContainsString('Sac à dos 30 L en nylon', $brief);
+    }
+
+    public function test_a_product_whose_neighbours_have_no_listing_is_briefed_as_before(): void
+    {
+        $product = Product::factory()->create(['category_id' => Category::factory()->create()->id]);
+
+        $brief = (new ReflectionMethod(VintedCopywriter::class, 'brief'))
+            ->invoke(new VintedCopywriter('test-key'), $product);
+
+        $this->assertStringNotContainsString('ne leur ressemblent pas', $brief);
+    }
+
+    /** Vinted reads look-alike listings as duplicates. */
+    public function test_the_prompt_refuses_a_listing_that_looks_like_its_neighbours(): void
+    {
+        $prompt = (new ReflectionClass(VintedCopywriter::class))->getConstant('SYSTEM_PROMPT');
+
+        $this->assertStringContainsString('doublons', $prompt);
+        $this->assertStringContainsString('une ouverture différente', $prompt);
+        // Wording varies, facts do not.
+        $this->assertStringContainsString('jamais les faits', $prompt);
     }
 
     /**

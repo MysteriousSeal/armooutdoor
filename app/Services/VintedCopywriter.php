@@ -7,6 +7,8 @@ use Anthropic\Core\Exceptions\AnthropicException;
 use Anthropic\Core\Exceptions\APIStatusException;
 use Anthropic\Core\Util;
 use App\Models\Product;
+use App\Models\VintedListing;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use RuntimeException;
 
@@ -24,6 +26,9 @@ class VintedCopywriter
 {
     /** Long enough for a listing, short enough that a runaway answer stops. */
     private const MAX_TOKENS = 1500;
+
+    /** Enough neighbours to see the pattern to avoid, few enough to read. */
+    private const SIBLING_LISTINGS = 8;
 
     /** What Vinted's title field takes. It trims around 60 on a phone. */
     private const TITLE_LIMIT = 100;
@@ -73,6 +78,16 @@ class VintedCopywriter
         Un motif de camouflage se nomme par sa famille : multi-terrain,
         désert, forêt, neige. N'écris jamais « CP », et ne cite « type
         Multicam » qu'une seule fois, dans la description.
+
+        La boutique vend souvent le même article en plusieurs coloris, et
+        Vinted sanctionne les annonces qui se ressemblent : deux titres qui
+        ne diffèrent que par un mot passent pour des doublons. Si des
+        annonces déjà rédigées te sont montrées, écris autre chose qu'elles.
+        Autre chose veut dire : une ouverture différente, une tournure
+        différente et un choix de précisions différent, pas un synonyme
+        glissé au même endroit. La description de la même façon : d'autres
+        phrases, un autre ordre, un autre angle d'approche. Tout doit rester
+        exact pour cet article-ci : varie la formulation, jamais les faits.
 
         La description : 4 à 6 lignes courtes séparées par des retours à la
         ligne. Dans l'ordre : ce que c'est et à quoi ça sert, les
@@ -266,10 +281,54 @@ class VintedCopywriter
             $lines[] = Str::limit($description, 2000);
         }
 
+        $siblings = $this->siblingListings($product);
+
+        if ($siblings->isNotEmpty()) {
+            $lines[] = '';
+            $lines[] = 'Annonces déjà rédigées pour des articles voisins de la même catégorie.';
+            $lines[] = 'Écris un titre et une description qui ne leur ressemblent pas :';
+
+            foreach ($siblings as $sibling) {
+                $lines[] = '';
+                $lines[] = '- Titre : '.$sibling->title;
+
+                if (filled($sibling->description)) {
+                    $lines[] = '  Description : '.Str::limit(preg_replace('/\s+/u', ' ', $sibling->description), 300);
+                }
+            }
+        }
+
         $lines[] = '';
         $lines[] = 'Rédige le titre et la description Vinted de cet article.';
 
         return implode("\n", $lines);
+    }
+
+    /**
+     * The listings already written for the product's neighbours.
+     *
+     * The shop sells the same article in several colourways, one product
+     * each, and each listing is written on its own: without this, the model
+     * writes the same sentence every time and Vinted reads the lot as
+     * duplicates. The category is the neighbourhood, the most recent first,
+     * and few enough that the brief stays short.
+     *
+     * @return Collection<int, VintedListing>
+     */
+    private function siblingListings(Product $product)
+    {
+        if ($product->category_id === null) {
+            return collect();
+        }
+
+        return VintedListing::query()
+            ->whereNot('product_id', $product->id)
+            ->where('title', '!=', '')
+            ->whereNotNull('title')
+            ->whereHas('product', fn ($query) => $query->where('category_id', $product->category_id))
+            ->latest('updated_at')
+            ->limit(self::SIBLING_LISTINGS)
+            ->get();
     }
 
     /**
