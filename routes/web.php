@@ -274,7 +274,8 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         Route::get('/products/{product}/photos/{photo}.jpg', [ProductPhotoController::class, 'gallery'])
             ->whereNumber('photo')
             ->name('products.photos.gallery');
-        Route::get('/products/{product}/variants/{variant}/photo.jpg', [ProductPhotoController::class, 'variant'])
+        Route::get('/products/{product}/variants/{variant}/photos/{position}.jpg', [ProductPhotoController::class, 'variant'])
+            ->whereNumber('position')
             ->name('products.photos.variant');
         Route::get('/products/{product}/stock-history', [AdminProductController::class, 'stockHistory'])->name('products.stock-history');
         // One label per article: a plain product, or one variant of a product

@@ -26,6 +26,7 @@ class ProductVariantResource extends JsonResource
             'is_active' => (bool) $this->is_active,
             'sort_order' => $this->sort_order,
             'image' => $this->image,
+            'images' => $this->photos(),
             'supplier_id' => $this->supplier_id,
             'available_at_supplier' => (bool) $this->available_at_supplier,
             'supplier_reference' => $this->supplier_reference,

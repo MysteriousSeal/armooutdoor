@@ -2049,6 +2049,10 @@ body.has-menu-open {
     margin-top: 0.75rem;
 }
 
+.product-detail-thumbs[hidden] {
+    display: none;
+}
+
 .product-detail-thumb {
     width: 4rem;
     height: 4rem;

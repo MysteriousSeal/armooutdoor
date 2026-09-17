@@ -42,11 +42,21 @@
 @section('content')
     @php
         $inWishlist = ($wishlistProductIds ?? collect())->contains($product->id);
-        $gallery = collect([['full' => $product->imageUrl(), 'thumb' => $product->thumbnailUrl()]])
+        $productGallery = collect([['full' => $product->imageUrl(), 'thumb' => $product->thumbnailUrl()]])
             ->concat($product->images->map(fn ($image) => ['full' => $image->imageUrl(), 'thumb' => $image->thumbnailUrl()]))
             ->filter(fn (array $entry) => $entry['full'] !== '')
             ->unique('full')
             ->values();
+        $activeVariants = $product->variants->where('is_active', true)
+            ->sortBy(fn ($variant) => $variant->sizeSortRank() ?? $variant->sort_order)
+            ->values();
+        $selectedVariantId = old('variant_id', optional($activeVariants->first(fn ($variant) => $variant->inStock()) ?? $activeVariants->first())->id);
+        $displayVariant = $product->hasVariants() ? $activeVariants->firstWhere('id', (int) $selectedVariantId) : null;
+        // A variant with photos of its own shows them in place of the
+        // product's gallery; product-variant.js swaps them on selection.
+        $gallery = $displayVariant && $displayVariant->photos() !== []
+            ? collect($displayVariant->gallerySlides())
+            : $productGallery;
         $allowedCarriers = \App\Models\Carrier::active()->get()->filter(fn ($carrier) => $product->isCarrierAllowed($carrier));
         $allowedHomeCarriers = $allowedCarriers->where('method', \App\Enums\DeliveryMethod::Home)->map->localizedName();
         $allowedRelayCarriers = $allowedCarriers->where('method', \App\Enums\DeliveryMethod::Relay)->map->localizedName();
@@ -71,19 +81,21 @@
         </nav>
 
         <article class="product-detail">
-            <div class="product-detail-gallery">
+            <div class="product-detail-gallery" data-default-gallery="{{ $productGallery->toJson(JSON_UNESCAPED_SLASHES) }}">
                 <div class="product-detail-stage">
                     <img
                         id="product-detail-main-image"
-                        src="{{ $product->imageUrl() }}"
+                        src="{{ $gallery->first()['full'] ?? $product->imageUrl() }}"
                         alt="{{ $product->localizedName() }}"
                         width="{{ \App\Support\ImageThumbnailer::MAIN_SIZE }}"
                         height="{{ \App\Support\ImageThumbnailer::MAIN_SIZE }}"
                         fetchpriority="high"
                     >
                 </div>
-                @if ($gallery->count() > 1)
-                    <div class="product-detail-thumbs" role="group" aria-label="{{ __('store.product_photos') }}">
+                {{-- Always there, hidden when there is a single photo: selecting a
+                     variant can bring a gallery where there was none. --}}
+                <div class="product-detail-thumbs" role="group" aria-label="{{ __('store.product_photos') }}" @if ($gallery->count() < 2) hidden @endif>
+                    @if ($gallery->count() > 1)
                         @foreach ($gallery as $src)
                             <button
                                 type="button"
@@ -99,8 +111,8 @@
                                 >
                             </button>
                         @endforeach
-                    </div>
-                @endif
+                    @endif
+                </div>
                 @if ($product->image_may_vary)
                     <p class="image-may-vary-notice" role="note">
                         @include('partials.icon', ['name' => 'triangle-exclamation', 'size' => 16])
@@ -111,11 +123,6 @@
 
             <div class="product-detail-buy">
                 @php
-                    $activeVariants = $product->variants->where('is_active', true)
-                        ->sortBy(fn ($variant) => $variant->sizeSortRank() ?? $variant->sort_order)
-                        ->values();
-                    $selectedVariantId = old('variant_id', optional($activeVariants->first(fn ($variant) => $variant->inStock()) ?? $activeVariants->first())->id);
-                    $displayVariant = $product->hasVariants() ? $activeVariants->firstWhere('id', (int) $selectedVariantId) : null;
                     $variantHasOwnPrice = $displayVariant?->price_cents !== null;
                     // La référence affichée est celle de ce qui partira au
                     // panier : celle de la variante si elle en a une.
@@ -315,8 +322,8 @@
                                                 data-variant-discount-ends-at="{{ ($variant->price_cents === null && $product->hasDiscount() && $product->discount->ends_at) ? $product->discount->ends_at->toIso8601String() : '' }}"
                                                 data-variant-max="{{ $variant->maxPurchasable() }}"
                                                 data-variant-sku="{{ $variant->sku ?: $product->sku }}"
-                                                @if ($variant->image)
-                                                    data-variant-image="{{ $variant->imageUrl() }}"
+                                                @if ($variant->photos() !== [])
+                                                    data-variant-images="{{ json_encode($variant->gallerySlides(), JSON_UNESCAPED_SLASHES) }}"
                                                 @endif
                                                 @checked((string) $selectedVariantId === (string) $variant->id)
                                             >

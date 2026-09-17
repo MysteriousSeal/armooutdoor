@@ -41,8 +41,18 @@
             currentEl.textContent = radio.getAttribute('data-variant-label') || '';
         }
 
-        if (mainImage && radio.getAttribute('data-variant-image')) {
-            mainImage.src = radio.getAttribute('data-variant-image');
+        // The gallery shows the variant's own photos, or the product's when it
+        // has none; product-gallery.js redraws it.
+        if (mainImage) {
+            var slides = null;
+
+            try {
+                slides = JSON.parse(radio.getAttribute('data-variant-images') || 'null');
+            } catch (error) {
+                slides = null;
+            }
+
+            document.dispatchEvent(new CustomEvent('product:gallery', { detail: { slides: slides } }));
         }
 
         if (priceEl && radio.hasAttribute('data-variant-price')) {

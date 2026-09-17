@@ -607,9 +607,6 @@
                         'price' => $variant->price_cents !== null ? number_format($variant->price_cents / 100, 2, '.', '') : '',
                         'quantity' => $variant->quantity,
                         'is_active' => $variant->is_active,
-                        'image_url' => $variant->image ? $variant->imageUrl() : null,
-                        'image_download_url' => $variant->image ? route('admin.products.photos.variant', ['product' => $product, 'variant' => $variant]) : null,
-                        'image_download_name' => $variant->image ? $variant->setRelation('product', $product)->photoDownloadName() : null,
                         'supplier_id' => $variant->supplier_id,
                         'available_at_supplier' => $variant->available_at_supplier,
                         'supplier_reference' => $variant->supplier_reference,
@@ -648,27 +645,13 @@
                             </header>
                             <div class="variant-card-body">
                                 <div class="variant-card-media">
-                                    <span class="variant-card-preview">
-                                        @if (! empty($variant['image_url']))
-                                            <img src="{{ $variant['image_url'] }}" alt="">
-                                        @endif
-                                    </span>
-                                    @if (! empty($variant['image_download_url']))
-                                        @include('admin.products.partials.photo-download', [
-                                            'href' => $variant['image_download_url'],
-                                            'filename' => $variant['image_download_name'],
-                                        ])
-                                    @endif
-                                    @if (! empty($variant['image_url']))
-                                        <label class="form-check">
-                                            <input type="checkbox" name="variants[{{ $index }}][remove_image]" value="1">
-                                            Remove photo
-                                        </label>
-                                    @endif
-                                    <label class="btn btn-sm btn-secondary variant-card-upload">
-                                        {{ ! empty($variant['image_url']) ? 'Replace photo' : 'Add photo' }}
-                                        <input type="file" name="variant_images[{{ $index }}]" accept="image/jpeg,image/png,image/gif,image/webp">
-                                    </label>
+                                    {{-- Read from the saved variant rather than the old input:
+                                         a failed validation must not show its photos as gone. --}}
+                                    @include('admin.products.partials.variant-photo-slots', [
+                                        'index' => $index,
+                                        'variantModel' => ! empty($variant['id']) ? $product->variants->firstWhere('id', (int) $variant['id']) : null,
+                                    ])
+                                    @error("variant_images.{$index}.*") <p class="form-error">{{ $message }}</p> @enderror
                                 </div>
                                 <div class="variant-card-fields">
                                     <div class="form-group">
@@ -753,11 +736,10 @@
                         </header>
                         <div class="variant-card-body">
                             <div class="variant-card-media">
-                                <span class="variant-card-preview"></span>
-                                <label class="btn btn-sm btn-secondary variant-card-upload">
-                                    Add photo
-                                    <input type="file" name="variant_images[__INDEX__]" accept="image/jpeg,image/png,image/gif,image/webp">
-                                </label>
+                                @include('admin.products.partials.variant-photo-slots', [
+                                    'index' => '__INDEX__',
+                                    'variantModel' => null,
+                                ])
                             </div>
                             <div class="variant-card-fields">
                                 <div class="form-group">
@@ -986,18 +968,18 @@
                 });
             }
 
-            // A variant photo opens full screen; the arrows step through the
-            // variant photos only, in their on-screen order, including one just
-            // picked and not saved yet.
+            // A variant photo opens full screen; the arrows step through that
+            // variant's photos only, including one just picked and not saved yet.
             document.addEventListener('click', function (event) {
                 var clicked = event.target.closest('.variant-card-preview img');
+                var row = clicked && clicked.closest('.variant-row');
 
-                if (!clicked || !clicked.getAttribute('src') || !window.armoImageLightbox) {
+                if (!clicked || !row || !clicked.getAttribute('src') || !window.armoImageLightbox) {
                     return;
                 }
 
                 var photos = Array.prototype.filter.call(
-                    document.querySelectorAll('#variants-list .variant-card-preview img'),
+                    row.querySelectorAll('.variant-card-preview img'),
                     function (img) { return img.getAttribute('src'); }
                 );
 
@@ -1008,20 +990,22 @@
             });
 
             function bindPreview(row) {
-                var file = row.querySelector('input[type="file"]');
-                var preview = row.querySelector('.variant-card-preview');
-                if (!file || !preview) {
-                    return;
-                }
-                file.addEventListener('change', function () {
-                    var chosen = file.files && file.files[0];
-                    if (!chosen) {
+                row.querySelectorAll('.variant-photo-slot').forEach(function (slot) {
+                    var file = slot.querySelector('input[type="file"]');
+                    var preview = slot.querySelector('.variant-card-preview');
+                    if (!file || !preview) {
                         return;
                     }
-                    var img = preview.querySelector('img') || document.createElement('img');
-                    img.alt = '';
-                    img.src = URL.createObjectURL(chosen);
-                    preview.appendChild(img);
+                    file.addEventListener('change', function () {
+                        var chosen = file.files && file.files[0];
+                        if (!chosen) {
+                            return;
+                        }
+                        var img = preview.querySelector('img') || document.createElement('img');
+                        img.alt = '';
+                        img.src = URL.createObjectURL(chosen);
+                        preview.appendChild(img);
+                    });
                 });
             }
 

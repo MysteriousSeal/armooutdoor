@@ -133,7 +133,7 @@ class ProductPhotoJpegTest extends TestCase
             ->assertNotFound();
     }
 
-    public function test_a_variant_photo_is_named_after_the_variant_sku(): void
+    public function test_variant_photos_are_named_after_the_variant_sku_and_position(): void
     {
         [$product] = $this->productWithGallery();
         $variant = ProductVariant::create([
@@ -141,13 +141,25 @@ class ProductPhotoJpegTest extends TestCase
             'sku' => 'CRT-REACT-076-JAUNE',
             'quantity' => 1,
             'image' => $this->webp('variant'),
+            'image_2' => $this->webp('variant-2'),
         ]);
+        $admin = $this->admin();
 
-        $this->actingAs($this->admin())
-            ->get('/admin/products/'.$product->id.'/variants/'.$variant->id.'/photo.jpg')
+        $this->actingAs($admin)
+            ->get('/admin/products/'.$product->id.'/variants/'.$variant->id.'/photos/1.jpg')
             ->assertOk()
             ->assertHeader('content-type', 'image/jpeg')
-            ->assertDownload('crt-react-076-jaune.jpg');
+            ->assertDownload('crt-react-076-jaune_1.jpg');
+
+        $this->actingAs($admin)
+            ->get('/admin/products/'.$product->id.'/variants/'.$variant->id.'/photos/2.jpg')
+            ->assertOk()
+            ->assertDownload('crt-react-076-jaune_2.jpg');
+
+        // No third photo, nothing to hand over.
+        $this->actingAs($admin)
+            ->get('/admin/products/'.$product->id.'/variants/'.$variant->id.'/photos/3.jpg')
+            ->assertNotFound();
     }
 
     public function test_a_variant_without_its_own_photo_has_nothing_to_hand_over(): void
@@ -156,7 +168,7 @@ class ProductPhotoJpegTest extends TestCase
         $variant = ProductVariant::create(['product_id' => $product->id, 'sku' => 'NO-PHOTO', 'quantity' => 1]);
 
         $this->actingAs($this->admin())
-            ->get('/admin/products/'.$product->id.'/variants/'.$variant->id.'/photo.jpg')
+            ->get('/admin/products/'.$product->id.'/variants/'.$variant->id.'/photos/1.jpg')
             ->assertNotFound();
     }
 
@@ -176,9 +188,9 @@ class ProductPhotoJpegTest extends TestCase
             ->assertSee('/photos/cover.jpg', false)
             ->assertSee('/photos/'.$first->id.'.jpg', false)
             ->assertSee('/photos/'.$second->id.'.jpg', false)
-            ->assertSee('/variants/'.$variant->id.'/photo.jpg', false)
+            ->assertSee('/variants/'.$variant->id.'/photos/1.jpg', false)
             ->assertSee('download="crt-react-076_3.jpg"', false)
-            ->assertSee('download="crt-react-076-jaune.jpg"', false)
+            ->assertSee('download="crt-react-076-jaune_1.jpg"', false)
             // The header button stays.
             ->assertSee('Cover as JPG');
     }

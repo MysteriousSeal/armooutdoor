@@ -36,15 +36,17 @@ class ProductPhotoController extends Controller
         return $this->jpeg($photo->image, $product->photoDownloadName($product->galleryPhotoPosition($photo)));
     }
 
-    public function variant(Product $product, ProductVariant $variant): Response
+    public function variant(Product $product, ProductVariant $variant, int $position): Response
     {
         abort_unless($variant->product_id === $product->id, 404);
 
-        // Only the variant's own photo: without one it shows the cover,
+        // Only the variant's own photos: without one it shows the cover,
         // which has its own link.
-        abort_if(blank($variant->image), 404);
+        $photo = $variant->photos()[$position - 1] ?? null;
 
-        return $this->jpeg($variant->image, $variant->setRelation('product', $product)->photoDownloadName());
+        abort_if($position < 1 || $photo === null, 404);
+
+        return $this->jpeg($photo, $variant->setRelation('product', $product)->photoDownloadName($position));
     }
 
     private function jpeg(string $relativePath, string $filename): Response

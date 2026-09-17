@@ -121,6 +121,7 @@ Every endpoint wraps its payload in `data`.
       "is_active": true,
       "sort_order": 0,
       "image": null,
+      "images": [],
       "supplier_id": 1,
       "available_at_supplier": true,
       "supplier_reference": "830103L",
@@ -309,7 +310,7 @@ That last line matters: `variants` is not a full replacement. A `PATCH` that sen
 | `sort_order` | int | defaults to the row's position |
 | `supplier_id`, `available_at_supplier`, `supplier_reference`, `supplier_product_url` | | per variant, since sizes are often ordered separately |
 
-Variant images are read-only here; set them in the web admin.
+Variant images are read-only here; set them in the web admin. A variant has up to three photos: `image` is the main one, and `images` lists all of them, main first.
 
 ---
 

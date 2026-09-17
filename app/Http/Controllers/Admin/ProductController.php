@@ -916,8 +916,8 @@ class ProductController extends Controller
                     $variant = ProductVariant::query()->find($variantId);
 
                     if ($variant !== null && $variant->product_id === $product->id) {
-                        if ($variant->image) {
-                            $this->deleteStoredImageFile($variant->image);
+                        foreach ($variant->photos() as $photo) {
+                            $this->deleteStoredImageFile($photo);
                         }
 
                         $variant->delete();
@@ -949,7 +949,8 @@ class ProductController extends Controller
                 'supplier_product_url' => filled($row['supplier_product_url'] ?? null) ? trim((string) $row['supplier_product_url']) : null,
             ];
 
-            $uploadedImage = $files[$index] ?? null;
+            $uploads = is_array($files[$index] ?? null) ? $files[$index] : [];
+            $removals = is_array($row['remove_images'] ?? null) ? $row['remove_images'] : [];
 
             if ($variantId !== null) {
                 $variant = ProductVariant::query()->find($variantId);
@@ -958,31 +959,53 @@ class ProductController extends Controller
                     continue;
                 }
 
-                if ($uploadedImage instanceof UploadedFile) {
-                    if ($variant->image) {
-                        $this->deleteStoredImageFile($variant->image);
-                    }
-
-                    $payload['image'] = $this->storeUploadedImage($uploadedImage, $product->slug.'-variant');
-                } elseif (! empty($row['remove_image'])) {
-                    if ($variant->image) {
-                        $this->deleteStoredImageFile($variant->image);
-                    }
-
-                    $payload['image'] = null;
-                }
-
-                $variant->update($payload);
+                $variant->update($payload + $this->variantPhotoSlots($variant, $uploads, $removals, $product));
 
                 continue;
             }
 
-            if ($uploadedImage instanceof UploadedFile) {
-                $payload['image'] = $this->storeUploadedImage($uploadedImage, $product->slug.'-variant');
+            $product->variants()->create($payload + $this->variantPhotoSlots(new ProductVariant, $uploads, [], $product));
+        }
+    }
+
+    /**
+     * The variant's three photo slots after this save: a new file replaces
+     * the slot's photo, a ticked Remove clears it, and the slots are then
+     * packed to the front so `image` is always the main photo whenever the
+     * variant has one.
+     *
+     * @param  array<int|string, mixed>  $uploads  slot => UploadedFile
+     * @param  array<int|string, mixed>  $removals  slot => truthy
+     * @return array{image: ?string, image_2: ?string, image_3: ?string}
+     */
+    private function variantPhotoSlots(ProductVariant $variant, array $uploads, array $removals, Product $product): array
+    {
+        $slots = [];
+
+        foreach (ProductVariant::PHOTO_COLUMNS as $slot => $column) {
+            $current = $variant->getAttribute($column);
+            $upload = $uploads[$slot] ?? null;
+
+            if ($upload instanceof UploadedFile) {
+                if (filled($current)) {
+                    $this->deleteStoredImageFile($current);
+                }
+
+                $current = $this->storeUploadedImage($upload, $product->slug.'-variant');
+            } elseif (! empty($removals[$slot]) && filled($current)) {
+                $this->deleteStoredImageFile($current);
+                $current = null;
             }
 
-            $product->variants()->create($payload);
+            if (filled($current)) {
+                $slots[] = $current;
+            }
         }
+
+        return array_combine(
+            ProductVariant::PHOTO_COLUMNS,
+            array_pad($slots, count(ProductVariant::PHOTO_COLUMNS), null),
+        );
     }
 
     /**

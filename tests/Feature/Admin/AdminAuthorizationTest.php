@@ -199,6 +199,7 @@ class AdminAuthorizationTest extends TestCase
             'document' => $identityDocument->id,
             'image' => $vintedImage->id,
             'photo' => $productPhoto->id,
+            'position' => 1,
             'weapon' => $weapon->id,
             'ammunition' => $ammunition->id,
             'session' => $fftirSession->id,

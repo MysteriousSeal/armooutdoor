@@ -25,11 +25,16 @@ use Illuminate\Support\Str;
     'price_cents',
     'quantity',
     'image',
+    'image_2',
+    'image_3',
     'is_active',
     'sort_order',
 ])]
 class ProductVariant extends Model
 {
+    /** The photo slots, in order: the first is the variant's main photo. */
+    public const PHOTO_COLUMNS = ['image', 'image_2', 'image_3'];
+
     private const SIZE_ORDER = [
         'XXS' => 0,
         '2XS' => 0,
@@ -205,15 +210,42 @@ class ProductVariant extends Model
     }
 
     /**
-     * The file name of the variant's own photo downloaded as a JPEG: its
-     * SKU, or the product's with the variant id when it has none.
+     * The variant's own photos, main first, empty slots left out.
+     *
+     * @return list<string>
      */
-    public function photoDownloadName(): string
+    public function photos(): array
+    {
+        return array_values(array_filter(
+            array_map(fn (string $column): ?string => $this->getAttribute($column), self::PHOTO_COLUMNS),
+            fn (?string $path): bool => filled($path),
+        ));
+    }
+
+    /**
+     * The photos as the product page's gallery reads them.
+     *
+     * @return list<array{full: string, thumb: string}>
+     */
+    public function gallerySlides(): array
+    {
+        return array_map(fn (string $path): array => [
+            'full' => str_starts_with($path, 'https://') || str_starts_with($path, 'http://') ? $path : asset('images/'.$path),
+            'thumb' => ImageThumbnailer::urlFor($path),
+        ], $this->photos());
+    }
+
+    /**
+     * The file name of one of the variant's photos downloaded as a JPEG: its
+     * SKU (or the product's with the variant id when it has none) and the
+     * photo's position, the main one being 1.
+     */
+    public function photoDownloadName(int $position): string
     {
         $name = filled($this->sku)
             ? $this->sku
             : (filled($this->product->sku) ? $this->product->sku : $this->product->slug).'-'.$this->id;
 
-        return Str::slug($name).'.jpg';
+        return Str::slug($name).'_'.$position.'.jpg';
     }
 }

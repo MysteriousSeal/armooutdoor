@@ -5,112 +5,259 @@
         return;
     }
 
-    var thumbs = Array.prototype.slice.call(document.querySelectorAll('.product-detail-thumb'));
+    var galleryEl = mainImage.closest('.product-detail-gallery');
+    var thumbsEl = galleryEl ? galleryEl.querySelector('.product-detail-thumbs') : null;
 
-    // The gallery as [{full, thumb}], read from the thumbnails — or just
-    // the main photo when the product has no gallery.
-    var slides = thumbs.length
-        ? thumbs.map(function (thumb) {
-            return { full: thumb.dataset.fullSrc, thumb: thumb.querySelector('img').src };
-        })
-        : [{ full: mainImage.src, thumb: mainImage.src }];
+    // The gallery as [{full, thumb}], read from the thumbnails, or just the
+    // main photo when there are none.
+    function slidesFromThumbs() {
+        var thumbs = thumbsEl ? Array.prototype.slice.call(thumbsEl.querySelectorAll('.product-detail-thumb')) : [];
 
-    thumbs.forEach(function (thumb, index) {
-        thumb.addEventListener('click', function () {
-            var src = thumb.dataset.fullSrc;
+        return thumbs.length
+            ? thumbs.map(function (thumb) {
+                return { full: thumb.dataset.fullSrc, thumb: thumb.querySelector('img').src };
+            })
+            : [{ full: mainImage.src, thumb: mainImage.src }];
+    }
 
-            if (!src) {
-                return;
-            }
+    // The product's own gallery, shown for a variant without photos.
+    var defaultSlides = null;
 
-            mainImage.src = src;
-            current = index;
+    try {
+        defaultSlides = JSON.parse((galleryEl && galleryEl.dataset.defaultGallery) || 'null');
+    } catch (error) {
+        defaultSlides = null;
+    }
 
-            thumbs.forEach(function (other) {
-                other.classList.toggle('is-active', other === thumb);
-            });
-        });
-    });
+    var slides = slidesFromThumbs();
 
-    /* --- Lightbox ------------------------------------------------------ */
+    if (!defaultSlides || !defaultSlides.length) {
+        defaultSlides = slides;
+    }
 
     var current = 0;
-    var open = false;
-    var returnFocusTo = null;
 
-    var box = document.createElement('div');
-    box.className = 'lightbox';
-    box.setAttribute('role', 'dialog');
-    box.setAttribute('aria-modal', 'true');
-    box.setAttribute('aria-label', mainImage.alt);
-    box.hidden = true;
-    box.innerHTML =
-        // Font Awesome's xmark (CC BY 4.0), inlined like partials/icon.blade.php does.
-        '<button type="button" class="lightbox-close" aria-label="Fermer">' +
-        '<svg viewBox="0 0 384 512" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/></svg>' +
-        '</button>' +
-        // Font Awesome chevrons (CC BY 4.0), like the close button's xmark.
-        (slides.length > 1
-            ? '<button type="button" class="lightbox-nav lightbox-prev" aria-label="Photo précédente">' +
-              '<svg viewBox="0 0 320 512" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256 246.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z"/></svg>' +
-              '</button>' +
-              '<button type="button" class="lightbox-nav lightbox-next" aria-label="Photo suivante">' +
-              '<svg viewBox="0 0 320 512" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L233.4 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"/></svg>' +
-              '</button>'
-            : '') +
-        '';
+    function selectThumb(index) {
+        if (!thumbsEl) {
+            return;
+        }
 
-    // The rest of the box is drawing only: icons written out in full,
-    // nothing coming from data. What does come from data — the photo's alt
-    // text and the thumbnails' addresses — is set on real nodes, property by
-    // property. The version before pasted both into an HTML string and
-    // escaped the quotes by hand, which held for exactly as long as nobody
-    // touched the line.
-    var stage = document.createElement('figure');
-    stage.className = 'lightbox-stage';
+        Array.prototype.forEach.call(thumbsEl.querySelectorAll('.product-detail-thumb'), function (thumb, i) {
+            thumb.classList.toggle('is-active', i === index);
+        });
+    }
 
-    var stageImage = document.createElement('img');
-    stageImage.className = 'lightbox-image';
-    stageImage.alt = mainImage.alt;
-    stage.appendChild(stageImage);
-    box.appendChild(stage);
+    function bindThumbs() {
+        if (!thumbsEl) {
+            return;
+        }
 
-    if (slides.length > 1) {
-        var foot = document.createElement('div');
-        foot.className = 'lightbox-foot';
+        Array.prototype.forEach.call(thumbsEl.querySelectorAll('.product-detail-thumb'), function (thumb, index) {
+            thumb.addEventListener('click', function () {
+                var src = thumb.dataset.fullSrc;
 
-        var counterEl = document.createElement('span');
-        counterEl.className = 'lightbox-counter';
-        counterEl.setAttribute('aria-live', 'polite');
-        foot.appendChild(counterEl);
+                if (!src) {
+                    return;
+                }
 
-        var thumbStrip = document.createElement('div');
-        thumbStrip.className = 'lightbox-thumbs';
+                mainImage.src = src;
+                current = index;
+                selectThumb(index);
+            });
+        });
+    }
 
-        slides.forEach(function (slide, i) {
+    // Redraws the thumbnails for a new set of photos: a variant's own, or
+    // the product's. Built node by node, as the lightbox below.
+    function renderThumbs() {
+        if (!thumbsEl) {
+            return;
+        }
+
+        thumbsEl.textContent = '';
+        thumbsEl.hidden = slides.length < 2;
+
+        if (slides.length < 2) {
+            return;
+        }
+
+        slides.forEach(function (slide, index) {
             var button = document.createElement('button');
             button.type = 'button';
-            button.className = 'lightbox-thumb';
-            button.setAttribute('data-index', String(i));
+            button.className = 'product-detail-thumb' + (index === 0 ? ' is-active' : '');
+            button.dataset.fullSrc = slide.full;
 
             var thumbImage = document.createElement('img');
             thumbImage.src = slide.thumb;
             thumbImage.alt = '';
+            thumbImage.width = 400;
+            thumbImage.height = 400;
             thumbImage.loading = 'lazy';
             button.appendChild(thumbImage);
 
-            thumbStrip.appendChild(button);
+            thumbsEl.appendChild(button);
         });
 
-        foot.appendChild(thumbStrip);
-        box.appendChild(foot);
+        bindThumbs();
     }
 
-    document.body.appendChild(box);
+    function sameSlides(a, b) {
+        return a.length === b.length && a.every(function (slide, i) {
+            return slide.full === b[i].full;
+        });
+    }
 
-    var image = box.querySelector('.lightbox-image');
-    var counter = box.querySelector('.lightbox-counter');
-    var boxThumbs = Array.prototype.slice.call(box.querySelectorAll('.lightbox-thumb'));
+    function setSlides(next) {
+        next = next && next.length ? next : defaultSlides;
+
+        if (sameSlides(next, slides)) {
+            return;
+        }
+
+        slides = next;
+        current = 0;
+        mainImage.src = slides[0].full;
+        renderThumbs();
+
+        // The lightbox is drawn for a set of photos: the next opening
+        // draws it again for this one.
+        if (box) {
+            box.remove();
+            box = null;
+        }
+    }
+
+    bindThumbs();
+
+    document.addEventListener('product:gallery', function (event) {
+        setSlides(event.detail && event.detail.slides);
+    });
+
+    /* --- Lightbox ------------------------------------------------------ */
+
+    var box = null;
+    var image = null;
+    var counter = null;
+    var boxThumbs = [];
+    var open = false;
+    var returnFocusTo = null;
+
+    function buildBox() {
+        box = document.createElement('div');
+        box.className = 'lightbox';
+        box.setAttribute('role', 'dialog');
+        box.setAttribute('aria-modal', 'true');
+        box.setAttribute('aria-label', mainImage.alt);
+        box.hidden = true;
+        box.innerHTML =
+            // Font Awesome's xmark (CC BY 4.0), inlined like partials/icon.blade.php does.
+            '<button type="button" class="lightbox-close" aria-label="Fermer">' +
+            '<svg viewBox="0 0 384 512" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/></svg>' +
+            '</button>' +
+            // Font Awesome chevrons (CC BY 4.0), like the close button's xmark.
+            (slides.length > 1
+                ? '<button type="button" class="lightbox-nav lightbox-prev" aria-label="Photo précédente">' +
+                  '<svg viewBox="0 0 320 512" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256 246.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z"/></svg>' +
+                  '</button>' +
+                  '<button type="button" class="lightbox-nav lightbox-next" aria-label="Photo suivante">' +
+                  '<svg viewBox="0 0 320 512" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L233.4 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"/></svg>' +
+                  '</button>'
+                : '');
+
+        // The rest of the box is drawing only: icons written out in full,
+        // nothing coming from data. What does come from data (the photo's alt
+        // text and the thumbnails' addresses) is set on real nodes, property
+        // by property. The version before pasted both into an HTML string and
+        // escaped the quotes by hand, which held for exactly as long as nobody
+        // touched the line.
+        var stage = document.createElement('figure');
+        stage.className = 'lightbox-stage';
+
+        image = document.createElement('img');
+        image.className = 'lightbox-image';
+        image.alt = mainImage.alt;
+        stage.appendChild(image);
+        box.appendChild(stage);
+
+        counter = null;
+        boxThumbs = [];
+
+        if (slides.length > 1) {
+            var foot = document.createElement('div');
+            foot.className = 'lightbox-foot';
+
+            counter = document.createElement('span');
+            counter.className = 'lightbox-counter';
+            counter.setAttribute('aria-live', 'polite');
+            foot.appendChild(counter);
+
+            var thumbStrip = document.createElement('div');
+            thumbStrip.className = 'lightbox-thumbs';
+
+            slides.forEach(function (slide, i) {
+                var button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'lightbox-thumb';
+                button.setAttribute('data-index', String(i));
+
+                var thumbImage = document.createElement('img');
+                thumbImage.src = slide.thumb;
+                thumbImage.alt = '';
+                thumbImage.loading = 'lazy';
+                button.appendChild(thumbImage);
+
+                button.addEventListener('click', function () {
+                    show(i);
+                });
+
+                thumbStrip.appendChild(button);
+                boxThumbs.push(button);
+            });
+
+            foot.appendChild(thumbStrip);
+            box.appendChild(foot);
+        }
+
+        document.body.appendChild(box);
+
+        box.addEventListener('click', function (event) {
+            if (event.target === box || event.target.classList.contains('lightbox-stage')) {
+                closeBox();
+            }
+        });
+        box.querySelector('.lightbox-close').addEventListener('click', closeBox);
+
+        var prev = box.querySelector('.lightbox-prev');
+        var next = box.querySelector('.lightbox-next');
+
+        if (prev) {
+            prev.addEventListener('click', function () { show(current - 1); });
+            next.addEventListener('click', function () { show(current + 1); });
+        }
+
+        // Swipe on touch screens: a mostly-horizontal move of 40px+ turns the page.
+        var touchX = null;
+        var touchY = null;
+
+        box.addEventListener('touchstart', function (event) {
+            touchX = event.changedTouches[0].clientX;
+            touchY = event.changedTouches[0].clientY;
+        }, { passive: true });
+
+        box.addEventListener('touchend', function (event) {
+            if (touchX === null || slides.length < 2) {
+                return;
+            }
+
+            var dx = event.changedTouches[0].clientX - touchX;
+            var dy = event.changedTouches[0].clientY - touchY;
+            touchX = touchY = null;
+
+            if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+                show(dx > 0 ? current - 1 : current + 1);
+            }
+        }, { passive: true });
+    }
 
     function show(index) {
         current = (index + slides.length) % slides.length;
@@ -126,6 +273,10 @@
     }
 
     function openBox(index) {
+        if (!box) {
+            buildBox();
+        }
+
         returnFocusTo = document.activeElement;
         open = true;
         box.hidden = false;
@@ -168,27 +319,6 @@
         }
     });
 
-    box.addEventListener('click', function (event) {
-        if (event.target === box || event.target.classList.contains('lightbox-stage')) {
-            closeBox();
-        }
-    });
-    box.querySelector('.lightbox-close').addEventListener('click', closeBox);
-
-    var prev = box.querySelector('.lightbox-prev');
-    var next = box.querySelector('.lightbox-next');
-
-    if (prev) {
-        prev.addEventListener('click', function () { show(current - 1); });
-        next.addEventListener('click', function () { show(current + 1); });
-    }
-
-    boxThumbs.forEach(function (thumb) {
-        thumb.addEventListener('click', function () {
-            show(parseInt(thumb.dataset.index, 10));
-        });
-    });
-
     document.addEventListener('keydown', function (event) {
         if (!open) {
             return;
@@ -202,27 +332,4 @@
             show(current + 1);
         }
     });
-
-    // Swipe on touch screens: a mostly-horizontal move of 40px+ turns the page.
-    var touchX = null;
-    var touchY = null;
-
-    box.addEventListener('touchstart', function (event) {
-        touchX = event.changedTouches[0].clientX;
-        touchY = event.changedTouches[0].clientY;
-    }, { passive: true });
-
-    box.addEventListener('touchend', function (event) {
-        if (touchX === null || slides.length < 2) {
-            return;
-        }
-
-        var dx = event.changedTouches[0].clientX - touchX;
-        var dy = event.changedTouches[0].clientY - touchY;
-        touchX = touchY = null;
-
-        if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
-            show(dx > 0 ? current - 1 : current + 1);
-        }
-    }, { passive: true });
 })();
