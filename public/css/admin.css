@@ -8651,6 +8651,22 @@ a.nb-match:hover {
     color: var(--text-muted);
 }
 
+/* A partly listed product: the variants still without a listing. */
+.nb-unlisted-variants {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    margin: 0.25rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+
+.nb-unlisted-arrow {
+    opacity: 0.7;
+}
+
 /* Our product's name and description, ready to paste into NaturaBuy's form. */
 .nb-copy {
     display: flex;

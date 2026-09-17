@@ -584,8 +584,8 @@ class NaturabuyListingsTest extends TestCase
             ->assertDontSee($product->localizedName());
     }
 
-    /** Un produit dont seule une déclinaison est en ligne compte comme présent. */
-    public function test_a_product_listed_through_a_variant_is_not_missing(): void
+    /** A product whose every active variant is online is listed. */
+    public function test_a_product_listed_through_all_its_variants_is_not_missing(): void
     {
         $product = Product::factory()->create(['sku' => null, 'is_active' => true]);
         $product->variants()->create([
@@ -593,12 +593,90 @@ class NaturabuyListingsTest extends TestCase
             'sku' => 'EXACT-VAR-L',
             'quantity' => 1,
         ]);
+        $product->variants()->create([
+            'attribute_values' => [['label' => 'Taille', 'value' => 'M']],
+            'sku' => 'EXACT-VAR-M',
+            'quantity' => 0,
+        ]);
         $this->listing(['internalcode' => 'EXACT-VAR-L']);
+        $this->listing(['internalcode' => 'EXACT-VAR-M']);
 
         $this->actingAs($this->admin())
             ->get('/admin/marketplaces/naturabuy?tab=missing')
             ->assertOk()
             ->assertDontSee($product->localizedName());
+    }
+
+    /** One listed size does not put the others online. */
+    public function test_a_partly_listed_product_stays_with_its_missing_variants_named(): void
+    {
+        $product = Product::factory()->create(['sku' => null, 'is_active' => true, 'name' => ['fr' => 'Patch groupe sanguin', 'en' => 'Blood type patch']]);
+        $product->variants()->create([
+            'attribute_values' => [['label' => 'Groupe', 'value' => 'A+']],
+            'sku' => 'PATCH-AP',
+            'quantity' => 1,
+        ]);
+        $product->variants()->create([
+            'attribute_values' => [['label' => 'Groupe', 'value' => 'A-']],
+            'sku' => 'PATCH-AN',
+            // Out of stock still has to be listed.
+            'quantity' => 0,
+        ]);
+        $product->variants()->create([
+            'attribute_values' => [['label' => 'Groupe', 'value' => 'B+']],
+            'sku' => null,
+            'quantity' => 1,
+        ]);
+        $this->listing(['internalcode' => 'PATCH-AP']);
+
+        $this->actingAs($this->admin())
+            ->get('/admin/marketplaces/naturabuy?tab=missing')
+            ->assertOk()
+            ->assertSee('Patch groupe sanguin')
+            ->assertSee('Variants not listed yet')
+            ->assertSee('PATCH-AN')
+            // A variant without a SKU can match nothing: it keeps the product here.
+            ->assertSee('no SKU')
+            ->assertDontSee('<code class="nb-code">PATCH-AP</code>', false);
+    }
+
+    public function test_a_product_with_no_variant_listed_does_not_list_them_all(): void
+    {
+        $product = Product::factory()->create(['sku' => null, 'is_active' => true]);
+        $product->variants()->create(['attribute_values' => [['label' => 'Taille', 'value' => 'S']], 'sku' => 'NONE-S', 'quantity' => 1]);
+        $product->variants()->create(['attribute_values' => [['label' => 'Taille', 'value' => 'M']], 'sku' => 'NONE-M', 'quantity' => 1]);
+
+        $this->actingAs($this->admin())
+            ->get('/admin/marketplaces/naturabuy?tab=missing')
+            ->assertOk()
+            ->assertSee($product->localizedName())
+            ->assertDontSee('Variants not listed yet');
+    }
+
+    public function test_inactive_variants_do_not_need_a_listing(): void
+    {
+        $product = Product::factory()->create(['sku' => null, 'is_active' => true]);
+        $product->variants()->create(['attribute_values' => [['label' => 'Taille', 'value' => 'L']], 'sku' => 'ACT-L', 'quantity' => 1]);
+        $product->variants()->create(['attribute_values' => [['label' => 'Taille', 'value' => 'XL']], 'sku' => 'OFF-XL', 'quantity' => 1, 'is_active' => false]);
+        $this->listing(['internalcode' => 'ACT-L']);
+
+        $this->actingAs($this->admin())
+            ->get('/admin/marketplaces/naturabuy?tab=missing')
+            ->assertOk()
+            ->assertDontSee($product->localizedName());
+    }
+
+    public function test_the_not_listed_count_follows_the_variants(): void
+    {
+        $partly = Product::factory()->create(['sku' => null, 'is_active' => true]);
+        $partly->variants()->create(['attribute_values' => [['label' => 'Taille', 'value' => 'L']], 'sku' => 'CNT-L', 'quantity' => 1]);
+        $partly->variants()->create(['attribute_values' => [['label' => 'Taille', 'value' => 'M']], 'sku' => 'CNT-M', 'quantity' => 1]);
+        $this->listing(['internalcode' => 'CNT-L']);
+
+        $this->actingAs($this->admin())
+            ->get('/admin/marketplaces/naturabuy?tab=missing')
+            ->assertOk()
+            ->assertViewHas('missingCount', 1);
     }
 
     /** Une annonce close ne compte pas comme une mise en ligne. */

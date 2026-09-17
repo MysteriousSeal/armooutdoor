@@ -107,6 +107,23 @@
                                 <tr>
                                     <td>
                                         <a href="{{ route('admin.products.edit', $product) }}">{{ $product->localizedName() }}</a>
+                                        @if (! empty($unlistedVariants[$product->id]))
+                                            {{-- Partly online: which variants still need a listing. --}}
+                                            <ul class="nb-unlisted-variants" aria-label="Variants not listed yet">
+                                                @foreach ($unlistedVariants[$product->id] as $variant)
+                                                    <li>
+                                                        <span class="nb-unlisted-arrow" aria-hidden="true">&#8627;</span>
+                                                        {{ $variant->label() !== '' ? $variant->label() : 'Variant' }}
+                                                        ·
+                                                        @if (filled($variant->sku))
+                                                            <code class="nb-code">{{ $variant->sku }}</code>
+                                                        @else
+                                                            <span class="nb-none">no SKU</span>
+                                                        @endif
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @endif
                                         @include('admin.marketplaces.partials.copy-product-text', [
                                             'name' => $product->localizedName(),
                                             'description' => $product->localizedDescription(),

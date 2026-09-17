@@ -203,10 +203,16 @@ class MarketplaceListingController extends Controller
      * Les produits du catalogue qui n'ont pas d'annonce chez eux.
      *
      * Le sens inverse des autres onglets : on part du catalogue, pas des
-     * annonces. Un produit est considéré présent si l'un de ses SKU — le sien
-     * ou celui d'une de ses déclinaisons — correspond à un code NaturaBuy,
-     * exactement ou par préfixe. Sans le préfixe, les articles vendus là-bas
-     * en une annonce par coloris ressortiraient tous comme absents.
+     * annonces. Un SKU est considéré présent s'il correspond à un code
+     * NaturaBuy, exactement ou par préfixe. Sans le préfixe, les articles
+     * vendus là-bas en une annonce par coloris ressortiraient tous comme
+     * absents.
+     *
+     * A product with active variants stays here until every one of them is
+     * listed, whatever its stock: one listed size does not put the others
+     * online. A variant without a SKU can match nothing, so it keeps its
+     * product here. Inactive variants do not count, and a product whose
+     * variants are all inactive is judged on its own SKU.
      *
      * Les produits désactivés restent dehors : ce sont ceux qu'on a choisi de
      * ne pas vendre.
@@ -224,12 +230,56 @@ class MarketplaceListingController extends Controller
                     ->whereColumn('naturabuy_listings.internalcode', $column)
                     ->orWhereRaw($this->listedPrefixCondition($column))));
 
+        $activeVariant = fn (Builder $variant) => $variant->where('product_variants.is_active', true);
+
         return Product::query()
             ->with('variants')
             ->where('is_active', true)
-            ->whereNot(fn (Builder $inner) => $inner
-                ->where(fn (Builder $own) => $listed($own, 'products.sku'))
-                ->orWhereHas('variants', fn (Builder $variant) => $listed($variant, 'product_variants.sku')));
+            ->where(fn (Builder $either) => $either
+                ->whereHas('variants', fn (Builder $variant) => $activeVariant($variant)
+                    ->whereNot(fn (Builder $unlisted) => $listed($unlisted, 'product_variants.sku')))
+                ->orWhere(fn (Builder $single) => $single
+                    ->whereDoesntHave('variants', $activeVariant)
+                    ->whereNot(fn (Builder $own) => $listed($own, 'products.sku'))));
+    }
+
+    /**
+     * For the products of the Not listed page that are partly online, the
+     * active variants still without a listing, keyed by product id.
+     *
+     * Checked in PHP against every open listing's code, fetched once for the
+     * page. The comparison ignores case, as the database's does.
+     *
+     * @param  Collection<int, Product>  $products
+     * @return array<int, Collection<int, ProductVariant>>
+     */
+    private function unlistedVariantsOfPartlyListed($products): array
+    {
+        $codes = $this->openListings()
+            ->whereNotNull('internalcode')
+            ->where('internalcode', '!=', '')
+            ->pluck('internalcode')
+            ->map(fn (string $code): string => mb_strtolower($code))
+            ->unique()
+            ->values();
+
+        $isListed = fn (?string $sku): bool => filled($sku) && $codes->contains(
+            fn (string $code): bool => mb_strtolower($sku) === $code || str_starts_with(mb_strtolower($sku), $code.'-')
+        );
+
+        $unlisted = [];
+
+        foreach ($products as $product) {
+            $active = $product->variants->where('is_active', true);
+            $missing = $active->reject(fn (ProductVariant $variant): bool => $isListed($variant->sku))->values();
+
+            // Nothing listed yet: the row speaks for the whole product.
+            if ($missing->isNotEmpty() && $missing->count() < $active->count()) {
+                $unlisted[$product->id] = $missing;
+            }
+        }
+
+        return $unlisted;
     }
 
     private function productsMissingFromNaturabuy(string $search)
@@ -429,6 +479,7 @@ class MarketplaceListingController extends Controller
 
         return view('admin.marketplaces.naturabuy', [
             'missing' => $missing,
+            'unlistedVariants' => $missing !== null ? $this->unlistedVariantsOfPartlyListed($missing->getCollection()) : [],
             'listings' => $listings,
             'catalogueMatches' => $this->catalogueMatches($listings->getCollection()),
             'tab' => $tab,
