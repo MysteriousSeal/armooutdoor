@@ -2,6 +2,20 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-17 · v1.44.0 · build H9ONP2
+
+### Storefront
+
+- **A variant can show up to three photos on the product page.** Selecting a variant that has photos of its own replaces the gallery with them: the main image, the thumbnails beneath it and the full-screen viewer. Selecting a variant without photos brings back the product's own gallery. The page opens on the photos of the variant selected by default, so nothing flickers on load.
+
+### Admin
+
+- **Each variant card has three photo slots: Main photo, Photo 2 and Photo 3.** Each slot has its own Add or Replace button and, once filled, a Remove box, a JPG download and a click to view it full screen, with arrows stepping through that variant's photos only. Saving closes up emptied slots so the first is always the main photo, the one the variant chip, cart, checkout and orders show. Replacing or removing a photo, or deleting the variant, deletes the old file.
+- **Variant photo downloads are named after the variant SKU and position**, `_1.jpg` to `_3.jpg`, like the product's own photos.
+- **The admin API lists a variant's photos** in a new read-only `images` field, main photo first, next to `image`.
+
+**Migration:** one, run with `php artisan migrate`, adding nullable `image_2` and `image_3` columns to `product_variants`. They start empty, and every existing variant keeps its photo as the main one.
+
 ## 2026-09-17 · v1.43.3 · build MM5PNR
 
 ### Admin
