@@ -12,12 +12,16 @@ use App\Services\Naturabuy\NaturabuySynchronizer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Throwable;
 
 class MarketplaceListingController extends Controller
 {
+    /** What Product::availabilityState() can answer, for the Not listed filter. */
+    private const AVAILABILITY_STATES = ['in_stock', 'low_stock', 'restocking', 'at_supplier', 'out_of_stock'];
+
     /** Les places de marché, et ce qu'on sait de chacune. */
     public function index(): View
     {
@@ -284,15 +288,34 @@ class MarketplaceListingController extends Controller
         return $unlisted;
     }
 
-    private function productsMissingFromNaturabuy(string $search)
+    private function productsMissingFromNaturabuy(string $search, string $availability = '')
     {
-        return $this->productsMissingFromNaturabuyQuery()
+        $query = $this->productsMissingFromNaturabuyQuery()
             ->when($search !== '', fn (Builder $q) => $q->where(fn (Builder $inner) => $inner
                 ->where('name', 'like', '%'.$search.'%')
                 ->orWhere('sku', 'like', '%'.$search.'%')))
-            ->orderBy('name')
-            ->paginate(50)
-            ->withQueryString();
+            ->orderBy('name');
+
+        if ($availability === '') {
+            return $query->paginate(50)->withQueryString();
+        }
+
+        // The state weighs the low-stock threshold, open restocks and the
+        // supplier flag, which SQL cannot say in one condition. This list is
+        // the catalogue's unlisted part, small enough to filter in PHP.
+        $matching = $query->with('restockingPurchaseItems')->get()
+            ->filter(fn (Product $product): bool => $product->availabilityState() === $availability)
+            ->values();
+
+        $page = LengthAwarePaginator::resolveCurrentPage();
+
+        return (new LengthAwarePaginator(
+            $matching->forPage($page, 50)->values(),
+            $matching->count(),
+            50,
+            $page,
+            ['path' => LengthAwarePaginator::resolveCurrentPath()],
+        ))->withQueryString();
     }
 
     /** « le SKU commence par le code interne, suivi d'un tiret ». */
@@ -475,8 +498,12 @@ class MarketplaceListingController extends Controller
             ->paginate(50)
             ->withQueryString();
 
+        $availability = in_array($request->query('availability'), self::AVAILABILITY_STATES, true)
+            ? $request->query('availability')
+            : '';
+
         $missing = $tab === 'missing'
-            ? $this->productsMissingFromNaturabuy($search)
+            ? $this->productsMissingFromNaturabuy($search, $availability)
             : null;
 
         return view('admin.marketplaces.naturabuy', [
@@ -486,6 +513,7 @@ class MarketplaceListingController extends Controller
             'catalogueMatches' => $this->catalogueMatches($listings->getCollection()),
             'tab' => $tab,
             'search' => $search,
+            'availability' => $availability,
             'allCount' => $this->openListings()->count(),
             'inStockCount' => $this->openListings()->where('out_of_stock', false)->count(),
             'outOfStockCount' => $this->openListings()->where('out_of_stock', true)->count(),

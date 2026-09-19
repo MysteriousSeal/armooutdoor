@@ -79,6 +79,17 @@
                     <label class="admin-field-label" for="nb-search">Search</label>
                     <input id="nb-search" type="search" name="search" class="form-control admin-toolbar-search" placeholder="Title or internal code…" value="{{ $search }}">
                 </div>
+                @if ($tab === 'missing')
+                    <div class="admin-filter-field">
+                        <label class="admin-field-label" for="nb-availability">Availability</label>
+                        <select id="nb-availability" name="availability" class="form-control">
+                            <option value="">All</option>
+                            @foreach (['in_stock' => 'In stock', 'low_stock' => 'Last pieces', 'restocking' => 'Restocking', 'at_supplier' => 'At supplier', 'out_of_stock' => 'Out of stock'] as $value => $label)
+                                <option value="{{ $value }}" @selected($availability === $value)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
                 <div class="admin-filter-actions">
                     <button type="submit" class="btn btn-primary">Apply</button>
                 </div>
