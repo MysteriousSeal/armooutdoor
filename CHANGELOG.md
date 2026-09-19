@@ -2,6 +2,17 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-19 · v1.46.0 · build 6PY04Q
+
+### Admin
+
+- **The Cdiscount card on the Marketplaces page opens a page of its own.** Octopia takes no feed: it takes the Excel template of a category, filled in. The page keeps the templates uploaded from Octopia, one per category, and gives back the same file with the chosen lines written in, macros and drop-down lists untouched. The card shows how many templates are kept and is no longer faded.
+- **Each product has a Cdiscount listing page.** It picks the category whose template describes the product, then asks that category's own attributes, one field per column of the template with its constraint beside it. Answers can be given once for the product or, for the attributes that differ, per variant. A link from the product page shows how far the listing is: category chosen, an EAN on every line, and the required answers.
+- **The export writes one line per variant, starting at row 9**, the template's first data row, with the variant's own answers winning over the product's. Descriptions go in as plain text, since the template refuses HTML. The file is named after the category, date and time, and never passes 40 characters, extension included.
+- **The template's own layout is kept.** Text goes through the file's shared string table and the sheet's declared range is widened to hold the lines, so a reader that trusts either sees the products. Octopia only accepts image addresses in https, so the page warns when it is used from a site served over http: export from production.
+
+**Migration:** one, run with `php artisan migrate`, creating the tables that hold the templates and the Cdiscount listings.
+
 ## 2026-09-19 · v1.45.0 · build NT7Y6F
 
 ### Admin
