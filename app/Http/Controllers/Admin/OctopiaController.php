@@ -245,7 +245,9 @@ class OctopiaController extends Controller
             return back()->withErrors(['lines' => $e->getMessage()]);
         }
 
-        $name = Str::slug($template->name).'-'.now()->format('Ymd-Hi').'.xlsm';
+        // Octopia refuses a file name over 40 characters, extension included.
+        $suffix = '-'.now()->format('Ymd-Hi').'.xlsm';
+        $name = rtrim(Str::limit(Str::slug($template->name), 40 - strlen($suffix), ''), '-').$suffix;
 
         return response()->download($destination, $name)->deleteFileAfterSend();
     }

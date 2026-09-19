@@ -248,6 +248,24 @@ class OctopiaTemplateTest extends TestCase
         $this->assertStringNotContainsString('&lt;strong&gt;', $sheet);
     }
 
+    public function test_the_exported_file_name_never_passes_forty_characters(): void
+    {
+        $template = $this->upload();
+        $template->update(['name' => 'Bonnet technique - cagoule technique - tube de sport']);
+        $product = Product::factory()->create(['gtin' => '3760452700039']);
+        $this->listing($product, $template);
+
+        $response = $this->actingAs($this->admin())
+            ->post('/admin/marketplaces/cdiscount/templates/'.$template->id.'/export', ['lines' => [$product->id.':0']])
+            ->assertOk();
+
+        preg_match('/filename=(\S+)/', $response->headers->get('content-disposition'), $match);
+
+        $this->assertLessThanOrEqual(40, strlen($match[1]));
+        $this->assertStringEndsWith(now()->format('Ymd-Hi').'.xlsm', $match[1]);
+        $this->assertStringStartsWith('bonnet-technique-cago-', $match[1]);
+    }
+
     public function test_the_listing_has_a_page_of_its_own_asking_the_category_s_attributes(): void
     {
         $template = $this->upload();
