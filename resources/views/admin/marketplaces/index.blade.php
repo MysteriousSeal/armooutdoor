@@ -24,7 +24,7 @@
                 <{{ $link ? 'a' : 'div' }}
                     @if ($connected) href="{{ route('admin.marketplaces.naturabuy') }}" @endif
                     @if ($octopia) href="{{ route('admin.marketplaces.cdiscount') }}" @endif
-                    class="marketplace-card{{ $connected ? ' is-connected' : '' }}"
+                    class="marketplace-card{{ $link ? ' is-connected' : '' }}"
                 >
                     <span class="marketplace-card-head">
                         @if ($marketplace->logo)
