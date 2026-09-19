@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-19 · v1.45.0 · build NT7Y6F
+
+### Admin
+
+- **The NaturaBuy Not listed tab can be filtered by availability.** A dropdown next to the search offers In stock, Last pieces, Restocking, At supplier and Out of stock, the same states as the chips in the Availability column, and combines with the search and the paging. An unknown value is ignored and shows every product. The tab count still counts all unlisted products.
+- **« Write with Claude » no longer writes Vinted listings that read alike for neighbouring products.** The same article sells in several colourways, one product each, and each listing was written without knowing the others: three cagoules came back with titles differing by one word, which Vinted reads as duplicates. The brief now carries the listings already written for the category's other products, titles and a first line of description, and asks for another opening, another turn of phrase and another pick of facts. The wording varies, never the facts.
+
+**No migration.**
+
 ## 2026-09-17 · v1.44.2 · build 1VBFBO
 
 ### Admin
