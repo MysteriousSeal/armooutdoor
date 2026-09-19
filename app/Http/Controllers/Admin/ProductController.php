@@ -264,7 +264,7 @@ class ProductController extends Controller
             // The Vinted listing comes with its photos: the product page
             // says what it still needs, and counting them item by item would
             // start a query for each.
-            'product' => $product->load('images', 'variants', 'vintedListing.images'),
+            'product' => $product->load('images', 'variants', 'vintedListing.images', 'cdiscountListing.template', 'cdiscountListing.variants'),
             'categories' => $this->categoryOptions(),
             'carriers' => Carrier::query()->orderBy('sort_order')->get(),
             'suppliers' => Supplier::query()->orderBy('name')->get(),

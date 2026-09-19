@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Marketplace;
 use App\Models\NaturabuyListing;
+use App\Models\OctopiaTemplate;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Services\Naturabuy\NaturabuySynchronizer;
@@ -24,6 +25,7 @@ class MarketplaceListingController extends Controller
             'marketplaces' => Marketplace::query()->orderBy('name')->get(),
             'naturabuyCount' => $this->openListings()->count(),
             'naturabuySyncedAt' => NaturabuyListing::query()->max('synced_at'),
+            'octopiaTemplates' => OctopiaTemplate::query()->count(),
         ]);
     }
 

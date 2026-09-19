@@ -159,6 +159,15 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
+    /**
+     * This product's Cdiscount listing, if it has one: the category that
+     * describes it and the answers that category asks for.
+     */
+    public function cdiscountListing(): HasOne
+    {
+        return $this->hasOne(CdiscountListing::class);
+    }
+
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);

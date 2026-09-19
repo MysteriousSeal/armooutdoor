@@ -35,6 +35,7 @@ use App\Http\Controllers\Admin\LabelController as AdminLabelController;
 use App\Http\Controllers\Admin\MarketplaceController as AdminMarketplaceController;
 use App\Http\Controllers\Admin\MarketplaceListingController as AdminMarketplaceListingController;
 use App\Http\Controllers\Admin\MarketplaceSettingController as AdminMarketplaceSettingController;
+use App\Http\Controllers\Admin\OctopiaController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PackageTypeController as AdminPackageTypeController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
@@ -256,6 +257,10 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         Route::get('/products/{product}/edit', [AdminProductController::class, 'edit'])->name('products.edit');
         // The product's Vinted listing: a screen of its own, because what
         // one says on a marketplace is not what goes on a product page.
+        // The product's Cdiscount listing: its Octopia category and that
+        // category's own attributes, on a page of their own like Vinted's.
+        Route::get('/products/{product}/cdiscount', [OctopiaController::class, 'product'])->name('products.cdiscount.edit');
+        Route::put('/products/{product}/cdiscount', [OctopiaController::class, 'updateProduct'])->name('products.cdiscount.update');
         Route::get('/products/{product}/vinted', [VintedListingController::class, 'edit'])->name('products.vinted.edit');
         Route::put('/products/{product}/vinted', [VintedListingController::class, 'update'])->name('products.vinted.update');
         Route::post('/products/{product}/vinted/generate', [VintedListingController::class, 'generate'])
@@ -295,6 +300,12 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         // Marketplaces
         Route::get('/marketplaces', [AdminMarketplaceListingController::class, 'index'])->name('marketplaces.index');
         Route::get('/marketplaces/naturabuy', [AdminMarketplaceListingController::class, 'naturabuy'])->name('marketplaces.naturabuy');
+        // Cdiscount, through Octopia's per-category product templates: the
+        // shop fills the file, nobody fetches a feed.
+        Route::get('/marketplaces/cdiscount', [OctopiaController::class, 'index'])->name('marketplaces.cdiscount');
+        Route::post('/marketplaces/cdiscount/templates', [OctopiaController::class, 'storeTemplate'])->name('marketplaces.cdiscount.templates.store');
+        Route::delete('/marketplaces/cdiscount/templates/{template}', [OctopiaController::class, 'destroyTemplate'])->name('marketplaces.cdiscount.templates.destroy');
+        Route::post('/marketplaces/cdiscount/templates/{template}/export', [OctopiaController::class, 'export'])->name('marketplaces.cdiscount.export');
         Route::post('/marketplaces/naturabuy/sync', [AdminMarketplaceListingController::class, 'syncNaturabuy'])->name('marketplaces.naturabuy.sync');
 
         // Blog

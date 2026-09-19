@@ -17,8 +17,13 @@
         <div class="marketplace-grid">
             @foreach ($marketplaces as $marketplace)
                 @php($connected = $marketplace->name === 'NaturaBuy')
-                <{{ $connected ? 'a' : 'div' }}
+                {{-- Cdiscount has a page of its own too, though nothing is synced:
+                     it holds Octopia's templates and the export made from them. --}}
+                @php($octopia = $marketplace->name === 'CDiscount')
+                @php($link = $connected || $octopia)
+                <{{ $link ? 'a' : 'div' }}
                     @if ($connected) href="{{ route('admin.marketplaces.naturabuy') }}" @endif
+                    @if ($octopia) href="{{ route('admin.marketplaces.cdiscount') }}" @endif
                     class="marketplace-card{{ $connected ? ' is-connected' : '' }}"
                 >
                     <span class="marketplace-card-head">
@@ -42,12 +47,16 @@
                                 Never synced
                             @endif
                         </span>
+                    @elseif ($octopia)
+                        <span class="marketplace-card-figure">{{ number_format($octopiaTemplates) }}</span>
+                        <span class="marketplace-card-label">{{ $octopiaTemplates === 1 ? 'template' : 'templates' }}</span>
+                        <span class="marketplace-card-foot">Filled by hand, through Octopia</span>
                     @else
                         <span class="marketplace-card-figure marketplace-card-figure--muted">—</span>
                         <span class="marketplace-card-label">not connected</span>
                         <span class="marketplace-card-foot">No API set up yet</span>
                     @endif
-                </{{ $connected ? 'a' : 'div' }}>
+                </{{ $link ? 'a' : 'div' }}>
             @endforeach
         </div>
     </div>

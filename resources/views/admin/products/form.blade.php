@@ -1,3 +1,5 @@
+@use('App\Support\Octopia\Readiness')
+
 @extends('layouts.admin')
 
 @section('title', $product->exists ? 'Edit product' : 'Add product')
@@ -62,6 +64,35 @@
                                  is left. --}}
                             <span class="vinted-link-state">
                                 {{ ($vinted?->isReady() ?? false) ? 'Ready' : $vintedDone.'/'.count($vintedChecks) }}
+                            </span>
+                        </a>
+
+                        {{-- Cdiscount, the same way: the name, then what the
+                             category's template still wants. --}}
+                        @php
+                            $octopiaChecks = Readiness::checks($product);
+                            $octopiaDone = count(array_filter($octopiaChecks));
+                            $octopiaReady = Readiness::isReady($product);
+                        @endphp
+
+                        <a
+                            href="{{ route('admin.products.cdiscount.edit', $product) }}"
+                            class="vinted-link {{ $octopiaReady ? 'is-ready' : '' }}"
+                        >
+                            <span class="vinted-link-label">Cdiscount listing</span>
+                            <span class="vinted-checks">
+                                @foreach ($octopiaChecks as $label => $done)
+                                    <span
+                                        class="vinted-check {{ $done ? 'is-done' : '' }}"
+                                        title="{{ $label }}{{ $done ? ' — done' : ' — still to fill in' }}"
+                                    >
+                                        <span class="vinted-check-mark" aria-hidden="true"></span>
+                                        <span class="vinted-check-label">{{ $label }}</span>
+                                    </span>
+                                @endforeach
+                            </span>
+                            <span class="vinted-link-state">
+                                {{ $octopiaReady ? 'Ready' : $octopiaDone.'/'.count($octopiaChecks) }}
                             </span>
                         </a>
                     @endif

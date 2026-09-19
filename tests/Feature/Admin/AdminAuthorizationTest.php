@@ -17,6 +17,7 @@ use App\Models\FftirSession;
 use App\Models\FftirWeapon;
 use App\Models\IdentityDocument;
 use App\Models\Marketplace;
+use App\Models\OctopiaTemplate;
 use App\Models\Order;
 use App\Models\PackageType;
 use App\Models\Product;
@@ -146,6 +147,17 @@ class AdminAuthorizationTest extends TestCase
             'sort_order' => 0,
         ]);
 
+        // An Octopia template: same reason as the Vinted photo below.
+        $octopiaTemplate = OctopiaTemplate::query()->create([
+            'code' => 'AUDIT01',
+            'name' => 'Audit category',
+            'original_filename' => 'audit.xlsm',
+            'path' => 'octopia/audit.xlsm',
+            'sheet_path' => 'xl/worksheets/sheet1.xml',
+            'first_data_row' => 10,
+            'fields' => [],
+        ]);
+
         $weapon = FftirWeapon::query()->create([
             'brand' => 'Audit', 'model' => 'Audit', 'caliber' => '9x19mm', 'type' => WeaponType::Pistol,
         ]);
@@ -200,6 +212,7 @@ class AdminAuthorizationTest extends TestCase
             'image' => $vintedImage->id,
             'photo' => $productPhoto->id,
             'position' => 1,
+            'template' => $octopiaTemplate->id,
             'weapon' => $weapon->id,
             'ammunition' => $ammunition->id,
             'session' => $fftirSession->id,
