@@ -703,6 +703,31 @@ class NaturabuyListingsTest extends TestCase
             ->assertDontSee($other->localizedName());
     }
 
+    public function test_the_not_listed_tab_can_be_filtered_by_availability(): void
+    {
+        $inStock = Product::factory()->create(['sku' => 'STOCKED', 'is_active' => true, 'quantity' => 500]);
+        $soldOut = Product::factory()->create(['sku' => 'SOLD-OUT', 'is_active' => true, 'quantity' => 0, 'available_at_supplier' => false]);
+
+        $this->actingAs($this->admin())
+            ->get('/admin/marketplaces/naturabuy?tab=missing&availability=out_of_stock')
+            ->assertOk()
+            ->assertSee($soldOut->localizedName())
+            ->assertDontSee($inStock->localizedName());
+
+        $this->actingAs($this->admin())
+            ->get('/admin/marketplaces/naturabuy?tab=missing&availability=in_stock')
+            ->assertOk()
+            ->assertSee($inStock->localizedName())
+            ->assertDontSee($soldOut->localizedName());
+
+        // An answer the filter does not know is no filter at all.
+        $this->actingAs($this->admin())
+            ->get('/admin/marketplaces/naturabuy?tab=missing&availability=nonsense')
+            ->assertOk()
+            ->assertSee($inStock->localizedName())
+            ->assertSee($soldOut->localizedName());
+    }
+
     // ------------------------------------------------------- name mismatch
 
     public function test_the_name_mismatch_tab_holds_only_differing_names(): void
