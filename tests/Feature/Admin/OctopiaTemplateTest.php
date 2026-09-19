@@ -232,17 +232,17 @@ class OctopiaTemplateTest extends TestCase
         $zip->close();
         @unlink($path);
 
-        // The template's own rows are untouched, and ours start at row 10.
+        // The template's own rows are untouched, and ours start at row 9.
         $this->assertStringContainsString('<c r="C4"', $sheet);
-        $this->assertStringContainsString('<c r="A10" t="inlineStr"><is><t xml:space="preserve">3760452700046</t></is></c>', $sheet);
+        $this->assertStringContainsString('<c r="A9" t="inlineStr"><is><t xml:space="preserve">3760452700046</t></is></c>', $sheet);
         $this->assertStringContainsString('CAG-DESERT-M', $sheet);
-        $this->assertStringContainsString('<c r="A11" t="inlineStr"><is><t xml:space="preserve">3760452700053</t></is></c>', $sheet);
+        $this->assertStringContainsString('<c r="A10" t="inlineStr"><is><t xml:space="preserve">3760452700053</t></is></c>', $sheet);
 
         // The variant's own answer wins; the product's stands where it says nothing.
-        $this->assertStringContainsString('<c r="G10" t="inlineStr"><is><t xml:space="preserve">M</t></is></c>', $sheet);
-        $this->assertStringContainsString('<c r="G11" t="inlineStr"><is><t xml:space="preserve">Taille unique</t></is></c>', $sheet);
+        $this->assertStringContainsString('<c r="G9" t="inlineStr"><is><t xml:space="preserve">M</t></is></c>', $sheet);
+        $this->assertStringContainsString('<c r="G10" t="inlineStr"><is><t xml:space="preserve">Taille unique</t></is></c>', $sheet);
         // The colour is the product's, on both lines.
-        $this->assertStringContainsString('<c r="F10" t="inlineStr"><is><t xml:space="preserve">Beige</t></is></c>', $sheet);
+        $this->assertStringContainsString('<c r="F9" t="inlineStr"><is><t xml:space="preserve">Beige</t></is></c>', $sheet);
         // The description goes in as plain text: the template refuses HTML.
         $this->assertStringContainsString('Une cagoule respirante.', $sheet);
         $this->assertStringNotContainsString('&lt;strong&gt;', $sheet);

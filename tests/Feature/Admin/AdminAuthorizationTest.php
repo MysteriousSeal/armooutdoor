@@ -154,7 +154,7 @@ class AdminAuthorizationTest extends TestCase
             'original_filename' => 'audit.xlsm',
             'path' => 'octopia/audit.xlsm',
             'sheet_path' => 'xl/worksheets/sheet1.xml',
-            'first_data_row' => 10,
+            'first_data_row' => 9,
             'fields' => [],
         ]);
 

@@ -23,12 +23,14 @@ use ZipArchive;
  *   row 5  the field code Octopia reads: `gtin`, `title`, or a number
  *   row 6  how many values it takes (mono, multi, monoranged, ...)
  *   row 8  the constraint in words ("132 caractères max")
- *   row 10 where the seller's rows begin
+ *   row 9  where the seller's rows begin
  */
 class TemplateFile
 {
-    /** Where the seller's first row goes. Rows 1 to 9 are the template's. */
-    public const FIRST_DATA_ROW = 10;
+    /** Where the seller's first row goes. Rows 1 to 8 are the template's. */
+    public const FIRST_DATA_ROW = 9;
+
+    private const STRINGS_PATH = 'xl/sharedStrings.xml';
 
     private const LABEL_ROW = 4;
 
@@ -100,7 +102,7 @@ class TemplateFile
     }
 
     /**
-     * A copy of the file with the given rows written from row 10 down.
+     * A copy of the file with the given rows written from row 9 down.
      *
      * @param  list<array<string, string>>  $rows  column letter => value
      */
@@ -123,27 +125,101 @@ class TemplateFile
                 throw new RuntimeException('The template sheet has gone from the file.');
             }
 
-            $zip->addFromString(ltrim($sheetPath, '/'), $this->withRows($sheet, $rows));
+            $strings = $this->stringTable($zip);
+            $zip->addFromString(ltrim($sheetPath, '/'), $this->withRows($sheet, $rows, $strings));
+
+            if ($strings !== null) {
+                $zip->addFromString(self::STRINGS_PATH, $strings->document->saveXML());
+            }
         } finally {
             $zip->close();
         }
     }
 
+    /** The shared string table, ready to take more entries; null if the file has none. */
+    private function stringTable(ZipArchive $zip): ?object
+    {
+        $xml = $zip->getFromName(self::STRINGS_PATH);
+
+        if ($xml === false) {
+            return null;
+        }
+
+        $document = new DOMDocument;
+        $document->preserveWhiteSpace = true;
+        $document->formatOutput = false;
+
+        if (! $document->loadXML($xml)) {
+            return null;
+        }
+
+        $root = $document->documentElement;
+
+        if (! $root instanceof DOMElement || $root->localName !== 'sst') {
+            return null;
+        }
+
+        $unique = 0;
+
+        foreach ($root->childNodes as $node) {
+            if ($node instanceof DOMElement && $node->localName === 'si') {
+                $unique++;
+            }
+        }
+
+        return (object) [
+            'document' => $document,
+            'root' => $root,
+            'unique' => $unique,
+            'index' => [],
+        ];
+    }
+
+    /** The index of that text in the table, appended to the end if it is new. */
+    private function sharedString(object $strings, string $value): int
+    {
+        $strings->root->setAttribute('count', (string) ((int) $strings->root->getAttribute('count') + 1));
+
+        if (isset($strings->index[$value])) {
+            return $strings->index[$value];
+        }
+
+        $namespace = (string) $strings->root->namespaceURI;
+        $prefix = $strings->root->prefix !== '' ? $strings->root->prefix.':' : '';
+
+        $item = $strings->document->createElementNS($namespace, $prefix.'si');
+        $text = $strings->document->createElementNS($namespace, $prefix.'t');
+        $text->setAttribute('xml:space', 'preserve');
+        $text->appendChild($strings->document->createTextNode($value));
+        $item->appendChild($text);
+        $strings->root->appendChild($item);
+
+        $index = $strings->unique++;
+        $strings->index[$value] = $index;
+
+        $strings->root->setAttribute('uniqueCount', (string) $strings->unique);
+
+        return $index;
+    }
+
     /**
-     * The rows, written as inline strings into the sheet.
+     * The rows, written into the sheet.
      *
-     * Inline rather than through the shared string table: the table is
-     * referenced by index from every other sheet, and appending to it would
-     * mean renumbering what the template already says.
+     * The text goes through the shared string table, appended to its end so
+     * the indexes the template already uses stay as they are. Inline strings
+     * are valid, but a reader that only knows the table sees an empty file.
+     *
+     * The declared dimension of the sheet is widened to hold what was written:
+     * a reader that trusts it would otherwise stop at the template's own.
      *
      * The template ships a few rows of its own below the headings, styled and
      * carrying the category's drop-down lists. Those rows are filled in place
-     * rather than doubled: two rows numbered 10 is a file Excel offers to
+     * rather than doubled: two rows with the same number is a file Excel offers to
      * repair.
      *
      * @param  list<array<string, string>>  $rows
      */
-    private function withRows(string $sheetXml, array $rows): string
+    private function withRows(string $sheetXml, array $rows, ?object $strings): string
     {
         $document = new DOMDocument;
         $document->preserveWhiteSpace = true;
@@ -162,6 +238,9 @@ class TemplateFile
         $namespace = (string) $sheetData->namespaceURI;
         $prefix = $sheetData->prefix !== '' ? $sheetData->prefix.':' : '';
 
+        $lastRow = 0;
+        $lastColumn = 0;
+
         foreach ($rows as $index => $cells) {
             $number = self::FIRST_DATA_ROW + $index;
             $row = $this->rowElement($document, $sheetData, $namespace, $prefix, $number);
@@ -171,11 +250,40 @@ class TemplateFile
                     continue;
                 }
 
-                $this->writeCell($document, $row, $namespace, $prefix, $column.$number, (string) $value);
+                $this->writeCell($document, $row, $namespace, $prefix, $column.$number, (string) $value, $strings);
+                $lastRow = max($lastRow, $number);
+                $lastColumn = max($lastColumn, $this->columnIndex($column));
             }
         }
 
+        $this->widenDimension($document, $lastColumn, $lastRow);
+
         return (string) $document->saveXML();
+    }
+
+    /** Make the sheet's declared range reach the last cell written. */
+    private function widenDimension(DOMDocument $document, int $column, int $row): void
+    {
+        $dimension = $document->getElementsByTagNameNS('*', 'dimension')->item(0);
+
+        if (! $dimension instanceof DOMElement || $row === 0) {
+            return;
+        }
+
+        $end = explode(':', $dimension->getAttribute('ref'))[1] ?? '';
+
+        if (preg_match('/^([A-Z]+)(\d+)$/', $end, $match) === 1) {
+            $column = max($column, $this->columnIndex($match[1]));
+            $row = max($row, (int) $match[2]);
+        }
+
+        $letters = '';
+
+        for ($n = $column; $n > 0; $n = intdiv($n - 1, 26)) {
+            $letters = chr(65 + ($n - 1) % 26).$letters;
+        }
+
+        $dimension->setAttribute('ref', 'A1:'.$letters.$row);
     }
 
     /** The row of that number, the template's own if it has one. */
@@ -213,7 +321,7 @@ class TemplateFile
      * One cell, replacing whatever the template had there while keeping the
      * style it gave it.
      */
-    private function writeCell(DOMDocument $document, DOMElement $row, string $namespace, string $prefix, string $reference, string $value): void
+    private function writeCell(DOMDocument $document, DOMElement $row, string $namespace, string $prefix, string $reference, string $value, ?object $strings): void
     {
         $cell = null;
         $after = null;
@@ -245,6 +353,15 @@ class TemplateFile
 
         while ($cell->firstChild !== null) {
             $cell->removeChild($cell->firstChild);
+        }
+
+        if ($strings !== null) {
+            $cell->setAttribute('t', 's');
+
+            $index = $document->createElementNS($namespace, $prefix.'v', (string) $this->sharedString($strings, $value));
+            $cell->appendChild($index);
+
+            return;
         }
 
         $cell->setAttribute('t', 'inlineStr');
