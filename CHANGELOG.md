@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-20 · v1.47.0 · build JL80PR
+
+### Admin
+
+- **A product can have several Vinted listings.** The same article can be posted again with other wording or other photos, and each draft is written and kept on its own. « Vinted listing » on the product page now opens a list of the product's drafts, and a New listing button starts another, blank: nothing is carried over from the product page or the other drafts. The draft that existed before is kept as it was and becomes the first of the list.
+- **The list shows each draft at a glance.** Its id, the first Vinted photo, the title with the opening of its description, the price, the four marks of the product page (title, text, price, photos, filled when done), and when it was saved. The product page follows the oldest active draft for its marks and says how many drafts there are when there is more than one.
+- **Each draft has a page of its own**, with the same fields, copy buttons and photos as before, at its own address. A draft can only be opened or changed through its own product.
+- **Two tabs, Active and Archived, each with its count.** Archive takes a draft out of the working list without losing its wording or photos, and Restore brings it back. A draft cannot be deleted, only archived. An archived draft no longer speaks for the product on its page.
+- **« Write with Claude » avoids repeating the product's other drafts**, archived ones included, as it already does for the listings of neighbouring products in the category, so that two drafts of one article do not open with the same sentence.
+
+**Migration:** two, run with `php artisan migrate`. The first replaces the one-draft-per-product constraint on `vinted_listings` with a plain index. The second adds a nullable `archived_at` column. Existing drafts are untouched and none is archived.
+
 ## 2026-09-19 · v1.46.0 · build 6PY04Q
 
 ### Admin
