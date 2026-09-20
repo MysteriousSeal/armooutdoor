@@ -261,10 +261,19 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         // category's own attributes, on a page of their own like Vinted's.
         Route::get('/products/{product}/cdiscount', [OctopiaController::class, 'product'])->name('products.cdiscount.edit');
         Route::put('/products/{product}/cdiscount', [OctopiaController::class, 'updateProduct'])->name('products.cdiscount.update');
-        Route::get('/products/{product}/vinted', [VintedListingController::class, 'edit'])->name('products.vinted.edit');
-        Route::put('/products/{product}/vinted', [VintedListingController::class, 'update'])->name('products.vinted.update');
-        Route::post('/products/{product}/vinted/generate', [VintedListingController::class, 'generate'])
-            ->name('products.vinted.generate');
+        // Several drafts per product: a list, then one page for each.
+        Route::get('/products/{product}/vinted', [VintedListingController::class, 'index'])->name('products.vinted.index');
+        Route::post('/products/{product}/vinted', [VintedListingController::class, 'store'])->name('products.vinted.store');
+        Route::get('/products/{product}/vinted/{listing}', [VintedListingController::class, 'edit'])
+            ->whereNumber('listing')->name('products.vinted.edit');
+        Route::put('/products/{product}/vinted/{listing}', [VintedListingController::class, 'update'])
+            ->whereNumber('listing')->name('products.vinted.update');
+        Route::post('/products/{product}/vinted/{listing}/archive', [VintedListingController::class, 'archive'])
+            ->whereNumber('listing')->name('products.vinted.archive');
+        Route::post('/products/{product}/vinted/{listing}/restore', [VintedListingController::class, 'restore'])
+            ->whereNumber('listing')->name('products.vinted.restore');
+        Route::post('/products/{product}/vinted/{listing}/generate', [VintedListingController::class, 'generate'])
+            ->whereNumber('listing')->name('products.vinted.generate');
         // The photo as a JPEG: the shop stores WebP, which Vinted's form
         // will not take.
         Route::get('/products/{product}/vinted/photos/{image}.jpg', [VintedListingController::class, 'downloadImage'])

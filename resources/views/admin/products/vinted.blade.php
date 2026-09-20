@@ -24,7 +24,7 @@
                         </svg>
                         <span class="vinted-hero-dest">Vinted</span>
                     </p>
-                    <h2 class="admin-list-title">Vinted listing</h2>
+                    <h2 class="admin-list-title">Vinted listing #{{ $listing->id }}</h2>
                     <p class="admin-list-lede vinted-hero-lede">
                         {{-- Say what the page does and what it does not:
                              without that one waits for a posting that never
@@ -33,7 +33,7 @@
                         <strong>Nothing is sent from this page.</strong>
                     </p>
                 </div>
-                <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-secondary vinted-hero-back">Back to product</a>
+                <a href="{{ route('admin.products.vinted.index', $product) }}" class="btn btn-secondary vinted-hero-back">All listings</a>
             </div>
         </header>
 
@@ -67,8 +67,10 @@
                 </span>
             </div>
 
-            <span class="vinted-state {{ $listing->exists ? 'is-saved' : '' }}">
-                @if ($listing->exists)
+            <span class="vinted-state {{ $listing->isEmpty() ? '' : 'is-saved' }}">
+                @if ($listing->isArchived())
+                    Archived {{ $listing->archived_at->locale('en')->diffForHumans() }}
+                @elseif (! $listing->isEmpty())
                     {{-- The application locale is French, the shop's own; the
                          back-office is English throughout. This names its
                          locale rather than following the site's. --}}
@@ -102,7 +104,7 @@
                 <button
                     type="button"
                     class="btn btn-primary vinted-assist-run"
-                    data-generate-url="{{ route('admin.products.vinted.generate', $product) }}"
+                    data-generate-url="{{ route('admin.products.vinted.generate', [$product, $listing]) }}"
                 >Write with Claude</button>
             </div>
             <p class="vinted-assist-status" data-generate-status role="status" hidden></p>
@@ -110,7 +112,7 @@
 
         <form
             method="POST"
-            action="{{ route('admin.products.vinted.update', $product) }}"
+            action="{{ route('admin.products.vinted.update', [$product, $listing]) }}"
             enctype="multipart/form-data"
             class="vinted-form"
         >
@@ -287,7 +289,7 @@
 
             <div class="vinted-actions">
                 <button type="submit" class="btn btn-primary">Save listing</button>
-                <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-secondary">Cancel</a>
+                <a href="{{ route('admin.products.vinted.index', $product) }}" class="btn btn-secondary">Cancel</a>
             </div>
         </form>
     </div>

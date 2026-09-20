@@ -195,7 +195,7 @@ class VintedCopywriter
     /**
      * @return array{title: string, description: string, price: float|null}
      */
-    public function write(Product $product): array
+    public function write(Product $product, ?VintedListing $listing = null): array
     {
         if (! $this->isConfigured()) {
             throw new RuntimeException('No Anthropic API key is configured.');
@@ -212,7 +212,7 @@ class VintedCopywriter
                 // waiting on the button: no thinking, moderate effort.
                 thinking: ['type' => 'disabled'],
                 outputConfig: ['effort' => 'medium'],
-                messages: [['role' => 'user', 'content' => $this->brief($product)]],
+                messages: [['role' => 'user', 'content' => $this->brief($product, $listing)]],
                 tools: [self::tool()],
                 toolChoice: ['type' => 'tool', 'name' => self::tool()['name']],
                 workspaceID: $this->workspaceId ?: null,
@@ -241,7 +241,7 @@ class VintedCopywriter
      * in there because it tells Claude what range of article this is, not so
      * that it writes it down.
      */
-    private function brief(Product $product): string
+    private function brief(Product $product, ?VintedListing $listing = null): string
     {
         $lines = ['Fiche produit de la boutique :', ''];
         $lines[] = 'Nom : '.$product->localizedName();
@@ -281,11 +281,11 @@ class VintedCopywriter
             $lines[] = Str::limit($description, 2000);
         }
 
-        $siblings = $this->siblingListings($product);
+        $siblings = $this->siblingListings($product, $listing);
 
         if ($siblings->isNotEmpty()) {
             $lines[] = '';
-            $lines[] = 'Annonces déjà rédigées pour des articles voisins de la même catégorie.';
+            $lines[] = 'Annonces déjà rédigées pour cet article et pour des articles voisins de la même catégorie.';
             $lines[] = 'Écris un titre et une description qui ne leur ressemblent pas :';
 
             foreach ($siblings as $sibling) {
@@ -305,30 +305,41 @@ class VintedCopywriter
     }
 
     /**
-     * The listings already written for the product's neighbours.
+     * The listings already written next to this one: first the other drafts
+     * of the same product, then its neighbours'.
      *
      * The shop sells the same article in several colourways, one product
      * each, and each listing is written on its own: without this, the model
      * writes the same sentence every time and Vinted reads the lot as
-     * duplicates. The category is the neighbourhood, the most recent first,
-     * and few enough that the brief stays short.
+     * duplicates. The same goes for a product posted again in several drafts.
+     * The category is the neighbourhood, the most recent first, and few
+     * enough that the brief stays short.
      *
      * @return Collection<int, VintedListing>
      */
-    private function siblingListings(Product $product)
+    private function siblingListings(Product $product, ?VintedListing $listing = null)
     {
+        $written = fn ($query) => $query->where('title', '!=', '')->whereNotNull('title');
+
+        $sameProduct = $written(VintedListing::query())
+            ->where('product_id', $product->id)
+            ->when($listing?->exists, fn ($query) => $query->whereNot('id', $listing->id))
+            ->latest('updated_at')
+            ->limit(self::SIBLING_LISTINGS)
+            ->get();
+
         if ($product->category_id === null) {
-            return collect();
+            return $sameProduct;
         }
 
-        return VintedListing::query()
+        $neighbours = $written(VintedListing::query())
             ->whereNot('product_id', $product->id)
-            ->where('title', '!=', '')
-            ->whereNotNull('title')
             ->whereHas('product', fn ($query) => $query->where('category_id', $product->category_id))
             ->latest('updated_at')
             ->limit(self::SIBLING_LISTINGS)
             ->get();
+
+        return $sameProduct->concat($neighbours)->take(self::SIBLING_LISTINGS)->values();
     }
 
     /**

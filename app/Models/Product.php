@@ -205,12 +205,23 @@ class Product extends Model
     }
 
     /**
-     * This product's Vinted listing, if it has one. Only ever one: the
-     * draft reworked between two postings, not a history of them.
+     * This product's first Vinted listing, if it has one: the oldest draft
+     * still in use, which the product page reads its progress from. An
+     * archived one has run its course and says nothing about what is left.
      */
     public function vintedListing(): HasOne
     {
-        return $this->hasOne(VintedListing::class);
+        return $this->hasOne(VintedListing::class)
+            ->ofMany(['id' => 'min'], fn ($query) => $query->whereNull('archived_at'));
+    }
+
+    /**
+     * Every Vinted draft of this product, the oldest first. The same article
+     * can be posted again with other wording or other photos.
+     */
+    public function vintedListings(): HasMany
+    {
+        return $this->hasMany(VintedListing::class)->orderBy('id');
     }
 
     public function images(): HasMany

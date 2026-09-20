@@ -39,7 +39,7 @@ class VintedCopyGenerationTest extends TestCase
                 parent::__construct('test-key');
             }
 
-            public function write(Product $product): array
+            public function write(Product $product, ?\App\Models\VintedListing $listing = null): array
             {
                 return $this->copy;
             }
@@ -55,7 +55,7 @@ class VintedCopyGenerationTest extends TestCase
                 parent::__construct('test-key');
             }
 
-            public function write(Product $product): array
+            public function write(Product $product, ?\App\Models\VintedListing $listing = null): array
             {
                 throw new RuntimeException($this->message);
             }
@@ -67,7 +67,7 @@ class VintedCopyGenerationTest extends TestCase
         config(['services.anthropic.key' => 'test-key']);
 
         $this->actingAs($this->admin())
-            ->get(route('admin.products.vinted.edit', Product::factory()->create()))
+            ->get($this->vintedRoute('edit', Product::factory()->create()))
             ->assertOk()
             ->assertSee('Write with Claude');
     }
@@ -79,7 +79,7 @@ class VintedCopyGenerationTest extends TestCase
         config(['services.anthropic.key' => null]);
 
         $this->actingAs($this->admin())
-            ->get(route('admin.products.vinted.edit', Product::factory()->create()))
+            ->get($this->vintedRoute('edit', Product::factory()->create()))
             ->assertOk()
             ->assertDontSee('Write with Claude');
     }
@@ -89,7 +89,7 @@ class VintedCopyGenerationTest extends TestCase
         $this->writerReturning(['title' => 'Cagoule camo', 'description' => "Neuve.\nEnvoi rapide.", 'price' => 12.5]);
 
         $this->actingAs($this->admin())
-            ->postJson(route('admin.products.vinted.generate', Product::factory()->create()))
+            ->postJson($this->vintedRoute('generate', Product::factory()->create()))
             ->assertOk()
             ->assertJson(['title' => 'Cagoule camo', 'description' => "Neuve.\nEnvoi rapide.", 'price' => 12.5]);
     }
@@ -101,9 +101,12 @@ class VintedCopyGenerationTest extends TestCase
         $product = Product::factory()->create();
         $this->writerReturning(['title' => 'Cagoule camo', 'description' => 'Neuve.', 'price' => 12.5]);
 
-        $this->actingAs($this->admin())->postJson(route('admin.products.vinted.generate', $product));
+        $this->actingAs($this->admin())->postJson($this->vintedRoute('generate', $product));
 
-        $this->assertDatabaseCount('vinted_listings', 0);
+        // Only the blank draft the address named: generating adds nothing
+        // and fills nothing.
+        $this->assertDatabaseCount('vinted_listings', 1);
+        $this->assertTrue(VintedListing::query()->first()->isEmpty());
     }
 
     public function test_a_failure_upstream_is_reported_rather_than_swallowed(): void
@@ -111,7 +114,7 @@ class VintedCopyGenerationTest extends TestCase
         $this->writerFailing('Claude answered in an unexpected shape.');
 
         $this->actingAs($this->admin())
-            ->postJson(route('admin.products.vinted.generate', Product::factory()->create()))
+            ->postJson($this->vintedRoute('generate', Product::factory()->create()))
             ->assertStatus(502)
             ->assertJson(['message' => 'Claude answered in an unexpected shape.']);
     }
@@ -121,7 +124,7 @@ class VintedCopyGenerationTest extends TestCase
         config(['services.anthropic.key' => null]);
 
         $this->actingAs($this->admin())
-            ->postJson(route('admin.products.vinted.generate', Product::factory()->create()))
+            ->postJson($this->vintedRoute('generate', Product::factory()->create()))
             ->assertStatus(503);
     }
 
@@ -327,19 +330,39 @@ class VintedCopyGenerationTest extends TestCase
             'description' => "Cagoule intégrale.\nEnvoi rapide.",
         ]);
 
-        // Its own listing is not a neighbour, nor is another category's.
-        VintedListing::query()->create(['product_id' => $product->id, 'title' => 'Ce que disait la version précédente']);
+        // The draft being written is not a neighbour, nor is another category's.
+        $own = VintedListing::query()->create(['product_id' => $product->id, 'title' => 'Ce que disait la version précédente']);
         $elsewhere = Product::factory()->create(['category_id' => $other->id]);
         VintedListing::query()->create(['product_id' => $elsewhere->id, 'title' => 'Sac à dos 30 L en nylon']);
 
         $brief = (new ReflectionMethod(VintedCopywriter::class, 'brief'))
-            ->invoke(new VintedCopywriter('test-key'), $product);
+            ->invoke(new VintedCopywriter('test-key'), $product, $own);
 
         $this->assertStringContainsString('Cagoule cache-cou en polyester, camouflage pixel gris', $brief);
         $this->assertStringContainsString('ne leur ressemblent pas', $brief);
         $this->assertStringContainsString('Cagoule intégrale.', $brief);
         $this->assertStringNotContainsString('Ce que disait la version précédente', $brief);
         $this->assertStringNotContainsString('Sac à dos 30 L en nylon', $brief);
+    }
+
+    public function test_the_brief_shows_the_other_drafts_of_the_same_product(): void
+    {
+        $product = Product::factory()->create();
+        $first = VintedListing::query()->create([
+            'product_id' => $product->id,
+            'title' => 'Cagoule camouflage désert respirante',
+            'description' => 'Première annonce.',
+        ]);
+        $second = VintedListing::query()->create(['product_id' => $product->id]);
+
+        $brief = fn (VintedListing $listing): string => (new ReflectionMethod(VintedCopywriter::class, 'brief'))
+            ->invoke(new VintedCopywriter('test-key'), $product, $listing);
+
+        // The blank draft is written against the first one; the first is not
+        // told about itself.
+        $this->assertStringContainsString('Cagoule camouflage désert respirante', $brief($second));
+        $this->assertStringContainsString('Première annonce.', $brief($second));
+        $this->assertStringNotContainsString('Cagoule camouflage désert respirante', $brief($first));
     }
 
     public function test_a_product_whose_neighbours_have_no_listing_is_briefed_as_before(): void

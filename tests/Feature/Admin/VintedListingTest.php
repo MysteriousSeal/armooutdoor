@@ -36,7 +36,7 @@ class VintedListingTest extends TestCase
             ->get(route('admin.products.edit', $product))
             ->assertOk()
             ->assertSee('Vinted listing')
-            ->assertSee(route('admin.products.vinted.edit', $product), false);
+            ->assertSee(route('admin.products.vinted.index', $product), false);
     }
 
     public function test_a_product_being_created_has_no_listing_to_offer(): void
@@ -58,7 +58,7 @@ class VintedListingTest extends TestCase
         ]);
 
         $html = $this->actingAs($this->admin())
-            ->get(route('admin.products.vinted.edit', $product))
+            ->get($this->vintedRoute('edit', $product))
             ->assertOk()
             // The product is named at the top of the page, to know what this
             // is about — but the fields themselves are empty.
@@ -76,9 +76,8 @@ class VintedListingTest extends TestCase
         $this->assertMatchesRegularExpression('#id="vinted-price".*?value=""#s', $html);
         $this->assertStringContainsString('Shop price', $html);
 
-        // Opening the page writes nothing: until it is saved there is no
-        // listing.
-        $this->assertSame(0, VintedListing::query()->count());
+        // Opening the page writes nothing into the draft.
+        $this->assertTrue(VintedListing::query()->first()->isEmpty());
     }
 
     public function test_saving_keeps_the_listing_against_the_product(): void
@@ -86,12 +85,12 @@ class VintedListingTest extends TestCase
         $product = Product::factory()->create();
 
         $this->actingAs($this->admin())
-            ->put(route('admin.products.vinted.update', $product), [
+            ->put($this->vintedRoute('update', $product), [
                 'title' => 'Cagoule camo — taille unique',
                 'description' => "Portée deux fois.\nAucun défaut.",
                 'price' => '12.50',
             ])
-            ->assertRedirect(route('admin.products.vinted.edit', $product));
+            ->assertRedirect($this->vintedRoute('edit', $product));
 
         $listing = $product->fresh()->vintedListing;
 
@@ -102,17 +101,128 @@ class VintedListingTest extends TestCase
 
     public function test_saving_twice_edits_the_same_listing(): void
     {
-        // One listing per product: two drafts would force every screen to
-        // choose which to show.
         $product = Product::factory()->create();
 
         foreach (['Premier jet', 'Deuxième jet'] as $title) {
             $this->actingAs($this->admin())
-                ->put(route('admin.products.vinted.update', $product), ['title' => $title]);
+                ->put($this->vintedRoute('update', $product), ['title' => $title]);
         }
 
         $this->assertSame(1, VintedListing::query()->where('product_id', $product->id)->count());
         $this->assertSame('Deuxième jet', $product->fresh()->vintedListing->title);
+    }
+
+    public function test_a_product_can_have_several_drafts(): void
+    {
+        $product = Product::factory()->create();
+        $admin = $this->admin();
+
+        $this->actingAs($admin)->post(route('admin.products.vinted.store', $product))->assertRedirect();
+        $this->actingAs($admin)->post(route('admin.products.vinted.store', $product))->assertRedirect();
+
+        $drafts = $product->vintedListings()->get();
+        $this->assertCount(2, $drafts);
+
+        // Each one has a page of its own and saves on its own.
+        foreach ($drafts as $i => $draft) {
+            $this->actingAs($admin)
+                ->put(route('admin.products.vinted.update', [$product, $draft]), ['title' => 'Annonce '.($i + 1), 'price' => '10'])
+                ->assertRedirect(route('admin.products.vinted.edit', [$product, $draft]));
+        }
+
+        $this->assertSame(['Annonce 1', 'Annonce 2'], $product->vintedListings()->pluck('title')->all());
+
+        $this->actingAs($admin)
+            ->get(route('admin.products.vinted.index', $product))
+            ->assertOk()
+            ->assertSee('Annonce 1')
+            ->assertSee('Annonce 2')
+            // Each row carries the draft's own id, the one in its address.
+            ->assertSeeInOrder(['>#'.$drafts[0]->id.'<', '>#'.$drafts[1]->id.'<'], false);
+    }
+
+    public function test_a_draft_can_be_archived_and_restored(): void
+    {
+        $product = Product::factory()->create();
+        $keep = VintedListing::query()->create(['product_id' => $product->id, 'title' => 'En cours']);
+        $old = VintedListing::query()->create(['product_id' => $product->id, 'title' => 'Vendue']);
+        $admin = $this->admin();
+
+        $this->actingAs($admin)
+            ->post(route('admin.products.vinted.archive', [$product, $old]))
+            ->assertRedirect(route('admin.products.vinted.index', $product));
+
+        $this->assertTrue($old->fresh()->isArchived());
+
+        // Two tabs: each draft shows in one only, and the counts say so.
+        $this->actingAs($admin)
+            ->get(route('admin.products.vinted.index', $product))
+            ->assertOk()
+            ->assertSee('En cours')
+            ->assertDontSee('Vendue');
+
+        $this->actingAs($admin)
+            ->get(route('admin.products.vinted.index', ['product' => $product, 'tab' => 'archived']))
+            ->assertOk()
+            ->assertSee('Vendue')
+            ->assertDontSee('En cours');
+
+        $this->actingAs($admin)
+            ->post(route('admin.products.vinted.restore', [$product, $old]))
+            ->assertRedirect();
+
+        $this->assertFalse($old->fresh()->isArchived());
+        $this->assertFalse($keep->fresh()->isArchived());
+    }
+
+    public function test_an_archived_draft_no_longer_stands_for_the_product(): void
+    {
+        $product = Product::factory()->create();
+        $first = VintedListing::query()->create(['product_id' => $product->id, 'title' => 'Première']);
+        $second = VintedListing::query()->create(['product_id' => $product->id, 'title' => 'Seconde']);
+
+        $this->assertSame($first->id, $product->fresh()->vintedListing->id);
+
+        $first->update(['archived_at' => now()]);
+
+        $this->assertSame($second->id, $product->fresh()->vintedListing->id);
+    }
+
+    public function test_a_draft_cannot_be_archived_through_another_products_address(): void
+    {
+        $product = Product::factory()->create();
+        $theirs = VintedListing::query()->create(['product_id' => Product::factory()->create()->id]);
+
+        $this->actingAs($this->admin())
+            ->post(route('admin.products.vinted.archive', [$product, $theirs]))
+            ->assertNotFound();
+
+        $this->assertFalse($theirs->fresh()->isArchived());
+    }
+
+    public function test_a_new_draft_starts_blank(): void
+    {
+        $product = Product::factory()->create();
+        VintedListing::query()->create(['product_id' => $product->id, 'title' => 'Déjà écrite', 'price_cents' => 1000]);
+
+        $this->actingAs($this->admin())->post(route('admin.products.vinted.store', $product));
+
+        $new = $product->vintedListings()->get()->last();
+        $this->assertTrue($new->isEmpty());
+        $this->assertSame(2, $product->vintedListings()->count());
+    }
+
+    public function test_a_draft_cannot_be_reached_through_another_products_address(): void
+    {
+        $product = Product::factory()->create();
+        $other = Product::factory()->create();
+        $theirs = VintedListing::query()->create(['product_id' => $other->id, 'title' => 'Pas la vôtre']);
+        $admin = $this->admin();
+
+        $this->actingAs($admin)->get(route('admin.products.vinted.edit', [$product, $theirs]))->assertNotFound();
+        $this->actingAs($admin)->put(route('admin.products.vinted.update', [$product, $theirs]), ['title' => 'Piratée'])->assertNotFound();
+
+        $this->assertSame('Pas la vôtre', $theirs->fresh()->title);
     }
 
     public function test_the_saved_stamp_is_in_english_like_the_rest_of_the_admin(): void
@@ -124,7 +234,7 @@ class VintedListingTest extends TestCase
         VintedListing::query()->create(['product_id' => $product->id, 'title' => 'Écrite']);
 
         $this->actingAs($this->admin())
-            ->get(route('admin.products.vinted.edit', $product))
+            ->get($this->vintedRoute('edit', $product))
             ->assertOk()
             ->assertSee('Saved')
             ->assertSee('ago')
@@ -137,7 +247,7 @@ class VintedListingTest extends TestCase
         $product = Product::factory()->create();
 
         $this->actingAs($this->admin())
-            ->put(route('admin.products.vinted.update', $product), ['title' => 'Sans prix', 'price' => null])
+            ->put($this->vintedRoute('update', $product), ['title' => 'Sans prix', 'price' => null])
             ->assertRedirect();
 
         $this->assertNull($product->fresh()->vintedListing->price_cents);
@@ -148,7 +258,7 @@ class VintedListingTest extends TestCase
         $product = Product::factory()->create();
 
         $this->actingAs($this->admin())
-            ->put(route('admin.products.vinted.update', $product), [
+            ->put($this->vintedRoute('update', $product), [
                 'title' => 'Avec photos',
                 'images' => [
                     UploadedFile::fake()->image('first.jpg'),
@@ -171,7 +281,7 @@ class VintedListingTest extends TestCase
         $droppedThumb = ImageThumbnailer::absoluteThumbnailPath($dropped->image);
 
         $this->actingAs($this->admin())
-            ->put(route('admin.products.vinted.update', $product), [
+            ->put($this->vintedRoute('update', $product), [
                 'title' => 'Avec photos',
                 'remove_images' => [$dropped->id],
                 'order' => [$kept->id],
@@ -200,7 +310,7 @@ class VintedListingTest extends TestCase
         $product = Product::factory()->create();
 
         $this->actingAs($this->admin())
-            ->put(route('admin.products.vinted.update', $product), [
+            ->put($this->vintedRoute('update', $product), [
                 'title' => 'Photos au bon format',
                 'images' => [
                     UploadedFile::fake()->image('paysage.jpg', 3000, 2000),
@@ -259,7 +369,7 @@ class VintedListingTest extends TestCase
         $foreign = VintedListingImage::query()->create(['vinted_listing_id' => $theirs->id, 'image' => 'vinted/c.jpg', 'sort_order' => 1]);
 
         $this->actingAs($this->admin())
-            ->put(route('admin.products.vinted.update', $product), [
+            ->put($this->vintedRoute('update', $product), [
                 'title' => 'A',
                 'order' => [$b->id, $foreign->id, $a->id],
             ])
@@ -284,12 +394,12 @@ class VintedListingTest extends TestCase
     {
         $product = Product::factory()->create();
 
-        $this->get(route('admin.products.vinted.edit', $product))->assertRedirect();
+        $this->get($this->vintedRoute('edit', $product))->assertRedirect();
 
         // The back-office sends non-admins to the shop rather than
         // confirming the address exists.
         $this->actingAs(User::factory()->create())
-            ->get(route('admin.products.vinted.edit', $product))
+            ->get($this->vintedRoute('edit', $product))
             ->assertRedirect();
     }
 
@@ -300,7 +410,7 @@ class VintedListingTest extends TestCase
         $product = Product::factory()->create();
 
         $this->actingAs($this->admin())
-            ->put(route('admin.products.vinted.update', $product), [
+            ->put($this->vintedRoute('update', $product), [
                 'title' => 'Avec une photo',
                 'images' => [UploadedFile::fake()->image('shot.jpg', 800, 800)],
             ]);
@@ -332,7 +442,7 @@ class VintedListingTest extends TestCase
         $product = Product::factory()->create(['sku' => 'CAG-MCDES-BREATH']);
 
         $this->actingAs($this->admin())
-            ->put(route('admin.products.vinted.update', $product), [
+            ->put($this->vintedRoute('update', $product), [
                 'title' => 'Trois photos',
                 'images' => [
                     UploadedFile::fake()->image('one.jpg'),
@@ -355,7 +465,7 @@ class VintedListingTest extends TestCase
         // one place, and a page promising something other than the response
         // would be worse than no name at all.
         $html = $this->actingAs($this->admin())
-            ->get(route('admin.products.vinted.edit', $product))
+            ->get($this->vintedRoute('edit', $product))
             ->assertOk()
             ->getContent();
 

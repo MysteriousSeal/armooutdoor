@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -20,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'title',
     'description',
     'price_cents',
+    'archived_at',
 ])]
 class VintedListing extends Model
 {
@@ -27,7 +29,23 @@ class VintedListing extends Model
     {
         return [
             'price_cents' => 'integer',
+            'archived_at' => 'datetime',
         ];
+    }
+
+    public function isArchived(): bool
+    {
+        return $this->archived_at !== null;
+    }
+
+    public function scopeActive(Builder $query): void
+    {
+        $query->whereNull('archived_at');
+    }
+
+    public function scopeArchived(Builder $query): void
+    {
+        $query->whereNotNull('archived_at');
     }
 
     public function product(): BelongsTo

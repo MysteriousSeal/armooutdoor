@@ -210,6 +210,7 @@ class AdminAuthorizationTest extends TestCase
             'entry' => $accountingEntry->id,
             'document' => $identityDocument->id,
             'image' => $vintedImage->id,
+            'listing' => $vintedListing->id,
             'photo' => $productPhoto->id,
             'position' => 1,
             'template' => $octopiaTemplate->id,

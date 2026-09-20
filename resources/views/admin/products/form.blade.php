@@ -36,16 +36,19 @@
                             $vintedChecks = $vinted?->readiness() ?? ['Title' => false, 'Text' => false, 'Price' => false, 'Photos' => false];
                             $vintedPhotos = $vinted?->imageCount() ?? 0;
                             $vintedDone = count(array_filter($vintedChecks));
+                            // The marks read the first draft; the count says
+                            // there are more.
+                            $vintedCount = $product->vintedListings()->active()->count();
                         @endphp
 
                         {{-- One control: the name, then what is missing. Two
                              separate elements floated between the
                              neighbouring buttons belonging to neither. --}}
                         <a
-                            href="{{ route('admin.products.vinted.edit', $product) }}"
+                            href="{{ route('admin.products.vinted.index', $product) }}"
                             class="vinted-link {{ ($vinted?->isReady() ?? false) ? 'is-ready' : '' }}"
                         >
-                            <span class="vinted-link-label">Vinted listing</span>
+                            <span class="vinted-link-label">Vinted {{ $vintedCount > 1 ? 'listings' : 'listing' }}</span>
                             <span class="vinted-checks">
                                 @foreach ($vintedChecks as $label => $done)
                                     <span
@@ -63,7 +66,7 @@
                             {{-- The summary carries the news: ready, or what
                                  is left. --}}
                             <span class="vinted-link-state">
-                                {{ ($vinted?->isReady() ?? false) ? 'Ready' : $vintedDone.'/'.count($vintedChecks) }}
+                                {{ ($vinted?->isReady() ?? false) ? 'Ready' : $vintedDone.'/'.count($vintedChecks) }}{{ $vintedCount > 1 ? ' · '.$vintedCount.' drafts' : '' }}
                             </span>
                         </a>
 

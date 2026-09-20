@@ -18,7 +18,10 @@ use Illuminate\View\View;
 use RuntimeException;
 
 /**
- * A product's Vinted listing: compose it, keep it, copy it.
+ * A product's Vinted listings: compose them, keep them, copy them.
+ *
+ * A product can carry several drafts, the same article posted again with
+ * other wording or other photos: a list, then a page for each.
  *
  * Nothing leaves from here. Vinted opens no API for depositing a listing,
  * and just as well: the moment of posting is the moment one decides it goes
@@ -30,8 +33,67 @@ class VintedListingController extends Controller
     /** Enough for a listing, not enough to weigh three megabytes. */
     private const JPEG_QUALITY = 90;
 
-    public function edit(Product $product, VintedCopywriter $writer): View
+    /**
+     * Every draft of the product, with a way to start another. Two tabs: the
+     * drafts in use, and the archived ones.
+     */
+    public function index(Request $request, Product $product): View
     {
+        $tab = $request->query('tab') === 'archived' ? 'archived' : 'active';
+
+        return view('admin.products.vinted-index', [
+            'product' => $product,
+            'tab' => $tab,
+            'listings' => $product->vintedListings()->with('images')->{$tab}()->get(),
+            'activeCount' => $product->vintedListings()->active()->count(),
+            'archivedCount' => $product->vintedListings()->archived()->count(),
+        ]);
+    }
+
+    /** Out of the working list, nothing lost: it can come back. */
+    public function archive(Product $product, VintedListing $listing): RedirectResponse
+    {
+        $this->ownedBy($product, $listing);
+
+        $listing->update(['archived_at' => now()]);
+
+        return redirect()
+            ->route('admin.products.vinted.index', $product)
+            ->with('success', 'Vinted listing archived.');
+    }
+
+    public function restore(Product $product, VintedListing $listing): RedirectResponse
+    {
+        $this->ownedBy($product, $listing);
+
+        $listing->update(['archived_at' => null]);
+
+        return redirect()
+            ->route('admin.products.vinted.index', ['product' => $product, 'tab' => 'archived'])
+            ->with('success', 'Vinted listing restored.');
+    }
+
+    /**
+     * A new, blank draft. The row exists at once so the page it opens on has
+     * an address of its own; an abandoned one is deleted from the list.
+     *
+     * Blank, entirely: nothing is carried over from the product page, nor
+     * from the other drafts. What one writes on Vinted is not what one writes
+     * in a catalogue, and a prefilled field gets corrected rather than
+     * written. The shop's price stays in view beside the field without
+     * settling into it.
+     */
+    public function store(Product $product): RedirectResponse
+    {
+        $listing = $product->vintedListings()->create([]);
+
+        return redirect()->route('admin.products.vinted.edit', [$product, $listing]);
+    }
+
+    public function edit(Product $product, VintedListing $listing, VintedCopywriter $writer): View
+    {
+        $this->ownedBy($product, $listing);
+
         return view('admin.products.vinted', [
             // No key on this environment, no button: one that answers "not
             // configured" every time is worse than one that is not there.
@@ -41,10 +103,7 @@ class VintedListingController extends Controller
             // remembering it. Null when nothing has been received — an
             // unknown cost is not a cost of zero.
             'costCents' => $product->averagePurchaseCostInclVatCents(),
-            // A listing never opened is not a row yet: the page starts from
-            // the product, and writes only on save.
-            'listing' => $product->vintedListing()->with('images')->first()
-                ?? $this->draftFrom($product),
+            'listing' => $listing->load('images'),
         ]);
     }
 
@@ -55,8 +114,10 @@ class VintedListingController extends Controller
      * there, and it is the Save button — as before — that decides whether it
      * stays. The wording is proposed, never applied.
      */
-    public function generate(Product $product, VintedCopywriter $writer): JsonResponse
+    public function generate(Product $product, VintedListing $listing, VintedCopywriter $writer): JsonResponse
     {
+        $this->ownedBy($product, $listing);
+
         if (! $writer->isConfigured()) {
             return response()->json(
                 ['message' => 'No Anthropic API key is configured on this environment.'],
@@ -65,7 +126,7 @@ class VintedListingController extends Controller
         }
 
         try {
-            return response()->json($writer->write($product->load('category')));
+            return response()->json($writer->write($product->load('category'), $listing));
         } catch (RuntimeException $e) {
             // Said out loud rather than logged alone: somebody is waiting on
             // the button, and an empty field would read as an empty answer.
@@ -73,6 +134,15 @@ class VintedListingController extends Controller
 
             return response()->json(['message' => $e->getMessage()], 502);
         }
+    }
+
+    /**
+     * The address names both ids; without the check, a draft could be opened
+     * or changed through any product's page.
+     */
+    private function ownedBy(Product $product, VintedListing $listing): void
+    {
+        abort_unless($listing->product_id === $product->id, 404);
     }
 
     /**
@@ -119,8 +189,10 @@ class VintedListingController extends Controller
         ]);
     }
 
-    public function update(Request $request, Product $product): RedirectResponse
+    public function update(Request $request, Product $product, VintedListing $listing): RedirectResponse
     {
+        $this->ownedBy($product, $listing);
+
         $data = $request->validate([
             'title' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:5000'],
@@ -134,40 +206,21 @@ class VintedListingController extends Controller
             'order.*' => ['integer'],
         ]);
 
-        $listing = VintedListing::query()->updateOrCreate(
-            ['product_id' => $product->id],
-            [
-                'title' => $data['title'] ?? null,
-                'description' => $data['description'] ?? null,
-                'price_cents' => array_key_exists('price', $data) && $data['price'] !== null
-                    ? (int) round((float) $data['price'] * 100)
-                    : null,
-            ],
-        );
+        $listing->update([
+            'title' => $data['title'] ?? null,
+            'description' => $data['description'] ?? null,
+            'price_cents' => array_key_exists('price', $data) && $data['price'] !== null
+                ? (int) round((float) $data['price'] * 100)
+                : null,
+        ]);
 
         $this->removeImages($listing, $data['remove_images'] ?? []);
         $this->addImages($listing, $product, $request->file('images', []) ?? []);
         $this->reorderImages($listing, $data['order'] ?? []);
 
         return redirect()
-            ->route('admin.products.vinted.edit', $product)
+            ->route('admin.products.vinted.edit', [$product, $listing])
             ->with('success', 'Vinted listing saved.');
-    }
-
-    /**
-     * A blank listing, entirely. Nothing is carried over from the product
-     * page: what one writes on Vinted is not what one writes in a catalogue,
-     * and a prefilled field gets corrected rather than written — one keeps
-     * the phrasing next door for want of having cleared it. The shop's price
-     * stays in view beside the field without settling into it.
-     */
-    private function draftFrom(Product $product): VintedListing
-    {
-        $listing = new VintedListing;
-        $listing->product_id = $product->id;
-        $listing->setRelation('images', collect());
-
-        return $listing;
     }
 
     /**
