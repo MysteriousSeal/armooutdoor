@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-21 · v1.50.2 · build C4Y96O
+
+### Admin
+
+- **The Vinted title Claude writes is 60 characters at most.** Vinted cuts the display around 60 characters on a phone, so a longer title was never read whole. Claude now aims for 40 to 60 characters: the product's name first, then only what the room allows, the other name buyers search for and one or two details from the sheet. If the name alone comes close to 60, it is enough. The field itself still takes 100, and a title Claude sends longer than 60 is kept as it comes, not cut.
+
+**No migration.**
+
 ## 2026-09-21 · v1.50.1 · build 9ES3KW
 
 ### Admin
