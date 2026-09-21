@@ -100,7 +100,7 @@ class Exporter
             'variant' => $variant,
             'reference' => $reference,
             'gtin' => $gtin,
-            'title' => $this->title($product, $variant),
+            'title' => $this->title($product, $variant, $listing),
             'missing' => $missing,
             'payload' => $this->payload($listing, $product, $variant, $gtin, $reference, $values),
             'offer' => $this->offer($listing, $product, $variant, $gtin, $reference),
@@ -218,7 +218,7 @@ class Exporter
             // An integer, though a GTIN is written as text: Octopia says so.
             'gtin' => (int) preg_replace('/\D/', '', $gtin),
             'sellerProductReference' => $this->reference($reference),
-            'title' => $this->title($product, $variant),
+            'title' => $this->title($product, $variant, $listing),
             'description' => Str::limit($this->description($product, $listing), self::DESCRIPTION_LIMIT, ''),
             'brand' => Str::limit((string) $product->brandName(), 50, ''),
             'categoryCode' => $this->template->code,
@@ -309,13 +309,20 @@ class Exporter
         };
     }
 
-    /** The product's name, with the variant's own wording when it has one. */
-    private function title(Product $product, ?ProductVariant $variant): string
+    /**
+     * The title Octopia is given: the one written for Cdiscount when there is
+     * one, else the product's name, with the variant's own wording after it
+     * when it has one. A long title is cut before the variant's wording, not
+     * through it: each variant is a sheet of its own and the wording tells
+     * them apart.
+     */
+    private function title(Product $product, ?ProductVariant $variant, ?CdiscountListing $listing = null): string
     {
         $label = $variant?->label() ?? '';
-        $title = $product->localizedName().($label !== '' ? ' '.$label : '');
+        $suffix = $label !== '' ? ' '.$label : '';
+        $base = filled($listing?->title) ? trim($listing->title) : $product->localizedName();
 
-        return Str::limit($title, self::TITLE_LIMIT, '');
+        return Str::limit($base, max(1, self::TITLE_LIMIT - mb_strlen($suffix)), '').$suffix;
     }
 
     /**

@@ -5,6 +5,7 @@ namespace Tests\Feature\Admin;
 use App\Models\CdiscountListing;
 use App\Models\OctopiaTemplate;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\User;
 use App\Services\Octopia\OctopiaDescriptionWriter;
 use App\Support\Octopia\Exporter;
@@ -49,7 +50,7 @@ class OctopiaDescriptionTest extends TestCase
         ]);
     }
 
-    private function listing(Product $product, OctopiaTemplate $template, ?string $description = null): CdiscountListing
+    private function listing(Product $product, OctopiaTemplate $template, ?string $description = null, ?string $title = null): CdiscountListing
     {
         return CdiscountListing::query()->create([
             'product_id' => $product->id,
@@ -57,6 +58,7 @@ class OctopiaDescriptionTest extends TestCase
             'values' => [],
             'per_variant' => [],
             'description' => $description,
+            'title' => $title,
         ]);
     }
 
@@ -68,18 +70,18 @@ class OctopiaDescriptionTest extends TestCase
         )[0]['payload'];
     }
 
-    private function writerReturning(string $description): void
+    private function writerReturning(string $description, string $title = 'Casquette en coton'): void
     {
-        $this->instance(OctopiaDescriptionWriter::class, new class($description) extends OctopiaDescriptionWriter
+        $this->instance(OctopiaDescriptionWriter::class, new class($title, $description) extends OctopiaDescriptionWriter
         {
-            public function __construct(private readonly string $description)
+            public function __construct(private readonly string $title, private readonly string $description)
             {
                 parent::__construct('test-key');
             }
 
-            public function write(Product $product, OctopiaTemplate $template): string
+            public function write(Product $product, OctopiaTemplate $template): array
             {
-                return $this->description;
+                return ['title' => $this->title, 'description' => $this->description];
             }
         });
     }
@@ -133,6 +135,39 @@ class OctopiaDescriptionTest extends TestCase
             ->assertDontSee('>Description<', false);
     }
 
+    public function test_the_title_written_for_cdiscount_is_sent_instead_of_the_products_name(): void
+    {
+        $template = $this->template();
+        $product = $this->product();
+        $this->listing($product, $template, null, 'Casquette baseball camouflage noir en coton');
+
+        $this->assertSame('Casquette baseball camouflage noir en coton', $this->payload($product, $template)['title']);
+    }
+
+    public function test_without_a_title_of_its_own_the_products_name_is_sent_as_before(): void
+    {
+        $template = $this->template();
+        $product = $this->product();
+        $this->listing($product, $template);
+
+        $this->assertSame('Casquette camouflage', $this->payload($product, $template)['title']);
+    }
+
+    public function test_a_variants_wording_follows_the_title_and_is_never_the_part_cut(): void
+    {
+        $template = $this->template();
+        $product = $this->product();
+        ProductVariant::create(['product_id' => $product->id, 'attribute_values' => [['label' => 'Taille', 'value' => 'M/L']], 'sku' => 'CAP-ML', 'gtin' => '3760452700961', 'quantity' => 1]);
+        $this->listing($product, $template, null, str_repeat('a', 200));
+
+        $title = $this->payload($product->fresh(), $template)['title'];
+
+        // 132 characters at most, and the wording that tells the variants
+        // apart is what stays whole.
+        $this->assertSame(OctopiaDescriptionWriter::TITLE_LIMIT, mb_strlen($title));
+        $this->assertStringEndsWith(' M/L', $title);
+    }
+
     // ------------------------------------------------------------ the field
 
     public function test_the_field_is_saved_with_the_listing(): void
@@ -148,6 +183,47 @@ class OctopiaDescriptionTest extends TestCase
             ->assertSessionHasNoErrors();
 
         $this->assertSame("Casquette en coton.\nRéglable.", $product->fresh()->cdiscountListing->description);
+    }
+
+    public function test_the_title_is_saved_with_the_listing_and_trimmed(): void
+    {
+        $template = $this->template();
+        $product = $this->product();
+
+        $this->actingAs($this->admin())
+            ->put('/admin/products/'.$product->id.'/cdiscount', [
+                'octopia_template_id' => $template->id,
+                'title' => '  Casquette en coton  ',
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame('Casquette en coton', $product->fresh()->cdiscountListing->title);
+    }
+
+    public function test_an_emptied_title_goes_back_to_the_products_name(): void
+    {
+        $template = $this->template();
+        $product = $this->product();
+        $this->listing($product, $template, null, 'Casquette en coton');
+
+        $this->actingAs($this->admin())
+            ->put('/admin/products/'.$product->id.'/cdiscount', ['octopia_template_id' => $template->id, 'title' => '  '])
+            ->assertSessionHasNoErrors();
+
+        $this->assertNull($product->fresh()->cdiscountListing->title);
+    }
+
+    public function test_a_title_past_what_octopia_takes_is_refused(): void
+    {
+        $template = $this->template();
+        $product = $this->product();
+
+        $this->actingAs($this->admin())
+            ->put('/admin/products/'.$product->id.'/cdiscount', [
+                'octopia_template_id' => $template->id,
+                'title' => str_repeat('a', OctopiaDescriptionWriter::TITLE_LIMIT + 1),
+            ])
+            ->assertSessionHasErrors('title');
     }
 
     public function test_an_emptied_field_goes_back_to_the_shops_description(): void
@@ -186,7 +262,7 @@ class OctopiaDescriptionTest extends TestCase
         $this->actingAs($this->admin())
             ->get('/admin/products/'.$product->id.'/cdiscount')
             ->assertOk()
-            ->assertSee('Description for Cdiscount')
+            ->assertSee('Title and description for Cdiscount')
             ->assertSee('name="description"', false)
             ->assertSee('Casquette en coton.')
             ->assertSee('Write with Claude')
@@ -201,7 +277,7 @@ class OctopiaDescriptionTest extends TestCase
         $this->actingAs($this->admin())
             ->get('/admin/products/'.$this->product()->id.'/cdiscount')
             ->assertOk()
-            ->assertSee('Description for Cdiscount')
+            ->assertSee('Title and description for Cdiscount')
             ->assertDontSee('data-octopia-describe', false);
     }
 
@@ -216,7 +292,7 @@ class OctopiaDescriptionTest extends TestCase
         $this->actingAs($this->admin())
             ->postJson('/admin/products/'.$product->id.'/cdiscount/describe', ['octopia_template_id' => $template->id])
             ->assertOk()
-            ->assertExactJson(['description' => 'Casquette en coton, réglable.']);
+            ->assertExactJson(['title' => 'Casquette en coton', 'description' => 'Casquette en coton, réglable.']);
 
         $this->assertSame(0, CdiscountListing::query()->count());
     }
@@ -240,7 +316,7 @@ class OctopiaDescriptionTest extends TestCase
                 parent::__construct('test-key');
             }
 
-            public function write(Product $product, OctopiaTemplate $template): string
+            public function write(Product $product, OctopiaTemplate $template): array
             {
                 throw new RuntimeException('Claude could not be reached.');
             }
@@ -274,6 +350,23 @@ class OctopiaDescriptionTest extends TestCase
         $this->assertSame(OctopiaDescriptionWriter::LIMIT, mb_strlen($writer->clean(str_repeat('a', 5000))));
     }
 
+    public function test_the_title_is_cleaned_to_one_plain_line_within_what_octopia_takes(): void
+    {
+        $writer = new OctopiaDescriptionWriter('test-key');
+
+        $this->assertSame(
+            'Casquette camouflage - coton & polyester',
+            $writer->cleanTitle("<b>Casquette</b>  camouflage \u{2014}\n coton &amp; polyester  "),
+        );
+        $this->assertSame(OctopiaDescriptionWriter::TITLE_LIMIT, mb_strlen($writer->cleanTitle(str_repeat('a', 500))));
+    }
+
+    public function test_the_writer_uses_the_sonnet_model(): void
+    {
+        // Reading facts off a sheet does not need the largest model.
+        $this->assertSame('claude-sonnet-5', (new ReflectionClassConstant(OctopiaDescriptionWriter::class, 'MODEL'))->getValue());
+    }
+
     public function test_the_brief_names_the_category_and_gives_the_sheet(): void
     {
         $product = $this->product([
@@ -300,9 +393,12 @@ class OctopiaDescriptionTest extends TestCase
     {
         $prompt = (new ReflectionClassConstant(OctopiaDescriptionWriter::class, 'SYSTEM_PROMPT'))->getValue();
 
+        // The title too: what the article is, as the category names it, with no uses.
+        $this->assertMatchesRegularExpression('/Le titre : entre 50 et 110 caractères/', $prompt);
+        $this->assertMatchesRegularExpression("/N'y mets pas d'usage ni d'activité/", $prompt);
         // The article is described as its category names it, never as another kind.
-        $this->assertStringContainsString('cohérente avec cette catégorie', $prompt);
-        $this->assertMatchesRegularExpression("/Ne le présente\s+jamais comme un autre type d'article/", $prompt);
+        $this->assertMatchesRegularExpression('/cohérents\s+avec cette catégorie/', $prompt);
+        $this->assertMatchesRegularExpression("/Ne le présente\s+jamais comme un autre type\s+d'article/", $prompt);
         // A list of uses is what made a product read as something else.
         $this->assertStringContainsString("N'énumère pas les activités ou les usages", $prompt);
         $this->assertStringContainsString('Ne reprends pas les rubriques « Style »', $prompt);

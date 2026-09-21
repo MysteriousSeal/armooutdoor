@@ -12,39 +12,63 @@ use Illuminate\Support\Str;
 use RuntimeException;
 
 /**
- * The description a product is sent to Cdiscount with, written by Claude.
+ * The title and the description a product is sent to Cdiscount with, written
+ * by Claude.
  *
- * Octopia files a product by reading its description. The shop's is written
- * for a product page: it lists every use of the article, and a product filed
- * as a cap came back re-categorised because its text spoke of other things.
- * This one is written for the category the seller chose. It says what the
- * article is, as that category names it, and what the product sheet says of it,
- * and stops there. It is kept apart from the shop's and sent instead.
+ * Octopia files a product by reading its title and its description. The
+ * shop's are written for a product page: the description lists every use of
+ * the article, and a product filed as a cap came back re-categorised because
+ * its text spoke of other things. These are written for the category the seller
+ * chose. They say what the article is, as that category names it, and what the
+ * product sheet says of it, and stop there. They are kept apart from the
+ * shop's and sent instead.
  *
  * It does not choose the category and does not steer the product towards
- * another: the category is the seller's, and a description that made an
- * article read as some other kind of article would be false. Nothing is saved
- * from here; the answer lands in the field and the admin keeps or corrects it.
+ * another: the category is the seller's, and a title or a description that made
+ * an article read as some other kind of article would be false. Nothing is
+ * saved from here; the answer lands in the fields and the admin keeps or
+ * corrects it.
  */
 class OctopiaDescriptionWriter
 {
     /** Octopia takes 2000 characters; a description this short is read whole. */
     public const LIMIT = 2000;
 
+    /** What Octopia's title field takes. */
+    public const TITLE_LIMIT = 132;
+
+    /**
+     * Reading facts off a product sheet and phrasing them plainly is not a job
+     * for the largest model: the faster one does it, and the admin is waiting
+     * on the button.
+     */
+    private const MODEL = 'claude-sonnet-5';
+
     private const MAX_TOKENS = 1200;
 
     private const SOURCE_LIMIT = 3000;
 
     private const SYSTEM_PROMPT = <<<'PROMPT'
-        Tu rédiges la description d'un produit pour Cdiscount, pour une petite
+        Tu rédiges le titre et la description d'un produit pour Cdiscount, pour une petite
         boutique française d'articles de plein air. Les articles sont neufs.
 
-        Cdiscount range un produit d'après sa description, et la catégorie a
-        déjà été choisie par le vendeur. Ta description doit donc être
-        cohérente avec cette catégorie : présente l'article pour ce que la
-        catégorie nomme, et pas pour autre chose. Une casquette est décrite
-        comme une casquette, un sac à dos comme un sac à dos. Ne le présente
-        jamais comme un autre type d'article que celui de la catégorie.
+        Cdiscount range un produit d'après son titre et sa description, et la
+        catégorie a déjà été choisie par le vendeur. Ton titre et ta
+        description doivent donc être cohérents avec cette catégorie :
+        présente l'article pour ce que la catégorie nomme, et pas pour autre
+        chose. Une casquette est décrite comme une casquette, un sac à dos
+        comme un sac à dos. Ne le présente jamais comme un autre type
+        d'article que celui de la catégorie.
+
+        Le titre : entre 50 et 110 caractères, 132 au maximum. Il commence par
+        ce qu'est l'article, tel que la catégorie le nomme, puis la marque
+        s'il y en a une, puis les précisions que la fiche donne : matière,
+        motif ou coloris, taille, contenance, dimensions. Il se lit comme un
+        libellé de catalogue, pas comme une phrase : pas de ponctuation
+        empilée, pas de majuscules d'insistance, pas de mots vagues
+        (« qualité », « idéal », « pratique »), pas de prix, pas de nom de
+        boutique. N'y mets pas d'usage ni d'activité : ils ne servent pas à
+        identifier l'article et font ranger le produit ailleurs.
 
         Reste factuel et sobre. Commence par dire ce qu'est l'article, puis
         donne ce que la fiche établit : matière, coupe, finitions, coloris ou
@@ -76,25 +100,29 @@ class OctopiaDescriptionWriter
         ni de site, aucune marque autre que celle de l'article. Pas de tiret
         long.
 
-        Rends ta réponse en appelant l'outil « description_cdiscount », jamais
-        en écrivant du texte à côté.
+        Rends ta réponse en appelant l'outil « fiche_cdiscount », jamais en
+        écrivant du texte à côté.
         PROMPT;
 
     /** @return array<string, mixed> */
     private static function tool(): array
     {
         return [
-            'name' => 'description_cdiscount',
-            'description' => 'Dépose la description du produit pour Cdiscount, cohérente avec la catégorie choisie.',
+            'name' => 'fiche_cdiscount',
+            'description' => 'Dépose le titre et la description du produit pour Cdiscount, cohérents avec la catégorie choisie.',
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
+                    'title' => [
+                        'type' => 'string',
+                        'description' => "Le titre : ce qu'est l'article tel que la catégorie le nomme, puis la marque et les précisions de la fiche. Entre 50 et 110 caractères, 132 au maximum.",
+                    ],
                     'description' => [
                         'type' => 'string',
                         'description' => 'La description : trois à cinq phrases en texte simple, entre 250 et 700 caractères.',
                     ],
                 ],
-                'required' => ['description'],
+                'required' => ['title', 'description'],
             ],
         ];
     }
@@ -112,7 +140,10 @@ class OctopiaDescriptionWriter
         return filled($this->apiKey);
     }
 
-    public function write(Product $product, OctopiaTemplate $template): string
+    /**
+     * @return array{title: string, description: string}
+     */
+    public function write(Product $product, OctopiaTemplate $template): array
     {
         if (! $this->isConfigured()) {
             throw new RuntimeException('No Anthropic API key is configured.');
@@ -122,7 +153,7 @@ class OctopiaDescriptionWriter
 
         try {
             $message = $client->messages->create(
-                model: 'claude-opus-5',
+                model: self::MODEL,
                 maxTokens: self::MAX_TOKENS,
                 system: self::SYSTEM_PROMPT,
                 thinking: ['type' => 'disabled'],
@@ -145,13 +176,14 @@ class OctopiaDescriptionWriter
 
         foreach ($message->content as $block) {
             if ($block->type === 'tool_use' && $block->name === self::tool()['name']) {
+                $title = $this->cleanTitle((string) ($block->input['title'] ?? ''));
                 $description = $this->clean((string) ($block->input['description'] ?? ''));
 
-                if ($description === '') {
-                    throw new RuntimeException('Claude answered with an empty description.');
+                if ($title === '' || $description === '') {
+                    throw new RuntimeException('Claude answered with an empty title or description.');
                 }
 
-                return $description;
+                return ['title' => $title, 'description' => $description];
             }
         }
 
@@ -189,13 +221,26 @@ class OctopiaDescriptionWriter
         }
 
         $lines[] = '';
-        $lines[] = 'Rédige la description Cdiscount de cet article, cohérente avec la catégorie choisie.';
+        $lines[] = 'Rédige le titre et la description Cdiscount de cet article, cohérents avec la catégorie choisie.';
 
         return implode("\n", $lines);
     }
 
     /**
-     * The text as it will be sent: plain, on the lines it was written on, and
+     * The title as it will be sent: one line of plain text, within what
+     * Octopia's field takes.
+     */
+    public function cleanTitle(string $text): string
+    {
+        $text = html_entity_decode(strip_tags($text), ENT_QUOTES | ENT_HTML5);
+        $text = str_replace(["\u{2014}", "\u{2013}"], '-', $text);
+        $text = preg_replace('/\s+/u', ' ', $text) ?? $text;
+
+        return Str::limit(trim($text), self::TITLE_LIMIT, '');
+    }
+
+    /**
+     * The description as it will be sent: plain, on the lines it was written on, and
      * within what Octopia takes. Octopia refuses HTML in this field.
      */
     public function clean(string $text): string

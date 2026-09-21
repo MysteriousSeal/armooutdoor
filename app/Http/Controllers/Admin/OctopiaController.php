@@ -369,10 +369,11 @@ class OctopiaController extends Controller
     }
 
     /**
-     * Claude writes the description this product is sent to Cdiscount with.
+     * Claude writes the title and the description this product is sent to
+     * Cdiscount with.
      *
-     * Not saved: it lands in the field, and Save decides whether it stays. It
-     * is written for the category chosen, which is why the category is sent.
+     * Not saved: they land in the fields, and Save decides whether they stay.
+     * They are written for the category chosen, which is why it is sent.
      */
     public function generateDescription(Request $request, Product $product, OctopiaDescriptionWriter $writer): JsonResponse
     {
@@ -385,12 +386,10 @@ class OctopiaController extends Controller
         ]);
 
         try {
-            return response()->json([
-                'description' => $writer->write(
-                    $product->load(['category', 'variants']),
-                    OctopiaTemplate::query()->findOrFail((int) $data['octopia_template_id']),
-                ),
-            ]);
+            return response()->json($writer->write(
+                $product->load(['category', 'variants']),
+                OctopiaTemplate::query()->findOrFail((int) $data['octopia_template_id']),
+            ));
         } catch (RuntimeException $e) {
             report($e);
 
@@ -409,6 +408,7 @@ class OctopiaController extends Controller
             'variants' => ['nullable', 'array'],
             'variants.*' => ['nullable', 'array'],
             'variants.*.*' => ['nullable', 'string', 'max:5000'],
+            'title' => ['nullable', 'string', 'max:'.OctopiaDescriptionWriter::TITLE_LIMIT],
             'description' => ['nullable', 'string', 'max:'.OctopiaDescriptionWriter::LIMIT],
             'offer' => ['nullable', 'array'],
             'offer.condition' => ['nullable', 'string', Rule::in(array_keys(CdiscountListing::CONDITIONS))],
@@ -436,7 +436,8 @@ class OctopiaController extends Controller
                 'values' => $this->answers((array) ($data['values'] ?? [])),
                 'per_variant' => array_values(array_unique(array_map('strval', (array) ($data['per_variant'] ?? [])))),
                 'offer' => $this->offer((array) ($data['offer'] ?? [])),
-                // Empty is no description of its own: the shop's stands in.
+                // Empty is none of its own: the shop's name and description stand in.
+                'title' => filled($data['title'] ?? null) ? trim($data['title']) : null,
                 'description' => filled($data['description'] ?? null) ? trim($data['description']) : null,
             ],
         );

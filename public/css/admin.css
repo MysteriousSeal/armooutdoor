@@ -8742,7 +8742,8 @@ a.nb-match:hover {
     margin: 0;
 }
 
-[data-octopia-description] textarea.is-suggested {
+[data-octopia-description] textarea.is-suggested,
+[data-octopia-description] input.is-suggested {
     border-color: var(--accent);
     background: color-mix(in srgb, var(--accent) 8%, var(--surface));
 }

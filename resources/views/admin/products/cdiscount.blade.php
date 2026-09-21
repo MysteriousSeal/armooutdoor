@@ -234,15 +234,38 @@
             <div data-octopia-description @unless($currentTemplateId) hidden @endunless>
                 <section class="octopia-panel">
                     <header class="octopia-panel-head">
-                        <h3 class="octopia-panel-title">Description for Cdiscount</h3>
+                        <h3 class="octopia-panel-title">Title and description for Cdiscount</h3>
                         <p class="octopia-panel-hint">
-                            Sent to Cdiscount instead of the meta description and the long description, which Octopia reads to file the product
-                            and which, listing every use of the article, can move it to another category. Written for the category chosen: what the article is, plainly.
-                            Left empty, the meta description is sent, or the long one.
+                            Octopia reads the title and the description to file the product, and the shop's, which list every use of the article, can move it to another category.
+                            These are sent instead: written for the category chosen, they say what the article is, plainly.
+                            Left empty, the product's name is sent, and the meta description or the long one.
                         </p>
                     </header>
 
                     <div class="form-group">
+                        <label for="octopia-title">Title</label>
+                        <input
+                            type="text"
+                            name="title"
+                            id="octopia-title"
+                            class="form-control"
+                            maxlength="{{ \App\Services\Octopia\OctopiaDescriptionWriter::TITLE_LIMIT }}"
+                            value="{{ old('title', $listing?->title) }}"
+                            placeholder="{{ $product->localizedName() }}"
+                            data-octopia-title-field
+                        >
+                        <p class="form-hint">
+                            <span data-octopia-title-count>{{ mb_strlen((string) old('title', $listing?->title)) }}</span>
+                            / {{ \App\Services\Octopia\OctopiaDescriptionWriter::TITLE_LIMIT }} characters.
+                            @if ($activeVariants->isNotEmpty())
+                                The variant's own wording is added after it.
+                            @endif
+                        </p>
+                        @error('title')<p class="form-error">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label for="octopia-description">Description</label>
                         <textarea
                             name="description"
                             id="octopia-description"

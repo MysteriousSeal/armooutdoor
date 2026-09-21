@@ -148,6 +148,8 @@
     // category, and counted as it is typed.
     var text = document.querySelector('[data-octopia-description-field]');
     var count = document.querySelector('[data-octopia-count]');
+    var heading = document.querySelector('[data-octopia-title-field]');
+    var headingCount = document.querySelector('[data-octopia-title-count]');
     var write = document.querySelector('[data-octopia-describe]');
     var writeStatus = document.querySelector('[data-octopia-describe-status]');
 
@@ -155,6 +157,17 @@
         if (text && count) {
             count.textContent = String(text.value.length);
         }
+
+        if (heading && headingCount) {
+            headingCount.textContent = String(heading.value.length);
+        }
+    }
+
+    if (heading) {
+        heading.addEventListener('input', function () {
+            heading.classList.remove('is-suggested');
+            counted();
+        });
     }
 
     if (text) {
@@ -180,7 +193,9 @@
         write.addEventListener('click', function () {
             // What is already written was written by somebody: it is not
             // replaced without being asked for.
-            if (text.value.trim() !== '' && !window.confirm('Replace what is already written?')) {
+            var written = text.value.trim() !== '' || (heading && heading.value.trim() !== '');
+
+            if (written && !window.confirm('Replace what is already written?')) {
                 return;
             }
 
@@ -209,8 +224,14 @@
             }).then(function (body) {
                 text.value = body.description || '';
                 text.classList.add('is-suggested');
+
+                if (heading && body.title) {
+                    heading.value = body.title;
+                    heading.classList.add('is-suggested');
+                }
+
                 counted();
-                tell('Written for the category chosen. Read it over, then save.', false);
+                tell('Title and description written for the category chosen. Read them over, then save.', false);
             }).catch(function (error) {
                 tell(error.message || 'Claude could not be reached.', true);
             }).then(function () {
