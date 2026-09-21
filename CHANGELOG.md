@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-21 · v1.48.1 · build EKDKW9
+
+### Admin
+
+- **Products sent to Octopia carry their meta description as their description, when they have one.** Octopia files a product by reading its description, and the long one, full of the uses and materials of the article, kept sending products to another category than the one chosen. The meta description says what the article is in a couple of sentences, which is what the category is meant to be read from. A product without a meta description sends its long description as before, and the « Description » check on the Cdiscount page reads the same value, so a product with only a meta description counts as having one.
+
+**No migration.**
+
 ## 2026-09-21 · v1.48.0 · build ZL3FJY
 
 ### Admin
