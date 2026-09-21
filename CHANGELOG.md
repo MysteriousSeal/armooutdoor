@@ -2,6 +2,17 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-21 · v1.48.0 · build ZL3FJY
+
+### Admin
+
+- **Cdiscount now works through Octopia's API, and the Excel templates are gone.** A category is read straight from Octopia with the seller's credentials instead of from an .xlsm file Octopia gave out: the Cdiscount page has a search over Octopia's 7,600 categories (by name or 6-character code, accents and case set aside), a « Read it » button that keeps what the category asks, and « Refresh from Octopia » to read it again. The upload, the parser and the filled-file download are removed. The category codes are the same ones the templates used, so answers already given on products stay valid. The credentials are three variables, `OCTOPIA_CLIENT_ID`, `OCTOPIA_CLIENT_SECRET` and `OCTOPIA_SELLER_ID`, and until they are set the page says so instead of offering a search that can only fail. If Octopia refuses them, the page shows its answer rather than « no match ».
+- **Each product has an Offer panel on its Cdiscount page**, beside the category's own attributes: condition, a markup on the shop price, VAT, preparation time, and each way of delivering (tracked, signed, Mondial Relay) with its cost and the cost of each further item. Until a product has settings of its own the defaults stand: 40% markup, 0% VAT, one day to prepare, delivery at 3 €, 5 € and 0 €. A « Sold on Cdiscount at » block shows the price the customer will pay, one per variant, and follows the markup as it is typed. A promotion goes out with the undiscounted price struck through, and the stock is the shop's own, variant by variant. The product page gets a fourth mark, Offer.
+- **The Cdiscount page sends to Octopia in two steps.** « 1. Send the products » creates the product sheets in Octopia's catalogue, « 2. Put them on sale » sends the price, the stock and the delivery. Lines with something missing (an EAN, a description, a photo, a required attribute, the offer) cannot be ticked, and the page names what is missing beside each. Pictures must be served over https, so a send from a site served over http is refused: send from production. Both steps ask for confirmation.
+- **Octopia's answer is kept and shown per line.** Each batch is listed with its package id, and « Check the result » asks Octopia what became of it: Integrated, Refused, Rejected or still being processed, with Octopia's own error messages next to each line. Nothing is retried by itself when a send goes wrong, so a batch is never submitted twice.
+
+**Migration:** three, run with `php artisan migrate`. The first drops the Excel file columns of `octopia_templates` and adds `synced_at`, the second creates `octopia_submissions`, the third adds `offer` to `cdiscount_listings` and `kind` to `octopia_submissions`. Categories and answers already saved are kept. Before sending from production, add the three `OCTOPIA_` variables to its `.env`.
+
 ## 2026-09-20 · v1.47.0 · build JL80PR
 
 ### Admin
