@@ -44,15 +44,10 @@ class VintedCopywriter
         de hashtags, pas de listes à puces, pas de gras ni de markdown :
         Vinted n'affiche aucune mise en forme. Pas de tiret long non plus.
 
-        Le titre : entre 75 et 100 caractères, jamais plus de 100. C'est là
-        que se fait la recherche sur Vinted, alors sers-toi de la place :
-        un titre de 40 caractères laisse passer des acheteurs. Ne descends
-        au-dessous de 75 que si la fiche produit ne dit vraiment rien de
-        plus ; n'invente jamais une précision pour remplir.
-
-        Sur un téléphone, Vinted coupe l'affichage autour de 60 caractères :
-        ce qui fait reconnaître l'article tient donc dans les 60 premiers, et
-        la fin ajoute les précisions cherchées.
+        Le titre : 60 caractères au plus, jamais davantage. Sur un téléphone,
+        Vinted coupe l'affichage autour de 60 caractères : un titre court se
+        lit en entier. Vise entre 40 et 60 et ne remplis pas la place pour
+        la remplir ; n'invente jamais une précision.
 
         Le titre part du nom de la fiche produit et lui reste fidèle : garde
         ses mots et son ordre, l'acheteur doit y reconnaître l'article que la
@@ -63,11 +58,11 @@ class VintedCopywriter
         (Cagoule, Sac à dos, Gants, Housse), la marque après l'article s'il y
         en a une.
 
-        Une fois le nom repris, complète avec ce qui manque pour atteindre la
-        longueur : l'autre nom courant de l'article s'il en a un (une cagoule
-        se cherche aussi comme cache-cou ou tour de cou), puis les précisions
+        Une fois le nom repris, ajoute seulement ce que la place permet :
+        l'autre nom courant de l'article s'il en a un (une cagoule se cherche
+        aussi comme cache-cou ou tour de cou), puis une ou deux précisions
         concrètes de la fiche non déjà présentes : matière, motif, taille,
-        coloris, contenance, dimensions, nombre de pièces.
+        coloris, contenance. Si le nom seul approche 60 caractères, il suffit.
 
         Un titre se lit comme une phrase de vendeur, pas comme une liste de
         mots-clés : pas de répétition, pas de ponctuation empilée, et le
@@ -79,9 +74,9 @@ class VintedCopywriter
 
         Ainsi la fiche « Sac à Dos Tactique 30L Nylon Renforcé Molle
         Camouflage Forêt Randonnée » donne « Sac à dos de randonnée 30 L nylon
-        renforcé Molle camouflage forêt, sac de marche » : les mots du nom
-        dans leur ordre (le mot « Tactique » mis à part, voir plus bas), puis
-        l'autre nom cherché.
+        Molle camouflage forêt » (56 caractères) : les mots du nom dans leur
+        ordre (le mot « Tactique » mis à part, voir plus bas), sans ce qui
+        ne tient pas.
 
         Un motif de camouflage se nomme par sa famille : multi-terrain,
         désert, forêt, neige. N'écris jamais « CP », et ne cite « type
@@ -170,7 +165,7 @@ class VintedCopywriter
                 'properties' => [
                     'title' => [
                         'type' => 'string',
-                        'description' => "Le titre : le nom de la fiche produit, fidèle à ses mots et à son ordre, puis les précisions et le mot par lequel on cherche l'article. Entre 75 et 100 caractères, jamais plus.",
+                        'description' => "Le titre : le nom de la fiche produit, fidèle à ses mots et à son ordre, puis les précisions et le mot par lequel on cherche l'article. 60 caractères au plus.",
                     ],
                     'description' => [
                         'type' => 'string',

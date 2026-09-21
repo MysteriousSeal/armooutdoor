@@ -300,9 +300,8 @@ class VintedCopyGenerationTest extends TestCase
     {
         $prompt = (new ReflectionClass(VintedCopywriter::class))->getConstant('SYSTEM_PROMPT');
 
-        $this->assertStringContainsString('entre 75 et 100 caractères', $prompt);
-        // The space is there to be used: short titles miss searches.
-        $this->assertStringContainsString('recherche sur Vinted', $prompt);
+        // Vinted cuts the display around 60 characters on a phone.
+        $this->assertStringContainsString('60 caractères au plus', $prompt);
         // The title starts from the sheet's own name and keeps its words.
         $this->assertStringContainsString('part du nom de la fiche produit', $prompt);
         $this->assertStringContainsString('garde', $prompt);
