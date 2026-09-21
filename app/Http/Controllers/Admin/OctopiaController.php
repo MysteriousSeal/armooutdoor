@@ -10,6 +10,7 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Services\Octopia\OctopiaAttributeWriter;
 use App\Services\Octopia\OctopiaClient;
+use App\Services\Octopia\OctopiaDescriptionWriter;
 use App\Support\Octopia\ApiFields;
 use App\Support\Octopia\Exporter;
 use App\Support\Octopia\Readiness;
@@ -367,6 +368,36 @@ class OctopiaController extends Controller
         }
     }
 
+    /**
+     * Claude writes the description this product is sent to Cdiscount with.
+     *
+     * Not saved: it lands in the field, and Save decides whether it stays. It
+     * is written for the category chosen, which is why the category is sent.
+     */
+    public function generateDescription(Request $request, Product $product, OctopiaDescriptionWriter $writer): JsonResponse
+    {
+        if (! $writer->isConfigured()) {
+            return response()->json(['message' => 'No Anthropic API key is configured on this environment.'], 503);
+        }
+
+        $data = $request->validate([
+            'octopia_template_id' => ['required', 'integer', 'exists:octopia_templates,id'],
+        ]);
+
+        try {
+            return response()->json([
+                'description' => $writer->write(
+                    $product->load(['category', 'variants']),
+                    OctopiaTemplate::query()->findOrFail((int) $data['octopia_template_id']),
+                ),
+            ]);
+        } catch (RuntimeException $e) {
+            report($e);
+
+            return response()->json(['message' => $e->getMessage()], 502);
+        }
+    }
+
     public function updateProduct(Request $request, Product $product): RedirectResponse
     {
         $data = $request->validate([
@@ -378,6 +409,7 @@ class OctopiaController extends Controller
             'variants' => ['nullable', 'array'],
             'variants.*' => ['nullable', 'array'],
             'variants.*.*' => ['nullable', 'string', 'max:5000'],
+            'description' => ['nullable', 'string', 'max:'.OctopiaDescriptionWriter::LIMIT],
             'offer' => ['nullable', 'array'],
             'offer.condition' => ['nullable', 'string', Rule::in(array_keys(CdiscountListing::CONDITIONS))],
             'offer.markup' => ['nullable', 'numeric', 'min:-50', 'max:200'],
@@ -404,6 +436,8 @@ class OctopiaController extends Controller
                 'values' => $this->answers((array) ($data['values'] ?? [])),
                 'per_variant' => array_values(array_unique(array_map('strval', (array) ($data['per_variant'] ?? [])))),
                 'offer' => $this->offer((array) ($data['offer'] ?? [])),
+                // Empty is no description of its own: the shop's stands in.
+                'description' => filled($data['description'] ?? null) ? trim($data['description']) : null,
             ],
         );
 

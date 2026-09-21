@@ -13,6 +13,7 @@
     var blocks = Array.prototype.slice.call(document.querySelectorAll('[data-octopia-fields]'));
     var offer = document.querySelector('[data-octopia-offer]');
     var assist = document.querySelector('[data-octopia-assist]');
+    var describe = document.querySelector('[data-octopia-description]');
 
     function apply() {
         blocks.forEach(function (block) {
@@ -27,6 +28,14 @@
         // Nothing to fill before a category is chosen.
         if (assist) {
             assist.hidden = select.value === '';
+        }
+
+        // No category, no description to write for it.
+        if (describe) {
+            describe.hidden = select.value === '';
+            describe.querySelectorAll('input, select, textarea').forEach(function (field) {
+                field.disabled = select.value === '';
+            });
         }
 
         // No category, no offer: nothing to sell it under.
@@ -126,6 +135,82 @@
         }, { once: true });
 
         return true;
+    }
+
+    // The description for Cdiscount: written by Claude for the chosen
+    // category, and counted as it is typed.
+    var text = document.querySelector('[data-octopia-description-field]');
+    var count = document.querySelector('[data-octopia-count]');
+    var write = document.querySelector('[data-octopia-describe]');
+    var writeStatus = document.querySelector('[data-octopia-describe-status]');
+
+    function counted() {
+        if (text && count) {
+            count.textContent = String(text.value.length);
+        }
+    }
+
+    if (text) {
+        text.addEventListener('input', function () {
+            text.classList.remove('is-suggested');
+            counted();
+        });
+    }
+
+    if (write && text) {
+        var writeIdle = write.textContent;
+
+        function tell(message, failed) {
+            if (!writeStatus) {
+                return;
+            }
+
+            writeStatus.hidden = !message;
+            writeStatus.textContent = message || '';
+            writeStatus.className = 'vinted-assist-status' + (failed ? ' is-failed' : '');
+        }
+
+        write.addEventListener('click', function () {
+            // What is already written was written by somebody: it is not
+            // replaced without being asked for.
+            if (text.value.trim() !== '' && !window.confirm('Replace what is already written?')) {
+                return;
+            }
+
+            write.disabled = true;
+            write.textContent = 'Writing…';
+            tell('Claude is reading the product sheet, a few seconds.', false);
+
+            fetch(write.getAttribute('data-describe-url'), {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token ? token.getAttribute('content') : '',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({ octopia_template_id: select.value })
+            }).then(function (response) {
+                return response.json().then(function (body) {
+                    if (!response.ok) {
+                        throw new Error(body && body.message ? body.message : 'Claude could not be reached.');
+                    }
+
+                    return body;
+                });
+            }).then(function (body) {
+                text.value = body.description || '';
+                text.classList.add('is-suggested');
+                counted();
+                tell('Written for the category chosen. Read it over, then save.', false);
+            }).catch(function (error) {
+                tell(error.message || 'Claude could not be reached.', true);
+            }).then(function () {
+                write.disabled = false;
+                write.textContent = writeIdle;
+            });
+        });
     }
 
     if (run) {

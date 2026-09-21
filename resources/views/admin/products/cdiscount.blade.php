@@ -231,6 +231,47 @@
                 </div>
             @endforeach
 
+            {{-- The description Cdiscount is given, written for the category chosen.
+                 Sent instead of the shop's meta and long descriptions. --}}
+            <div data-octopia-description @unless($currentTemplateId) hidden @endunless>
+                <section class="order-panel">
+                    <h3 class="order-panel-title">Description for Cdiscount</h3>
+                    <p class="form-hint">
+                        Octopia reads the description to file the product, and the shop's, which lists every use of the article, can move it to another category.
+                        This one is sent instead of the meta description and the long description: written for the category chosen, it says what the article is, plainly.
+                        Left empty, the meta description is sent, or the long one.
+                    </p>
+
+                    <div class="form-group">
+                        <textarea
+                            name="description"
+                            id="octopia-description"
+                            class="form-control"
+                            rows="6"
+                            maxlength="{{ \App\Services\Octopia\OctopiaDescriptionWriter::LIMIT }}"
+                            data-octopia-description-field
+                        >{{ old('description', $listing?->description) }}</textarea>
+                        <p class="form-hint">
+                            <span data-octopia-count>{{ mb_strlen((string) old('description', $listing?->description)) }}</span>
+                            / {{ \App\Services\Octopia\OctopiaDescriptionWriter::LIMIT }} characters, plain text.
+                        </p>
+                        @error('description')<p class="form-error">{{ $message }}</p>@enderror
+                    </div>
+
+                    @if ($canGenerate)
+                        <div class="octopia-description-actions">
+                            <button
+                                type="button"
+                                class="btn btn-secondary"
+                                data-octopia-describe
+                                data-describe-url="{{ route('admin.products.cdiscount.describe', $product) }}"
+                            >Write with Claude</button>
+                            <p class="vinted-assist-status" data-octopia-describe-status role="status" hidden></p>
+                        </div>
+                    @endif
+                </section>
+            </div>
+
             {{-- The offer: what it is sold at and delivered how. Independent of
                  the category's attributes, but there is no offer without a
                  category, so it follows the choice above. --}}

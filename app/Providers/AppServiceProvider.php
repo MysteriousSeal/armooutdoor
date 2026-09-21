@@ -14,6 +14,7 @@ use App\Models\ShippingSetting;
 use App\Models\User;
 use App\Models\WishlistItem;
 use App\Services\Octopia\OctopiaAttributeWriter;
+use App\Services\Octopia\OctopiaDescriptionWriter;
 use App\Services\VintedCopywriter;
 use App\Support\Cart;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -41,6 +42,11 @@ class AppServiceProvider extends ServiceProvider
         ));
 
         $this->app->bind(OctopiaAttributeWriter::class, fn (): OctopiaAttributeWriter => new OctopiaAttributeWriter(
+            config('services.anthropic.key'),
+            config('services.anthropic.workspace_id'),
+        ));
+
+        $this->app->bind(OctopiaDescriptionWriter::class, fn (): OctopiaDescriptionWriter => new OctopiaDescriptionWriter(
             config('services.anthropic.key'),
             config('services.anthropic.workspace_id'),
         ));

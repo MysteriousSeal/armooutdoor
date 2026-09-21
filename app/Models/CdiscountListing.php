@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * next. It sits beside the product, as the Vinted listing does: what a
  * marketplace asks is not what the catalogue knows.
  */
-#[Fillable(['product_id', 'octopia_template_id', 'values', 'per_variant', 'offer'])]
+#[Fillable(['product_id', 'octopia_template_id', 'values', 'per_variant', 'offer', 'description'])]
 class CdiscountListing extends Model
 {
     /** What the article is like, as Octopia words it. */

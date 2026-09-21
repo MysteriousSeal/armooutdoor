@@ -8731,6 +8731,22 @@ a.nb-match:hover {
     font-size: 0.875rem;
 }
 
+.octopia-description-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1rem;
+}
+
+.octopia-description-actions .vinted-assist-status {
+    margin: 0;
+}
+
+[data-octopia-description] textarea.is-suggested {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+}
+
 .octopia-field .is-assumed {
     border-style: dashed;
     border-color: var(--accent-heading);

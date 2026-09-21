@@ -80,7 +80,7 @@ class Exporter
         }
 
         // What Octopia refuses a product sheet without, whatever the category.
-        if ($this->description($product) === '') {
+        if ($this->description($product, $listing) === '') {
             $missing[] = 'Description';
         }
 
@@ -102,7 +102,7 @@ class Exporter
             'gtin' => $gtin,
             'title' => $this->title($product, $variant),
             'missing' => $missing,
-            'payload' => $this->payload($product, $variant, $gtin, $reference, $values),
+            'payload' => $this->payload($listing, $product, $variant, $gtin, $reference, $values),
             'offer' => $this->offer($listing, $product, $variant, $gtin, $reference),
         ];
     }
@@ -180,8 +180,8 @@ class Exporter
     }
 
     /**
-     * The description Octopia is given: the product's meta description when it
-     * has one, its long description otherwise.
+     * The description Octopia is given: the one written for Cdiscount when
+     * there is one, else the product's meta description, else its long one.
      *
      * Octopia files a product by reading its description, and a long one,
      * full of the uses and the materials of the article, sent it to another
@@ -189,8 +189,12 @@ class Exporter
      * is in a couple of sentences, which is what the category is meant to be
      * read from.
      */
-    private function description(Product $product): string
+    private function description(Product $product, CdiscountListing $listing): string
     {
+        if (filled($listing->description)) {
+            return trim($listing->description);
+        }
+
         $meta = trim((string) $product->meta_description);
 
         return $meta !== '' ? $meta : trim($product->localizedDescriptionText());
@@ -208,14 +212,14 @@ class Exporter
      * @param  array<string, string>  $values  the category's own attributes, answered
      * @return array<string, mixed>
      */
-    private function payload(Product $product, ?ProductVariant $variant, string $gtin, string $reference, array $values): array
+    private function payload(CdiscountListing $listing, Product $product, ?ProductVariant $variant, string $gtin, string $reference, array $values): array
     {
         $payload = [
             // An integer, though a GTIN is written as text: Octopia says so.
             'gtin' => (int) preg_replace('/\D/', '', $gtin),
             'sellerProductReference' => $this->reference($reference),
             'title' => $this->title($product, $variant),
-            'description' => Str::limit($this->description($product), self::DESCRIPTION_LIMIT, ''),
+            'description' => Str::limit($this->description($product, $listing), self::DESCRIPTION_LIMIT, ''),
             'brand' => Str::limit((string) $product->brandName(), 50, ''),
             'categoryCode' => $this->template->code,
             'sellerPictureUrls' => collect($this->images($product, $variant))
@@ -225,7 +229,12 @@ class Exporter
             'attributes' => $this->attributes($values),
         ];
 
-        $marketing = Str::limit($product->localizedDescription(), self::MARKETING_LIMIT, '');
+        // The rich description is the shop's long one, in HTML: with a
+        // description of its own written for the category, it is not sent, or
+        // it would carry back what that one leaves out.
+        $marketing = filled($listing->description)
+            ? ''
+            : Str::limit($product->localizedDescription(), self::MARKETING_LIMIT, '');
 
         if (trim(strip_tags($marketing)) !== '') {
             $payload['richMarketingDescription'] = $marketing;
