@@ -84,8 +84,12 @@
         return match ? match[1] : null;
     }
 
-    /** Write a proposed value into an empty field, if the field can take it. */
-    function propose(field, value) {
+    /**
+     * Write a proposed value into an empty field, if the field can take it.
+     * A value Claude assumed rather than read is marked apart, so that it is
+     * checked rather than taken for a fact of the sheet.
+     */
+    function propose(field, value, assumed) {
         if (!field || field.value.trim() !== '') {
             return false;
         }
@@ -101,10 +105,24 @@
         }
 
         field.value = value;
-        field.classList.add('is-suggested');
+        field.classList.add(assumed ? 'is-assumed' : 'is-suggested');
+
+        var tag = null;
+
+        if (assumed && field.parentNode) {
+            tag = document.createElement('span');
+            tag.className = 'octopia-assumed-tag';
+            tag.textContent = 'Assumed, check it';
+            field.parentNode.insertBefore(tag, field);
+        }
+
         // Typing over a suggestion makes it the seller's own answer again.
         field.addEventListener('input', function () {
-            field.classList.remove('is-suggested');
+            field.classList.remove('is-suggested', 'is-assumed');
+
+            if (tag && tag.parentNode) {
+                tag.parentNode.removeChild(tag);
+            }
         }, { once: true });
 
         return true;
@@ -158,10 +176,19 @@
                 });
             }).then(function (body) {
                 var filled = 0;
+                var assumedLabels = [];
+                var assumed = body.assumed || [];
 
                 Object.keys(body.values || {}).forEach(function (code) {
-                    if (propose(block.querySelector('[name="values[' + code + ']"]'), body.values[code])) {
+                    var field = block.querySelector('[name="values[' + code + ']"]');
+                    var guess = assumed.indexOf(code) !== -1;
+
+                    if (propose(field, body.values[code], guess)) {
                         filled++;
+
+                        if (guess) {
+                            assumedLabels.push(field.closest('.octopia-field').querySelector('label').textContent.replace('*', '').trim());
+                        }
                     }
                 });
 
@@ -188,6 +215,11 @@
                 var message = filled === 0
                     ? 'Nothing more could be established from the product sheet.'
                     : 'Filled ' + filled + (filled === 1 ? ' attribute' : ' attributes') + ' from the product sheet. Read them over, then save.';
+
+                // Told apart in the message too: these are not read off the sheet.
+                if (assumedLabels.length) {
+                    message += ' Assumed rather than read from the sheet, so check them: ' + assumedLabels.join(', ') + '.';
+                }
 
                 if (lacking.length) {
                     message += ' Still to answer, and required: ' + lacking.join(', ') + '.';

@@ -40,6 +40,7 @@ class OctopiaAttributeFillTest extends TestCase
             ['column' => null, 'code' => '24061', 'label' => 'Matières', 'required' => false, 'kind' => 'mono', 'constraint' => '', 'options' => []],
             ['column' => null, 'code' => '999996', 'label' => 'Poids emballé', 'required' => false, 'kind' => 'mono', 'constraint' => 'Numérique · Unité : kg', 'options' => []],
             ['column' => null, 'code' => '46831', 'label' => 'Taille chapeau - bonnet', 'required' => true, 'kind' => 'monoranged', 'constraint' => '', 'options' => ['Taille unique', 'M']],
+            ['column' => null, 'code' => '28003', 'label' => 'Genre', 'required' => false, 'kind' => 'monoranged', 'constraint' => '', 'options' => ['Femme', 'Homme', 'Mixte']],
         ];
     }
 
@@ -126,6 +127,16 @@ class OctopiaAttributeFillTest extends TestCase
         $this->assertSame(['template' => $template->id, 'perVariant' => ['46831'], 'skip' => ['24061'], 'product' => $product->id], $spy->called);
     }
 
+    public function test_the_endpoint_tells_which_values_were_assumed(): void
+    {
+        $this->writerReturning(['values' => ['28003' => 'Mixte', '24061' => 'Polyester'], 'variants' => [], 'assumed' => ['28003']]);
+
+        $this->actingAs($this->admin())
+            ->postJson('/admin/products/'.Product::factory()->create()->id.'/cdiscount/generate', ['octopia_template_id' => $this->template()->id])
+            ->assertOk()
+            ->assertJsonPath('assumed', ['28003']);
+    }
+
     public function test_nothing_is_saved_by_filling(): void
     {
         $this->writerReturning(['values' => ['3264' => 'Noir'], 'variants' => []]);
@@ -195,7 +206,7 @@ class OctopiaAttributeFillTest extends TestCase
     {
         $pending = (new OctopiaAttributeWriter('test-key'))->pending($this->template(), ['3264', '24061']);
 
-        $this->assertSame(['3263', '999996', '46831'], array_column($pending, 'code'));
+        $this->assertSame(['3263', '999996', '46831', '28003'], array_column($pending, 'code'));
     }
 
     public function test_a_closed_list_takes_only_its_own_options_in_their_own_spelling(): void
@@ -214,6 +225,57 @@ class OctopiaAttributeFillTest extends TestCase
         $answer = $this->normalize(['values' => [['code' => '3264', 'value' => 'VERT OLIVE']]], [], $product);
 
         $this->assertSame(['3264' => 'Vert olive'], $answer['values']);
+    }
+
+    public function test_a_value_claude_assumed_is_marked_as_assumed(): void
+    {
+        $answer = $this->normalize(['values' => [
+            ['code' => '28003', 'value' => 'Mixte', 'basis' => 'supposé'],
+            ['code' => '24061', 'value' => 'Polyester', 'basis' => 'fiche'],
+            ['code' => '46831', 'value' => 'Taille unique', 'basis' => 'fiche'],
+        ]], [], Product::factory()->create());
+
+        // All three are kept; only the one Claude assumed is flagged. A value
+        // the sheet gave stays a fact of the sheet, even for an attribute that
+        // could have been assumed.
+        $this->assertSame(['28003' => 'Mixte', '24061' => 'Polyester', '46831' => 'Taille unique'], $answer['values']);
+        $this->assertSame(['28003'], $answer['assumed']);
+    }
+
+    public function test_an_assumption_is_refused_for_an_attribute_that_may_not_be_assumed(): void
+    {
+        $answer = $this->normalize(['values' => [
+            // Materials are read off the sheet or left empty.
+            ['code' => '24061', 'value' => '100 % coton', 'basis' => 'supposé'],
+            ['code' => '3264', 'value' => 'Noir', 'basis' => 'supposé'],
+        ]], [], Product::factory()->create());
+
+        $this->assertSame([], $answer['values']);
+        $this->assertSame([], $answer['assumed']);
+    }
+
+    public function test_an_attribute_that_may_be_assumed_is_assumed_when_claude_does_not_say(): void
+    {
+        $answer = $this->normalize(['values' => [['code' => '28003', 'value' => 'Mixte']]], [], Product::factory()->create());
+
+        // No word on where it is from: the cautious reading is that it is a guess.
+        $this->assertSame(['28003'], $answer['assumed']);
+    }
+
+    public function test_a_stated_value_with_no_basis_is_not_flagged(): void
+    {
+        $answer = $this->normalize(['values' => [['code' => '24061', 'value' => 'Polyester']]], [], Product::factory()->create());
+
+        $this->assertSame(['24061' => 'Polyester'], $answer['values']);
+        $this->assertSame([], $answer['assumed']);
+    }
+
+    public function test_the_attributes_that_may_be_assumed_are_the_six_the_seller_chose(): void
+    {
+        $this->assertEqualsCanonicalizing(
+            ['28003', '24097', '28898', '46831', '11429', '25233'],
+            array_keys(OctopiaAttributeWriter::ASSUMABLE),
+        );
     }
 
     public function test_a_colour_that_is_not_on_octopias_list_is_dropped(): void
@@ -306,6 +368,11 @@ class OctopiaAttributeFillTest extends TestCase
         // What was answered already is not in the list to fill.
         $this->assertStringNotContainsString('code 24061', $text);
 
+        // The rule to assume by is given for the attributes that may be assumed, and only for them.
+        $this->assertStringContainsString('Peut être supposé : Taille unique pour un accessoire', $text);
+        $this->assertStringContainsString('Peut être supposé : Mixte quand la fiche ne désigne', $text);
+        $this->assertSame(2, substr_count($text, 'Peut être supposé'));
+
         // The variants are shown only when an attribute is asked per variant.
         $this->assertStringContainsString('variante ', $text);
         $this->assertStringNotContainsString('Variantes :', $brief([]));
@@ -318,5 +385,9 @@ class OctopiaAttributeFillTest extends TestCase
         $this->assertStringContainsString("tu n'inventes", $prompt);
         $this->assertStringContainsString('Un attribut laissé vide est une bonne', $prompt);
         $this->assertStringContainsString('exactement l\'une des', $prompt);
+        // The one exception, and the word that keeps it apart from a fact.
+        $this->assertStringContainsString('peut être', $prompt);
+        $this->assertStringContainsString('« supposé »', $prompt);
+        $this->assertStringContainsString('Pour tous les autres, une valeur supposée est', $prompt);
     }
 }

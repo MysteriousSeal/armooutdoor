@@ -8745,6 +8745,22 @@ a.nb-match:hover {
     font-size: 0.875rem;
 }
 
+.octopia-field .is-assumed {
+    border-style: dashed;
+    border-color: var(--accent-heading);
+    background: color-mix(in srgb, var(--accent-heading) 6%, var(--surface));
+}
+
+.octopia-assumed-tag {
+    display: block;
+    margin-bottom: 0.2rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent-heading);
+}
+
 .octopia-field .is-suggested {
     border-color: var(--accent);
     background: color-mix(in srgb, var(--accent) 8%, var(--surface));

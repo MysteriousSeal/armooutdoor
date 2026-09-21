@@ -34,6 +34,30 @@ class OctopiaAttributeWriter
     /** A closed list can run to hundreds of colours: enough to choose from, not all of them. */
     private const OPTIONS_LIMIT = 400;
 
+    /**
+     * The attributes the shop lets Claude answer even when the sheet is
+     * silent, with the rule it answers by. Anything else is answered only
+     * when the sheet states it.
+     *
+     * They are the ones a seller of outdoor accessories answers the same way
+     * nearly every time, and which the sheet rarely spells out: who wears it,
+     * what size it comes in, how it is washed. A value given on this footing
+     * is marked as assumed, so the seller reads it over instead of taking it
+     * for a fact of the sheet. The origin is here on the seller's word: it is
+     * a statement to the customer, and an assumed one is checked before Save.
+     * Keyed by Octopia's property reference.
+     *
+     * @var array<string, string>
+     */
+    public const ASSUMABLE = [
+        '28003' => 'Mixte quand la fiche ne désigne ni les hommes, ni les femmes, ni les enfants.',
+        '24097' => "Adulte quand la fiche ne parle ni d'enfants ni de bébés.",
+        '28898' => 'La famille du sport principal parmi les usages que la fiche cite : le premier, ou celui qui domine.',
+        '46831' => 'Taille unique pour un accessoire vendu sans taille (cagoule, bonnet, tour de cou), sauf si la fiche donne des tailles.',
+        '11429' => "Le pays de fabrication si la fiche le dit ; sinon celui où ce type d'article est le plus souvent fabriqué.",
+        '25233' => "Les conseils d'entretien usuels de la matière indiquée sur la fiche.",
+    ];
+
     private const SYSTEM_PROMPT = <<<'PROMPT'
         Tu remplis les attributs d'une fiche produit Cdiscount, pour une petite
         boutique française d'articles de plein air. Les articles sont neufs.
@@ -57,6 +81,13 @@ class OctopiaAttributeWriter
         Pour un attribut numérique, écris le nombre seul, avec un point
         décimal, dans l'unité indiquée : convertis le poids de la fiche, qui est
         en grammes, si l'attribut est en kilogrammes.
+
+        Une exception : certains attributs portent la mention « peut être
+        supposé », avec la règle à suivre. Pour ceux-là seulement, si la fiche
+        ne dit rien, réponds ce que la règle indique, et déclare ta réponse
+        « supposé ». Une valeur que la fiche établit est déclarée « fiche »,
+        même pour ces attributs. Pour tous les autres, une valeur supposée est
+        interdite : sans la fiche, tu ne réponds pas.
 
         Un attribut marqué « par variante » a une réponse propre à chaque
         variante : donne-la avec l'identifiant de la variante, d'après son
@@ -89,8 +120,13 @@ class OctopiaAttributeWriter
                             'properties' => [
                                 'code' => ['type' => 'string', 'description' => "Le code de l'attribut, tel qu'il est donné."],
                                 'value' => ['type' => 'string', 'description' => 'La valeur.'],
+                                'basis' => [
+                                    'type' => 'string',
+                                    'enum' => ['fiche', 'supposé'],
+                                    'description' => "« fiche » si la fiche produit établit cette valeur, « supposé » si tu l'as déduite d'une règle « peut être supposé ».",
+                                ],
                             ],
-                            'required' => ['code', 'value'],
+                            'required' => ['code', 'value', 'basis'],
                         ],
                     ],
                     'variants' => [
@@ -130,7 +166,7 @@ class OctopiaAttributeWriter
      *
      * @param  list<string>  $perVariant  codes answered variant by variant
      * @param  list<string>  $skip  codes already answered, left as they are
-     * @return array{values: array<string, string>, variants: array<int, array<string, string>>}
+     * @return array{values: array<string, string>, variants: array<int, array<string, string>>, assumed: list<string>}
      */
     public function fill(Product $product, OctopiaTemplate $template, array $perVariant = [], array $skip = []): array
     {
@@ -141,7 +177,7 @@ class OctopiaAttributeWriter
         $fields = $this->pending($template, $skip);
 
         if ($fields === []) {
-            return ['values' => [], 'variants' => []];
+            return ['values' => [], 'variants' => [], 'assumed' => []];
         }
 
         $client = new Client(apiKey: $this->apiKey);
@@ -263,6 +299,10 @@ class OctopiaAttributeWriter
                 $lines[] = '  Contrainte : '.$field['constraint'];
             }
 
+            if (isset(self::ASSUMABLE[(string) $field['code']])) {
+                $lines[] = '  Peut être supposé : '.self::ASSUMABLE[(string) $field['code']];
+            }
+
             if (! empty($field['options'])) {
                 $lines[] = '  Liste fermée, une option exactement : '.implode(' | ', array_slice($field['options'], 0, self::OPTIONS_LIMIT));
             }
@@ -279,10 +319,15 @@ class OctopiaAttributeWriter
      * a size in the wrong unit would each be refused by Octopia days later.
      * So a value is kept only when it is one the category would take.
      *
+     * A value is assumed when Claude said so, and only the attributes the shop
+     * lets it assume may be: for any other, a value that is not on the sheet is
+     * dropped. An attribute that may be assumed and comes back with no word on
+     * where the value is from is taken as assumed, the cautious reading.
+     *
      * @param  array<string, mixed>  $input
      * @param  list<array<string, mixed>>  $fields
      * @param  list<string>  $perVariant
-     * @return array{values: array<string, string>, variants: array<int, array<string, string>>}
+     * @return array{values: array<string, string>, variants: array<int, array<string, string>>, assumed: list<string>}
      */
     private function normalize(array $input, array $fields, array $perVariant, Product $product): array
     {
@@ -290,14 +335,30 @@ class OctopiaAttributeWriter
         $variantIds = $product->variants->where('is_active', true)->pluck('id')->all();
 
         $values = [];
+        $assumed = [];
 
         foreach ((array) ($input['values'] ?? []) as $entry) {
             $code = (string) ($entry['code'] ?? '');
             $field = $byCode->get($code);
             $value = $field === null ? null : $this->clean($field, (string) ($entry['value'] ?? ''));
 
-            if ($value !== null) {
-                $values[$code] = $value;
+            if ($value === null) {
+                continue;
+            }
+
+            $assumable = isset(self::ASSUMABLE[$code]);
+            $basis = Str::lower(Str::ascii((string) ($entry['basis'] ?? '')));
+            $isAssumed = $basis === 'suppose' || ($basis === '' && $assumable);
+
+            // Not a value Claude may assume, and not one the sheet gave.
+            if ($isAssumed && ! $assumable) {
+                continue;
+            }
+
+            $values[$code] = $value;
+
+            if ($isAssumed) {
+                $assumed[] = $code;
             }
         }
 
@@ -320,7 +381,7 @@ class OctopiaAttributeWriter
             }
         }
 
-        return ['values' => $values, 'variants' => $variants];
+        return ['values' => $values, 'variants' => $variants, 'assumed' => $assumed];
     }
 
     /**
