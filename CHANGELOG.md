@@ -2,6 +2,17 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-21 · v1.50.0 · build KUBZT2
+
+### Admin
+
+- **A product can be sent to Cdiscount with a title and a description of its own, written by Claude.** Octopia files a product by reading its title and description, and the shop's, which list every use of the article, moved products to another category than the one chosen. The Cdiscount page of a product now has a « Title and description for Cdiscount » panel, and one « Write with Claude » button fills both from the product sheet, for the category chosen. Nothing is written until you ask, and nothing is saved until you press Save. A title and a description saved there are sent instead of the product's name, the meta description and the long description, and the shop's rich HTML description is not sent with them, or it would bring back what they leave out. Left empty, the product's name and the meta description, or the long one, are sent as before.
+- **What Claude is asked to write.** The article as the chosen category names it, then what the sheet states: material, pattern, size, weight. A title of 50 to 110 characters, never more than Octopia's 132, that reads as a catalogue label, and a description of three to five plain sentences. Every claim has to trace to a line of the sheet, so no care advice, no promise of durability, no situation of use and no accessory that the sheet does not give, and the sheet's « Style » and « Utilisation » lines, which are lists of uses, are not carried over. It describes an article as the kind of article its category says and never as another, so it is not a way of moving a product into a category it is not in. It is written on Sonnet, which answers in about three seconds. Read what it writes before saving: it is published as it stands.
+- **A variant's own wording follows the title.** Each variant is a sheet of its own on Cdiscount, so a long title is cut before that wording, never through it.
+- **The Cdiscount page of a product is laid out with room.** It had a full-screen width that put a label and its cost a screen apart, sections that touched, and 27 attributes in one wall. It now has a readable width and a card for each section. The attributes are grouped as Required (what Octopia refuses the product without), Recommended, and a closed « Other attributes » group that opens when something in it is answered, or when Claude fills a field in it, each group saying how many are answered. The delivery ways are a list with their costs beside them, and Save is a bar that stays in reach.
+
+**Migration:** two, run with `php artisan migrate`, adding a nullable `description` and a nullable `title` column to `cdiscount_listings`. Listings already saved are untouched.
+
 ## 2026-09-21 · v1.49.2 · build W7C8LQ
 
 ### Admin
