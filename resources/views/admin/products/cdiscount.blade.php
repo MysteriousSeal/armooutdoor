@@ -240,6 +240,7 @@
                     <p class="form-hint">
                         What Cdiscount is told about selling this product: at what price, delivered how, and how soon.
                         The stock is the shop's own{{ $activeVariants->isNotEmpty() ? ', variant by variant' : '' }}.
+                        The VAT, the eco-tax and the D3E tax are all sent as 0.
                     </p>
 
                     <div class="octopia-fields">
@@ -256,11 +257,6 @@
                             <label for="offer-markup">Markup on the shop price (%)</label>
                             <input type="number" step="0.1" min="-50" max="200" name="offer[markup]" id="offer-markup" class="form-control" value="{{ old('offer.markup', $offer['markup'] + 0) }}" data-offer-markup>
                             <p class="form-hint">Cdiscount takes a commission: this raises the shop's price to cover it.</p>
-                        </div>
-
-                        <div class="form-group octopia-field">
-                            <label for="offer-vat">VAT (%)</label>
-                            <input type="number" step="0.1" min="0" max="100" name="offer[vat]" id="offer-vat" class="form-control" value="{{ old('offer.vat', $offer['vat'] + 0) }}">
                         </div>
 
                         <div class="form-group octopia-field">
@@ -310,7 +306,7 @@
                         </div>
                     @endforeach
 
-                    @foreach (['offer.condition', 'offer.markup', 'offer.vat', 'offer.preparation_days'] as $key)
+                    @foreach (['offer.condition', 'offer.markup', 'offer.preparation_days'] as $key)
                         @error($key)<p class="form-error">{{ $message }}</p>@enderror
                     @endforeach
                 </section>

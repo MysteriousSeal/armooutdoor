@@ -259,6 +259,17 @@ class OctopiaController extends Controller
     public function checkSubmission(OctopiaSubmission $submission, OctopiaClient $octopia): RedirectResponse
     {
         try {
+            // An offer package has no results before Octopia has processed
+            // it, and asking early is answered with an error: say where it
+            // stands instead.
+            if ($submission->isOffers()) {
+                $state = $octopia->offerPackageState($submission->package_id);
+
+                if ($state !== null && ! in_array($state, ['Integrated', 'Rejected'], true)) {
+                    return back()->withErrors(['submission' => 'Octopia is still processing this package (it is '.$state.'). Check again in a minute.']);
+                }
+            }
+
             $report = $submission->isOffers()
                 ? $octopia->offerResults($submission->package_id)
                 : $octopia->productReports($submission->package_id);
@@ -358,7 +369,6 @@ class OctopiaController extends Controller
             'offer' => ['nullable', 'array'],
             'offer.condition' => ['nullable', 'string', Rule::in(array_keys(CdiscountListing::CONDITIONS))],
             'offer.markup' => ['nullable', 'numeric', 'min:-50', 'max:200'],
-            'offer.vat' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'offer.preparation_days' => ['nullable', 'integer', 'min:0', 'max:90'],
             'offer.delivery' => ['nullable', 'array'],
             'offer.delivery.*.enabled' => ['nullable', 'boolean'],
@@ -456,7 +466,6 @@ class OctopiaController extends Controller
         return [
             'condition' => $input['condition'] ?? 'New',
             'markup' => ($input['markup'] ?? '') !== '' ? (float) $input['markup'] : 0.0,
-            'vat' => ($input['vat'] ?? '') !== '' ? (float) $input['vat'] : 0.0,
             'preparation_days' => ($input['preparation_days'] ?? '') !== '' ? (int) $input['preparation_days'] : null,
             'delivery' => $delivery,
         ];

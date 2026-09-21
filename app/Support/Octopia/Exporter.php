@@ -134,7 +134,15 @@ class Exporter
 
         $marked = fn (int $cents): float => round($cents * (1 + $settings['markup'] / 100)) / 100;
 
-        $price = ['price' => $marked($effective), 'taxes' => [['code' => 'VAT', 'value' => $settings['vat']]]];
+        // Every tax is sent, and at zero: the shop charges no VAT, and its
+        // articles carry no eco-tax and no D3E (waste electrical equipment).
+        // Cdiscount France refuses an offer without the last two, though
+        // Octopia's documentation lists them as optional.
+        $price = ['price' => $marked($effective), 'taxes' => [
+            ['code' => 'VAT', 'value' => 0.0],
+            ['code' => 'Ecotax', 'value' => 0.0],
+            ['code' => 'Deatax', 'value' => 0.0],
+        ]];
 
         if ($original > $effective) {
             $price['originPrice'] = $marked($original);

@@ -43,14 +43,13 @@ class CdiscountListing extends Model
 
     /**
      * What a product's offer is until its seller decides otherwise: the shop's
-     * price plus 40% to cover Cdiscount's commission, no VAT,
-     * a day to prepare, and every way of delivering offered at a set cost.
-     * The mondial relay pickup is free.
+     * price plus 40% to cover Cdiscount's commission, a day to prepare, and
+     * every way of delivering offered at a set cost. The mondial relay pickup
+     * is free.
      */
     public const DEFAULT_OFFER = [
         'condition' => 'New',
         'markup' => 40.0,
-        'vat' => 0.0,
         'preparation_days' => 1,
         'delivery' => [
             'THD' => ['cost' => 3.0, 'additional' => null],
@@ -77,7 +76,7 @@ class CdiscountListing extends Model
      * What the seller decides about the offers of this product. Until they
      * have decided anything, the defaults stand.
      *
-     * @return array{condition: string, markup: float, vat: float, preparation_days: ?int, delivery: array<string, array{cost: float, additional: ?float}>}
+     * @return array{condition: string, markup: float, preparation_days: ?int, delivery: array<string, array{cost: float, additional: ?float}>}
      */
     public function offerSettings(): array
     {
@@ -91,7 +90,6 @@ class CdiscountListing extends Model
             'condition' => (string) ($offer['condition'] ?? self::DEFAULT_OFFER['condition']),
             // A percentage over the shop's price: Cdiscount takes a commission.
             'markup' => (float) ($offer['markup'] ?? self::DEFAULT_OFFER['markup']),
-            'vat' => (float) ($offer['vat'] ?? self::DEFAULT_OFFER['vat']),
             // Saved settings are the seller's own: what they left out stays out.
             'preparation_days' => isset($offer['preparation_days']) && $offer['preparation_days'] !== '' ? (int) $offer['preparation_days'] : null,
             'delivery' => (array) ($offer['delivery'] ?? []),

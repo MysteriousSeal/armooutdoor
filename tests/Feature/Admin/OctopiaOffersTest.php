@@ -85,7 +85,6 @@ class OctopiaOffersTest extends TestCase
         return $overrides + [
             'condition' => 'New',
             'markup' => 10,
-            'vat' => 20,
             'preparation_days' => 2,
             'delivery' => ['THD' => ['cost' => 4.9, 'additional' => 1.5], 'PPMR' => ['cost' => 3.5, 'additional' => null]],
         ];
@@ -112,7 +111,6 @@ class OctopiaOffersTest extends TestCase
                 'offer' => [
                     'condition' => 'UsedLikeNew',
                     'markup' => '12.5',
-                    'vat' => '20',
                     'preparation_days' => '3',
                     'delivery' => [
                         'THD' => ['enabled' => '1', 'cost' => '4.90', 'additional' => '1.50'],
@@ -179,7 +177,9 @@ class OctopiaOffersTest extends TestCase
             ->getContent();
 
         $this->assertMatchesRegularExpression('#name="offer\[markup\]"[^>]*value="40"#', $html);
-        $this->assertMatchesRegularExpression('#name="offer\[vat\]"[^>]*value="0"#', $html);
+        // No VAT to set: every tax goes out as zero.
+        $this->assertStringNotContainsString('name="offer[vat]"', $html);
+        $this->assertStringContainsString('The VAT, the eco-tax and the D3E tax are all sent as 0', $html);
         $this->assertMatchesRegularExpression('#name="offer\[preparation_days\]"[^>]*value="1"#', $html);
 
         // Every way of delivering is offered, at its cost.
@@ -200,7 +200,11 @@ class OctopiaOffersTest extends TestCase
         $this->assertSame([], $offer['missing']);
         $this->assertSame(1400, $offer['price_cents']);
         $this->assertSame(14.0, $offer['payload']['price']['price']);
-        $this->assertSame([['code' => 'VAT', 'value' => 0.0]], $offer['payload']['price']['taxes']);
+        $this->assertSame([
+            ['code' => 'VAT', 'value' => 0.0],
+            ['code' => 'Ecotax', 'value' => 0.0],
+            ['code' => 'Deatax', 'value' => 0.0],
+        ], $offer['payload']['price']['taxes']);
         $this->assertSame(1, $offer['payload']['preparationTime']);
         $this->assertSame([
             ['code' => 'THD', 'cost' => 3.0],
@@ -254,7 +258,12 @@ class OctopiaOffersTest extends TestCase
             'sellerExternalReference' => 'CAG-DESERT',
             'product' => ['gtin' => '3760452700039', 'reference' => 'CAG-DESERT'],
             'condition' => 'New',
-            'price' => ['price' => 11.0, 'taxes' => [['code' => 'VAT', 'value' => 20.0]]],
+            // Cdiscount refuses an offer without its eco-tax and D3E, even at zero.
+            'price' => ['price' => 11.0, 'taxes' => [
+                ['code' => 'VAT', 'value' => 0.0],
+                ['code' => 'Ecotax', 'value' => 0.0],
+                ['code' => 'Deatax', 'value' => 0.0],
+            ]],
             'deliveryModes' => [
                 ['code' => 'THD', 'cost' => 4.9, 'additionalCost' => 1.5],
                 ['code' => 'PPMR', 'cost' => 3.5],
@@ -262,6 +271,19 @@ class OctopiaOffersTest extends TestCase
             'preparationTime' => 2,
             'quantity' => 7,
         ], $offer['payload']);
+    }
+
+    public function test_every_tax_is_zero_whatever_an_old_setting_says(): void
+    {
+        $template = $this->category();
+        $product = $this->product();
+        // A listing saved before the VAT setting went: its 20 is not sent.
+        $this->listing($product, $template, $this->offer(['vat' => 20]));
+
+        $taxes = $this->payload($product, $template)['payload']['price']['taxes'];
+
+        $this->assertSame(['VAT', 'Ecotax', 'Deatax'], array_column($taxes, 'code'));
+        $this->assertSame([0.0, 0.0, 0.0], array_column($taxes, 'value'));
     }
 
     public function test_a_promotion_sends_the_undiscounted_price_struck_through(): void
@@ -312,7 +334,7 @@ class OctopiaOffersTest extends TestCase
             self::BASE.'/offer-packages/off-1/offer-requests' => Http::response('', 201),
             self::BASE.'/offer-packages/off-1' => fn ($request) => $request->method() === 'PATCH'
                 ? Http::response('', 204)
-                : Http::response(['status' => 'WaitingForCompletion']),
+                : Http::response(['state' => 'WaitingForCompletion']),
         ]);
     }
 
@@ -409,6 +431,7 @@ class OctopiaOffersTest extends TestCase
             ],
         ]);
         $this->fakeOffers([
+            self::BASE.'/offer-packages/off-1' => Http::response(['state' => 'Integrated']),
             self::BASE.'/offer-packages/off-1/offer-requests-results*' => Http::response(['items' => [
                 ['sellerExternalReference' => 'REF-A', 'integrationStatus' => 'Integrated', 'results' => [['resultCode' => '8000', 'message' => 'Offer created']]],
                 ['sellerExternalReference' => 'REF-B', 'integrationStatus' => 'Rejected', 'results' => [['resultCode' => '4001', 'message' => 'Unknown product']]],
@@ -435,6 +458,68 @@ class OctopiaOffersTest extends TestCase
             ->assertSee('Unknown product');
     }
 
+    public function test_results_are_not_asked_for_while_octopia_is_still_processing_the_package(): void
+    {
+        $template = $this->category();
+        $submission = $template->submissions()->create(['kind' => 'offers', 'package_id' => 'off-1', 'lines' => []]);
+        $this->fakeOffers([
+            self::BASE.'/offer-packages/off-1' => Http::response(['state' => 'IntegrationPending']),
+            // Asked too early, Octopia answers with an error.
+            self::BASE.'/offer-packages/off-1/offer-requests-results*' => Http::response(['title' => 'The retrieval of the offer requests results failed'], 400),
+        ]);
+
+        $this->actingAs($this->admin())
+            ->post('/admin/marketplaces/cdiscount/submissions/'.$submission->id.'/check')
+            ->assertSessionHasErrors('submission');
+
+        $this->assertStringContainsString('still processing', session('errors')->first('submission'));
+        $this->assertStringContainsString('IntegrationPending', session('errors')->first('submission'));
+        Http::assertNotSent(fn ($request) => str_contains($request->url(), 'offer-requests-results'));
+        $this->assertNull($submission->fresh()->report);
+    }
+
+    public function test_octopias_refusal_is_said_in_its_own_words(): void
+    {
+        $template = $this->category();
+        $submission = $template->submissions()->create(['kind' => 'products', 'package_id' => 'pkg-1', 'lines' => []]);
+        $this->fakeOffers([self::BASE.'/products-integration-reports*' => Http::response([
+            'type' => 'https://datatracker.ietf.org/doc/html/rfc9110#name-400-bad-request',
+            'status' => 400,
+            'title' => 'The retrieval failed',
+            'traceId' => '831ed20e',
+        ], 400)]);
+
+        $this->actingAs($this->admin())
+            ->post('/admin/marketplaces/cdiscount/submissions/'.$submission->id.'/check')
+            ->assertSessionHasErrors('submission');
+
+        // The title, not a screenful of JSON.
+        $this->assertSame('Octopia responded 400: The retrieval failed', session('errors')->first('submission'));
+    }
+
+    public function test_a_rejected_offer_shows_octopias_reason_without_a_stray_colon(): void
+    {
+        $template = $this->category();
+        $template->submissions()->create([
+            'kind' => 'offers',
+            'package_id' => 'off-1',
+            'lines' => [['gtin' => '3760452700039', 'reference' => 'REF-A', 'title' => 'Cagoule A']],
+            'report' => [['sellerExternalReference' => 'REF-A', 'integrationStatus' => 'Rejected', 'results' => [
+                ['resultCode' => '1008', 'message' => "EcoTax : Champ obligatoire pour la création d'une offre"],
+            ]]],
+        ]);
+
+        $html = $this->actingAs($this->admin())
+            ->get('/admin/marketplaces/cdiscount?template='.$template->id)
+            ->assertOk()
+            ->assertSee('Rejected')
+            ->getContent();
+
+        $this->assertStringContainsString('EcoTax : Champ obligatoire', $html);
+        // No field name to put in front of it.
+        $this->assertDoesNotMatchRegularExpression('#octopia-missing">: #', $html);
+    }
+
     public function test_the_results_are_followed_page_after_page(): void
     {
         $template = $this->category();
@@ -442,6 +527,7 @@ class OctopiaOffersTest extends TestCase
         // The second page first: the first matching pattern answers, and the
         // wildcard would match it too.
         $this->fakeOffers([
+            self::BASE.'/offer-packages/off-1' => Http::response(['state' => 'Integrated']),
             self::BASE.'/offer-packages/off-1/offer-requests-results?cursor=2' => Http::response(
                 ['items' => [['sellerExternalReference' => 'B', 'integrationStatus' => 'Rejected']]],
             ),

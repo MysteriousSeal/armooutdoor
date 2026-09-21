@@ -293,7 +293,7 @@ class OctopiaClient
             $response = $this->request()->get($match[1]);
 
             if ($response->failed()) {
-                throw new RuntimeException('Octopia responded '.$response->status().': '.mb_substr($response->body(), 0, 300));
+                throw new RuntimeException($this->refusal($response));
             }
         }
 
@@ -354,10 +354,33 @@ class OctopiaClient
         }
 
         if ($response->failed()) {
-            throw new RuntimeException('Octopia responded '.$response->status().': '.mb_substr($response->body(), 0, 300));
+            throw new RuntimeException($this->refusal($response));
         }
 
         return $response;
+    }
+
+    /**
+     * What Octopia said, in a sentence: its own title or detail when the
+     * answer is a problem document, the start of the body otherwise.
+     */
+    private function refusal(Response $response): string
+    {
+        $said = $response->json('detail') ?: $response->json('title') ?: $response->json('message');
+
+        return 'Octopia responded '.$response->status().': '.(is_string($said) && $said !== '' ? $said : mb_substr($response->body(), 0, 300));
+    }
+
+    /**
+     * Where an offer package stands: WaitingForCompletion, Ready,
+     * IntegrationPending, then Integrated once Octopia has processed it. Its
+     * results are not available before that.
+     */
+    public function offerPackageState(string $packageId): ?string
+    {
+        $state = $this->get('/offer-packages/'.rawurlencode($packageId))['state'] ?? null;
+
+        return is_string($state) ? $state : null;
     }
 
     private function send(string $method, string $path, array $query, array $body, array $headers = []): Response

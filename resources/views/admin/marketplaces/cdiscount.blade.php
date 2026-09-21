@@ -261,10 +261,10 @@
                                         </td>
                                         <td>
                                             @foreach ($outcome['errors'] as $error)
-                                                <span class="octopia-missing">{{ $error['field'] ?? '' }}: {{ $error['message'] ?? $error['code'] ?? '' }}</span><br>
+                                                <span class="octopia-missing">{{ filled($error['field'] ?? null) ? $error['field'].': ' : '' }}{{ $error['message'] ?? $error['code'] ?? '' }}</span><br>
                                             @endforeach
                                             @foreach ($outcome['warnings'] as $warning)
-                                                <span class="nb-none">{{ $warning['field'] ?? '' }}: {{ $warning['message'] ?? $warning['code'] ?? '' }}</span><br>
+                                                <span class="nb-none">{{ filled($warning['field'] ?? null) ? $warning['field'].': ' : '' }}{{ $warning['message'] ?? $warning['code'] ?? '' }}</span><br>
                                             @endforeach
                                         </td>
                                     </tr>
