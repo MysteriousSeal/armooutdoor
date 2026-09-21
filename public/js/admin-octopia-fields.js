@@ -116,6 +116,13 @@
         field.value = value;
         field.classList.add(assumed ? 'is-assumed' : 'is-suggested');
 
+        // A suggestion in a closed group would go unseen: open it.
+        var group = field.closest('details');
+
+        if (group) {
+            group.open = true;
+        }
+
         var tag = null;
 
         if (assumed && field.parentNode) {

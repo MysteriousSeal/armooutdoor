@@ -8,7 +8,7 @@
     @php($perVariant = $listing?->perVariantCodes() ?? [])
     @php($activeVariants = $product->variants->where('is_active', true))
 
-    <div class="admin-list-page">
+    <div class="admin-list-page cdiscount-listing">
         <header class="admin-list-hero">
             <div class="admin-list-hero-row">
                 <div>
@@ -35,12 +35,17 @@
             </div>
         </header>
 
-        <form method="POST" action="{{ route('admin.products.cdiscount.update', $product) }}" class="admin-product-form">
+        <form method="POST" action="{{ route('admin.products.cdiscount.update', $product) }}" class="admin-product-form octopia-form">
             @csrf
             @method('PUT')
 
-            <section class="order-panel">
-                <h3 class="order-panel-title">Category</h3>
+            <section class="octopia-panel">
+                <header class="octopia-panel-head">
+                    <h3 class="octopia-panel-title">Category</h3>
+                    <p class="octopia-panel-hint">
+                        The category decides the fields below. Leaving it empty removes this listing; the product itself is untouched.
+                    </p>
+                </header>
 
                 @if ($templates->isEmpty())
                     <p class="form-hint">
@@ -48,7 +53,7 @@
                         <a href="{{ route('admin.marketplaces.cdiscount') }}">Cdiscount page</a>, then come back.
                     </p>
                 @else
-                    <div class="form-group">
+                    <div class="form-group octopia-category-select">
                         <label for="octopia_template_id">Octopia category</label>
                         <select name="octopia_template_id" id="octopia_template_id" class="form-control">
                             <option value="">Not sold on Cdiscount</option>
@@ -58,10 +63,6 @@
                                 </option>
                             @endforeach
                         </select>
-                        <p class="form-hint">
-                            The category decides the fields below. Leaving it empty removes this listing;
-                            the product itself is untouched.
-                        </p>
                     </div>
                 @endif
             </section>
@@ -80,8 +81,7 @@
                     <div class="vinted-assist-main">
                         <p class="vinted-assist-title">Let Claude fill it in</p>
                         <p class="vinted-assist-note">
-                            Reads the product sheet (name, description, characteristics, weight, brand, variants) and fills the empty attributes it can establish from it.
-                            It never guesses: an attribute the sheet does not state is left for you, and what you already answered is not touched.
+                            Reads the product sheet and fills the empty attributes it can establish from it. What you already answered is not touched.
                             Nothing is saved until you press Save.
                         </p>
                     </div>
@@ -101,63 +101,61 @@
                 {{-- One block per category, only the chosen one shown and sent:
                      its fields are not the next category's. --}}
                 <div data-octopia-fields="{{ $template->id }}" @unless($isCurrent) hidden @endunless>
-                    <section class="order-panel">
-                        <h3 class="order-panel-title">{{ $template->name }}</h3>
-                        <p class="form-hint">
-                            Category <code class="nb-code">{{ $template->code }}</code>.
-                            A field ticked « answered per variant » is asked of each variant below instead.
-                        </p>
+                    {{-- What Octopia calls each attribute: required, recommended or
+                         optional. Grouped so the two or three that must be answered
+                         are not lost among a couple of dozen that need not be. --}}
+                    @php($groups = collect($template->attributeFields())->groupBy(fn (array $field): string => $field['necessity'] ?? ($field['required'] ? 'Mandatory' : 'Optional')))
+                    @php($sections = ['Mandatory' => ['Required', 'Octopia refuses the product without these.'], 'Recommended' => ['Recommended', 'They help the product be found and chosen.'], 'Optional' => ['Other attributes', null]])
+                    @php($answeredCount = collect($template->attributeFields())->filter(fn (array $field): bool => $isCurrent && filled($answers[$field['code']] ?? null))->count())
 
-                        <div class="octopia-fields">
-                            @foreach ($template->attributeFields() as $field)
-                                @php($value = $isCurrent ? ($answers[$field['code']] ?? '') : '')
-                                <div class="form-group octopia-field">
-                                    <label for="octopia-{{ $template->id }}-{{ $field['code'] }}">
-                                        {{ $field['label'] }}@if ($field['required'])<span class="octopia-required" title="Required by Octopia">*</span>@endif
-                                    </label>
+                    <section class="octopia-panel">
+                        <header class="octopia-panel-head">
+                            <h3 class="octopia-panel-title">
+                                Attributes
+                                <span class="octopia-panel-tag">{{ $template->name }}</span>
+                            </h3>
+                            <p class="octopia-panel-hint">
+                                <code class="nb-code">{{ $template->code }}</code>
+                                {{ count($template->attributeFields()) }} attributes, {{ $answeredCount }} answered.
+                                @if ($activeVariants->isNotEmpty())
+                                    A field ticked « answered per variant » is asked of each variant below instead.
+                                @endif
+                            </p>
+                        </header>
 
-                                    @if (! empty($field['options']))
-                                        <select
-                                            name="values[{{ $field['code'] }}]"
-                                            id="octopia-{{ $template->id }}-{{ $field['code'] }}"
-                                            class="form-control"
-                                            @unless($isCurrent) disabled @endunless
-                                        >
-                                            <option value="">—</option>
-                                            @foreach ($field['options'] as $option)
-                                                <option value="{{ $option }}" @selected($value === $option)>{{ $option }}</option>
-                                            @endforeach
-                                        </select>
-                                    @else
-                                        <input
-                                            type="text"
-                                            name="values[{{ $field['code'] }}]"
-                                            id="octopia-{{ $template->id }}-{{ $field['code'] }}"
-                                            class="form-control"
-                                            value="{{ $value }}"
-                                            @unless($isCurrent) disabled @endunless
-                                        >
-                                    @endif
+                        @foreach ($sections as $key => [$title, $hint])
+                            @continue(($groups[$key] ?? collect())->isEmpty())
+                            @php($group = $groups[$key])
+                            @php($groupAnswered = $group->filter(fn (array $field): bool => $isCurrent && filled($answers[$field['code']] ?? null))->count())
 
-                                    @if ($field['constraint'])
-                                        <p class="form-hint">{{ $field['constraint'] }}</p>
-                                    @endif
-
-                                    @if ($activeVariants->isNotEmpty())
-                                        <label class="form-check octopia-per-variant">
-                                            <input
-                                                type="checkbox"
-                                                name="per_variant[]"
-                                                value="{{ $field['code'] }}"
-                                                @checked($isCurrent && in_array($field['code'], $perVariant, true))
-                                                @unless($isCurrent) disabled @endunless
-                                            >
-                                            Answered per variant
-                                        </label>
-                                    @endif
+                            @if ($key === 'Optional')
+                                {{-- The long tail, closed until there is something in it. --}}
+                                <details class="octopia-group" @if ($isCurrent && $groupAnswered > 0) open @endif>
+                                    <summary class="octopia-group-title">
+                                        {{ $title }}
+                                        <span class="octopia-group-count">{{ $group->count() }}, {{ $groupAnswered }} answered</span>
+                                    </summary>
+                                    <div class="octopia-fields">
+                                        @foreach ($group as $field)
+                                            @include('admin.products.partials.octopia-field')
+                                        @endforeach
+                                    </div>
+                                </details>
+                            @else
+                                <div class="octopia-group">
+                                    <h4 class="octopia-group-title">
+                                        {{ $title }}
+                                        <span class="octopia-group-count">{{ $group->count() }}, {{ $groupAnswered }} answered</span>
+                                    </h4>
+                                    @if ($hint)<p class="octopia-group-hint">{{ $hint }}</p>@endif
+                                    <div class="octopia-fields">
+                                        @foreach ($group as $field)
+                                            @include('admin.products.partials.octopia-field')
+                                        @endforeach
+                                    </div>
                                 </div>
-                            @endforeach
-                        </div>
+                            @endif
+                        @endforeach
                     </section>
 
                     @if ($isCurrent && $activeVariants->isNotEmpty())
@@ -166,19 +164,19 @@
                             fn (array $field): bool => in_array($field['code'], $perVariant, true),
                         )))
 
-                        <section class="order-panel">
-                            <h3 class="order-panel-title">Variants</h3>
+                        <section class="octopia-panel">
+                            <header class="octopia-panel-head">
+                                <h3 class="octopia-panel-title">Variants</h3>
+                                <p class="octopia-panel-hint">
+                                    @if ($perVariantFields === [])
+                                        Nothing is answered per variant yet. Tick a field above, save, and it will be asked of each variant here.
+                                    @else
+                                        Each variant is an offer of its own on Cdiscount. Left empty, a variant takes the product's answer.
+                                    @endif
+                                </p>
+                            </header>
 
-                            @if ($perVariantFields === [])
-                                <p class="form-hint">
-                                    Nothing is answered per variant yet. Tick a field above, save, and it will be asked
-                                    of each variant here.
-                                </p>
-                            @else
-                                <p class="form-hint">
-                                    Each variant is an offer of its own on Cdiscount. Left empty, a variant takes the
-                                    product's answer.
-                                </p>
+                            @if ($perVariantFields !== [])
 
                                 @foreach ($activeVariants as $variant)
                                     @php($own = $listing?->variants->firstWhere('product_variant_id', $variant->id)?->answers() ?? [])
@@ -234,41 +232,46 @@
             {{-- The description Cdiscount is given, written for the category chosen.
                  Sent instead of the shop's meta and long descriptions. --}}
             <div data-octopia-description @unless($currentTemplateId) hidden @endunless>
-                <section class="order-panel">
-                    <h3 class="order-panel-title">Description for Cdiscount</h3>
-                    <p class="form-hint">
-                        Octopia reads the description to file the product, and the shop's, which lists every use of the article, can move it to another category.
-                        This one is sent instead of the meta description and the long description: written for the category chosen, it says what the article is, plainly.
-                        Left empty, the meta description is sent, or the long one.
-                    </p>
+                <section class="octopia-panel">
+                    <header class="octopia-panel-head">
+                        <h3 class="octopia-panel-title">Description for Cdiscount</h3>
+                        <p class="octopia-panel-hint">
+                            Sent to Cdiscount instead of the meta description and the long description, which Octopia reads to file the product
+                            and which, listing every use of the article, can move it to another category. Written for the category chosen: what the article is, plainly.
+                            Left empty, the meta description is sent, or the long one.
+                        </p>
+                    </header>
 
                     <div class="form-group">
                         <textarea
                             name="description"
                             id="octopia-description"
                             class="form-control"
-                            rows="6"
+                            rows="5"
                             maxlength="{{ \App\Services\Octopia\OctopiaDescriptionWriter::LIMIT }}"
                             data-octopia-description-field
                         >{{ old('description', $listing?->description) }}</textarea>
+                        @error('description')<p class="form-error">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div class="octopia-description-foot">
                         <p class="form-hint">
                             <span data-octopia-count>{{ mb_strlen((string) old('description', $listing?->description)) }}</span>
                             / {{ \App\Services\Octopia\OctopiaDescriptionWriter::LIMIT }} characters, plain text.
                         </p>
-                        @error('description')<p class="form-error">{{ $message }}</p>@enderror
-                    </div>
 
-                    @if ($canGenerate)
-                        <div class="octopia-description-actions">
-                            <button
-                                type="button"
-                                class="btn btn-secondary"
-                                data-octopia-describe
-                                data-describe-url="{{ route('admin.products.cdiscount.describe', $product) }}"
-                            >Write with Claude</button>
-                            <p class="vinted-assist-status" data-octopia-describe-status role="status" hidden></p>
-                        </div>
-                    @endif
+                        @if ($canGenerate)
+                            <div class="octopia-description-actions">
+                                <p class="vinted-assist-status" data-octopia-describe-status role="status" hidden></p>
+                                <button
+                                    type="button"
+                                    class="btn btn-secondary"
+                                    data-octopia-describe
+                                    data-describe-url="{{ route('admin.products.cdiscount.describe', $product) }}"
+                                >Write with Claude</button>
+                            </div>
+                        @endif
+                    </div>
                 </section>
             </div>
 
@@ -276,13 +279,15 @@
                  the category's attributes, but there is no offer without a
                  category, so it follows the choice above. --}}
             <div data-octopia-offer @unless($currentTemplateId) hidden @endunless>
-                <section class="order-panel">
-                    <h3 class="order-panel-title">Offer</h3>
-                    <p class="form-hint">
-                        What Cdiscount is told about selling this product: at what price, delivered how, and how soon.
-                        The stock is the shop's own{{ $activeVariants->isNotEmpty() ? ', variant by variant' : '' }}.
-                        The VAT, the eco-tax and the D3E tax are all sent as 0.
-                    </p>
+                <section class="octopia-panel">
+                    <header class="octopia-panel-head">
+                        <h3 class="octopia-panel-title">Offer</h3>
+                        <p class="octopia-panel-hint">
+                            What Cdiscount is told about selling this product: at what price, delivered how, and how soon.
+                            The stock is the shop's own{{ $activeVariants->isNotEmpty() ? ', variant by variant' : '' }}.
+                            The VAT, the eco-tax and the D3E tax are all sent as 0.
+                        </p>
+                    </header>
 
                     <div class="octopia-fields">
                         <div class="form-group octopia-field">
@@ -321,12 +326,13 @@
                         @endforeach
                     </div>
 
-                    <h4 class="octopia-variant-title">Delivery</h4>
-                    <p class="form-hint">
+                    <h4 class="octopia-group-title octopia-delivery-title">Delivery</h4>
+                    <p class="octopia-group-hint">
                         Each way you deliver, and what the customer pays for it. The tracked delivery is the one Octopia requires;
                         a free delivery is a cost of 0. The extra cost is for each further item in the same order.
                     </p>
 
+                    <div class="octopia-delivery-list">
                     @foreach (\App\Models\CdiscountListing::DELIVERY_MODES as $code => $label)
                         @php($mode = $offer['delivery'][$code] ?? null)
                         <div class="octopia-delivery">
@@ -346,6 +352,7 @@
                             </div>
                         </div>
                     @endforeach
+                    </div>
 
                     @foreach (['offer.condition', 'offer.markup', 'offer.preparation_days'] as $key)
                         @error($key)<p class="form-error">{{ $message }}</p>@enderror
@@ -353,7 +360,7 @@
                 </section>
             </div>
 
-            <div class="order-panel admin-order-create-actions">
+            <div class="octopia-actions">
                 <button type="submit" class="btn btn-primary">Save listing</button>
                 <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-secondary">Cancel</a>
             </div>

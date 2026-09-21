@@ -13213,3 +13213,210 @@ a.order-stepper-btn:focus-visible {
         grid-template-columns: minmax(0, 1fr) auto;
     }
 }
+
+/* ------------------------------------- a product's Cdiscount listing page */
+
+/* A readable width: the fields, and above all the delivery rows, are read
+   across, and a screen's width put a label and its cost a screen apart. */
+.cdiscount-listing {
+    max-width: 62rem;
+}
+
+/* Cards with air between them. */
+.octopia-form > * + * {
+    margin-top: 1.25rem;
+}
+
+.octopia-panel {
+    padding: 1.5rem 1.75rem 1.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.octopia-panel-head {
+    margin-bottom: 1.4rem;
+}
+
+.octopia-panel-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.75rem;
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.octopia-panel-tag {
+    padding: 0.15rem 0.55rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    background: color-mix(in srgb, var(--bg) 60%, var(--surface));
+    border: 1px solid var(--border);
+}
+
+.octopia-panel-hint {
+    max-width: 48rem;
+    margin: 0.4rem 0 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+}
+
+.octopia-category-select {
+    margin: 0;
+    max-width: 40rem;
+}
+
+/* Attributes in groups: what Octopia requires first, the long tail closed. */
+.octopia-group + .octopia-group {
+    margin-top: 1.75rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+}
+
+.octopia-group-title {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin: 0 0 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text);
+}
+
+.octopia-group-count {
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--text-muted);
+}
+
+.octopia-group-hint {
+    margin: 0 0 1.1rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+details.octopia-group > summary {
+    margin: 0;
+    cursor: pointer;
+    list-style: none;
+}
+
+details.octopia-group > summary::-webkit-details-marker {
+    display: none;
+}
+
+details.octopia-group > summary::before {
+    content: '';
+    flex-shrink: 0;
+    align-self: center;
+    width: 0.4rem;
+    height: 0.4rem;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(-45deg);
+    transition: transform 140ms ease;
+}
+
+details.octopia-group[open] > summary::before {
+    transform: rotate(45deg);
+}
+
+details.octopia-group[open] > summary {
+    margin-bottom: 1.1rem;
+}
+
+/* The fields of a card: three across, with room between them. */
+.octopia-panel .octopia-fields {
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 1.25rem 1.5rem;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+}
+
+.octopia-panel .octopia-field {
+    margin: 0;
+}
+
+.octopia-panel .octopia-field .form-hint {
+    margin-top: 0.3rem;
+}
+
+.octopia-panel .octopia-variant:first-of-type {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+}
+
+.octopia-description-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1.5rem;
+}
+
+.octopia-description-foot .form-hint {
+    margin: 0;
+}
+
+.octopia-panel .form-group textarea {
+    resize: vertical;
+    line-height: 1.55;
+}
+
+/* Delivery as a list: the way, then its cost, close together. */
+.octopia-delivery-title {
+    margin-top: 1.75rem;
+}
+
+.octopia-delivery-list {
+    border: 1px solid var(--border);
+}
+
+.octopia-delivery-list .octopia-delivery {
+    padding: 0.85rem 1.1rem;
+    border-top: 1px solid var(--border);
+}
+
+.octopia-delivery-list .octopia-delivery:first-child {
+    border-top: 0;
+}
+
+.octopia-panel .octopia-sale-price {
+    margin: 1.5rem 0 0;
+}
+
+/* Save is always in reach, however long the form is. */
+.octopia-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    display: flex;
+    gap: 0.6rem;
+    padding: 0.9rem 1.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: 0 -8px 18px -14px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 640px) {
+    .octopia-panel {
+        padding: 1.25rem 1.1rem 1.4rem;
+    }
+
+    .octopia-actions {
+        padding: 0.8rem 1.1rem;
+    }
+}
