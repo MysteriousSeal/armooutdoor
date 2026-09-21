@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-21 · v1.49.0 · build FCX6M1
+
+### Admin
+
+- **A « Fill with Claude » button on a product's Cdiscount page fills the category's attributes from the product sheet.** It appears once a category is chosen, where the Anthropic key is configured. Claude reads the name, brand, weight, characteristics, meta description, the long description and, for attributes answered per variant, the variants' labels and references. It fills only the attributes still empty, never replaces an answer already given, and leaves blank what the sheet does not state. Nothing is saved until you press Save. The fields it filled are highlighted, and a line under the strip names the required attributes still to answer.
+- **Everything Claude answers is checked against the category before it reaches the form.** For an attribute with a closed list, only one of Octopia's own options is kept, in its own spelling: a colour that is not on the list is dropped. A numeric attribute keeps a plain number, several values are checked one by one and joined by semicolons, and a code the category does not have is dropped.
+- **Six attributes may be assumed when the sheet is silent, and are marked as such.** Genre, Type de public, Famille de sport, Taille, Pays d'origine and Conseils d'entretien follow a rule stated for each (Mixte and Adulte when the article names no gender or age, Taille unique for an accessory sold without sizes, and so on). Claude declares each value as read from the sheet or assumed, and an assumed one gets a dashed border and an « Assumed, check it » tag, and is named in the message, so it is read over before saving. Any other attribute stays strict: an assumption on it is refused. The country of origin and the care advice are statements to the customer, so check them.
+- **Offers sent to Octopia now carry all three taxes, at zero.** Cdiscount France rejected the offers for lacking an eco-tax and a D3E tax, though Octopia's documentation lists them as optional. VAT, Ecotax and Deatax are all sent as 0, and the VAT setting of the Offer panel is removed since it no longer has any effect. A listing saved earlier with another VAT is not sent with it. The offers rejected before this must be sent again.
+- **« Check the result » says where an offer package stands.** Octopia has no results for a package it has not finished processing, and asking early was answered with an error. The page now says the package is still being processed, with its state, and to check again in a minute. Octopia's refusals are shown by their own title instead of a screenful of JSON, and a rejected offer no longer starts with a stray colon.
+
+**No migration.**
+
 ## 2026-09-21 · v1.48.1 · build EKDKW9
 
 ### Admin
