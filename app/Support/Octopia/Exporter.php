@@ -80,7 +80,7 @@ class Exporter
         }
 
         // What Octopia refuses a product sheet without, whatever the category.
-        if (trim($product->localizedDescriptionText()) === '') {
+        if ($this->description($product) === '') {
             $missing[] = 'Description';
         }
 
@@ -171,6 +171,23 @@ class Exporter
         ];
     }
 
+    /**
+     * The description Octopia is given: the product's meta description when it
+     * has one, its long description otherwise.
+     *
+     * Octopia files a product by reading its description, and a long one,
+     * full of the uses and the materials of the article, sent it to another
+     * category than the one chosen. The meta description says what the article
+     * is in a couple of sentences, which is what the category is meant to be
+     * read from.
+     */
+    private function description(Product $product): string
+    {
+        $meta = trim((string) $product->meta_description);
+
+        return $meta !== '' ? $meta : trim($product->localizedDescriptionText());
+    }
+
     /** ASCII 33 to 127, the pipe apart: the rest is refused. */
     private function reference(string $reference): string
     {
@@ -190,7 +207,7 @@ class Exporter
             'gtin' => (int) preg_replace('/\D/', '', $gtin),
             'sellerProductReference' => $this->reference($reference),
             'title' => $this->title($product, $variant),
-            'description' => Str::limit($product->localizedDescriptionText(), self::DESCRIPTION_LIMIT, ''),
+            'description' => Str::limit($this->description($product), self::DESCRIPTION_LIMIT, ''),
             'brand' => Str::limit((string) $product->brandName(), 50, ''),
             'categoryCode' => $this->template->code,
             'sellerPictureUrls' => collect($this->images($product, $variant))

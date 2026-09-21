@@ -132,6 +132,49 @@ class OctopiaSendTest extends TestCase
         $this->assertSame('3760452700039', $submission->lines[0]['gtin']);
     }
 
+    public function test_the_meta_description_is_what_octopia_reads_when_there_is_one(): void
+    {
+        $template = $this->category();
+        $product = $this->product(['meta_description' => 'Cagoule respirante en polyester, pour le sport et l\'outdoor.']);
+        $this->listing($product, $template, ['3263' => 'Beige', '46831' => 'M']);
+        $this->fakeOctopia();
+
+        $this->actingAs($this->admin())
+            ->post('/admin/marketplaces/cdiscount/categories/'.$template->id.'/send', ['lines' => [$product->id.':0']])
+            ->assertSessionHasNoErrors();
+
+        // Not the long description, which is what sent it to another category.
+        Http::assertSent(fn ($request) => str_ends_with($request->url(), '/products-integration')
+            && $request['products'][0]['description'] === 'Cagoule respirante en polyester, pour le sport et l\'outdoor.');
+    }
+
+    public function test_the_long_description_stands_in_when_there_is_no_meta_description(): void
+    {
+        $template = $this->category();
+        $product = $this->product(['meta_description' => '  ']);
+        $this->listing($product, $template, ['3263' => 'Beige', '46831' => 'M']);
+        $this->fakeOctopia();
+
+        $this->actingAs($this->admin())
+            ->post('/admin/marketplaces/cdiscount/categories/'.$template->id.'/send', ['lines' => [$product->id.':0']]);
+
+        Http::assertSent(fn ($request) => str_ends_with($request->url(), '/products-integration')
+            && $request['products'][0]['description'] === 'Une cagoule respirante.');
+    }
+
+    public function test_a_meta_description_alone_is_enough_for_the_description(): void
+    {
+        $template = $this->category();
+        $product = $this->product(['description' => ['fr' => ''], 'meta_description' => 'Cagoule respirante.']);
+        $this->listing($product, $template, ['3263' => 'Beige', '46831' => 'M']);
+
+        $this->actingAs($this->admin())
+            ->get('/admin/marketplaces/cdiscount')
+            ->assertOk()
+            ->assertDontSee('Description, ')
+            ->assertDontSee('>Description<', false);
+    }
+
     public function test_each_variant_is_its_own_line_tied_by_a_group_reference(): void
     {
         $template = $this->category();
