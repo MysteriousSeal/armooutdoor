@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-22 · v1.51.0 · build NJT08J
+
+### Admin
+
+- **An order keeps its shipping label as a PDF.** The Shipping card of an order has a « Shipping label » block under the tracking form: drop a PDF on it, or click, and it is saved as soon as it is chosen. The label is then a small file card with an Open button, which shows the PDF in a new tab so it can be printed again without going back to the carrier. Once a label is there, replacing or removing it is a quiet « Replace · Remove » line under the card, and removing asks first. One label per order, 10 MB at most, checked on its contents and not on its name. Drafts have none.
+- **The file is private.** It is kept off the public folder, with no address of its own, and only signed-in admins can open it, since a label carries the customer's name and address. Uploading again deletes the old file, and uploads and removals are written to the activity log.
+
+**Migration:** one, run with `php artisan migrate`, adding a nullable `shipping_label_path` column to `orders`. Orders already saved are untouched.
+
 ## 2026-09-21 · v1.50.2 · build C4Y96O
 
 ### Admin
