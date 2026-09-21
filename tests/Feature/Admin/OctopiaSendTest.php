@@ -51,6 +51,7 @@ class OctopiaSendTest extends TestCase
         return OctopiaTemplate::query()->create([
             'code' => '0U0O05',
             'name' => 'CAGOULE TECHNIQUE',
+            'is_variant' => false,
             'fields' => [
                 ['column' => null, 'code' => '3263', 'label' => 'Couleur(s)', 'required' => true, 'kind' => 'multi', 'constraint' => '', 'options' => []],
                 ['column' => null, 'code' => '46831', 'label' => 'Taille', 'required' => true, 'kind' => 'monoranged', 'constraint' => '', 'options' => ['M']],
@@ -191,6 +192,76 @@ class OctopiaSendTest extends TestCase
             && $request['products'][0]['gtin'] === 3760452700046
             && $request['products'][0]['sellerProductReference'] === 'CAG-DESERT-M'
             && $request['products'][0]['variantGroupReference'] === 'CAG-DESERT');
+    }
+
+    public function test_a_variant_category_wants_the_group_reference_even_on_a_product_without_variants(): void
+    {
+        $template = $this->category();
+        $template->update(['is_variant' => true]);
+        $product = $this->product();
+        $this->listing($product, $template, ['3263' => 'Beige', '46831' => 'M']);
+        $this->fakeOctopia();
+
+        $this->actingAs($this->admin())
+            ->post('/admin/marketplaces/cdiscount/categories/'.$template->id.'/send', ['lines' => [$product->id.':0']])
+            ->assertSessionHasNoErrors();
+
+        // Octopia refuses the sheet without it: « la référence de regroupement
+        // des variants est obligatoire pour cette catégorie variante ».
+        Http::assertSent(fn ($request) => str_ends_with($request->url(), '/products-integration')
+            && $request['products'][0]['variantGroupReference'] === 'CAG-DESERT');
+    }
+
+    public function test_a_category_that_is_not_a_variant_one_sends_no_group_reference_for_a_plain_product(): void
+    {
+        $template = $this->category();
+        $product = $this->product();
+        $this->listing($product, $template, ['3263' => 'Beige', '46831' => 'M']);
+        $this->fakeOctopia();
+
+        $this->actingAs($this->admin())
+            ->post('/admin/marketplaces/cdiscount/categories/'.$template->id.'/send', ['lines' => [$product->id.':0']]);
+
+        Http::assertSent(fn ($request) => str_ends_with($request->url(), '/products-integration')
+            && ! isset($request['products'][0]['variantGroupReference']));
+    }
+
+    public function test_a_category_read_before_its_kind_was_kept_is_asked_about_when_a_product_is_sent(): void
+    {
+        $template = $this->category();
+        $template->update(['is_variant' => null]);
+        $product = $this->product();
+        $this->listing($product, $template, ['3263' => 'Beige', '46831' => 'M']);
+        $this->fakeOctopia([
+            'https://api.octopia-io.net/seller/v2/categories/0U0O05' => Http::response(['categoryReference' => '0U0O05', 'label' => 'CAGOULE TECHNIQUE', 'level' => 3, 'isVariant' => true]),
+        ]);
+
+        $this->actingAs($this->admin())
+            ->post('/admin/marketplaces/cdiscount/categories/'.$template->id.'/send', ['lines' => [$product->id.':0']])
+            ->assertSessionHasNoErrors();
+
+        // Asked once, kept, and the product went out with its group reference.
+        $this->assertTrue($template->fresh()->is_variant);
+        Http::assertSent(fn ($request) => str_ends_with($request->url(), '/products-integration')
+            && $request['products'][0]['variantGroupReference'] === 'CAG-DESERT');
+    }
+
+    public function test_a_send_stops_when_the_category_cannot_be_looked_up(): void
+    {
+        $template = $this->category();
+        $template->update(['is_variant' => null]);
+        $product = $this->product();
+        $this->listing($product, $template, ['3263' => 'Beige', '46831' => 'M']);
+        $this->fakeOctopia([
+            'https://api.octopia-io.net/seller/v2/categories/0U0O05' => Http::response(['title' => 'Not found'], 404),
+        ]);
+
+        $this->actingAs($this->admin())
+            ->post('/admin/marketplaces/cdiscount/categories/'.$template->id.'/send', ['lines' => [$product->id.':0']])
+            ->assertSessionHasErrors('lines');
+
+        Http::assertNotSent(fn ($request) => str_ends_with($request->url(), '/products-integration'));
+        $this->assertSame(0, OctopiaSubmission::query()->count());
     }
 
     public function test_a_line_with_something_missing_is_not_sent(): void

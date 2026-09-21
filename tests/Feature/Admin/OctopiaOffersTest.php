@@ -53,7 +53,7 @@ class OctopiaOffersTest extends TestCase
 
     private function category(): OctopiaTemplate
     {
-        return OctopiaTemplate::query()->create(['code' => '0U0O05', 'name' => 'CAGOULE TECHNIQUE', 'fields' => []]);
+        return OctopiaTemplate::query()->create(['code' => '0U0O05', 'name' => 'CAGOULE TECHNIQUE', 'is_variant' => false, 'fields' => []]);
     }
 
     private function product(array $overrides = []): Product

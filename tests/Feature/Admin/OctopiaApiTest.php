@@ -251,6 +251,19 @@ class OctopiaApiTest extends TestCase
         $this->assertCount(1, $template->requiredAttributeFields());
     }
 
+    public function test_a_category_keeps_whether_octopia_treats_it_as_a_variant_one(): void
+    {
+        Http::fake([
+            self::AUTH => Http::response(['access_token' => 'tok', 'expires_in' => 7200]),
+            'https://api.octopia-io.net/seller/v2/categories/0U0O05/properties' => Http::response(['items' => $this->properties()]),
+            'https://api.octopia-io.net/seller/v2/categories/0U0O05' => Http::response(['categoryReference' => '0U0O05', 'label' => 'CAGOULE TECHNIQUE', 'level' => 3, 'isVariant' => true]),
+        ]);
+
+        $this->actingAs($this->admin())->post('/admin/marketplaces/cdiscount/categories', ['code' => '0U0O05']);
+
+        $this->assertTrue(OctopiaTemplate::query()->firstOrFail()->is_variant);
+    }
+
     public function test_reading_a_category_again_refreshes_it(): void
     {
         $this->fakeOctopia();

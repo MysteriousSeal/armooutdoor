@@ -232,8 +232,10 @@ class Exporter
         }
 
         // What ties a product's variants together on Cdiscount: the product's
-        // own reference, the same on each of its lines.
-        if ($variant !== null) {
+        // own reference, the same on each of its lines. A variant category
+        // wants it on every product, one without variants included: Octopia
+        // refuses the sheet without it.
+        if ($variant !== null || $this->template->is_variant) {
             $payload['variantGroupReference'] = Str::limit((string) ($product->sku ?: $product->slug), 50, '');
         }
 

@@ -303,7 +303,7 @@ class OctopiaClient
     /**
      * One category by its 6-character code.
      *
-     * @return array{code: string, label: string, brand_mandatory: bool}
+     * @return array{code: string, label: string, brand_mandatory: bool, is_variant: bool}
      */
     public function category(string $code): array
     {
@@ -317,6 +317,9 @@ class OctopiaClient
             'code' => (string) $item['categoryReference'],
             'label' => (string) ($item['label'] ?? $item['categoryReference']),
             'brand_mandatory' => (bool) ($item['isBrandMandatory'] ?? false),
+            // A variant category wants a variant group reference on every
+            // product, whether or not the product has variants.
+            'is_variant' => (bool) ($item['isVariant'] ?? false),
         ];
     }
 

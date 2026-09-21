@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * hat size, a target is not. They are read from Octopia's API and kept here,
  * with when they were read, so no page has to ask again.
  */
-#[Fillable(['code', 'name', 'fields', 'synced_at'])]
+#[Fillable(['code', 'name', 'fields', 'synced_at', 'is_variant'])]
 class OctopiaTemplate extends Model
 {
     /** The columns the export fills from the catalogue, by their field code. */
@@ -38,6 +38,7 @@ class OctopiaTemplate extends Model
         return [
             'fields' => 'array',
             'synced_at' => 'datetime',
+            'is_variant' => 'boolean',
         ];
     }
 

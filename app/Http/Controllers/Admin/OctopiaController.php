@@ -105,6 +105,7 @@ class OctopiaController extends Controller
         OctopiaTemplate::query()->updateOrCreate(['code' => $category['code']], [
             'name' => $category['label'],
             'fields' => $fields,
+            'is_variant' => $category['is_variant'],
             'synced_at' => now(),
         ]);
 
@@ -154,6 +155,17 @@ class OctopiaController extends Controller
 
         if (! $octopia->isConfigured()) {
             return [[], 'The Octopia credentials are not set on this environment.'];
+        }
+
+        // A category read before its kind was kept is asked about once, here:
+        // a variant category refuses a product sheet without its group
+        // reference, and the payload has to know.
+        if ($template->is_variant === null) {
+            try {
+                $template->update(['is_variant' => $octopia->category($template->code)['is_variant']]);
+            } catch (Throwable $e) {
+                return [[], $e->getMessage()];
+            }
         }
 
         $chosen = array_flip($data['lines']);
