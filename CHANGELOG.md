@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-21 · v1.50.1 · build 9ES3KW
+
+### Admin
+
+- **The Vinted title Claude writes starts from the product's own name.** It used to be rewritten from scratch and no longer looked like the product it sold. Claude now keeps the name's words and order, cleaning it up where needed (stray capitals, a word tacked on at the end) and putting it in correct French, then adds the other name buyers search for and the concrete details the sheet gives: material, pattern, size, colour. The length (75 to 100 characters) and the words Vinted's moderation refuses are unchanged.
+
+**No migration.**
+
 ## 2026-09-21 · v1.50.0 · build KUBZT2
 
 ### Admin
