@@ -712,6 +712,60 @@
                             </div>
                             <button type="submit" class="btn btn-secondary btn-block">Save tracking</button>
                         </form>
+
+                        <div class="order-shipping-form">
+                            <span class="order-shipping-form-title">Shipping label</span>
+                            @if ($order->shipping_label_path)
+                                <div class="order-label-file">
+                                    <svg class="order-label-file-icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                                        <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                                        <path d="M14 3v5h5M9 13h6M9 16.5h4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    <span class="order-label-file-name">
+                                        <strong>{{ $order->number }}.pdf</strong>
+                                        <small>Shipping label</small>
+                                    </span>
+                                    <a href="{{ route('admin.orders.shipping-label.show', $order) }}" class="btn btn-secondary order-label-open" target="_blank" rel="noopener">
+                                        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+                                            <path d="M12 4v11m0 0-4-4m4 4 4-4M5 19h14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                        Open
+                                    </a>
+                                </div>
+                            @endif
+                            <form method="POST" action="{{ route('admin.orders.shipping-label.store', $order) }}" enctype="multipart/form-data">
+                                @csrf
+                                @if ($order->shipping_label_path)
+                                    {{-- A label is already there: replacing it is a quiet link, not a target. --}}
+                                    <div class="order-label-quiet">
+                                        <label class="order-label-link">
+                                            Replace
+                                            <input type="file" name="shipping_label" accept="application/pdf" required onchange="this.form.requestSubmit()">
+                                        </label>
+                                        <span aria-hidden="true">·</span>
+                                        <button type="submit" form="remove-shipping-label" class="order-label-link is-danger">Remove</button>
+                                    </div>
+                                @else
+                                    <label class="order-label-drop">
+                                        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                                            <path d="M12 16V5m0 0-4 4m4-4 4 4M5 19h14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                        <span>
+                                            <strong>Upload the shipping label</strong>
+                                            <small>Drop a PDF here or click to choose, 10 MB max</small>
+                                        </span>
+                                        <input type="file" name="shipping_label" accept="application/pdf" required onchange="this.form.requestSubmit()">
+                                    </label>
+                                @endif
+                                @error('shipping_label') <p class="form-error">{{ $message }}</p> @enderror
+                            </form>
+                            @if ($order->shipping_label_path)
+                                <form id="remove-shipping-label" method="POST" action="{{ route('admin.orders.shipping-label.destroy', $order) }}" onsubmit="return confirm('Remove the shipping label?')">
+                                    @csrf
+                                    @method('DELETE')
+                                </form>
+                            @endif
+                        </div>
                     @endunless
                 </section>
 

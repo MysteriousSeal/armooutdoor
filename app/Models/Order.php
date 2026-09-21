@@ -37,6 +37,7 @@ use Illuminate\Support\Str;
     'carrier_snapshot',
     'tracking_number',
     'tracking_carrier_id',
+    'shipping_label_path',
     'package_type_id',
     'package_type_name',
     'marketplace_id',

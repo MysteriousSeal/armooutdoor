@@ -420,6 +420,9 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         Route::delete('/orders/bulk/delete', [AdminOrderController::class, 'bulkDestroy'])->middleware('admin.owner')->name('orders.bulk-destroy');
         Route::delete('/orders/{order}', [AdminOrderController::class, 'destroy'])->middleware('admin.owner')->name('orders.destroy');
         Route::patch('/orders/{order}/tracking', [AdminOrderController::class, 'updateTracking'])->name('orders.tracking.update');
+        Route::post('/orders/{order}/shipping-label', [AdminOrderController::class, 'storeShippingLabel'])->name('orders.shipping-label.store');
+        Route::get('/orders/{order}/shipping-label', [AdminOrderController::class, 'showShippingLabel'])->name('orders.shipping-label.show');
+        Route::delete('/orders/{order}/shipping-label', [AdminOrderController::class, 'destroyShippingLabel'])->name('orders.shipping-label.destroy');
         Route::post('/orders/{order}/discount-code', [AdminOrderController::class, 'createDiscountCode'])->name('orders.discount-code.store');
         Route::patch('/orders/{order}/marketplace-commission', [AdminOrderController::class, 'updateMarketplaceCommission'])->name('orders.marketplace-commission.update');
         Route::patch('/orders/{order}/marketplace-bonus', [AdminOrderController::class, 'updateMarketplaceBonus'])->name('orders.marketplace-bonus.update');

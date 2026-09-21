@@ -36,6 +36,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -1118,6 +1119,59 @@ class OrderController extends Controller
         AdminActivityLog::record('order.tracking_updated', $order, 'Updated tracking for order '.$order->number);
 
         return back()->with('status', 'Tracking details saved.');
+    }
+
+    /**
+     * Keeps the carrier's shipping label, as the PDF it was bought as.
+     *
+     * The file goes to the private disk, never under public/: a label carries
+     * the customer's name and address. Uploading again replaces what was
+     * there, and the old file is deleted rather than left behind.
+     */
+    public function storeShippingLabel(Request $request, Order $order): RedirectResponse
+    {
+        abort_if($order->isDraft(), 404);
+
+        $request->validate([
+            'shipping_label' => ['required', 'file', 'mimetypes:application/pdf', 'max:10240'],
+        ], [], ['shipping_label' => 'shipping label']);
+
+        $previous = $order->shipping_label_path;
+
+        $order->update([
+            'shipping_label_path' => $request->file('shipping_label')->store('orders/shipping-labels'),
+        ]);
+
+        if ($previous && $previous !== $order->shipping_label_path) {
+            Storage::delete($previous);
+        }
+
+        AdminActivityLog::record('order.shipping_label_uploaded', $order, 'Uploaded the shipping label for order '.$order->number);
+
+        return back()->with('status', 'Shipping label saved.');
+    }
+
+    /** Serves the label in the browser; the file has no public URL. */
+    public function showShippingLabel(Order $order): Response
+    {
+        abort_unless($order->shipping_label_path && Storage::exists($order->shipping_label_path), 404);
+
+        return response(Storage::get($order->shipping_label_path), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="shipping-label-'.$order->number.'.pdf"',
+            'Cache-Control' => 'private, no-store',
+        ]);
+    }
+
+    public function destroyShippingLabel(Order $order): RedirectResponse
+    {
+        if ($order->shipping_label_path) {
+            Storage::delete($order->shipping_label_path);
+            $order->update(['shipping_label_path' => null]);
+            AdminActivityLog::record('order.shipping_label_removed', $order, 'Removed the shipping label for order '.$order->number);
+        }
+
+        return back()->with('status', 'Shipping label removed.');
     }
 
     public function updateMarketplaceCommission(Request $request, Order $order): RedirectResponse
