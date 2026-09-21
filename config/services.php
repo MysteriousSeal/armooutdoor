@@ -50,6 +50,21 @@ return [
     ],
 
     /*
+     * Octopia's REST Seller API, behind Cdiscount. The three values come from
+     * the seller's API credentials page on Octopia; without them nothing is
+     * called and the admin says so rather than failing on submit.
+     */
+    'octopia' => [
+        'client_id' => env('OCTOPIA_CLIENT_ID'),
+        'client_secret' => env('OCTOPIA_CLIENT_SECRET'),
+        'seller_id' => env('OCTOPIA_SELLER_ID'),
+        'auth_url' => env('OCTOPIA_AUTH_URL', 'https://auth.octopia-io.net/auth/realms/maas/protocol/openid-connect/token'),
+        'base_url' => env('OCTOPIA_BASE_URL', 'https://api.octopia-io.net/seller/v2'),
+        // Offers are made to a sales channel; CDISFR is Cdiscount France.
+        'sales_channel_id' => env('OCTOPIA_SALES_CHANNEL_ID', 'CDISFR'),
+    ],
+
+    /*
      * Claude, for the admin's writing helpers. Without a key the buttons
      * that call it say so rather than failing on submit.
      */

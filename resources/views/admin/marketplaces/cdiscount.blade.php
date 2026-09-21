@@ -10,36 +10,76 @@
                     <p class="admin-list-kicker"><a href="{{ route('admin.marketplaces.index') }}">Marketplaces</a></p>
                     <h2 class="admin-list-title">Cdiscount</h2>
                     <p class="admin-list-lede">
-                        Octopia takes no feed: it takes the Excel template of a category, filled in.
-                        Keep the template here, say on a product which one describes it, and take the file back with the lines written in.
+                        Read a category from Octopia, say on a product which one describes it, and answer what it asks.
                     </p>
                 </div>
             </div>
         </header>
 
-        {{-- The one thing the export cannot fix by itself. --}}
+        {{-- The one thing the shop cannot fix by itself. --}}
         @unless ($imagesAreSecure)
             <p class="empty-state">
                 This site is served over <code>{{ config('app.url') }}</code>, and Octopia only accepts image addresses in https.
-                The file will carry the addresses as they are, so export from production rather than from here.
+                Products sent from here would carry the addresses as they are, so send them from production rather than from here.
             </p>
         @endunless
 
-        <form method="POST" action="{{ route('admin.marketplaces.cdiscount.templates.store') }}" enctype="multipart/form-data" class="admin-filter-bar">
-            @csrf
-            <div class="admin-filter-row">
-                <div class="admin-filter-field admin-filter-field--search">
-                    <label class="admin-field-label" for="octopia-template">Add a category template (.xlsm from Octopia)</label>
-                    <input id="octopia-template" type="file" name="template" accept=".xlsm,.xlsx" class="form-control" required>
+        {{-- Octopia's API: no file, the category's attributes read as they are.
+             Without credentials the section says what is missing, rather than
+             offering a search that can only fail. --}}
+        @if ($apiConfigured)
+            <form method="GET" action="{{ route('admin.marketplaces.cdiscount') }}" class="admin-filter-bar">
+                <div class="admin-filter-row">
+                    <div class="admin-filter-field admin-filter-field--search">
+                        <label class="admin-field-label" for="octopia-find">Read a category from Octopia</label>
+                        <input id="octopia-find" type="search" name="find" class="form-control" placeholder="Name or 6-character code…" value="{{ $find }}">
+                    </div>
+                    <div class="admin-filter-actions">
+                        <button type="submit" class="btn btn-primary">Find</button>
+                    </div>
                 </div>
-                <div class="admin-filter-actions">
-                    <button type="submit" class="btn btn-primary">Read it</button>
-                </div>
-            </div>
-        </form>
+            </form>
+
+            @error('code')<p class="form-error">{{ $message }}</p>@enderror
+
+            @if ($findError)
+                <p class="form-error">Octopia could not be read: {{ $findError }}</p>
+            @endif
+
+            @if ($find !== '' && ! $findError)
+                @if ($matches === [])
+                    <p class="empty-state">No Octopia category matches « {{ $find }} ».</p>
+                @else
+                    <div class="admin-table-wrap">
+                        <table class="admin-table nb-table">
+                            <tbody>
+                                @foreach ($matches as $match)
+                                    <tr>
+                                        <td>{{ $match['label'] }}</td>
+                                        <td><code class="nb-code">{{ $match['code'] }}</code></td>
+                                        <td>
+                                            <form method="POST" action="{{ route('admin.marketplaces.cdiscount.categories.import') }}" class="admin-table-actions">
+                                                @csrf
+                                                <input type="hidden" name="code" value="{{ $match['code'] }}">
+                                                <button type="submit" class="btn btn-sm btn-primary">Read it</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            @endif
+        @else
+            <p class="form-hint">
+                To read categories straight from Octopia, set <code>OCTOPIA_CLIENT_ID</code>, <code>OCTOPIA_CLIENT_SECRET</code>
+                and <code>OCTOPIA_SELLER_ID</code> in the environment. They come from the API credentials page of your Octopia account.
+            </p>
+        @endif
 
         @if ($templates->isEmpty())
-            <p class="empty-state">No template yet. Download one from Octopia for a category and add it above.</p>
+            <p class="empty-state">No category yet. Read one from Octopia above.</p>
         @else
             <nav class="admin-tabs" aria-label="Octopia categories">
                 @foreach ($templates as $one)
@@ -54,34 +94,44 @@
 
             <div class="octopia-template-head">
                 <p class="form-hint">
-                    Category <code class="nb-code">{{ $template->code }}</code>, {{ count($template->fields) }} columns,
-                    {{ count($template->requiredAttributeFields()) }} of them required attributes.
-                    From <code class="nb-code">{{ $template->original_filename }}</code>, added {{ admin_relative_date($template->created_at) }}.
+                    Category <code class="nb-code">{{ $template->code }}</code>, {{ count($template->fields) }} attributes,
+                    {{ count($template->requiredAttributeFields()) }} of them required.
+                    Read from Octopia {{ admin_relative_date($template->synced_at ?? $template->created_at) }}.
                 </p>
-                <form method="POST" action="{{ route('admin.marketplaces.cdiscount.templates.destroy', $template) }}">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-sm btn-secondary">Remove template</button>
-                </form>
+                <div class="admin-table-actions">
+                    <form method="POST" action="{{ route('admin.marketplaces.cdiscount.categories.import') }}">
+                        @csrf
+                        <input type="hidden" name="code" value="{{ $template->code }}">
+                        <button type="submit" class="btn btn-sm btn-secondary">Refresh from Octopia</button>
+                    </form>
+                    <form method="POST" action="{{ route('admin.marketplaces.cdiscount.categories.destroy', $template) }}">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-sm btn-secondary">Remove category</button>
+                    </form>
+                </div>
             </div>
 
             @if ($lines === [])
                 <p class="empty-state">
-                    No product points at this template yet. Open a product, follow its
+                    No product points at this category yet. Open a product, follow its
                     « Cdiscount listing » link and pick « {{ $template->name }} » there.
                 </p>
             @else
-                <form method="POST" action="{{ route('admin.marketplaces.cdiscount.export', $template) }}">
+                <form method="POST" action="{{ route('admin.marketplaces.cdiscount.send', $template) }}" data-octopia-send>
                     @csrf
+                    @error('lines')<p class="form-error">{{ $message }}</p>@enderror
+
                     <div class="admin-table-wrap">
                         <table class="admin-table nb-table">
                             <thead>
                                 <tr>
-                                    <th class="octopia-pick"><span class="sr-only">Export</span></th>
+                                    <th class="octopia-pick"><span class="sr-only">Send</span></th>
                                     <th>Line</th>
                                     <th>EAN</th>
                                     <th>Seller reference</th>
-                                    <th>Missing</th>
+                                    <th>Sheet</th>
+                                    <th>Offer</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -89,14 +139,15 @@
                                     @php($ready = $line['missing'] === [])
                                     <tr class="{{ $ready ? '' : 'octopia-row--incomplete' }}">
                                         <td class="octopia-pick">
-                                            {{-- An incomplete line would be refused on import: it can
-                                                 still be sent, but it is not ticked for you. --}}
+                                            {{-- A line with something missing would be refused: it
+                                                 cannot be ticked, and the column says why. --}}
                                             <input
                                                 type="checkbox"
                                                 name="lines[]"
                                                 value="{{ $line['key'] }}"
                                                 @checked($ready)
-                                                aria-label="Export this line"
+                                                @disabled(! $ready)
+                                                aria-label="Send this line"
                                             >
                                         </td>
                                         <td>
@@ -129,6 +180,14 @@
                                                 <span class="octopia-missing">{{ implode(', ', $line['missing']) }}</span>
                                             @endif
                                         </td>
+                                        <td>
+                                            @if ($line['offer']['missing'] === [])
+                                                <span class="order-chip order-chip--shipped">{{ format_euros($line['offer']['price_cents']) }}</span>
+                                                <span class="nb-none">{{ $line['offer']['stock'] }} in stock</span>
+                                            @else
+                                                <a href="{{ route('admin.products.cdiscount.edit', $line['product']) }}" class="octopia-missing">{{ implode(', ', $line['offer']['missing']) }}</a>
+                                            @endif
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -136,13 +195,84 @@
                     </div>
 
                     <div class="vinted-actions">
-                        <button type="submit" class="btn btn-primary">Download the filled template</button>
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                            onclick="return confirm('Send the ticked lines to Octopia? This creates their product sheets on Cdiscount.')"
+                        >1. Send the products</button>
+                        <button
+                            type="submit"
+                            formaction="{{ route('admin.marketplaces.cdiscount.offers', $template) }}"
+                            class="btn btn-primary"
+                            onclick="return confirm('Put the ticked lines on sale on Cdiscount, at the price and stock shown? This makes them buyable.')"
+                        >2. Put them on sale</button>
                         <p class="form-hint">
-                            The file comes back as Octopia's own, with the ticked lines written from row {{ $template->first_data_row }}.
-                            Prices and stock are not in this template: they are set on Octopia's side.
+                            First the products: Octopia creates their sheets in its catalogue and checks each one.
+                            Once they show as Integrated below, put them on sale: that sends the price, the stock and the delivery,
+                            set on each product's Cdiscount page. Nothing is buyable before the second step.
                         </p>
                     </div>
                 </form>
+            @endif
+
+            @if ($submissions->isNotEmpty())
+                <h3 class="order-panel-title">Sent to Octopia</h3>
+                @error('submission')<p class="form-error">{{ $message }}</p>@enderror
+
+                @foreach ($submissions as $submission)
+                    <div class="octopia-template-head">
+                        <p class="form-hint">
+                            <strong>{{ $submission->isOffers() ? 'Offers' : 'Products' }}</strong>,
+                            package <code class="nb-code">{{ $submission->package_id }}</code>,
+                            sent {{ admin_relative_date($submission->created_at) }}.
+                            @if ($submission->checked_at)
+                                Checked {{ admin_relative_date($submission->checked_at) }}.
+                            @else
+                                Not checked yet.
+                            @endif
+                        </p>
+                        @unless ($submission->isSettled())
+                            <form method="POST" action="{{ route('admin.marketplaces.cdiscount.submissions.check', $submission) }}">
+                                @csrf
+                                <button type="submit" class="btn btn-sm btn-secondary">Check the result</button>
+                            </form>
+                        @endunless
+                    </div>
+
+                    <div class="admin-table-wrap">
+                        <table class="admin-table nb-table">
+                            <tbody>
+                                @foreach ($submission->outcomes() as $outcome)
+                                    <tr>
+                                        <td>{{ $outcome['title'] }}</td>
+                                        <td><code class="nb-code">{{ $outcome['gtin'] }}</code></td>
+                                        <td>
+                                            @if ($outcome['status'] === 'Integrated')
+                                                <span class="order-chip order-chip--shipped">Integrated</span>
+                                            @elseif (in_array($outcome['status'], ['Refused', 'Rejected'], true))
+                                                <span class="order-chip order-chip--refunded">{{ $outcome['status'] }}</span>
+                                            @elseif ($outcome['status'] === 'Duplicated')
+                                                <span class="order-chip">Duplicated</span>
+                                            @elseif ($outcome['status'] === 'Validated')
+                                                <span class="order-chip">Being processed</span>
+                                            @else
+                                                <span class="nb-none">No answer yet</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @foreach ($outcome['errors'] as $error)
+                                                <span class="octopia-missing">{{ $error['field'] ?? '' }}: {{ $error['message'] ?? $error['code'] ?? '' }}</span><br>
+                                            @endforeach
+                                            @foreach ($outcome['warnings'] as $warning)
+                                                <span class="nb-none">{{ $warning['field'] ?? '' }}: {{ $warning['message'] ?? $warning['code'] ?? '' }}</span><br>
+                                            @endforeach
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endforeach
             @endif
         @endif
     </div>

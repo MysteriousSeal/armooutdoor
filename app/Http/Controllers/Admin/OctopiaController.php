@@ -4,32 +4,30 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\CdiscountListing;
+use App\Models\OctopiaSubmission;
 use App\Models\OctopiaTemplate;
 use App\Models\Product;
+use App\Models\ProductVariant;
+use App\Services\Octopia\OctopiaClient;
+use App\Support\Octopia\ApiFields;
 use App\Support\Octopia\Exporter;
 use App\Support\Octopia\Readiness;
-use App\Support\Octopia\TemplateFile;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Throwable;
 
 /**
- * Cdiscount, through Octopia's product templates.
+ * Cdiscount, through Octopia.
  *
- * Octopia takes no feed: a seller fills the Excel template of the category
- * and uploads it in their back office. So the shop keeps the templates, says
- * which of its products belong to each, and hands back the same file with
- * its own rows written in.
+ * The shop keeps what Octopia asks of each category, read from Octopia's API,
+ * and says which of its products belong to each.
  */
 class OctopiaController extends Controller
 {
-    private const DIRECTORY = 'octopia';
-
     /**
      * The listings of a category, with everything a line reads.
      *
@@ -44,9 +42,20 @@ class OctopiaController extends Controller
             ->values();
     }
 
-    public function index(Request $request): View
+    public function index(Request $request, OctopiaClient $octopia): View
     {
         $templates = OctopiaTemplate::query()->orderBy('name')->get();
+        $matches = [];
+        $findError = null;
+
+        try {
+            $matches = $this->matchingCategories($octopia, trim((string) $request->query('find', '')));
+        } catch (Throwable $e) {
+            // Said on the page: « no match » would read as Octopia having
+            // nothing, when it is the credentials or the network.
+            $findError = $e->getMessage();
+        }
+
         $template = $templates->firstWhere('id', (int) $request->query('template')) ?? $templates->first();
         $lines = [];
 
@@ -58,62 +67,213 @@ class OctopiaController extends Controller
             'templates' => $templates,
             'template' => $template,
             'lines' => $lines,
+            'submissions' => $template?->submissions()->limit(10)->get() ?? collect(),
+            'apiConfigured' => $octopia->isConfigured(),
+            'find' => trim((string) $request->query('find', '')),
+            'matches' => $matches,
+            'findError' => $findError,
             // Octopia refuses a picture that is not served over https, and
             // nothing here can fix that for a shop served over http.
             'imagesAreSecure' => str_starts_with((string) config('app.url'), 'https://'),
         ]);
     }
 
-    public function storeTemplate(Request $request): RedirectResponse
+    /**
+     * A category read from Octopia's API: what it asks of a product. Reading
+     * it again refreshes it, products and answers staying where they are.
+     */
+    public function importCategory(Request $request, OctopiaClient $octopia): RedirectResponse
     {
-        $request->validate([
-            'template' => ['required', 'file', 'max:10240', 'mimetypes:application/vnd.ms-excel.sheet.macroEnabled.12,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/zip,application/octet-stream'],
-        ], [], ['template' => 'template file']);
-
-        $file = $request->file('template');
-        $path = self::DIRECTORY.'/'.Str::uuid()->toString().'.'.($file->getClientOriginalExtension() ?: 'xlsm');
-
-        Storage::disk('local')->putFileAs(
-            self::DIRECTORY,
-            $file,
-            basename($path),
-        );
+        $data = $request->validate([
+            'code' => ['required', 'string', 'regex:/^[A-Za-z0-9]{6}$/'],
+        ], ['code.regex' => 'An Octopia category code is 6 letters or digits.']);
 
         try {
-            $read = (new TemplateFile(storage_path('app/private/'.$path)))->read();
+            $category = $octopia->category($data['code']);
+            $fields = ApiFields::fromProperties($octopia->properties($data['code']));
         } catch (Throwable $e) {
-            Storage::disk('local')->delete($path);
-
-            return back()->withErrors(['template' => $e->getMessage()]);
+            return back()->withErrors(['code' => $e->getMessage()]);
         }
 
-        // One template per category: a newer file for a category replaces the
-        // one held, products and answers staying where they are.
-        $existing = OctopiaTemplate::query()->where('code', $read['code'])->first();
-
-        if ($existing !== null) {
-            Storage::disk('local')->delete($existing->path);
+        if ($fields === []) {
+            return back()->withErrors(['code' => 'Octopia lists no attribute for '.$category['label'].'.']);
         }
 
-        OctopiaTemplate::query()->updateOrCreate(['code' => $read['code']], [
-            'name' => $read['name'] !== '' ? $read['name'] : $read['code'],
-            'original_filename' => $file->getClientOriginalName(),
-            'path' => $path,
-            'sheet_path' => $read['sheet_path'],
-            'first_data_row' => TemplateFile::FIRST_DATA_ROW,
-            'fields' => $read['fields'],
+        OctopiaTemplate::query()->updateOrCreate(['code' => $category['code']], [
+            'name' => $category['label'],
+            'fields' => $fields,
+            'synced_at' => now(),
         ]);
 
-        return back()->with('status', 'Template "'.$read['name'].'" saved, '.count($read['fields']).' columns read.');
+        return redirect()
+            ->route('admin.marketplaces.cdiscount', ['template' => OctopiaTemplate::query()->where('code', $category['code'])->value('id')])
+            ->with('status', '« '.$category['label'].' » read from Octopia, '.count($fields).' attributes.');
     }
 
-    public function destroyTemplate(OctopiaTemplate $template): RedirectResponse
+    /**
+     * The categories whose name or code holds what was typed. Octopia has no
+     * search of its own, so this filters the list the client keeps.
+     *
+     * @return list<array{code: string, label: string}>
+     *
+     * @throws Throwable when Octopia cannot be read
+     */
+    private function matchingCategories(OctopiaClient $octopia, string $find): array
     {
-        Storage::disk('local')->delete($template->path);
+        if ($find === '' || ! $octopia->isConfigured()) {
+            return [];
+        }
+
+        $categories = $octopia->categories();
+
+        // Accents and case set aside: « cagoule » finds « Cagoule ».
+        $needle = Str::lower(Str::ascii($find));
+
+        return collect($categories)
+            ->filter(fn (array $category): bool => str_contains(Str::lower(Str::ascii($category['label'])), $needle)
+                || str_contains(Str::lower($category['code']), $needle))
+            ->take(30)
+            ->values()
+            ->all();
+    }
+
+    /**
+     * The lines the request ticked, or the reason nothing can be sent.
+     *
+     * @return array{0: list<array<string, mixed>>, 1: ?string}
+     */
+    private function chosenLines(Request $request, OctopiaTemplate $template, OctopiaClient $octopia): array
+    {
+        $data = $request->validate([
+            'lines' => ['required', 'array', 'max:100'],
+            'lines.*' => ['string'],
+        ], ['lines.required' => 'Tick at least one line to send.']);
+
+        if (! $octopia->isConfigured()) {
+            return [[], 'The Octopia credentials are not set on this environment.'];
+        }
+
+        $chosen = array_flip($data['lines']);
+        $lines = array_values(array_filter(
+            (new Exporter($template))->lines($this->listings($template)),
+            fn (array $line): bool => isset($chosen[$line['key']]),
+        ));
+
+        return $lines === [] ? [[], 'None of the chosen lines belong to this category.'] : [$lines, null];
+    }
+
+    /**
+     * Send the chosen lines to Octopia's catalogue.
+     *
+     * Only lines with nothing missing go, and only with https pictures:
+     * Octopia refuses the rest, and a refused batch is a request spent for
+     * nothing. This creates the product sheets; a price and a stock are an
+     * offer, which is sent apart.
+     */
+    public function send(Request $request, OctopiaTemplate $template, OctopiaClient $octopia): RedirectResponse
+    {
+        [$lines, $problem] = $this->chosenLines($request, $template, $octopia);
+
+        if ($problem !== null) {
+            return back()->withErrors(['lines' => $problem]);
+        }
+
+        foreach ($lines as $line) {
+            if ($line['missing'] !== []) {
+                return back()->withErrors(['lines' => $line['title'].' still lacks: '.implode(', ', $line['missing']).'.']);
+            }
+
+            foreach ($line['payload']['sellerPictureUrls'] as $picture) {
+                if (! str_starts_with($picture['url'], 'https://')) {
+                    return back()->withErrors(['lines' => 'Octopia only takes pictures served over https, and '.$line['title'].' has '.$picture['url'].'. Send from the live site.']);
+                }
+            }
+        }
+
+        try {
+            $packageId = $octopia->submitProducts(array_column($lines, 'payload'));
+        } catch (Throwable $e) {
+            return back()->withErrors(['lines' => $e->getMessage()]);
+        }
+
+        $this->recordSubmission($template, 'products', $packageId, $lines);
+
+        return back()->with('status', count($lines).' '.Str::plural('product', count($lines)).' sent to Octopia. Check the result below in a minute.');
+    }
+
+    /**
+     * Put the chosen lines on sale: their price, stock and delivery.
+     *
+     * The products have to be in Octopia's catalogue first, and integrated:
+     * an offer on an EAN Octopia does not know is rejected, and the report
+     * says so. What the offer needs from the seller is asked on the product's
+     * own Cdiscount page.
+     */
+    public function sendOffers(Request $request, OctopiaTemplate $template, OctopiaClient $octopia): RedirectResponse
+    {
+        [$lines, $problem] = $this->chosenLines($request, $template, $octopia);
+
+        if ($problem !== null) {
+            return back()->withErrors(['lines' => $problem]);
+        }
+
+        foreach ($lines as $line) {
+            if ($line['gtin'] === '') {
+                return back()->withErrors(['lines' => $line['title'].' has no EAN: Octopia knows an offer by it.']);
+            }
+
+            if ($line['offer']['missing'] !== []) {
+                return back()->withErrors(['lines' => 'The offer for '.$line['title'].' still lacks: '.implode(', ', $line['offer']['missing']).'. Set it on the product\'s Cdiscount page.']);
+            }
+        }
+
+        try {
+            $packageId = $octopia->submitOffers(array_column(array_column($lines, 'offer'), 'payload'));
+        } catch (Throwable $e) {
+            return back()->withErrors(['lines' => $e->getMessage()]);
+        }
+
+        $this->recordSubmission($template, 'offers', $packageId, $lines);
+
+        return back()->with('status', count($lines).' '.Str::plural('offer', count($lines)).' sent to Octopia. Check the result below in a minute.');
+    }
+
+    /** @param  list<array<string, mixed>>  $lines */
+    private function recordSubmission(OctopiaTemplate $template, string $kind, string $packageId, array $lines): void
+    {
+        $template->submissions()->create([
+            'kind' => $kind,
+            'package_id' => $packageId,
+            'lines' => array_map(fn (array $line): array => [
+                'gtin' => $line['gtin'],
+                'reference' => $line['reference'],
+                'title' => $line['title'],
+            ], $lines),
+        ]);
+    }
+
+    /** Ask Octopia what became of a batch. */
+    public function checkSubmission(OctopiaSubmission $submission, OctopiaClient $octopia): RedirectResponse
+    {
+        try {
+            $report = $submission->isOffers()
+                ? $octopia->offerResults($submission->package_id)
+                : $octopia->productReports($submission->package_id);
+        } catch (Throwable $e) {
+            return back()->withErrors(['submission' => $e->getMessage()]);
+        }
+
+        $submission->update(['report' => $report, 'checked_at' => now()]);
+
+        return back();
+    }
+
+    public function destroyCategory(OctopiaTemplate $template): RedirectResponse
+    {
         $template->delete();
 
         return redirect()->route('admin.marketplaces.cdiscount')
-            ->with('status', 'Template removed. The products it described keep their answers.');
+            ->with('status', 'Category removed. The answers given for it go with it; the products stay.');
     }
 
     /**
@@ -133,6 +293,9 @@ class OctopiaController extends Controller
             'listing' => $product->cdiscountListing,
             'templates' => OctopiaTemplate::query()->orderBy('name')->get(),
             'checks' => Readiness::checks($product),
+            'offer' => ($product->cdiscountListing ?? new CdiscountListing)->offerSettings(),
+            // What each line is sold at in the shop, to show what Cdiscount will charge.
+            'priceLines' => $this->priceLines($product),
         ]);
     }
 
@@ -147,6 +310,15 @@ class OctopiaController extends Controller
             'variants' => ['nullable', 'array'],
             'variants.*' => ['nullable', 'array'],
             'variants.*.*' => ['nullable', 'string', 'max:5000'],
+            'offer' => ['nullable', 'array'],
+            'offer.condition' => ['nullable', 'string', Rule::in(array_keys(CdiscountListing::CONDITIONS))],
+            'offer.markup' => ['nullable', 'numeric', 'min:-50', 'max:200'],
+            'offer.vat' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'offer.preparation_days' => ['nullable', 'integer', 'min:0', 'max:90'],
+            'offer.delivery' => ['nullable', 'array'],
+            'offer.delivery.*.enabled' => ['nullable', 'boolean'],
+            'offer.delivery.*.cost' => ['nullable', 'numeric', 'min:0', 'max:1000'],
+            'offer.delivery.*.additional' => ['nullable', 'numeric', 'min:0', 'max:1000'],
         ]);
 
         // No category means the product is not sold there: the listing goes
@@ -164,6 +336,7 @@ class OctopiaController extends Controller
                 'octopia_template_id' => (int) $data['octopia_template_id'],
                 'values' => $this->answers((array) ($data['values'] ?? [])),
                 'per_variant' => array_values(array_unique(array_map('strval', (array) ($data['per_variant'] ?? [])))),
+                'offer' => $this->offer((array) ($data['offer'] ?? [])),
             ],
         );
 
@@ -193,6 +366,58 @@ class OctopiaController extends Controller
     }
 
     /**
+     * The lines the product is sold as, each with the shop's price: one for a
+     * product on its own, one per active variant otherwise.
+     *
+     * @return list<array{label: string, cents: int}>
+     */
+    private function priceLines(Product $product): array
+    {
+        $variants = $product->variants->where('is_active', true);
+
+        if ($variants->isEmpty()) {
+            return [['label' => $product->localizedName(), 'cents' => $product->effectivePriceCents()]];
+        }
+
+        return $variants->map(fn (ProductVariant $variant): array => [
+            'label' => $variant->label() !== '' ? $variant->label() : 'Variant',
+            'cents' => $variant->effectivePriceCents(),
+        ])->values()->all();
+    }
+
+    /**
+     * The offer settings as they are kept: a delivery mode counts only when it
+     * is ticked and has a cost, and a blank number is no number rather than a
+     * zero (a free delivery is a cost of 0, typed).
+     *
+     * @param  array<string, mixed>  $input
+     * @return array<string, mixed>
+     */
+    private function offer(array $input): array
+    {
+        $delivery = [];
+
+        foreach (array_keys(CdiscountListing::DELIVERY_MODES) as $code) {
+            $mode = (array) ($input['delivery'][$code] ?? []);
+
+            if (! empty($mode['enabled']) && ($mode['cost'] ?? '') !== '') {
+                $delivery[$code] = [
+                    'cost' => round((float) $mode['cost'], 2),
+                    'additional' => ($mode['additional'] ?? '') !== '' ? round((float) $mode['additional'], 2) : null,
+                ];
+            }
+        }
+
+        return [
+            'condition' => $input['condition'] ?? 'New',
+            'markup' => ($input['markup'] ?? '') !== '' ? (float) $input['markup'] : 0.0,
+            'vat' => ($input['vat'] ?? '') !== '' ? (float) $input['vat'] : 0.0,
+            'preparation_days' => ($input['preparation_days'] ?? '') !== '' ? (int) $input['preparation_days'] : null,
+            'delivery' => $delivery,
+        ];
+    }
+
+    /**
      * Answers with something in them. An empty one is not stored: an
      * attribute nobody filled in is one the export reports missing.
      *
@@ -212,43 +437,5 @@ class OctopiaController extends Controller
         }
 
         return $answers;
-    }
-
-    /**
-     * The template handed back with the chosen lines written into it.
-     *
-     * The file is Octopia's own, copied and added to: their macros and their
-     * closed lists survive, which they would not through a spreadsheet
-     * library rewriting the workbook.
-     */
-    public function export(Request $request, OctopiaTemplate $template): BinaryFileResponse|RedirectResponse
-    {
-        $data = $request->validate([
-            'lines' => ['required', 'array'],
-            'lines.*' => ['string'],
-        ]);
-
-        $exporter = new Exporter($template);
-        $rows = $exporter->rows($exporter->lines($this->listings($template)), $data['lines']);
-
-        if ($rows === []) {
-            return back()->withErrors(['lines' => 'None of the chosen lines could be written.']);
-        }
-
-        $destination = tempnam(sys_get_temp_dir(), 'octopia').'.xlsm';
-
-        try {
-            $template->file()->fill($template->sheet_path, $rows, $destination);
-        } catch (Throwable $e) {
-            @unlink($destination);
-
-            return back()->withErrors(['lines' => $e->getMessage()]);
-        }
-
-        // Octopia refuses a file name over 40 characters, extension included.
-        $suffix = '-'.now()->format('Ymd-Hi').'.xlsm';
-        $name = rtrim(Str::limit(Str::slug($template->name), 40 - strlen($suffix), ''), '-').$suffix;
-
-        return response()->download($destination, $name)->deleteFileAfterSend();
     }
 }

@@ -9,7 +9,7 @@ use App\Models\ProductVariant;
 use Illuminate\Support\Str;
 
 /**
- * The shop's products as lines of an Octopia product template.
+ * The shop's products as the lines Octopia would receive.
  *
  * One line per offer: a product without variants is one line, a product with
  * variants is one line per active variant, since each is bought on its own on
@@ -31,10 +31,10 @@ class Exporter
     public function __construct(private readonly OctopiaTemplate $template) {}
 
     /**
-     * Every line the template's listings would produce, ready or not.
+     * Every line the category's listings would produce, ready or not.
      *
      * @param  iterable<CdiscountListing>  $listings
-     * @return list<array{key: string, product: Product, variant: ?ProductVariant, reference: string, gtin: string, title: string, missing: list<string>, cells: array<string, string>}>
+     * @return list<array{key: string, product: Product, variant: ?ProductVariant, reference: string, gtin: string, title: string, missing: list<string>, payload: array<string, mixed>, offer: array{payload: array<string, mixed>, missing: list<string>, price_cents: int, stock: int}}>
      */
     public function lines(iterable $listings): array
     {
@@ -64,39 +64,32 @@ class Exporter
     }
 
     /**
-     * The cells of the lines whose keys were chosen, in the order given.
-     *
-     * @param  list<array<string, mixed>>  $lines
-     * @param  list<string>  $keys
-     * @return list<array<string, string>>
-     */
-    public function rows(array $lines, array $keys): array
-    {
-        $chosen = array_flip($keys);
-
-        return array_values(array_map(
-            fn (array $line): array => $line['cells'],
-            array_filter($lines, fn (array $line): bool => isset($chosen[$line['key']])),
-        ));
-    }
-
-    /**
-     * @return array{key: string, product: Product, variant: ?ProductVariant, reference: string, gtin: string, title: string, missing: list<string>, cells: array<string, string>}
+     * @return array{key: string, product: Product, variant: ?ProductVariant, reference: string, gtin: string, title: string, missing: list<string>, payload: array<string, mixed>, offer: array{payload: array<string, mixed>, missing: list<string>, price_cents: int, stock: int}}
      */
     private function line(CdiscountListing $listing, Product $product, ?ProductVariant $variant): array
     {
         $gtin = (string) ($variant?->gtin ?: $product->gtin);
         $reference = (string) ($variant?->sku ?: $product->sku);
         $values = $listing->answersFor($variant);
-        $cells = [];
         $missing = [];
 
-        foreach ($this->template->fields as $field) {
-            $value = $this->cell($field, $product, $variant, $gtin, $reference, $values);
+        // The EAN is what Octopia identifies an offer by, and no category
+        // lists it among its own attributes.
+        if ($gtin === '') {
+            $missing[] = 'EAN';
+        }
 
-            if ($value !== '') {
-                $cells[$field['column']] = $value;
-            } elseif ($field['required']) {
+        // What Octopia refuses a product sheet without, whatever the category.
+        if (trim($product->localizedDescriptionText()) === '') {
+            $missing[] = 'Description';
+        }
+
+        if ($this->images($product, $variant) === []) {
+            $missing[] = 'Photo';
+        }
+
+        foreach ($this->template->attributeFields() as $field) {
+            if ($field['required'] && $this->cell($field, $product, $variant, $gtin, $reference, $values) === '') {
                 $missing[] = $field['label'];
             }
         }
@@ -109,8 +102,147 @@ class Exporter
             'gtin' => $gtin,
             'title' => $this->title($product, $variant),
             'missing' => $missing,
-            'cells' => $cells,
+            'payload' => $this->payload($product, $variant, $gtin, $reference, $values),
+            'offer' => $this->offer($listing, $product, $variant, $gtin, $reference),
         ];
+    }
+
+    /**
+     * The offer for the line: what it is sold at, in what quantity, delivered
+     * how, in the shape Octopia's offer packages take.
+     *
+     * The price is the shop's, the variant's own when it has one and the
+     * promotional one when there is a promotion, raised by the markup the
+     * seller set for Cdiscount's commission. Where a promotion is running the
+     * undiscounted price goes with it, struck through. The stock is the
+     * shop's stock: an offer is only ever as large as what can be shipped.
+     *
+     * @return array{payload: array<string, mixed>, missing: list<string>, price_cents: int, stock: int}
+     */
+    private function offer(CdiscountListing $listing, Product $product, ?ProductVariant $variant, string $gtin, string $reference): array
+    {
+        $settings = $listing->offerSettings();
+        $missing = $listing->offerMissing();
+
+        $effective = $variant?->effectivePriceCents() ?? $product->effectivePriceCents();
+        $original = $variant?->price_cents ?? $product->price_cents;
+        $stock = max(0, (int) ($variant?->quantity ?? $product->quantity));
+
+        if ($effective <= 0) {
+            $missing[] = 'Price';
+        }
+
+        $marked = fn (int $cents): float => round($cents * (1 + $settings['markup'] / 100)) / 100;
+
+        $price = ['price' => $marked($effective), 'taxes' => [['code' => 'VAT', 'value' => $settings['vat']]]];
+
+        if ($original > $effective) {
+            $price['originPrice'] = $marked($original);
+        }
+
+        $modes = [];
+
+        // The tracked one first, as Octopia lists them.
+        foreach (array_keys(CdiscountListing::DELIVERY_MODES) as $code) {
+            $mode = $settings['delivery'][$code] ?? null;
+
+            if (isset($mode['cost'])) {
+                $modes[] = array_filter([
+                    'code' => $code,
+                    'cost' => (float) $mode['cost'],
+                    'additionalCost' => isset($mode['additional']) ? (float) $mode['additional'] : null,
+                ], fn (mixed $value): bool => $value !== null);
+            }
+        }
+
+        return [
+            'payload' => [
+                'sellerExternalReference' => Str::limit($reference, 100, ''),
+                'product' => array_filter(['gtin' => $gtin, 'reference' => $this->reference($reference)]),
+                'condition' => $settings['condition'],
+                'price' => $price,
+                'deliveryModes' => $modes,
+                'preparationTime' => $settings['preparation_days'] ?? 0,
+                'quantity' => $stock,
+            ],
+            'missing' => $missing,
+            'price_cents' => (int) round($effective * (1 + $settings['markup'] / 100)),
+            'stock' => $stock,
+        ];
+    }
+
+    /** ASCII 33 to 127, the pipe apart: the rest is refused. */
+    private function reference(string $reference): string
+    {
+        return Str::limit((string) preg_replace('/[^\x21-\x7B\x7D-\x7F]/', '', $reference), 50, '');
+    }
+
+    /**
+     * The product as Octopia's products-integration endpoint takes it.
+     *
+     * @param  array<string, string>  $values  the category's own attributes, answered
+     * @return array<string, mixed>
+     */
+    private function payload(Product $product, ?ProductVariant $variant, string $gtin, string $reference, array $values): array
+    {
+        $payload = [
+            // An integer, though a GTIN is written as text: Octopia says so.
+            'gtin' => (int) preg_replace('/\D/', '', $gtin),
+            'sellerProductReference' => $this->reference($reference),
+            'title' => $this->title($product, $variant),
+            'description' => Str::limit($product->localizedDescriptionText(), self::DESCRIPTION_LIMIT, ''),
+            'brand' => Str::limit((string) $product->brandName(), 50, ''),
+            'categoryCode' => $this->template->code,
+            'sellerPictureUrls' => collect($this->images($product, $variant))
+                ->map(fn (string $url, int $i): array => ['index' => $i + 1, 'url' => $url])
+                ->values()
+                ->all(),
+            'attributes' => $this->attributes($values),
+        ];
+
+        $marketing = Str::limit($product->localizedDescription(), self::MARKETING_LIMIT, '');
+
+        if (trim(strip_tags($marketing)) !== '') {
+            $payload['richMarketingDescription'] = $marketing;
+        }
+
+        // What ties a product's variants together on Cdiscount: the product's
+        // own reference, the same on each of its lines.
+        if ($variant !== null) {
+            $payload['variantGroupReference'] = Str::limit((string) ($product->sku ?: $product->slug), 50, '');
+        }
+
+        return array_filter($payload, fn (mixed $value): bool => $value !== '');
+    }
+
+    /**
+     * The answers, as the property/values pairs the endpoint takes. A
+     * property that takes several values is answered with them split on
+     * semicolons.
+     *
+     * @param  array<string, string>  $values
+     * @return list<array{propertyReference: string, values: list<string>}>
+     */
+    private function attributes(array $values): array
+    {
+        $attributes = [];
+
+        foreach ($this->template->attributeFields() as $field) {
+            $answer = trim((string) ($values[$field['code']] ?? ''));
+
+            if ($answer === '') {
+                continue;
+            }
+
+            $attributes[] = [
+                'propertyReference' => (string) $field['code'],
+                'values' => str_starts_with((string) ($field['kind'] ?? ''), 'multi')
+                    ? array_values(array_filter(array_map('trim', explode(';', $answer)), fn (string $v): bool => $v !== ''))
+                    : [$answer],
+            ];
+        }
+
+        return $attributes;
     }
 
     /**
@@ -155,7 +287,7 @@ class Exporter
      * variant, and its own colour should be the first thing shown.
      *
      * Octopia takes https addresses only, which is the site's own business:
-     * the export page says so rather than dropping the pictures here.
+     * the Cdiscount page says so rather than dropping the pictures here.
      *
      * @return list<string>
      */

@@ -22,13 +22,14 @@ class Readiness
         $listing = $product->cdiscountListing;
 
         if ($listing?->template === null) {
-            return ['Category' => false, 'EAN' => false, 'Fields' => false];
+            return ['Category' => false, 'EAN' => false, 'Fields' => false, 'Offer' => false];
         }
 
         return [
             'Category' => true,
             'EAN' => self::hasCodes($product),
             'Fields' => self::hasAnswers($product),
+            'Offer' => $listing->offerMissing() === [],
         ];
     }
 

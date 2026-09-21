@@ -312,9 +312,11 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         // Cdiscount, through Octopia's per-category product templates: the
         // shop fills the file, nobody fetches a feed.
         Route::get('/marketplaces/cdiscount', [OctopiaController::class, 'index'])->name('marketplaces.cdiscount');
-        Route::post('/marketplaces/cdiscount/templates', [OctopiaController::class, 'storeTemplate'])->name('marketplaces.cdiscount.templates.store');
-        Route::delete('/marketplaces/cdiscount/templates/{template}', [OctopiaController::class, 'destroyTemplate'])->name('marketplaces.cdiscount.templates.destroy');
-        Route::post('/marketplaces/cdiscount/templates/{template}/export', [OctopiaController::class, 'export'])->name('marketplaces.cdiscount.export');
+        Route::post('/marketplaces/cdiscount/categories', [OctopiaController::class, 'importCategory'])->name('marketplaces.cdiscount.categories.import');
+        Route::post('/marketplaces/cdiscount/categories/{template}/send', [OctopiaController::class, 'send'])->name('marketplaces.cdiscount.send');
+        Route::post('/marketplaces/cdiscount/categories/{template}/offers', [OctopiaController::class, 'sendOffers'])->name('marketplaces.cdiscount.offers');
+        Route::post('/marketplaces/cdiscount/submissions/{submission}/check', [OctopiaController::class, 'checkSubmission'])->name('marketplaces.cdiscount.submissions.check');
+        Route::delete('/marketplaces/cdiscount/categories/{template}', [OctopiaController::class, 'destroyCategory'])->name('marketplaces.cdiscount.categories.destroy');
         Route::post('/marketplaces/naturabuy/sync', [AdminMarketplaceListingController::class, 'syncNaturabuy'])->name('marketplaces.naturabuy.sync');
 
         // Blog

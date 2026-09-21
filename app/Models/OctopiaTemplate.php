@@ -2,21 +2,18 @@
 
 namespace App\Models;
 
-use App\Support\Octopia\TemplateFile;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * An Octopia product template, one per Cdiscount category.
+ * What Octopia asks of a Cdiscount category, one per category.
  *
- * Octopia gives out an Excel file per category, whose columns are that
- * category's own: a balaclava is asked for its hat size, a target is not.
- * The file is kept as it came so the export can hand back the same file
- * filled in; what was read out of it at upload time is kept here so no page
- * has to open it again.
+ * Octopia's attributes are the category's own: a balaclava is asked for its
+ * hat size, a target is not. They are read from Octopia's API and kept here,
+ * with when they were read, so no page has to ask again.
  */
-#[Fillable(['code', 'name', 'original_filename', 'path', 'sheet_path', 'first_data_row', 'fields'])]
+#[Fillable(['code', 'name', 'fields', 'synced_at'])]
 class OctopiaTemplate extends Model
 {
     /** The columns the export fills from the catalogue, by their field code. */
@@ -40,19 +37,20 @@ class OctopiaTemplate extends Model
     {
         return [
             'fields' => 'array',
-            'first_data_row' => 'integer',
+            'synced_at' => 'datetime',
         ];
     }
 
-    /** The products described by this category's template. */
+    /** What was sent to Octopia for this category, the latest first. */
+    public function submissions(): HasMany
+    {
+        return $this->hasMany(OctopiaSubmission::class)->latest('id');
+    }
+
+    /** The products described by this category. */
     public function listings(): HasMany
     {
         return $this->hasMany(CdiscountListing::class);
-    }
-
-    public function file(): TemplateFile
-    {
-        return new TemplateFile(storage_path('app/private/'.$this->path));
     }
 
     /**

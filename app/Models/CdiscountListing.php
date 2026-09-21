@@ -16,9 +16,49 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * next. It sits beside the product, as the Vinted listing does: what a
  * marketplace asks is not what the catalogue knows.
  */
-#[Fillable(['product_id', 'octopia_template_id', 'values', 'per_variant'])]
+#[Fillable(['product_id', 'octopia_template_id', 'values', 'per_variant', 'offer'])]
 class CdiscountListing extends Model
 {
+    /** What the article is like, as Octopia words it. */
+    public const CONDITIONS = [
+        'New' => 'New',
+        'UsedLikeNew' => 'Used, like new',
+        'UsedVeryGoodState' => 'Used, very good state',
+        'UsedAverageState' => 'Used, average state',
+        'RefurbishedLikeNew' => 'Refurbished, like new',
+        'RefurbishedVeryGoodState' => 'Refurbished, very good state',
+        'RefurbishedCorrectState' => 'Refurbished, correct state',
+    ];
+
+    /**
+     * The ways this shop delivers, under the codes Octopia knows them by:
+     * Envoi suivi, Recommandé and Mondial Relay are what its Cdiscount
+     * account is set up for. The tracked one is the mandatory one.
+     */
+    public const DELIVERY_MODES = [
+        'THD' => 'Tracked home delivery (Envoi suivi)',
+        'SHD' => 'Signed home delivery (Recommandé)',
+        'PPMR' => 'Mondial Relay pickup point',
+    ];
+
+    /**
+     * What a product's offer is until its seller decides otherwise: the shop's
+     * price plus 40% to cover Cdiscount's commission, no VAT,
+     * a day to prepare, and every way of delivering offered at a set cost.
+     * The mondial relay pickup is free.
+     */
+    public const DEFAULT_OFFER = [
+        'condition' => 'New',
+        'markup' => 40.0,
+        'vat' => 0.0,
+        'preparation_days' => 1,
+        'delivery' => [
+            'THD' => ['cost' => 3.0, 'additional' => null],
+            'SHD' => ['cost' => 5.0, 'additional' => null],
+            'PPMR' => ['cost' => 0.0, 'additional' => null],
+        ],
+    ];
+
     protected $attributes = [
         'values' => '[]',
         'per_variant' => '[]',
@@ -29,7 +69,55 @@ class CdiscountListing extends Model
         return [
             'values' => 'array',
             'per_variant' => 'array',
+            'offer' => 'array',
         ];
+    }
+
+    /**
+     * What the seller decides about the offers of this product. Until they
+     * have decided anything, the defaults stand.
+     *
+     * @return array{condition: string, markup: float, vat: float, preparation_days: ?int, delivery: array<string, array{cost: float, additional: ?float}>}
+     */
+    public function offerSettings(): array
+    {
+        if ($this->offer === null) {
+            return self::DEFAULT_OFFER;
+        }
+
+        $offer = (array) $this->offer;
+
+        return [
+            'condition' => (string) ($offer['condition'] ?? self::DEFAULT_OFFER['condition']),
+            // A percentage over the shop's price: Cdiscount takes a commission.
+            'markup' => (float) ($offer['markup'] ?? self::DEFAULT_OFFER['markup']),
+            'vat' => (float) ($offer['vat'] ?? self::DEFAULT_OFFER['vat']),
+            // Saved settings are the seller's own: what they left out stays out.
+            'preparation_days' => isset($offer['preparation_days']) && $offer['preparation_days'] !== '' ? (int) $offer['preparation_days'] : null,
+            'delivery' => (array) ($offer['delivery'] ?? []),
+        ];
+    }
+
+    /**
+     * What an offer cannot go without. The tracked home delivery is the one
+     * mode Octopia makes mandatory.
+     *
+     * @return list<string>
+     */
+    public function offerMissing(): array
+    {
+        $offer = $this->offerSettings();
+        $missing = [];
+
+        if ($offer['preparation_days'] === null) {
+            $missing[] = 'Preparation time';
+        }
+
+        if (! isset($offer['delivery']['THD']['cost'])) {
+            $missing[] = 'Tracked delivery';
+        }
+
+        return $missing;
     }
 
     public function product(): BelongsTo

@@ -18,7 +18,7 @@
                     <h2 class="admin-list-title">Cdiscount listing</h2>
                     <p class="admin-list-lede">
                         Octopia asks a different thing of every category. Pick the one this product belongs to,
-                        answer what it asks, and take the file from the
+                        answer what it asks. The ready lines are listed on the
                         <a href="{{ route('admin.marketplaces.cdiscount') }}">Cdiscount page</a>.
                     </p>
                 </div>
@@ -44,7 +44,7 @@
 
                 @if ($templates->isEmpty())
                     <p class="form-hint">
-                        No Octopia template yet. Add one on the
+                        No Octopia category yet. Read one from Octopia on the
                         <a href="{{ route('admin.marketplaces.cdiscount') }}">Cdiscount page</a>, then come back.
                     </p>
                 @else
@@ -59,7 +59,7 @@
                             @endforeach
                         </select>
                         <p class="form-hint">
-                            The template decides the fields below. Leaving it empty removes this listing;
+                            The category decides the fields below. Leaving it empty removes this listing;
                             the product itself is untouched.
                         </p>
                     </div>
@@ -200,6 +200,91 @@
                     @endif
                 </div>
             @endforeach
+
+            {{-- The offer: what it is sold at and delivered how. Independent of
+                 the category's attributes, but there is no offer without a
+                 category, so it follows the choice above. --}}
+            <div data-octopia-offer @unless($currentTemplateId) hidden @endunless>
+                <section class="order-panel">
+                    <h3 class="order-panel-title">Offer</h3>
+                    <p class="form-hint">
+                        What Cdiscount is told about selling this product: at what price, delivered how, and how soon.
+                        The stock is the shop's own{{ $activeVariants->isNotEmpty() ? ', variant by variant' : '' }}.
+                    </p>
+
+                    <div class="octopia-fields">
+                        <div class="form-group octopia-field">
+                            <label for="offer-condition">Condition</label>
+                            <select name="offer[condition]" id="offer-condition" class="form-control">
+                                @foreach (\App\Models\CdiscountListing::CONDITIONS as $code => $label)
+                                    <option value="{{ $code }}" @selected(old('offer.condition', $offer['condition']) === $code)>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="form-group octopia-field">
+                            <label for="offer-markup">Markup on the shop price (%)</label>
+                            <input type="number" step="0.1" min="-50" max="200" name="offer[markup]" id="offer-markup" class="form-control" value="{{ old('offer.markup', $offer['markup'] + 0) }}" data-offer-markup>
+                            <p class="form-hint">Cdiscount takes a commission: this raises the shop's price to cover it.</p>
+                        </div>
+
+                        <div class="form-group octopia-field">
+                            <label for="offer-vat">VAT (%)</label>
+                            <input type="number" step="0.1" min="0" max="100" name="offer[vat]" id="offer-vat" class="form-control" value="{{ old('offer.vat', $offer['vat'] + 0) }}">
+                        </div>
+
+                        <div class="form-group octopia-field">
+                            <label for="offer-preparation">Preparation time (days)<span class="octopia-required" title="Required by Octopia">*</span></label>
+                            <input type="number" step="1" min="0" max="90" name="offer[preparation_days]" id="offer-preparation" class="form-control" value="{{ old('offer.preparation_days', $offer['preparation_days']) }}">
+                            <p class="form-hint">Days before the parcel leaves.</p>
+                        </div>
+                    </div>
+
+                    {{-- What the customer will pay on Cdiscount, following the markup
+                         as it is typed. Every line the product is sold as. --}}
+                    <div class="octopia-sale-price" aria-live="polite">
+                        <p class="octopia-sale-price-title">Sold on Cdiscount at</p>
+                        @php($markup = (float) old('offer.markup', $offer['markup']))
+                        @foreach ($priceLines as $line)
+                            <p class="octopia-sale-price-line">
+                                @if (count($priceLines) > 1)<span class="octopia-sale-price-label">{{ $line['label'] }}</span>@endif
+                                <strong data-shop-cents="{{ $line['cents'] }}">{{ format_euros((int) round($line['cents'] * (1 + $markup / 100))) }}</strong>
+                                <span class="nb-none">shop price {{ format_euros($line['cents']) }}</span>
+                            </p>
+                        @endforeach
+                    </div>
+
+                    <h4 class="octopia-variant-title">Delivery</h4>
+                    <p class="form-hint">
+                        Each way you deliver, and what the customer pays for it. The tracked delivery is the one Octopia requires;
+                        a free delivery is a cost of 0. The extra cost is for each further item in the same order.
+                    </p>
+
+                    @foreach (\App\Models\CdiscountListing::DELIVERY_MODES as $code => $label)
+                        @php($mode = $offer['delivery'][$code] ?? null)
+                        <div class="octopia-delivery">
+                            <label class="form-check">
+                                <input type="checkbox" name="offer[delivery][{{ $code }}][enabled]" value="1" @checked(old('offer.delivery.'.$code.'.enabled', $mode !== null))>
+                                {{ $label }}@if ($code === 'THD')<span class="octopia-required" title="Required by Octopia">*</span>@endif
+                            </label>
+                            <div class="octopia-delivery-costs">
+                                <label class="octopia-delivery-cost">
+                                    <span>Cost (€)</span>
+                                    <input type="number" step="0.01" min="0" name="offer[delivery][{{ $code }}][cost]" class="form-control" value="{{ old('offer.delivery.'.$code.'.cost', $mode['cost'] ?? '') }}">
+                                </label>
+                                <label class="octopia-delivery-cost">
+                                    <span>Each extra item (€)</span>
+                                    <input type="number" step="0.01" min="0" name="offer[delivery][{{ $code }}][additional]" class="form-control" value="{{ old('offer.delivery.'.$code.'.additional', $mode['additional'] ?? '') }}">
+                                </label>
+                            </div>
+                        </div>
+                    @endforeach
+
+                    @foreach (['offer.condition', 'offer.markup', 'offer.vat', 'offer.preparation_days'] as $key)
+                        @error($key)<p class="form-error">{{ $message }}</p>@enderror
+                    @endforeach
+                </section>
+            </div>
 
             <div class="order-panel admin-order-create-actions">
                 <button type="submit" class="btn btn-primary">Save listing</button>
