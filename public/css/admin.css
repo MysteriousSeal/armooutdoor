@@ -8745,6 +8745,11 @@ a.nb-match:hover {
     font-size: 0.875rem;
 }
 
+.octopia-field .is-suggested {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+}
+
 .octopia-delivery {
     display: grid;
     grid-template-columns: minmax(14rem, 1fr) auto;

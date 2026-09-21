@@ -8,16 +8,19 @@ use App\Models\OctopiaSubmission;
 use App\Models\OctopiaTemplate;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Services\Octopia\OctopiaAttributeWriter;
 use App\Services\Octopia\OctopiaClient;
 use App\Support\Octopia\ApiFields;
 use App\Support\Octopia\Exporter;
 use App\Support\Octopia\Readiness;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use RuntimeException;
 use Throwable;
 
 /**
@@ -284,7 +287,7 @@ class OctopiaController extends Controller
      * has: what a marketplace asks is long, particular to it, and beside the
      * point when one is only correcting a price.
      */
-    public function product(Product $product): View
+    public function product(Product $product, OctopiaAttributeWriter $writer): View
     {
         $product->load(['variants', 'cdiscountListing.variants', 'cdiscountListing.template']);
 
@@ -293,10 +296,52 @@ class OctopiaController extends Controller
             'listing' => $product->cdiscountListing,
             'templates' => OctopiaTemplate::query()->orderBy('name')->get(),
             'checks' => Readiness::checks($product),
+            // No key on this environment, no button: one that answers "not
+            // configured" every time is worse than one that is not there.
+            'canGenerate' => $writer->isConfigured(),
             'offer' => ($product->cdiscountListing ?? new CdiscountListing)->offerSettings(),
             // What each line is sold at in the shop, to show what Cdiscount will charge.
             'priceLines' => $this->priceLines($product),
         ]);
+    }
+
+    /**
+     * Claude fills the category's attributes from what the product sheet says.
+     *
+     * The answer is not saved: it lands in the form like something typed
+     * there, and Save decides whether it stays. The fields already answered
+     * are sent along so they are neither asked again nor replaced.
+     */
+    public function generateAttributes(Request $request, Product $product, OctopiaAttributeWriter $writer): JsonResponse
+    {
+        if (! $writer->isConfigured()) {
+            return response()->json(['message' => 'No Anthropic API key is configured on this environment.'], 503);
+        }
+
+        $data = $request->validate([
+            'octopia_template_id' => ['required', 'integer', 'exists:octopia_templates,id'],
+            'per_variant' => ['nullable', 'array'],
+            'per_variant.*' => ['string', 'max:64'],
+            'skip' => ['nullable', 'array'],
+            'skip.*' => ['string', 'max:64'],
+        ]);
+
+        $template = OctopiaTemplate::query()->findOrFail((int) $data['octopia_template_id']);
+
+        try {
+            return response()->json($writer->fill(
+                $product->load(['category', 'variants']),
+                $template,
+                array_values($data['per_variant'] ?? []),
+                array_values($data['skip'] ?? []),
+            ));
+        } catch (RuntimeException $e) {
+            // Said out loud rather than logged alone: somebody is waiting on
+            // the button, and an empty form would read as an empty answer.
+            report($e);
+
+            return response()->json(['message' => $e->getMessage()], 502);
+        }
     }
 
     public function updateProduct(Request $request, Product $product): RedirectResponse

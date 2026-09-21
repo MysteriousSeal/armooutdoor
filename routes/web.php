@@ -261,6 +261,7 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         // category's own attributes, on a page of their own like Vinted's.
         Route::get('/products/{product}/cdiscount', [OctopiaController::class, 'product'])->name('products.cdiscount.edit');
         Route::put('/products/{product}/cdiscount', [OctopiaController::class, 'updateProduct'])->name('products.cdiscount.update');
+        Route::post('/products/{product}/cdiscount/generate', [OctopiaController::class, 'generateAttributes'])->name('products.cdiscount.generate');
         // Several drafts per product: a list, then one page for each.
         Route::get('/products/{product}/vinted', [VintedListingController::class, 'index'])->name('products.vinted.index');
         Route::post('/products/{product}/vinted', [VintedListingController::class, 'store'])->name('products.vinted.store');

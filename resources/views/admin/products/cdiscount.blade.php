@@ -66,6 +66,36 @@
                 @endif
             </section>
 
+            {{-- Claude reads the product sheet and fills what it establishes. It
+                 proposes; the form still has to be saved. Shown once a category
+                 is chosen, and only where a key is configured. --}}
+            @if ($canGenerate)
+                <div class="vinted-assist" data-octopia-assist @unless($currentTemplateId) hidden @endunless>
+                    <span class="vinted-assist-mark" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="18" height="18" focusable="false">
+                            <path d="M12 3.2 13.7 9l5.8 1.7-5.8 1.7L12 18.2 10.3 12.4 4.5 10.7 10.3 9zM18.4 3.4l.7 2.3 2.3.7-2.3.7-.7 2.3-.7-2.3-2.3-.7 2.3-.7z" fill="currentColor"/>
+                        </svg>
+                    </span>
+
+                    <div class="vinted-assist-main">
+                        <p class="vinted-assist-title">Let Claude fill it in</p>
+                        <p class="vinted-assist-note">
+                            Reads the product sheet (name, description, characteristics, weight, brand, variants) and fills the empty attributes it can establish from it.
+                            It never guesses: an attribute the sheet does not state is left for you, and what you already answered is not touched.
+                            Nothing is saved until you press Save.
+                        </p>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="btn btn-primary vinted-assist-run"
+                        data-octopia-generate
+                        data-generate-url="{{ route('admin.products.cdiscount.generate', $product) }}"
+                    >Fill with Claude</button>
+                </div>
+                <p class="vinted-assist-status" data-octopia-generate-status role="status" hidden></p>
+            @endif
+
             @foreach ($templates as $template)
                 @php($isCurrent = $currentTemplateId === $template->id)
                 {{-- One block per category, only the chosen one shown and sent:
