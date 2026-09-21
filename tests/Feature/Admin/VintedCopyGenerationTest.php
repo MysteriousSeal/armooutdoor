@@ -292,8 +292,9 @@ class VintedCopyGenerationTest extends TestCase
     }
 
     /**
-     * A title used to be the catalogue name with its adjectives stacked up.
-     * What a buyer needs in a feed is the item, then what makes it that one.
+     * A title used to be rewritten from scratch, and no longer looked like the
+     * product it sold. It now starts from the catalogue name, cleaned up, then
+     * adds what makes it findable.
      */
     public function test_the_prompt_asks_for_a_title_that_says_what_the_item_is(): void
     {
@@ -302,7 +303,9 @@ class VintedCopyGenerationTest extends TestCase
         $this->assertStringContainsString('entre 75 et 100 caractères', $prompt);
         // The space is there to be used: short titles miss searches.
         $this->assertStringContainsString('recherche sur Vinted', $prompt);
-        $this->assertStringContainsString("ce qu'est l'article", $prompt);
+        // The title starts from the sheet's own name and keeps its words.
+        $this->assertStringContainsString('part du nom de la fiche produit', $prompt);
+        $this->assertStringContainsString('garde', $prompt);
         $this->assertStringContainsString('majuscule', $prompt);
         $this->assertStringContainsString('mots-clés', $prompt);
         // The camouflage naming rule the catalogue follows holds here too.

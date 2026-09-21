@@ -54,13 +54,20 @@ class VintedCopywriter
         ce qui fait reconnaître l'article tient donc dans les 60 premiers, et
         la fin ajoute les précisions cherchées.
 
-        Il commence par ce qu'est l'article, écrit avec une majuscule
-        (Cagoule, Sac à dos, Gants, Housse), puis la marque s'il y en a une.
-        Viennent ensuite les mots par lesquels un acheteur cherche cet
-        article : son autre nom courant s'il en a un (une cagoule se cherche
-        aussi comme cache-cou ou tour de cou, un sac à dos comme sac de
-        randonnée), puis les précisions concrètes de la fiche : matière,
-        motif, taille, coloris, contenance, dimensions, nombre de pièces.
+        Le titre part du nom de la fiche produit et lui reste fidèle : garde
+        ses mots et son ordre, l'acheteur doit y reconnaître l'article que la
+        boutique vend. Tu peux le nettoyer (majuscules en trop, mots
+        empilés, « Randonnée » collé à la fin sans lien), le remettre en
+        français correct, puis le prolonger. Tu ne le remplaces pas par une
+        autre formulation. Écris-le avec une majuscule initiale seulement
+        (Cagoule, Sac à dos, Gants, Housse), la marque après l'article s'il y
+        en a une.
+
+        Une fois le nom repris, complète avec ce qui manque pour atteindre la
+        longueur : l'autre nom courant de l'article s'il en a un (une cagoule
+        se cherche aussi comme cache-cou ou tour de cou), puis les précisions
+        concrètes de la fiche non déjà présentes : matière, motif, taille,
+        coloris, contenance, dimensions, nombre de pièces.
 
         Un titre se lit comme une phrase de vendeur, pas comme une liste de
         mots-clés : pas de répétition, pas de ponctuation empilée, et le
@@ -71,9 +78,10 @@ class VintedCopywriter
         capitales.
 
         Ainsi la fiche « Sac à Dos Tactique 30L Nylon Renforcé Molle
-        Camouflage Forêt Randonnée » donne « Sac à dos de randonnée 30 L en
-        nylon renforcé, sangles Molle, camouflage forêt » : l'article, le mot
-        cherché, puis les précisions de la fiche.
+        Camouflage Forêt Randonnée » donne « Sac à dos de randonnée 30 L nylon
+        renforcé Molle camouflage forêt, sac de marche » : les mots du nom
+        dans leur ordre (le mot « Tactique » mis à part, voir plus bas), puis
+        l'autre nom cherché.
 
         Un motif de camouflage se nomme par sa famille : multi-terrain,
         désert, forêt, neige. N'écris jamais « CP », et ne cite « type
@@ -162,7 +170,7 @@ class VintedCopywriter
                 'properties' => [
                     'title' => [
                         'type' => 'string',
-                        'description' => "Le titre : ce qu'est l'article, puis la marque, le mot par lequel on le cherche et les précisions de la fiche. Entre 75 et 100 caractères, jamais plus.",
+                        'description' => "Le titre : le nom de la fiche produit, fidèle à ses mots et à son ordre, puis les précisions et le mot par lequel on cherche l'article. Entre 75 et 100 caractères, jamais plus.",
                     ],
                     'description' => [
                         'type' => 'string',
