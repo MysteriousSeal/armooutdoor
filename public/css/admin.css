@@ -8698,20 +8698,6 @@ a.nb-match:hover {
     font-weight: 600;
 }
 
-/* Cdiscount, through Octopia's templates. */
-.octopia-template-head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    margin-bottom: 0.75rem;
-}
-
-.octopia-template-head .form-hint {
-    margin: 0;
-}
-
 .octopia-sale-price {
     margin: 0.5rem 0 1rem;
     padding: 0.75rem 1rem;
@@ -12921,4 +12907,293 @@ a.order-stepper-btn:focus-visible {
     font-size: 0.8125rem;
     color: var(--text-muted);
     white-space: nowrap;
+}
+
+/* ------------------------------------------------------ the Cdiscount page */
+
+/* A readable width: full screen spread the columns of every table a hand's
+   breadth apart. */
+.cdiscount-page {
+    max-width: 74rem;
+}
+
+.octopia-card {
+    padding: 1.1rem 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.octopia-card + .octopia-card {
+    margin-top: 1rem;
+}
+
+.octopia-search-card {
+    margin-bottom: 1.5rem;
+}
+
+/* A word about the environment, not an empty page: quiet and left-aligned. */
+.octopia-notice {
+    margin: 0 0 1.25rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+    background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+}
+
+.octopia-search-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.35rem;
+}
+
+.octopia-search-row .form-control {
+    flex: 1 1 auto;
+    max-width: 28rem;
+}
+
+.octopia-matches {
+    margin: 0.9rem 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--border);
+}
+
+.octopia-matches li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.octopia-matches li:last-child {
+    border-bottom: 0;
+}
+
+.octopia-match-label {
+    font-size: 0.875rem;
+}
+
+.octopia-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1.5rem;
+    margin-top: 1.25rem;
+}
+
+.octopia-summary-facts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 1rem;
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+/* Where each block of the page begins: a label, with air above it. */
+.octopia-section-title {
+    margin: 2rem 0 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+/* Columns with a width of their own, so that every row lines up and the
+   line's name takes what is left. */
+.octopia-lines,
+.octopia-outcomes {
+    table-layout: fixed;
+}
+
+.octopia-lines .octopia-pick {
+    width: 3rem;
+}
+
+.octopia-col-code {
+    width: 11rem;
+}
+
+.octopia-lines .octopia-col-ref {
+    width: 13rem;
+}
+
+.octopia-lines .octopia-col-state {
+    width: 9rem;
+}
+
+.octopia-lines .octopia-col-offer {
+    width: 13rem;
+}
+
+.octopia-lines td,
+.octopia-outcomes td {
+    overflow-wrap: anywhere;
+}
+
+/* Fixed columns need a floor: below it the table scrolls sideways inside its
+   own box rather than squeezing a name to a letter wide. */
+.octopia-lines {
+    min-width: 64rem;
+}
+
+.octopia-outcomes {
+    min-width: 50rem;
+}
+
+.octopia-scroll {
+    overflow-x: auto;
+}
+
+.octopia-lines .octopia-col-offer .nb-none {
+    margin-left: 0.4rem;
+}
+
+/* The two steps of selling, side by side and told apart. */
+.octopia-steps {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1.25rem;
+}
+
+.octopia-step {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+        'number body'
+        '. action';
+    /* The button always at the foot of the card, so both sit level however
+       long the words above them run. */
+    grid-template-rows: 1fr auto;
+    gap: 0.35rem 1rem;
+    padding: 1.1rem 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.octopia-step-number {
+    grid-area: number;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--accent-heading);
+    border: 1.5px solid color-mix(in srgb, var(--accent-heading) 55%, transparent);
+    border-radius: 50%;
+}
+
+.octopia-step-body {
+    grid-area: body;
+}
+
+.octopia-step-title {
+    margin: 0 0 0.25rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+}
+
+.octopia-step-body p {
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+.octopia-step .btn {
+    grid-area: action;
+    justify-self: start;
+    margin-top: 0.6rem;
+}
+
+/* What was sent, a batch at a time: a header that says where it stands, then
+   the lines with what Octopia said about each. */
+.octopia-card.octopia-batch {
+    padding: 0;
+}
+
+.octopia-batch-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem 1.5rem;
+    padding: 0.9rem 1.25rem;
+    background: color-mix(in srgb, var(--bg) 55%, var(--surface));
+    border-bottom: 1px solid var(--border);
+}
+
+.octopia-batch-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.9rem;
+    font-size: 0.8125rem;
+}
+
+.octopia-batch-kind {
+    font-size: 0.9375rem;
+    font-weight: 600;
+}
+
+.octopia-batch-side {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.octopia-outcomes td {
+    vertical-align: top;
+}
+
+.octopia-outcomes .octopia-outcome-line {
+    width: 28%;
+}
+
+/* In line with the batch's header above. */
+.octopia-outcomes td:first-child {
+    padding-left: 1.25rem;
+}
+
+.octopia-outcomes .octopia-col-status {
+    width: 9.5rem;
+}
+
+.octopia-notes {
+    display: grid;
+    gap: 0.3rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+}
+
+.octopia-notes .octopia-missing {
+    color: #a44;
+}
+
+[data-theme='dark'] .octopia-notes .octopia-missing {
+    color: #e08a8a;
+}
+
+@media (max-width: 760px) {
+    .octopia-steps {
+        grid-template-columns: 1fr;
+    }
+
+    .octopia-matches li {
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
 }
