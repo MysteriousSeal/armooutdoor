@@ -2,6 +2,17 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-21 · v1.49.1 · build HG2Q5Q
+
+### Admin
+
+- **The Cdiscount page has room to breathe.** It kept the full width of the screen, which spread every table's columns a hand's breadth apart, and had grown a step at a time. It now has a readable width and three labelled sections: the category, the lines, and what was sent to Octopia. The category line is a row of facts (its code, how many attributes it asks and how many are required, when it was read), the search is a compact card with a clean list of matches, and the lines table has columns of set widths so the EAN, the reference, the sheet state and the offer line up in every row.
+- **The two steps of selling are cards of their own.** « Send the products » and « Put them on sale » sit side by side, numbered because the order is the point, each with a sentence saying what it does and its button at the foot, level with the other.
+- **Each batch sent to Octopia is a card that says where it stands.** Its header gives the kind (Products or Offers), when it was sent and checked, the package, and a summary such as « 2 rejected » or « 2 integrated », with « Check the result » beside it. All the results tables share one column layout, and Octopia's messages, which it words in French and English at once, show their French half, the whole one on hover. The error already shown in the banner at the top is no longer repeated under the table and under the buttons.
+- **On a phone the tables scroll sideways in their own box** instead of squeezing a name to one letter per line, and the two steps stack.
+
+**No migration.**
+
 ## 2026-09-21 · v1.49.0 · build FCX6M1
 
 ### Admin
