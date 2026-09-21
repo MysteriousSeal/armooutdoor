@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-21 · v1.49.2 · build W7C8LQ
+
+### Admin
+
+- **A product sent to Cdiscount carries its variant group reference in a variant category, even without variants.** Octopia refused a plain cap with « la référence de regroupement des variants est obligatoire pour cette catégorie variante »: some categories are variant categories, in which every product needs that reference, whether or not it has variants, and only products with variants were sending it. Such a product now sends its own reference, the same one its variants would share. A category that is not a variant one is unchanged.
+- **The kind of a category is kept when it is read.** A category read before this change is asked about once, the first time a product of it is sent, and kept, so nothing has to be refreshed by hand. If Octopia cannot answer, the send stops with its message and sends nothing.
+
+**Migration:** one, run with `php artisan migrate`, adding a nullable `is_variant` column to `octopia_templates`. Categories already read keep everything else they had.
+
 ## 2026-09-21 · v1.49.1 · build HG2Q5Q
 
 ### Admin
