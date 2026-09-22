@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-22 · v1.51.1 · build 2XAYL6
+
+### Admin
+
+- **A partially received purchase order can be marked complete.** A « Complete » button sits next to Cancel once the order is partially received, owner-only. It joins the received ones as it stands, without the rest ever being received: no stock is added for units that never arrived, only what was actually scanned in counts. Offered only once something has landed — a sent order with nothing received yet is still cancelled, not completed — and a completed order takes no more stock and cannot be completed or cancelled again.
+
+**No migration.**
+
 ## 2026-09-22 · v1.51.0 · build NJT08J
 
 ### Admin
