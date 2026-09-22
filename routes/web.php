@@ -379,6 +379,7 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         // Owner-only, like order refund and delete: cancelling closes out
         // committed stock, and deleting cannot be taken back.
         Route::patch('/purchase-orders/{purchaseOrder}/cancel', [AdminPurchaseOrderController::class, 'cancel'])->middleware('admin.owner')->name('purchase-orders.cancel');
+        Route::patch('/purchase-orders/{purchaseOrder}/complete', [AdminPurchaseOrderController::class, 'complete'])->middleware('admin.owner')->name('purchase-orders.complete');
         Route::delete('/purchase-orders/{purchaseOrder}', [AdminPurchaseOrderController::class, 'destroy'])->middleware('admin.owner')->name('purchase-orders.destroy');
 
         Route::get('/carts', [AdminCartController::class, 'index'])->name('carts.index');

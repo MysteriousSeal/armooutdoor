@@ -35,6 +35,9 @@
                             <button type="button" class="btn btn-danger" data-modal-open="po-delete-modal">Delete draft</button>
                         @endif
                     @endif
+                    @if ($purchaseOrder->canBeCompleted() && auth()->user()->isOwner())
+                        <button type="button" class="btn btn-secondary" data-modal-open="po-complete-modal">Complete</button>
+                    @endif
                     @if ($purchaseOrder->canBeCancelled() && auth()->user()->isOwner())
                         <button type="button" class="btn btn-secondary" data-modal-open="po-cancel-modal">Cancel order</button>
                     @endif
@@ -301,6 +304,26 @@
                     <div class="modal-actions">
                         <button type="button" class="btn btn-secondary" data-modal-close>Keep it open</button>
                         <button type="submit" class="btn btn-danger">Cancel order</button>
+                    </div>
+                </form>
+            </dialog>
+        @endif
+
+        @if ($purchaseOrder->canBeCompleted() && auth()->user()->isOwner())
+            <dialog id="po-complete-modal" class="modal" aria-labelledby="po-complete-title">
+                <form method="POST" action="{{ route('admin.purchase-orders.complete', $purchaseOrder) }}">
+                    @csrf
+                    @method('PATCH')
+                    <p class="modal-kicker">{{ $purchaseOrder->number }}</p>
+                    <h3 class="modal-title" id="po-complete-title">Complete this order?</h3>
+                    <p class="modal-body">
+                        The order is marked done as it stands. The units still
+                        missing are not received and no stock is added for
+                        them — only what already arrived counts.
+                    </p>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" data-modal-close>Keep it open</button>
+                        <button type="submit" class="btn btn-danger">Complete</button>
                     </div>
                 </form>
             </dialog>

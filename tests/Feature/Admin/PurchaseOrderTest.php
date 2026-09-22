@@ -169,6 +169,106 @@ class PurchaseOrderTest extends TestCase
         $this->assertNotNull($po->cancelled_at);
     }
 
+    /** Nothing arrived yet: there is nothing to call good enough. */
+    public function test_a_sent_order_with_nothing_received_cannot_be_completed(): void
+    {
+        $owner = User::factory()->admin()->create();
+        $supplier = $this->supplier();
+        $product = Product::factory()->create();
+        $this->actingAs($owner)->post('/admin/purchase-orders', $this->payload($supplier, $product));
+        $po = PurchaseOrder::query()->firstOrFail();
+        $this->actingAs($owner)->patch(route('admin.purchase-orders.send', $po));
+
+        $this->actingAs($owner)->patch(route('admin.purchase-orders.complete', $po))->assertForbidden();
+        $this->assertSame('sent', $po->fresh()->status);
+    }
+
+    public function test_the_owner_can_complete_a_partially_received_order(): void
+    {
+        $owner = User::factory()->admin()->create();
+        $supplier = $this->supplier();
+        $product = Product::factory()->create(['quantity' => 0]);
+        $this->actingAs($owner)->post('/admin/purchase-orders', $this->payload($supplier, $product, [
+            'items' => [['product_id' => $product->id, 'quantity' => 10, 'cost' => '3.50']],
+        ]));
+        $po = PurchaseOrder::query()->firstOrFail();
+        $this->actingAs($owner)->patch(route('admin.purchase-orders.send', $po));
+        $this->actingAs($owner)->post(route('admin.purchase-orders.receive', $po), [
+            'lines' => [$po->items->first()->id => 4],
+        ]);
+        $this->assertSame('partially_received', $po->fresh()->status);
+
+        $this->actingAs($owner)->patch(route('admin.purchase-orders.complete', $po))->assertRedirect();
+
+        $po->refresh();
+        // Same bucket as a full delivery: it is a received order now.
+        $this->assertSame('received', $po->status);
+        $this->assertNotNull($po->received_at);
+        // The units that never arrived are not received, and no stock is
+        // added for them — only what was actually scanned in counts.
+        $this->assertSame(4, $po->items->first()->quantity_received);
+        $this->assertSame(4, $product->fresh()->quantity);
+    }
+
+    /** Owner-only, like cancel: staff can receive but not force it done. */
+    public function test_staff_can_receive_but_not_complete(): void
+    {
+        $staff = User::factory()->admin()->create(['role' => 'staff']);
+        $supplier = $this->supplier();
+        $product = Product::factory()->create(['quantity' => 0]);
+        $this->actingAs($staff)->post('/admin/purchase-orders', $this->payload($supplier, $product, [
+            'items' => [['product_id' => $product->id, 'quantity' => 10, 'cost' => '3.50']],
+        ]));
+        $po = PurchaseOrder::query()->firstOrFail();
+        $this->actingAs($staff)->patch(route('admin.purchase-orders.send', $po));
+        $this->actingAs($staff)->post(route('admin.purchase-orders.receive', $po), [
+            'lines' => [$po->items->first()->id => 4],
+        ]);
+
+        $this->actingAs($staff)->patch(route('admin.purchase-orders.complete', $po))->assertForbidden();
+        $this->assertSame('partially_received', $po->fresh()->status);
+    }
+
+    /** A completed order takes no more stock and is not offered again. */
+    public function test_a_completed_order_cannot_receive_more_or_be_completed_again(): void
+    {
+        $owner = User::factory()->admin()->create();
+        $supplier = $this->supplier();
+        $product = Product::factory()->create(['quantity' => 0]);
+        $this->actingAs($owner)->post('/admin/purchase-orders', $this->payload($supplier, $product, [
+            'items' => [['product_id' => $product->id, 'quantity' => 10, 'cost' => '3.50']],
+        ]));
+        $po = PurchaseOrder::query()->firstOrFail();
+        $this->actingAs($owner)->patch(route('admin.purchase-orders.send', $po));
+        $this->actingAs($owner)->post(route('admin.purchase-orders.receive', $po), [
+            'lines' => [$po->items->first()->id => 4],
+        ]);
+        $this->actingAs($owner)->patch(route('admin.purchase-orders.complete', $po));
+
+        $this->assertFalse($po->fresh()->canReceive());
+        $this->assertFalse($po->fresh()->canBeCompleted());
+        $this->actingAs($owner)->patch(route('admin.purchase-orders.cancel', $po))->assertForbidden();
+        $this->actingAs($owner)->patch(route('admin.purchase-orders.complete', $po))->assertForbidden();
+    }
+
+    public function test_completing_is_written_to_the_activity_log(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $supplier = $this->supplier();
+        $product = Product::factory()->create(['quantity' => 0]);
+        $this->actingAs($admin)->post('/admin/purchase-orders', $this->payload($supplier, $product, [
+            'items' => [['product_id' => $product->id, 'quantity' => 10, 'cost' => '3.50']],
+        ]));
+        $po = PurchaseOrder::query()->firstOrFail();
+        $this->actingAs($admin)->patch(route('admin.purchase-orders.send', $po));
+        $this->actingAs($admin)->post(route('admin.purchase-orders.receive', $po), [
+            'lines' => [$po->items->first()->id => 4],
+        ]);
+        $this->actingAs($admin)->patch(route('admin.purchase-orders.complete', $po));
+
+        $this->assertTrue(AdminActivityLog::query()->where('action', 'purchase_order.completed')->exists());
+    }
+
     public function test_only_a_draft_can_be_deleted(): void
     {
         $owner = User::factory()->admin()->create();

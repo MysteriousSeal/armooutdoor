@@ -233,6 +233,29 @@ class PurchaseOrderController extends Controller
         return back()->with('status', 'Purchase order cancelled. Stock already received is untouched.');
     }
 
+    /**
+     * Calls a partially received order good enough: it joins the received
+     * ones without the rest ever being received. No stock moves for what
+     * never arrived — only what was actually received counts.
+     */
+    public function complete(PurchaseOrder $purchaseOrder): RedirectResponse
+    {
+        abort_unless($purchaseOrder->canBeCompleted(), 403);
+
+        $missing = (int) $purchaseOrder->items->sum(
+            fn (PurchaseOrderItem $item): int => $item->quantityRemaining(),
+        );
+
+        if ($purchaseOrder->received_at === null) {
+            $purchaseOrder->update(['received_at' => now()]);
+        }
+
+        $purchaseOrder->markStatus('received', $missing.' unit(s) marked as not coming.');
+        AdminActivityLog::record('purchase_order.completed', $purchaseOrder, 'Completed purchase order '.$purchaseOrder->number.' with '.$missing.' unit(s) still missing');
+
+        return back()->with('status', 'Purchase order marked complete. The missing units are not expected anymore.');
+    }
+
     public function destroy(PurchaseOrder $purchaseOrder): RedirectResponse
     {
         abort_unless($purchaseOrder->canBeDeleted(), 403);

@@ -267,6 +267,17 @@ class PurchaseOrder extends Model
     }
 
     /**
+     * Whether what already arrived can be called good enough: the rest is
+     * given up on without being received, and the order joins the ones
+     * that came in full. Offered only once something has actually landed —
+     * a sent order with nothing received yet is cancelled, not completed.
+     */
+    public function canBeCompleted(): bool
+    {
+        return $this->status === 'partially_received';
+    }
+
+    /**
      * A sent order is a record of something that happened: it is cancelled,
      * never deleted. Only a draft can go without trace.
      */
