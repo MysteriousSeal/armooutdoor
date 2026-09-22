@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-22 · v1.51.2 · build 873C0E
+
+### Admin
+
+- **A purchase order line received at 0 offers no label buttons.** Once an order was allowed to be completed short, a line nothing ever arrived for could still show « Edit label » and « Download label »: there is nothing to put a label on, so that cell now stays empty, while a line actually received still offers both.
+- **Remaining reads as a dash, not a number, once an order is done.** On a received or cancelled order, a line's Remaining column used to keep counting what never arrived as if it were still expected, and a line received in full showed 0 for the same reason. Neither is really "remaining" on a finished order, so every line now shows a dash there instead — the number stays real for a line still open, where more genuinely could still arrive.
+
+**No migration.**
+
 ## 2026-09-22 · v1.51.1 · build 2XAYL6
 
 ### Admin
