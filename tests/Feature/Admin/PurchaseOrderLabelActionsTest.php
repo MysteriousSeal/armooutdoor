@@ -277,6 +277,58 @@ class PurchaseOrderLabelActionsTest extends TestCase
         $this->assertStringNotContainsString('Download label', $html);
     }
 
+    /**
+     * A completed order can carry a line nothing ever arrived for: there is
+     * nothing to put a label on, so that line's cell stays empty while its
+     * neighbour, actually received, still offers the buttons.
+     */
+    public function test_a_line_received_at_zero_offers_no_label_buttons(): void
+    {
+        $article = Product::factory()->labelled()->create([
+            'name' => ['en' => 'Tactical gloves', 'fr' => 'Gants tactiques'],
+            'sku' => 'ARM-GLOVE-M',
+            'gtin' => '4006381333931',
+        ]);
+        $missing = Product::factory()->labelled()->create([
+            'name' => ['en' => 'Tactical boots', 'fr' => 'Bottes tactiques'],
+            'sku' => 'ARM-BOOT-M',
+            'gtin' => '4006381333948',
+        ]);
+        $po = PurchaseOrder::factory()->create([
+            'status' => 'received',
+            'sent_at' => now(),
+            'received_at' => now(),
+        ]);
+        $received = PurchaseOrderItem::query()->create([
+            'purchase_order_id' => $po->id,
+            'product_id' => $article->id,
+            'name' => $article->localizedName(),
+            'sku' => $article->sku,
+            'quantity_ordered' => 5,
+            'quantity_received' => 5,
+            'unit_cost_cents' => 100,
+        ]);
+        PurchaseOrderItem::query()->create([
+            'purchase_order_id' => $po->id,
+            'product_id' => $missing->id,
+            'name' => $missing->localizedName(),
+            'sku' => $missing->sku,
+            'quantity_ordered' => 3,
+            'quantity_received' => 0,
+            'unit_cost_cents' => 100,
+        ]);
+
+        $html = $this->page($po->fresh(['items.product.label', 'items.variant']));
+
+        $this->assertStringContainsString('href="'.e($received->labelEditUrl()).'"', $html);
+        // Two label cells render either way, but only the received line's
+        // carries a button.
+        $this->assertSame(1, substr_count($html, 'Edit label'));
+        $this->assertSame(1, substr_count($html, 'Download label'));
+        // The header cell plus one per line.
+        $this->assertSame(3, substr_count($html, 'po-label-cell'));
+    }
+
     public function test_a_deleted_product_keeps_the_column_without_the_buttons(): void
     {
         $po = $this->receivedOrder();

@@ -157,7 +157,9 @@
                                         @endif
                                         @if ($purchaseOrder->isReceived())
                                             <td class="po-label-cell">
-                                                @if ($item->product)
+                                                {{-- Nothing of this line arrived: there is nothing to
+                                                     put a label on. --}}
+                                                @if ($item->quantity_received > 0 && $item->product)
                                                     @php($downloadUrl = $item->labelDownloadUrl())
                                                     @php($missing = $item->missingLabelRequirements())
                                                     <div class="po-label-actions">
