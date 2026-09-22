@@ -126,7 +126,16 @@
                                                 {{ $item->quantity_received }}
                                             </span>
                                         </td>
-                                        <td>{{ $item->quantityRemaining() }}</td>
+                                        <td>
+                                            @if ($purchaseOrder->nothingMoreExpected())
+                                                {{-- Done, one way or another: nothing on this order is
+                                                     pending anymore, not even a line received in full,
+                                                     so no line reads as having something "remaining". --}}
+                                                —
+                                            @else
+                                                {{ $item->quantityRemaining() }}
+                                            @endif
+                                        </td>
                                         <td>{{ format_euros($item->unit_cost_cents) }}</td>
                                         <td>{{ format_euros($item->lineTotalCents()) }}</td>
                                         @if ($purchaseOrder->hasVat())

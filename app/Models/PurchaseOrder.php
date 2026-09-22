@@ -249,6 +249,17 @@ class PurchaseOrder extends Model
     }
 
     /**
+     * Whether the order is done and nothing more is coming: received
+     * (whether in full or completed short) or cancelled. A line's
+     * remaining quantity means something different once this is true — it
+     * is no longer pending, it is what never arrived.
+     */
+    public function nothingMoreExpected(): bool
+    {
+        return in_array($this->status, ['received', 'cancelled'], true);
+    }
+
+    /**
      * How many lines can print a label as they stand.
      *
      * Same four Catalog › Labels checks, and a size uses its own codes.

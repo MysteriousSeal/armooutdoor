@@ -210,6 +210,96 @@ class PurchaseOrderTest extends TestCase
         $this->assertSame(4, $product->fresh()->quantity);
     }
 
+    /**
+     * "Remaining" means "still expected". Once nothing more is coming, a
+     * shortfall is not that anymore, so the page stops calling it that.
+     */
+    public function test_the_page_stops_showing_a_remaining_count_once_nothing_more_is_expected(): void
+    {
+        $owner = User::factory()->admin()->create();
+        $supplier = $this->supplier();
+        $product = Product::factory()->create(['quantity' => 0]);
+        $this->actingAs($owner)->post('/admin/purchase-orders', $this->payload($supplier, $product, [
+            'items' => [['product_id' => $product->id, 'quantity' => 10, 'cost' => '3.50']],
+        ]));
+        $po = PurchaseOrder::query()->firstOrFail();
+        $this->actingAs($owner)->patch(route('admin.purchase-orders.send', $po));
+        $this->actingAs($owner)->post(route('admin.purchase-orders.receive', $po), [
+            'lines' => [$po->items->first()->id => 4],
+        ]);
+
+        // Still open: 6 units are genuinely still expected.
+        $html = $this->actingAs($owner)->get(route('admin.purchase-orders.show', $po))
+            ->assertOk()
+            ->getContent();
+        $this->assertMatchesRegularExpression('/<td>\s*6\s*<\/td>/', $html);
+
+        $this->actingAs($owner)->patch(route('admin.purchase-orders.complete', $po));
+
+        $html = $this->actingAs($owner)->get(route('admin.purchase-orders.show', $po))
+            ->assertOk()
+            ->getContent();
+        $this->assertDoesNotMatchRegularExpression('/<td>\s*6\s*<\/td>/', $html);
+        $this->assertMatchesRegularExpression('/<td>\s*—\s*<\/td>/u', $html);
+    }
+
+    /**
+     * Even a line received in full shows a dash once the order is done: 0
+     * remaining is just as misleading as 6 — the column means "expected",
+     * and nothing on a finished order is.
+     */
+    public function test_a_fully_received_line_also_shows_a_dash_not_zero(): void
+    {
+        $product = Product::factory()->create(['quantity' => 0]);
+        $po = PurchaseOrder::factory()->create([
+            'status' => 'sent',
+            'sent_at' => now(),
+        ]);
+        PurchaseOrderItem::query()->create([
+            'purchase_order_id' => $po->id,
+            'product_id' => $product->id,
+            'name' => $product->localizedName(),
+            'sku' => $product->sku,
+            'quantity_ordered' => 5,
+            'unit_cost_cents' => 100,
+        ]);
+        $owner = User::factory()->admin()->create();
+        $this->actingAs($owner)->post(route('admin.purchase-orders.receive', $po), [
+            'lines' => [$po->items->first()->id => 5],
+        ]);
+        $this->assertSame('received', $po->fresh()->status);
+
+        $html = $this->actingAs($owner)->get(route('admin.purchase-orders.show', $po))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertDoesNotMatchRegularExpression('/<td>\s*0\s*<\/td>/', $html);
+        $this->assertMatchesRegularExpression('/<td>\s*—\s*<\/td>/u', $html);
+    }
+
+    /** Cancelling closes out what was expected too: same as completing. */
+    public function test_the_page_stops_showing_a_remaining_count_once_cancelled(): void
+    {
+        $owner = User::factory()->admin()->create();
+        $supplier = $this->supplier();
+        $product = Product::factory()->create(['quantity' => 0]);
+        $this->actingAs($owner)->post('/admin/purchase-orders', $this->payload($supplier, $product, [
+            'items' => [['product_id' => $product->id, 'quantity' => 10, 'cost' => '3.50']],
+        ]));
+        $po = PurchaseOrder::query()->firstOrFail();
+        $this->actingAs($owner)->patch(route('admin.purchase-orders.send', $po));
+
+        $this->actingAs($owner)->patch(route('admin.purchase-orders.cancel', $po));
+
+        // 10 stays under "Ordered" — that never changes — but "Remaining"
+        // reads as a dash rather than the same 10, now that none of it is
+        // still expected.
+        $html = $this->actingAs($owner)->get(route('admin.purchase-orders.show', $po))
+            ->assertOk()
+            ->getContent();
+        $this->assertMatchesRegularExpression('/<td>\s*—\s*<\/td>/u', $html);
+    }
+
     /** Owner-only, like cancel: staff can receive but not force it done. */
     public function test_staff_can_receive_but_not_complete(): void
     {
