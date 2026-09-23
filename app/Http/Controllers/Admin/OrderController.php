@@ -106,6 +106,24 @@ class OrderController extends Controller
 
         [$profitCents, $pricedOrderCount, $totalOrderCount, $profitProductCostCents] = $this->profitSummary(clone $salesOrders);
 
+        // Les compteurs d'onglets ignorent les filtres, comme ceux des
+        // autres onglets : ils disent ce que contient chaque onglet, pas
+        // ce que la recherche en cours y trouverait. One grouped query for
+        // the working list gives the Orders tab, each status tab, and the
+        // two "missing" tabs, which cover the very same orders.
+        $workingListCounts = Order::query()
+            ->whereNull('archived_at')
+            ->excludingTest()
+            ->where('status', '!=', 'draft')
+            ->selectRaw(
+                'status, count(*) as aggregate,'
+                .' sum(case when '.Order::MISSING_PACKAGE_PHOTO_SQL.' then 1 else 0 end) as missing_photo,'
+                .' sum(case when '.Order::MISSING_SHIPPING_LABEL_SQL.' then 1 else 0 end) as missing_label',
+                [Order::shippingLabelsKeptSinceTimestamp()],
+            )
+            ->groupBy('status')
+            ->get();
+
         return view('admin.orders.index', [
             'orders' => $orders,
             'ageRestrictedOrderIds' => $ageRestrictedOrderIds,
@@ -149,23 +167,13 @@ class OrderController extends Controller
                     })
                     ->count(),
             ],
-            'orderCount' => Order::query()->whereNull('archived_at')->excludingTest()->where('status', '!=', 'draft')->count(),
-            // Les compteurs d'onglets ignorent les filtres, comme ceux des
-            // autres onglets : ils disent ce que contient chaque onglet, pas
-            // ce que la recherche en cours y trouverait. Un seul groupBy
-            // plutôt qu'un count par statut.
-            'statusCounts' => Order::query()
-                ->whereNull('archived_at')
-                ->excludingTest()
-                ->where('status', '!=', 'draft')
-                ->selectRaw('status, count(*) as aggregate')
-                ->groupBy('status')
-                ->pluck('aggregate', 'status'),
+            'orderCount' => (int) $workingListCounts->sum('aggregate'),
+            'statusCounts' => $workingListCounts->pluck('aggregate', 'status'),
             'draftCount' => Order::query()->excludingTest()->where('status', 'draft')->count(),
             'archivedCount' => Order::query()->whereNotNull('archived_at')->excludingTest()->where('status', '!=', 'draft')->count(),
             'testCount' => Order::query()->onlyTest()->count(),
-            'missingPhotoCount' => Order::query()->excludingTest()->missingPackagePhoto()->count(),
-            'missingLabelCount' => Order::query()->excludingTest()->missingShippingLabel()->count(),
+            'missingPhotoCount' => (int) $workingListCounts->sum('missing_photo'),
+            'missingLabelCount' => (int) $workingListCounts->sum('missing_label'),
             'search' => $filters['search'],
             'status' => $filters['status'],
             'marketplaceId' => $filters['marketplace_id'],

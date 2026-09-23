@@ -550,6 +550,21 @@ class Order extends Model
     public const SHIPPING_LABELS_KEPT_SINCE = '2026-09-01';
 
     /**
+     * The two "still missing" conditions, written once: the tabs filter on
+     * them through the scopes below, and the order list counts them in the
+     * same query as its status tabs.
+     */
+    public const MISSING_PACKAGE_PHOTO_SQL = 'package_photo_path is null and package_photo_unavailable_at is null';
+
+    public const MISSING_SHIPPING_LABEL_SQL = 'shipping_label_path is null and created_at >= ?';
+
+    /** The binding MISSING_SHIPPING_LABEL_SQL takes: the cut-off, from midnight. */
+    public static function shippingLabelsKeptSinceTimestamp(): string
+    {
+        return self::SHIPPING_LABELS_KEPT_SINCE.' 00:00:00';
+    }
+
+    /**
      * Orders on the working list (not a draft, not archived) with no photo
      * of the packed parcel, and not marked as having none to give. Every
      * status counts, from placed to refunded.
@@ -558,8 +573,7 @@ class Order extends Model
     {
         return $query->whereNull('archived_at')
             ->where('status', '!=', 'draft')
-            ->whereNull('package_photo_path')
-            ->whereNull('package_photo_unavailable_at');
+            ->whereRaw(self::MISSING_PACKAGE_PHOTO_SQL);
     }
 
     /**
@@ -570,8 +584,7 @@ class Order extends Model
     {
         return $query->whereNull('archived_at')
             ->where('status', '!=', 'draft')
-            ->whereNull('shipping_label_path')
-            ->whereDate('created_at', '>=', self::SHIPPING_LABELS_KEPT_SINCE);
+            ->whereRaw(self::MISSING_SHIPPING_LABEL_SQL, [self::shippingLabelsKeptSinceTimestamp()]);
     }
 
     public function isDraft(): bool
