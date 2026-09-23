@@ -170,6 +170,12 @@ class Order extends Model
         return $this->hasOne(DiscountCode::class, 'source_order_id');
     }
 
+    /** Admin notes, newest first. Never shown to the customer. */
+    public function notes(): HasMany
+    {
+        return $this->hasMany(OrderNote::class)->latest()->latest('id');
+    }
+
     public function statusHistories(): HasMany
     {
         return $this->hasMany(OrderStatusHistory::class)->latest();

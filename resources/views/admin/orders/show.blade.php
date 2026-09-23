@@ -510,6 +510,81 @@
                         @endforeach
                     </ol>
                 </section>
+
+                {{-- For the admins only: this page is behind the admin login,
+                     and notes appear on no customer page, email or document. --}}
+                <section class="order-panel" id="order-notes">
+                    <div class="order-notes-head">
+                        <h3 class="order-panel-title">Notes</h3>
+                        @if ($order->notes->isNotEmpty())
+                            <span class="order-notes-count">{{ $order->notes->count() }}</span>
+                        @endif
+                        <span class="order-notes-private">
+                            <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">
+                                <rect x="5" y="11" width="14" height="9" fill="none" stroke="currentColor" stroke-width="1.75"/>
+                                <path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.75"/>
+                            </svg>
+                            Admins only
+                        </span>
+                    </div>
+
+                    <form method="POST" action="{{ route('admin.orders.notes.store', $order) }}" class="order-note-composer">
+                        @csrf
+                        <label class="sr-only" for="order-note-body">New note</label>
+                        <textarea id="order-note-body" name="body" rows="2" maxlength="2000" placeholder="Add a note for the other admins…" required>{{ old('body') }}</textarea>
+                        <div class="order-note-composer-foot">
+                            <span class="order-note-hint">Never shown to the customer</span>
+                            <button type="submit" class="btn btn-primary order-note-submit">Add note</button>
+                        </div>
+                    </form>
+                    @error('body') <p class="form-error">{{ $message }}</p> @enderror
+
+                    @if ($order->notes->isEmpty())
+                        <p class="order-notes-empty">No notes yet.</p>
+                    @else
+                        <ol class="order-notes">
+                            @foreach ($order->notes as $note)
+                                @php($author = $note->user)
+                                <li class="order-note">
+                                    <span class="order-note-avatar" aria-hidden="true">{{ $author ? mb_strtoupper(mb_substr((string) $author->first_name, 0, 1).mb_substr((string) $author->last_name, 0, 1)) : '?' }}</span>
+                                    <div class="order-note-main">
+                                        <div class="order-note-head">
+                                            <span class="order-note-author">{{ $author?->name ?? 'Deleted admin' }}</span>
+                                            <time class="order-note-date" datetime="{{ $note->created_at->toIso8601String() }}" title="{{ $note->created_at->format('d M Y · H:i') }}">{{ $note->created_at->format('d M Y · H:i') }}</time>
+                                            @if ($note->canBeDeletedBy(auth()->user()))
+                                                <button type="button" class="order-note-delete" data-modal-open="delete-note-{{ $note->id }}" aria-label="Delete this note" title="Delete">
+                                                    <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+                                                        <path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10 11v5.5M14 11v5.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    </svg>
+                                                </button>
+                                            @endif
+                                        </div>
+                                        <p class="order-note-body">{!! nl2br(e($note->body)) !!}</p>
+                                    </div>
+
+                                    @if ($note->canBeDeletedBy(auth()->user()))
+                                        <dialog id="delete-note-{{ $note->id }}" class="modal" aria-labelledby="delete-note-{{ $note->id }}-title">
+                                            <form method="POST" action="{{ route('admin.orders.notes.destroy', [$order, $note]) }}">
+                                                @csrf
+                                                @method('DELETE')
+                                                <p class="modal-kicker">{{ $order->number }}</p>
+                                                <h3 class="modal-title" id="delete-note-{{ $note->id }}-title">Delete this note?</h3>
+                                                <p class="modal-body">
+                                                    “{{ \Illuminate\Support\Str::limit($note->body, 140) }}”
+                                                </p>
+                                                <p class="modal-body">It is removed for every admin, and cannot be brought back.</p>
+                                                <div class="modal-actions">
+                                                    <button type="button" class="btn btn-secondary" data-modal-close>Keep it</button>
+                                                    <button type="submit" class="btn btn-danger">Delete note</button>
+                                                </div>
+                                            </form>
+                                        </dialog>
+                                    @endif
+                                </li>
+                            @endforeach
+                        </ol>
+                    @endif
+                </section>
             </div>
 
             <aside class="order-facts">

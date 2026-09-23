@@ -184,7 +184,11 @@ class AdminAuthorizationTest extends TestCase
             'status' => 'pending',
         ]);
 
+        // An order note: same reason as the Vinted photo.
+        $orderNote = $order->notes()->create(['body' => 'Audit note.']);
+
         $bindings = [
+            'note' => $orderNote->id,
             'category' => $category->id,
             'product' => $product->id,
             'variant' => $variant->id,

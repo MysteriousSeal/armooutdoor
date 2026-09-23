@@ -1509,6 +1509,182 @@
     background: var(--bg);
 }
 
+/* Admin notes on an order, under the status history. */
+.order-notes-head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.9rem;
+}
+
+.order-notes-head .order-panel-title {
+    margin: 0;
+}
+
+.order-notes-count {
+    min-width: 1.35rem;
+    padding: 0.05rem 0.4rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-align: center;
+    color: var(--accent-hover);
+    background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+}
+
+.order-notes-private {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-left: auto;
+    font-size: 0.6875rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+/* One box holding the text and its button, lit as a whole on focus. */
+.order-note-composer {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.order-note-composer:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+.order-note-composer textarea {
+    display: block;
+    width: 100%;
+    min-height: 3.5rem;
+    padding: 0.75rem 0.85rem 0.4rem;
+    font: inherit;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--text);
+    background: transparent;
+    border: 0;
+    outline: none;
+    resize: vertical;
+}
+
+.order-note-composer textarea::placeholder {
+    color: var(--text-muted);
+}
+
+.order-note-composer-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.5rem 0.5rem 0.5rem 0.85rem;
+    border-top: 1px dashed var(--border);
+}
+
+.order-note-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.order-note-submit {
+    padding: 0.45rem 1rem;
+    font-size: 0.8125rem;
+}
+
+.order-notes-empty {
+    margin: 1rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+
+.order-notes {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin: 1.1rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* A note: the author's initials, then who, when, and what was said. */
+.order-note {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.8rem 0.9rem;
+    background: color-mix(in srgb, var(--accent) 5%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--accent) 16%, var(--border));
+    border-left: 3px solid var(--accent);
+}
+
+.order-note-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--accent-hover);
+    background: color-mix(in srgb, var(--accent) 18%, var(--surface));
+}
+
+.order-note-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.order-note-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.order-note-author {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.order-note-date {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Quiet until the note is pointed at; always there for the keyboard. */
+.order-note-delete {
+    display: inline-flex;
+    align-self: center;
+    margin-left: auto;
+    padding: 0.25rem;
+    color: var(--text-muted);
+    background: none;
+    border: 0;
+    cursor: pointer;
+    opacity: 0.45;
+    transition: opacity 0.15s, color 0.15s;
+}
+
+.order-note:hover .order-note-delete,
+.order-note-delete:focus-visible {
+    opacity: 1;
+}
+
+.order-note-delete:hover,
+.order-note-delete:focus-visible {
+    color: #aa4444;
+}
+
+.order-note-body {
+    margin: 0.3rem 0 0;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--text);
+    overflow-wrap: anywhere;
+}
+
 /* Replace and remove once a label exists: text, not targets. */
 .order-label-quiet {
     position: relative;

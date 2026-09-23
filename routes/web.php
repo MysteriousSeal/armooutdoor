@@ -37,6 +37,7 @@ use App\Http\Controllers\Admin\MarketplaceListingController as AdminMarketplaceL
 use App\Http\Controllers\Admin\MarketplaceSettingController as AdminMarketplaceSettingController;
 use App\Http\Controllers\Admin\OctopiaController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\OrderNoteController as AdminOrderNoteController;
 use App\Http\Controllers\Admin\PackageTypeController as AdminPackageTypeController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\ProductPhotoController;
@@ -427,6 +428,8 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         Route::post('/orders/{order}/package-photo', [AdminOrderController::class, 'storePackagePhoto'])->name('orders.package-photo.store');
         Route::get('/orders/{order}/package-photo', [AdminOrderController::class, 'showPackagePhoto'])->name('orders.package-photo.show');
         Route::delete('/orders/{order}/package-photo', [AdminOrderController::class, 'destroyPackagePhoto'])->name('orders.package-photo.destroy');
+        Route::post('/orders/{order}/notes', [AdminOrderNoteController::class, 'store'])->name('orders.notes.store');
+        Route::delete('/orders/{order}/notes/{note}', [AdminOrderNoteController::class, 'destroy'])->name('orders.notes.destroy');
         Route::post('/orders/{order}/discount-code', [AdminOrderController::class, 'createDiscountCode'])->name('orders.discount-code.store');
         Route::patch('/orders/{order}/marketplace-commission', [AdminOrderController::class, 'updateMarketplaceCommission'])->name('orders.marketplace-commission.update');
         Route::patch('/orders/{order}/marketplace-bonus', [AdminOrderController::class, 'updateMarketplaceBonus'])->name('orders.marketplace-bonus.update');
