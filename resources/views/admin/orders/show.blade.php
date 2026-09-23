@@ -768,6 +768,58 @@
                                 </form>
                             @endif
                         </div>
+
+                        <div class="order-shipping-form">
+                            <span class="order-shipping-form-title">Package photo</span>
+                            @if ($order->package_photo_path)
+                                {{-- The same card as the label, with the photo itself in place of the file icon. --}}
+                                <div class="order-label-file">
+                                    <img class="order-package-photo" src="{{ route('admin.orders.package-photo.show', $order) }}" alt="" loading="lazy">
+                                    <span class="order-label-file-name">
+                                        <strong>{{ $order->number }}.{{ pathinfo($order->package_photo_path, PATHINFO_EXTENSION) }}</strong>
+                                        <small>Package photo</small>
+                                    </span>
+                                    <a href="{{ route('admin.orders.package-photo.show', $order) }}" class="btn btn-secondary order-label-open" target="_blank" rel="noopener">
+                                        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+                                            <path d="M12 4v11m0 0-4-4m4 4 4-4M5 19h14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                        Open
+                                    </a>
+                                </div>
+                            @endif
+                            <form method="POST" action="{{ route('admin.orders.package-photo.store', $order) }}" enctype="multipart/form-data">
+                                @csrf
+                                @if ($order->package_photo_path)
+                                    <div class="order-label-quiet">
+                                        <label class="order-label-link">
+                                            Replace
+                                            <input type="file" name="package_photo" accept="image/jpeg,image/png,image/webp" required onchange="this.form.requestSubmit()">
+                                        </label>
+                                        <span aria-hidden="true">·</span>
+                                        <button type="submit" form="remove-package-photo" class="order-label-link is-danger">Remove</button>
+                                    </div>
+                                @else
+                                    <label class="order-label-drop">
+                                        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                                            <path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2l1.5-2h6l1.5 2h2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
+                                            <circle cx="12" cy="13" r="3.25" fill="none" stroke="currentColor" stroke-width="1.75"/>
+                                        </svg>
+                                        <span>
+                                            <strong>Upload a package photo</strong>
+                                            <small>Drop a JPG, PNG or WebP here or click to choose, 10 MB max</small>
+                                        </span>
+                                        <input type="file" name="package_photo" accept="image/jpeg,image/png,image/webp" required onchange="this.form.requestSubmit()">
+                                    </label>
+                                @endif
+                                @error('package_photo') <p class="form-error">{{ $message }}</p> @enderror
+                            </form>
+                            @if ($order->package_photo_path)
+                                <form id="remove-package-photo" method="POST" action="{{ route('admin.orders.package-photo.destroy', $order) }}" onsubmit="return confirm('Remove the package photo?')">
+                                    @csrf
+                                    @method('DELETE')
+                                </form>
+                            @endif
+                        </div>
                     @endunless
                 </section>
 

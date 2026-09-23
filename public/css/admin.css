@@ -1498,6 +1498,17 @@
     cursor: pointer;
 }
 
+/* The saved package photo, in the label's file card: a small square in
+   place of the file icon. */
+.order-package-photo {
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    background: var(--bg);
+}
+
 /* Replace and remove once a label exists: text, not targets. */
 .order-label-quiet {
     position: relative;

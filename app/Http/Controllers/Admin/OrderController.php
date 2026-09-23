@@ -1213,6 +1213,60 @@ class OrderController extends Controller
         return back()->with('status', 'Shipping label removed.');
     }
 
+    /**
+     * Keeps a photo of the packed parcel, as proof of what left and how.
+     *
+     * Private like the label, and for the same reason: it can show the
+     * address. Uploading again replaces the old photo and deletes its file.
+     */
+    public function storePackagePhoto(Request $request, Order $order): RedirectResponse
+    {
+        abort_if($order->isDraft(), 404);
+
+        $request->validate([
+            'package_photo' => ['required', 'file', 'mimetypes:image/jpeg,image/png,image/webp', 'max:10240'],
+        ], [], ['package_photo' => 'package photo']);
+
+        $previous = $order->package_photo_path;
+
+        $order->update([
+            'package_photo_path' => $request->file('package_photo')->store('orders/package-photos'),
+        ]);
+
+        if ($previous && $previous !== $order->package_photo_path) {
+            Storage::delete($previous);
+        }
+
+        AdminActivityLog::record('order.package_photo_uploaded', $order, 'Uploaded the package photo for order '.$order->number);
+
+        return back()->with('status', 'Package photo saved.');
+    }
+
+    /** Serves the photo in the browser; the file has no public URL. */
+    public function showPackagePhoto(Order $order): Response
+    {
+        abort_unless($order->package_photo_path && Storage::exists($order->package_photo_path), 404);
+
+        $extension = pathinfo($order->package_photo_path, PATHINFO_EXTENSION);
+
+        return response(Storage::get($order->package_photo_path), 200, [
+            'Content-Type' => Storage::mimeType($order->package_photo_path) ?: 'image/jpeg',
+            'Content-Disposition' => 'inline; filename="package-'.$order->number.'.'.$extension.'"',
+            'Cache-Control' => 'private, no-store',
+        ]);
+    }
+
+    public function destroyPackagePhoto(Order $order): RedirectResponse
+    {
+        if ($order->package_photo_path) {
+            Storage::delete($order->package_photo_path);
+            $order->update(['package_photo_path' => null]);
+            AdminActivityLog::record('order.package_photo_removed', $order, 'Removed the package photo for order '.$order->number);
+        }
+
+        return back()->with('status', 'Package photo removed.');
+    }
+
     public function updateMarketplaceCommission(Request $request, Order $order): RedirectResponse
     {
         abort_unless($order->is_manual && $order->marketplace_id, 404);
