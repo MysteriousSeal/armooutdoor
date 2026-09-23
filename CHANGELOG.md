@@ -2,6 +2,19 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-23 · v1.53.0 · build GA7H7E
+
+### Admin
+
+- **An order keeps a photo of the packed parcel.** Under the shipping label, the Shipping card has a « Package photo » block: drop a JPG, PNG or WebP on it, or click, and it is saved as soon as it is chosen. It then shows in the same card as the label, with the photo in place of the file icon and an Open button for the full size. It can be replaced or removed. The file is private, like the label: no address of its own, admins only.
+- **The package photo is stored as WebP.** Converted on upload like the shop's other images, its long side capped at 2000 px, so a phone photo drops from several megabytes to a few hundred kilobytes. It is turned the way the phone was held, so a portrait shot is not saved lying down. Photos uploaded before this release stay as they were.
+- **« I have no picture available ».** On an order with no photo, this button under the upload takes it off the Missing package picture tab, and the block then says who marked it and when, with an Undo link. Uploading a photo later clears the mark.
+- **Two new tabs on the order list, after Refunded.** « Missing package picture » lists the orders with no photo and no « none available » mark, whatever their status. « Missing shipping label » lists the orders with no label placed since 1 September 2026; labels from before that date were not kept, so older orders are left out. Lettre suivie orders count in both. Drafts, archived and test orders stay out, as in the Orders tab.
+- **Admins can leave notes on an order.** A « Notes » section under the status history: any admin, owner or staff, can add a note, signed and dated, newest first. Notes are never shown to the customer, on any page, email or document. A note is not rewritten; its author, or the owner for any note, can delete it after a confirmation modal. Adding and deleting are written to the activity log.
+- **The order list counts its tabs in one query.** The status tabs, the Orders total and the two Missing tabs now come from the same grouped count.
+
+**Migration:** three, run with `php artisan migrate`: a nullable `package_photo_path`, then a nullable `package_photo_unavailable_at` and `package_photo_unavailable_by_user_id` on `orders`, and a new `order_notes` table. Orders already saved are untouched.
+
 ## 2026-09-23 · v1.52.0 · build VFF1B8
 
 ### Admin
