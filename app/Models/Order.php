@@ -534,6 +534,35 @@ class Order extends Model
         return ($this->user?->identityStatus()['state'] ?? 'none') !== 'verified';
     }
 
+    /**
+     * Shipping labels were only kept from this day on: an order placed
+     * before it is not missing one, its label is simply gone.
+     */
+    public const SHIPPING_LABELS_KEPT_SINCE = '2026-09-01';
+
+    /**
+     * Orders on the working list (not a draft, not archived) with no photo
+     * of the packed parcel. Every status counts, from placed to refunded.
+     */
+    public function scopeMissingPackagePhoto(Builder $query): Builder
+    {
+        return $query->whereNull('archived_at')
+            ->where('status', '!=', 'draft')
+            ->whereNull('package_photo_path');
+    }
+
+    /**
+     * Orders on the working list with no shipping label, placed on or after
+     * SHIPPING_LABELS_KEPT_SINCE. Lettre suivie orders count too.
+     */
+    public function scopeMissingShippingLabel(Builder $query): Builder
+    {
+        return $query->whereNull('archived_at')
+            ->where('status', '!=', 'draft')
+            ->whereNull('shipping_label_path')
+            ->whereDate('created_at', '>=', self::SHIPPING_LABELS_KEPT_SINCE);
+    }
+
     public function isDraft(): bool
     {
         return $this->status === 'draft';

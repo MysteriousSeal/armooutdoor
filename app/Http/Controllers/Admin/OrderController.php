@@ -164,6 +164,8 @@ class OrderController extends Controller
             'draftCount' => Order::query()->excludingTest()->where('status', 'draft')->count(),
             'archivedCount' => Order::query()->whereNotNull('archived_at')->excludingTest()->where('status', '!=', 'draft')->count(),
             'testCount' => Order::query()->onlyTest()->count(),
+            'missingPhotoCount' => Order::query()->excludingTest()->missingPackagePhoto()->count(),
+            'missingLabelCount' => Order::query()->excludingTest()->missingShippingLabel()->count(),
             'search' => $filters['search'],
             'status' => $filters['status'],
             'marketplaceId' => $filters['marketplace_id'],
@@ -265,7 +267,7 @@ class OrderController extends Controller
     private function orderFilters(Request $request): array
     {
         return [
-            'tab' => in_array($request->query('tab'), ['draft', 'archived', 'test'], true) ? $request->query('tab') : 'orders',
+            'tab' => in_array($request->query('tab'), ['draft', 'archived', 'test', 'missing_photo', 'missing_label'], true) ? $request->query('tab') : 'orders',
             'search' => trim((string) $request->query('search', '')),
             'status' => in_array($request->query('status'), ['placed', 'preparing', 'shipped', 'in_transit', 'delivered', 'refunded'], true)
                 ? $request->query('status')
@@ -294,6 +296,8 @@ class OrderController extends Controller
             ->when($filters['tab'] === 'orders', fn ($query) => $query->whereNull('archived_at')->where('status', '!=', 'draft'))
             ->when($filters['tab'] === 'draft', fn ($query) => $query->where('status', 'draft'))
             ->when($filters['tab'] === 'archived', fn ($query) => $query->whereNotNull('archived_at')->where('status', '!=', 'draft'))
+            ->when($filters['tab'] === 'missing_photo', fn ($query) => $query->missingPackagePhoto())
+            ->when($filters['tab'] === 'missing_label', fn ($query) => $query->missingShippingLabel())
             ->when($filters['status'] !== '', fn ($query) => $query->where('status', $filters['status']))
             ->when($filters['marketplace_id'] !== null, fn ($query) => $query->where('marketplace_id', $filters['marketplace_id']))
             ->when($filters['date_from'] !== '', fn ($query) => $query->whereDate('created_at', '>=', $filters['date_from']))

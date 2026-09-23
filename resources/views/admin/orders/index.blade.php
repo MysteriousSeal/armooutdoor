@@ -158,6 +158,13 @@
                     <span class="admin-tab-count">{{ number_format($statusCounts[$statusOption] ?? 0) }}</span>
                 </a>
             @endforeach
+            {{-- What is still to be filed on orders already out: their own family. --}}
+            <a href="{{ $tabUrl(['tab' => 'missing_photo']) }}" class="starts-group {{ $tab === 'missing_photo' ? 'active' : '' }}">
+                Missing package picture <span class="admin-tab-count">{{ number_format($missingPhotoCount) }}</span>
+            </a>
+            <a href="{{ $tabUrl(['tab' => 'missing_label']) }}" class="{{ $tab === 'missing_label' ? 'active' : '' }}" title="Orders placed since {{ \Illuminate\Support\Carbon::parse(\App\Models\Order::SHIPPING_LABELS_KEPT_SINCE)->format('d/m/Y') }}">
+                Missing shipping label <span class="admin-tab-count">{{ number_format($missingLabelCount) }}</span>
+            </a>
             <a href="{{ $tabUrl(['tab' => 'archived']) }}" class="sits-apart {{ $tab === 'archived' ? 'active' : '' }}">
                 Archived <span class="admin-tab-count">{{ number_format($archivedCount) }}</span>
             </a>
@@ -257,13 +264,19 @@
                 'draft' => 'drafts',
                 'archived' => 'archived orders',
                 'test' => 'test orders',
+                'missing_photo' => 'orders missing a package picture',
+                'missing_label' => 'orders missing a shipping label',
                 default => 'orders',
             };
         @endphp
 
         @if ($orders->isEmpty())
             <p class="empty-state">
-                @if ($hasFilters)
+                @if ($tab === 'missing_photo' && ! $hasFilters)
+                    Every order has its package picture.
+                @elseif ($tab === 'missing_label' && ! $hasFilters)
+                    Every order since {{ \Illuminate\Support\Carbon::parse(\App\Models\Order::SHIPPING_LABELS_KEPT_SINCE)->format('d/m/Y') }} has its shipping label.
+                @elseif ($hasFilters)
                     No {{ $tabLabel }} match these filters.
                 @else
                     No {{ $tabLabel }} yet.
