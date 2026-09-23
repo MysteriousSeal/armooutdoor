@@ -1685,6 +1685,30 @@
     overflow-wrap: anywhere;
 }
 
+/* Marked as having no package photo: said plainly, with the way back. */
+.order-photo-unavailable {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.7rem 0.85rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.order-photo-unavailable strong {
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.order-photo-unavailable-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.order-photo-none {
+    font-size: 0.8125rem;
+}
+
 /* Replace and remove once a label exists: text, not targets. */
 .order-label-quiet {
     position: relative;

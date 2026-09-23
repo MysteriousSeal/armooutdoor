@@ -39,6 +39,8 @@ use Illuminate\Support\Str;
     'tracking_carrier_id',
     'shipping_label_path',
     'package_photo_path',
+    'package_photo_unavailable_at',
+    'package_photo_unavailable_by_user_id',
     'package_type_id',
     'package_type_name',
     'marketplace_id',
@@ -74,6 +76,7 @@ class Order extends Model
     protected function casts(): array
     {
         return [
+            'package_photo_unavailable_at' => 'datetime',
             'is_manual' => 'boolean',
             'archived_at' => 'datetime',
             'test_marked_at' => 'datetime',
@@ -142,6 +145,12 @@ class Order extends Model
     public function carrier(): BelongsTo
     {
         return $this->belongsTo(Carrier::class);
+    }
+
+    /** The admin who said there was no package photo to give. */
+    public function packagePhotoUnavailableBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'package_photo_unavailable_by_user_id');
     }
 
     public function trackingCarrier(): BelongsTo
@@ -542,13 +551,15 @@ class Order extends Model
 
     /**
      * Orders on the working list (not a draft, not archived) with no photo
-     * of the packed parcel. Every status counts, from placed to refunded.
+     * of the packed parcel, and not marked as having none to give. Every
+     * status counts, from placed to refunded.
      */
     public function scopeMissingPackagePhoto(Builder $query): Builder
     {
         return $query->whereNull('archived_at')
             ->where('status', '!=', 'draft')
-            ->whereNull('package_photo_path');
+            ->whereNull('package_photo_path')
+            ->whereNull('package_photo_unavailable_at');
     }
 
     /**

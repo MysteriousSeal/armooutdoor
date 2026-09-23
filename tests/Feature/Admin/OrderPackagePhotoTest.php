@@ -219,4 +219,59 @@ class OrderPackagePhotoTest extends TestCase
             ->assertSee('remove-package-photo', false)
             ->assertDontSee('Upload a package photo');
     }
+
+    public function test_an_order_can_be_marked_as_having_no_photo_and_undone(): void
+    {
+        $order = $this->order();
+        $admin = User::factory()->admin()->create(['first_name' => 'Colas']);
+
+        $html = $this->actingAs($admin)->get(route('admin.orders.show', $order))->getContent();
+        $this->assertStringContainsString('I have no picture available', $html);
+
+        $this->actingAs($admin)->post(route('admin.orders.package-photo.unavailable', $order))->assertRedirect();
+
+        $order->refresh();
+        $this->assertNotNull($order->package_photo_unavailable_at);
+        $this->assertSame($admin->id, $order->package_photo_unavailable_by_user_id);
+        $this->assertSame(0, Order::query()->missingPackagePhoto()->count());
+
+        $this->actingAs($admin)->get(route('admin.orders.show', $order))
+            ->assertSee('No picture available')
+            ->assertSee('Colas')
+            ->assertSee('Upload a package photo')
+            ->assertDontSee('I have no picture available');
+
+        $this->actingAs($admin)->delete(route('admin.orders.package-photo.unavailable.undo', $order))->assertRedirect();
+
+        $this->assertNull($order->refresh()->package_photo_unavailable_at);
+        $this->assertSame(1, Order::query()->missingPackagePhoto()->count());
+    }
+
+    /** A photo uploaded after all replaces the mark. */
+    public function test_uploading_a_photo_clears_the_mark(): void
+    {
+        $order = $this->order();
+        $admin = $this->admin();
+        $this->actingAs($admin)->post(route('admin.orders.package-photo.unavailable', $order));
+
+        $this->actingAs($admin)->post(route('admin.orders.package-photo.store', $order), ['package_photo' => UploadedFile::fake()->image('a.jpg')]);
+
+        $order->refresh();
+        $this->assertNotNull($order->package_photo_path);
+        $this->assertNull($order->package_photo_unavailable_at);
+        $this->assertNull($order->package_photo_unavailable_by_user_id);
+    }
+
+    /** With a photo there, the button is not offered and the mark cannot be set. */
+    public function test_an_order_with_a_photo_cannot_be_marked(): void
+    {
+        $order = $this->order();
+        $admin = $this->admin();
+        $this->actingAs($admin)->post(route('admin.orders.package-photo.store', $order), ['package_photo' => UploadedFile::fake()->image('a.jpg')]);
+
+        $this->actingAs($admin)->get(route('admin.orders.show', $order))->assertDontSee('I have no picture available');
+        $this->actingAs($admin)->post(route('admin.orders.package-photo.unavailable', $order));
+
+        $this->assertNull($order->refresh()->package_photo_unavailable_at);
+    }
 }

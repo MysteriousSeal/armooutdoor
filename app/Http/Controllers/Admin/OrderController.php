@@ -1245,7 +1245,12 @@ class OrderController extends Controller
 
         $previous = $order->package_photo_path;
 
-        $order->update(['package_photo_path' => $path]);
+        // A photo after all: the "none available" mark no longer holds.
+        $order->update([
+            'package_photo_path' => $path,
+            'package_photo_unavailable_at' => null,
+            'package_photo_unavailable_by_user_id' => null,
+        ]);
 
         if ($previous && $previous !== $order->package_photo_path) {
             Storage::delete($previous);
@@ -1268,6 +1273,38 @@ class OrderController extends Controller
             'Content-Disposition' => 'inline; filename="package-'.$order->number.'.'.$extension.'"',
             'Cache-Control' => 'private, no-store',
         ]);
+    }
+
+    /**
+     * Says there is no package photo to give for this order, which takes it
+     * off the Missing package picture tab. Undone by unmarkPackagePhotoUnavailable().
+     */
+    public function markPackagePhotoUnavailable(Request $request, Order $order): RedirectResponse
+    {
+        abort_if($order->isDraft(), 404);
+
+        if ($order->package_photo_path === null) {
+            $order->update([
+                'package_photo_unavailable_at' => now(),
+                'package_photo_unavailable_by_user_id' => $request->user()->id,
+            ]);
+            AdminActivityLog::record('order.package_photo_unavailable', $order, 'Marked order '.$order->number.' as having no package photo');
+        }
+
+        return back()->with('status', 'Marked as having no package photo.');
+    }
+
+    public function unmarkPackagePhotoUnavailable(Order $order): RedirectResponse
+    {
+        if ($order->package_photo_unavailable_at !== null) {
+            $order->update([
+                'package_photo_unavailable_at' => null,
+                'package_photo_unavailable_by_user_id' => null,
+            ]);
+            AdminActivityLog::record('order.package_photo_unavailable_undone', $order, 'Undid the no package photo mark on order '.$order->number);
+        }
+
+        return back()->with('status', 'The order is waiting for its package photo again.');
     }
 
     public function destroyPackagePhoto(Order $order): RedirectResponse

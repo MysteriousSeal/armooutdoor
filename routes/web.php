@@ -428,6 +428,8 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         Route::post('/orders/{order}/package-photo', [AdminOrderController::class, 'storePackagePhoto'])->name('orders.package-photo.store');
         Route::get('/orders/{order}/package-photo', [AdminOrderController::class, 'showPackagePhoto'])->name('orders.package-photo.show');
         Route::delete('/orders/{order}/package-photo', [AdminOrderController::class, 'destroyPackagePhoto'])->name('orders.package-photo.destroy');
+        Route::post('/orders/{order}/package-photo/unavailable', [AdminOrderController::class, 'markPackagePhotoUnavailable'])->name('orders.package-photo.unavailable');
+        Route::delete('/orders/{order}/package-photo/unavailable', [AdminOrderController::class, 'unmarkPackagePhotoUnavailable'])->name('orders.package-photo.unavailable.undo');
         Route::post('/orders/{order}/notes', [AdminOrderNoteController::class, 'store'])->name('orders.notes.store');
         Route::delete('/orders/{order}/notes/{note}', [AdminOrderNoteController::class, 'destroy'])->name('orders.notes.destroy');
         Route::post('/orders/{order}/discount-code', [AdminOrderController::class, 'createDiscountCode'])->name('orders.discount-code.store');

@@ -846,6 +846,22 @@
 
                         <div class="order-shipping-form">
                             <span class="order-shipping-form-title">Package photo</span>
+                            @if (! $order->package_photo_path && $order->package_photo_unavailable_at)
+                                {{-- Said to have none: off the Missing package picture tab, until undone or a photo arrives. --}}
+                                <div class="order-photo-unavailable">
+                                    <strong>No picture available</strong>
+                                    <span class="order-photo-unavailable-meta">
+                                        {{ $order->package_photo_unavailable_at->format('d M Y') }}
+                                        · {{ $order->packagePhotoUnavailableBy?->name ?? 'Deleted admin' }}
+                                        ·
+                                        <button type="submit" form="undo-package-photo-unavailable" class="order-label-link">Undo</button>
+                                    </span>
+                                </div>
+                                <form id="undo-package-photo-unavailable" method="POST" action="{{ route('admin.orders.package-photo.unavailable.undo', $order) }}">
+                                    @csrf
+                                    @method('DELETE')
+                                </form>
+                            @endif
                             @if ($order->package_photo_path)
                                 {{-- The same card as the label, with the photo itself in place of the file icon. --}}
                                 <div class="order-label-file">
@@ -892,6 +908,11 @@
                                 <form id="remove-package-photo" method="POST" action="{{ route('admin.orders.package-photo.destroy', $order) }}" onsubmit="return confirm('Remove the package photo?')">
                                     @csrf
                                     @method('DELETE')
+                                </form>
+                            @elseif (! $order->package_photo_unavailable_at)
+                                <form method="POST" action="{{ route('admin.orders.package-photo.unavailable', $order) }}">
+                                    @csrf
+                                    <button type="submit" class="btn btn-secondary btn-block order-photo-none">I have no picture available</button>
                                 </form>
                             @endif
                         </div>
