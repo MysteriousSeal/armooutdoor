@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'restocked_quantity',
     'restocked_at',
     'restocked_by_user_id',
+    'is_custom',
 ])]
 class OrderItem extends Model
 {
@@ -42,6 +43,7 @@ class OrderItem extends Model
             'supplier_lead_time_days' => 'integer',
             'restocked_quantity' => 'integer',
             'restocked_at' => 'datetime',
+            'is_custom' => 'boolean',
         ];
     }
 

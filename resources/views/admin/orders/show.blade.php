@@ -72,7 +72,9 @@
                              modale ne s'ouvre pas, et valider une commande sans
                              confirmation ne se rattrape pas. --}}
                         <button type="button" class="btn btn-primary" data-modal-open="validate-draft-modal" data-draft-validate hidden>Validate draft</button>
-                        <a href="{{ route('admin.orders.edit', $order) }}" class="btn btn-secondary">Edit draft</a>
+                        @unless ($order->hasCustomLines())
+                            <a href="{{ route('admin.orders.edit', $order) }}" class="btn btn-secondary">Edit draft</a>
+                        @endunless
                     @else
                         @if ($order->status === 'placed')
                             @if ($order->awaitsAgeProof())

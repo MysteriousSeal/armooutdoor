@@ -110,11 +110,26 @@ class StoreManualOrderRequest extends FormRequest
             function (Validator $validator): void {
                 $rows = collect($this->input('items', []))
                     ->filter(fn (array $row): bool => filled($row['product_id'] ?? null) && filled($row['quantity'] ?? null));
+                $customRows = collect($this->input('items', []))
+                    ->filter(fn (array $row): bool => $this->isCustomRow($row));
 
-                if ($rows->isEmpty()) {
+                if ($rows->isEmpty() && $customRows->isEmpty()) {
                     $validator->errors()->add('items', 'Add at least one product.');
 
                     return;
+                }
+
+                // A line the catalogue does not carry has no price or stock to
+                // fall back on: what it sells for has to be said, and there is
+                // no stock to check it against.
+                foreach ($customRows as $index => $row) {
+                    if (blank($row['quantity'] ?? null)) {
+                        $validator->errors()->add("items.{$index}.quantity", 'A line outside the catalogue needs a quantity.');
+                    }
+
+                    if (blank($row['price'] ?? null)) {
+                        $validator->errors()->add("items.{$index}.price", 'A line outside the catalogue needs a price.');
+                    }
                 }
 
                 foreach ($rows as $index => $row) {
@@ -155,6 +170,28 @@ class StoreManualOrderRequest extends FormRequest
     }
 
     /**
+     * Whether a line may name something the catalogue does not carry. Only
+     * the admin API says yes: the web form has no fields for it, and the
+     * edit form would drop such a line on its next save.
+     */
+    protected function acceptsCustomLines(): bool
+    {
+        return false;
+    }
+
+    /**
+     * A line with a name of its own and no product: off-catalogue.
+     *
+     * @param  array<string, mixed>  $row
+     */
+    private function isCustomRow(array $row): bool
+    {
+        return $this->acceptsCustomLines()
+            && blank($row['product_id'] ?? null)
+            && filled($row['name'] ?? null);
+    }
+
+    /**
      * The pickup point as it will be frozen on the order, or null when nothing
      * was given. Kept as a snapshot rather than a link: a marketplace relay is
      * not in the carrier's own list, so there is no row to point at.
@@ -179,7 +216,10 @@ class StoreManualOrderRequest extends FormRequest
     }
 
     /**
-     * @return Collection<int, array{product_id: int, variant_id: ?int, quantity: int, unit_price_cents: int}>
+     * Catalogue lines carry a product_id; off-catalogue ones carry
+     * product_id null and their own name, SKU, variant label and weight.
+     *
+     * @return Collection<int, array{product_id: ?int, variant_id: ?int, quantity: int, unit_price_cents: int, custom?: array{name: string, sku: ?string, variant_label: ?string, weight_grams: int}}>
      */
     public function validItems(): Collection
     {
@@ -187,7 +227,12 @@ class StoreManualOrderRequest extends FormRequest
             // Deux lignes du même article sont une seule ligne : les laisser
             // séparées ferait vérifier chacune contre le stock entier, puis
             // retrancher les deux — et le stock passerait sous zéro.
-            ->groupBy(fn (array $item): string => $item['product_id'].':'.($item['variant_id'] ?? ''))
+            // An off-catalogue line has no stock to protect, and two of them
+            // with the same name may well be two different things: each
+            // stays its own line.
+            ->groupBy(fn (array $item, int $index): string => $item['product_id'] === null
+                ? 'custom:'.$index
+                : $item['product_id'].':'.($item['variant_id'] ?? ''))
             ->map(fn (Collection $group): array => [
                 ...$group->first(),
                 'quantity' => $group->sum('quantity'),
@@ -196,13 +241,28 @@ class StoreManualOrderRequest extends FormRequest
     }
 
     /**
-     * @return Collection<int, array{product_id: int, variant_id: ?int, quantity: int, unit_price_cents: int}>
+     * @return Collection<int, array{product_id: ?int, variant_id: ?int, quantity: int, unit_price_cents: int, custom?: array{name: string, sku: ?string, variant_label: ?string, weight_grams: int}}>
      */
     private function rawItems(): Collection
     {
         return collect($this->input('items', []))
-            ->filter(fn (array $row): bool => filled($row['product_id'] ?? null) && filled($row['quantity'] ?? null))
+            ->filter(fn (array $row): bool => (filled($row['product_id'] ?? null) || $this->isCustomRow($row)) && filled($row['quantity'] ?? null))
             ->map(function (array $row): array {
+                if ($this->isCustomRow($row)) {
+                    return [
+                        'product_id' => null,
+                        'variant_id' => null,
+                        'quantity' => (int) $row['quantity'],
+                        'unit_price_cents' => (int) round(((float) $row['price']) * 100),
+                        'custom' => [
+                            'name' => trim((string) $row['name']),
+                            'sku' => filled($row['sku'] ?? null) ? trim((string) $row['sku']) : null,
+                            'variant_label' => filled($row['variant_label'] ?? null) ? trim((string) $row['variant_label']) : null,
+                            'weight_grams' => (int) ($row['weight_grams'] ?? 0),
+                        ],
+                    ];
+                }
+
                 $product = Product::query()->with('variants')->find($row['product_id']);
                 $variant = filled($row['variant_id'] ?? null)
                     ? $product?->variants->firstWhere('id', (int) $row['variant_id'])

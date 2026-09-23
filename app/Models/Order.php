@@ -521,6 +521,16 @@ class Order extends Model
     }
 
     /**
+     * Whether a line was typed in through the admin API for something the
+     * catalogue does not carry. The web edit form has no way to show such a
+     * line, and saving it would drop the line, so it stays closed to them.
+     */
+    public function hasCustomLines(): bool
+    {
+        return $this->items->contains(fn (OrderItem $item): bool => $item->is_custom);
+    }
+
+    /**
      * Le statut tel qu'on l'écrit dans l'interface.
      *
      * La valeur stockée peut porter un underscore — `in_transit` — et

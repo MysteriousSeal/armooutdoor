@@ -552,6 +552,9 @@ class DashboardMetrics
             ->whereNull('orders.test_marked_at')
             ->whereNotIn('orders.status', ['refunded', 'draft'])
             ->whereBetween('orders.created_at', [$this->period->start, $this->period->end])
+            // Off-catalogue lines share an empty slug: grouped, they would
+            // rank as one product that does not exist.
+            ->where('order_items.is_custom', false)
             ->groupBy('order_items.product_slug')
             ->orderByRaw('sum(order_items.quantity) desc')
             ->limit($limit)

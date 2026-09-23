@@ -324,11 +324,17 @@ class OrderController extends Controller
         ]);
     }
 
-    public function edit(Order $order): View
+    public function edit(Order $order): View|RedirectResponse
     {
         abort_unless($order->isDraft(), 404);
 
         $order->load('items');
+
+        if ($order->hasCustomLines()) {
+            return redirect()
+                ->route('admin.orders.show', $order)
+                ->withErrors(['order' => 'This draft has lines outside the catalogue. Edit it through the admin API.']);
+        }
 
         return view('admin.orders.create', [
             'order' => $order,
@@ -347,6 +353,7 @@ class OrderController extends Controller
     public function update(StoreManualOrderRequest $request, Order $order): RedirectResponse
     {
         abort_unless($order->isDraft(), 404);
+        abort_if($order->hasCustomLines(), 409, 'This draft has lines outside the catalogue. Edit it through the admin API.');
 
         return $this->handleManualOrderSave($request, $order);
     }
@@ -484,7 +491,7 @@ class OrderController extends Controller
         };
 
         return DB::transaction(function () use ($order, $customer, $carrier, $shippingSnapshot, $billingSnapshot, $relaySnapshot, $items, $shippingPrice, $marketplace, $discountType, $discountValue, $paymentMethod, $finalize, $allocator): Order {
-            $productsQuery = Product::query()->whereIn('id', $items->pluck('product_id'));
+            $productsQuery = Product::query()->whereIn('id', $items->pluck('product_id')->filter());
             $products = $finalize
                 ? $productsQuery->lockForUpdate()->get()->keyBy('id')
                 : $productsQuery->get()->keyBy('id');
@@ -503,6 +510,15 @@ class OrderController extends Controller
             $weightGrams = 0;
 
             foreach ($items as $item) {
+                // Off-catalogue: no stock to check, and its weight is whatever
+                // the line said.
+                if (isset($item['custom'])) {
+                    $subtotal += $item['unit_price_cents'] * $item['quantity'];
+                    $weightGrams += $item['custom']['weight_grams'] * $item['quantity'];
+
+                    continue;
+                }
+
                 $product = $products->get($item['product_id']);
                 $variant = $item['variant_id'] ? $variants->get($item['variant_id']) : null;
                 if ($product === null) {
@@ -575,6 +591,28 @@ class OrderController extends Controller
             }
 
             foreach ($items as $item) {
+                if (isset($item['custom'])) {
+                    // Nothing in the catalogue to point at or take stock from:
+                    // the line is its own snapshot. The slug and image columns
+                    // do not take null, so they stay empty.
+                    OrderItem::query()->create([
+                        'order_id' => $savedOrder->id,
+                        'product_id' => null,
+                        'product_variant_id' => null,
+                        'product_slug' => '',
+                        'name' => ['fr' => $item['custom']['name'], 'en' => $item['custom']['name']],
+                        'variant_label' => $item['custom']['variant_label'],
+                        'sku' => $item['custom']['sku'],
+                        'image' => '',
+                        'is_custom' => true,
+                        'unit_price_cents' => $item['unit_price_cents'],
+                        'quantity' => $item['quantity'],
+                        'line_cents' => $item['unit_price_cents'] * $item['quantity'],
+                    ]);
+
+                    continue;
+                }
+
                 $product = $products->get($item['product_id']);
                 $variant = $item['variant_id'] ? $variants->get($item['variant_id']) : null;
 
