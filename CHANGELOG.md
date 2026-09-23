@@ -2,6 +2,22 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-23 · v1.52.0 · build VFF1B8
+
+### Admin
+
+- **A draft order can hold lines that are not in the catalogue, through the admin API.** In `POST` or `PATCH /api/admin/orders`, an item with a `name` and no `product_id` is such a line: it needs a `price` and a `quantity`, and can carry a `sku`, a `variant_label` and a `weight_grams`, which counts toward the automatic shipping price. Catalogue and off-catalogue lines mix freely on one order. The web order form is unchanged and still takes catalogue products only.
+- **Validating the draft takes stock for the catalogue lines only.** An off-catalogue line has no stock to take. It shows on the order page, the invoice and the delivery slip with its name, SKU and variant label.
+- **Such a draft is edited through the API, not the web form.** The web form cannot show an off-catalogue line and would drop it on save, so its « Edit draft » button is hidden for these drafts, the edit page sends you back with a message, and a submitted form is refused.
+- **An off-catalogue line can carry its cost.** An optional `cost` per unit, incl. VAT, fills the order's product cost, so P. costs and Profit can be worked out. Without one they stay unknown rather than counting the item as free.
+- **The dashboard's top products leave off-catalogue lines out**, since there is no product to rank.
+
+### Documents
+
+- **A line with no image shows a placeholder picture on the invoice and the delivery slip**, instead of an empty cell. That covers off-catalogue lines, and any older line whose image is empty.
+
+**Migration:** two, run with `php artisan migrate`, adding `is_custom` (false by default) and a nullable `unit_cost_incl_vat_cents` to `order_items`. Lines already saved are untouched.
+
 ## 2026-09-22 · v1.51.2 · build 873C0E
 
 ### Admin
