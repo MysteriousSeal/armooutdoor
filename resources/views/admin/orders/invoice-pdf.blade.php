@@ -249,8 +249,12 @@
             @foreach ($order->items as $item)
                 <tr>
                     <td class="col-thumb">
+                        {{-- A line with no image, such as one outside the catalogue,
+                             gets an empty grey box so no row is left blank. --}}
                         @if ($item->image)
                             <img src="{{ $item->imagePath() }}" alt="">
+                        @else
+                            <img src="{{ resource_path('pdf/missing-image.svg') }}" alt="">
                         @endif
                     </td>
                     <td class="col-name">{{ $item->localizedName() }}</td>

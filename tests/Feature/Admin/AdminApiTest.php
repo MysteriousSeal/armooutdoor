@@ -277,6 +277,9 @@ class AdminApiTest extends TestCase
         foreach (['admin.orders.invoice-pdf', 'admin.orders.delivery-slip-pdf'] as $view) {
             $html = view($view, ['order' => $order, 'company' => CompanySetting::current()])->render();
             $this->assertStringContainsString('Holster sur mesure', $html, $view);
+            // The line with no image gets the grey box; the catalogue line
+            // keeps its photo.
+            $this->assertSame(1, substr_count($html, 'pdf/missing-image.svg'), $view);
         }
     }
 
