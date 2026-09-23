@@ -23,6 +23,7 @@ use App\Models\ShippingSetting;
 use App\Models\User;
 use App\Services\OrderStockAllocator;
 use App\Support\Csv;
+use App\Support\ImageThumbnailer;
 use App\Support\StockContext;
 use App\Support\StripeDashboard;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -32,11 +33,11 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
-use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -1227,11 +1228,20 @@ class OrderController extends Controller
             'package_photo' => ['required', 'file', 'mimetypes:image/jpeg,image/png,image/webp', 'max:10240'],
         ], [], ['package_photo' => 'package photo']);
 
+        // Stored as WebP, like the shop's other images: a phone photo drops
+        // from several megabytes to a few hundred kilobytes.
+        $bytes = ImageThumbnailer::webpBytesFromUpload($request->file('package_photo')->getRealPath());
+
+        if ($bytes === null) {
+            return back()->withErrors(['package_photo' => 'The package photo could not be read as an image.']);
+        }
+
+        $path = 'orders/package-photos/'.Str::random(40).'.webp';
+        Storage::put($path, $bytes);
+
         $previous = $order->package_photo_path;
 
-        $order->update([
-            'package_photo_path' => $request->file('package_photo')->store('orders/package-photos'),
-        ]);
+        $order->update(['package_photo_path' => $path]);
 
         if ($previous && $previous !== $order->package_photo_path) {
             Storage::delete($previous);

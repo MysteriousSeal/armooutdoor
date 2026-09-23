@@ -304,6 +304,82 @@ class ImageThumbnailer
      *
      * @return \GdImage|null
      */
+    /**
+     * An uploaded photo, as WebP bytes to store wherever the caller wants.
+     *
+     * For files kept off the public folder, which the path-based methods
+     * above cannot write to. The EXIF orientation a phone sets is applied
+     * first, since GD ignores it and a portrait shot would come out lying
+     * down. The longest side is brought down to `$maxSide` (never up).
+     * Null when the file cannot be read as an image.
+     */
+    public static function webpBytesFromUpload(string $path, int $maxSide = 2000, int $quality = 82): ?string
+    {
+        $image = self::load($path);
+
+        if ($image === null) {
+            return null;
+        }
+
+        $image = self::applyExifOrientation($image, $path);
+
+        $width = imagesx($image);
+        $height = imagesy($image);
+        $scale = min(1, $maxSide / max($width, $height));
+
+        if ($scale < 1) {
+            $targetWidth = max(1, (int) round($width * $scale));
+            $targetHeight = max(1, (int) round($height * $scale));
+            $resized = imagecreatetruecolor($targetWidth, $targetHeight);
+            imagealphablending($resized, false);
+            imagesavealpha($resized, true);
+            imagecopyresampled($resized, $image, 0, 0, 0, 0, $targetWidth, $targetHeight, $width, $height);
+            imagedestroy($image);
+            $image = $resized;
+        }
+
+        imagepalettetotruecolor($image);
+        imagesavealpha($image, true);
+
+        ob_start();
+        imagewebp($image, null, $quality);
+        $bytes = ob_get_clean();
+        imagedestroy($image);
+
+        return $bytes === false || $bytes === '' ? null : $bytes;
+    }
+
+    /**
+     * Turns the image the way the camera's EXIF flag says it was held.
+     *
+     * @param  \GdImage  $image
+     * @return \GdImage
+     */
+    private static function applyExifOrientation($image, string $path)
+    {
+        if (! function_exists('exif_read_data')) {
+            return $image;
+        }
+
+        $exif = @exif_read_data($path);
+        $orientation = is_array($exif) ? (int) ($exif['Orientation'] ?? 1) : 1;
+
+        $rotated = match ($orientation) {
+            3 => imagerotate($image, 180, 0),
+            6 => imagerotate($image, -90, 0),
+            8 => imagerotate($image, 90, 0),
+            default => null,
+        };
+
+        if ($rotated === null || $rotated === false) {
+            return $image;
+        }
+
+        imagedestroy($image);
+
+        return $rotated;
+    }
+
     private static function load(string $path)
     {
         $contents = @file_get_contents($path);

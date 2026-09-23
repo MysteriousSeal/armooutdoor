@@ -60,8 +60,70 @@ class OrderPackagePhotoTest extends TestCase
         $this->actingAs($this->admin())
             ->get(route('admin.orders.package-photo.show', $order))
             ->assertOk()
-            ->assertHeader('Content-Type', 'image/jpeg')
+            ->assertHeader('Content-Type', 'image/webp')
             ->assertHeader('Cache-Control', 'no-store, private');
+    }
+
+    /** Whatever came in, WebP is what is kept, like the shop's other images. */
+    public function test_the_photo_is_stored_as_webp(): void
+    {
+        foreach (['colis.jpg', 'colis.png', 'colis.webp'] as $name) {
+            $order = $this->order();
+
+            $this->actingAs($this->admin())
+                ->post(route('admin.orders.package-photo.store', $order), ['package_photo' => UploadedFile::fake()->image($name, 400, 300)])
+                ->assertSessionHasNoErrors();
+
+            $path = $order->refresh()->package_photo_path;
+            $this->assertStringEndsWith('.webp', $path, $name);
+            $this->assertSame('image/webp', getimagesizefromstring(Storage::disk('local')->get($path))['mime'], $name);
+        }
+    }
+
+    /** A full-size phone photo is brought down to 2000 px on its long side. */
+    public function test_a_large_photo_is_scaled_down_keeping_its_proportions(): void
+    {
+        $order = $this->order();
+
+        $this->actingAs($this->admin())
+            ->post(route('admin.orders.package-photo.store', $order), ['package_photo' => UploadedFile::fake()->image('big.jpg', 3000, 1500)]);
+
+        [$width, $height] = getimagesizefromstring(Storage::disk('local')->get($order->refresh()->package_photo_path));
+        $this->assertSame([2000, 1000], [$width, $height]);
+    }
+
+    /**
+     * A phone stores a portrait shot landscape with an EXIF flag saying how
+     * it was held; GD ignores the flag, so the photo is turned before saving.
+     */
+    public function test_a_photo_is_turned_the_way_the_phone_was_held(): void
+    {
+        $order = $this->order();
+        $landscape = UploadedFile::fake()->image('portrait.jpg', 300, 150);
+        $jpeg = file_get_contents($landscape->getRealPath());
+        // A minimal EXIF block: one IFD entry, Orientation (0x0112) = 6, "rotate 90° clockwise".
+        $tiff = "MM\x00\x2A\x00\x00\x00\x08\x00\x01\x01\x12\x00\x03\x00\x00\x00\x01\x00\x06\x00\x00\x00\x00\x00\x00";
+        $payload = "Exif\x00\x00".$tiff;
+        file_put_contents($landscape->getRealPath(), substr($jpeg, 0, 2)."\xFF\xE1".pack('n', strlen($payload) + 2).$payload.substr($jpeg, 2));
+
+        $this->actingAs($this->admin())
+            ->post(route('admin.orders.package-photo.store', $order), ['package_photo' => $landscape])
+            ->assertSessionHasNoErrors();
+
+        [$width, $height] = getimagesizefromstring(Storage::disk('local')->get($order->refresh()->package_photo_path));
+        $this->assertSame([150, 300], [$width, $height]);
+    }
+
+    /** A small one is not blown up. */
+    public function test_a_small_photo_keeps_its_size(): void
+    {
+        $order = $this->order();
+
+        $this->actingAs($this->admin())
+            ->post(route('admin.orders.package-photo.store', $order), ['package_photo' => UploadedFile::fake()->image('small.jpg', 640, 480)]);
+
+        [$width, $height] = getimagesizefromstring(Storage::disk('local')->get($order->refresh()->package_photo_path));
+        $this->assertSame([640, 480], [$width, $height]);
     }
 
     public function test_png_and_webp_are_accepted(): void
@@ -153,7 +215,7 @@ class OrderPackagePhotoTest extends TestCase
         $this->actingAs($admin)->get(route('admin.orders.show', $order))
             ->assertOk()
             ->assertSee('class="order-package-photo" src="'.route('admin.orders.package-photo.show', $order).'"', false)
-            ->assertSee($order->number.'.jpg')
+            ->assertSee($order->number.'.webp')
             ->assertSee('remove-package-photo', false)
             ->assertDontSee('Upload a package photo');
     }
