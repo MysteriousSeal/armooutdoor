@@ -348,6 +348,18 @@ class Order extends Model
         $total = 0;
 
         foreach ($this->items as $item) {
+            // An off-catalogue line has no purchase history: it counts at the
+            // cost it was entered with, and leaves the total unknown without.
+            if ($item->is_custom) {
+                if ($item->unit_cost_incl_vat_cents === null) {
+                    return null;
+                }
+
+                $total += $item->unit_cost_incl_vat_cents * $item->quantity;
+
+                continue;
+            }
+
             if ($item->product_id === null || ! array_key_exists($item->product_id, $averageCostsByProductId)) {
                 return null;
             }

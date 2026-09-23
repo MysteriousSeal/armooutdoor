@@ -330,6 +330,43 @@ class AdminApiTest extends TestCase
         $this->assertSame(5000, $order->fresh()->items->firstWhere('is_custom', true)->unit_price_cents);
     }
 
+    /** The cost given at creation, incl. VAT, is what the margin counts. */
+    public function test_an_off_catalogue_line_with_a_cost_gives_the_order_a_product_cost(): void
+    {
+        $product = Product::factory()->create();
+        $payload = $this->draftOrderPayload($product, 1);
+        $payload['items'] = [['name' => 'Cagoule', 'price' => '4.50', 'quantity' => 3, 'cost' => '1.20']];
+
+        $this->postJson('/api/admin/orders', $payload, $this->headers())->assertStatus(201);
+        $order = Order::query()->latest('id')->firstOrFail();
+
+        $this->assertSame(120, $order->items->first()->unit_cost_incl_vat_cents);
+        $this->assertSame(360, $order->productCostInclVatCents([]));
+    }
+
+    /** Without one, the cost stays unknown rather than reading as free. */
+    public function test_an_off_catalogue_line_without_a_cost_leaves_the_product_cost_unknown(): void
+    {
+        $product = Product::factory()->create();
+        $payload = $this->draftOrderPayload($product, 1);
+        $payload['items'] = [['name' => 'Cagoule', 'price' => '4.50', 'quantity' => 1]];
+
+        $this->postJson('/api/admin/orders', $payload, $this->headers())->assertStatus(201);
+
+        $this->assertNull(Order::query()->latest('id')->firstOrFail()->productCostInclVatCents([]));
+    }
+
+    public function test_an_off_catalogue_cost_cannot_be_negative(): void
+    {
+        $product = Product::factory()->create();
+        $payload = $this->draftOrderPayload($product, 1);
+        $payload['items'] = [['name' => 'Cagoule', 'price' => '4.50', 'quantity' => 1, 'cost' => '-1']];
+
+        $this->postJson('/api/admin/orders', $payload, $this->headers())
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('items.0.cost');
+    }
+
     public function test_admins_index_lists_admin_users_only(): void
     {
         User::factory()->admin()->create();

@@ -219,7 +219,7 @@ class StoreManualOrderRequest extends FormRequest
      * Catalogue lines carry a product_id; off-catalogue ones carry
      * product_id null and their own name, SKU, variant label and weight.
      *
-     * @return Collection<int, array{product_id: ?int, variant_id: ?int, quantity: int, unit_price_cents: int, custom?: array{name: string, sku: ?string, variant_label: ?string, weight_grams: int}}>
+     * @return Collection<int, array{product_id: ?int, variant_id: ?int, quantity: int, unit_price_cents: int, custom?: array{name: string, sku: ?string, variant_label: ?string, weight_grams: int, cost_cents: ?int}}>
      */
     public function validItems(): Collection
     {
@@ -241,7 +241,7 @@ class StoreManualOrderRequest extends FormRequest
     }
 
     /**
-     * @return Collection<int, array{product_id: ?int, variant_id: ?int, quantity: int, unit_price_cents: int, custom?: array{name: string, sku: ?string, variant_label: ?string, weight_grams: int}}>
+     * @return Collection<int, array{product_id: ?int, variant_id: ?int, quantity: int, unit_price_cents: int, custom?: array{name: string, sku: ?string, variant_label: ?string, weight_grams: int, cost_cents: ?int}}>
      */
     private function rawItems(): Collection
     {
@@ -259,6 +259,7 @@ class StoreManualOrderRequest extends FormRequest
                             'sku' => filled($row['sku'] ?? null) ? trim((string) $row['sku']) : null,
                             'variant_label' => filled($row['variant_label'] ?? null) ? trim((string) $row['variant_label']) : null,
                             'weight_grams' => (int) ($row['weight_grams'] ?? 0),
+                            'cost_cents' => filled($row['cost'] ?? null) ? (int) round(((float) $row['cost']) * 100) : null,
                         ],
                     ];
                 }

@@ -605,6 +605,7 @@ class OrderController extends Controller
                         'sku' => $item['custom']['sku'],
                         'image' => '',
                         'is_custom' => true,
+                        'unit_cost_incl_vat_cents' => $item['custom']['cost_cents'],
                         'unit_price_cents' => $item['unit_price_cents'],
                         'quantity' => $item['quantity'],
                         'line_cents' => $item['unit_price_cents'] * $item['quantity'],

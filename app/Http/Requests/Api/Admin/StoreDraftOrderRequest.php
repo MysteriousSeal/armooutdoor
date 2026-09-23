@@ -27,6 +27,8 @@ class StoreDraftOrderRequest extends StoreManualOrderRequest
             'items.*.sku' => ['nullable', 'string', 'max:100'],
             'items.*.variant_label' => ['nullable', 'string', 'max:255'],
             'items.*.weight_grams' => ['nullable', 'integer', 'min:0', 'max:1000000'],
+            // What the unit cost the shop, incl. VAT: the margin's other half.
+            'items.*.cost' => ['nullable', 'numeric', 'min:0', 'max:99999.99'],
         ];
     }
 
