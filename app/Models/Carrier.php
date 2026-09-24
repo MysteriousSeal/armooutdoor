@@ -108,6 +108,13 @@ class Carrier extends Model
     ];
 
     /**
+     * Mondial Relay's page for a parcel sent with a Vinted label: Vinted
+     * books those under its own brand code, V2, and the page finds them by
+     * number alone.
+     */
+    private const VINTED_MONDIAL_RELAY_TRACKING_URL = 'https://www.mondialrelay.fr/suivi-de-colis?codeMarque=V2&numeroExpedition=:number';
+
+    /**
      * The carrier's tracking page with no number filled in — where the
      * help page can send a visitor who has their number in hand. Null for
      * a slug with no known tracking tool.
@@ -127,13 +134,15 @@ class Carrier extends Model
      * lien mènerait à un formulaire vide, ce qui est pire qu'un numéro à
      * recopier.
      */
-    public function trackingUrlFor(?string $trackingNumber, ?string $postcode = null): ?string
+    public function trackingUrlFor(?string $trackingNumber, ?string $postcode = null, bool $viaVinted = false): ?string
     {
         if (! filled($trackingNumber) || ! isset(self::TRACKING_URLS[$this->slug])) {
             return null;
         }
 
-        $template = self::TRACKING_URLS[$this->slug];
+        $template = $viaVinted && $this->slug === 'mondial-relay'
+            ? self::VINTED_MONDIAL_RELAY_TRACKING_URL
+            : self::TRACKING_URLS[$this->slug];
 
         if (str_contains($template, ':postcode') && ! filled($postcode)) {
             return null;

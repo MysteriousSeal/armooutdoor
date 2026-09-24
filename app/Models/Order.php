@@ -448,7 +448,17 @@ class Order extends Model
     public function trackingUrl(): ?string
     {
         return ($this->trackingCarrier ?? $this->carrier)
-            ?->trackingUrlFor($this->tracking_number, $this->trackingPostcode());
+            ?->trackingUrlFor($this->tracking_number, $this->trackingPostcode(), $this->isFromVinted());
+    }
+
+    /**
+     * Sold on Vinted, whose shipping labels go out under its own carrier
+     * accounts. Read from the marketplace name kept on the order rather than
+     * an id, since ids differ between databases.
+     */
+    public function isFromVinted(): bool
+    {
+        return strcasecmp(trim((string) $this->marketplace_name), 'Vinted') === 0;
     }
 
     /**

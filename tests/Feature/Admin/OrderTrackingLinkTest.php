@@ -257,4 +257,53 @@ class OrderTrackingLinkTest extends TestCase
             ->assertSee('XM022436897TS')
             ->assertDontSee('chronopost.fr', false);
     }
+
+    /** A Vinted parcel is booked under Vinted's brand code, and found by number alone. */
+    public function test_a_vinted_mondial_relay_order_links_with_vinted_brand_code(): void
+    {
+        $carrier = $this->carrier('mondial-relay', 'relay');
+        $order = $this->order([
+            'carrier_id' => $carrier->id,
+            'tracking_number' => '74051897',
+            'marketplace_name' => 'Vinted',
+        ]);
+
+        $this->assertSame(
+            'https://www.mondialrelay.fr/suivi-de-colis?codeMarque=V2&numeroExpedition=74051897',
+            $order->trackingUrl(),
+        );
+    }
+
+    /** Only Vinted's own parcels: the shop's and other marketplaces' keep number and postcode. */
+    public function test_other_mondial_relay_orders_keep_the_postcode_link(): void
+    {
+        $carrier = $this->carrier('mondial-relay', 'relay');
+
+        foreach ([null, 'LeBonCoin'] as $marketplace) {
+            $order = $this->order([
+                'carrier_id' => $carrier->id,
+                'tracking_number' => '74051897',
+                'marketplace_name' => $marketplace,
+            ]);
+
+            $this->assertSame(
+                'https://www.mondialrelay.fr/suivi-de-colis?numeroExpedition=74051897&codePostal=75000',
+                $order->trackingUrl(),
+                (string) $marketplace,
+            );
+        }
+    }
+
+    /** A Vinted order with another carrier keeps that carrier's page. */
+    public function test_a_vinted_order_with_another_carrier_is_unchanged(): void
+    {
+        $carrier = $this->carrier('colissimo-home');
+        $order = $this->order([
+            'carrier_id' => $carrier->id,
+            'tracking_number' => '6A123',
+            'marketplace_name' => 'Vinted',
+        ]);
+
+        $this->assertSame('https://www.laposte.fr/outils/suivre-vos-envois?code=6A123', $order->trackingUrl());
+    }
 }
