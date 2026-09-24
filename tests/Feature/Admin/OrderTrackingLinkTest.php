@@ -101,11 +101,12 @@ class OrderTrackingLinkTest extends TestCase
         $order = $this->order([
             'carrier_id' => $carrier->id,
             'tracking_number' => '64271769',
+            'billing_address_snapshot' => ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'x', 'postal_code' => '', 'city' => 'Nantes', 'country' => 'FR'],
             'address_snapshot' => ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'x', 'postal_code' => '44300', 'city' => 'Nantes', 'country' => 'FR'],
             'relay_snapshot' => ['name' => 'Point relais', 'line1' => 'y', 'postal_code' => '44000', 'city' => 'Nantes'],
         ]);
 
-        // L'adresse de livraison prime sur le point relais.
+        // No billing postcode: the delivery address comes before the relay point.
         $this->assertStringContainsString('codePostal=44300', $order->trackingUrl());
     }
 
@@ -115,6 +116,7 @@ class OrderTrackingLinkTest extends TestCase
         $order = $this->order([
             'carrier_id' => $carrier->id,
             'tracking_number' => '64271769',
+            'billing_address_snapshot' => ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'x', 'postal_code' => '', 'city' => 'Nantes', 'country' => 'FR'],
             'address_snapshot' => ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'x', 'postal_code' => '', 'city' => 'Nantes', 'country' => 'FR'],
             'relay_snapshot' => ['name' => 'Point relais', 'line1' => 'y', 'postal_code' => '44000', 'city' => 'Nantes'],
         ]);
@@ -129,6 +131,7 @@ class OrderTrackingLinkTest extends TestCase
         $order = $this->order([
             'carrier_id' => $carrier->id,
             'tracking_number' => '64271769',
+            'billing_address_snapshot' => ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'x', 'postal_code' => '', 'city' => 'Nantes', 'country' => 'FR'],
             'address_snapshot' => ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'x', 'postal_code' => '', 'city' => 'Nantes', 'country' => 'FR'],
             'relay_snapshot' => null,
         ]);
@@ -305,5 +308,32 @@ class OrderTrackingLinkTest extends TestCase
         ]);
 
         $this->assertSame('https://www.laposte.fr/outils/suivre-vos-envois?code=6A123', $order->trackingUrl());
+    }
+
+    /** The billing postcode first, then the shipping one, then the relay point's. */
+    public function test_the_mondial_relay_postcode_is_taken_from_billing_first(): void
+    {
+        $carrier = $this->carrier('mondial-relay', 'relay');
+        $shipping = ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'x', 'postal_code' => '40700', 'city' => 'Hagetmau', 'country' => 'FR'];
+        $billing = ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'y', 'postal_code' => '44270', 'city' => 'Machecoul', 'country' => 'FR'];
+        $relay = ['name' => 'Locker', 'line1' => 'z', 'postal_code' => '33000', 'city' => 'Bordeaux', 'country' => 'FR'];
+
+        $cases = [
+            '44270' => [$billing, $shipping, $relay],
+            '40700' => [[...$billing, 'postal_code' => ''], $shipping, $relay],
+            '33000' => [null, [...$shipping, 'postal_code' => null], $relay],
+        ];
+
+        foreach ($cases as $expected => [$billingSnapshot, $shippingSnapshot, $relaySnapshot]) {
+            $order = $this->order([
+                'carrier_id' => $carrier->id,
+                'tracking_number' => '74051897',
+                'billing_address_snapshot' => $billingSnapshot,
+                'address_snapshot' => $shippingSnapshot,
+                'relay_snapshot' => $relaySnapshot,
+            ]);
+
+            $this->assertStringEndsWith('&codePostal='.$expected, (string) $order->trackingUrl(), (string) $expected);
+        }
     }
 }

@@ -462,17 +462,21 @@ class Order extends Model
     }
 
     /**
-     * Le code postal du destinataire, que Mondial Relay demande en plus du
-     * numéro. Celui de l'adresse de livraison d'abord — il est renseigné sur
-     * toutes les commandes — et à défaut celui du point relais.
+     * The postcode Mondial Relay asks for next to the number. The billing
+     * address's first, then the shipping address's, then the relay point's:
+     * the first one filled in wins.
      */
     private function trackingPostcode(): ?string
     {
-        $address = $this->address_snapshot['postal_code'] ?? null;
+        foreach ([$this->billing_address_snapshot, $this->address_snapshot, $this->relay_snapshot] as $snapshot) {
+            $postcode = $snapshot['postal_code'] ?? null;
 
-        return filled($address)
-            ? (string) $address
-            : ($this->relay_snapshot['postal_code'] ?? null);
+            if (filled($postcode)) {
+                return (string) $postcode;
+            }
+        }
+
+        return null;
     }
 
     public function trackingCarrierName(): string
