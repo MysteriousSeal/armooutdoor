@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-24 · v1.54.0 · build 84GFM9
+
+### Admin
+
+- **The NaturaBuy page says how many photos each product has on our shop.** A « Photos » column in both tables: on the listings, after Catalogue, for the product the listing is matched to, and a dash when it matches nothing here; on the tab of products missing from NaturaBuy, after Stock. It counts the main photo plus the gallery, what a product page shows. None reads as a red chip and one as an amber chip, so the listings short of photos stand out; two or more is a plain number. It costs the page no extra query.
+
+**No migration.**
+
 ## 2026-09-24 · v1.53.1 · build ZF0634
 
 ### Admin
