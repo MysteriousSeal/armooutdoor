@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-24 · v1.53.1 · build ZF0634
+
+### Admin
+
+- **A Vinted order shipped with Mondial Relay links to Vinted's own tracking page.** Vinted books its Mondial Relay labels under its brand code V2, so the tracking number on the order page now opens `mondialrelay.fr/suivi-de-colis?codeMarque=V2&numeroExpedition=…`, found by number alone. Mondial Relay orders from the shop or another marketplace keep the link with the number and postcode. A Vinted order is recognised by the marketplace name saved on it.
+- **The Mondial Relay postcode comes from the billing address first.** The link that carries a postcode now takes the billing address's, then the shipping address's, then the relay point's, whichever is filled in first. With none of them, the number stays plain text, as before.
+
+**No migration.**
+
 ## 2026-09-23 · v1.53.0 · build GA7H7E
 
 ### Admin
