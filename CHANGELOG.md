@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-24 · v1.55.0 · build 184WH2
+
+### Admin
+
+- **The NaturaBuy page shows how many photos each listing has on NaturaBuy.** Their API returns no photos, so the count is read from each listing's public page. A « NB photos » column sits next to our Photos column: an amber chip when the listing has fewer photos than our shop, so the ones worth adding photos to stand out, a dash until the listing has been read, and the date of the last read on hover.
+- **One page a minute, each listing once a week.** A new command, `naturabuy:count-photos`, runs every minute from the scheduler and reads a single open listing: never-read listings first, then the one read longest ago. A listing is not read again for 7 days, and one whose page cannot be read keeps its last count and is tried again the next day. `php artisan naturabuy:count-photos --listing=<id>` reads a given listing at once. A resync from the API leaves the count alone.
+
+**Migration:** one, run with `php artisan migrate`, adding a nullable `photo_count` and `photos_checked_at` to `naturabuy_listings`. The counts then fill in by themselves through the minute scheduler.
+
 ## 2026-09-24 · v1.54.0 · build 84GFM9
 
 ### Admin
