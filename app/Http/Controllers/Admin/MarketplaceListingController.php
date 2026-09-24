@@ -118,7 +118,7 @@ class MarketplaceListingController extends Controller
      * formatted paste and as plain text for editors that refuse it.
      *
      * @param  array<string, array{product_id: int, quantity: int, exact: bool}>  $matches
-     * @return array<string, array{product_id: int, quantity: int, exact: bool, name: string, description: string, description_text: string}>
+     * @return array<string, array{product_id: int, quantity: int, exact: bool, image_count: ?int, name: string, description: string, description_text: string}>
      */
     private function withProductNames(array $matches): array
     {
@@ -128,13 +128,16 @@ class MarketplaceListingController extends Controller
             return [];
         }
 
+        // The photo count rides along in the same query, for the Photos column.
         $products = Product::query()
             ->whereIn('id', $ids)
-            ->get(['id', 'name', 'description'])
+            ->withCount('images')
+            ->get(['id', 'name', 'description', 'image'])
             ->keyBy('id');
 
         foreach ($matches as $code => $match) {
             $product = $products->get($match['product_id']);
+            $matches[$code]['image_count'] = $product?->shopImageCount();
             $matches[$code]['name'] = (string) $product?->localizedName();
             $matches[$code]['description'] = (string) $product?->localizedDescription();
             $matches[$code]['description_text'] = (string) $product?->localizedDescriptionText();
@@ -291,6 +294,7 @@ class MarketplaceListingController extends Controller
     private function productsMissingFromNaturabuy(string $search, string $availability = '')
     {
         $query = $this->productsMissingFromNaturabuyQuery()
+            ->withCount('images')
             ->when($search !== '', fn (Builder $q) => $q->where(fn (Builder $inner) => $inner
                 ->where('name', 'like', '%'.$search.'%')
                 ->orWhere('sku', 'like', '%'.$search.'%')))

@@ -1155,4 +1155,65 @@ class NaturabuyListingsTest extends TestCase
 
         $this->assertSame(0, NaturabuyListing::query()->count());
     }
+
+    // ------------------------------------------------------------- photos
+
+    /** A product with a main photo and two in its gallery. */
+    private function productWithPhotos(string $sku, int $gallery, bool $main = true, array $attributes = []): Product
+    {
+        $product = Product::factory()->create(['sku' => $sku, 'image' => $main ? 'products/'.$sku.'.webp' : '', ...$attributes]);
+
+        foreach (range(1, $gallery) as $i) {
+            if ($gallery > 0) {
+                $product->images()->create(['image' => 'products/'.$sku.'-'.$i.'.webp', 'sort_order' => $i]);
+            }
+        }
+
+        return $product;
+    }
+
+    public function test_a_matched_listing_shows_how_many_photos_our_product_has(): void
+    {
+        $this->productWithPhotos('PHOTOS-3', 2);
+        $this->listing(['internalcode' => 'PHOTOS-3']);
+
+        $html = $this->actingAs($this->admin())->get('/admin/marketplaces/naturabuy')->assertOk()->getContent();
+
+        $this->assertStringContainsString('title="Photos on our shop: main photo plus gallery">Photos</th>', $html);
+        $this->assertMatchesRegularExpression('/<td class="nb-num">\s*3\s*<\/td>/', $html);
+    }
+
+    /** None in red, one in amber: the listings short of photos stand out. */
+    public function test_few_photos_are_flagged(): void
+    {
+        $this->productWithPhotos('NO-PHOTO', 0, main: false);
+        $this->productWithPhotos('ONE-PHOTO', 0);
+        $this->listing(['internalcode' => 'NO-PHOTO', 'title' => 'Sans photo']);
+        $this->listing(['internalcode' => 'ONE-PHOTO', 'title' => 'Une photo']);
+
+        $this->actingAs($this->admin())->get('/admin/marketplaces/naturabuy')
+            ->assertOk()
+            ->assertSee('<span class="admin-availability-chip is-out-of-stock" title="No photo on our shop">0</span>', false)
+            ->assertSee('<span class="admin-availability-chip is-low-stock" title="Only one photo on our shop">1</span>', false);
+    }
+
+    /** A listing matched to nothing here has no photo count to give. */
+    public function test_an_unmatched_listing_shows_a_dash_for_photos(): void
+    {
+        $this->listing(['internalcode' => 'NOWHERE']);
+
+        $this->actingAs($this->admin())->get('/admin/marketplaces/naturabuy')
+            ->assertOk()
+            ->assertDontSee('title="No photo on our shop"', false);
+    }
+
+    public function test_the_missing_tab_shows_the_photo_count_too(): void
+    {
+        $this->productWithPhotos('NOT-LISTED', 4, attributes: ['is_active' => true]);
+
+        $html = $this->actingAs($this->admin())->get('/admin/marketplaces/naturabuy?tab=missing')->assertOk()->getContent();
+
+        $this->assertStringContainsString('>Photos</th>', $html);
+        $this->assertMatchesRegularExpression('/<td class="nb-num">\s*5\s*<\/td>/', $html);
+    }
 }

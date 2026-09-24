@@ -229,6 +229,18 @@ class Product extends Model
         return $this->hasMany(ProductImage::class)->orderBy('sort_order');
     }
 
+    /**
+     * How many photos the product page shows: the main photo plus the
+     * gallery. Reads images_count when the query loaded it with
+     * withCount('images'), and counts otherwise.
+     */
+    public function shopImageCount(): int
+    {
+        $gallery = $this->images_count ?? $this->images()->count();
+
+        return (int) $gallery + (filled($this->image) ? 1 : 0);
+    }
+
     public function variants(): HasMany
     {
         return $this->hasMany(ProductVariant::class)->orderBy('sort_order');

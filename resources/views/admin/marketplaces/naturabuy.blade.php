@@ -110,6 +110,7 @@
                                 <th>SKU</th>
                                 <th class="nb-num">Price</th>
                                 <th class="nb-num">Stock</th>
+                                <th class="nb-num" title="Photos on our shop: main photo plus gallery">Photos</th>
                                 <th>Availability</th>
                             </tr>
                         </thead>
@@ -152,6 +153,7 @@
                                     </td>
                                     <td class="nb-num">{{ format_euros($product->price_cents) }}</td>
                                     <td class="nb-num">{{ number_format($product->quantity) }}</td>
+                                    <td class="nb-num">@include('admin.marketplaces.partials.shop-image-count', ['count' => $product->shopImageCount()])</td>
                                     <td>
                                         @php($state = $product->availabilityState())
                                         <span class="admin-availability-chip is-{{ str_replace('_', '-', $state) }}">
@@ -181,6 +183,7 @@
                             <th class="nb-num">NB qty</th>
                             <th class="nb-num">Ours</th>
                             <th>Catalogue</th>
+                            <th class="nb-num" title="Photos on our shop: main photo plus gallery">Photos</th>
                             <th>Stock</th>
                         </tr>
                     </thead>
@@ -265,6 +268,7 @@
                                         <span class="admin-availability-chip nb-nocode">No code</span>
                                     @endif
                                 </td>
+                                <td class="nb-num">@include('admin.marketplaces.partials.shop-image-count', ['count' => $match['image_count'] ?? null])</td>
                                 <td>
                                     @if ($listing->out_of_stock)
                                         <span class="order-chip order-chip--refunded">Out of stock</span>
