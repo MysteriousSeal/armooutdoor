@@ -20,3 +20,11 @@ Schedule::command('backup:database')
     ->everyFiveMinutes()
     ->withoutOverlapping(10)
     ->runInBackground();
+
+/*
+ * One NaturaBuy listing page a minute, for its photo count: their API does
+ * not give it. Each listing is read again after a week.
+ */
+Schedule::command('naturabuy:count-photos')
+    ->everyMinute()
+    ->withoutOverlapping(5);

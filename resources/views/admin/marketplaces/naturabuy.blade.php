@@ -184,6 +184,7 @@
                             <th class="nb-num">Ours</th>
                             <th>Catalogue</th>
                             <th class="nb-num" title="Photos on our shop: main photo plus gallery">Photos</th>
+                            <th class="nb-num" title="Photos on the NaturaBuy listing, read from its page once a week">NB photos</th>
                             <th>Stock</th>
                         </tr>
                     </thead>
@@ -269,6 +270,16 @@
                                     @endif
                                 </td>
                                 <td class="nb-num">@include('admin.marketplaces.partials.shop-image-count', ['count' => $match['image_count'] ?? null])</td>
+                                <td class="nb-num">
+                                    {{-- Read from their page by naturabuy:count-photos, one listing a minute. --}}
+                                    @if ($listing->photo_count === null)
+                                        <span class="nb-none" title="{{ $listing->photos_checked_at ? 'Could not be read, tried again soon' : 'Not read yet' }}">—</span>
+                                    @elseif (($match['image_count'] ?? null) !== null && $match['image_count'] > $listing->photo_count)
+                                        <span class="admin-availability-chip is-low-stock" title="Fewer photos than on our shop ({{ $match['image_count'] }}). Read {{ $listing->photos_checked_at?->format('d M Y') }}">{{ $listing->photo_count }}</span>
+                                    @else
+                                        <span title="Read {{ $listing->photos_checked_at?->format('d M Y') }}">{{ $listing->photo_count }}</span>
+                                    @endif
+                                </td>
                                 <td>
                                     @if ($listing->out_of_stock)
                                         <span class="order-chip order-chip--refunded">Out of stock</span>

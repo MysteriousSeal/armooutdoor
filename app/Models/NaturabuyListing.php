@@ -21,6 +21,8 @@ use Illuminate\Database\Eloquent\Model;
     'closed',
     'variants',
     'synced_at',
+    'photo_count',
+    'photos_checked_at',
 ])]
 class NaturabuyListing extends Model
 {
@@ -29,6 +31,8 @@ class NaturabuyListing extends Model
     protected function casts(): array
     {
         return [
+            'photo_count' => 'integer',
+            'photos_checked_at' => 'datetime',
             'category' => 'integer',
             'price_cents' => 'integer',
             'oldprice_cents' => 'integer',
