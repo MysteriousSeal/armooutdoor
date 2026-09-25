@@ -6760,6 +6760,23 @@ body.admin-lightbox-open {
     border-color: color-mix(in srgb, #e0b673 32%, var(--border));
 }
 
+/* The "Mark as shipped" reminder: each missing file leads to its upload. */
+.order-ship-warning .order-invoice-warning-list li + li {
+    margin-top: 0.2rem;
+}
+
+.order-ship-warning-link {
+    margin-left: 0.4rem;
+    font-weight: 600;
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.order-ship-warning-link::after {
+    content: ' \2192';
+}
+
 /* ------------------------------------------------------------------
    Coût d'achat moyen, calculé depuis les bons de commande reçus
    ------------------------------------------------------------------ */

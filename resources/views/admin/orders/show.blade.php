@@ -790,7 +790,7 @@
                             <button type="submit" class="btn btn-secondary btn-block">Save tracking</button>
                         </form>
 
-                        <div class="order-shipping-form">
+                        <div class="order-shipping-form" id="order-shipping-label">
                             <span class="order-shipping-form-title">Shipping label</span>
                             @if ($order->shipping_label_path)
                                 <div class="order-label-file">
@@ -844,7 +844,7 @@
                             @endif
                         </div>
 
-                        <div class="order-shipping-form">
+                        <div class="order-shipping-form" id="order-package-photo">
                             <span class="order-shipping-form-title">Package photo</span>
                             @if (! $order->package_photo_path && $order->package_photo_unavailable_at)
                                 {{-- Said to have none: off the Missing package picture tab, until undone or a photo arrives. --}}
@@ -982,13 +982,28 @@
                     @method('PATCH')
                     <p class="modal-kicker">{{ $order->number }}</p>
                     <h3 class="modal-title" id="ship-confirm-title">Mark as shipped?</h3>
+                    @php($missingShippingFiles = $order->missingShippingFiles())
+                    @if ($missingShippingFiles !== [])
+                        {{-- A reminder, not a lock: the order can still ship without them. --}}
+                        <div class="order-invoice-warning order-ship-warning">
+                            <p class="order-invoice-warning-lede">Still missing on this order:</p>
+                            <ul class="order-invoice-warning-list">
+                                @foreach ($missingShippingFiles as $file)
+                                    <li>
+                                        {{ $file }}
+                                        <a href="#{{ $file === 'Shipping label' ? 'order-shipping-label' : 'order-package-photo' }}" class="order-ship-warning-link" data-modal-close>Upload it</a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                     <p class="modal-body">
                         This will set the order status to <strong>Shipped</strong>.
                         The customer will see the update on their order.
                     </p>
                     <div class="modal-actions">
                         <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
-                        <button type="submit" class="btn btn-primary">Mark as shipped</button>
+                        <button type="submit" class="btn btn-primary">{{ $missingShippingFiles === [] ? 'Mark as shipped' : 'Mark as shipped anyway' }}</button>
                     </div>
                 </form>
             </dialog>

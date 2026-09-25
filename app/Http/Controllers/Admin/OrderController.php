@@ -804,8 +804,17 @@ class OrderController extends Controller
     {
         abort_if($order->isDraft(), 404);
 
+        // Shipping without them is allowed, after the modal's warning; the
+        // log keeps what was missing at that moment.
+        $missing = $order->missingShippingFiles();
+
         $order->markStatus('shipped');
-        AdminActivityLog::record('order.shipped', $order, 'Marked order '.$order->number.' as shipped');
+        AdminActivityLog::record(
+            'order.shipped',
+            $order,
+            'Marked order '.$order->number.' as shipped'
+                .($missing === [] ? '' : ' without '.mb_strtolower(implode(' and ', $missing))),
+        );
 
         return $this->statusChangeResponse($request, $order, 'Order marked as shipped.');
     }

@@ -578,6 +578,34 @@ class Order extends Model
         return self::SHIPPING_LABELS_KEPT_SINCE.' 00:00:00';
     }
 
+    /** This order's side of scopeMissingPackagePhoto(): same rule, read on one order. */
+    public function isMissingPackagePhoto(): bool
+    {
+        return $this->package_photo_path === null && $this->package_photo_unavailable_at === null;
+    }
+
+    /** This order's side of scopeMissingShippingLabel(): same rule, read on one order. */
+    public function isMissingShippingLabel(): bool
+    {
+        return $this->shipping_label_path === null
+            && $this->created_at !== null
+            && $this->created_at->gte(self::shippingLabelsKeptSinceTimestamp());
+    }
+
+    /**
+     * What the shipping check asks for and this order lacks, as labels for
+     * the "Mark as shipped" modal and the activity log.
+     *
+     * @return list<string>
+     */
+    public function missingShippingFiles(): array
+    {
+        return array_values(array_filter([
+            $this->isMissingShippingLabel() ? 'Shipping label' : null,
+            $this->isMissingPackagePhoto() ? 'Package photo' : null,
+        ]));
+    }
+
     /**
      * Orders on the working list (not a draft, not archived) with no photo
      * of the packed parcel, and not marked as having none to give. Every
