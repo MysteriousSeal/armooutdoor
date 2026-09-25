@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-25 · v1.55.1 · build 1IPL33
+
+### Admin
+
+- **Marking an order as shipped warns about a missing label or package photo.** When either is missing, the « Mark as shipped? » modal lists it in an amber box, each with an « Upload it » link that closes the modal and jumps to its upload block, and the button reads « Mark as shipped anyway ». It follows the same rules as the Missing tabs: « I have no picture available » counts as having the photo, and a label is only asked for on orders placed since 1 September 2026. It is a reminder, not a lock: shipping anyway still works, and the activity log says what was missing. With nothing missing, the modal is unchanged.
+
+**No migration.**
+
 ## 2026-09-24 · v1.55.0 · build 184WH2
 
 ### Admin
