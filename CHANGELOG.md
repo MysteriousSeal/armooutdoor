@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-26 · v1.56.0 · build 6NC64H
+
+### Admin
+
+- **The customer list shows each customer's last visit.** A « Last visit » column after Joined: the last page the customer saw while signed in, taken from the shop's visit log. It reads « Today » or « 3 days ago », with the exact date and time on hover. A customer with no signed-in visit shows a dash, whose hover explains that visits have only been recorded since 29 August 2026. Browsing while signed out cannot be tied to anyone, so it does not count. The column costs the list no query per row.
+
+**Migration:** one, run with `php artisan migrate`, adding an index on `site_visits` (user, date) so each customer's latest visit is a quick lookup. No data changes.
+
 ## 2026-09-25 · v1.55.1 · build 1IPL33
 
 ### Admin
