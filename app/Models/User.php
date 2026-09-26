@@ -120,6 +120,12 @@ class User extends Authenticatable
         return $this->hasMany(Order::class)->latest();
     }
 
+    /** Pages seen while signed in, from the shop's own visit log. */
+    public function siteVisits(): HasMany
+    {
+        return $this->hasMany(SiteVisit::class);
+    }
+
     public function discountCodes(): HasMany
     {
         return $this->hasMany(DiscountCode::class)->latest();

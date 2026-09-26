@@ -161,6 +161,7 @@
                             <th class="admin-table-num">Spent</th>
                             <th>Addresses</th>
                             <th>Joined</th>
+                            <th>Last visit</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -170,6 +171,9 @@
                                 $displayName = $customer->name !== '' ? $customer->name : $customer->email;
                                 $lastOrderAt = $customer->last_order_at
                                     ? \Illuminate\Support\Carbon::parse($customer->last_order_at)
+                                    : null;
+                                $lastVisitAt = $customer->last_visit_at
+                                    ? \Illuminate\Support\Carbon::parse($customer->last_visit_at)
                                     : null;
                             @endphp
                             <tr class="{{ $customer->admin_viewed_at === null ? 'admin-row--new' : '' }}">
@@ -226,6 +230,15 @@
                                 <td>
                                     <span class="admin-table-primary">{{ $customer->created_at->format('d M Y') }}</span>
                                     <span class="admin-table-sub">{{ $customer->created_at->format('H:i') }}</span>
+                                </td>
+                                <td>
+                                    @if ($lastVisitAt)
+                                        <time class="admin-table-primary" datetime="{{ $lastVisitAt->toIso8601String() }}" title="{{ $lastVisitAt->format('d M Y · H:i') }}">
+                                            {{ $lastVisitAt->isToday() ? 'Today' : $lastVisitAt->copy()->locale('en')->diffForHumans() }}
+                                        </time>
+                                    @else
+                                        <span class="admin-table-sub" title="No signed-in visit since 29 Aug 2026, when visits started being recorded">—</span>
+                                    @endif
                                 </td>
                                 <td>
                                     <div class="admin-table-actions">

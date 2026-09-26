@@ -33,6 +33,9 @@ class CustomerController extends Controller
             ])
             ->withSum(['orders as spent_cents' => $this->spentOrdersScope()], 'total_cents')
             ->withMax(['orders as last_order_at' => $countedOrders], 'created_at')
+            // The last page seen while signed in: a visit while signed out
+            // cannot be tied to anyone.
+            ->withMax('siteVisits as last_visit_at', 'created_at')
             ->latest()
             ->simplePaginate(20)
             ->withQueryString();
