@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-28 · v1.57.2 · build BTMOSB
+
+### Admin
+
+- **Every Vinted Go relay point is named « Locker Vinted Go ».** Vinted picks the locker, so the name is fixed: whatever the manual order form or the admin API sends, the order is saved with « Locker Vinted Go ». In the form, the pickup point name shows it and is locked while Vinted Go is selected. Placing a Vinted Go order no longer asks for a relay name, only its address (address, postal code, city). Other relay carriers keep the name that is typed. Existing Vinted Go orders are renamed the same way, their address kept, so a relay point that repeated the customer's name no longer prints it twice.
+- **The « Edit relay point » modal from v1.57.1 is removed.** With the name fixed, it has no use.
+
+**Migration:** one, run with `php artisan migrate`, renaming the relay point of existing Vinted Go orders to « Locker Vinted Go ». No schema change.
+
 ## 2026-09-28 · v1.57.1 · build 2JXBM1
 
 ### Admin
