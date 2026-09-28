@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-28 · v1.57.1 · build 2JXBM1
+
+### Admin
+
+- **A Vinted Go order's relay point can be edited by hand.** Vinted picks the locker, and it is often only known from the label. On a Vinted Go order, an « Edit relay point » link under the relay block in the Shipping card opens a modal with the locker's name, address, postal code and city, all required and pre-filled with the current relay point. It reads « Add relay point » when there is none yet. It is offered at any status past draft, shipped included, and only changes the order's relay point: the customer's own address is untouched. Other relay carriers do not offer it, since their relay point is the customer's own choice. The change is written to the activity log.
+
+**No migration.**
+
 ## 2026-09-28 · v1.57.0 · build 1GVZWT
 
 ### Admin
