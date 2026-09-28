@@ -101,7 +101,12 @@ class StoreManualOrderRequest extends FormRequest
                     return;
                 }
 
-                foreach (['name', 'line1', 'postal_code', 'city'] as $field) {
+                // A fixed name (Vinted Go) is set by the shop, not asked for.
+                $fields = $carrier->fixedRelayName() === null
+                    ? ['name', 'line1', 'postal_code', 'city']
+                    : ['line1', 'postal_code', 'city'];
+
+                foreach ($fields as $field) {
                     if (blank($this->input('relay.'.$field))) {
                         $validator->errors()->add('relay.'.$field, 'Required for a pickup point delivery.');
                     }
@@ -196,17 +201,27 @@ class StoreManualOrderRequest extends FormRequest
      * was given. Kept as a snapshot rather than a link: a marketplace relay is
      * not in the carrier's own list, so there is no row to point at.
      *
+     * A carrier with a fixed relay name (Vinted Go) gets that name whatever
+     * was sent, by the form or the API; its snapshot exists as soon as any
+     * part of the address is given.
+     *
      * @return array{slug: ?string, name: string, line1: string, postal_code: string, city: string, country: string, hours: null}|null
      */
-    public function relaySnapshot(): ?array
+    public function relaySnapshot(?Carrier $carrier = null): ?array
     {
-        if (blank($this->input('relay.name'))) {
+        $fixedName = $carrier?->fixedRelayName();
+
+        $given = $fixedName === null
+            ? filled($this->input('relay.name'))
+            : filled($this->input('relay.line1')) || filled($this->input('relay.postal_code')) || filled($this->input('relay.city'));
+
+        if (! $given) {
             return null;
         }
 
         return [
             'slug' => $this->input('relay.slug') ?: null,
-            'name' => (string) $this->input('relay.name'),
+            'name' => $fixedName ?? (string) $this->input('relay.name'),
             'line1' => (string) $this->input('relay.line1'),
             'postal_code' => (string) $this->input('relay.postal_code'),
             'city' => (string) $this->input('relay.city'),

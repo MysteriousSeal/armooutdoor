@@ -36,6 +36,10 @@ change them.
 | `active` | `false` means the carrier cannot be used at all, not even by an order. |
 | `manual_only` | `true` means the carrier is never offered to customers at checkout, but manual orders and draft orders can use it. `vinted-go` is one. |
 
+`vinted-go` is also the one carrier whose relay point name is fixed: an order on it
+always carries `"name": "Locker Vinted Go"` in its relay point, whatever `relay.name`
+is sent. Only its address (`line1`, `postal_code`, `city`) is yours to give.
+
 ---
 
 ## Example

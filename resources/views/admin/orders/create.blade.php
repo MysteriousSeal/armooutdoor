@@ -803,6 +803,27 @@
                 loadRelayPoints(postalCode, billingCountry.value, provider);
             }
 
+            // Vinted Go's relay point is always named the same: shown, locked,
+            // and set again by the server whatever is sent.
+            var FIXED_RELAY_NAMES = @json(['vinted-go' => \App\Models\Carrier::VINTED_GO_RELAY_NAME]);
+            var relayNameInput = document.getElementById('relay_name');
+
+            function syncFixedRelayName() {
+                var carrier = selectedCarrierRadio();
+                var fixedName = carrier ? FIXED_RELAY_NAMES[carrier.getAttribute('data-carrier-slug')] : null;
+
+                if (fixedName) {
+                    relayNameInput.value = fixedName;
+                    relayNameInput.readOnly = true;
+                    return;
+                }
+
+                if (relayNameInput.readOnly) {
+                    relayNameInput.readOnly = false;
+                    relayNameInput.value = '';
+                }
+            }
+
             function syncRelayPicker() {
                 var carrier = selectedCarrierRadio();
                 var provider = carrier ? RELAY_PROVIDERS[carrier.getAttribute('data-carrier-slug')] : null;
@@ -825,11 +846,13 @@
             document.addEventListener('change', function (event) {
                 if (event.target.matches('input[data-sync-field="carrier_id"]')) {
                     syncRelayPicker();
+                    syncFixedRelayName();
                 }
             });
             billingPostalCode.addEventListener('input', syncRelayPicker);
             billingCountry.addEventListener('change', syncRelayPicker);
             syncRelayPicker();
+            syncFixedRelayName();
 
             var discountType = document.getElementById('discount_type');
             var discountValueGroup = document.getElementById('discount-value-group');

@@ -38,7 +38,6 @@ use App\Http\Controllers\Admin\MarketplaceSettingController as AdminMarketplaceS
 use App\Http\Controllers\Admin\OctopiaController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\OrderNoteController as AdminOrderNoteController;
-use App\Http\Controllers\Admin\OrderRelayPointController as AdminOrderRelayPointController;
 use App\Http\Controllers\Admin\PackageTypeController as AdminPackageTypeController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\ProductPhotoController;
@@ -439,7 +438,6 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         Route::patch('/orders/{order}/shipping-paid', [AdminOrderController::class, 'updateShippingPaid'])->name('orders.shipping-paid.update');
         Route::patch('/orders/{order}/payment-fee', [AdminOrderController::class, 'updatePaymentFee'])->name('orders.payment-fee.update');
         Route::patch('/orders/{order}/shipping-address', [AdminOrderController::class, 'updateShippingAddress'])->name('orders.address.shipping');
-        Route::patch('/orders/{order}/relay-point', [AdminOrderRelayPointController::class, 'update'])->name('orders.relay-point.update');
         Route::patch('/orders/{order}/billing-address', [AdminOrderController::class, 'updateBillingAddress'])->name('orders.address.billing');
 
         // Settings

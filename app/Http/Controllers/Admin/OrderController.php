@@ -481,7 +481,7 @@ class OrderController extends Controller
 
         // Un point relais ne se déduit pas de l'adresse d'expédition : celle-ci
         // porte le nom du commerce, pas son identité de point de retrait.
-        $relaySnapshot = $carrier->isRelay() ? $request->relaySnapshot() : null;
+        $relaySnapshot = $carrier->isRelay() ? $request->relaySnapshot($carrier) : null;
 
         $allocator = $this->allocator;
 

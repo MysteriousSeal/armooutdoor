@@ -47,6 +47,18 @@ class Carrier extends Model
         return $query->where('active', true)->where('manual_only', false)->orderBy('sort_order');
     }
 
+    /** The relay name every Vinted Go order carries. Vinted picks the locker; the name never changes. */
+    public const VINTED_GO_RELAY_NAME = 'Locker Vinted Go';
+
+    /**
+     * A relay name this carrier imposes, whatever is sent, or null when the
+     * relay point's name is the admin's to type.
+     */
+    public function fixedRelayName(): ?string
+    {
+        return $this->slug === 'vinted-go' ? self::VINTED_GO_RELAY_NAME : null;
+    }
+
     /** The carriers a manual order can use: every active one, manual-only included. */
     public function scopeUsableInManualOrders(Builder $query): Builder
     {
