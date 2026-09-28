@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\Admin\AdminUserController as ApiAdminAdminUserController;
 use App\Http\Controllers\Api\Admin\AnalyticsController as ApiAdminAnalyticsController;
 use App\Http\Controllers\Api\Admin\BlogPostController as ApiAdminBlogPostController;
+use App\Http\Controllers\Api\Admin\CarrierController as ApiAdminCarrierController;
 use App\Http\Controllers\Api\Admin\CategoryController as ApiAdminCategoryController;
 use App\Http\Controllers\Api\Admin\DiscountController as ApiAdminDiscountController;
 use App\Http\Controllers\Api\Admin\OrderController as ApiAdminOrderController;
@@ -39,6 +40,9 @@ Route::middleware(['throttle:admin-api', 'admin.api'])->prefix('admin')->name('a
     Route::get('/blog/posts/{post}', [ApiAdminBlogPostController::class, 'show'])->name('blog.posts.show');
     Route::patch('/blog/posts/{post}', [ApiAdminBlogPostController::class, 'update'])->name('blog.posts.update');
     Route::delete('/blog/posts/{post}', [ApiAdminBlogPostController::class, 'destroy'])->name('blog.posts.destroy');
+
+    // Carriers: ids for a draft order's carrier_id.
+    Route::get('/carriers', [ApiAdminCarrierController::class, 'index'])->name('carriers.index');
 
     // Orders
     Route::post('/orders', [ApiAdminOrderController::class, 'createDraft'])->name('orders.store');

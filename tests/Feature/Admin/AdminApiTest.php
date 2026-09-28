@@ -370,6 +370,25 @@ class AdminApiTest extends TestCase
             ->assertJsonValidationErrors('items.0.cost');
     }
 
+    public function test_carriers_index_lists_every_carrier_with_its_id(): void
+    {
+        $this->getJson('/api/admin/carriers', ['Authorization' => 'Bearer wrong-token'])->assertStatus(401);
+
+        $response = $this->getJson('/api/admin/carriers', $this->headers())
+            ->assertOk()
+            ->assertJsonStructure(['data' => [['id', 'slug', 'name', 'method', 'price_cents', 'active', 'manual_only']]]);
+
+        $bySlug = collect($response->json('data'))->keyBy('slug');
+        $mondialRelay = Carrier::query()->where('slug', 'mondial-relay')->firstOrFail();
+
+        $this->assertSame($mondialRelay->id, $bySlug['mondial-relay']['id']);
+        $this->assertSame('relay', $bySlug['mondial-relay']['method']);
+        $this->assertFalse($bySlug['mondial-relay']['manual_only']);
+        // Manual-only carriers are listed too: a draft order can use them.
+        $this->assertTrue($bySlug['vinted-go']['manual_only']);
+        $this->assertSame(Carrier::query()->count(), count($response->json('data')));
+    }
+
     public function test_admins_index_lists_admin_users_only(): void
     {
         User::factory()->admin()->create();
