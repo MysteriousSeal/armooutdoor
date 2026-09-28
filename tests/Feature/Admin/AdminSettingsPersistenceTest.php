@@ -37,9 +37,10 @@ class AdminSettingsPersistenceTest extends TestCase
         return User::factory()->admin()->create();
     }
 
+    /** A checkout carrier: a manual-only one, like Vinted Go, cannot ship for free. */
     private function carrier(): Carrier
     {
-        return Carrier::query()->orderBy('id')->firstOrFail();
+        return Carrier::query()->where('manual_only', false)->orderBy('id')->firstOrFail();
     }
 
     /* --- Livraison offerte -------------------------------------------- */
