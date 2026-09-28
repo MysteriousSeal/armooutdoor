@@ -708,6 +708,12 @@
                             {{ $order->relay_snapshot['postal_code'] }} {{ $order->relay_snapshot['city'] }}
                         </p>
                     @endif
+                    @if ($order->relayPointIsEditable())
+                        {{-- Vinted picks the locker: it is set here once known. --}}
+                        <button type="button" class="footer-text-btn order-relay-edit" data-modal-open="edit-relay-point-modal">
+                            {{ $order->relay_snapshot ? 'Edit relay point' : 'Add relay point' }}
+                        </button>
+                    @endif
 
                     @if ($order->hasTracking())
                         <div class="order-tracking-link">
@@ -1254,6 +1260,54 @@
                     <div class="modal-actions">
                         <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
                         <button type="submit" class="btn btn-primary">Save address</button>
+                    </div>
+                </form>
+            </dialog>
+        @endif
+
+        @if ($order->relayPointIsEditable())
+            {{-- One-line statements only here: a PHP block this far down pairs with an earlier one-liner. --}}
+            @php($relayErrors = $errors->relayPoint)
+            @php($relayValue = fn (string $key) => $relayErrors->any() ? old('relay_'.$key, $order->relay_snapshot[$key] ?? '') : ($order->relay_snapshot[$key] ?? ''))
+            <dialog
+                id="edit-relay-point-modal"
+                class="modal modal--form"
+                aria-labelledby="edit-relay-point-title"
+                @if ($relayErrors->any()) data-autoopen @endif
+            >
+                <form method="POST" action="{{ route('admin.orders.relay-point.update', $order) }}">
+                    @csrf
+                    @method('PATCH')
+                    <p class="modal-kicker">{{ $order->number }}</p>
+                    <h3 class="modal-title" id="edit-relay-point-title">{{ $order->carrierName() }} relay point</h3>
+                    <p class="modal-body">
+                        The locker or pickup point the parcel goes to, as printed on the label.
+                    </p>
+                    <div class="form-group">
+                        <label for="relay_name">Name</label>
+                        <input type="text" id="relay_name" name="relay_name" class="form-control" value="{{ $relayValue('name') }}" required maxlength="120" placeholder="Locker Vinted Go Cesson">
+                        @if ($relayErrors->has('relay_name')) <p class="form-error">{{ $relayErrors->first('relay_name') }}</p> @endif
+                    </div>
+                    <div class="form-group">
+                        <label for="relay_line1">Address</label>
+                        <input type="text" id="relay_line1" name="relay_line1" class="form-control" value="{{ $relayValue('line1') }}" required maxlength="120">
+                        @if ($relayErrors->has('relay_line1')) <p class="form-error">{{ $relayErrors->first('relay_line1') }}</p> @endif
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="relay_postal_code">Postal code</label>
+                            <input type="text" id="relay_postal_code" name="relay_postal_code" class="form-control" value="{{ $relayValue('postal_code') }}" required maxlength="12">
+                            @if ($relayErrors->has('relay_postal_code')) <p class="form-error">{{ $relayErrors->first('relay_postal_code') }}</p> @endif
+                        </div>
+                        <div class="form-group">
+                            <label for="relay_city">City</label>
+                            <input type="text" id="relay_city" name="relay_city" class="form-control" value="{{ $relayValue('city') }}" required maxlength="80">
+                            @if ($relayErrors->has('relay_city')) <p class="form-error">{{ $relayErrors->first('relay_city') }}</p> @endif
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save relay point</button>
                     </div>
                 </form>
             </dialog>

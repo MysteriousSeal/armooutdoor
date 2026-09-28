@@ -1521,6 +1521,11 @@
     background: var(--bg);
 }
 
+/* A Vinted Go relay point, typed by hand once known. */
+.order-relay-edit {
+    margin-top: 0.35rem;
+}
+
 /* Admin notes on an order, under the status history. */
 .order-notes-head {
     display: flex;

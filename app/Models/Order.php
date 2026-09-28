@@ -206,6 +206,19 @@ class Order extends Model
         return in_array($this->status, ['placed', 'preparing'], true);
     }
 
+    /**
+     * Whether the relay point can be typed in by hand: a Vinted Go order
+     * (a manual-only relay carrier), at any status past draft. Vinted picks
+     * the locker, so it is often only known once the label is out. A draft
+     * sets it in the full edit form instead.
+     */
+    public function relayPointIsEditable(): bool
+    {
+        return ! $this->isDraft()
+            && $this->carrier?->manual_only === true
+            && $this->carrier->isRelay();
+    }
+
     public function formattedSubtotal(): string
     {
         return format_euros($this->subtotal_cents);
