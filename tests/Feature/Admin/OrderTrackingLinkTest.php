@@ -267,12 +267,12 @@ class OrderTrackingLinkTest extends TestCase
         $carrier = $this->carrier('mondial-relay', 'relay');
         $order = $this->order([
             'carrier_id' => $carrier->id,
-            'tracking_number' => '74051897',
+            'tracking_number' => '12345678',
             'marketplace_name' => 'Vinted',
         ]);
 
         $this->assertSame(
-            'https://www.mondialrelay.fr/suivi-de-colis?codeMarque=V2&numeroExpedition=74051897',
+            'https://www.mondialrelay.fr/suivi-de-colis?codeMarque=V2&numeroExpedition=12345678',
             $order->trackingUrl(),
         );
     }
@@ -285,12 +285,12 @@ class OrderTrackingLinkTest extends TestCase
         foreach ([null, 'LeBonCoin'] as $marketplace) {
             $order = $this->order([
                 'carrier_id' => $carrier->id,
-                'tracking_number' => '74051897',
+                'tracking_number' => '12345678',
                 'marketplace_name' => $marketplace,
             ]);
 
             $this->assertSame(
-                'https://www.mondialrelay.fr/suivi-de-colis?numeroExpedition=74051897&codePostal=75000',
+                'https://www.mondialrelay.fr/suivi-de-colis?numeroExpedition=12345678&codePostal=75000',
                 $order->trackingUrl(),
                 (string) $marketplace,
             );
@@ -314,20 +314,20 @@ class OrderTrackingLinkTest extends TestCase
     public function test_the_mondial_relay_postcode_is_taken_from_billing_first(): void
     {
         $carrier = $this->carrier('mondial-relay', 'relay');
-        $shipping = ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'x', 'postal_code' => '40700', 'city' => 'Hagetmau', 'country' => 'FR'];
-        $billing = ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'y', 'postal_code' => '44270', 'city' => 'Machecoul', 'country' => 'FR'];
+        $shipping = ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'x', 'postal_code' => '69002', 'city' => 'Lyon', 'country' => 'FR'];
+        $billing = ['first_name' => 'A', 'last_name' => 'B', 'line1' => 'y', 'postal_code' => '31000', 'city' => 'Toulouse', 'country' => 'FR'];
         $relay = ['name' => 'Locker', 'line1' => 'z', 'postal_code' => '33000', 'city' => 'Bordeaux', 'country' => 'FR'];
 
         $cases = [
-            '44270' => [$billing, $shipping, $relay],
-            '40700' => [[...$billing, 'postal_code' => ''], $shipping, $relay],
+            '31000' => [$billing, $shipping, $relay],
+            '69002' => [[...$billing, 'postal_code' => ''], $shipping, $relay],
             '33000' => [null, [...$shipping, 'postal_code' => null], $relay],
         ];
 
         foreach ($cases as $expected => [$billingSnapshot, $shippingSnapshot, $relaySnapshot]) {
             $order = $this->order([
                 'carrier_id' => $carrier->id,
-                'tracking_number' => '74051897',
+                'tracking_number' => '12345678',
                 'billing_address_snapshot' => $billingSnapshot,
                 'address_snapshot' => $shippingSnapshot,
                 'relay_snapshot' => $relaySnapshot,
