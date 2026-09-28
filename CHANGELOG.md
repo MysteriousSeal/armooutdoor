@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-28 · v1.57.0 · build 1GVZWT
+
+### Admin
+
+- **A new carrier, Vinted Go, for manual orders only.** It is a relay (locker) carrier at 0 € by default, for parcels sold on Vinted and shipped with its label. The manual order form and the admin API can pick it, with the locker as the relay point; customers never see it. It has no tracking link and no logo yet.
+- **A carrier can be kept off the checkout.** A new « manual only » flag keeps a carrier out of every customer-facing list: checkout, cart, shipping estimate, discount codes, the home page's free shipping line and the product page's structured data, where a 0 € carrier would have read as free shipping. Placing an order with one is refused. In shipping settings the carrier keeps its price card, tagged « Manual orders only », and cannot be picked for free shipping. The product form no longer lists it, since that list only restricts checkout.
+- **The admin API lists the carriers.** `GET /api/admin/carriers` returns every carrier with its id, slug, method, price, and whether it is active and manual only, so a draft order can take the right `carrier_id`: ids differ between databases. Documented in `docs/admin/api/carriers.md`.
+
+**Migration:** one, run with `php artisan migrate`, adding a `manual_only` column to `carriers` and creating the Vinted Go carrier, since a deploy never runs the seeder.
+
 ## 2026-09-26 · v1.56.0 · build 6NC64H
 
 ### Admin
