@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateShippingSettingRequest extends FormRequest
 {
@@ -19,7 +20,8 @@ class UpdateShippingSettingRequest extends FormRequest
         return [
             'free_shipping_threshold' => ['nullable', 'numeric', 'min:0', 'max:99999.99'],
             'free_shipping_carrier_ids' => ['nullable', 'array'],
-            'free_shipping_carrier_ids.*' => ['integer', 'exists:carriers,id'],
+            // A manual-only carrier is never offered at checkout, so it cannot be free there.
+            'free_shipping_carrier_ids.*' => ['integer', Rule::exists('carriers', 'id')->where('manual_only', 0)],
         ];
     }
 }

@@ -58,7 +58,7 @@ class StripeCheckoutFinalizer
         $billingAddress = $billingAddressId !== null
             ? Address::query()->where('user_id', $userId)->findOrFail($billingAddressId)
             : $address;
-        $carrier = Carrier::query()->where('active', true)->findOrFail($carrierId);
+        $carrier = Carrier::query()->active()->findOrFail($carrierId);
         $relayPoint = $carrier->isRelay() ? RelayPoint::query()->findOrFail($relayPointId) : null;
 
         // Fetched once here, outside the transaction, so it's saved on the

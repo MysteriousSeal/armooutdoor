@@ -332,7 +332,7 @@ class OrderController extends Controller
             'preselectedCustomerId' => (int) $request->query('user_id'),
             'customers' => $this->customerOptions(),
             'products' => Product::query()->active()->with('variants')->orderBy('name')->get(),
-            'carriers' => Carrier::query()->active()->get(),
+            'carriers' => Carrier::query()->usableInManualOrders()->get(),
             'marketplaces' => Marketplace::query()->orderBy('name')->get(),
         ]);
     }
@@ -353,7 +353,7 @@ class OrderController extends Controller
             'order' => $order,
             'customers' => $this->customerOptions(),
             'products' => Product::query()->active()->with('variants')->orderBy('name')->get(),
-            'carriers' => Carrier::query()->active()->get(),
+            'carriers' => Carrier::query()->usableInManualOrders()->get(),
             'marketplaces' => Marketplace::query()->orderBy('name')->get(),
         ]);
     }

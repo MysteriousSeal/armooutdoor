@@ -111,8 +111,7 @@ class HomeController extends Controller
     {
         return Carrier::query()
             ->whereIn('id', $shipping->free_shipping_carrier_ids ?? [])
-            ->where('active', true)
-            ->orderBy('sort_order')
+            ->active()
             ->get()
             ->map(fn (Carrier $carrier): string => $carrier->localizedName())
             ->all();

@@ -319,7 +319,7 @@ class CheckoutController extends Controller
                 ->findOrFail($request->integer('billing_address_id'));
 
         $carrier = Carrier::query()
-            ->where('active', true)
+            ->active()
             ->findOrFail($request->integer('carrier_id'));
 
         $relayPoint = null;

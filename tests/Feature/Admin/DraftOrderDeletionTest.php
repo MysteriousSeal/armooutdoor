@@ -42,7 +42,8 @@ class DraftOrderDeletionTest extends TestCase
 
     private function carrier(): Carrier
     {
-        return Carrier::query()->first() ?? Carrier::query()->create([
+        // A home carrier: a relay one (Vinted Go exists from its migration) would need a pickup point.
+        return Carrier::query()->where('method', 'home')->first() ?? Carrier::query()->create([
             'slug' => 'draft-test-carrier',
             'name' => ['en' => 'Carrier', 'fr' => 'Transporteur'],
             'description' => ['en' => '', 'fr' => ''],

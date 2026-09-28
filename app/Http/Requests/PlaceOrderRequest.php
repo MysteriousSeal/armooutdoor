@@ -31,7 +31,7 @@ class PlaceOrderRequest extends FormRequest
                 'nullable',
                 Rule::exists('addresses', 'id')->where('user_id', $this->user()->id),
             ],
-            'carrier_id' => ['required', Rule::exists('carriers', 'id')->where('active', true)],
+            'carrier_id' => ['required', Rule::exists('carriers', 'id')->where('active', true)->where('manual_only', 0)],
             'relay_point_id' => ['nullable', 'exists:relay_points,id'],
             'payment_method' => ['required', Rule::in(['card', 'paypal'])],
         ];

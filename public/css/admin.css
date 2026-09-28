@@ -1052,6 +1052,18 @@
 }
 
 .shipping-method-chip,
+.shipping-manual-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.18rem 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
 .shipping-free-chip {
     display: inline-flex;
     align-items: center;

@@ -72,6 +72,20 @@ class ShippingSeeder extends Seeder
                 'price_cents' => 350,
                 'sort_order' => 5,
             ],
+            [
+                // Manual orders only: never offered at checkout.
+                'slug' => 'vinted-go',
+                'name' => ['en' => 'Vinted Go', 'fr' => 'Vinted Go'],
+                'description' => [
+                    'en' => 'Vinted Go locker or pickup point, with a Vinted label.',
+                    'fr' => 'Casier ou point de retrait Vinted Go, avec une étiquette Vinted.',
+                ],
+                'eta' => ['en' => '3–5 days', 'fr' => '3–5 jours'],
+                'method' => DeliveryMethod::Relay,
+                'price_cents' => 0,
+                'sort_order' => 6,
+                'manual_only' => true,
+            ],
         ];
 
         foreach ($carriers as $carrier) {

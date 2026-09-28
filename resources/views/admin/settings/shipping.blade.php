@@ -72,6 +72,8 @@
                     @endphp
                     <div class="shipping-carrier-options">
                         @foreach ($carriers as $carrier)
+                            {{-- Free shipping is a checkout offer: a carrier customers never see cannot carry it. --}}
+                            @continue($carrier->manual_only)
                             <label class="admin-choice {{ in_array($carrier->id, $selectedCarrierIds) ? 'is-selected' : '' }}">
                                 <input
                                     type="checkbox"
@@ -215,6 +217,9 @@
                                 @endif
                                 <span class="admin-table-strong">{{ $carrier->localizedName() }}</span>
                                 <span class="shipping-method-chip is-{{ $carrier->method->value }}">{{ $carrier->method->value === 'relay' ? 'Relay point' : 'Home' }}</span>
+                                @if ($carrier->manual_only)
+                                    <span class="shipping-manual-chip" title="Never offered at checkout: only manual orders can use it">Manual orders only</span>
+                                @endif
                                 @if ($setting->free_shipping_threshold_cents !== null && in_array($carrier->id, $setting->free_shipping_carrier_ids ?? [], true))
                                     <span class="shipping-free-chip">Free above {{ format_euros($setting->free_shipping_threshold_cents) }}</span>
                                 @endif

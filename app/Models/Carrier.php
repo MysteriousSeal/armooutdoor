@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'max_weight_grams',
     'sort_order',
     'active',
+    'manual_only',
 ])]
 class Carrier extends Model
 {
@@ -32,10 +33,22 @@ class Carrier extends Model
             'max_weight_grams' => 'integer',
             'sort_order' => 'integer',
             'active' => 'boolean',
+            'manual_only' => 'boolean',
         ];
     }
 
+    /**
+     * The carriers customers can be offered. A manual-only carrier, such as
+     * Vinted Go, never shows here: leaving it out by default means a
+     * customer-facing list cannot pick it up by accident.
+     */
     public function scopeActive(Builder $query): Builder
+    {
+        return $query->where('active', true)->where('manual_only', false)->orderBy('sort_order');
+    }
+
+    /** The carriers a manual order can use: every active one, manual-only included. */
+    public function scopeUsableInManualOrders(Builder $query): Builder
     {
         return $query->where('active', true)->orderBy('sort_order');
     }

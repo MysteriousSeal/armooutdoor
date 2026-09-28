@@ -174,7 +174,8 @@ class ProductController extends Controller
                 'sort_order' => 0,
             ]),
             'categories' => $this->categoryOptions(),
-            'carriers' => Carrier::query()->orderBy('sort_order')->get(),
+            // Checkout carriers only: a manual-only one is never offered, so restricting it means nothing.
+            'carriers' => Carrier::query()->where('manual_only', false)->orderBy('sort_order')->get(),
             'suppliers' => Supplier::query()->orderBy('name')->get(),
             // Un produit qui n'existe pas encore n'a rien en commande.
             'inboundStock' => ['quantity' => 0, 'orders' => collect()],
@@ -266,7 +267,8 @@ class ProductController extends Controller
             // start a query for each.
             'product' => $product->load('images', 'variants', 'vintedListing.images', 'cdiscountListing.template', 'cdiscountListing.variants'),
             'categories' => $this->categoryOptions(),
-            'carriers' => Carrier::query()->orderBy('sort_order')->get(),
+            // Checkout carriers only: a manual-only one is never offered, so restricting it means nothing.
+            'carriers' => Carrier::query()->where('manual_only', false)->orderBy('sort_order')->get(),
             'suppliers' => Supplier::query()->orderBy('name')->get(),
             'averagePurchaseCostInclVatCents' => $product->averagePurchaseCostInclVatCents(),
             'inboundStock' => $product->inboundStock(),

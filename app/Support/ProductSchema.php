@@ -232,7 +232,7 @@ class ProductSchema
         // Queried per render, not memoised: a static here would outlive the
         // request in tests and queue workers, and it is one small query on a
         // page that already made several.
-        $carrier = Carrier::query()->where('active', true)->get()
+        $carrier = Carrier::query()->active()->get()
             ->filter(fn (Carrier $carrier): bool => $product->isCarrierAllowed($carrier)
                 && $carrier->carriesWeight($weight))
             ->sortBy(fn (Carrier $carrier): int => $setting->effectivePriceCents($carrier, $subtotalCents, $weight))
