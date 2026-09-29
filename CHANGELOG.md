@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-09-29 · v1.57.3 · build Q8XN3P
+
+### Admin
+
+- **Austria joins the admin order country list.** Orders from marketplaces can now carry an Austrian address, on the shipping and billing side alike; the manual order form and the admin API both accept it. The shop's own checkout still ships to France only.
+
+**No migration.**
+
 ## 2026-09-28 · v1.57.2 · build BTMOSB
 
 ### Admin
