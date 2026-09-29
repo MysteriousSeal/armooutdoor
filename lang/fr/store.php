@@ -382,6 +382,7 @@ return [
     'phone' => 'Téléphone',
     'make_default' => 'Adresse par défaut',
     'country_FR' => 'France',
+    'country_AT' => 'Autriche',
     'country_BE' => 'Belgique',
     'country_CH' => 'Suisse',
     'country_DE' => 'Allemagne',

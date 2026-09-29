@@ -40,7 +40,7 @@ class OrderCountryListTest extends TestCase
 
     public function test_the_expected_countries_are_accepted(): void
     {
-        $expected = ['FR', 'DE', 'BE', 'ES', 'IE', 'IT', 'LU', 'NL', 'PT', 'CH'];
+        $expected = ['FR', 'DE', 'AT', 'BE', 'ES', 'IE', 'IT', 'LU', 'NL', 'PT', 'CH'];
 
         $this->assertSame($expected, config('shop.countries'));
     }
@@ -49,7 +49,7 @@ class OrderCountryListTest extends TestCase
     {
         // Sans libellé, le sélecteur afficherait la clé de traduction brute.
         $names = [
-            'FR' => 'France', 'DE' => 'Allemagne', 'BE' => 'Belgique',
+            'FR' => 'France', 'DE' => 'Allemagne', 'AT' => 'Autriche', 'BE' => 'Belgique',
             'ES' => 'Espagne', 'IE' => 'Irlande', 'IT' => 'Italie',
             'LU' => 'Luxembourg', 'NL' => 'Pays-Bas', 'PT' => 'Portugal',
             'CH' => 'Suisse',
