@@ -19,8 +19,8 @@ class OrderTrackingLinkTest extends TestCase
 
     private function carrier(string $slug, string $method = 'home'): Carrier
     {
-        return Carrier::query()->create([
-            'slug' => $slug,
+        // vinted-go already exists: the migration that adds it seeds the row.
+        return Carrier::query()->firstOrCreate(['slug' => $slug], [
             'name' => ['en' => $slug, 'fr' => $slug],
             'description' => ['en' => '', 'fr' => ''],
             'eta' => ['en' => '', 'fr' => ''],
@@ -58,6 +58,7 @@ class OrderTrackingLinkTest extends TestCase
             'chronopost-home' => 'chronopost.fr',
             'relais-pickup' => 'chronopost.fr',
             'mondial-relay' => 'mondialrelay.fr',
+            'vinted-go' => 'vintedgo.com',
         ];
 
         foreach ($expected as $slug => $host) {

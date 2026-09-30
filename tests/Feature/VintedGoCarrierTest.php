@@ -165,10 +165,13 @@ class VintedGoCarrierTest extends TestCase
         $this->assertSame(0, $order->shipping_cents);
     }
 
-    /** No known tracking page yet: the number stays plain text. */
-    public function test_it_has_no_tracking_link_yet(): void
+    /** Vinted Go's own tracking page, found by number alone. */
+    public function test_it_has_a_tracking_link(): void
     {
-        $this->assertNull($this->vintedGo()->trackingUrlFor('VG123456'));
+        $this->assertSame(
+            'https://vintedgo.com/fr/tracking/VG123456',
+            $this->vintedGo()->trackingUrlFor('VG123456'),
+        );
     }
 
     /** @return array<string, mixed> */

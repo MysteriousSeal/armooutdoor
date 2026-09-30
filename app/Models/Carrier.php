@@ -130,6 +130,7 @@ class Carrier extends Model
         'chronopost-home' => 'https://www.chronopost.fr/tracking-no-cms/suivi-page?listeNumerosLT=:number',
         'relais-pickup' => 'https://www.chronopost.fr/tracking-no-cms/suivi-page?listeNumerosLT=:number',
         'mondial-relay' => 'https://www.mondialrelay.fr/suivi-de-colis?numeroExpedition=:number&codePostal=:postcode',
+        'vinted-go' => 'https://vintedgo.com/fr/tracking/:number',
     ];
 
     /**
