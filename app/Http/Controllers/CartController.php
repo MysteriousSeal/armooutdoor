@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CartAddEvent;
 use App\Models\Carrier;
 use App\Models\Product;
 use App\Models\ProductVariant;
@@ -161,6 +162,20 @@ class CartController extends Controller
 
         $addedQuantity = min($wanted, $allowed);
         $cart->add($product, $addedQuantity, $variant);
+
+        CartAddEvent::create([
+            'product_id' => $product->id,
+            'variant_id' => $variant?->id,
+            'quantity' => $addedQuantity,
+            'unit_price_cents' => $source->effectivePriceCents(),
+            'user_id' => $request->user()?->id,
+            // Same consent gate as site_visits: only carried once the
+            // visitor accepted the cookie banner.
+            'session_id' => $request->cookie('cookie_consent') === 'all' && $request->hasSession()
+                ? $request->session()->getId()
+                : null,
+            'ip_address' => $request->ip(),
+        ]);
 
         if ($request->wantsJson()) {
             $product->loadMissing('discount');
