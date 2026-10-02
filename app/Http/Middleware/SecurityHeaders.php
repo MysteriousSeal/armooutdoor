@@ -38,7 +38,7 @@ class SecurityHeaders
      * changes. A shop with no key configured keeps the closed policy exactly
      * as it was — the hole only exists where it is used.
      */
-    private static function policy(): string
+    private static function policy(Request $request): string
     {
         $scripts = [];
         $connects = [];
@@ -78,11 +78,7 @@ class SecurityHeaders
             $images = $adsHosts;
         }
 
-        if ($scripts === []) {
-            return self::CSP;
-        }
-
-        return str_replace(
+        $policy = $scripts === [] ? self::CSP : str_replace(
             ["script-src 'self' 'unsafe-inline'", "img-src 'self' data:", "default-src 'self'"],
             [
                 "script-src 'self' 'unsafe-inline' ".implode(' ', array_unique($scripts)),
@@ -91,6 +87,20 @@ class SecurityHeaders
             ],
             self::CSP,
         );
+
+        // Telescope's dashboard ships Vue 2's runtime template compiler and
+        // vue-json-viewer, both of which call new Function() to turn strings
+        // into code at runtime, which the browser treats the same as
+        // eval(), so the page mounts nothing and sits blank without this.
+        // Scoped to Telescope's own path: the storefront and the rest of the
+        // admin never gets it.
+        $telescopePath = (string) config('telescope.path');
+
+        if ($telescopePath !== '' && $request->is($telescopePath, $telescopePath.'/*')) {
+            $policy = str_replace("script-src 'self' 'unsafe-inline'", "script-src 'self' 'unsafe-inline' 'unsafe-eval'", $policy);
+        }
+
+        return $policy;
     }
 
     public function handle(Request $request, Closure $next): Response
@@ -110,7 +120,7 @@ class SecurityHeaders
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-        $response->headers->set('Content-Security-Policy', self::policy());
+        $response->headers->set('Content-Security-Policy', self::policy($request));
 
         // Le back-office ne s'indexe jamais — surtout pas sous un chemin
         // renommé, que robots.txt ne cite plus justement pour le taire.

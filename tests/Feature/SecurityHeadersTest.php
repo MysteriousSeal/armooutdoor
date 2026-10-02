@@ -60,4 +60,25 @@ class SecurityHeadersTest extends TestCase
         $this->get('/login')->assertOk()->assertHeaderMissing('X-Robots-Tag');
         $this->get('/register')->assertOk()->assertHeaderMissing('X-Robots-Tag');
     }
+
+    /**
+     * Telescope's bundle calls new Function() (Vue 2's template compiler,
+     * vue-json-viewer), which the browser treats as eval() and the base
+     * policy does not allow: without this, the page loads but mounts
+     * nothing. Checked via the 404 Telescope itself renders in tests (it is
+     * disabled in phpunit.xml, like Pulse and Nightwatch) since the header
+     * is set from the request path alone, not from the route resolving.
+     */
+    public function test_telescopes_own_path_allows_unsafe_eval_and_nothing_else_does(): void
+    {
+        $this->assertStringContainsString(
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+            $this->get(config('telescope.path'))->headers->get('Content-Security-Policy'),
+        );
+
+        $this->assertStringNotContainsString(
+            'unsafe-eval',
+            $this->get('/admin')->headers->get('Content-Security-Policy'),
+        );
+    }
 }
