@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-03 · v1.58.0 · build 7KPLWX
+
+### Admin
+
+- **Every add-to-cart is now logged on the server.** Each successful add is recorded with its quantity, price, and the session or signed-in customer, independent of the browser's own analytics events, so the record stands even for a visitor who blocks analytics scripts, and even when the browser event fires on an add that the server itself ends up rejecting.
+- **The analytics page shows which products get added to cart.** A new « Top added to cart » table, alongside Top products and Top categories, ranks products by number of adds within the selected range, with units and potential revenue.
+
+**Migration:** one, run with `php artisan migrate`, creating the `cart_add_events` table. No data changes.
+
 ## 2026-09-30 · v1.57.4 · build IDDYCH
 
 ### Admin
