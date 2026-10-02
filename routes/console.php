@@ -28,3 +28,11 @@ Schedule::command('backup:database')
 Schedule::command('naturabuy:count-photos')
     ->everyMinute()
     ->withoutOverlapping(5);
+
+/*
+ * Telescope keeps every entry forever otherwise, and the filter in
+ * TelescopeServiceProvider already limits what gets written in production
+ * to exceptions, failures, and tagged entries - a week is enough to debug
+ * an incident, not a growing archive of request bodies.
+ */
+Schedule::command('telescope:prune --hours=168')->daily();
