@@ -231,6 +231,39 @@
                 </div>
             @endif
 
+            <section class="order-panel admin-analytics-section" aria-label="Top added to cart for {{ $ranges[$range] }}">
+                <div class="dash-panel-head">
+                    <h3 class="order-panel-title">Top added to cart</h3>
+                    <span class="dash-panel-note">{{ strtolower($ranges[$range]) }}</span>
+                </div>
+                @if (empty($topCartProducts))
+                    <p class="empty-state">No products added to cart in this range.</p>
+                @else
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th class="admin-table-num">Adds</th>
+                                <th class="admin-table-num">Units</th>
+                                <th class="admin-table-num">Potential revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($topCartProducts as $product)
+                                <tr>
+                                    <td class="admin-analytics-top-path admin-analytics-top-path--name">
+                                        <a href="{{ route('admin.products.edit', $product['id']) }}">{{ $product['name'] }}</a>
+                                    </td>
+                                    <td class="admin-table-num">{{ number_format($product['count']) }}</td>
+                                    <td class="admin-table-num">{{ number_format($product['quantity']) }}</td>
+                                    <td class="admin-table-num">{{ format_euros($product['revenueCents']) }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @endif
+            </section>
+
             @if ($flow['total'] > 0 || $flow['bounces'] > 0)
                 <section class="order-panel dash-chart-panel admin-analytics-section" aria-label="User flow for {{ $ranges[$range] }}">
                     <div class="dash-panel-head">

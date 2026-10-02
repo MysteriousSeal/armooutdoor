@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\CartAddEvent;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\SiteVisit;
@@ -235,6 +236,30 @@ class AdminAnalyticsTest extends TestCase
         $topCategories = collect($response->viewData('topCategories'))->keyBy('id');
         $this->assertSame(2, $topCategories[$category->id]['count']);
         $this->assertSame(1, $topCategories[$other->id]['count']);
+    }
+
+    public function test_the_page_shows_top_added_to_cart_products(): void
+    {
+        $product = Product::factory()->create(['price_cents' => 1000]);
+        $other = Product::factory()->create(['price_cents' => 500]);
+
+        // The "no visits" empty state short-circuits the whole breakdown,
+        // this panel included — a page view keeps the range non-empty.
+        SiteVisit::create(['path' => '/', 'ip_address' => '203.0.113.53']);
+
+        CartAddEvent::create(['product_id' => $product->id, 'quantity' => 2, 'unit_price_cents' => 1000, 'ip_address' => '203.0.113.50']);
+        CartAddEvent::create(['product_id' => $product->id, 'quantity' => 1, 'unit_price_cents' => 1000, 'ip_address' => '203.0.113.51']);
+        CartAddEvent::create(['product_id' => $other->id, 'quantity' => 3, 'unit_price_cents' => 500, 'ip_address' => '203.0.113.52']);
+
+        $response = $this->actingAsAdmin()->get('/admin/analytics')->assertOk()
+            ->assertSee('Top added to cart')
+            ->assertSee($product->localizedName());
+
+        $topCartProducts = collect($response->viewData('topCartProducts'))->keyBy('id');
+        $this->assertSame(2, $topCartProducts[$product->id]['count']);
+        $this->assertSame(3, $topCartProducts[$product->id]['quantity']);
+        $this->assertSame(3000, $topCartProducts[$product->id]['revenueCents']);
+        $this->assertSame(1, $topCartProducts[$other->id]['count']);
     }
 
     public function test_the_page_shows_a_user_flow_from_entrance_to_order(): void

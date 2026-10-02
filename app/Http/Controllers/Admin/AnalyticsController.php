@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\CartAddEvent;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\SiteVisit;
@@ -45,6 +46,7 @@ class AnalyticsController extends Controller
         $burstyIps = $this->burstyIps($since);
         $breakdown = $this->buildCharts($since, $burstyIps, $range);
         $flow = $this->buildFlow($since, $burstyIps);
+        $topCartProducts = $this->buildTopCartProducts($since, $burstyIps);
 
         $visitsQuery = SiteVisit::query()->with('user')->latest('created_at');
         $this->applyRange($visitsQuery, $since);
@@ -72,6 +74,7 @@ class AnalyticsController extends Controller
             'topReferrers' => $breakdown['topReferrers'],
             'topProducts' => $breakdown['topProducts'],
             'topCategories' => $breakdown['topCategories'],
+            'topCartProducts' => $topCartProducts,
             'flow' => $flow,
             'range' => $range,
             'ranges' => $ranges,
@@ -162,7 +165,7 @@ class AnalyticsController extends Controller
     }
 
     /**
-     * @param  Builder<SiteVisit>  $query
+     * @param  Builder<SiteVisit|CartAddEvent>  $query
      */
     private function applyRange(Builder $query, ?CarbonInterface $since): void
     {
@@ -286,6 +289,53 @@ class AnalyticsController extends Controller
         }
 
         return SessionFlow::build($sessions);
+    }
+
+    /**
+     * Products added to cart within the selected range, ranked by number of
+     * add events — the server-side log in cart_add_events, not the browser's
+     * own add_to_cart/cart_item_added events, so it stands even for a
+     * visitor who blocks analytics scripts entirely.
+     *
+     * @param  array<string, true>  $burstyIps
+     * @return list<array{id: int, name: string, count: int, quantity: int, revenueCents: int}>
+     */
+    private function buildTopCartProducts(?CarbonInterface $since, array $burstyIps): array
+    {
+        $query = CartAddEvent::query()->select(['product_id', 'quantity', 'unit_price_cents', 'ip_address']);
+        $this->applyRange($query, $since);
+
+        $counts = [];
+        $quantities = [];
+        $revenueCents = [];
+
+        foreach ($query->cursor() as $row) {
+            if (isset($burstyIps[$row->ip_address ?: 'unknown'])) {
+                continue;
+            }
+
+            $counts[$row->product_id] = ($counts[$row->product_id] ?? 0) + 1;
+            $quantities[$row->product_id] = ($quantities[$row->product_id] ?? 0) + $row->quantity;
+            $revenueCents[$row->product_id] = ($revenueCents[$row->product_id] ?? 0) + $row->quantity * $row->unit_price_cents;
+        }
+
+        arsort($counts);
+
+        $topIds = array_slice(array_keys($counts), 0, 10);
+        $products = Product::query()->whereIn('id', $topIds)->get()->keyBy('id');
+
+        // A product deleted since the event was recorded is simply skipped —
+        // nothing left to link the ranking to.
+        return collect($topIds)
+            ->filter(fn (int $id) => $products->has($id))
+            ->map(fn (int $id) => [
+                'id' => $id,
+                'name' => $products[$id]->localizedName(),
+                'count' => $counts[$id],
+                'quantity' => $quantities[$id],
+                'revenueCents' => $revenueCents[$id],
+            ])
+            ->values()->all();
     }
 
     /**
