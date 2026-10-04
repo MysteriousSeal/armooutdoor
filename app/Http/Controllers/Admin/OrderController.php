@@ -1079,12 +1079,30 @@ class OrderController extends Controller
 
         $order->load('items.product', 'items.variant');
 
+        // The sale as billed: a refund goes on its own credit note.
         $pdf = Pdf::loadView('admin.orders.invoice-pdf', [
             'order' => $order,
             'company' => CompanySetting::current(),
+            'netRefund' => false,
         ])->setPaper('a4');
 
         return $pdf->download('facture-'.$order->number.'.pdf');
+    }
+
+    /** The credit note of a refunded order, dated the day it was refunded. */
+    public function creditNote(Order $order): Response
+    {
+        abort_unless($order->status === 'refunded', 404);
+
+        $order->load('items.product', 'items.variant', 'statusHistories');
+
+        $pdf = Pdf::loadView('admin.orders.invoice-pdf', [
+            'order' => $order,
+            'company' => CompanySetting::current(),
+            'creditNote' => true,
+        ])->setPaper('a4');
+
+        return $pdf->download('avoir-'.$order->number.'.pdf');
     }
 
     public function deliverySlip(Order $order): Response

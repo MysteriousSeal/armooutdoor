@@ -393,6 +393,7 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         Route::get('/orders/{order}/edit', [AdminOrderController::class, 'edit'])->name('orders.edit');
         Route::put('/orders/{order}', [AdminOrderController::class, 'update'])->name('orders.update');
         Route::get('/orders/{order}/invoice', [AdminOrderController::class, 'invoice'])->name('orders.invoice');
+        Route::get('/orders/{order}/credit-note', [AdminOrderController::class, 'creditNote'])->name('orders.credit-note');
         Route::get('/orders/{order}/delivery-slip', [AdminOrderController::class, 'deliverySlip'])->name('orders.delivery-slip');
         Route::get('/orders/{order}/address-label', [AdminOrderController::class, 'addressLabel'])->name('orders.address-label');
         Route::patch('/orders/{order}/validate-draft', [AdminOrderController::class, 'validateDraft'])->name('orders.validate-draft');
