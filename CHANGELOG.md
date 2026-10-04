@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-04 · v1.58.1 · build OEZ5J3
+
+### Admin
+
+- **An order line with no known cost now counts at 0,01 € per unit.** An order holding a product with no purchase history, a custom line entered without a cost, or a deleted product used to lose its « P. costs » and « Profit » figures entirely, even when its other lines had costs. Those lines now count at one cent a unit, so the order list, the orders page Profit card and the dashboard all show a figure. Only an order with no lines at all still shows a dash.
+- **The orders page Profit card leaves refunded orders out.** A refunded sale made no profit, so the card now skips it, as the dashboard already did. Its « on X of Y orders » note still counts every sale, so it says how many it left out.
+
+**No migration.**
+
 ## 2026-10-03 · v1.58.0 · build 7KPLWX
 
 ### Admin
