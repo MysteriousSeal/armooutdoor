@@ -6,12 +6,12 @@
     $creditNote = $creditNote ?? false;
     $netRefund = ($netRefund ?? true) && ! $creditNote && $order->status === 'refunded';
     $refundedAt = $creditNote ? ($order->refundedAt() ?? $order->updated_at) : null;
-    $documentNumber = ($creditNote ? 'AV-' : 'INV-').$order->number;
+    $documentNumber = ($creditNote ? 'RFD-' : 'INV-').$order->number;
 @endphp
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>{{ $creditNote ? 'Avoir' : 'Facture' }} {{ $order->number }}</title>
+    <title>{{ $creditNote ? 'Remboursement' : 'Facture' }} {{ $order->number }}</title>
     <style>
         @page { margin: 0; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -184,7 +184,7 @@
 
     <table class="title-row">
         <tr>
-            <td><div class="title">{{ $creditNote ? 'Avoir' : 'Facture' }}</div></td>
+            <td><div class="title">{{ $creditNote ? 'Remboursement' : 'Facture' }}</div></td>
             <td class="title-meta">{{ $documentNumber }} · {{ ($refundedAt ?? $order->created_at)->format('d/m/Y') }}</td>
         </tr>
     </table>
@@ -196,7 +196,7 @@
                 <div class="value">{{ $order->number }}</div>
             </td>
             <td>
-                <div class="label">{{ $creditNote ? "N° d'avoir" : 'N° de facture' }}</div>
+                <div class="label">{{ $creditNote ? 'N° de remboursement' : 'N° de facture' }}</div>
                 <div class="value">{{ $documentNumber }}</div>
             </td>
             <td>
@@ -283,7 +283,7 @@
                 <div class="section-label">Notes</div>
                 <div class="notes-body">
                     @if ($creditNote)
-                        <div class="notes-line">Avoir sur la facture INV-{{ $order->number }} du {{ $order->created_at->format('d/m/Y') }}</div>
+                        <div class="notes-line">Remboursement de la facture INV-{{ $order->number }} du {{ $order->created_at->format('d/m/Y') }}</div>
                     @endif
                     @if (! ($order->is_manual && ($order->marketplace_id || $order->marketplace_name)) && $order->payment_method)
                         <div class="notes-line">Paiement : {{ $order->payment_method->label() }}</div>
@@ -344,7 +344,7 @@
                     {{-- A credit note gives the whole sale back: the lines
                          above say what it covers, the total comes off. --}}
                     <tr class="grand">
-                        <td class="t-label">{{ $creditNote ? "Total de l'avoir TTC" : 'Total TTC' }}</td>
+                        <td class="t-label">{{ $creditNote ? 'Total remboursé TTC' : 'Total TTC' }}</td>
                         <td class="t-value">{{ $creditNote ? format_euros(-$order->total_cents) : ($netRefund ? format_euros(0) : $order->formattedTotal()) }}</td>
                     </tr>
                 </table>

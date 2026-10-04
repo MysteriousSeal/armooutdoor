@@ -1102,7 +1102,7 @@ class OrderController extends Controller
             'creditNote' => true,
         ])->setPaper('a4');
 
-        return $pdf->download('avoir-'.$order->number.'.pdf');
+        return $pdf->download('remboursement-'.$order->number.'.pdf');
     }
 
     public function deliverySlip(Order $order): Response

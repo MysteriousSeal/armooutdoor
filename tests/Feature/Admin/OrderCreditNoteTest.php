@@ -62,10 +62,10 @@ class OrderCreditNoteTest extends TestCase
 
         $html = $this->render($order, ['creditNote' => true]);
 
-        $this->assertStringContainsString('Avoir', $html);
-        $this->assertStringContainsString('AV-'.$order->number.' · 04/10/2026', $html);
-        $this->assertStringContainsString('Avoir sur la facture INV-'.$order->number.' du 01/09/2026', $html);
-        $this->assertStringContainsString('Total de l&#039;avoir TTC', $html);
+        $this->assertStringContainsString('Remboursement', $html);
+        $this->assertStringContainsString('RFD-'.$order->number.' · 04/10/2026', $html);
+        $this->assertStringContainsString('Remboursement de la facture INV-'.$order->number.' du 01/09/2026', $html);
+        $this->assertStringContainsString('Total remboursé TTC', $html);
         $this->assertStringContainsString('-45,00', $html);
     }
 
@@ -109,7 +109,7 @@ class OrderCreditNoteTest extends TestCase
         $this->actingAs($admin)
             ->get(route('admin.orders.credit-note', $order))
             ->assertOk()
-            ->assertDownload('avoir-'.$order->number.'.pdf');
+            ->assertDownload('remboursement-'.$order->number.'.pdf');
     }
 
     public function test_an_order_not_refunded_has_no_credit_note(): void

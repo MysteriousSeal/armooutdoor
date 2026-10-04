@@ -270,7 +270,7 @@ class AccountingController extends Controller
                 ...$sale,
                 'kind' => 'refund',
                 'date' => $order->refundedAt()->startOfDay(),
-                'invoice' => 'AV-'.$order->number,
+                'invoice' => 'RFD-'.$order->number,
                 'type' => 'Refund',
                 'type_fr' => 'Remboursement',
                 'total_cents' => -$sale['total_cents'],

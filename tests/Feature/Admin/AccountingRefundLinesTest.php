@@ -75,7 +75,7 @@ class AccountingRefundLinesTest extends TestCase
 
         $response = $this->page('2026-09')
             ->assertSee('INV-'.$order->number)
-            ->assertDontSee('AV-'.$order->number)
+            ->assertDontSee('RFD-'.$order->number)
             ->assertDontSee('is-refunded', false)
             ->assertDontSee('refund left out')
             ->assertSee('1 sale');
@@ -94,7 +94,7 @@ class AccountingRefundLinesTest extends TestCase
         $this->order('2026-10-10 09:00:00', ['total_cents' => 10000, 'payment_fee_cents' => 250]);
 
         $response = $this->page('2026-10')
-            ->assertSee('AV-'.$order->number)
+            ->assertSee('RFD-'.$order->number)
             ->assertSee('04/10/2026')
             ->assertSee('Refund')
             ->assertSee('is-refund', false)
@@ -122,7 +122,7 @@ class AccountingRefundLinesTest extends TestCase
 
         $response = $this->page('2026-10')
             ->assertSee('INV-'.$order->number)
-            ->assertSee('AV-'.$order->number)
+            ->assertSee('RFD-'.$order->number)
             ->assertDontSee('is-refunded', false)
             ->assertSeeInOrder(['1 sale', '· 1 refund'], false);
 
@@ -138,7 +138,7 @@ class AccountingRefundLinesTest extends TestCase
         $this->page('2026-09')
             ->assertSee('is-refunded', false)
             ->assertSee('1 refund left out')
-            ->assertDontSee('AV-'.$order->number);
+            ->assertDontSee('RFD-'.$order->number);
     }
 
     public function test_the_month_list_counts_the_refund_line_in_its_month(): void
@@ -162,7 +162,7 @@ class AccountingRefundLinesTest extends TestCase
         $order = $this->order('2026-09-20 09:00:00', ['test_marked_at' => '2026-09-20 10:00:00']);
         $this->refund($order, '2026-10-04 11:00:00');
 
-        $this->page('2026-10')->assertDontSee('AV-'.$order->number);
+        $this->page('2026-10')->assertDontSee('RFD-'.$order->number);
     }
 
     public function test_the_journal_pdf_prints_the_refund_line_and_deducts_it(): void
@@ -177,7 +177,7 @@ class AccountingRefundLinesTest extends TestCase
         $method = new \ReflectionMethod($controller, 'journalData');
         $html = view('admin.accounting.sales-pdf', $method->invoke($controller, CarbonImmutable::parse('2026-10-01')))->render();
 
-        $this->assertStringContainsString('AV-'.$order->number, $html);
+        $this->assertStringContainsString('RFD-'.$order->number, $html);
         $this->assertStringContainsString('Remboursement', $html);
         $this->assertStringContainsString('dont 1 remboursement déduit', $html);
         $this->assertStringContainsString('60,00', substr($html, strpos($html, '<tfoot>')));

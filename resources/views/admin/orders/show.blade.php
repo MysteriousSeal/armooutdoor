@@ -375,7 +375,7 @@
                             >Download invoice</a>
                         @endif
                         @if ($order->status === 'refunded')
-                            <a href="{{ route('admin.orders.credit-note', $order) }}" class="btn btn-secondary">Download credit note</a>
+                            <a href="{{ route('admin.orders.credit-note', $order) }}" class="btn btn-secondary">Download refund note</a>
                         @endif
                     </div>
                 @endif
