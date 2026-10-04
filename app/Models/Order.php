@@ -190,6 +190,15 @@ class Order extends Model
         return $this->hasMany(OrderStatusHistory::class)->latest();
     }
 
+    /**
+     * When the order was last marked refunded, or null if it never was.
+     * Reads the loaded status history, newest first.
+     */
+    public function refundedAt(): ?Carbon
+    {
+        return $this->statusHistories->firstWhere('status', 'refunded')?->created_at;
+    }
+
     public function markStatus(string $status): void
     {
         $this->update(['status' => $status]);

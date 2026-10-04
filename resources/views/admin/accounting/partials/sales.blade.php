@@ -35,10 +35,17 @@
     </header>
 
         @php
-            // A refund stays in the table — it happened — but adds to
-            // nothing: the money went back out.
+            // A refund from before October 2026 stays in the table, struck
+            // through, but adds to nothing: the money went back out. Later
+            // ones are lines of their own, with negative amounts.
             $counted = $rows->where('counts', true);
             $refunded = $rows->count() - $counted->count();
+            $refundLines = $rows->where('kind', 'refund')->count();
+            $saleCount = $counted->count() - $refundLines;
+            // Fees come off and a bonus is added, so a refund line, which
+            // turns both around, shows the opposite sign.
+            $feesLabel = fn (int $cents): string => $cents > 0 ? '−'.format_euros($cents) : ($cents < 0 ? '+'.format_euros(-$cents) : '—');
+            $bonusLabel = fn (int $cents): string => $cents > 0 ? '+'.format_euros($cents) : ($cents < 0 ? '−'.format_euros(-$cents) : '—');
             $totalCents = $counted->sum('total_cents');
             $feesCents = $counted->sum('fees_cents');
             $bonusCents = $counted->sum('bonus_cents');
@@ -54,7 +61,7 @@
                 </div>
                 <div class="admin-stat-card">
                     <span class="admin-stat-label">Fees</span>
-                    <span class="admin-stat-value">{{ $feesCents > 0 ? '−'.format_euros($feesCents) : '—' }}</span>
+                    <span class="admin-stat-value">{{ $feesLabel($feesCents) }}</span>
                 </div>
                 <div class="admin-stat-card">
                     <span class="admin-stat-label">Perceived</span>
@@ -83,11 +90,11 @@
                     </thead>
                     <tbody>
                         @foreach ($rows as $row)
-                            <tr class="{{ $row['refunded'] ? 'is-refunded' : '' }} {{ $row['kind'] === 'entry' ? 'is-manual' : '' }}">
+                            <tr class="{{ $row['refunded'] ? 'is-refunded' : '' }} {{ $row['kind'] === 'entry' ? 'is-manual' : '' }} {{ $row['kind'] === 'refund' ? 'is-refund' : '' }}">
                                 <td class="accounting-date">{{ $row['date']->format('d/m/Y') }}</td>
                                 <td>
                                     <span class="accounting-invoice">
-                                        @if ($row['kind'] === 'order')
+                                        @if ($row['order'] !== null)
                                             <a href="{{ route('admin.orders.show', $row['order']) }}" class="admin-table-strong">{{ $row['invoice'] }}</a>
                                         @else
                                             <span class="admin-table-strong">{{ $row['invoice'] }}</span>
@@ -99,8 +106,8 @@
                                 <td><span class="order-chip order-chip--channel">{{ $row['channel'] }}</span></td>
                                 <td><span class="order-chip">{{ $row['type'] }}</span></td>
                                 <td class="admin-table-num">{{ format_euros($row['total_cents']) }}</td>
-                                <td class="admin-table-num">{{ $row['fees_cents'] > 0 ? '−'.format_euros($row['fees_cents']) : '—' }}</td>
-                                <td class="admin-table-num">{{ $row['bonus_cents'] > 0 ? '+'.format_euros($row['bonus_cents']) : '—' }}</td>
+                                <td class="admin-table-num">{{ $feesLabel($row['fees_cents']) }}</td>
+                                <td class="admin-table-num">{{ $bonusLabel($row['bonus_cents']) }}</td>
                                 <td class="admin-table-num">{{ format_euros($row['total_cents'] - $row['fees_cents'] + $row['bonus_cents']) }}</td>
                                 <td><span class="order-chip">{{ $row['payment'] }}</span></td>
                                 <td class="accounting-remark">{{ $row['remark'] }}</td>
@@ -131,18 +138,21 @@
                             </tr>
                         @endforeach
                     </tbody>
-                    {{-- The month's totals, refunds left out of all three. --}}
+                    {{-- The month's totals: struck refunds left out, refund lines deducted. --}}
                     <tfoot>
                         <tr>
                             <td colspan="5">
-                                {{ trans_choice('{0}no sale|{1}:count sale|[2,*]:count sales', $counted->count(), ['count' => $counted->count()]) }}
+                                {{ trans_choice('{0}no sale|{1}:count sale|[2,*]:count sales', $saleCount, ['count' => $saleCount]) }}
+                                @if ($refundLines > 0)
+                                    · {{ trans_choice('{1}:count refund|[2,*]:count refunds', $refundLines, ['count' => $refundLines]) }}
+                                @endif
                                 @if ($refunded > 0)
                                     <span class="accounting-foot-note">{{ trans_choice('{1}:count refund left out|[2,*]:count refunds left out', $refunded, ['count' => $refunded]) }}</span>
                                 @endif
                             </td>
                             <td class="admin-table-num">{{ format_euros($totalCents) }}</td>
-                            <td class="admin-table-num">{{ $feesCents > 0 ? '−'.format_euros($feesCents) : '—' }}</td>
-                            <td class="admin-table-num">{{ $bonusCents > 0 ? '+'.format_euros($bonusCents) : '—' }}</td>
+                            <td class="admin-table-num">{{ $feesLabel($feesCents) }}</td>
+                            <td class="admin-table-num">{{ $bonusLabel($bonusCents) }}</td>
                             <td class="admin-table-num accounting-perceived">{{ format_euros($totalCents - $feesCents + $bonusCents) }}</td>
                             <td colspan="3"></td>
                         </tr>
@@ -153,7 +163,7 @@
             {{-- Says out loud what the figures leave out, so the totals are
                  not taken for something they are not. --}}
             <p class="accounting-note">
-                Fees are the marketplace commission and the payment charge. Shipping paid out of pocket is a cost of its own and is not deducted here. A bonus is money the marketplace paid on top of a sale, and is added to the perceived figure. Refunded orders are listed but left out of every total.
+                Fees are the marketplace commission and the payment charge. Shipping paid out of pocket is a cost of its own and is not deducted here. A bonus is money the marketplace paid on top of a sale, and is added to the perceived figure. An order refunded since 1 October 2026 keeps its sale line, and gets a refund line in the month it was refunded that takes every amount back off. One refunded earlier is struck through and left out of every total.
             </p>
         @endif
 

@@ -78,6 +78,11 @@
 @endpush
 
 @section('table')
+    @php
+        // A refund line turns the fees and the bonus around, so their sign flips.
+        $feesLabel = fn (int $cents): string => $cents > 0 ? '−'.format_euros($cents) : ($cents < 0 ? '+'.format_euros(-$cents) : '—');
+        $bonusLabel = fn (int $cents): string => $cents > 0 ? '+'.format_euros($cents) : ($cents < 0 ? '−'.format_euros(-$cents) : '—');
+    @endphp
     <table class="journal">
         {{-- Date, invoice, client, channel, kind, the four amounts, payment. --}}
         <thead>
@@ -109,8 +114,8 @@
                     <td class="col-channel">{{ $row['channel'] }}</td>
                     <td class="col-type">{{ $row['type_fr'] }}</td>
                     <td class="col-money num">{{ format_euros($row['total_cents']) }}</td>
-                    <td class="col-money num">{{ $row['fees_cents'] > 0 ? '−'.format_euros($row['fees_cents']) : '—' }}</td>
-                    <td class="col-money num">{{ $row['bonus_cents'] > 0 ? '+'.format_euros($row['bonus_cents']) : '—' }}</td>
+                    <td class="col-money num">{{ $feesLabel($row['fees_cents']) }}</td>
+                    <td class="col-money num">{{ $bonusLabel($row['bonus_cents']) }}</td>
                     <td class="col-money-wide num">{{ format_euros($row['total_cents'] - $row['fees_cents'] + $row['bonus_cents']) }}</td>
                     <td class="col-payment">{{ $row['payment_fr'] }}</td>
                 </tr>
@@ -121,6 +126,9 @@
             <tr>
                 <td colspan="5">
                     Total du mois
+                    @if ($refundLines > 0)
+                        <span class="foot-note">— dont {{ $refundLines }} remboursement{{ $refundLines > 1 ? 's' : '' }} déduit{{ $refundLines > 1 ? 's' : '' }}</span>
+                    @endif
                     @if ($refunded > 0)
                         <span class="foot-note">— {{ $refunded }} remboursement{{ $refunded > 1 ? 's' : '' }} hors total</span>
                     @endif
@@ -128,8 +136,8 @@
                 {{-- The headings come back at the foot: on a long page, the
                      bottom of the table reads without going back up. --}}
                 <td class="num"><span class="foot-label">Total</span>{{ format_euros($totalCents) }}</td>
-                <td class="num"><span class="foot-label">Frais</span>{{ $feesCents > 0 ? '−'.format_euros($feesCents) : '—' }}</td>
-                <td class="num"><span class="foot-label">Bonus</span>{{ $bonusCents > 0 ? '+'.format_euros($bonusCents) : '—' }}</td>
+                <td class="num"><span class="foot-label">Frais</span>{{ $feesLabel($feesCents) }}</td>
+                <td class="num"><span class="foot-label">Bonus</span>{{ $bonusLabel($bonusCents) }}</td>
                 <td class="num perceived col-money-wide"><span class="foot-label">Perçu</span>{{ format_euros($totalCents - $feesCents + $bonusCents) }}</td>
                 <td></td>
             </tr>
@@ -138,5 +146,5 @@
 @endsection
 
 @section('note')
-    Les frais retenus sont la commission de la place de marché et les frais d'encaissement. Le port payé par la boutique est une dépense propre et n'est pas déduit ici. Un bonus est une somme versée par la place de marché en plus de la vente : il s'ajoute au perçu. Les commandes remboursées figurent au journal mais n'entrent dans aucun total.
+    Les frais retenus sont la commission de la place de marché et les frais d'encaissement. Le port payé par la boutique est une dépense propre et n'est pas déduit ici. Un bonus est une somme versée par la place de marché en plus de la vente : il s'ajoute au perçu. Une commande remboursée depuis le 1er octobre 2026 garde sa ligne de vente, et reçoit dans le mois du remboursement une ligne d'avoir qui en retire tous les montants. Une commande remboursée avant cette date figure au journal, barrée, mais n'entre dans aucun total.
 @endsection

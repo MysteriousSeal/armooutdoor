@@ -8,6 +8,7 @@ use App\Models\AccountingEntry;
 use App\Models\AccountingJournalDownload;
 use App\Models\CompanySetting;
 use App\Models\Order;
+use App\Models\OrderStatusHistory;
 use App\Support\AccountingPeriods;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\CarbonImmutable;
@@ -36,6 +37,14 @@ class AccountingController extends Controller
 {
     /** Where attached invoices live on the private disk. */
     private const INVOICE_DIRECTORY = 'accounting/invoices';
+
+    /**
+     * Refunds marked from this day on get a line of their own, in the month
+     * they were refunded, and leave the sale standing in its own month.
+     * Earlier ones stay struck through in place, so the months already filed
+     * with them do not move.
+     */
+    private const REFUND_LINES_SINCE = '2026-10-01';
 
     /** The list of sales months. */
     public function sales(): View
@@ -107,12 +116,18 @@ class AccountingController extends Controller
             'entered_on',
         );
 
+        // A refund line counts in the month it was refunded, like any line.
+        $refunds = $section === 'sales'
+            ? $this->countByMonth($this->refundHistoriesQuery(), 'created_at')
+            : collect();
+
         return $orders->toBase()
             ->keys()
             ->merge($entries->keys())
+            ->merge($refunds->keys())
             ->unique()
             ->mapWithKeys(fn (string $month): array => [
-                $month => (int) ($orders[$month] ?? 0) + (int) ($entries[$month] ?? 0),
+                $month => (int) ($orders[$month] ?? 0) + (int) ($entries[$month] ?? 0) + (int) ($refunds[$month] ?? 0),
             ]);
     }
 
@@ -221,8 +236,13 @@ class AccountingController extends Controller
      * - the printed columns: `invoice`, `client`, `channel`, `type`,
      *   `total_cents`, `fees_cents`, `bonus_cents`, `payment`, `remark`.
      * - `type_fr`, `payment_fr`: the same two labels in French, for the PDF.
-     * - `counts`: whether the line joins the totals. False for a refund.
+     * - `counts`: whether the line joins the totals. False for a refund
+     *   marked before REFUND_LINES_SINCE.
      * - `refunded`: whether to strike it through.
+     *
+     * A refund marked since REFUND_LINES_SINCE is a line of its own (`kind`
+     * 'refund'), in the month it was refunded, mirroring the sale with every
+     * amount negated.
      *
      * @return Collection<int, array<string, mixed>>
      */
@@ -230,28 +250,36 @@ class AccountingController extends Controller
     {
         // The shop's own orders, as table rows.
         $orders = $this->salesOf($period)->map(fn (Order $order): array => [
+            ...$this->orderRow($order),
             'kind' => 'order',
             'date' => $order->created_at->startOfDay(),
-            'order' => $order,
-            'entry' => null,
             'invoice' => 'INV-'.$order->number,
-            'client' => $order->user?->name ?? '—',
-            'channel' => $order->marketplace_name ?: ($order->marketplace?->name ?? 'Direct'),
             'type' => 'Stock sale',
             // The accounting documents are in French; the screen stays in
             // English like the rest of the admin.
             'type_fr' => AccountingEntry::TYPES_FR['stock_sale'],
-            'total_cents' => $order->total_cents,
-            'fees_cents' => ($order->marketplace_commission_cents ?? 0) + ($order->payment_fee_cents ?? 0),
-            // Money the marketplace paid on top of the sale. Shown in its own
-            // column, and no part of the fees, which only ever come off.
-            'bonus_cents' => $order->marketplace_bonus_cents ?? 0,
-            'payment' => 'Bank wire',
-            'payment_fr' => AccountingEntry::PAYMENT_METHODS_FR['bank_wire'],
-            'remark' => $order->number,
-            'counts' => $order->status !== 'refunded',
-            'refunded' => $order->status === 'refunded',
+            'counts' => ! $this->isStruckRefund($order),
+            'refunded' => $this->isStruckRefund($order),
         ]);
+
+        // The refunds of the month, each the sale turned around.
+        $refunds = $this->refundsOf($period)->map(function (Order $order): array {
+            $sale = $this->orderRow($order);
+
+            return [
+                ...$sale,
+                'kind' => 'refund',
+                'date' => $order->refundedAt()->startOfDay(),
+                'invoice' => 'AV-'.$order->number,
+                'type' => 'Refund',
+                'type_fr' => 'Remboursement',
+                'total_cents' => -$sale['total_cents'],
+                'fees_cents' => -$sale['fees_cents'],
+                'bonus_cents' => -$sale['bonus_cents'],
+                'counts' => true,
+                'refunded' => false,
+            ];
+        });
 
         // The entries typed by hand for this section and this month.
         $entries = AccountingEntry::query()
@@ -285,9 +313,83 @@ class AccountingController extends Controller
         // it try to read a key off each one. The invoice number breaks ties so
         // two lines of the same day keep a stable order between page loads.
         return $orders->toBase()
+            ->merge($refunds->toBase())
             ->merge($entries->toBase())
             ->sortBy([['date', 'asc'], ['invoice', 'asc']])
             ->values();
+    }
+
+    /**
+     * The columns an order fills, shared by its sale line and its refund line.
+     *
+     * @return array<string, mixed>
+     */
+    private function orderRow(Order $order): array
+    {
+        return [
+            'order' => $order,
+            'entry' => null,
+            'client' => $order->user?->name ?? '—',
+            'channel' => $order->marketplace_name ?: ($order->marketplace?->name ?? 'Direct'),
+            'total_cents' => $order->total_cents,
+            'fees_cents' => ($order->marketplace_commission_cents ?? 0) + ($order->payment_fee_cents ?? 0),
+            // Money the marketplace paid on top of the sale. Shown in its own
+            // column, and no part of the fees, which only ever come off.
+            'bonus_cents' => $order->marketplace_bonus_cents ?? 0,
+            'payment' => 'Bank wire',
+            'payment_fr' => AccountingEntry::PAYMENT_METHODS_FR['bank_wire'],
+            'remark' => $order->number,
+        ];
+    }
+
+    /** A refund from before REFUND_LINES_SINCE: struck through on the sale itself. */
+    private function isStruckRefund(Order $order): bool
+    {
+        if ($order->status !== 'refunded') {
+            return false;
+        }
+
+        $refundedAt = $order->refundedAt();
+
+        return $refundedAt === null || $refundedAt->lt(CarbonImmutable::parse(self::REFUND_LINES_SINCE));
+    }
+
+    /**
+     * The orders refunded within the month, from REFUND_LINES_SINCE on.
+     *
+     * @return Collection<int, Order>
+     */
+    private function refundsOf(CarbonImmutable $period): Collection
+    {
+        $from = $period->max(CarbonImmutable::parse(self::REFUND_LINES_SINCE));
+        $to = $period->endOfMonth();
+
+        if ($from->gt($to)) {
+            return new Collection;
+        }
+
+        return $this->soldQuery()
+            ->where('status', 'refunded')
+            ->whereHas('statusHistories', fn (Builder $query) => $query
+                ->where('status', 'refunded')
+                ->whereBetween('created_at', [$from, $to]))
+            ->with('user', 'marketplace', 'statusHistories')
+            ->get()
+            // Refunded twice is not a thing, but the date that counts is the
+            // latest, the one refundedAt() reads.
+            ->filter(fn (Order $order): bool => $order->refundedAt()->between($from, $to))
+            ->values();
+    }
+
+    /** The refund status changes behind refund lines, for counting them by month. */
+    private function refundHistoriesQuery(): Builder
+    {
+        return OrderStatusHistory::query()
+            ->where('status', 'refunded')
+            ->where('created_at', '>=', CarbonImmutable::parse(self::REFUND_LINES_SINCE))
+            ->whereHas('order', fn (Builder $query) => $query
+                ->where('status', 'refunded')
+                ->excludingTest());
     }
 
     /**
@@ -553,14 +655,15 @@ class AccountingController extends Controller
     {
         $rows = $this->rowsOf('sales', $period);
 
-        // Refunds are listed but join no total, so the sums run on the
-        // counted lines while `rows` keeps everything to print.
+        // Refunds struck through are listed but join no total, so the sums
+        // run on the counted lines while `rows` keeps everything to print.
         $counted = $rows->where('counts', true);
 
         return [
             'period' => $period,
             'rows' => $rows,
             'refunded' => $rows->count() - $counted->count(),
+            'refundLines' => $rows->where('kind', 'refund')->count(),
             'totalCents' => $counted->sum('total_cents'),
             'feesCents' => $counted->sum('fees_cents'),
             'bonusCents' => $counted->sum('bonus_cents'),
@@ -724,7 +827,7 @@ class AccountingController extends Controller
     private function salesOf(CarbonImmutable $period): Collection
     {
         return $this->soldQuery()
-            ->with('user', 'marketplace')
+            ->with('user', 'marketplace', 'statusHistories')
             ->whereBetween('created_at', [$period, $period->endOfMonth()])
             ->orderBy('created_at')
             ->orderBy('id')
