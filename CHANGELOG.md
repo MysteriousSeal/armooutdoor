@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-04 · v1.59.0 · build FNTHY7
+
+### Admin
+
+- **A refund now gets its own line in the sales journal.** For an order marked refunded from 1 October 2026 on, the sale stays a normal line in the month it was placed, and a refund line numbered `RFD-<order>` goes in the month it was refunded, mirroring the sale with its total, fees and bonus negated. The month's totals deduct it, the footer counts it apart (« 1 sale · 1 refund »), the month list counts it as an entry, and the PDF journal prints it too. Refunds marked before that date stay struck through and left out, so months already filed do not change.
+- **Refunded orders have a refund note to download.** The order page offers « Download refund note » beside the invoice: a « Remboursement » PDF numbered `RFD-<order>`, dated the day of the refund, referring back to the original invoice and ending on the amount given back. The admin invoice now shows the sale as it was billed, without netting the refund; the invoice customers download is unchanged.
+
+**No migration.**
+
 ## 2026-10-04 · v1.58.1 · build OEZ5J3
 
 ### Admin
