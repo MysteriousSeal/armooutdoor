@@ -336,6 +336,7 @@ class OrderProductCostColumnTest extends TestCase
             ->getContent();
 
         $this->assertStringContainsString('admin-stat-part-value is-profit">12,60', $html);
-        $this->assertStringContainsString('on 1 of 1 orders', $html);
+        // The refunded sale is skipped, but still counted in the total.
+        $this->assertStringContainsString('on 1 of 2 orders', $html);
     }
 }

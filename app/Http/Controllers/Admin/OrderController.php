@@ -105,8 +105,9 @@ class OrderController extends Controller
         $percentOf = fn (int $part, int $whole): ?float => $whole > 0 ? round($part / $whole * 100, 2) : null;
 
         // A refunded sale made no profit: the money went back. Left out the
-        // same way the dashboard leaves it out.
-        [$profitCents, $pricedOrderCount, $totalOrderCount, $profitProductCostCents] = $this->profitSummary(
+        // same way the dashboard leaves it out, though the "of" count below
+        // still covers every sale, so the card says how many it skipped.
+        [$profitCents, $pricedOrderCount, , $profitProductCostCents] = $this->profitSummary(
             (clone $salesOrders)->where('status', '!=', 'refunded'),
         );
 
@@ -139,7 +140,7 @@ class OrderController extends Controller
                 'average_order_cents' => $averageOrderCents,
                 'profit_cents' => $profitCents,
                 'profit_priced_order_count' => $pricedOrderCount,
-                'profit_total_order_count' => $totalOrderCount,
+                'profit_total_order_count' => $salesOrderCount,
                 // Against the goods cost of the priced orders only, not of
                 // all of them: the profit above covers no more than those
                 // either.
