@@ -318,4 +318,24 @@ class OrderProductCostColumnTest extends TestCase
         $this->assertStringContainsString('12,60', $html);
         $this->assertStringContainsString('on 1 of 2 orders', $html);
     }
+
+    public function test_the_profit_kpi_card_leaves_refunded_orders_out(): void
+    {
+        $product = Product::factory()->create();
+        $this->receive($product, 10, 100); // avg 120 incl. VAT
+
+        $sold = $this->order(['total_cents' => 1500]);
+        $this->line($sold, $product, 2); // profit 1500-240=1260
+
+        $refunded = $this->order(['total_cents' => 4000, 'status' => 'refunded']);
+        $this->line($refunded, $product, 1);
+
+        $html = $this->actingAs(User::factory()->admin()->create())
+            ->get(route('admin.orders.index'))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('admin-stat-part-value is-profit">12,60', $html);
+        $this->assertStringContainsString('on 1 of 1 orders', $html);
+    }
 }

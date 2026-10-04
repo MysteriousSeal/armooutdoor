@@ -104,7 +104,11 @@ class OrderController extends Controller
 
         $percentOf = fn (int $part, int $whole): ?float => $whole > 0 ? round($part / $whole * 100, 2) : null;
 
-        [$profitCents, $pricedOrderCount, $totalOrderCount, $profitProductCostCents] = $this->profitSummary(clone $salesOrders);
+        // A refunded sale made no profit: the money went back. Left out the
+        // same way the dashboard leaves it out.
+        [$profitCents, $pricedOrderCount, $totalOrderCount, $profitProductCostCents] = $this->profitSummary(
+            (clone $salesOrders)->where('status', '!=', 'refunded'),
+        );
 
         // Les compteurs d'onglets ignorent les filtres, comme ceux des
         // autres onglets : ils disent ce que contient chaque onglet, pas
