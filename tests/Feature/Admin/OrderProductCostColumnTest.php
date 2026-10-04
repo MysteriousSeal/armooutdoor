@@ -87,7 +87,7 @@ class OrderProductCostColumnTest extends TestCase
         $this->assertSame(840, $order->productCostInclVatCents($averages));
     }
 
-    public function test_a_line_with_no_purchase_history_makes_the_whole_order_unpriceable(): void
+    public function test_a_line_with_no_purchase_history_counts_at_one_cent_a_unit(): void
     {
         $known = Product::factory()->create();
         $unknown = Product::factory()->create();
@@ -95,17 +95,17 @@ class OrderProductCostColumnTest extends TestCase
 
         $order = $this->order();
         $this->line($order, $known, 1);
-        $this->line($order, $unknown, 1);
+        $this->line($order, $unknown, 3);
         $order->load('items');
 
         $averages = Product::averagePurchaseCostsInclVatCents([$known->id, $unknown->id]);
 
-        $this->assertSame(120, [$known->id => 120][$known->id]);
         $this->assertArrayNotHasKey($unknown->id, $averages);
-        $this->assertNull($order->productCostInclVatCents($averages));
+        // 120 + 3 * 1
+        $this->assertSame(123, $order->productCostInclVatCents($averages));
     }
 
-    public function test_a_deleted_product_line_makes_the_whole_order_unpriceable(): void
+    public function test_a_deleted_product_line_counts_at_one_cent_a_unit(): void
     {
         $known = Product::factory()->create();
         $this->receive($known, 5, 100);
@@ -117,7 +117,7 @@ class OrderProductCostColumnTest extends TestCase
 
         $averages = Product::averagePurchaseCostsInclVatCents([$known->id]);
 
-        $this->assertNull($order->productCostInclVatCents($averages));
+        $this->assertSame(121, $order->productCostInclVatCents($averages));
     }
 
     public function test_an_order_with_no_lines_has_no_product_cost(): void
@@ -160,9 +160,15 @@ class OrderProductCostColumnTest extends TestCase
         $this->assertStringContainsString('6,00', $html);
     }
 
-    public function test_the_orders_list_shows_a_dash_when_a_line_cannot_be_priced(): void
+    public function test_the_orders_list_prices_a_line_with_no_cost_at_one_cent(): void
     {
-        $order = $this->order();
+        // The order from the bug report: one priced line beside one with no
+        // purchase history still shows both columns.
+        $known = Product::factory()->create();
+        $this->receive($known, 2, 250); // avg 300 incl. VAT
+
+        $order = $this->order(['total_cents' => 1500]);
+        $this->line($order, $known, 1);
         $this->line($order, Product::factory()->create(), 1);
 
         $html = $this->actingAs(User::factory()->admin()->create())
@@ -170,7 +176,10 @@ class OrderProductCostColumnTest extends TestCase
             ->assertOk()
             ->getContent();
 
-        $this->assertStringContainsString('Missing purchase history for at least one line', $html);
+        // 3,00 € + 0,01 € of goods; 15,00 € - 3,01 € = 11,99 € of profit.
+        $this->assertStringContainsString('3,01', $html);
+        $this->assertStringContainsString('admin-order-profit">11,99', $html);
+        $this->assertStringNotContainsString('No lines to price', $html);
     }
 
     public function test_profit_is_perceived_minus_product_cost(): void
@@ -192,7 +201,6 @@ class OrderProductCostColumnTest extends TestCase
     public function test_profit_is_null_whenever_the_product_cost_is(): void
     {
         $order = $this->order();
-        $this->line($order, Product::factory()->create(), 1);
         $order->load('items');
 
         $this->assertNull($order->profitInclVatCents([]));
@@ -216,7 +224,6 @@ class OrderProductCostColumnTest extends TestCase
     public function test_the_profit_percentage_is_null_when_the_cost_is_unknown_or_zero(): void
     {
         $unpriced = $this->order();
-        $this->line($unpriced, Product::factory()->create(), 1);
         $unpriced->load('items');
 
         $this->assertNull($unpriced->profitPercentageOfProductCost([]));
@@ -295,8 +302,8 @@ class OrderProductCostColumnTest extends TestCase
         $priceable = $this->order(['total_cents' => 1500]);
         $this->line($priceable, $product, 2); // coût 240, profit 1500-240=1260
 
-        $unpriceable = $this->order(['total_cents' => 999]);
-        $this->line($unpriceable, Product::factory()->create(), 1);
+        // No lines, so nothing to price.
+        $this->order(['total_cents' => 999]);
 
         $html = $this->actingAs(User::factory()->admin()->create())
             ->get(route('admin.orders.index'))

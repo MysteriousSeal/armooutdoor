@@ -125,11 +125,10 @@
                             <span class="admin-stat-pct">{{ number_format($kpis['perceived_total_pct_amount'] ?? 0, 2) }} % of amount</span>
                         </span>
                     </li>
-                    {{-- Un coût produit inconnu exclut la commande plutôt que de
-                         compter zéro : le compteur dit combien sont concernées,
-                         comme le tiret sur chaque ligne de la liste. --}}
+                    {{-- A line with no known cost counts at 0,01 € per unit; only
+                         an order with no lines is left out of the count. --}}
                     <li class="admin-stat-part">
-                        <span class="admin-stat-part-name" title="Perceived − product cost. Orders with an unknown product cost are left out.">Profit</span>
+                        <span class="admin-stat-part-name" title="Perceived − product cost. A line with no known cost counts at 0,01 € per unit.">Profit</span>
                         <span class="admin-stat-part-value is-profit">{{ format_euros($kpis['profit_cents']) }}@if (($kpis['profit_pct_product_cost'] ?? null) !== null)<span class="admin-stat-part-value-pct" title="Profit as a share of what the goods cost">({{ number_format($kpis['profit_pct_product_cost'], 1, ',', ' ') }} %)</span>@endif</span>
                         <span class="admin-stat-part-pcts">
                             <span class="admin-stat-pct">on {{ number_format($kpis['profit_priced_order_count']) }} of {{ number_format($kpis['profit_total_order_count']) }} orders</span>
@@ -443,7 +442,7 @@
                                     @if ($productCostCents !== null)
                                         <span class="stripe-fee-chip" title="Average purchase cost, incl. VAT">− {{ format_euros($productCostCents) }}</span>
                                     @else
-                                        <span class="admin-table-sub" title="Missing purchase history for at least one line">—</span>
+                                        <span class="admin-table-sub" title="No lines to price">—</span>
                                     @endif
                                 </td>
                                 <td class="admin-table-num">
@@ -455,7 +454,7 @@
                                     @if ($profitCents !== null)
                                         <span class="admin-order-profit">{{ format_euros($profitCents) }}@if ($profitPct !== null)<span class="admin-order-profit-pct" title="Profit as a share of what the goods cost">({{ number_format($profitPct, 1, ',', ' ') }} %)</span>@endif</span>
                                     @else
-                                        <span class="admin-table-sub" title="Missing purchase history for at least one line">—</span>
+                                        <span class="admin-table-sub" title="No lines to price">—</span>
                                     @endif
                                 </td>
                                 @if ($showRowActions)

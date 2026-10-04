@@ -347,16 +347,16 @@ class AdminApiTest extends TestCase
         $this->assertSame(360, $order->productCostInclVatCents([]));
     }
 
-    /** Without one, the cost stays unknown rather than reading as free. */
-    public function test_an_off_catalogue_line_without_a_cost_leaves_the_product_cost_unknown(): void
+    /** Without one, each unit counts at 0,01 €. */
+    public function test_an_off_catalogue_line_without_a_cost_counts_at_one_cent(): void
     {
         $product = Product::factory()->create();
         $payload = $this->draftOrderPayload($product, 1);
-        $payload['items'] = [['name' => 'Cagoule', 'price' => '4.50', 'quantity' => 1]];
+        $payload['items'] = [['name' => 'Cagoule', 'price' => '4.50', 'quantity' => 3]];
 
         $this->postJson('/api/admin/orders', $payload, $this->headers())->assertStatus(201);
 
-        $this->assertNull(Order::query()->latest('id')->firstOrFail()->productCostInclVatCents([]));
+        $this->assertSame(3, Order::query()->latest('id')->firstOrFail()->productCostInclVatCents([]));
     }
 
     public function test_an_off_catalogue_cost_cannot_be_negative(): void

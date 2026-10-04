@@ -2,11 +2,18 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\Discount;
+use App\Models\Marketplace;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductSetting;
+use App\Models\ProductVariant;
+use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderItem;
+use App\Models\Supplier;
 use App\Models\User;
+use App\Services\DashboardMetrics;
 use App\Services\DashboardPeriod;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -49,11 +56,11 @@ class DashboardTest extends TestCase
     }
 
     /** Receive $quantity units of $product at $unitCostCents excl. VAT. */
-    private function receive(Product $product, int $quantity, int $unitCostCents, int $vatBasisPoints = 2000): \App\Models\PurchaseOrder
+    private function receive(Product $product, int $quantity, int $unitCostCents, int $vatBasisPoints = 2000): PurchaseOrder
     {
-        $supplier = \App\Models\Supplier::query()->create(['name' => 'Fournisseur', 'lead_time_days' => 5]);
+        $supplier = Supplier::query()->create(['name' => 'Fournisseur', 'lead_time_days' => 5]);
 
-        $purchaseOrder = \App\Models\PurchaseOrder::query()->create([
+        $purchaseOrder = PurchaseOrder::query()->create([
             'number' => 'BC-'.str_pad((string) random_int(1, 99999), 5, '0', STR_PAD_LEFT),
             'supplier_id' => $supplier->id,
             'supplier_name' => 'Fournisseur',
@@ -61,7 +68,7 @@ class DashboardTest extends TestCase
             'vat_rate_basis_points' => $vatBasisPoints,
         ]);
 
-        \App\Models\PurchaseOrderItem::query()->create([
+        PurchaseOrderItem::query()->create([
             'purchase_order_id' => $purchaseOrder->id,
             'product_id' => $product->id,
             'name' => $product->localizedName(),
@@ -256,7 +263,7 @@ class DashboardTest extends TestCase
         Product::factory()->create(['is_active' => true, 'quantity' => 5]);
         $sized = Product::factory()->create(['is_active' => true, 'quantity' => 0]);
         foreach ([['M', 3], ['L', 4]] as [$size, $quantity]) {
-            \App\Models\ProductVariant::query()->create([
+            ProductVariant::query()->create([
                 'product_id' => $sized->id,
                 'attribute_values' => [['label' => 'Taille', 'value' => $size]],
                 'sku' => 'VAR-'.$size,
@@ -274,13 +281,13 @@ class DashboardTest extends TestCase
         // An open purchase order: 6 still awaited for the active plain
         // product (7 ordered, 1 in), 20 for the sleeping one, which counts
         // as one reference to receive and nothing in the stock to receive.
-        $supplier = \App\Models\Supplier::query()->create(['name' => 'Fournisseur', 'lead_time_days' => 5]);
-        $purchaseOrder = \App\Models\PurchaseOrder::query()->create([
+        $supplier = Supplier::query()->create(['name' => 'Fournisseur', 'lead_time_days' => 5]);
+        $purchaseOrder = PurchaseOrder::query()->create([
             'number' => 'BC-TEST-0001', 'supplier_id' => $supplier->id, 'supplier_name' => 'Fournisseur', 'status' => 'sent',
         ]);
         $awake = Product::query()->where('is_active', true)->whereDoesntHave('variants')->firstOrFail();
         foreach ([[$awake, 7, 1], [$sleeping, 20, 0]] as [$product, $ordered, $received]) {
-            \App\Models\PurchaseOrderItem::query()->create([
+            PurchaseOrderItem::query()->create([
                 'purchase_order_id' => $purchaseOrder->id, 'product_id' => $product->id,
                 'name' => $product->localizedName(), 'sku' => $product->sku,
                 'quantity_ordered' => $ordered, 'quantity_received' => $received, 'unit_cost_cents' => 100,
@@ -323,7 +330,7 @@ class DashboardTest extends TestCase
             'unit_price_cents' => 750, 'line_cents' => 1500,
         ]);
 
-        $money = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->money();
+        $money = (new DashboardMetrics(DashboardPeriod::resolve('30d')))->money();
 
         $this->assertSame(1500, $money['revenue_cents']);
         $this->assertSame(300, $money['order_costs_cents']);
@@ -334,32 +341,29 @@ class DashboardTest extends TestCase
         $this->assertSame(1, $money['total_orders']);
     }
 
-    public function test_an_order_that_cannot_be_priced_stays_out_of_the_profit(): void
+    public function test_a_line_with_no_purchase_history_counts_at_one_cent(): void
     {
-        // No purchase order behind this product: the profit on this sale is
-        // unknown, not nothing. It counts towards revenue, and the counter
-        // says it is missing from the rest.
+        // No purchase order behind this product: its cost counts at 0,01 €
+        // a unit, so the sale still enters the profit.
         $order = $this->order(['total_cents' => 2000]);
         OrderItem::query()->create([
             'order_id' => $order->id, 'product_id' => Product::factory()->create()->id,
-            'product_slug' => 'x', 'name' => ['fr' => 'X'], 'image' => '', 'quantity' => 1,
-            'unit_price_cents' => 2000, 'line_cents' => 2000,
+            'product_slug' => 'x', 'name' => ['fr' => 'X'], 'image' => '', 'quantity' => 2,
+            'unit_price_cents' => 1000, 'line_cents' => 2000,
         ]);
 
-        $money = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->money();
+        $money = (new DashboardMetrics(DashboardPeriod::resolve('30d')))->money();
 
         $this->assertSame(2000, $money['revenue_cents']);
-        $this->assertSame(0, $money['product_cost_cents']);
-        $this->assertSame(0, $money['profit_cents']);
-        $this->assertSame(0, $money['priced_orders']);
+        $this->assertSame(2, $money['product_cost_cents']);
+        $this->assertSame(1998, $money['profit_cents']);
+        $this->assertSame(1, $money['priced_orders']);
         $this->assertSame(1, $money['total_orders']);
-        // With no priced order there is no margin to write.
-        $this->assertNull($money['margin_percent']);
     }
 
     public function test_the_ledger_bar_keeps_one_base_for_its_three_shares(): void
     {
-        // Two sales, only one priceable: the bar is a share of that one's
+        // Two sales, only one priceable (the other has no lines): the bar is a share of that one's
         // revenue, so its three parts add up to 100 %.
         $product = Product::factory()->create();
         $this->receive($product, 10, 100);
@@ -372,13 +376,8 @@ class DashboardTest extends TestCase
         ]);
 
         $unpriced = $this->order(['total_cents' => 5000, 'payment_fee_cents' => 200]);
-        OrderItem::query()->create([
-            'order_id' => $unpriced->id, 'product_id' => Product::factory()->create()->id,
-            'product_slug' => 'y', 'name' => ['fr' => 'Y'], 'image' => '', 'quantity' => 1,
-            'unit_price_cents' => 5000, 'line_cents' => 5000,
-        ]);
 
-        $money = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->money();
+        $money = (new DashboardMetrics(DashboardPeriod::resolve('30d')))->money();
 
         $this->assertSame(6500, $money['revenue_cents']);
         $this->assertSame(1500, $money['priced_revenue_cents']);
@@ -417,7 +416,7 @@ class DashboardTest extends TestCase
             'unit_price_cents' => 750, 'line_cents' => 1500,
         ]);
 
-        $money = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->money();
+        $money = (new DashboardMetrics(DashboardPeriod::resolve('30d')))->money();
 
         $this->assertSame(1500, $money['revenue_cents']);
         $this->assertSame(100, $money['bonus_cents']);
@@ -455,7 +454,7 @@ class DashboardTest extends TestCase
             'unit_price_cents' => 750, 'line_cents' => 1500,
         ]);
 
-        // A second sale that cannot be priced, carrying a bonus of its own.
+        // A second sale that cannot be priced (no lines), carrying a bonus of its own.
         // The bar must use the priced orders' bonus, not the window's: with
         // the two figures deliberately different, reaching for the wrong one
         // stops the shares adding up.
@@ -464,13 +463,8 @@ class DashboardTest extends TestCase
             'payment_fee_cents' => 200,
             'marketplace_bonus_cents' => 50,
         ]);
-        OrderItem::query()->create([
-            'order_id' => $unpriced->id, 'product_id' => Product::factory()->create()->id,
-            'product_slug' => 'y', 'name' => ['fr' => 'Y'], 'image' => '', 'quantity' => 1,
-            'unit_price_cents' => 5000, 'line_cents' => 5000,
-        ]);
 
-        $money = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->money();
+        $money = (new DashboardMetrics(DashboardPeriod::resolve('30d')))->money();
 
         // The window sees both bonuses, the bar only the priced one.
         $this->assertSame(150, $money['bonus_cents']);
@@ -537,7 +531,7 @@ class DashboardTest extends TestCase
         $this->order(['total_cents' => 9999, 'marketplace_bonus_cents' => 700, 'status' => 'draft']);
         $this->order(['total_cents' => 9999, 'marketplace_bonus_cents' => 900, 'status' => 'refunded']);
 
-        $money = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->money();
+        $money = (new DashboardMetrics(DashboardPeriod::resolve('30d')))->money();
 
         $this->assertSame(1500, $money['revenue_cents']);
         $this->assertSame(100, $money['bonus_cents']);
@@ -566,16 +560,11 @@ class DashboardTest extends TestCase
             'unit_price_cents' => 750, 'line_cents' => 1500,
         ]);
 
-        // A far larger bonus on a sale whose goods cannot be priced: loud
+        // A far larger bonus on a sale with no lines to price: loud
         // enough that reaching for it by mistake could not pass unnoticed.
         $unpriced = $this->order(['total_cents' => 5000, 'marketplace_bonus_cents' => 900]);
-        OrderItem::query()->create([
-            'order_id' => $unpriced->id, 'product_id' => Product::factory()->create()->id,
-            'product_slug' => 'y', 'name' => ['fr' => 'Y'], 'image' => '', 'quantity' => 1,
-            'unit_price_cents' => 5000, 'line_cents' => 5000,
-        ]);
 
-        $money = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->money();
+        $money = (new DashboardMetrics(DashboardPeriod::resolve('30d')))->money();
 
         // The ledger line counts both bonuses, the bar only the priced one.
         $this->assertSame(1000, $money['bonus_cents']);
@@ -601,7 +590,7 @@ class DashboardTest extends TestCase
         // counted separately, never at zero.
         Product::factory()->create(['is_active' => true, 'quantity' => 7]);
 
-        $stock = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->stockValue();
+        $stock = (new DashboardMetrics(DashboardPeriod::resolve('30d')))->stockValue();
 
         $this->assertSame(1200, $stock['warehouse_cents']);
         $this->assertSame(4, $stock['valued_units']);
@@ -618,7 +607,7 @@ class DashboardTest extends TestCase
         $this->receive($sized, 10, 250); // 3,00 € TTC l'unité
 
         foreach ([['M', 2], ['L', 3]] as [$size, $quantity]) {
-            \App\Models\ProductVariant::query()->create([
+            ProductVariant::query()->create([
                 'product_id' => $sized->id,
                 'attribute_values' => [['label' => 'Taille', 'value' => $size]],
                 'sku' => 'VAR-'.$size,
@@ -628,7 +617,7 @@ class DashboardTest extends TestCase
             ]);
         }
 
-        $stock = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->stockValue();
+        $stock = (new DashboardMetrics(DashboardPeriod::resolve('30d')))->stockValue();
 
         // 5 declined units at 3,00 €, never 14.
         $this->assertSame(5, $stock['valued_units']);
@@ -639,18 +628,18 @@ class DashboardTest extends TestCase
     {
         $product = Product::factory()->create(['is_active' => true, 'quantity' => 0]);
 
-        $supplier = \App\Models\Supplier::query()->create(['name' => 'Fournisseur', 'lead_time_days' => 5]);
-        $open = \App\Models\PurchaseOrder::query()->create([
+        $supplier = Supplier::query()->create(['name' => 'Fournisseur', 'lead_time_days' => 5]);
+        $open = PurchaseOrder::query()->create([
             'number' => 'BC-OPEN-1', 'supplier_id' => $supplier->id, 'supplier_name' => 'Fournisseur',
             'status' => 'sent', 'vat_rate_basis_points' => 2000,
         ]);
-        \App\Models\PurchaseOrderItem::query()->create([
+        PurchaseOrderItem::query()->create([
             'purchase_order_id' => $open->id, 'product_id' => $product->id,
             'name' => $product->localizedName(), 'sku' => $product->sku,
             'quantity_ordered' => 10, 'quantity_received' => 4, 'unit_cost_cents' => 500,
         ]);
 
-        $stock = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->stockValue();
+        $stock = (new DashboardMetrics(DashboardPeriod::resolve('30d')))->stockValue();
 
         // Six units still owed at 5,00 € excl. VAT, VAT 20 %: 36,00 €.
         $this->assertSame(3600, $stock['committed_cents']);
@@ -668,7 +657,7 @@ class DashboardTest extends TestCase
         $this->order(['user_id' => $loyal->id]);
         $this->order(['user_id' => $fresh->id]);
 
-        $customers = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->customers();
+        $customers = (new DashboardMetrics(DashboardPeriod::resolve('30d')))->customers();
 
         $this->assertSame(2, $customers['buyers']);
         $this->assertSame(1, $customers['returning']);
@@ -688,7 +677,7 @@ class DashboardTest extends TestCase
         ]);
         $this->order(['total_cents' => 5000]);
 
-        $split = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->channelSplit();
+        $split = (new DashboardMetrics(DashboardPeriod::resolve('30d')))->channelSplit();
 
         $marketplace = $split->firstWhere('label', 'NaturaBuy');
         $direct = $split->firstWhere('label', 'Direct sale');
@@ -750,7 +739,7 @@ class DashboardTest extends TestCase
         // delta has nothing to measure against.
         $this->assertTrue($period->previousEnd->lessThan($period->previousStart));
 
-        $metrics = new \App\Services\DashboardMetrics($period);
+        $metrics = new DashboardMetrics($period);
 
         $this->assertSame(0, $metrics->revenueSeries()['previous']->count());
         $this->assertNull($metrics->headline()['revenue_delta']['percent']);
@@ -766,7 +755,7 @@ class DashboardTest extends TestCase
 
         $this->assertTrue($period->bucketsByMonth());
 
-        $series = (new \App\Services\DashboardMetrics($period))->revenueSeries()['current'];
+        $series = (new DashboardMetrics($period))->revenueSeries()['current'];
 
         // Six months, six buckets — never a hundred and fifty days of
         // hair.
@@ -781,7 +770,7 @@ class DashboardTest extends TestCase
         $period = DashboardPeriod::resolve('7d');
 
         $this->assertFalse($period->bucketsByMonth());
-        $this->assertSame(7, (new \App\Services\DashboardMetrics($period))->revenueSeries()['current']->count());
+        $this->assertSame(7, (new DashboardMetrics($period))->revenueSeries()['current']->count());
     }
 
     public function test_the_page_offers_all_time_and_names_its_buckets(): void
@@ -830,7 +819,7 @@ class DashboardTest extends TestCase
         $this->order(['status' => 'refunded']);
         $this->order(['status' => 'refunded']);
 
-        $pipeline = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->pipeline();
+        $pipeline = (new DashboardMetrics(DashboardPeriod::resolve('30d')))->pipeline();
 
         $refunded = $pipeline->firstWhere('status', 'refunded');
 
@@ -849,7 +838,7 @@ class DashboardTest extends TestCase
         $this->order(['status' => 'delivered']);
         $this->order(['status' => 'refunded']);
 
-        $pipeline = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->pipeline();
+        $pipeline = (new DashboardMetrics(DashboardPeriod::resolve('30d')))->pipeline();
 
         $this->assertSame(
             ['placed', 'preparing', 'shipped', 'in_transit'],
@@ -887,7 +876,7 @@ class DashboardTest extends TestCase
         // as for every other status.
         $this->order(['status' => 'refunded'])->forceFill(['archived_at' => now()])->save();
 
-        $pipeline = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->pipeline();
+        $pipeline = (new DashboardMetrics(DashboardPeriod::resolve('30d')))->pipeline();
 
         $this->assertSame(0, $pipeline->firstWhere('status', 'refunded')['count']);
     }
@@ -900,7 +889,7 @@ class DashboardTest extends TestCase
         $this->order(['user_id' => $banned->id, 'total_cents' => 9000]);
         $this->order(['user_id' => $good->id, 'total_cents' => 1000]);
 
-        $metrics = new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d'));
+        $metrics = new DashboardMetrics(DashboardPeriod::resolve('30d'));
         $customers = $metrics->customers();
 
         // One head fewer everywhere: buyers of the period, buyers of all
@@ -916,7 +905,7 @@ class DashboardTest extends TestCase
 
         $banned->forceFill(['banned_at' => null])->save();
 
-        $lifted = new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d'));
+        $lifted = new DashboardMetrics(DashboardPeriod::resolve('30d'));
 
         $this->assertSame($accountsBanned + 1, $lifted->reference()['customers']);
         $this->assertSame($newBanned + 1, $lifted->headline()['new_customers']);
@@ -930,7 +919,7 @@ class DashboardTest extends TestCase
         $banned = User::factory()->create(['banned_at' => now()]);
         $this->order(['user_id' => $banned->id, 'total_cents' => 9000]);
 
-        $metrics = new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d'));
+        $metrics = new DashboardMetrics(DashboardPeriod::resolve('30d'));
 
         $this->assertSame(9000, $metrics->headline()['revenue_cents']);
         $this->assertSame(9000, $metrics->money()['revenue_cents']);
@@ -945,18 +934,18 @@ class DashboardTest extends TestCase
         $coming = Product::factory()->create(['is_active' => true, 'quantity' => 0]);
         Product::factory()->create(['is_active' => true, 'quantity' => 0]);
 
-        $supplier = \App\Models\Supplier::query()->create(['name' => 'Fournisseur', 'lead_time_days' => 5]);
-        $open = \App\Models\PurchaseOrder::query()->create([
+        $supplier = Supplier::query()->create(['name' => 'Fournisseur', 'lead_time_days' => 5]);
+        $open = PurchaseOrder::query()->create([
             'number' => 'BC-ONORDER-1', 'supplier_id' => $supplier->id,
             'supplier_name' => 'Fournisseur', 'status' => 'sent',
         ]);
-        \App\Models\PurchaseOrderItem::query()->create([
+        PurchaseOrderItem::query()->create([
             'purchase_order_id' => $open->id, 'product_id' => $coming->id,
             'name' => $coming->localizedName(), 'sku' => $coming->sku,
             'quantity_ordered' => 10, 'quantity_received' => 0, 'unit_cost_cents' => 500,
         ]);
 
-        $attention = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->attention();
+        $attention = (new DashboardMetrics(DashboardPeriod::resolve('30d')))->attention();
         $chip = $attention->firstWhere('key', 'out-of-stock');
 
         $this->assertSame(2, $chip['count']);
@@ -970,18 +959,18 @@ class DashboardTest extends TestCase
     {
         $product = Product::factory()->create(['is_active' => true, 'quantity' => 0]);
 
-        $supplier = \App\Models\Supplier::query()->create(['name' => 'Fournisseur', 'lead_time_days' => 5]);
-        $closed = \App\Models\PurchaseOrder::query()->create([
+        $supplier = Supplier::query()->create(['name' => 'Fournisseur', 'lead_time_days' => 5]);
+        $closed = PurchaseOrder::query()->create([
             'number' => 'BC-DONE-1', 'supplier_id' => $supplier->id,
             'supplier_name' => 'Fournisseur', 'status' => 'received',
         ]);
-        \App\Models\PurchaseOrderItem::query()->create([
+        PurchaseOrderItem::query()->create([
             'purchase_order_id' => $closed->id, 'product_id' => $product->id,
             'name' => $product->localizedName(), 'sku' => $product->sku,
             'quantity_ordered' => 10, 'quantity_received' => 10, 'unit_cost_cents' => 500,
         ]);
 
-        $chip = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))
+        $chip = (new DashboardMetrics(DashboardPeriod::resolve('30d')))
             ->attention()->firstWhere('key', 'out-of-stock');
 
         // Nothing on its way: the chip carries no empty bracket.
@@ -1002,7 +991,7 @@ class DashboardTest extends TestCase
             ]);
         }
 
-        $marketplace = \App\Models\Marketplace::query()->create(['name' => 'NaturaBuy']);
+        $marketplace = Marketplace::query()->create(['name' => 'NaturaBuy']);
         $sold = $this->order([
             'total_cents' => 2000,
             'marketplace_id' => $marketplace->id,
@@ -1014,7 +1003,7 @@ class DashboardTest extends TestCase
             'unit_price_cents' => 2000, 'line_cents' => 2000,
         ]);
 
-        $orders = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->recentOrders();
+        $orders = (new DashboardMetrics(DashboardPeriod::resolve('30d')))->recentOrders();
 
         // The units in the box, not the number of references: three targets
         // and one roll make four items to pack.
@@ -1045,7 +1034,7 @@ class DashboardTest extends TestCase
             ]);
         }
 
-        $row = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->topProducts()->first();
+        $row = (new DashboardMetrics(DashboardPeriod::resolve('30d')))->topProducts()->first();
 
         $this->assertSame(5, $row['quantity']);
         $this->assertSame(3100, $row['revenue_cents']);
@@ -1071,7 +1060,7 @@ class DashboardTest extends TestCase
             'unit_price_cents' => 1000, 'line_cents' => 2000,
         ]);
 
-        $row = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->topProducts()->first();
+        $row = (new DashboardMetrics(DashboardPeriod::resolve('30d')))->topProducts()->first();
 
         $this->assertSame(1000, $row['unit_price_cents']);
         $this->assertSame(300, $row['unit_cost_cents']);
@@ -1090,7 +1079,7 @@ class DashboardTest extends TestCase
             'unit_price_cents' => 2000, 'line_cents' => 2000,
         ]);
 
-        $row = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->topProducts()->first();
+        $row = (new DashboardMetrics(DashboardPeriod::resolve('30d')))->topProducts()->first();
 
         $this->assertNull($row['unit_cost_cents']);
     }
@@ -1107,7 +1096,7 @@ class DashboardTest extends TestCase
             'unit_price_cents' => 500, 'line_cents' => 500,
         ]);
 
-        $row = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->topProducts()->first();
+        $row = (new DashboardMetrics(DashboardPeriod::resolve('30d')))->topProducts()->first();
 
         $this->assertNull($row['sku']);
         $this->assertSame(500, $row['unit_price_cents']);
@@ -1118,7 +1107,7 @@ class DashboardTest extends TestCase
         $product = Product::factory()->create(['is_active' => true, 'quantity' => 4, 'price_cents' => 1000]);
         $this->receive($product, 10, 250); // 3,00 € TTC l'unité
 
-        $stock = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->stockValue();
+        $stock = (new DashboardMetrics(DashboardPeriod::resolve('30d')))->stockValue();
 
         // 4 × 10,00 € on the shelf against 4 × 3,00 € paid.
         $this->assertSame(4000, $stock['retail_cents']);
@@ -1137,7 +1126,7 @@ class DashboardTest extends TestCase
 
         Product::factory()->create(['is_active' => true, 'quantity' => 5, 'price_cents' => 4000]);
 
-        $stock = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->stockValue();
+        $stock = (new DashboardMetrics(DashboardPeriod::resolve('30d')))->stockValue();
 
         $this->assertSame(22000, $stock['retail_cents']);
         $this->assertSame(2000, $stock['retail_of_valued_cents']);
@@ -1150,7 +1139,7 @@ class DashboardTest extends TestCase
     {
         $product = Product::factory()->create(['is_active' => true, 'quantity' => 3, 'price_cents' => 2000]);
 
-        \App\Models\Discount::query()->create([
+        Discount::query()->create([
             'product_id' => $product->id,
             'type' => 'percentage',
             'value' => 25,
@@ -1158,7 +1147,7 @@ class DashboardTest extends TestCase
             'ends_at' => now()->addDay(),
         ]);
 
-        $stock = (new \App\Services\DashboardMetrics(DashboardPeriod::resolve('30d')))->stockValue();
+        $stock = (new DashboardMetrics(DashboardPeriod::resolve('30d')))->stockValue();
 
         // 3 × 15,00 €, the price a customer pays today.
         $this->assertSame(4500, $stock['retail_cents']);

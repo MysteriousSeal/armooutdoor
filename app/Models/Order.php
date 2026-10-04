@@ -346,9 +346,9 @@ class Order extends Model
      * average purchase cost — a margin figure, distinct from the deducted
      * costs above (commission, shipping, fees) which never touch the goods.
      *
-     * Null the moment one line can't be priced — a deleted product, or one
-     * never yet received on a purchase order — rather than silently summing
-     * only the lines that can: a partial total reads as a complete one.
+     * A line that can't be priced (a deleted product, one never yet received
+     * on a purchase order, or a custom line entered without a cost) counts
+     * at MISSING_UNIT_COST_CENTS per unit, so the order still gets a figure.
      *
      * @param  array<int, int>  $averageCostsByProductId  From
      *                                                    Product::averagePurchaseCostsInclVatCents(), keyed by product id.
@@ -365,22 +365,12 @@ class Order extends Model
 
         foreach ($this->items as $item) {
             // An off-catalogue line has no purchase history: it counts at the
-            // cost it was entered with, and leaves the total unknown without.
-            if ($item->is_custom) {
-                if ($item->unit_cost_incl_vat_cents === null) {
-                    return null;
-                }
+            // cost it was entered with.
+            $unitCostCents = $item->is_custom
+                ? $item->unit_cost_incl_vat_cents
+                : ($item->product_id === null ? null : ($averageCostsByProductId[$item->product_id] ?? null));
 
-                $total += $item->unit_cost_incl_vat_cents * $item->quantity;
-
-                continue;
-            }
-
-            if ($item->product_id === null || ! array_key_exists($item->product_id, $averageCostsByProductId)) {
-                return null;
-            }
-
-            $total += $averageCostsByProductId[$item->product_id] * $item->quantity;
+            $total += ($unitCostCents ?? self::MISSING_UNIT_COST_CENTS) * $item->quantity;
         }
 
         return $total;
@@ -388,9 +378,7 @@ class Order extends Model
 
     /**
      * What actually landed, minus what the goods cost — the margin figure.
-     * Null whenever the product cost is (see productCostInclVatCents()):
-     * a profit computed over an unknown cost would be a guess dressed up
-     * as a number.
+     * Null whenever the product cost is (see productCostInclVatCents()).
      */
     public function profitInclVatCents(array $averageCostsByProductId): ?int
     {
@@ -402,7 +390,7 @@ class Order extends Model
     /**
      * The profit as a share of what the goods cost, e.g. "62,0 %" — how much
      * each euro spent on stock brought back. Null whenever the profit is
-     * (an unpriced line), and null too when the goods cost nothing: a
+     * (an order with no lines), and null too when the goods cost nothing: a
      * percentage of zero is a division, not a figure.
      */
     public function profitPercentageOfProductCost(array $averageCostsByProductId): ?float
@@ -571,6 +559,12 @@ class Order extends Model
     public const MISSING_PACKAGE_PHOTO_SQL = 'package_photo_path is null and package_photo_unavailable_at is null';
 
     public const MISSING_SHIPPING_LABEL_SQL = 'shipping_label_path is null and created_at >= ?';
+
+    /**
+     * The unit cost, incl. VAT, of a line whose real cost is unknown: 0,01 €,
+     * so the order still gets a product cost and a profit.
+     */
+    public const MISSING_UNIT_COST_CENTS = 1;
 
     /** The binding MISSING_SHIPPING_LABEL_SQL takes: the cut-off, from midnight. */
     public static function shippingLabelsKeptSinceTimestamp(): string

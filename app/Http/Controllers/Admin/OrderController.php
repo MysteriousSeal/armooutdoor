@@ -225,11 +225,9 @@ class OrderController extends Controller
      */
     /**
      * The Profit KPI card's numbers: total profit, how many orders it was
-     * drawn from, and how many exist in scope. An order whose product cost
-     * can't be priced (a deleted product, or one with no purchase history)
-     * is left out entirely rather than silently treated as zero — the card
-     * says how many orders that affects, the same honesty as the dash on
-     * each row.
+     * drawn from, and how many exist in scope. A line with no known cost
+     * counts at Order::MISSING_UNIT_COST_CENTS per unit, so only an order
+     * with no lines at all is left out.
      *
      * The fourth figure is the product cost those priced orders carried,
      * which is what the profit percentage is a share of.
