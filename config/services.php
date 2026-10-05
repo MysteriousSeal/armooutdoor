@@ -81,6 +81,17 @@ return [
         'secret_key' => env('SENDCLOUD_SECRET_KEY'),
     ],
 
+    /*
+     * "Continuer avec Google" on the login and register pages. Without both
+     * values the button is not shown and its routes answer 404. The callback
+     * to authorise in the Google Cloud console is /auth/google/callback.
+     */
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => '/auth/google/callback',
+    ],
+
     'stripe' => [
         'key' => env('STRIPE_KEY'),
         'secret' => env('STRIPE_SECRET'),

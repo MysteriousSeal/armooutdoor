@@ -6454,6 +6454,93 @@ body.lightbox-open {
     text-decoration: underline;
 }
 
+/*
+ * "Continuer avec Google". Google's brand rules set the neutral colours and
+ * the four-colour mark; the shape and the type stay the shop's, so the
+ * button sits in the card like the others rather than as a pasted widget.
+ */
+.auth-google {
+    margin-top: 1.5rem;
+}
+
+.auth-google + .auth-form {
+    margin-top: 0;
+}
+
+.btn-google {
+    gap: 0.75rem;
+    min-height: 2.75rem;
+    color: #1f1f1f;
+    background: #ffffff;
+    border-color: #747775;
+}
+
+.btn-google:hover {
+    background: #f6f6f6;
+}
+
+.btn-google:active {
+    background: #ececec;
+}
+
+.btn-google:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.btn-google-mark {
+    flex-shrink: 0;
+}
+
+[data-theme='dark'] .btn-google {
+    color: #e3e3e3;
+    background: #131314;
+    border-color: #8e918f;
+}
+
+[data-theme='dark'] .btn-google:hover {
+    background: #1e1e20;
+}
+
+[data-theme='dark'] .btn-google:active {
+    background: #28282a;
+}
+
+.auth-google .form-error {
+    margin-top: 0.625rem;
+}
+
+.auth-google-note {
+    margin-top: 0.625rem;
+    font-size: 0.75rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+}
+
+.auth-google-note a {
+    color: inherit;
+    text-decoration: underline;
+}
+
+/* A hairline either side of the words, so the two ways in read as peers. */
+.auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    margin: 1.25rem 0;
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+    color: var(--text-muted);
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+
 .auth-legal-note a:hover {
     color: var(--accent-hover);
 }

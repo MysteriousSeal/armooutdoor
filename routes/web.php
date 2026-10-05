@@ -53,6 +53,7 @@ use App\Http\Controllers\Admin\VintedListingController;
 // Auth (customer-facing login/register/password reset)
 use App\Http\Controllers\AllProductsController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 // Storefront (shop, cart, checkout, orders, etc.)
@@ -588,6 +589,11 @@ Route::middleware('guest')->group(function () {
         ->name('login.store');
     Route::get('/register', [RegisterController::class, 'create'])->name('register');
     Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
+
+    Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('auth.google');
+    Route::get('/auth/google/callback', [GoogleController::class, 'callback'])
+        ->middleware('throttle:10,1')
+        ->name('auth.google.callback');
 
     Route::get('/forgot-password', [ForgotPasswordController::class, 'create'])->name('password.request');
     // Looser than it looks: the controller already holds each address to one

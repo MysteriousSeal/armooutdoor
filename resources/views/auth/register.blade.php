@@ -13,6 +13,8 @@
                 <h1>{{ __('store.register_title') }}</h1>
                 <p class="auth-card-intro">{{ __('store.register_intro') }}</p>
 
+                @include('auth.partials.google')
+
                 <form method="POST" action="{{ localized_route('register.store') }}" class="auth-form" novalidate data-register-form>
                     @csrf
 

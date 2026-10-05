@@ -13,6 +13,8 @@
                 <h1>{{ __('store.login_title') }}</h1>
                 <p class="auth-card-intro">{{ __('store.login_intro') }}</p>
 
+                @include('auth.partials.google')
+
                 <form method="POST" action="{{ localized_route('login.store') }}" class="auth-form">
                     @csrf
 
