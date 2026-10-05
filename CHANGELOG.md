@@ -2,6 +2,19 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-06 · v1.60.0 · build DANSZT
+
+### Storefront
+
+- **Customers can sign in with Google.** The login and register pages open with « Continuer avec Google », above the e-mail form. A first visit opens the account, name and address taken from Google, with the same welcome e-mail and new-customer notice as the form; a returning customer is recognised by their Google account, so a changed address on the Google side changes nothing. The terms are stated under the button, since this path skips the register form's checkbox.
+- **An existing account is joined only when Google answers for its address.** A Gmail address, or one on a Google Workspace domain, signs into the account already holding it. Any other address is sent back to its password, since Google only checked it once. Admin and banned accounts are refused, each with its own message under the button.
+
+### Admin
+
+- **The customer list shows how each customer signs in.** A « Sign-in » column reads Google once the customer has used it, Email otherwise, and the CSV export carries the same column.
+
+**Migration:** one, run with `php artisan migrate`, adding a `google_id` column to `users`. No data changes. `composer install` is needed on deploy: Laravel Socialite joins the dependencies. The button stays hidden until `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are set, from an OAuth client whose redirect URI is `https://armooutdoor.fr/auth/google/callback`.
+
 ## 2026-10-05 · v1.59.1 · build MPXHLG
 
 ### Admin
