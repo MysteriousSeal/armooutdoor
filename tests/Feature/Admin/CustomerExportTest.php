@@ -78,7 +78,7 @@ class CustomerExportTest extends TestCase
     public function test_the_header_row_names_every_column(): void
     {
         $this->assertStringStartsWith(
-            'Name,Email,Orders,Spent,Addresses,Joined',
+            'Name,Email,Orders,Spent,Addresses,Sign-in,Joined',
             $this->export(),
         );
     }
@@ -98,7 +98,15 @@ class CustomerExportTest extends TestCase
         $this->assertSame('2', $row[2]);
         $this->assertSame('40.00', $row[3]);
         $this->assertSame('1', $row[4]);
-        $this->assertSame($customer->created_at->format('Y-m-d'), $row[5]);
+        $this->assertSame('Email', $row[5]);
+        $this->assertSame($customer->created_at->format('Y-m-d'), $row[6]);
+    }
+
+    public function test_a_customer_who_signed_in_with_google_says_so(): void
+    {
+        $this->customer()->forceFill(['google_id' => '1234567890'])->save();
+
+        $this->assertSame('Google', $this->rows($this->export())[0][5]);
     }
 
     public function test_a_test_order_moves_neither_the_count_nor_the_spend(): void

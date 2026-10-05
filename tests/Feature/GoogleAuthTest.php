@@ -195,6 +195,24 @@ class GoogleAuthTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_the_admin_customer_list_shows_the_sign_in(): void
+    {
+        User::factory()->create(['email' => 'form@example.com']);
+        User::factory()->create(['email' => 'google@example.com'])
+            ->forceFill(['google_id' => '1234567890'])->save();
+
+        $html = $this->actingAs(User::factory()->admin()->create())
+            ->get('/admin/customers')
+            ->assertOk()
+            ->assertSee('<th>Sign-in</th>', false)
+            ->getContent();
+
+        $row = fn (string $email): string => substr($html, $start = strpos($html, $email), strpos($html, '</tr>', $start) - $start);
+
+        $this->assertStringContainsString('>Email</span>', $row('form@example.com'));
+        $this->assertStringContainsString('>Google</span>', $row('google@example.com'));
+    }
+
     public function test_the_error_is_shown_on_the_login_page(): void
     {
         $this->googleReturns(['email_verified' => false]);

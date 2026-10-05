@@ -160,6 +160,7 @@
                             <th>Orders</th>
                             <th class="admin-table-num">Spent</th>
                             <th>Addresses</th>
+                            <th>Sign-in</th>
                             <th>Joined</th>
                             <th>Last visit</th>
                             <th></th>
@@ -226,6 +227,11 @@
                                     @else
                                         <span class="admin-table-sub">None</span>
                                     @endif
+                                </td>
+                                <td>
+                                    {{-- Google once the customer has signed in with it, even if
+                                         the account was first opened with the form. --}}
+                                    <span class="admin-table-primary">{{ $customer->google_id !== null ? 'Google' : 'Email' }}</span>
                                 </td>
                                 <td>
                                     <span class="admin-table-primary">{{ $customer->created_at->format('d M Y') }}</span>

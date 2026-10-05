@@ -71,13 +71,14 @@ class CustomerController extends Controller
 
         return Csv::download(
             'customers-'.now()->format('Y-m-d').'.csv',
-            ['Name', 'Email', 'Orders', 'Spent', 'Addresses', 'Joined'],
+            ['Name', 'Email', 'Orders', 'Spent', 'Addresses', 'Sign-in', 'Joined'],
             $customers->map(fn (User $customer): array => [
                 $customer->name,
                 $customer->email,
                 $customer->orders_count,
                 number_format(((int) $customer->spent_cents) / 100, 2, '.', ''),
                 $customer->addresses_count,
+                $customer->google_id !== null ? 'Google' : 'Email',
                 $customer->created_at->format('Y-m-d'),
             ])
         );
