@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-05 · v1.59.1 · build MPXHLG
+
+### Admin
+
+- **The sales journal shows the time of each sale and sorts by it.** Each order and refund line now shows its time under the date, and the lines of a day follow that time instead of the invoice number, hand-written entries closing their day. The time is on screen only: the PDF journal keeps the date alone, and months already filed are not flagged as out of date by the new order.
+
+**No migration.**
+
 ## 2026-10-04 · v1.59.0 · build FNTHY7
 
 ### Admin
