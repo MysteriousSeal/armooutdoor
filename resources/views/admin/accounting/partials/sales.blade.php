@@ -91,7 +91,7 @@
                     <tbody>
                         @foreach ($rows as $row)
                             <tr class="{{ $row['refunded'] ? 'is-refunded' : '' }} {{ $row['kind'] === 'entry' ? 'is-manual' : '' }} {{ $row['kind'] === 'refund' ? 'is-refund' : '' }}">
-                                <td class="accounting-date">{{ $row['date']->format('d/m/Y') }}</td>
+                                <td class="accounting-date">{{ $row['date']->format('d/m/Y') }}@if ($row['time']) <span class="admin-table-sub">{{ $row['time']->format('H:i') }}</span>@endif</td>
                                 <td>
                                     <span class="accounting-invoice">
                                         @if ($row['order'] !== null)

@@ -2,9 +2,12 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Http\Controllers\Admin\AccountingController;
+use App\Models\AccountingEntry;
 use App\Models\Marketplace;
 use App\Models\Order;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Database\Seeders\ShippingSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\TestResponse;
@@ -318,5 +321,64 @@ class AccountingSalesTableTest extends TestCase
             ->getContent();
 
         $this->assertMatchesRegularExpression('#March.*?1 entry#s', $html);
+    }
+
+    public function test_the_screen_shows_the_time_of_a_sale_but_the_pdf_does_not(): void
+    {
+        $order = $this->order('2026-03-05 14:37:00');
+
+        $this->page()
+            ->assertSee('05/03/2026', false)
+            ->assertSee('<span class="admin-table-sub">14:37</span>', false);
+
+        $controller = app(AccountingController::class);
+        $method = new \ReflectionMethod($controller, 'journalData');
+        $pdf = view('admin.accounting.sales-pdf', $method->invoke($controller, CarbonImmutable::parse('2026-03-01')))->render();
+
+        $this->assertStringContainsString($order->number, $pdf);
+        $this->assertStringNotContainsString('14:37', $pdf);
+    }
+
+    public function test_lines_of_a_day_follow_the_time_with_entries_last(): void
+    {
+        // The invoice numbers run the other way from the times, so a sort on
+        // the number would put them backwards.
+        $this->order('2026-03-05 16:05:00', ['number' => 'AO-20260305-AAAA']);
+        $this->order('2026-03-05 09:12:00', ['number' => 'AO-20260305-ZZZZ']);
+        AccountingEntry::query()->create([
+            'section' => 'sales',
+            'entered_on' => '2026-03-05',
+            'invoice_number' => 'A-0001',
+            'type' => 'other',
+            'total_cents' => 1000,
+            'fees_cents' => 0,
+            'payment_method' => 'cash',
+        ]);
+        $this->order('2026-03-06 08:00:00', ['number' => 'AO-20260306-MMMM']);
+
+        $this->page()->assertSeeInOrder([
+            'INV-AO-20260305-ZZZZ',
+            'INV-AO-20260305-AAAA',
+            'A-0001',
+            'INV-AO-20260306-MMMM',
+        ]);
+    }
+
+    public function test_reordering_a_day_does_not_make_a_filed_month_stale(): void
+    {
+        $this->order('2026-03-05 16:05:00', ['number' => 'AO-20260305-AAAA']);
+        $this->order('2026-03-05 09:12:00', ['number' => 'AO-20260305-ZZZZ']);
+
+        // The signature reads the lines by day then invoice, as the journal
+        // was printed before the time decided the order.
+        $controller = app(AccountingController::class);
+        $rowsOf = new \ReflectionMethod($controller, 'rowsOf');
+        $fingerprint = new \ReflectionMethod($controller, 'fingerprint');
+        $rows = $rowsOf->invoke($controller, 'sales', CarbonImmutable::parse('2026-03-01'));
+
+        $this->assertSame(
+            $fingerprint->invoke($controller, $rows->sortBy([['date', 'asc'], ['invoice', 'asc']])->values()),
+            $fingerprint->invoke($controller, $rows),
+        );
     }
 }

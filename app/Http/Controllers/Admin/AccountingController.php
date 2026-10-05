@@ -236,6 +236,9 @@ class AccountingController extends Controller
      * - the printed columns: `invoice`, `client`, `channel`, `type`,
      *   `total_cents`, `fees_cents`, `bonus_cents`, `payment`, `remark`.
      * - `type_fr`, `payment_fr`: the same two labels in French, for the PDF.
+     * - `time`: when the order was placed or refunded, shown on screen only;
+     *   null for an entry. Left out of the sort and the fingerprint, so the
+     *   months already filed keep theirs.
      * - `counts`: whether the line joins the totals. False for a refund
      *   marked before REFUND_LINES_SINCE.
      * - `refunded`: whether to strike it through.
@@ -253,6 +256,7 @@ class AccountingController extends Controller
             ...$this->orderRow($order),
             'kind' => 'order',
             'date' => $order->created_at->startOfDay(),
+            'time' => $order->created_at,
             'invoice' => 'INV-'.$order->number,
             'type' => 'Stock sale',
             // The accounting documents are in French; the screen stays in
@@ -270,6 +274,7 @@ class AccountingController extends Controller
                 ...$sale,
                 'kind' => 'refund',
                 'date' => $order->refundedAt()->startOfDay(),
+                'time' => $order->refundedAt(),
                 'invoice' => 'RFD-'.$order->number,
                 'type' => 'Refund',
                 'type_fr' => 'Remboursement',
@@ -291,6 +296,8 @@ class AccountingController extends Controller
             ->map(fn (AccountingEntry $entry): array => [
                 'kind' => 'entry',
                 'date' => $entry->entered_on,
+                // An entry is typed with a day only.
+                'time' => null,
                 'order' => null,
                 'entry' => $entry,
                 'invoice' => $entry->invoice_number ?: '—',
@@ -310,12 +317,19 @@ class AccountingController extends Controller
             ]);
 
         // `toBase()` first: merging arrays into an Eloquent collection makes
-        // it try to read a key off each one. The invoice number breaks ties so
-        // two lines of the same day keep a stable order between page loads.
+        // it try to read a key off each one. Within a day, lines follow the
+        // time they happened; an entry has none, so it closes its day. The
+        // invoice number breaks the remaining ties so the order stays stable
+        // between page loads.
         return $orders->toBase()
             ->merge($refunds->toBase())
             ->merge($entries->toBase())
-            ->sortBy([['date', 'asc'], ['invoice', 'asc']])
+            ->sortBy(fn (array $row): array => [
+                $row['date']->format('Y-m-d'),
+                $row['time'] === null ? 1 : 0,
+                $row['time']?->format('H:i:s') ?? '',
+                $row['invoice'],
+            ])
             ->values();
     }
 
@@ -475,10 +489,17 @@ class AccountingController extends Controller
      * warning that cries wolf is one nobody reads. A line with no bonus
      * prints the same dash as before, so it has nothing new to say.
      *
+     * The lines are read in the order the journal used to print them, by day
+     * then invoice number, whatever order the page now shows: reordering the
+     * lines within a day changes no figure, and must not make every month
+     * already filed look out of date.
+     *
      * @param  Collection<int, array<string, mixed>>  $rows
      */
     private function fingerprint(Collection $rows): string
     {
+        $rows = $rows->sortBy(fn (array $row): array => [$row['date']->format('Y-m-d'), $row['invoice']]);
+
         return hash('sha256', $rows->map(function (array $row): string {
             $fields = [
                 $row['date']->format('Y-m-d'),
