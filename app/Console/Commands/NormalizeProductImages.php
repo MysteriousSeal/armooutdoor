@@ -12,7 +12,7 @@ use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
 
 #[Signature('app:normalize-product-images')]
-#[Description('Resize every product/gallery/variant image to 1000x1000 WebP, and regenerate its thumbnail')]
+#[Description('Resize every product/gallery/variant image to a square WebP (1000 to 1600 px), and regenerate its thumbnail')]
 class NormalizeProductImages extends Command
 {
     public function handle(): int

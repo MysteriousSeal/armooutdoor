@@ -15,7 +15,14 @@ class ImageThumbnailer
 
     public const LANDSCAPE_CARD_HEIGHT = 450;
 
-    public const MAIN_SIZE = 1000;
+    /**
+     * Largest side of a product image. Google Merchant Center counts an
+     * image as high resolution only above 1024 px, hence the headroom.
+     */
+    public const MAIN_SIZE = 1600;
+
+    /** Smallest side a product image is brought up to, as it always was. */
+    public const MAIN_MIN_SIZE = 1000;
 
     /** Vinted : le plus petit côté d'une photo mise en ligne. */
     public const MIN_SIDE = 1000;
@@ -59,15 +66,27 @@ class ImageThumbnailer
     }
 
     /**
-     * Normalizes a local image to exactly 1000x1000 WebP — scaled to fit
-     * (never cropped, since the product stage displays with object-fit:
-     * contain) and padded with transparency. Returns the new relative path
+     * Normalizes a local image to a square WebP — scaled to fit (never
+     * cropped, since the product stage displays with object-fit: contain)
+     * and padded with transparency. The square follows the source's longest
+     * side, kept between MAIN_MIN_SIZE and MAIN_SIZE: an upscaled photo adds
+     * no detail, and Google flags it. Returns the new relative path
      * (extension may have changed), or null for remote/unreadable images.
-     * Idempotent: an image that's already 1000x1000 WebP is left alone.
+     * Idempotent: an image already square WebP at that size is left alone,
+     * so the existing 1000x1000 images stay as they are.
      */
     public static function normalizeMain(string $relativePath): ?string
     {
-        return self::normalizeSquare($relativePath, self::MAIN_SIZE);
+        return self::normalizeSquare($relativePath, self::mainSizeFor($relativePath));
+    }
+
+    /** The side of the square normalizeMain() produces for this image. */
+    public static function mainSizeFor(string $relativePath): int
+    {
+        $imageSize = @getimagesize(public_path('images/'.$relativePath));
+        $longest = $imageSize ? max($imageSize[0], $imageSize[1]) : self::MAIN_SIZE;
+
+        return max(self::MAIN_MIN_SIZE, min(self::MAIN_SIZE, $longest));
     }
 
     /**
