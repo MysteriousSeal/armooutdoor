@@ -36,8 +36,12 @@
     @hasSection('canonical')
         <link rel="canonical" href="@yield('canonical')">
     @endif
+    {{-- Without a page of its own, Google may use the full-size photos in
+         search and Shopping, which Merchant Center asks for. --}}
     @hasSection('robots')
         <meta name="robots" content="@yield('robots')">
+    @else
+        <meta name="robots" content="max-image-preview:large">
     @endif
     @include('partials.social-meta')
     <link rel="preload" href="{{ asset('fonts/inter-latin.woff2') }}" as="font" type="font/woff2" crossorigin>

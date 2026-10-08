@@ -140,7 +140,8 @@ class ProductUnavailablePageTest extends TestCase
         $response = $this->get('/products/'.$product->slug)
             ->assertOk()
             ->assertHeaderMissing('X-Robots-Tag')
-            ->assertDontSee('<meta name="robots"', false);
+            ->assertSee('<meta name="robots" content="max-image-preview:large">', false)
+            ->assertDontSee('noindex', false);
 
         preg_match('#<link rel="canonical" href="([^"]+)"#', $response->getContent(), $canonical);
         $this->assertSame(url('/products/'.$product->slug), $canonical[1] ?? null);

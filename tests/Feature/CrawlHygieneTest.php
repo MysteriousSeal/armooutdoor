@@ -36,8 +36,10 @@ class CrawlHygieneTest extends TestCase
         $this->get('/robots.txt')->assertOk()->assertDontSee('Disallow: /search');
     }
 
-    public function test_an_ordinary_page_asks_for_nothing(): void
+    public function test_an_ordinary_page_only_offers_its_large_images(): void
     {
-        $this->get('/')->assertOk()->assertDontSee('name="robots"', false);
+        $this->get('/')->assertOk()
+            ->assertSee('<meta name="robots" content="max-image-preview:large">', false)
+            ->assertDontSee('noindex', false);
     }
 }
