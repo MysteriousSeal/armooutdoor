@@ -8,6 +8,7 @@ use App\Models\NaturabuyListing;
 use App\Models\OctopiaTemplate;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Models\VintedItem;
 use App\Services\Naturabuy\NaturabuySynchronizer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -30,6 +31,7 @@ class MarketplaceListingController extends Controller
             'naturabuyCount' => $this->openListings()->count(),
             'naturabuySyncedAt' => NaturabuyListing::query()->max('synced_at'),
             'octopiaTemplates' => OctopiaTemplate::query()->count(),
+            'vintedItems' => VintedItem::query()->available()->count(),
         ]);
     }
 

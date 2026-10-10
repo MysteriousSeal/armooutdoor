@@ -13306,6 +13306,100 @@ a.order-stepper-btn:focus-visible {
     white-space: nowrap;
 }
 
+/* ------------------------------------------------- a Vinted-only item's page */
+
+/* Two columns: the item on the left, its stock on the right. One under the
+   other once the right-hand table would no longer have room. */
+.vinted-item-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+}
+
+@media (max-width: 1240px) {
+    .vinted-item-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* The column sets the width here, not the card's own cap. */
+.vinted-item-grid .admin-form-card--solo {
+    max-width: none;
+}
+
+/* Several cards down one column, each its own form or its own figures. */
+.vinted-item-card {
+    margin-top: 1rem;
+}
+
+.vinted-item-col > .vinted-item-card:first-child {
+    margin-top: 0;
+}
+
+/* The photo on file, above the field that replaces it: a block of its own,
+   so the field does not ride up against it. */
+.vinted-item-image {
+    display: block;
+    width: 5.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.vinted-item-image .admin-product-thumb {
+    display: block;
+    width: 5.5rem;
+    height: 5.5rem;
+}
+
+.vinted-item-summary {
+    margin: 0 0 1rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.vinted-item-summary strong {
+    color: var(--text);
+}
+
+/* Half a page wide, these tables have no room to give: the date stays on
+   one line and the Remove cell takes only what its button needs. */
+.vinted-item-date {
+    white-space: nowrap;
+}
+
+.vinted-item-table th,
+.vinted-item-table td {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    white-space: nowrap;
+}
+
+/* A piece sold under what it cost: the one figure that should stop the eye. */
+.vinted-item-loss,
+.vinted-item-summary strong.vinted-item-loss {
+    color: var(--danger, #a44);
+}
+
+/* The button and what it does on one line, centred on each other. */
+.vinted-item-action {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.875rem;
+    margin-top: 1rem;
+}
+
+.vinted-item-action .form-hint {
+    margin: 0;
+}
+
+/* The last thing in a card adds nothing under it: the card's own padding
+   is the gap. */
+.vinted-item-card > .form-hint:last-child,
+.vinted-item-card > .form-actions:last-child {
+    margin-bottom: 0;
+}
+
 /* ------------------------------------------------------ the Cdiscount page */
 
 /* A readable width: full screen spread the columns of every table a hand's

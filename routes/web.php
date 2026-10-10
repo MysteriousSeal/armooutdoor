@@ -49,6 +49,7 @@ use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\ShippingSettingController as AdminShippingSettingController;
 use App\Http\Controllers\Admin\StripePaymentController as AdminStripePaymentController;
 use App\Http\Controllers\Admin\SupplierController as AdminSupplierController;
+use App\Http\Controllers\Admin\VintedItemController;
 use App\Http\Controllers\Admin\VintedListingController;
 // Auth (customer-facing login/register/password reset)
 use App\Http\Controllers\AllProductsController;
@@ -322,6 +323,18 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         Route::post('/marketplaces/cdiscount/submissions/{submission}/check', [OctopiaController::class, 'checkSubmission'])->name('marketplaces.cdiscount.submissions.check');
         Route::delete('/marketplaces/cdiscount/categories/{template}', [OctopiaController::class, 'destroyCategory'])->name('marketplaces.cdiscount.categories.destroy');
         Route::post('/marketplaces/naturabuy/sync', [AdminMarketplaceListingController::class, 'syncNaturabuy'])->name('marketplaces.naturabuy.sync');
+        // Vinted: the articles sold there and nowhere else, kept by hand.
+        // They are not products, so the storefront never sees them.
+        Route::get('/marketplaces/vinted', [VintedItemController::class, 'index'])->name('marketplaces.vinted');
+        Route::get('/marketplaces/vinted/items/create', [VintedItemController::class, 'create'])->name('marketplaces.vinted.items.create');
+        Route::post('/marketplaces/vinted/items', [VintedItemController::class, 'store'])->name('marketplaces.vinted.items.store');
+        Route::get('/marketplaces/vinted/items/{vintedItem}/edit', [VintedItemController::class, 'edit'])->name('marketplaces.vinted.items.edit');
+        Route::put('/marketplaces/vinted/items/{vintedItem}', [VintedItemController::class, 'update'])->name('marketplaces.vinted.items.update');
+        Route::post('/marketplaces/vinted/items/{vintedItem}/sold', [VintedItemController::class, 'sold'])->name('marketplaces.vinted.items.sold');
+        Route::delete('/marketplaces/vinted/items/{vintedItem}/sales/{vintedSale}', [VintedItemController::class, 'removeSale'])->name('marketplaces.vinted.items.sales.destroy');
+        Route::delete('/marketplaces/vinted/items/{vintedItem}', [VintedItemController::class, 'destroy'])->name('marketplaces.vinted.items.destroy');
+        Route::post('/marketplaces/vinted/items/{vintedItem}/lots', [VintedItemController::class, 'addLot'])->name('marketplaces.vinted.items.lots.store');
+        Route::delete('/marketplaces/vinted/items/{vintedItem}/lots/{vintedLot}', [VintedItemController::class, 'removeLot'])->name('marketplaces.vinted.items.lots.destroy');
 
         // Blog
         Route::get('/blog', [AdminBlogPostController::class, 'index'])->name('blog.index');

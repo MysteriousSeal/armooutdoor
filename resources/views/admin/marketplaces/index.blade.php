@@ -20,10 +20,14 @@
                 {{-- Cdiscount has a page of its own too, though nothing is synced:
                      it holds Octopia's templates and the export made from them. --}}
                 @php($octopia = $marketplace->name === 'CDiscount')
-                @php($link = $connected || $octopia)
+                {{-- Vinted has no API either: its page is the list of what is
+                     sold there only, kept by hand. --}}
+                @php($vinted = $marketplace->name === 'Vinted')
+                @php($link = $connected || $octopia || $vinted)
                 <{{ $link ? 'a' : 'div' }}
                     @if ($connected) href="{{ route('admin.marketplaces.naturabuy') }}" @endif
                     @if ($octopia) href="{{ route('admin.marketplaces.cdiscount') }}" @endif
+                    @if ($vinted) href="{{ route('admin.marketplaces.vinted') }}" @endif
                     class="marketplace-card{{ $link ? ' is-connected' : '' }}"
                 >
                     <span class="marketplace-card-head">
@@ -51,6 +55,10 @@
                         <span class="marketplace-card-figure">{{ number_format($octopiaTemplates) }}</span>
                         <span class="marketplace-card-label">{{ $octopiaTemplates === 1 ? 'template' : 'templates' }}</span>
                         <span class="marketplace-card-foot">Filled by hand, through Octopia</span>
+                    @elseif ($vinted)
+                        <span class="marketplace-card-figure">{{ number_format($vintedItems) }}</span>
+                        <span class="marketplace-card-label">{{ $vintedItems === 1 ? 'item' : 'items' }} to sell</span>
+                        <span class="marketplace-card-foot">Sold on Vinted only, never on the shop</span>
                     @else
                         <span class="marketplace-card-figure marketplace-card-figure--muted">—</span>
                         <span class="marketplace-card-label">not connected</span>

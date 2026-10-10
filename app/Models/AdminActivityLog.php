@@ -54,6 +54,7 @@ class AdminActivityLog extends Model
             PackageType::class => 'Package type',
             Carrier::class => 'Carrier',
             Conversation::class => 'Conversation',
+            VintedItem::class => 'Vinted item',
             default => 'Item',
         };
     }

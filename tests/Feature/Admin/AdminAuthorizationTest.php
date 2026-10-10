@@ -28,6 +28,7 @@ use App\Models\ProductVariant;
 use App\Models\PurchaseOrder;
 use App\Models\Supplier;
 use App\Models\User;
+use App\Models\VintedItem;
 use App\Models\VintedListing;
 use App\Models\VintedListingImage;
 use App\Support\AccountingPeriods;
@@ -141,6 +142,16 @@ class AdminAuthorizationTest extends TestCase
             'sort_order' => 1,
         ]);
 
+        // A Vinted-only item: same reason again.
+        $vintedItem = VintedItem::query()->create([
+            'title' => 'Audit item',
+            'purchase_total_cents' => 1000,
+            'lot_quantity' => 2,
+            'quantity' => 2,
+        ]);
+        $vintedLot = $vintedItem->lots()->create(['quantity' => 2, 'purchase_total_cents' => 1000]);
+        $vintedSale = $vintedItem->sales()->create(['price_cents' => 900]);
+
         // A gallery photo of the product: same reason as the Vinted one.
         $productPhoto = ProductImage::query()->create([
             'product_id' => $product->id,
@@ -217,6 +228,9 @@ class AdminAuthorizationTest extends TestCase
             'document' => $identityDocument->id,
             'image' => $vintedImage->id,
             'listing' => $vintedListing->id,
+            'vintedItem' => $vintedItem->id,
+            'vintedLot' => $vintedLot->id,
+            'vintedSale' => $vintedSale->id,
             'photo' => $productPhoto->id,
             'position' => 1,
             'template' => $octopiaTemplate->id,
