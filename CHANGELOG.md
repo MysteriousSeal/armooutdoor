@@ -2,6 +2,21 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-10 · v1.61.0 · build YAWCFW
+
+### Storefront
+
+- **Google may show the large product photos.** Every page that search engines can index now tells Google it may use the full-size images in search and Shopping, which Merchant Center asks for.
+
+### Admin
+
+- **Vinted has a page of its own, for what is sold there and nowhere else.** The Vinted card on the Marketplaces page opens a list kept by hand: a photo, a title, what the lot cost and how many pieces are left. These items are not products, so none of them can appear on the shop. An item whose last piece is sold moves to a « Sold out » tab.
+- **Each Vinted item keeps its purchases.** « Add stock » on the item page records more pieces bought, with what that lot cost; the cost per piece is the average over every lot. A lot entered by mistake can be removed, except the first one, and only while the stock left still covers it.
+- **Each sale on Vinted is recorded with its price.** « Sold » on the item page asks what the piece went for and takes it off the stock. The item page lists every sale with its margin against the average cost, and the list shows what each item brought in and its profit, a loss in red. Removing a sale puts its piece back.
+- **Product photos are kept up to 1600 px.** A photo uploaded larger than 1000 px is now saved at its own size, up to 1600 px, so Google counts it as high resolution. Smaller photos are still brought up to 1000 px, and the photos already on file are left as they are.
+
+**Migration:** three, run with `php artisan migrate`, creating the `vinted_items`, `vinted_item_lots` and `vinted_item_sales` tables. No data changes.
+
 ## 2026-10-06 · v1.60.0 · build DANSZT
 
 ### Storefront
