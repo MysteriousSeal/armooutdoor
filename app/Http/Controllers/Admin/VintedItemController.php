@@ -8,6 +8,7 @@ use App\Models\VintedItem;
 use App\Models\VintedItemLot;
 use App\Models\VintedItemSale;
 use App\Support\ImageThumbnailer;
+use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -93,7 +94,7 @@ class VintedItemController extends Controller
     }
 
     /**
-     * The title and the photo only. What was paid and how many there are
+     * The title, the photo and the link to the listing only. What was paid and how many there are
      * change through the lots and the Sold button, never by typing over them.
      */
     public function update(Request $request, VintedItem $vintedItem): RedirectResponse
@@ -102,9 +103,18 @@ class VintedItemController extends Controller
             'title' => ['required', 'string', 'max:255'],
             // Optional here: the photo already on file stays unless replaced.
             'image' => [filled($vintedItem->image) ? 'nullable' : 'required', 'image', 'max:8192'],
+            'vinted_url' => ['nullable', 'string', 'max:500', 'url:https', function (string $attribute, mixed $value, Closure $fail): void {
+                // One of Vinted's own sites, whatever the country: a link
+                // pasted from elsewhere is a slip, not a listing.
+                $host = (string) parse_url((string) $value, PHP_URL_HOST);
+
+                if (! preg_match('/^(www\.)?vinted\.[a-z]{2,3}(\.[a-z]{2})?$/i', $host)) {
+                    $fail('The Vinted link must be an address on Vinted, such as https://www.vinted.fr/items/…');
+                }
+            }],
         ]);
 
-        $changes = ['title' => $data['title']];
+        $changes = ['title' => $data['title'], 'vinted_url' => $data['vinted_url'] ?? null];
 
         $replaced = null;
 

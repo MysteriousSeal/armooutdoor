@@ -71,6 +71,9 @@
                                 </td>
                                 <td>
                                     <a href="{{ $edit }}" class="admin-table-strong admin-name-clamp">{{ $item->title }}</a>
+                                    @if (filled($item->vinted_url))
+                                        <a href="{{ $item->vinted_url }}" target="_blank" rel="noopener noreferrer" class="admin-table-sub vinted-item-link">View on Vinted</a>
+                                    @endif
                                 </td>
                                 <td class="admin-table-num">{{ format_euros($item->purchase_total_cents) }}</td>
                                 <td class="admin-table-num">{{ format_euros($item->unitCostCents()) }}</td>

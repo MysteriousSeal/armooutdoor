@@ -13361,6 +13361,24 @@ a.order-stepper-btn:focus-visible {
     color: var(--text);
 }
 
+/* The way out to the listing: small like the note it sits in, but plainly
+   something to click. */
+.vinted-item-link,
+.admin-table-sub.vinted-item-link {
+    color: var(--accent-heading);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.vinted-item-link:hover {
+    color: var(--text);
+}
+
+/* Only the words are the link, not the whole width of the cell. */
+.admin-table-sub.vinted-item-link {
+    width: fit-content;
+}
+
 /* Half a page wide, these tables have no room to give: the date stays on
    one line and the Remove cell takes only what its button needs. */
 .vinted-item-date {

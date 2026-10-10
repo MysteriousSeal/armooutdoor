@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable([
     'title',
     'image',
+    'vinted_url',
     'purchase_total_cents',
     'lot_quantity',
     'quantity',

@@ -54,6 +54,23 @@
                 @error('image') <p class="form-error">{{ $message }}</p> @enderror
             </div>
 
+            @if ($item->exists)
+                {{-- Filled in once the listing is up: an item is often
+                     recorded before it is posted. --}}
+                <div class="form-group">
+                    <label for="vinted_url">Vinted link</label>
+                    <input type="url" id="vinted_url" name="vinted_url" class="form-control" value="{{ old('vinted_url', $item->vinted_url) }}" maxlength="500" placeholder="https://www.vinted.fr/items/…">
+                    @if (filled($item->vinted_url))
+                        <p class="form-hint">
+                            <a href="{{ $item->vinted_url }}" target="_blank" rel="noopener noreferrer" class="vinted-item-link">View on Vinted</a>
+                        </p>
+                    @else
+                        <p class="form-hint">The address of the listing on Vinted, once it is posted.</p>
+                    @endif
+                    @error('vinted_url') <p class="form-error">{{ $message }}</p> @enderror
+                </div>
+            @endif
+
             @unless ($item->exists)
                 <div class="form-group">
                     <label for="purchase_total">Purchase price (€, whole lot)</label>

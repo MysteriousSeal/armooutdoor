@@ -333,6 +333,80 @@ class VintedItemTest extends TestCase
         $this->assertSame([6000, 4, 3], [$item->purchase_total_cents, $item->lot_quantity, $item->quantity]);
     }
 
+    public function test_the_vinted_link_is_saved_and_shown_on_the_page_and_the_list(): void
+    {
+        $item = $this->item();
+        $admin = $this->admin();
+        $link = 'https://www.vinted.fr/items/1234567890-veste-m65';
+
+        $this->actingAs($admin)
+            ->put(route('admin.marketplaces.vinted.items.update', $item), [
+                'title' => 'Veste M65 olive',
+                'vinted_url' => $link,
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame($link, $item->fresh()->vinted_url);
+
+        foreach ([route('admin.marketplaces.vinted.items.edit', $item), route('admin.marketplaces.vinted')] as $page) {
+            $this->actingAs($admin)
+                ->get($page)
+                ->assertOk()
+                ->assertSee('href="'.$link.'"', false)
+                ->assertSee('View on Vinted');
+        }
+
+        // Emptied, the link goes: the item is no longer posted.
+        $this->actingAs($admin)
+            ->put(route('admin.marketplaces.vinted.items.update', $item), [
+                'title' => 'Veste M65 olive',
+                'vinted_url' => '',
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertNull($item->fresh()->vinted_url);
+    }
+
+    public function test_a_link_that_is_not_on_vinted_is_refused(): void
+    {
+        $item = $this->item();
+
+        foreach ([
+            'https://www.leboncoin.fr/ad/123',
+            'https://vinted.fr.example.com/items/1',
+            'https://notvinted.fr/items/1',
+            'http://www.vinted.fr/items/1',
+            'javascript:alert(1)',
+        ] as $link) {
+            $this->actingAs($this->admin())
+                ->put(route('admin.marketplaces.vinted.items.update', $item), [
+                    'title' => 'Veste M65 olive',
+                    'vinted_url' => $link,
+                ])
+                ->assertSessionHasErrors('vinted_url');
+        }
+
+        $this->assertNull($item->fresh()->vinted_url);
+
+        // The other country sites are Vinted too.
+        foreach (['https://www.vinted.co.uk/items/1', 'https://vinted.com/items/1', 'https://www.vinted.be/items/1'] as $link) {
+            $this->actingAs($this->admin())
+                ->put(route('admin.marketplaces.vinted.items.update', $item), [
+                    'title' => 'Veste M65 olive',
+                    'vinted_url' => $link,
+                ])
+                ->assertSessionHasNoErrors();
+        }
+    }
+
+    public function test_the_add_form_does_not_ask_for_the_link(): void
+    {
+        $this->actingAs($this->admin())
+            ->get(route('admin.marketplaces.vinted.items.create'))
+            ->assertOk()
+            ->assertDontSee('name="vinted_url"', false);
+    }
+
     public function test_a_lot_entered_by_mistake_is_taken_back_off(): void
     {
         $item = $this->item();
