@@ -42,6 +42,27 @@ class AdminCartsTest extends TestCase
             ->assertSee('30,00');
     }
 
+    public function test_every_product_of_a_cart_is_listed_not_only_the_first_three(): void
+    {
+        $shopper = User::factory()->create();
+        $names = [];
+
+        foreach (range(1, 5) as $n) {
+            $product = Product::factory()->create(['name' => ['fr' => 'Article panier '.$n]]);
+            CartItem::create(['user_id' => $shopper->id, 'product_id' => $product->id, 'quantity' => 1]);
+            $names[] = 'Article panier '.$n;
+        }
+
+        $response = $this->actingAsAdmin()->get('/admin/carts')->assertOk();
+
+        foreach ($names as $name) {
+            $response->assertSee($name);
+        }
+
+        // No "+2 more" standing in for the rest.
+        $response->assertDontSee(' more</span>', false);
+    }
+
     public function test_customers_with_an_empty_cart_are_not_listed(): void
     {
         $customer = User::factory()->create(['first_name' => 'Bob', 'last_name' => 'SansPanier']);

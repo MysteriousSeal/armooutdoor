@@ -71,8 +71,6 @@
                                 $lines = $cart['lines'];
                                 $updatedAt = $cart['updatedAt'] ? \Illuminate\Support\Carbon::parse($cart['updatedAt']) : null;
                                 $displayName = $customer->name !== '' ? $customer->name : $customer->email;
-                                $preview = $lines->take(3);
-                                $remaining = $lines->count() - $preview->count();
                             @endphp
                             <tr>
                                 <td>
@@ -80,7 +78,7 @@
                                     <span class="admin-table-sub">{{ $customer->email }}</span>
                                 </td>
                                 <td class="admin-carts-lines">
-                                    @foreach ($preview as $line)
+                                    @foreach ($lines as $line)
                                         <span class="admin-carts-line">
                                             {{ $line->quantity }}&times; {{ $line->product->localizedName() }}
                                             @if ($line->variantLabel())
@@ -88,9 +86,6 @@
                                             @endif
                                         </span>
                                     @endforeach
-                                    @if ($remaining > 0)
-                                        <span class="admin-table-sub">+{{ $remaining }} more</span>
-                                    @endif
                                 </td>
                                 <td class="admin-table-num">{{ number_format($cart['itemCount']) }}</td>
                                 <td class="admin-table-num">{{ format_euros($cart['totalCents']) }}</td>
