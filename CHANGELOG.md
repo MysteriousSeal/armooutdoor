@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-10 · v1.61.2 · build CUKQTP
+
+### Admin
+
+- **The carts page lists every product of a cart.** A row used to show its first three products and « +2 more » for the rest; it now shows them all, each with its quantity.
+
+**No migration.**
+
 ## 2026-10-10 · v1.61.1 · build JII33B
 
 ### Admin
