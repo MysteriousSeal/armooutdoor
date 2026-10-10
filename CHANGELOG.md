@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-10 · v1.61.1 · build JII33B
+
+### Admin
+
+- **A Vinted item can carry the link to its listing.** The item page has an optional « Vinted link » field, filled in once the listing is posted. Only an https address on one of Vinted's own sites is accepted. The link shows as « View on Vinted » on the item page and on its row in the list, and opens in a new tab.
+
+**Migration:** one, run with `php artisan migrate`, adding a `vinted_url` column to `vinted_items`. No data changes.
+
 ## 2026-10-10 · v1.61.0 · build YAWCFW
 
 ### Storefront
