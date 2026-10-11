@@ -1443,9 +1443,13 @@ class OrderController extends Controller
         return back()->with('status', 'Payment fee saved.');
     }
 
+    /**
+     * What the parcel cost to send, on any order: the shop does not always
+     * pay the carrier what the customer was charged for shipping.
+     */
     public function updateShippingPaid(Request $request, Order $order): RedirectResponse
     {
-        abort_unless($order->is_manual && $order->marketplace_id, 404);
+        abort_if($order->isDraft(), 404);
 
         $validated = $request->validate([
             'shipping_paid' => ['nullable', 'numeric', 'min:0', 'max:99999.99'],

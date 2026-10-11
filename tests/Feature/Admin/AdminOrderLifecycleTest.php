@@ -207,9 +207,48 @@ class AdminOrderLifecycleTest extends TestCase
             ->assertNotFound();
     }
 
-    public function test_shipping_paid_is_rejected_for_a_non_marketplace_order(): void
+    public function test_shipping_paid_can_be_saved_on_a_website_order(): void
     {
         $order = $this->order();
+
+        $html = $this->actingAs($this->admin())
+            ->get('/admin/orders/'.$order->number)
+            ->assertOk()
+            ->getContent();
+
+        // Once on the page, and not in a Marketplace section it has none of.
+        $this->assertSame(1, substr_count($html, 'Shipping paid (EUR)'));
+        $this->assertStringNotContainsString('Commission (EUR)', $html);
+
+        $this->actingAs($this->admin())
+            ->patch('/admin/orders/'.$order->number.'/shipping-paid', ['shipping_paid' => '4.50'])
+            ->assertRedirect();
+        $this->assertSame(450, $order->fresh()->shipping_paid_cents);
+
+        // Emptied again: back to "not filled in", which is not zero.
+        $this->actingAs($this->admin())
+            ->patch('/admin/orders/'.$order->number.'/shipping-paid', ['shipping_paid' => ''])
+            ->assertRedirect();
+        $this->assertNull($order->fresh()->shipping_paid_cents);
+    }
+
+    public function test_a_marketplace_order_shows_the_shipping_paid_field_once(): void
+    {
+        $marketplace = Marketplace::query()->create(['name' => 'Vinted']);
+        $order = $this->order();
+        $order->update(['is_manual' => true, 'marketplace_id' => $marketplace->id]);
+
+        $html = $this->actingAs($this->admin())
+            ->get('/admin/orders/'.$order->number)
+            ->assertOk()
+            ->getContent();
+
+        $this->assertSame(1, substr_count($html, 'Shipping paid (EUR)'));
+    }
+
+    public function test_shipping_paid_is_rejected_for_a_draft(): void
+    {
+        $order = $this->order('draft');
 
         $this->actingAs($this->admin())
             ->patch('/admin/orders/'.$order->number.'/shipping-paid', ['shipping_paid' => '4.50'])

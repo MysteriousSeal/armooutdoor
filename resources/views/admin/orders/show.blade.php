@@ -617,26 +617,7 @@
                             <button type="submit" class="btn btn-secondary btn-block">Save commission</button>
                         </form>
 
-                        <form method="POST" action="{{ route('admin.orders.shipping-paid.update', $order) }}" class="order-shipping-form">
-                            @csrf
-                            @method('PATCH')
-                            <div class="order-shipping-field">
-                                <label for="shipping_paid">Shipping paid (EUR)</label>
-                                <input
-                                    type="number"
-                                    id="shipping_paid"
-                                    name="shipping_paid"
-                                    class="order-shipping-input"
-                                    value="{{ old('shipping_paid', $order->shipping_paid_cents !== null ? number_format($order->shipping_paid_cents / 100, 2, '.', '') : '') }}"
-                                    min="0"
-                                    max="99999.99"
-                                    step="0.01"
-                                    placeholder="e.g. 5.00"
-                                >
-                                @error('shipping_paid') <p class="form-error">{{ $message }}</p> @enderror
-                            </div>
-                            <button type="submit" class="btn btn-secondary btn-block">Save shipping paid</button>
-                        </form>
+                        @include('admin.orders.partials.shipping-paid-form')
 
                         {{-- Money the marketplace paid on top of the order. --}}
                         <form method="POST" action="{{ route('admin.orders.marketplace-bonus.update', $order) }}" class="order-shipping-form">
@@ -792,6 +773,12 @@
                             </div>
                             <button type="submit" class="btn btn-secondary btn-block">Save tracking</button>
                         </form>
+
+                        {{-- A marketplace order has this field with its other
+                             costs, in the Marketplace section above. --}}
+                        @unless ($order->is_manual && $order->marketplace_id)
+                            @include('admin.orders.partials.shipping-paid-form')
+                        @endunless
 
                         <div class="order-shipping-form" id="order-shipping-label">
                             <span class="order-shipping-form-title">Shipping label</span>
