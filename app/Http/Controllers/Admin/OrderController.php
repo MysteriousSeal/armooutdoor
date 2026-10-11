@@ -811,6 +811,10 @@ class OrderController extends Controller
         // log keeps what was missing at that moment.
         $missing = $order->missingShippingFiles();
 
+        // Emailed only on the actual move to shipped: marking an order
+        // already on its way again must not write the customer twice.
+        $wasShipped = $order->hasBeenShipped();
+
         $order->markStatus('shipped');
         AdminActivityLog::record(
             'order.shipped',
@@ -818,6 +822,10 @@ class OrderController extends Controller
             'Marked order '.$order->number.' as shipped'
                 .($missing === [] ? '' : ' without '.mb_strtolower(implode(' and ', $missing))),
         );
+
+        if (! $wasShipped) {
+            $order->sendShippedEmail();
+        }
 
         return $this->statusChangeResponse($request, $order, 'Order marked as shipped.');
     }

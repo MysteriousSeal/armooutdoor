@@ -7,6 +7,7 @@ use App\Enums\PaymentMethod;
 use App\Notifications\AdminOrderPlaced;
 use App\Notifications\OrderConfirmed;
 use App\Notifications\OrderPreparing;
+use App\Notifications\OrderShipped;
 use App\Support\AdminMail;
 use App\Support\CustomerMail;
 use App\Support\ShippingEstimate;
@@ -819,6 +820,20 @@ class Order extends Model
 
         CustomerMail::notify($this->user, new OrderPreparing($this),
             'Could not email an order preparation notice.', ['order_id' => $this->id]);
+    }
+
+    /**
+     * Tells the customer their order left, with the tracking when there is
+     * one. Same audience policy as the confirmation.
+     */
+    public function sendShippedEmail(): void
+    {
+        if (! $this->wantsCustomerEmails()) {
+            return;
+        }
+
+        CustomerMail::notify($this->user, new OrderShipped($this),
+            'Could not email an order shipment notice.', ['order_id' => $this->id]);
     }
 
     /**
