@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-11 · v1.62.2 · build TH65KP
+
+### Admin
+
+- **A draft order can record the shipping paid.** Since v1.62.1, saving « Shipping paid (EUR) » on a marketplace draft returned a 404, although the field was shown and had worked before. Saving now works on any order, draft or not, and a draft without a marketplace shows the field too, at the bottom of its Shipping section.
+
+**No migration.**
+
 ## 2026-10-11 · v1.62.1 · build RUR4AN
 
 ### Admin
