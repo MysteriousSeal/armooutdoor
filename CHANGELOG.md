@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-11 · v1.62.1 · build RUR4AN
+
+### Admin
+
+- **Every order can record the shipping actually paid.** The « Shipping paid (EUR) » field was offered on marketplace orders only. A website order, or one typed in by hand without a marketplace, now has it too, in the Shipping section of its page under « Save tracking »; marketplace orders keep it in their Marketplace section. The amount is deducted as it already was for marketplace orders: « −X ship. » in the orders list, a lower perceived total and a lower dashboard profit. An empty field deducts nothing, so past orders are unchanged until filled in. Drafts do not take the field.
+
+**No migration.**
+
 ## 2026-10-11 · v1.62.0 · build GG56KH
 
 ### Storefront
