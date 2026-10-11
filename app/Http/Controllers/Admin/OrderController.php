@@ -1445,12 +1445,11 @@ class OrderController extends Controller
 
     /**
      * What the parcel cost to send, on any order: the shop does not always
-     * pay the carrier what the customer was charged for shipping.
+     * pay the carrier what the customer was charged for shipping. A draft
+     * takes it too: the figure is often known before the order is validated.
      */
     public function updateShippingPaid(Request $request, Order $order): RedirectResponse
     {
-        abort_if($order->isDraft(), 404);
-
         $validated = $request->validate([
             'shipping_paid' => ['nullable', 'numeric', 'min:0', 'max:99999.99'],
         ]);

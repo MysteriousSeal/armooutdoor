@@ -246,13 +246,26 @@ class AdminOrderLifecycleTest extends TestCase
         $this->assertSame(1, substr_count($html, 'Shipping paid (EUR)'));
     }
 
-    public function test_shipping_paid_is_rejected_for_a_draft(): void
+    public function test_shipping_paid_can_be_saved_on_a_draft(): void
     {
-        $order = $this->order('draft');
+        $marketplace = Marketplace::query()->create(['name' => 'Vinted']);
+        $plain = $this->order('draft');
+        $fromMarketplace = $this->order('draft');
+        $fromMarketplace->update(['is_manual' => true, 'marketplace_id' => $marketplace->id]);
 
-        $this->actingAs($this->admin())
-            ->patch('/admin/orders/'.$order->number.'/shipping-paid', ['shipping_paid' => '4.50'])
-            ->assertNotFound();
+        foreach ([$plain, $fromMarketplace] as $draft) {
+            $html = $this->actingAs($this->admin())
+                ->get('/admin/orders/'.$draft->number)
+                ->assertOk()
+                ->getContent();
+
+            $this->assertSame(1, substr_count($html, 'Shipping paid (EUR)'));
+
+            $this->actingAs($this->admin())
+                ->patch('/admin/orders/'.$draft->number.'/shipping-paid', ['shipping_paid' => '4.50'])
+                ->assertRedirect();
+            $this->assertSame(450, $draft->fresh()->shipping_paid_cents);
+        }
     }
 
     public function test_admin_orders_index_can_be_filtered_by_status(): void

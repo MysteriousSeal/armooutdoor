@@ -774,12 +774,6 @@
                             <button type="submit" class="btn btn-secondary btn-block">Save tracking</button>
                         </form>
 
-                        {{-- A marketplace order has this field with its other
-                             costs, in the Marketplace section above. --}}
-                        @unless ($order->is_manual && $order->marketplace_id)
-                            @include('admin.orders.partials.shipping-paid-form')
-                        @endunless
-
                         <div class="order-shipping-form" id="order-shipping-label">
                             <span class="order-shipping-form-title">Shipping label</span>
                             @if ($order->shipping_label_path)
@@ -906,6 +900,12 @@
                                 </form>
                             @endif
                         </div>
+                    @endunless
+
+                    {{-- A marketplace order has this field with its other
+                         costs, in the Marketplace section above. --}}
+                    @unless ($order->is_manual && $order->marketplace_id)
+                        @include('admin.orders.partials.shipping-paid-form')
                     @endunless
                 </section>
 
