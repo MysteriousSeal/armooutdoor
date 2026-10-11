@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-11 · v1.62.0 · build GG56KH
+
+### Storefront
+
+- **The customer gets an email when their order ships.** The preparation email promised a word at shipping time and none followed. Marking an order as shipped now sends « Votre commande est expédiée », with the carrier, the tracking number and a « Suivre mon colis » link to the carrier's page when the order has a tracking number at that moment, and the « Suivre ma commande » button. Marketplace orders and external accounts receive nothing, as with the other order emails, and marking a shipped order as shipped again does not write twice.
+
+**No migration.**
+
 ## 2026-10-10 · v1.61.2 · build CUKQTP
 
 ### Admin
