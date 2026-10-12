@@ -159,6 +159,20 @@ class MerchantFeedTest extends TestCase
         $this->assertStringNotContainsString('CHILD-SKU', $this->get('/feed/google.xml')->getContent());
     }
 
+    public function test_a_product_states_its_aisle_parent_first(): void
+    {
+        $parent = Category::factory()->create(['name' => ['fr' => 'Vêtements', 'en' => 'Clothing']]);
+        $child = Category::factory()->create(['name' => ['fr' => 'Cagoules', 'en' => 'Balaclavas'], 'parent_id' => $parent->id]);
+        Product::factory()->create(['is_active' => true, 'quantity' => 5, 'category_id' => $child->id]);
+        Product::factory()->create(['is_active' => true, 'quantity' => 5, 'category_id' => $parent->id]);
+
+        $xml = $this->get('/feed/google.xml')->getContent();
+
+        // The separator is Google's own; the XML escapes its bracket.
+        $this->assertStringContainsString('<g:product_type>Vêtements &gt; Cagoules</g:product_type>', $xml);
+        $this->assertStringContainsString('<g:product_type>Vêtements</g:product_type>', $xml);
+    }
+
     public function test_an_admin_flips_the_switch_from_the_categories_page(): void
     {
         $category = Category::factory()->create();

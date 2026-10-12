@@ -30,7 +30,7 @@ class MerchantFeedController extends Controller
                 ->where(fn ($query) => $query
                     ->whereNull('parent_id')
                     ->orWhereHas('parent', fn ($parent) => $parent->where('google_feed', true))))
-            ->with(['discount', 'variants', 'images'])
+            ->with(['discount', 'variants', 'images', 'category.parent'])
             ->orderBy('id')
             ->get();
 
@@ -62,6 +62,7 @@ class MerchantFeedController extends Controller
             'g:price' => $this->price($product),
             'g:availability' => $this->availability($product),
             'g:condition' => 'new',
+            'g:product_type' => $this->productType($product),
             'g:brand' => filled($product->brand) ? $product->brand : null,
             'g:gtin' => filled($product->gtin) ? $product->gtin : null,
             // Grams as the catalogue stores them; a product that has not
@@ -91,6 +92,24 @@ class MerchantFeedController extends Controller
         }
 
         return $xml.'</item>';
+    }
+
+    /**
+     * The shop's own aisle, parent first, the way Google reads a path. It is
+     * what lets an Ads campaign follow a whole category instead of a list
+     * of products kept by hand.
+     */
+    private function productType(Product $product): ?string
+    {
+        $category = $product->category;
+
+        if (! $category) {
+            return null;
+        }
+
+        return collect([$category->parent?->localizedName(), $category->localizedName()])
+            ->filter()
+            ->implode(' > ');
     }
 
     /**
