@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-13 · v1.63.0 · build BPFJTR
+
+### Storefront
+
+- **The Google feed states each product's category.** Every product in the Merchant Center feed now carries its category, parent first, as in « Vêtements > Cagoules ». A Google Ads campaign can then advertise a whole category instead of a list of products kept by hand, and a product added to that category later is picked up at Google's next reading of the feed.
+
+**No migration.**
+
 ## 2026-10-11 · v1.62.2 · build TH65KP
 
 ### Admin
