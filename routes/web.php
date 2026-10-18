@@ -401,6 +401,7 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
 
         Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/export', [AdminOrderController::class, 'export'])->name('orders.export');
+        Route::get('/orders/picking-slip', [AdminOrderController::class, 'pickingSlip'])->name('orders.picking-slip');
         Route::get('/orders/create', [AdminOrderController::class, 'create'])->name('orders.create');
         Route::post('/orders', [AdminOrderController::class, 'store'])->name('orders.store');
         Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');

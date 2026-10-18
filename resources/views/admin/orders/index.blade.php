@@ -44,6 +44,7 @@
                 </div>
                 <div class="admin-list-hero-actions">
                     <a href="{{ route('admin.orders.export', request()->query()) }}" class="btn btn-secondary">Export CSV</a>
+                    <a href="{{ route('admin.orders.picking-slip') }}" class="btn btn-secondary">Delivery slip (to prepare)</a>
                     <a href="{{ route('admin.orders.create') }}" class="btn btn-primary">Create manual order</a>
                 </div>
             </div>

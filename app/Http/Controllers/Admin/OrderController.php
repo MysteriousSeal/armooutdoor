@@ -1128,6 +1128,38 @@ class OrderController extends Controller
     }
 
     /**
+     * One slip for the whole batch: every product of the orders still to
+     * ship (placed or preparing, not draft, test or archived), added up per
+     * product and variant. Independent of the list filters on purpose.
+     */
+    public function pickingSlip(): Response
+    {
+        $orders = Order::query()
+            ->whereIn('status', ['placed', 'preparing'])
+            ->whereNull('archived_at')
+            ->excludingTest()
+            ->with('items.product', 'items.variant')
+            ->get();
+
+        $lines = $orders->flatMap->items
+            ->groupBy(fn (OrderItem $item) => $item->product_id.'|'.$item->product_variant_id.'|'.($item->product_id ? '' : $item->localizedName().'|'.$item->variant_label))
+            ->map(fn (Collection $items) => [
+                'item' => $items->first(),
+                'quantity' => $items->sum('quantity'),
+            ])
+            ->sortBy(fn (array $line) => mb_strtolower($line['item']->localizedName().' '.$line['item']->variant_label))
+            ->values();
+
+        $pdf = Pdf::loadView('admin.orders.picking-slip-pdf', [
+            'lines' => $lines,
+            'orderCount' => $orders->count(),
+            'company' => CompanySetting::current(),
+        ])->setPaper('a4');
+
+        return $pdf->download('bdl-a-preparer-'.now()->format('Y-m-d').'.pdf');
+    }
+
+    /**
      * A 70 × 50 mm address label for a Lettre suivie envelope, cut from the
      * same card stock as the discount codes: recipient only, nothing else —
      * the letter has no room for a delivery slip, so the label is the one
