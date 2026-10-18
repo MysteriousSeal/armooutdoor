@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-18 · v1.64.0 · build WZG51Y
+
+### Admin
+
+- **One delivery slip for everything still to prepare.** The Orders page has a new « Delivery slip (to prepare) » button next to « Export CSV ». It downloads a single PDF that adds up every product across the orders in status placed or preparing, with one line per product and variant (picture, name, variant, SKU, quantity), the number of orders and the total number of items. Drafts, test orders and archived orders are left out, and the filters currently applied to the list are ignored, so the slip always covers the whole batch to pick.
+
+**No migration.**
+
 ## 2026-10-13 · v1.63.0 · build BPFJTR
 
 ### Storefront
