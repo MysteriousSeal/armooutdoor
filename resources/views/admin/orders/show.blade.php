@@ -373,9 +373,17 @@
                                     data-confirm-modal="invoice-warning-modal"
                                 @endif
                             >Download invoice</a>
+                            <a
+                                href="{{ route('admin.orders.invoice', [$order, 'brand' => 'swiftshelf']) }}"
+                                class="btn btn-secondary"
+                                @if ($missingInvoiceFields !== [])
+                                    data-confirm-modal="invoice-warning-modal"
+                                @endif
+                            >Download SwiftShelf invoice</a>
                         @endif
                         @if ($order->status === 'refunded')
                             <a href="{{ route('admin.orders.credit-note', $order) }}" class="btn btn-secondary">Download refund note</a>
+                            <a href="{{ route('admin.orders.credit-note', [$order, 'brand' => 'swiftshelf']) }}" class="btn btn-secondary">Download SwiftShelf refund note</a>
                         @endif
                     </div>
                 @endif
@@ -1189,7 +1197,7 @@
                 </p>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
-                    <a href="{{ route('admin.orders.invoice', $order) }}" class="btn btn-primary">Download anyway</a>
+                    <a href="{{ route('admin.orders.invoice', $order) }}" class="btn btn-primary" data-confirm-proceed>Download anyway</a>
                 </div>
             </dialog>
         @endif

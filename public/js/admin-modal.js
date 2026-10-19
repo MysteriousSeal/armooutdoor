@@ -38,6 +38,12 @@
                 var modal = document.getElementById(link.getAttribute('data-confirm-modal'));
                 if (modal) {
                     event.preventDefault();
+                    // One dialog can guard several links: its proceed link
+                    // goes wherever the opening link was headed.
+                    var proceed = modal.querySelector('[data-confirm-proceed]');
+                    if (proceed) {
+                        proceed.href = link.href;
+                    }
                     modal.showModal();
                 }
             });

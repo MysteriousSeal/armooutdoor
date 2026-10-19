@@ -1081,36 +1081,49 @@ class OrderController extends Controller
         return $count.' order'.($count === 1 ? '' : 's').' '.$past.'.';
     }
 
-    public function invoice(Order $order): Response
+    public function invoice(Request $request, Order $order): Response
     {
         abort_unless($order->adminInvoiceIsAvailable(), 404);
 
         $order->load('items.product', 'items.variant');
+        $swiftShelf = $this->wantsSwiftShelfBranding($request);
 
         // The sale as billed: a refund goes on its own credit note.
         $pdf = Pdf::loadView('admin.orders.invoice-pdf', [
             'order' => $order,
             'company' => CompanySetting::current(),
             'netRefund' => false,
+            'swiftShelf' => $swiftShelf,
         ])->setPaper('a4');
 
-        return $pdf->download('facture-'.$order->number.'.pdf');
+        return $pdf->download('facture-'.$order->number.($swiftShelf ? '-swiftshelf' : '').'.pdf');
     }
 
     /** The credit note of a refunded order, dated the day it was refunded. */
-    public function creditNote(Order $order): Response
+    public function creditNote(Request $request, Order $order): Response
     {
         abort_unless($order->status === 'refunded', 404);
 
         $order->load('items.product', 'items.variant', 'statusHistories');
+        $swiftShelf = $this->wantsSwiftShelfBranding($request);
 
         $pdf = Pdf::loadView('admin.orders.invoice-pdf', [
             'order' => $order,
             'company' => CompanySetting::current(),
             'creditNote' => true,
+            'swiftShelf' => $swiftShelf,
         ])->setPaper('a4');
 
-        return $pdf->download('remboursement-'.$order->number.'.pdf');
+        return $pdf->download('remboursement-'.$order->number.($swiftShelf ? '-swiftshelf' : '').'.pdf');
+    }
+
+    /**
+     * The same document under the company's name rather than the shop's:
+     * same number, same lines, only the letterhead changes.
+     */
+    private function wantsSwiftShelfBranding(Request $request): bool
+    {
+        return $request->query('brand') === 'swiftshelf';
     }
 
     public function deliverySlip(Order $order): Response

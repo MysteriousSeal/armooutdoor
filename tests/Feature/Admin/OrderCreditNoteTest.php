@@ -112,6 +112,47 @@ class OrderCreditNoteTest extends TestCase
             ->assertDownload('remboursement-'.$order->number.'.pdf');
     }
 
+    public function test_the_swiftshelf_copy_swaps_the_letterhead_and_keeps_the_number(): void
+    {
+        $order = $this->refunded();
+        CompanySetting::current()->update([
+            'invoice_footer_enabled' => true,
+            'invoice_footer_text' => 'Retrouvez-nous en ligne',
+        ]);
+
+        foreach ([['netRefund' => false], ['creditNote' => true]] as $data) {
+            $branded = $this->render($order, [...$data, 'swiftShelf' => true]);
+            $shop = $this->render($order, $data);
+
+            $this->assertStringContainsString('Swift</span><span class="brand-secondary">Shelf', $branded);
+            $this->assertStringContainsString('hello@swiftshelf.fr', $branded);
+            $this->assertStringNotContainsString('armo-mark-print.svg', $branded);
+            $this->assertStringNotContainsString('Stand et terrain', $branded);
+            $this->assertStringNotContainsString('Retrouvez-nous en ligne', $branded);
+            $this->assertStringContainsString('Retrouvez-nous en ligne', $shop);
+        }
+
+        $this->assertStringContainsString('INV-'.$order->number, $this->render($order, ['netRefund' => false, 'swiftShelf' => true]));
+        $this->assertStringContainsString('RFD-'.$order->number, $this->render($order, ['creditNote' => true, 'swiftShelf' => true]));
+    }
+
+    public function test_the_swiftshelf_copies_are_offered_and_download(): void
+    {
+        $order = $this->refunded();
+        $admin = User::factory()->admin()->create();
+        $invoice = route('admin.orders.invoice', [$order, 'brand' => 'swiftshelf']);
+        $creditNote = route('admin.orders.credit-note', [$order, 'brand' => 'swiftshelf']);
+
+        $this->actingAs($admin)
+            ->get(route('admin.orders.show', $order))
+            ->assertOk()
+            ->assertSee(e($invoice), false)
+            ->assertSee(e($creditNote), false);
+
+        $this->actingAs($admin)->get($invoice)->assertOk()->assertDownload('facture-'.$order->number.'-swiftshelf.pdf');
+        $this->actingAs($admin)->get($creditNote)->assertOk()->assertDownload('remboursement-'.$order->number.'-swiftshelf.pdf');
+    }
+
     public function test_an_order_not_refunded_has_no_credit_note(): void
     {
         $order = $this->order();

@@ -7,6 +7,9 @@
     $netRefund = ($netRefund ?? true) && ! $creditNote && $order->status === 'refunded';
     $refundedAt = $creditNote ? ($order->refundedAt() ?? $order->updated_at) : null;
     $documentNumber = ($creditNote ? 'RFD-' : 'INV-').$order->number;
+    // Billed under the company's name instead of the shop's: the number
+    // stays the same, only the letterhead, contact and footer change.
+    $swiftShelf = $swiftShelf ?? false;
 @endphp
 <html lang="fr">
 <head>
@@ -155,6 +158,12 @@
     <table class="header">
         <tr>
             <td>
+                @if ($swiftShelf)
+                    {{-- No mark for the company: the wordmark alone. --}}
+                    <div class="brand">
+                        <span class="brand-primary">Swift</span><span class="brand-secondary">Shelf</span>
+                    </div>
+                @else
                 {{-- The mark itself, read from the brand folder: this renderer
                      takes an SVG, so the document carries the drawing rather
                      than a picture of it, and prints it at any resolution. --}}
@@ -169,6 +178,7 @@
                         </td>
                     </tr>
                 </table>
+                @endif
             </td>
             <td class="company-info">
                 <div class="name">{{ $company->value('company_name') }}</div>
@@ -177,7 +187,7 @@
                 @endforeach
                 <div>SIRET {{ $company->value('siret') }}</div>
                 <div>{{ $company->formattedPhone() }}</div>
-                <div>{{ $company->value('contact_email') }}</div>
+                <div>{{ $swiftShelf ? 'hello@swiftshelf.fr' : $company->value('contact_email') }}</div>
             </td>
         </tr>
     </table>
@@ -354,7 +364,8 @@
 
     <div class="footer">
         TVA non applicable - art. L. 223-3 du Code des impositions sur les biens et services (CIBS)
-        @if ($company->invoice_footer_enabled && ($company->invoice_footer_url || $company->invoice_footer_text))
+        {{-- The footer points at the shop, so the company copy leaves it out. --}}
+        @if (! $swiftShelf && $company->invoice_footer_enabled && ($company->invoice_footer_url || $company->invoice_footer_text))
             <div class="footer-link">
                 @if ($company->invoice_footer_text)
                     <div>{{ $company->invoice_footer_text }}</div>
