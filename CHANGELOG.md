@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-19 · v1.65.1 · build 2QUX05
+
+### Admin
+
+- **The SwiftShelf buttons get a row of their own.** On the order page, « Download SwiftShelf invoice » and « Download SwiftShelf refund note » now sit on a second line under the other document buttons, instead of crowding the same row.
+
+**No migration.**
+
 ## 2026-10-19 · v1.65.0 · build QBLNBQ
 
 ### Admin
