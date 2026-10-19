@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-19 · v1.65.0 · build QBLNBQ
+
+### Admin
+
+- **Invoices and refund notes under the SwiftShelf name.** The order page has a new « Download SwiftShelf invoice » button next to « Download invoice », and refunded orders also get « Download SwiftShelf refund note ». The document is the same (same number, same lines, same totals), but the header shows the SwiftShelf wordmark instead of the ArmoOutdoor logo and tagline, the contact email is hello@swiftshelf.fr, and the shop footer from the invoice settings is left out. The file name ends in `-swiftshelf.pdf`.
+
+**Fixed:** the « Shipping details are incomplete » warning on the order page now downloads the document whose button opened it, instead of always the ArmoOutdoor invoice.
+
+**No migration.**
+
 ## 2026-10-18 · v1.64.0 · build WZG51Y
 
 ### Admin
