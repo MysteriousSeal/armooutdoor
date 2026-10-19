@@ -373,19 +373,29 @@
                                     data-confirm-modal="invoice-warning-modal"
                                 @endif
                             >Download invoice</a>
-                            <a
-                                href="{{ route('admin.orders.invoice', [$order, 'brand' => 'swiftshelf']) }}"
-                                class="btn btn-secondary"
-                                @if ($missingInvoiceFields !== [])
-                                    data-confirm-modal="invoice-warning-modal"
-                                @endif
-                            >Download SwiftShelf invoice</a>
                         @endif
                         @if ($order->status === 'refunded')
                             <a href="{{ route('admin.orders.credit-note', $order) }}" class="btn btn-secondary">Download refund note</a>
-                            <a href="{{ route('admin.orders.credit-note', [$order, 'brand' => 'swiftshelf']) }}" class="btn btn-secondary">Download SwiftShelf refund note</a>
                         @endif
                     </div>
+                    {{-- The SwiftShelf copies on a row of their own, so the
+                         shop's documents are not crowded by their twins. --}}
+                    @if ($order->adminInvoiceIsAvailable() || $order->status === 'refunded')
+                        <div class="order-panel-actions">
+                            @if ($order->adminInvoiceIsAvailable())
+                                <a
+                                    href="{{ route('admin.orders.invoice', [$order, 'brand' => 'swiftshelf']) }}"
+                                    class="btn btn-secondary"
+                                    @if ($missingInvoiceFields !== [])
+                                        data-confirm-modal="invoice-warning-modal"
+                                    @endif
+                                >Download SwiftShelf invoice</a>
+                            @endif
+                            @if ($order->status === 'refunded')
+                                <a href="{{ route('admin.orders.credit-note', [$order, 'brand' => 'swiftshelf']) }}" class="btn btn-secondary">Download SwiftShelf refund note</a>
+                            @endif
+                        </div>
+                    @endif
                 @endif
                 </div>
 

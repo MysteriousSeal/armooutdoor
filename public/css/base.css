@@ -936,6 +936,10 @@ textarea.form-control {
     text-align: right;
 }
 
+.order-panel-actions + .order-panel-actions {
+    margin-top: 0.5rem;
+}
+
 .order-total-amount {
     margin: 0;
     font-size: 1.5rem;
