@@ -109,6 +109,146 @@ class NaturabuyListingsTest extends TestCase
         }
     }
 
+    /** The lowest ,90 price that pays out the packaging and three times the cost. */
+    public function test_the_suggested_price_is_the_lowest_x90_with_200_percent_profit(): void
+    {
+        // 12,00 € of cost needs 36,30 € paid out with the packaging: 41,90 €
+        // leaves 35,87 €, 42,90 € leaves 36,72 €. 3,95 € needs 12,15 €: 13,90 €
+        // leaves 11,90 €, so 14,90 €. A free product still sells for 0,90 €.
+        foreach ([1200 => 4290, 2400 => 8490, 1000 => 3590, 395 => 1490, 0 => 90] as $cost => $price) {
+            $this->assertSame($price, NaturabuyListing::suggestedPriceCents($cost), "Suggested price for {$cost} cents");
+
+            $paidOut = (new NaturabuyListing(['price_cents' => $price]))->netAfterCommissionCents();
+            $this->assertGreaterThanOrEqual($cost * 3 + NaturabuyListing::PACKAGING_COST_CENTS, $paidOut);
+
+            // One euro less would not be enough, unless there is no lower ,90 price.
+            if ($price > 90) {
+                $lower = new NaturabuyListing(['price_cents' => $price - 100]);
+                $this->assertLessThan($cost * 3 + NaturabuyListing::PACKAGING_COST_CENTS, $lower->netAfterCommissionCents());
+            }
+        }
+    }
+
+    public function test_the_suggested_price_shows_its_profit_and_whether_the_listing_meets_it(): void
+    {
+        $received = function (Product $product, int $unitCostCents): void {
+            PurchaseOrderItem::query()->create([
+                'purchase_order_id' => PurchaseOrder::factory()->create(['vat_rate_basis_points' => 2000])->id,
+                'product_id' => $product->id,
+                'name' => 'Ligne',
+                'quantity_ordered' => 1,
+                'quantity_received' => 1,
+                'unit_cost_cents' => $unitCostCents,
+            ]);
+        };
+
+        // 12,00 € with VAT: 42,90 € suggested, above the 22,99 € listing.
+        // 5,00 € with VAT: 17,90 € suggested, below it. Packaging paid,
+        // 3672 - 1200 - 30 over 1200 is 203,5 %; 1532 - 500 - 30 over 500 is 200,4 %.
+        $received(Product::factory()->create(['sku' => 'UNDER-SKU']), 1000);
+        $received(Product::factory()->create(['sku' => 'OVER-SKU']), 417);
+        $this->listing(['title' => 'Trop bas', 'internalcode' => 'UNDER-SKU']);
+        $this->listing(['title' => 'Assez haut', 'internalcode' => 'OVER-SKU']);
+
+        $this->actingAs($this->admin())
+            ->get('/admin/marketplaces/naturabuy?tab=in-catalogue')
+            ->assertOk()
+            ->assertSee('>Suggested price</th>', false)
+            ->assertSee('class="admin-order-profit nb-suggested is-above"', false)
+            ->assertSee('42,90', false)
+            ->assertSee('(203,5 %)', false)
+            ->assertSee('class="admin-order-profit nb-suggested is-met"', false)
+            ->assertSee('17,90', false)
+            ->assertSee('(200,4 %)', false)
+            ->assertSee('>At suggested</th>', false)
+            // Neither listing sits exactly on its suggestion.
+            ->assertSee('class="gtin-flag is-missing"', false)
+            ->assertDontSee('class="gtin-flag is-set"', false);
+    }
+
+    /** The listings with a cross: priced anywhere but exactly the suggestion. */
+    public function test_the_price_mismatch_tab_lists_listings_off_their_suggestion(): void
+    {
+        foreach (['EXACT-SKU', 'BELOW-SKU', 'ABOVE-SKU'] as $sku) {
+            PurchaseOrderItem::query()->create([
+                'purchase_order_id' => PurchaseOrder::factory()->create(['vat_rate_basis_points' => 2000])->id,
+                'product_id' => Product::factory()->create(['sku' => $sku])->id,
+                'name' => 'Ligne',
+                'quantity_ordered' => 1,
+                'quantity_received' => 1,
+                'unit_cost_cents' => 1000,
+            ]);
+        }
+        Product::factory()->create(['sku' => 'NOCOST-SKU']);
+
+        // 12,00 € with VAT: suggested 42,90 €.
+        $exact = $this->listing(['title' => 'Pile au prix', 'internalcode' => 'EXACT-SKU', 'price_cents' => 4290]);
+        $below = $this->listing(['title' => 'Trop bas', 'internalcode' => 'BELOW-SKU', 'price_cents' => 2299]);
+        $above = $this->listing(['title' => 'Trop haut', 'internalcode' => 'ABOVE-SKU', 'price_cents' => 4990]);
+        // No product cost, so no suggestion to miss; no product, nothing to compare.
+        $noCost = $this->listing(['title' => 'Sans cout', 'internalcode' => 'NOCOST-SKU', 'price_cents' => 999]);
+        $unmatched = $this->listing(['title' => 'Inconnue', 'internalcode' => '000019-1', 'price_cents' => 999]);
+
+        $this->actingAs($this->admin())
+            ->get('/admin/marketplaces/naturabuy?tab=price-mismatch')
+            ->assertOk()
+            ->assertSee('Price mismatch <span class="admin-tab-count">2</span>', false)
+            ->assertSee($below->title)
+            ->assertSee($above->title)
+            ->assertDontSee($exact->title)
+            ->assertDontSee($noCost->title)
+            ->assertDontSee($unmatched->title)
+            // Every row is in the catalogue: no Catalogue column. And the tab
+            // is about money: no quantity or photo columns either.
+            ->assertDontSee('<th>Catalogue</th>', false)
+            ->assertDontSee('>NB qty</th>', false)
+            ->assertDontSee('>Ours</th>', false)
+            ->assertDontSee('>Photos</th>', false)
+            ->assertDontSee('>NB photos</th>', false)
+            ->assertSee('<th>Stock</th>', false);
+
+        // The other side: only the listing exactly at its suggestion, with the
+        // same money-only columns. No cost or no product stays out of both.
+        $this->actingAs($this->admin())
+            ->get('/admin/marketplaces/naturabuy?tab=price-match')
+            ->assertOk()
+            ->assertSee('Price match <span class="admin-tab-count">1</span>', false)
+            ->assertSee($exact->title)
+            ->assertDontSee($below->title)
+            ->assertDontSee($above->title)
+            ->assertDontSee($noCost->title)
+            ->assertDontSee($unmatched->title)
+            ->assertDontSee('<th>Catalogue</th>', false)
+            ->assertDontSee('>NB qty</th>', false)
+            ->assertDontSee('>NB photos</th>', false);
+
+        // Both counts show on every tab.
+        $this->actingAs($this->admin())
+            ->get('/admin/marketplaces/naturabuy')
+            ->assertSee('Price mismatch <span class="admin-tab-count">2</span>', false)
+            ->assertSee('Price match <span class="admin-tab-count">1</span>', false);
+    }
+
+    public function test_a_listing_priced_at_its_suggestion_gets_a_check(): void
+    {
+        PurchaseOrderItem::query()->create([
+            'purchase_order_id' => PurchaseOrder::factory()->create(['vat_rate_basis_points' => 2000])->id,
+            'product_id' => Product::factory()->create(['sku' => 'EXACT-SKU'])->id,
+            'name' => 'Ligne',
+            'quantity_ordered' => 1,
+            'quantity_received' => 1,
+            'unit_cost_cents' => 1000,
+        ]);
+        // 12,00 € with VAT: suggested 42,90 €, which is the listing's price.
+        $this->listing(['internalcode' => 'EXACT-SKU', 'price_cents' => 4290]);
+
+        $this->actingAs($this->admin())
+            ->get('/admin/marketplaces/naturabuy?tab=in-catalogue')
+            ->assertOk()
+            ->assertSee('class="gtin-flag is-set"', false)
+            ->assertDontSee('class="gtin-flag is-missing"', false);
+    }
+
     /** What the sale brings in once NaturaBuy has kept its commission. */
     public function test_each_listing_shows_its_price_net_of_commission(): void
     {
@@ -322,23 +462,48 @@ class NaturabuyListingsTest extends TestCase
     /** Le rapprochement tient en deux requêtes, quel que soit le nombre de lignes. */
     public function test_matching_does_not_query_per_row(): void
     {
-        foreach (range(1, 12) as $i) {
-            Product::factory()->create(['sku' => 'SKU-'.$i]);
-            $this->listing(['internalcode' => 'SKU-'.$i]);
-        }
+        // Each product has a received purchase line, so the cost reads (the
+        // Profit column and the Price mismatch count) run in full.
+        $seed = function (int $from, int $to): void {
+            foreach (range($from, $to) as $i) {
+                $product = Product::factory()->create(['sku' => 'SKU-'.$i]);
+                PurchaseOrderItem::query()->create([
+                    'purchase_order_id' => PurchaseOrder::factory()->create()->id,
+                    'product_id' => $product->id,
+                    'name' => 'Ligne',
+                    'quantity_ordered' => 1,
+                    'quantity_received' => 1,
+                    'unit_cost_cents' => 500,
+                ]);
+                $this->listing(['internalcode' => 'SKU-'.$i]);
+            }
+        };
+        $admin = $this->admin();
+        $count = function () use ($admin): int {
+            \DB::enableQueryLog();
+            $this->actingAs($admin)->get('/admin/marketplaces/naturabuy')->assertOk();
+            $queries = count(\DB::getQueryLog());
+            \DB::flushQueryLog();
+            \DB::disableQueryLog();
 
-        \DB::enableQueryLog();
-        $this->actingAs($this->admin())->get('/admin/marketplaces/naturabuy')->assertOk();
-        $queries = count(\DB::getQueryLog());
-        \DB::disableQueryLog();
+            return $queries;
+        };
 
-        // Twelve rows: the guard is that matching them costs a fixed number of
-        // queries and not one apiece. The budget went from twenty to
-        // twenty-one when the admin nav gained a fifth badge, each of which
-        // counts once per page for an owner — a constant, not a per-row cost.
-        // Then to twenty-two for the Profit column: one batched read of the
-        // purchase costs for every matched product on the page.
-        $this->assertLessThan(22, $queries, "Expected a handful of queries, ran {$queries}");
+        $seed(1, 12);
+        $twelve = $count();
+        $seed(13, 36);
+        $thirtySix = $count();
+
+        // The guard is that matching costs a fixed number of queries and not
+        // one per row: three times the rows, the same count.
+        $this->assertSame($twelve, $thirtySix, "Queries grew with the rows: {$twelve} then {$thirtySix}");
+
+        // And that the fixed number stays small. The budget went from twenty
+        // to twenty-one when the admin nav gained a fifth badge, to twenty-two
+        // for the Profit column's batched cost read, then to thirty for the
+        // Price mismatch count, which matches every catalogue listing. With
+        // purchase lines seeded, each cost read also loads its orders.
+        $this->assertLessThan(30, $twelve, "Expected a handful of queries, ran {$twelve}");
     }
 
     public function test_the_catalogue_tabs_split_the_listings(): void
@@ -507,6 +672,37 @@ class NaturabuyListingsTest extends TestCase
     }
 
     // --------------------------------------------------------- second name
+
+    /** The quantity and name mismatch tabs are about stock and wording: no money columns. */
+    public function test_the_qty_and_name_mismatch_tabs_have_no_money_columns(): void
+    {
+        // Named differently and stocked differently: it sits on both tabs.
+        Product::factory()->create(['sku' => 'NAME-SKU', 'name' => ['fr' => 'Notre nom a nous'], 'quantity' => 9]);
+        $this->listing(['title' => 'Leur titre', 'internalcode' => 'NAME-SKU', 'quantity' => 3]);
+
+        $admin = $this->admin();
+
+        foreach (['qty-mismatch', 'name-mismatch'] as $tab) {
+            $this->actingAs($admin)
+                ->get('/admin/marketplaces/naturabuy?tab='.$tab)
+                ->assertOk()
+                ->assertSee('Leur titre')
+                ->assertSee('>Price</th>', false)
+                ->assertDontSee('>You get</th>', false)
+                ->assertDontSee('>Product cost</th>', false)
+                ->assertDontSee('>Profit</th>', false)
+                ->assertDontSee('>Suggested price</th>', false)
+                ->assertDontSee('>At suggested</th>', false)
+                ->assertDontSee('admin-order-perceived', false)
+                ->assertSee('>NB qty</th>', false);
+        }
+
+        // The other tabs keep them.
+        $this->actingAs($admin)
+            ->get('/admin/marketplaces/naturabuy?tab=in-catalogue')
+            ->assertSee('>You get</th>', false)
+            ->assertSee('>At suggested</th>', false);
+    }
 
     public function test_our_name_is_shown_under_theirs_on_the_catalogue_tab(): void
     {

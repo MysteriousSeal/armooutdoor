@@ -34,6 +34,12 @@ class NaturabuyListing extends Model
     /** The VAT NaturaBuy adds on top of its commission. */
     public const COMMISSION_VAT_PERCENT = 20;
 
+    /** The profit a suggested price aims for, as a share of the product cost. */
+    public const TARGET_PROFIT_PERCENT = 200;
+
+    /** What packing one sale costs, paid out of the price like the product. */
+    public const PACKAGING_COST_CENTS = 30;
+
     protected function casts(): array
     {
         return [
@@ -79,5 +85,32 @@ class NaturabuyListing extends Model
     public function netAfterCommissionCents(): int
     {
         return $this->price_cents - $this->commissionInclVatCents();
+    }
+
+    /**
+     * The lowest price ending in ,90 that leaves at least the target profit
+     * once NaturaBuy has taken its commission and the packaging is paid:
+     * with 200%, what the shop receives covers the packaging and three
+     * times what the product cost.
+     */
+    public static function suggestedPriceCents(int $costCents): int
+    {
+        $neededCents = $costCents * (100 + self::TARGET_PROFIT_PERCENT) / 100 + self::PACKAGING_COST_CENTS;
+
+        // Start just under the price that would leave exactly enough once
+        // the commission is taken, then step up a euro at a time: the
+        // rounding of the commission may cost a step.
+        $keptShare = 1 - self::COMMISSION_PERCENT_EXCL_VAT * (100 + self::COMMISSION_VAT_PERCENT) / 10000;
+        $euros = max(0, intdiv((int) floor($neededCents / $keptShare), 100) - 1);
+
+        while (true) {
+            $listing = new self(['price_cents' => $euros * 100 + 90]);
+
+            if ($listing->netAfterCommissionCents() >= $neededCents) {
+                return $listing->price_cents;
+            }
+
+            $euros++;
+        }
     }
 }

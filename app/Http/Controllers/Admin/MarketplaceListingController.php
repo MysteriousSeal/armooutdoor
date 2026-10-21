@@ -409,6 +409,38 @@ class MarketplaceListingController extends Controller
             ->whereRaw("({$ours}) <> naturabuy_listings.title");
     }
 
+    /**
+     * The listings priced exactly at their suggested price, and the others.
+     *
+     * Unlike the other mismatches this one is not written in SQL: the
+     * purchase cost averages purchase orders with their charges, and the
+     * suggestion steps through ,90 prices. With a few hundred listings,
+     * reading them in PHP costs a fixed handful of queries per page, and
+     * one pass fills both tabs. A listing with no product cost has no
+     * suggestion and stays out of both.
+     *
+     * @return array{match: array<int, int>, mismatch: array<int, int>} listing ids
+     */
+    private function priceComparisonIds(): array
+    {
+        $listings = $this->whereMatched($this->openListings())->get(['id', 'internalcode', 'price_cents']);
+        $matches = $this->catalogueMatches($listings);
+        $ids = ['match' => [], 'mismatch' => []];
+
+        foreach ($listings as $listing) {
+            $costCents = $matches[$listing->internalcode]['cost_cents'] ?? null;
+
+            if ($costCents === null) {
+                continue;
+            }
+
+            $side = $listing->price_cents === NaturabuyListing::suggestedPriceCents($costCents) ? 'match' : 'mismatch';
+            $ids[$side][] = $listing->id;
+        }
+
+        return $ids;
+    }
+
     /** Notre nom pour une annonce, exprimé en SQL. */
     private function ourNameExpression(Builder $query): string
     {
@@ -489,11 +521,14 @@ class MarketplaceListingController extends Controller
 
     public function naturabuy(Request $request): View
     {
-        $tab = in_array($request->query('tab'), ['in-stock', 'out-of-stock', 'in-catalogue', 'not-in-catalogue', 'qty-mismatch', 'name-mismatch', 'missing'], true)
+        $tab = in_array($request->query('tab'), ['in-stock', 'out-of-stock', 'in-catalogue', 'not-in-catalogue', 'qty-mismatch', 'name-mismatch', 'price-mismatch', 'price-match', 'missing'], true)
             ? $request->query('tab')
             : 'all';
 
         $search = trim((string) $request->query('search', ''));
+
+        // Read once: it filters the two price tabs and counts them on every tab.
+        $priceIds = $this->priceComparisonIds();
 
         $listings = $this->openListings()
             ->when($search !== '', fn (Builder $q) => $q->where(fn (Builder $inner) => $inner
@@ -505,6 +540,8 @@ class MarketplaceListingController extends Controller
             ->when($tab === 'not-in-catalogue', fn (Builder $q) => $this->whereMatched($q, false))
             ->when($tab === 'qty-mismatch', fn (Builder $q) => $this->whereQuantityMismatch($q))
             ->when($tab === 'name-mismatch', fn (Builder $q) => $this->whereNameMismatch($q))
+            ->when($tab === 'price-mismatch', fn (Builder $q) => $q->whereIn('id', $priceIds['mismatch']))
+            ->when($tab === 'price-match', fn (Builder $q) => $q->whereIn('id', $priceIds['match']))
             ->orderBy('title')
             ->paginate(50)
             ->withQueryString();
@@ -532,6 +569,8 @@ class MarketplaceListingController extends Controller
             'notInCatalogueCount' => $this->whereMatched($this->openListings(), false)->count(),
             'mismatchCount' => $this->whereQuantityMismatch($this->openListings())->count(),
             'nameMismatchCount' => $this->whereNameMismatch($this->openListings())->count(),
+            'priceMismatchCount' => count($priceIds['mismatch']),
+            'priceMatchCount' => count($priceIds['match']),
             'missingCount' => $this->productsMissingFromNaturabuyQuery()->count(),
             'syncedAt' => NaturabuyListing::query()->max('synced_at'),
         ]);

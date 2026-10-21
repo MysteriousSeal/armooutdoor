@@ -61,6 +61,20 @@
             >
                 Name mismatch <span class="admin-tab-count">{{ number_format($nameMismatchCount) }}</span>
             </a>
+            <a
+                href="{{ route('admin.marketplaces.naturabuy', ['tab' => 'price-mismatch']) }}"
+                class="{{ $tab === 'price-mismatch' ? 'active' : '' }}{{ $priceMismatchCount > 0 ? ' nb-tab-attention' : '' }}"
+                title="Listings whose price is not exactly the suggested price"
+            >
+                Price mismatch <span class="admin-tab-count">{{ number_format($priceMismatchCount) }}</span>
+            </a>
+            <a
+                href="{{ route('admin.marketplaces.naturabuy', ['tab' => 'price-match']) }}"
+                class="{{ $tab === 'price-match' ? 'active' : '' }}"
+                title="Listings priced exactly at the suggested price"
+            >
+                Price match <span class="admin-tab-count">{{ number_format($priceMatchCount) }}</span>
+            </a>
             <a href="{{ route('admin.marketplaces.naturabuy', ['tab' => 'in-stock']) }}" class="starts-group {{ $tab === 'in-stock' ? 'active' : '' }}">
                 In stock <span class="admin-tab-count">{{ number_format($inStockCount) }}</span>
             </a>
@@ -179,17 +193,29 @@
                         <tr>
                             <th>Title</th>
                             <th class="nb-num">Price</th>
+                            {{-- The quantity and name mismatch tabs are about stock and wording: the money columns only crowd them. --}}
+                            @php($withoutMoney = in_array($tab, ['qty-mismatch', 'name-mismatch'], true))
+                            @unless ($withoutMoney)
                             <th class="nb-num" title="Price minus NaturaBuy's commission: {{ \App\Models\NaturabuyListing::COMMISSION_PERCENT_EXCL_VAT }}% plus {{ \App\Models\NaturabuyListing::COMMISSION_VAT_PERCENT }}% VAT">You get</th>
                             <th class="nb-num" title="Average purchase cost, incl. VAT">Product cost</th>
                             <th class="nb-num" title="You get, minus the product cost">Profit</th>
-                            <th class="nb-num">NB qty</th>
-                            <th class="nb-num">Ours</th>
-                            {{-- Every row of the catalogue tab is in the catalogue: the column would only repeat it. --}}
-                            @if ($tab !== 'in-catalogue')
+                            <th class="nb-num" title="The lowest price ending in ,90 that leaves at least {{ \App\Models\NaturabuyListing::TARGET_PROFIT_PERCENT }}% profit after NaturaBuy's commission and {{ format_euros(\App\Models\NaturabuyListing::PACKAGING_COST_CENTS) }} of packaging">Suggested price</th>
+                            <th title="Whether the price is exactly the suggested price">At suggested</th>
+                            @endunless
+                            {{-- The two price tabs are about money: quantities and photos only crowd them. --}}
+                            @php($pricesOnly = in_array($tab, ['price-mismatch', 'price-match'], true))
+                            @unless ($pricesOnly)
+                                <th class="nb-num">NB qty</th>
+                                <th class="nb-num">Ours</th>
+                            @endunless
+                            {{-- Every row of the catalogue and price tabs is in the catalogue: the column would only repeat it. --}}
+                            @if (! in_array($tab, ['in-catalogue', 'price-mismatch', 'price-match'], true))
                                 <th>Catalogue</th>
                             @endif
-                            <th class="nb-num" title="Photos on our shop: main photo plus gallery">Photos</th>
-                            <th class="nb-num" title="Photos on the NaturaBuy listing, read from its page once a week">NB photos</th>
+                            @unless ($pricesOnly)
+                                <th class="nb-num" title="Photos on our shop: main photo plus gallery">Photos</th>
+                                <th class="nb-num" title="Photos on the NaturaBuy listing, read from its page once a week">NB photos</th>
+                            @endunless
                             <th>Stock</th>
                         </tr>
                     </thead>
@@ -238,6 +264,7 @@
                                         <span class="nb-oldprice">{{ format_euros($listing->oldprice_cents) }}</span>
                                     @endif
                                 </td>
+                                @unless ($withoutMoney)
                                 {{-- The money columns wear the orders list's chips: perceived, product cost, profit. --}}
                                 <td class="nb-num"><span class="admin-order-perceived">{{ format_euros($listing->netAfterCommissionCents()) }}</span></td>
                                 @php($costCents = $match['cost_cents'] ?? null)
@@ -257,6 +284,45 @@
                                         <span class="nb-none" title="No product cost to deduct">–</span>
                                     @endif
                                 </td>
+                                <td class="nb-num">
+                                    @if ($costCents !== null)
+                                        @php($suggested = new \App\Models\NaturabuyListing(['price_cents' => \App\Models\NaturabuyListing::suggestedPriceCents($costCents)]))
+                                        @php($suggestedProfit = $suggested->netAfterCommissionCents() - $costCents - \App\Models\NaturabuyListing::PACKAGING_COST_CENTS)
+                                        {{-- Green when the listing already sells at or above it, amber when it sells for less. --}}
+                                        @php($underpriced = $listing->price_cents < $suggested->price_cents)
+                                        <span
+                                            class="admin-order-profit nb-suggested {{ $underpriced ? 'is-above' : 'is-met' }}"
+                                            title="{{ $underpriced ? 'The listing sells for less than this' : 'The listing already sells at or above this' }}. Pays out {{ format_euros($suggested->netAfterCommissionCents()) }}, a profit of {{ format_euros($suggestedProfit) }} after {{ format_euros(\App\Models\NaturabuyListing::PACKAGING_COST_CENTS) }} of packaging"
+                                        >{{ format_euros($suggested->price_cents) }}@if ($costCents > 0)<span class="admin-order-profit-pct" title="Profit at this price, packaging paid, as a share of what the goods cost">({{ number_format($suggestedProfit / $costCents * 100, 1, ',', ' ') }} %)</span>@endif</span>
+                                    @else
+                                        <span class="nb-none" title="No product cost to base it on">–</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    {{-- The product list's check and cross pill: is the price exactly the suggestion? --}}
+                                    @if ($costCents !== null)
+                                        @php($atSuggested = $listing->price_cents === $suggested->price_cents)
+                                        <span
+                                            class="gtin-flag {{ $atSuggested ? 'is-set' : 'is-missing' }}"
+                                            title="{{ $atSuggested ? 'Priced at the suggested price' : 'Not at the suggested price' }}"
+                                        >
+                                            @if ($atSuggested)
+                                                <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                                                    <path d="m5 13 4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
+                                            @else
+                                                <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                                                    <path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                                                </svg>
+                                            @endif
+                                            <span class="sr-only">{{ $atSuggested ? 'At the suggested price' : 'Not at the suggested price' }}</span>
+                                        </span>
+                                    @else
+                                        <span class="nb-none" title="No suggested price without a product cost">–</span>
+                                    @endif
+                                </td>
+                                @endunless
+                                @unless ($pricesOnly)
                                 <td class="nb-num">{{ number_format($listing->quantity) }}</td>
                                 <td class="nb-num">
                                     @if ($match)
@@ -272,7 +338,8 @@
                                         <span class="nb-none">—</span>
                                     @endif
                                 </td>
-                                @if ($tab !== 'in-catalogue')
+                                @endunless
+                                @if (! in_array($tab, ['in-catalogue', 'price-mismatch', 'price-match'], true))
                                 <td>
                                     @if ($matchedProductId)
                                         {{-- Un rapprochement par préfixe est une déduction, pas une
@@ -293,6 +360,7 @@
                                     @endif
                                 </td>
                                 @endif
+                                @unless ($pricesOnly)
                                 <td class="nb-num">@include('admin.marketplaces.partials.shop-image-count', ['count' => $match['image_count'] ?? null])</td>
                                 <td class="nb-num">
                                     {{-- Read from their page by naturabuy:count-photos, one listing a minute. --}}
@@ -304,6 +372,7 @@
                                         <span title="Read {{ $listing->photos_checked_at?->format('d M Y') }}">{{ $listing->photo_count }}</span>
                                     @endif
                                 </td>
+                                @endunless
                                 <td>
                                     @if ($listing->out_of_stock)
                                         <span class="order-chip order-chip--refunded">Out of stock</span>
