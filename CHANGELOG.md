@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-21 · v1.67.0 · build 0RJXD4
+
+### Admin
+
+- **A suggested NaturaBuy price for every listing with a known cost.** The NaturaBuy listings table has two new columns after « Profit »:
+  - **Suggested price:** the lowest price ending in ,90 that leaves at least 200% profit on the product cost once NaturaBuy's commission (12% plus VAT) and 0,30 € of packaging are paid. The chip shows the profit at that price in brackets; it is green when the listing already sells at or above it, amber when it sells for less.
+  - **At suggested:** a check when the price is exactly the suggested price, a cross otherwise.
+- **Two new tabs, « Price mismatch » and « Price match »,** split the catalogue listings by whether their price is exactly the suggested one. A listing whose product has nothing received on a purchase order yet has no cost, so no suggestion, and sits in neither. Both tabs show only the money columns.
+- **The « Qty mismatch » and « Name mismatch » tabs drop the money columns**, to keep them about stock and wording.
+
+**No migration.**
+
 ## 2026-10-21 · v1.66.0 · build FGI9HR
 
 ### Admin
