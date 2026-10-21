@@ -2,6 +2,19 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-21 · v1.66.0 · build FGI9HR
+
+### Admin
+
+- **What a NaturaBuy listing really brings in.** The NaturaBuy listings table has three new columns after « Price », styled like the money columns of the Orders page:
+  - **You get:** the price minus NaturaBuy's commission, 12% plus 20% VAT (14.4% of the price), rounded the way their statements round it.
+  - **Product cost:** the product's average purchase cost, VAT included, the same figure the Orders page uses. « no cost » when nothing has been received on a purchase order yet.
+  - **Profit:** « You get » minus the product cost, with the profit as a share of the cost in brackets, as on the Orders page. A listing that sells below cost shows in red.
+- **The internal code moves under the listing title**, instead of filling a column of its own.
+- **The « In catalogue » tab drops the Catalogue column**, since every row there is in the catalogue.
+
+**No migration.**
+
 ## 2026-10-19 · v1.65.1 · build 2QUX05
 
 ### Admin
