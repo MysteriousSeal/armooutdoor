@@ -8794,6 +8794,11 @@ a.marketplace-card:hover {
     white-space: nowrap;
 }
 
+.nb-title-code {
+    display: block;
+    margin-top: 0.2rem;
+}
+
 .nb-code {
     font-size: 0.8125rem;
     padding: 0.1rem 0.35rem;
@@ -8987,6 +8992,20 @@ a.nb-match:hover {
 [data-theme='dark'] .nb-ours.is-differing,
 [data-theme='dark'] .nb-delta {
     color: #e0b464;
+}
+
+/* The orders list's profit chip; a listing that sells below what the
+   product cost takes the colours of the out-of-stock chip instead. */
+.admin-order-profit.nb-profit.is-loss {
+    color: #7a4a45;
+    background: #f6eeec;
+    border-color: #e6d4d0;
+}
+
+[data-theme='dark'] .admin-order-profit.nb-profit.is-loss {
+    color: #d4a39d;
+    background: color-mix(in srgb, #d4a39d 12%, var(--surface));
+    border-color: color-mix(in srgb, #d4a39d 32%, var(--border));
 }
 
 [data-theme='dark'] .nb-delta {

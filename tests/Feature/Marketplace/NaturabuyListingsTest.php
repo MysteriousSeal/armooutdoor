@@ -5,6 +5,8 @@ namespace Tests\Feature\Marketplace;
 use App\Models\Marketplace;
 use App\Models\NaturabuyListing;
 use App\Models\Product;
+use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderItem;
 use App\Models\User;
 use App\Services\Naturabuy\NaturabuyClient;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -91,8 +93,34 @@ class NaturabuyListingsTest extends TestCase
             ->get('/admin/marketplaces/naturabuy')
             ->assertOk()
             ->assertSee($listing->title)
-            ->assertSee('MOLLE-BELT-EVA-KHAKI')
+            ->assertSee('<span class="nb-title-code"><code class="nb-code">MOLLE-BELT-EVA-KHAKI</code></span>', false)
+            ->assertDontSee('<th>Internal code</th>', false)
             ->assertSee('22,99', false);
+    }
+
+    /** 12% plus 20% VAT, rounded once: the amounts on NaturaBuy's own statements. */
+    public function test_the_commission_matches_naturabuy_statements(): void
+    {
+        foreach ([1149 => 165, 2480 => 357, 1999 => 288, 699 => 101, 1299 => 187, 2290 => 330] as $price => $commission) {
+            $listing = new NaturabuyListing(['price_cents' => $price]);
+
+            $this->assertSame($commission, $listing->commissionInclVatCents(), "Commission on {$price} cents");
+            $this->assertSame($price - $commission, $listing->netAfterCommissionCents());
+        }
+    }
+
+    /** What the sale brings in once NaturaBuy has kept its commission. */
+    public function test_each_listing_shows_its_price_net_of_commission(): void
+    {
+        $this->listing(['price_cents' => 2299]);
+
+        $this->assertSame(1968, NaturabuyListing::query()->first()->netAfterCommissionCents());
+
+        $this->actingAs($this->admin())
+            ->get('/admin/marketplaces/naturabuy')
+            ->assertOk()
+            ->assertSee('You get')
+            ->assertSee('19,68', false);
     }
 
     public function test_the_tabs_filter_by_stock(): void
@@ -308,7 +336,9 @@ class NaturabuyListingsTest extends TestCase
         // queries and not one apiece. The budget went from twenty to
         // twenty-one when the admin nav gained a fifth badge, each of which
         // counts once per page for an owner — a constant, not a per-row cost.
-        $this->assertLessThan(21, $queries, "Expected a handful of queries, ran {$queries}");
+        // Then to twenty-two for the Profit column: one batched read of the
+        // purchase costs for every matched product on the page.
+        $this->assertLessThan(22, $queries, "Expected a handful of queries, ran {$queries}");
     }
 
     public function test_the_catalogue_tabs_split_the_listings(): void
@@ -517,6 +547,65 @@ class NaturabuyListingsTest extends TestCase
                 ->assertOk()
                 ->assertDontSee('nb-ourname', false);
         }
+    }
+
+    /** Profit: what NaturaBuy pays out, minus what the product cost to buy. */
+    public function test_the_profit_deducts_the_purchase_cost_from_the_payout(): void
+    {
+        $received = function (Product $product, int $unitCostCents): void {
+            PurchaseOrderItem::query()->create([
+                'purchase_order_id' => PurchaseOrder::factory()->create(['vat_rate_basis_points' => 2000])->id,
+                'product_id' => $product->id,
+                'name' => 'Ligne',
+                'quantity_ordered' => 1,
+                'quantity_received' => 1,
+                'unit_cost_cents' => $unitCostCents,
+            ]);
+        };
+
+        // 22,99 € on NaturaBuy pays out 19,68 €. A 10,00 € HT cost is 12,00 €
+        // with VAT, leaving 7,68 €; a 20,00 € HT one is 24,00 €, a 4,32 € loss.
+        $received(Product::factory()->create(['sku' => 'PROFIT-SKU']), 1000);
+        $received(Product::factory()->create(['sku' => 'LOSS-SKU']), 2000);
+        Product::factory()->create(['sku' => 'NOCOST-SKU']);
+        $this->listing(['title' => 'Rentable', 'internalcode' => 'PROFIT-SKU']);
+        $this->listing(['title' => 'A perte', 'internalcode' => 'LOSS-SKU']);
+        $this->listing(['title' => 'Sans cout', 'internalcode' => 'NOCOST-SKU']);
+
+        $this->actingAs($this->admin())
+            ->get('/admin/marketplaces/naturabuy?tab=in-catalogue')
+            ->assertOk()
+            ->assertSee('>Product cost</th>', false)
+            ->assertSee('>Profit</th>', false)
+            // The orders list's chips: perceived, product cost, profit.
+            ->assertSee('<span class="admin-order-perceived">19,68', false)
+            ->assertSee('<span class="stripe-fee-chip" title="Average purchase cost, incl. VAT">− 12,00', false)
+            ->assertSee('<span class="stripe-fee-chip" title="Average purchase cost, incl. VAT">− 24,00', false)
+            // As on the orders list: profit over cost, 768 / 1200 and -432 / 2400.
+            ->assertSee('<span class="admin-order-profit nb-profit">7,68', false)
+            ->assertSee('(64,0 %)', false)
+            ->assertSee('<span class="admin-order-profit nb-profit is-loss">-4,32', false)
+            ->assertSee('(-18,0 %)', false)
+            ->assertSee('no cost');
+    }
+
+    /** Every row there is in the catalogue, so the column would only repeat it. */
+    public function test_the_catalogue_tab_has_no_catalogue_column(): void
+    {
+        Product::factory()->create(['sku' => 'COL-SKU']);
+        $this->listing(['internalcode' => 'COL-SKU']);
+
+        $admin = $this->admin();
+
+        $this->actingAs($admin)->get('/admin/marketplaces/naturabuy?tab=in-catalogue')
+            ->assertOk()
+            ->assertDontSee('<th>Catalogue</th>', false)
+            ->assertDontSee('nb-match', false);
+
+        $this->actingAs($admin)->get('/admin/marketplaces/naturabuy')
+            ->assertOk()
+            ->assertSee('<th>Catalogue</th>', false)
+            ->assertSee('nb-match', false);
     }
 
     /** Un rapprochement par préfixe montre le nom du produit parent. */

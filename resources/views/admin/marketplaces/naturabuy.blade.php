@@ -178,11 +178,16 @@
                     <thead>
                         <tr>
                             <th>Title</th>
-                            <th>Internal code</th>
                             <th class="nb-num">Price</th>
+                            <th class="nb-num" title="Price minus NaturaBuy's commission: {{ \App\Models\NaturabuyListing::COMMISSION_PERCENT_EXCL_VAT }}% plus {{ \App\Models\NaturabuyListing::COMMISSION_VAT_PERCENT }}% VAT">You get</th>
+                            <th class="nb-num" title="Average purchase cost, incl. VAT">Product cost</th>
+                            <th class="nb-num" title="You get, minus the product cost">Profit</th>
                             <th class="nb-num">NB qty</th>
                             <th class="nb-num">Ours</th>
-                            <th>Catalogue</th>
+                            {{-- Every row of the catalogue tab is in the catalogue: the column would only repeat it. --}}
+                            @if ($tab !== 'in-catalogue')
+                                <th>Catalogue</th>
+                            @endif
                             <th class="nb-num" title="Photos on our shop: main photo plus gallery">Photos</th>
                             <th class="nb-num" title="Photos on the NaturaBuy listing, read from its page once a week">NB photos</th>
                             <th>Stock</th>
@@ -199,6 +204,11 @@
                                         <a href="{{ $listing->publicUrl() }}" target="_blank" rel="noopener noreferrer">{{ $listing->title }}</a>
                                     @else
                                         {{ $listing->title }}
+                                    @endif
+
+                                    {{-- The internal code sits under the title rather than in a column of its own. --}}
+                                    @if ($listing->internalcode)
+                                        <span class="nb-title-code"><code class="nb-code">{{ $listing->internalcode }}</code></span>
                                     @endif
 
                                     {{-- Le nom d'ici seulement sur l'onglet du catalogue :
@@ -222,17 +232,29 @@
                                         ])
                                     @endif
                                 </td>
-                                <td>
-                                    @if ($listing->internalcode)
-                                        <code class="nb-code">{{ $listing->internalcode }}</code>
-                                    @else
-                                        <span class="nb-none">—</span>
-                                    @endif
-                                </td>
                                 <td class="nb-num">
                                     {{ format_euros($listing->price_cents) }}
                                     @if ($listing->isDiscounted())
                                         <span class="nb-oldprice">{{ format_euros($listing->oldprice_cents) }}</span>
+                                    @endif
+                                </td>
+                                {{-- The money columns wear the orders list's chips: perceived, product cost, profit. --}}
+                                <td class="nb-num"><span class="admin-order-perceived">{{ format_euros($listing->netAfterCommissionCents()) }}</span></td>
+                                @php($costCents = $match['cost_cents'] ?? null)
+                                <td class="nb-num">
+                                    @if ($costCents !== null)
+                                        <span class="stripe-fee-chip" title="Average purchase cost, incl. VAT">− {{ format_euros($costCents) }}</span>
+                                    @else
+                                        <span class="nb-none" title="{{ $match ? 'Nothing received on a purchase order yet, so no cost to deduct' : 'Not matched to a product in the catalogue' }}">no cost</span>
+                                    @endif
+                                </td>
+                                <td class="nb-num">
+                                    @if ($costCents !== null)
+                                        @php($profit = $listing->netAfterCommissionCents() - $costCents)
+                                        {{-- The percentage reads as on the orders list: profit as a share of what the goods cost. --}}
+                                        <span class="admin-order-profit nb-profit{{ $profit < 0 ? ' is-loss' : '' }}">{{ format_euros($profit) }}@if ($costCents > 0)<span class="admin-order-profit-pct" title="Profit as a share of what the goods cost">({{ number_format($profit / $costCents * 100, 1, ',', ' ') }} %)</span>@endif</span>
+                                    @else
+                                        <span class="nb-none" title="No product cost to deduct">–</span>
                                     @endif
                                 </td>
                                 <td class="nb-num">{{ number_format($listing->quantity) }}</td>
@@ -250,6 +272,7 @@
                                         <span class="nb-none">—</span>
                                     @endif
                                 </td>
+                                @if ($tab !== 'in-catalogue')
                                 <td>
                                     @if ($matchedProductId)
                                         {{-- Un rapprochement par préfixe est une déduction, pas une
@@ -269,6 +292,7 @@
                                         <span class="admin-availability-chip nb-nocode">No code</span>
                                     @endif
                                 </td>
+                                @endif
                                 <td class="nb-num">@include('admin.marketplaces.partials.shop-image-count', ['count' => $match['image_count'] ?? null])</td>
                                 <td class="nb-num">
                                     {{-- Read from their page by naturabuy:count-photos, one listing a minute. --}}

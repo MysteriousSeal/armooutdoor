@@ -120,7 +120,7 @@ class MarketplaceListingController extends Controller
      * formatted paste and as plain text for editors that refuse it.
      *
      * @param  array<string, array{product_id: int, quantity: int, exact: bool}>  $matches
-     * @return array<string, array{product_id: int, quantity: int, exact: bool, image_count: ?int, name: string, description: string, description_text: string}>
+     * @return array<string, array{product_id: int, quantity: int, exact: bool, cost_cents: ?int, image_count: ?int, name: string, description: string, description_text: string}>
      */
     private function withProductNames(array $matches): array
     {
@@ -137,8 +137,13 @@ class MarketplaceListingController extends Controller
             ->get(['id', 'name', 'description', 'image'])
             ->keyBy('id');
 
+        // What each product cost to buy, for the Profit column: absent when
+        // nothing has been received yet.
+        $costs = Product::averagePurchaseCostsInclVatCents($ids);
+
         foreach ($matches as $code => $match) {
             $product = $products->get($match['product_id']);
+            $matches[$code]['cost_cents'] = $costs[$match['product_id']] ?? null;
             $matches[$code]['image_count'] = $product?->shopImageCount();
             $matches[$code]['name'] = (string) $product?->localizedName();
             $matches[$code]['description'] = (string) $product?->localizedDescription();
