@@ -40,6 +40,9 @@ class NaturabuyListing extends Model
     /** What packing one sale costs, paid out of the price like the product. */
     public const PACKAGING_COST_CENTS = 30;
 
+    /** URSSAF's social contributions, 13.3% of the full sale price, in basis points. */
+    public const URSSAF_BASIS_POINTS = 1330;
+
     protected function casts(): array
     {
         return [
@@ -87,26 +90,40 @@ class NaturabuyListing extends Model
         return $this->price_cents - $this->commissionInclVatCents();
     }
 
+    /** What URSSAF takes on the sale, charged on the full price the buyer pays. */
+    public function urssafCents(): int
+    {
+        return (int) round($this->price_cents * self::URSSAF_BASIS_POINTS / 10000);
+    }
+
+    /** What the shop keeps once NaturaBuy and URSSAF have both been paid. */
+    public function netAfterChargesCents(): int
+    {
+        return $this->netAfterCommissionCents() - $this->urssafCents();
+    }
+
     /**
      * The lowest price ending in ,90 that leaves at least the target profit
-     * once NaturaBuy has taken its commission and the packaging is paid:
-     * with 200%, what the shop receives covers the packaging and three
-     * times what the product cost.
+     * once NaturaBuy has taken its commission, URSSAF its contributions and
+     * the packaging is paid: with 200%, what the shop keeps covers the
+     * packaging and three times what the product cost.
      */
     public static function suggestedPriceCents(int $costCents): int
     {
         $neededCents = $costCents * (100 + self::TARGET_PROFIT_PERCENT) / 100 + self::PACKAGING_COST_CENTS;
 
         // Start just under the price that would leave exactly enough once
-        // the commission is taken, then step up a euro at a time: the
-        // rounding of the commission may cost a step.
-        $keptShare = 1 - self::COMMISSION_PERCENT_EXCL_VAT * (100 + self::COMMISSION_VAT_PERCENT) / 10000;
+        // the commission and URSSAF are taken, then step up a euro at a
+        // time: the rounding of either may cost a step.
+        $keptShare = 1
+            - self::COMMISSION_PERCENT_EXCL_VAT * (100 + self::COMMISSION_VAT_PERCENT) / 10000
+            - self::URSSAF_BASIS_POINTS / 10000;
         $euros = max(0, intdiv((int) floor($neededCents / $keptShare), 100) - 1);
 
         while (true) {
             $listing = new self(['price_cents' => $euros * 100 + 90]);
 
-            if ($listing->netAfterCommissionCents() >= $neededCents) {
+            if ($listing->netAfterChargesCents() >= $neededCents) {
                 return $listing->price_cents;
             }
 

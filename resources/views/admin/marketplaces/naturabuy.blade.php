@@ -199,7 +199,7 @@
                             <th class="nb-num" title="Price minus NaturaBuy's commission: {{ \App\Models\NaturabuyListing::COMMISSION_PERCENT_EXCL_VAT }}% plus {{ \App\Models\NaturabuyListing::COMMISSION_VAT_PERCENT }}% VAT">You get</th>
                             <th class="nb-num" title="Average purchase cost, incl. VAT">Product cost</th>
                             <th class="nb-num" title="You get, minus the product cost">Profit</th>
-                            <th class="nb-num" title="The lowest price ending in ,90 that leaves at least {{ \App\Models\NaturabuyListing::TARGET_PROFIT_PERCENT }}% profit after NaturaBuy's commission and {{ format_euros(\App\Models\NaturabuyListing::PACKAGING_COST_CENTS) }} of packaging">Suggested price</th>
+                            <th class="nb-num" title="The lowest price ending in ,90 that leaves at least {{ \App\Models\NaturabuyListing::TARGET_PROFIT_PERCENT }}% profit after NaturaBuy's commission, {{ number_format(\App\Models\NaturabuyListing::URSSAF_BASIS_POINTS / 100, 1, ',', ' ') }}% of URSSAF and {{ format_euros(\App\Models\NaturabuyListing::PACKAGING_COST_CENTS) }} of packaging">Suggested price</th>
                             <th title="Whether the price is exactly the suggested price">At suggested</th>
                             @endunless
                             {{-- The two price tabs are about money: quantities and photos only crowd them. --}}
@@ -287,13 +287,13 @@
                                 <td class="nb-num">
                                     @if ($costCents !== null)
                                         @php($suggested = new \App\Models\NaturabuyListing(['price_cents' => \App\Models\NaturabuyListing::suggestedPriceCents($costCents)]))
-                                        @php($suggestedProfit = $suggested->netAfterCommissionCents() - $costCents - \App\Models\NaturabuyListing::PACKAGING_COST_CENTS)
+                                        @php($suggestedProfit = $suggested->netAfterChargesCents() - $costCents - \App\Models\NaturabuyListing::PACKAGING_COST_CENTS)
                                         {{-- Green when the listing already sells at or above it, amber when it sells for less. --}}
                                         @php($underpriced = $listing->price_cents < $suggested->price_cents)
                                         <span
                                             class="admin-order-profit nb-suggested {{ $underpriced ? 'is-above' : 'is-met' }}"
-                                            title="{{ $underpriced ? 'The listing sells for less than this' : 'The listing already sells at or above this' }}. Pays out {{ format_euros($suggested->netAfterCommissionCents()) }}, a profit of {{ format_euros($suggestedProfit) }} after {{ format_euros(\App\Models\NaturabuyListing::PACKAGING_COST_CENTS) }} of packaging"
-                                        >{{ format_euros($suggested->price_cents) }}@if ($costCents > 0)<span class="admin-order-profit-pct" title="Profit at this price, packaging paid, as a share of what the goods cost">({{ number_format($suggestedProfit / $costCents * 100, 1, ',', ' ') }} %)</span>@endif</span>
+                                            title="{{ $underpriced ? 'The listing sells for less than this' : 'The listing already sells at or above this' }}. Pays out {{ format_euros($suggested->netAfterCommissionCents()) }}, minus {{ format_euros($suggested->urssafCents()) }} of URSSAF: a profit of {{ format_euros($suggestedProfit) }} after {{ format_euros(\App\Models\NaturabuyListing::PACKAGING_COST_CENTS) }} of packaging"
+                                        >{{ format_euros($suggested->price_cents) }}@if ($costCents > 0)<span class="admin-order-profit-pct" title="Profit at this price, URSSAF and packaging paid, as a share of what the goods cost">({{ number_format($suggestedProfit / $costCents * 100, 1, ',', ' ') }} %)</span>@endif</span>
                                     @else
                                         <span class="nb-none" title="No product cost to base it on">–</span>
                                     @endif

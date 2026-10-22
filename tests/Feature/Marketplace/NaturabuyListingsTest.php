@@ -109,22 +109,23 @@ class NaturabuyListingsTest extends TestCase
         }
     }
 
-    /** The lowest ,90 price that pays out the packaging and three times the cost. */
+    /** The lowest ,90 price that keeps the packaging and three times the cost. */
     public function test_the_suggested_price_is_the_lowest_x90_with_200_percent_profit(): void
     {
-        // 12,00 € of cost needs 36,30 € paid out with the packaging: 41,90 €
-        // leaves 35,87 €, 42,90 € leaves 36,72 €. 3,95 € needs 12,15 €: 13,90 €
-        // leaves 11,90 €, so 14,90 €. A free product still sells for 0,90 €.
-        foreach ([1200 => 4290, 2400 => 8490, 1000 => 3590, 395 => 1490, 0 => 90] as $cost => $price) {
+        // 12,00 € of cost needs 36,30 € kept with the packaging. 50,90 € pays
+        // out 43,57 € minus 6,77 € of URSSAF: 36,80 €, where 49,90 € keeps
+        // 36,07 €. 3,95 € needs 12,15 €: 15,90 € keeps 11,50 €, so 16,90 €.
+        // A free product still sells for 0,90 €.
+        foreach ([1200 => 5090, 2400 => 10090, 1000 => 4190, 395 => 1690, 0 => 90] as $cost => $price) {
             $this->assertSame($price, NaturabuyListing::suggestedPriceCents($cost), "Suggested price for {$cost} cents");
 
-            $paidOut = (new NaturabuyListing(['price_cents' => $price]))->netAfterCommissionCents();
-            $this->assertGreaterThanOrEqual($cost * 3 + NaturabuyListing::PACKAGING_COST_CENTS, $paidOut);
+            $kept = (new NaturabuyListing(['price_cents' => $price]))->netAfterChargesCents();
+            $this->assertGreaterThanOrEqual($cost * 3 + NaturabuyListing::PACKAGING_COST_CENTS, $kept);
 
             // One euro less would not be enough, unless there is no lower ,90 price.
             if ($price > 90) {
                 $lower = new NaturabuyListing(['price_cents' => $price - 100]);
-                $this->assertLessThan($cost * 3 + NaturabuyListing::PACKAGING_COST_CENTS, $lower->netAfterCommissionCents());
+                $this->assertLessThan($cost * 3 + NaturabuyListing::PACKAGING_COST_CENTS, $lower->netAfterChargesCents());
             }
         }
     }
@@ -142,9 +143,9 @@ class NaturabuyListingsTest extends TestCase
             ]);
         };
 
-        // 12,00 € with VAT: 42,90 € suggested, above the 22,99 € listing.
-        // 5,00 € with VAT: 17,90 € suggested, below it. Packaging paid,
-        // 3672 - 1200 - 30 over 1200 is 203,5 %; 1532 - 500 - 30 over 500 is 200,4 %.
+        // 12,00 € with VAT: 50,90 € suggested, above the 22,99 € listing.
+        // 5,00 € with VAT: 21,90 € suggested, below it. URSSAF and packaging
+        // paid, 3680 - 1200 - 30 over 1200 is 204,2 %; 1584 - 500 - 30 over 500 is 210,8 %.
         $received(Product::factory()->create(['sku' => 'UNDER-SKU']), 1000);
         $received(Product::factory()->create(['sku' => 'OVER-SKU']), 417);
         $this->listing(['title' => 'Trop bas', 'internalcode' => 'UNDER-SKU']);
@@ -155,11 +156,11 @@ class NaturabuyListingsTest extends TestCase
             ->assertOk()
             ->assertSee('>Suggested price</th>', false)
             ->assertSee('class="admin-order-profit nb-suggested is-above"', false)
-            ->assertSee('42,90', false)
-            ->assertSee('(203,5 %)', false)
+            ->assertSee('50,90', false)
+            ->assertSee('(204,2 %)', false)
             ->assertSee('class="admin-order-profit nb-suggested is-met"', false)
-            ->assertSee('17,90', false)
-            ->assertSee('(200,4 %)', false)
+            ->assertSee('21,90', false)
+            ->assertSee('(210,8 %)', false)
             ->assertSee('>At suggested</th>', false)
             // Neither listing sits exactly on its suggestion.
             ->assertSee('class="gtin-flag is-missing"', false)
@@ -181,10 +182,10 @@ class NaturabuyListingsTest extends TestCase
         }
         Product::factory()->create(['sku' => 'NOCOST-SKU']);
 
-        // 12,00 € with VAT: suggested 42,90 €.
-        $exact = $this->listing(['title' => 'Pile au prix', 'internalcode' => 'EXACT-SKU', 'price_cents' => 4290]);
+        // 12,00 € with VAT: suggested 50,90 €.
+        $exact = $this->listing(['title' => 'Pile au prix', 'internalcode' => 'EXACT-SKU', 'price_cents' => 5090]);
         $below = $this->listing(['title' => 'Trop bas', 'internalcode' => 'BELOW-SKU', 'price_cents' => 2299]);
-        $above = $this->listing(['title' => 'Trop haut', 'internalcode' => 'ABOVE-SKU', 'price_cents' => 4990]);
+        $above = $this->listing(['title' => 'Trop haut', 'internalcode' => 'ABOVE-SKU', 'price_cents' => 5490]);
         // No product cost, so no suggestion to miss; no product, nothing to compare.
         $noCost = $this->listing(['title' => 'Sans cout', 'internalcode' => 'NOCOST-SKU', 'price_cents' => 999]);
         $unmatched = $this->listing(['title' => 'Inconnue', 'internalcode' => '000019-1', 'price_cents' => 999]);
@@ -239,8 +240,8 @@ class NaturabuyListingsTest extends TestCase
             'quantity_received' => 1,
             'unit_cost_cents' => 1000,
         ]);
-        // 12,00 € with VAT: suggested 42,90 €, which is the listing's price.
-        $this->listing(['internalcode' => 'EXACT-SKU', 'price_cents' => 4290]);
+        // 12,00 € with VAT: suggested 50,90 €, which is the listing's price.
+        $this->listing(['internalcode' => 'EXACT-SKU', 'price_cents' => 5090]);
 
         $this->actingAs($this->admin())
             ->get('/admin/marketplaces/naturabuy?tab=in-catalogue')
