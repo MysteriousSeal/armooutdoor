@@ -2,6 +2,20 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-22 · v1.68.0 · build IMYWLN
+
+### Storefront
+
+- **A welcome-code banner under the free-shipping strip.** It reads « -10% sur votre première commande, avec le code BIENVENUE10 », with the amount and the code taken from the discount code itself: change the code in the back office and the banner follows. It hides when no code is ticked for it, when the code has expired or run out, and for a signed-in customer who has already used it.
+- **Both strips now show beyond the homepage:** on the category list and category pages, product pages, « Nouveautés », « Promotions », « Meilleures ventes » and the cart. Their styles moved to their own stylesheet, loaded only where they appear.
+- **The checkout offers the welcome code in one click.** Under the « Code de réduction » field, a customer who can use the code sees it with a « Utiliser ce code » button. It only appears when applying it would succeed, and comes back if an applied code is removed.
+
+### Admin
+
+- **« Show in the homepage banner »** on the discount code form picks the code the banner advertises. Only one code at a time: ticking it on one unticks the others. A code reserved for one customer, or a free relay delivery code, can't be ticked.
+
+**Migration:** adds `in_welcome_banner` to `discount_codes`. After deploy, create BIENVENUE10 in the back office (percentage, 10, max 1 use per customer, no deadline) and tick « Show in the homepage banner ».
+
 ## 2026-10-22 · v1.67.1 · build EGRMQM
 
 ### Admin
