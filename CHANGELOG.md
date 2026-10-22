@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-22 · v1.68.3 · build TY4XS6
+
+### Storefront
+
+- **A second « Valider la commande » under the checkout's payment section,** for customers who missed the one in the summary. Large and right-aligned like the cart's « Commander », it submits the same form and is enabled and disabled together with the summary's button. Desktop only: on smaller screens the summary already sits right under the payment section.
+
+**No migration.**
+
 ## 2026-10-22 · v1.68.2 · build XJMITC
 
 ### Storefront
