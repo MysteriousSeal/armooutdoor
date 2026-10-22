@@ -52,7 +52,8 @@ class CheckoutWelcomeCodeTest extends TestCase
             ->assertOk()
             ->assertSee('discount-code-suggested', false)
             ->assertSee('<input type="hidden" name="code" value="BIENVENUE10">', false)
-            ->assertSee('-10% sur votre première commande')
+            ->assertSee('<b class="discount-code-suggested-amount">-10%</b> sur votre première commande', false)
+            ->assertSee('<code class="discount-code-suggested-code">BIENVENUE10</code>', false)
             ->assertSee('Utiliser ce code');
     }
 

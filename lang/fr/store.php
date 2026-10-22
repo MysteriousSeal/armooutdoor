@@ -359,6 +359,7 @@ return [
     'discount_code_placeholder' => 'Entrez un code',
     'discount_code_apply' => 'Appliquer',
     'discount_code_suggested' => ':amount sur votre première commande',
+    'discount_code_suggested_note' => 'avec le code :code',
     'discount_code_suggested_apply' => 'Utiliser ce code',
     'discount_code_remove' => 'Retirer',
     'discount_code_applied' => 'Code « :code » appliqué.',

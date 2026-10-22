@@ -188,4 +188,18 @@ class CartTest extends TestCase
             ->assertSee('Votre panier')
             ->assertSee('Bouilloire de camp en émail');
     }
+
+    /** A second « Commander » at the end of the list, as well as the summary's. */
+    public function test_a_second_checkout_button_follows_the_items(): void
+    {
+        $product = Product::query()->where('slug', 'daylight-pack')->firstOrFail();
+        $this->post('/cart', ['product_id' => $product->id, 'quantity' => 1]);
+
+        $html = $this->get('/cart')->assertOk()->getContent();
+        $checkoutUrl = 'href="'.localized_route('checkout.show').'" class="btn btn-primary';
+
+        $this->assertSame(2, substr_count($html, $checkoutUrl));
+        $this->assertGreaterThan(strpos($html, '</ul>', strpos($html, 'class="cart-list"')), strpos($html, 'class="cart-list-checkout"'));
+        $this->assertLessThan(strpos($html, 'class="cart-summary"'), strpos($html, 'class="cart-list-checkout"'));
+    }
 }

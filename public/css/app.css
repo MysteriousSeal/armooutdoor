@@ -3735,6 +3735,49 @@ body.has-menu-open {
     align-items: start;
 }
 
+.cart-list-column {
+    min-width: 0;
+}
+
+.cart-list-checkout {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1.25rem;
+}
+
+/* The end of the list is where the eye lands after the last item, so this
+   is the page's main action, not a footnote: taller and wider than a plain
+   button, as wide as the summary column beside it. */
+.cart-list-checkout-btn {
+    min-width: 18rem;
+    padding: 1rem 1.75rem;
+    gap: 0.6rem;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+}
+
+.cart-list-checkout-btn svg {
+    flex-shrink: 0;
+    transition: transform 0.15s ease;
+}
+
+.cart-list-checkout-btn:hover svg {
+    transform: translateX(3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cart-list-checkout-btn svg {
+        transition: none;
+    }
+}
+
+@media (max-width: 1024px) {
+    .cart-list-checkout {
+        display: none;
+    }
+}
+
 .cart-list {
     list-style: none;
     margin: 0;
@@ -4248,21 +4291,105 @@ body.has-menu-open {
     margin-top: 0.55rem;
 }
 
-/* The welcome code on offer: the applied row's shape, but with a dashed
-   edge like a coupon, since it is not applied yet. */
+/* The welcome code on offer. It wears the rust of the banner the customer
+   saw on the way in, on a pale tint of it, with a dashed coupon edge since
+   it is not applied yet: the one warm thing in a column of neutral forms. */
+:root {
+    --welcome-rust: #8b3f22;
+    --welcome-rust-hover: #74331b;
+    --welcome-tint: #fbefe9;
+    --welcome-ink: #4a2214;
+}
+
+[data-theme='dark'] {
+    --welcome-rust: #c4714f;
+    --welcome-rust-hover: #d4835f;
+    --welcome-tint: #2e1d16;
+    --welcome-ink: #f1ddd3;
+}
+
 .discount-code-form.discount-code-suggested {
     align-items: center;
-    justify-content: space-between;
-    gap: 0.85rem;
-    margin-top: 0.75rem;
-    padding: 0.7rem 0.8rem;
-    background: var(--bg);
-    border: 1px dashed var(--border);
+    gap: 0.9rem;
+    margin-top: 0.85rem;
+    padding: 0.95rem 1rem;
+    background: var(--welcome-tint);
+    border: 1.5px dashed var(--welcome-rust);
+    color: var(--welcome-ink);
+}
+
+.discount-code-suggested-icon {
+    flex-shrink: 0;
+    color: var(--welcome-rust);
 }
 
 .discount-code-suggested-copy {
-    font-size: 0.875rem;
-    color: var(--text-muted);
+    flex: 1;
+    min-width: 0;
+}
+
+.discount-code-suggested-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+/* The figure, stamped like the banner's: reversed out of the rust. */
+.discount-code-suggested-amount {
+    display: inline-block;
+    margin-right: 0.2em;
+    padding: 0.08em 0.5em;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: #fff;
+    background: var(--welcome-rust);
+}
+
+[data-theme='dark'] .discount-code-suggested-amount {
+    color: #1c120d;
+}
+
+.discount-code-suggested-note {
+    margin: 0.3rem 0 0;
+    font-size: 0.8125rem;
+    color: color-mix(in srgb, var(--welcome-ink) 75%, transparent);
+}
+
+.discount-code-suggested-code {
+    margin-left: 0.2em;
+    padding: 0.05em 0.45em;
+    font-family: inherit;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--welcome-ink);
+    border: 1px dashed var(--welcome-rust);
+}
+
+.discount-code-form .btn.discount-code-suggested-btn {
+    padding: 0.8rem 1.25rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #fff;
+    background: var(--welcome-rust);
+}
+
+.discount-code-form .btn.discount-code-suggested-btn:hover:not(:disabled) {
+    background: var(--welcome-rust-hover);
+}
+
+[data-theme='dark'] .discount-code-form .btn.discount-code-suggested-btn {
+    color: #1c120d;
+}
+
+@media (max-width: 640px) {
+    .discount-code-form.discount-code-suggested {
+        flex-wrap: wrap;
+    }
+
+    .discount-code-form .btn.discount-code-suggested-btn {
+        width: 100%;
+    }
 }
 
 .choice-grid {
