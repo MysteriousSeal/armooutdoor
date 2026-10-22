@@ -36,6 +36,9 @@ class CheckoutController extends Controller
 
     private const DISCOUNT_CODE_SESSION_KEY = 'checkout.discount_code_id';
 
+    /** Ticked by default at checkout whenever the cart can go with it. */
+    private const DEFAULT_CARRIER_SLUG = 'mondial-relay';
+
     public function show(Cart $cart): View|RedirectResponse
     {
         if ($cart->isEmpty()) {
@@ -58,14 +61,16 @@ class CheckoutController extends Controller
         $selectedAddress = $addresses->firstWhere('id', (int) $selectedAddressId);
         $sameBillingAddress = old('same_billing_address', true);
         $selectedBillingAddressId = old('billing_address_id', $selectedAddressId);
-        $selectedCarrierId = old('carrier_id', request()->query('carrier_id', $selectableCarriers->first()?->id));
-        $selectedCarrier = $selectableCarriers->firstWhere('id', (int) $selectedCarrierId) ?? $selectableCarriers->first();
 
         $subtotalCents = $cart->totalCents();
         $shippingSetting = ShippingSetting::current();
         $carrierPricesCents = $carriers->mapWithKeys(
             fn (Carrier $carrier): array => [$carrier->id => $shippingSetting->effectivePriceCents($carrier, $subtotalCents, $weightGrams)],
         );
+
+        $defaultCarrier = $this->defaultCarrier($selectableCarriers, $carrierPricesCents);
+        $selectedCarrierId = old('carrier_id', request()->query('carrier_id', $defaultCarrier?->id));
+        $selectedCarrier = $selectableCarriers->firstWhere('id', (int) $selectedCarrierId) ?? $defaultCarrier;
 
         $discountCode = $this->resolveAppliedDiscountCode($user);
         $discountCents = $discountCode ? $subtotalCents - $discountCode->apply($subtotalCents) : 0;
@@ -268,6 +273,20 @@ class CheckoutController extends Controller
             ->pluck('id')
             ->values()
             ->all();
+    }
+
+    /**
+     * The carrier ticked on arrival: Mondial Relay when the cart can go with
+     * it, otherwise the cheapest carrier still on offer, as charged for this
+     * cart (free shipping included). A tie keeps the carriers' own order.
+     *
+     * @param  \Illuminate\Support\Collection<int, Carrier>  $selectableCarriers
+     * @param  \Illuminate\Support\Collection<int, int>  $carrierPricesCents
+     */
+    private function defaultCarrier($selectableCarriers, $carrierPricesCents): ?Carrier
+    {
+        return $selectableCarriers->firstWhere('slug', self::DEFAULT_CARRIER_SLUG)
+            ?? $selectableCarriers->sortBy(fn (Carrier $carrier): int => $carrierPricesCents[$carrier->id])->first();
     }
 
     /**
