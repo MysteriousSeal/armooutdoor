@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-22 · v1.67.1 · build EGRMQM
+
+### Admin
+
+- **The suggested NaturaBuy price now pays URSSAF too.** It is the lowest price ending in ,90 that still leaves 200% profit on the product cost once NaturaBuy's commission (12% plus VAT), URSSAF's 13.3% of the full sale price and 0,30 € of packaging are paid. A 12,00 € product goes from 42,90 € to 50,90 €. The profit in brackets and the chip's tooltip count URSSAF as well; the « Profit » column is unchanged. Listings priced at the old suggestion move from « Price match » to « Price mismatch ».
+
+**No migration.**
+
 ## 2026-10-21 · v1.67.0 · build 0RJXD4
 
 ### Admin
