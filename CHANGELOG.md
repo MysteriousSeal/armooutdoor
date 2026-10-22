@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-22 · v1.68.1 · build IOWH7B
+
+### Storefront
+
+- **A second « Commander » under the cart items.** Large, right-aligned and as wide as the summary column, with an arrow, so a customer at the end of a long list need not scroll back up. Desktop only: on smaller screens the summary, with its own button, already sits right under the list.
+- **The checkout's welcome code offer stands out.** It now wears the welcome banner's rust and price tag: a tinted coupon with a dashed edge, the amount stamped, the code on its own line and a larger rust « Utiliser ce code » button. Full width on mobile.
+
+**No migration.**
+
 ## 2026-10-22 · v1.68.0 · build IMYWLN
 
 ### Storefront
