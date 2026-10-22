@@ -3,6 +3,8 @@
 @section('title', __('store.cart_title').' — '.config('app.name'))
 @section('canonical', localized_route('cart.show'))
 
+@include('partials.top-strips')
+
 @section('content')
     <div class="container">
         <nav class="breadcrumbs" aria-label="breadcrumb">

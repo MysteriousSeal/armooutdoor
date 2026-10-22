@@ -62,6 +62,7 @@ class DiscountCodeController extends Controller
     public function store(StoreDiscountCodeRequest $request): RedirectResponse
     {
         $discountCode = DiscountCode::query()->create($this->payload($request));
+        $this->keepWelcomeBannerUnique($discountCode);
         AdminActivityLog::record('discount_code.created', $discountCode, 'Created discount code '.$discountCode->code);
 
         return redirect()
@@ -80,6 +81,7 @@ class DiscountCodeController extends Controller
     public function update(StoreDiscountCodeRequest $request, DiscountCode $discountCode): RedirectResponse
     {
         $discountCode->update($this->payload($request));
+        $this->keepWelcomeBannerUnique($discountCode);
         AdminActivityLog::record('discount_code.updated', $discountCode, 'Updated discount code '.$discountCode->code);
 
         return redirect()
@@ -117,8 +119,17 @@ class DiscountCodeController extends Controller
             'user_id' => $request->filled('user_id') ? $request->integer('user_id') : null,
             'quantity' => $request->filled('quantity') ? $request->integer('quantity') : null,
             'max_uses_per_customer' => $request->filled('max_uses_per_customer') ? $request->integer('max_uses_per_customer') : null,
+            'in_welcome_banner' => $request->boolean('in_welcome_banner'),
             'ends_at' => $request->filled('ends_at') ? $request->date('ends_at') : null,
         ];
+    }
+
+    /** The banner advertises one code: ticking it on one unticks the rest. */
+    private function keepWelcomeBannerUnique(DiscountCode $discountCode): void
+    {
+        if ($discountCode->in_welcome_banner) {
+            DiscountCode::query()->whereKeyNot($discountCode->id)->where('in_welcome_banner', true)->update(['in_welcome_banner' => false]);
+        }
     }
 
     private function customerOptions()

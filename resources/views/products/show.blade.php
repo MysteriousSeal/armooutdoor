@@ -39,6 +39,8 @@
     </script>
 @endpush
 
+@include('partials.top-strips')
+
 @section('content')
     @php
         $inWishlist = ($wishlistProductIds ?? collect())->contains($product->id);

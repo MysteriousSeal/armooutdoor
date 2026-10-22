@@ -1,0 +1,215 @@
+/*
+ * The free-shipping strip, and the welcome-code band under it.
+ *
+ * They sit above the site header on the homepage, category and product
+ * pages, and have one job: be read before anything else on the page. A wash
+ * of olive on cream did not do that: it read as chrome, the same weight as the header rule
+ * under it. So it is a filled band now, the single darkest thing above the
+ * fold, and the threshold keeps its ticket stub, reversed: light paper on
+ * dark ground rather than the other way round.
+ */
+:root {
+    /* An olive deeper than the headings' own: the same house tone, dark
+       enough to carry light text (6.6:1). */
+    --ship-band: #55573a;
+    --ship-ink: #f6f4ec;
+    /* The welcome-code band under it: rust, an offer rather than a service. */
+    --welcome-band: #8b3f22;
+}
+
+/* On a dark ground the band stays dark: flipping polarity from one theme
+   to the other would make the page blink on a mode change. It stands out
+   from the black by its olive, not by its lightness. */
+[data-theme='dark'] {
+    --ship-band: #454731;
+    --ship-ink: #eeecdf;
+    --welcome-band: #6e3320;
+}
+
+.ship-strip {
+    position: relative;
+    overflow: hidden;
+    background: var(--ship-band);
+    border-bottom: 1px solid color-mix(in srgb, var(--ship-band) 70%, #000);
+}
+
+/*
+ * Both ends of the band are hatched on the diagonal, like the border of an
+ * airmail envelope. It is the band's only ornament, and it comes from the
+ * subject: this ribbon is about shipping, so it wears a postal mark rather
+ * than a gradient that would have meant nothing.
+ */
+.ship-strip::before,
+.ship-strip::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 4.5rem;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        -45deg,
+        color-mix(in srgb, var(--ship-ink) 26%, transparent) 0 5px,
+        transparent 5px 11px
+    );
+}
+
+.ship-strip::before {
+    left: 0;
+    /* The hatching fades towards the text: it borders, it does not
+       encroach. */
+    mask-image: linear-gradient(90deg, #000 0%, transparent 100%);
+}
+
+.ship-strip::after {
+    right: 0;
+    background: repeating-linear-gradient(
+        45deg,
+        color-mix(in srgb, var(--ship-ink) 26%, transparent) 0 5px,
+        transparent 5px 11px
+    );
+    mask-image: linear-gradient(270deg, #000 0%, transparent 100%);
+}
+
+.ship-strip-inner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.8rem;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0.72rem 1.5rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: 0.005em;
+    line-height: 1.35;
+    text-align: center;
+    color: var(--ship-ink);
+}
+
+/* The parcel announces the subject before the sentence is read. Unframed:
+   the hatching at both edges already carries all the band's ornament, and a
+   third rectangle would have made it a dashboard. */
+.ship-strip-icon {
+    flex-shrink: 0;
+    color: var(--ship-ink);
+}
+
+/* The stroke thins as the drawing grows: at 28px, a weight of 1.5 would
+   make it heavier than the sentence beside it. */
+.ship-strip-icon path {
+    stroke-width: 1.35;
+}
+
+@media (max-width: 640px) {
+    .ship-strip-icon {
+        width: 24px;
+        height: 24px;
+    }
+}
+
+.ship-strip-copy {
+    min-width: 0;
+}
+
+/* The threshold, stamped: light paper on the band, the reverse of what it
+   was on the wash. It is the figure one keeps from the sentence. */
+/* The threshold is a ticket, not a highlight: notched at both ends, like a
+   stub one tears off. The fallback to a plain rectangle is there for
+   browsers without clip-path. */
+.ship-strip-amount {
+    display: inline-block;
+    padding: 0.11em 0.62em 0.13em;
+    margin: 0 0.15em;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+    line-height: 1.3;
+    vertical-align: 0.05em;
+    color: var(--ship-band);
+    background: var(--ship-ink);
+}
+
+@supports (clip-path: polygon(0 0)) {
+    .ship-strip-amount {
+        padding-inline: 0.72em;
+        clip-path: polygon(
+            0 0, 100% 0,
+            100% 38%, calc(100% - 0.22em) 50%, 100% 62%,
+            100% 100%, 0 100%,
+            0 62%, 0.22em 50%, 0 38%
+        );
+    }
+}
+
+/* A postal marking, not a second message. */
+.ship-strip-note {
+    position: relative;
+    padding-left: 1rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--ship-ink) 72%, transparent);
+}
+
+.ship-strip-note::before {
+    content: '';
+    position: absolute;
+    left: 0.45rem;
+    top: 50%;
+    width: 1px;
+    height: 0.8em;
+    margin-top: -0.4em;
+    background: color-mix(in srgb, var(--ship-ink) 45%, transparent);
+}
+
+/*
+ * The welcome-code band, right under the shipping one. Same shape, so the
+ * two read as one header, but a rust ground rather than olive: it is an
+ * offer, not a service, and it must not pass for a second line of the first.
+ */
+.ship-strip--welcome {
+    --ship-band: var(--welcome-band);
+    border-top: 1px solid color-mix(in srgb, #fff 14%, transparent);
+}
+
+/* The code is what the visitor has to copy, so it is set apart from the
+   small capitals around it: full size, dashed like a coupon's edge. */
+.welcome-strip-code {
+    display: inline-block;
+    margin-left: 0.3em;
+    padding: 0.05em 0.5em;
+    border: 1px dashed color-mix(in srgb, var(--ship-ink) 70%, transparent);
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--ship-ink);
+    user-select: all;
+}
+
+@media (max-width: 640px) {
+    .ship-strip-inner {
+        padding: 0.65rem 1rem 0.7rem;
+        gap: 0.35rem 0.6rem;
+        font-size: 0.875rem;
+    }
+
+    .ship-strip-note {
+        flex-basis: 100%;
+        padding-left: 0;
+    }
+
+    .ship-strip-note::before {
+        display: none;
+    }
+
+    /* No edge left to border: the band is nothing but its message. */
+    .ship-strip::before,
+    .ship-strip::after {
+        display: none;
+    }
+}

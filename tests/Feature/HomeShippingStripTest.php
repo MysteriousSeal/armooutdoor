@@ -77,11 +77,11 @@ class HomeShippingStripTest extends TestCase
         $this->get('/')->assertOk()->assertDontSee('ship-strip', false);
     }
 
-    public function test_the_strip_is_only_on_the_homepage(): void
+    public function test_the_strip_stays_off_pages_outside_the_catalogue(): void
     {
         $this->freeShippingOver(6000);
 
-        foreach (['/contact', '/nouveautes', '/meilleures-ventes'] as $path) {
+        foreach (['/contact', '/faq'] as $path) {
             $this->get($path)->assertOk()->assertDontSee('ship-strip', false);
         }
     }
@@ -120,7 +120,7 @@ class HomeShippingStripTest extends TestCase
      */
     public function test_the_band_keeps_its_text_readable_in_both_themes(): void
     {
-        $css = file_get_contents(__DIR__.'/../../public/css/home.css');
+        $css = file_get_contents(__DIR__.'/../../public/css/top-strips.css');
 
         foreach (['--ship-band', '--ship-ink'] as $token) {
             $this->assertMatchesRegularExpression(

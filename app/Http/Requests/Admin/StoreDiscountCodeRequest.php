@@ -59,6 +59,16 @@ class StoreDiscountCodeRequest extends FormRequest
                 'min:1',
                 Rule::when($this->filled('quantity'), ['lte:quantity']),
             ],
+            // The banner is public, so it can only advertise a code anyone
+            // can redeem for money off.
+            'in_welcome_banner' => [
+                'boolean',
+                Rule::when($this->boolean('in_welcome_banner'), ['prohibits:user_id']),
+                Rule::when(
+                    $this->boolean('in_welcome_banner') && $this->input('type') === DiscountCode::TYPE_FREE_RELAY_SHIPPING,
+                    ['declined'],
+                ),
+            ],
             'ends_at' => ['nullable', 'date'],
         ];
     }
@@ -94,6 +104,8 @@ class StoreDiscountCodeRequest extends FormRequest
             'user_id.exists' => 'That customer could not be found.',
             'quantity.min' => 'Quantity must be at least 1, or left blank for unlimited.',
             'max_uses_per_customer.min' => 'Max uses per customer must be at least 1, or left blank for unlimited.',
+            'in_welcome_banner.prohibits' => 'A code reserved for one customer can\'t be shown in the homepage banner.',
+            'in_welcome_banner.declined' => 'The homepage banner needs a percentage or fixed amount off.',
             'max_uses_per_customer.lte' => 'Max uses per customer can\'t be higher than the total quantity available.',
         ];
     }

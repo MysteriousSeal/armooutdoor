@@ -4,27 +4,7 @@
 @section('meta_description', __('store.meta_home'))
 @section('canonical', localized_route('home'))
 
-@if ($freeShippingAmount)
-    @push('topbar')
-        {{-- Only rendered when there is a real figure to name: a promise of
-             free shipping with no threshold behind it is worse than silence. --}}
-        <aside class="ship-strip" aria-label="{{ __('store.home_ship_banner_title', ['amount' => $freeShippingAmount]) }}">
-            <p class="ship-strip-inner">
-                {{-- A parcel drawn in line rather than the catalogue's
-                     filled silhouette: at this size a solid shape becomes a
-                     blot, and the lines of travel say "on its way" where the
-                     truck only said "truck". --}}
-                <svg class="ship-strip-icon" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false">
-                    <path d="M1.6 9.4h3.6M0.8 12.6h3.2M2.4 15.8h2.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".65"/>
-                    <path d="M8.4 8.2 14.6 5l6.2 3.2v7.6L14.6 19l-6.2-3.2V8.2Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-                    <path d="m8.4 8.2 6.2 3.2 6.2-3.2M14.6 11.4V19" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-                </svg>
-                <span class="ship-strip-copy">{!! __('store.home_ship_strip', ['amount' => '<b class="ship-strip-amount">'.e($freeShippingAmount).'</b>']) !!}</span>
-                <span class="ship-strip-note">{{ __('store.home_ship_strip_note') }}</span>
-            </p>
-        </aside>
-    @endpush
-@endif
+@include('partials.top-strips')
 
 @section('content')
     @php

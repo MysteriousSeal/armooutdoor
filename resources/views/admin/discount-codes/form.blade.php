@@ -197,6 +197,22 @@
                         </div>
 
                         <div class="form-group">
+                            <input type="hidden" name="in_welcome_banner" value="0">
+                            <label class="form-check">
+                                <input
+                                    type="checkbox"
+                                    name="in_welcome_banner"
+                                    value="1"
+                                    id="in_welcome_banner"
+                                    @checked(old('in_welcome_banner', $discountCode->in_welcome_banner))
+                                >
+                                Show in the homepage banner
+                            </label>
+                            <p class="form-hint">The banner under the free-shipping strip shows this code and its amount, and disappears when it expires or runs out. Only one code at a time: ticking it here unticks any other.</p>
+                            @error('in_welcome_banner') <p class="form-error">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div class="form-group">
                             <label for="ends_at">Deadline</label>
                             <input
                                 type="datetime-local"

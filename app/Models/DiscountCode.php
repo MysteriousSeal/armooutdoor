@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'source_order_id',
     'quantity',
     'max_uses_per_customer',
+    'in_welcome_banner',
     'ends_at',
 ])]
 class DiscountCode extends Model
@@ -49,8 +50,31 @@ class DiscountCode extends Model
             'value' => 'integer',
             'quantity' => 'integer',
             'max_uses_per_customer' => 'integer',
+            'in_welcome_banner' => 'boolean',
             'ends_at' => 'datetime',
         ];
+    }
+
+    /**
+     * The code the homepage banner advertises, while anyone can still redeem
+     * it. Null hides the banner: it never promises a code checkout refuses.
+     */
+    public static function welcomeBannerCode(): ?self
+    {
+        $code = self::query()->where('in_welcome_banner', true)->whereNull('user_id')->first();
+
+        return $code !== null && ! $code->isFreeRelayShipping() && $code->status() === 'active' ? $code : null;
+    }
+
+    /**
+     * The banner code, unless this visitor is signed in and checkout would
+     * refuse it to them, say because they have already used it.
+     */
+    public static function welcomeBannerCodeFor(?User $user): ?self
+    {
+        $code = self::welcomeBannerCode();
+
+        return $code !== null && $code->eligibilityError($user) === null ? $code : null;
     }
 
     public function user(): BelongsTo

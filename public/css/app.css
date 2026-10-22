@@ -4248,6 +4248,23 @@ body.has-menu-open {
     margin-top: 0.55rem;
 }
 
+/* The welcome code on offer: the applied row's shape, but with a dashed
+   edge like a coupon, since it is not applied yet. */
+.discount-code-form.discount-code-suggested {
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.85rem;
+    margin-top: 0.75rem;
+    padding: 0.7rem 0.8rem;
+    background: var(--bg);
+    border: 1px dashed var(--border);
+}
+
+.discount-code-suggested-copy {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
 .choice-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -49,6 +49,8 @@
     </script>
 @endpush
 
+@include('partials.top-strips')
+
 @section('content')
     <div class="container cat-index">
         <nav class="breadcrumbs" aria-label="breadcrumb">

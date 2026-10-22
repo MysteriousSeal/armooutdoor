@@ -34,4 +34,19 @@
     @error('discount_code')
         <p class="form-error">{{ $message }}</p>
     @enderror
+
+    {{-- The homepage's welcome code, one click away. Only passed in when
+         applying it would succeed, and posted through the same form class so
+         it goes through the same AJAX path as a typed code. --}}
+    @if ($suggestedCode ?? null)
+        <form method="POST" action="{{ localized_route('checkout.discount-code.store') }}" class="discount-code-form discount-code-suggested">
+            @csrf
+            <input type="hidden" name="code" value="{{ $suggestedCode->code }}">
+            <div class="discount-code-applied-copy">
+                <span class="order-discount-badge">{{ $suggestedCode->code }}</span>
+                <span class="discount-code-suggested-copy">{{ __('store.discount_code_suggested', ['amount' => $suggestedCode->customerLabel()]) }}</span>
+            </div>
+            <button type="submit" class="btn btn-sm btn-primary">{{ __('store.discount_code_suggested_apply') }}</button>
+        </form>
+    @endif
 @endif

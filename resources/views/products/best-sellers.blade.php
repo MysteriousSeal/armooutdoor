@@ -50,6 +50,8 @@
     </script>
 @endpush
 
+@include('partials.top-strips')
+
 @section('content')
     <div class="container">
         <nav class="breadcrumbs" aria-label="breadcrumb">

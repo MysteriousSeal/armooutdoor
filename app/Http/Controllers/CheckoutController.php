@@ -91,6 +91,7 @@ class CheckoutController extends Controller
             'carrierPricesCents' => $carrierPricesCents,
             'discountCode' => $discountCode,
             'discountCents' => $discountCents,
+            'suggestedCode' => $discountCode === null ? $this->suggestedDiscountCode($user, $cart) : null,
             'freeShippingCarrierIds' => $freeShippingCarrierIds,
             'addresses' => $addresses,
             'homeCarriers' => $carriers->filter(fn (Carrier $carrier): bool => $carrier->method === DeliveryMethod::Home)->values(),
@@ -269,6 +270,18 @@ class CheckoutController extends Controller
             ->all();
     }
 
+    /**
+     * The homepage's welcome code, offered in one click when nothing is
+     * applied yet, but only if applying it would succeed: the same checks
+     * applyDiscountCode() runs, so the button can never lead to a refusal.
+     */
+    private function suggestedDiscountCode(?User $user, Cart $cart): ?DiscountCode
+    {
+        $code = DiscountCode::welcomeBannerCodeFor($user);
+
+        return $code !== null && $code->cartEligibilityError($cart->totalCents()) === null ? $code : null;
+    }
+
     private function discountCodeSectionResponse(Cart $cart, ?DiscountCode $discountCode, string $message, ?string $errorMessage = null): JsonResponse
     {
         $subtotalCents = $cart->totalCents();
@@ -283,6 +296,7 @@ class CheckoutController extends Controller
         $sectionHtml = view('partials.checkout-discount-code', [
             'discountCode' => $discountCode,
             'discountCents' => $discountCents,
+            'suggestedCode' => $discountCode === null ? $this->suggestedDiscountCode(request()->user(), $cart) : null,
         ])->with('errors', $errors)->render();
 
         return response()->json([
