@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-22 · v1.68.4 · build Q5ALDB
+
+### Storefront
+
+- **« Carte bancaire » is ticked by default at checkout,** the only way to pay until PayPal opens. While the payment section waits for a relay point it stays greyed, but the card stays ticked, so once a point is picked the order is ready without another click. A choice already made (after a form error) is kept.
+
+**No migration.**
+
 ## 2026-10-22 · v1.68.3 · build TY4XS6
 
 ### Storefront
