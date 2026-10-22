@@ -481,6 +481,25 @@
                         <p class="form-error">{{ $message }}</p>
                     @enderror
                 </section>
+
+                {{-- The same submit as the summary's, where the customer
+                     finishes filling the form in, since some missed the one
+                     in the sidebar. Desktop only: once the summary stacks
+                     under this column, its button is right here anyway. --}}
+                <div class="cart-list-checkout checkout-main-submit">
+                    <button
+                        type="submit"
+                        form="checkout-form"
+                        class="btn btn-primary cart-list-checkout-btn"
+                        data-checkout-submit
+                        @disabled($addresses->isEmpty())
+                    >
+                        {{ __('store.place_order') }}
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                            <path d="M5 12h14M13 6l6 6-6 6"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <aside class="cart-summary checkout-summary">
@@ -559,6 +578,7 @@
                     id="checkout-submit"
                     form="checkout-form"
                     class="btn btn-primary btn-block"
+                    data-checkout-submit
                     @disabled($addresses->isEmpty())
                 >
                     {{ __('store.place_order') }}

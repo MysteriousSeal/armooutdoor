@@ -3762,7 +3762,7 @@ body.has-menu-open {
     transition: transform 0.15s ease;
 }
 
-.cart-list-checkout-btn:hover svg {
+.cart-list-checkout-btn:hover:not(:disabled) svg {
     transform: translateX(3px);
 }
 
@@ -3770,6 +3770,12 @@ body.has-menu-open {
     .cart-list-checkout-btn svg {
         transition: none;
     }
+}
+
+/* Under the checkout's payment section: the gap the sections keep
+   between themselves, so it reads as the form's last step. */
+.checkout-main-submit {
+    margin-top: 1.75rem;
 }
 
 @media (max-width: 1024px) {

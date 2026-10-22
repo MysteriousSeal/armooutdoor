@@ -109,4 +109,17 @@ class CheckoutDefaultCarrierTest extends TestCase
 
         $this->assertMatchesRegularExpression('/<input[^>]*name="carrier_id"[^>]*value="'.$colissimo.'"[^>]*\schecked\b/s', $html);
     }
+
+    /** A second « Valider la commande » under the payment section, on the same form. */
+    public function test_a_second_place_order_button_follows_the_payment_section(): void
+    {
+        $this->cartOfWeight(200);
+
+        $html = $this->actingAs($this->customer)->get('/checkout')->assertOk()->getContent();
+
+        $this->assertSame(2, substr_count($html, 'data-checkout-submit'));
+        $this->assertSame(2, preg_match_all('/<button[^>]*type="submit"[^>]*form="checkout-form"[^>]*data-checkout-submit/s', $html));
+        $this->assertGreaterThan(strpos($html, 'id="payment-section"'), strpos($html, 'class="cart-list-checkout checkout-main-submit"'));
+        $this->assertLessThan(strpos($html, 'class="cart-summary checkout-summary"'), strpos($html, 'checkout-main-submit'));
+    }
 }

@@ -8,7 +8,9 @@
     var grandTotal = document.getElementById('checkout-grand-total');
     var sameBilling = document.getElementById('same-billing-address');
     var billingPicker = document.getElementById('billing-address-picker');
-    var submitButton = document.getElementById('checkout-submit');
+    // The summary's button and the one under the payment section: both
+    // submit the same form, so both follow the same readiness.
+    var submitButtons = document.querySelectorAll('[data-checkout-submit]');
 
     if (!config) {
         return;
@@ -118,7 +120,7 @@
     }
 
     function syncSubmitAvailability() {
-        if (!submitButton) {
+        if (!submitButtons.length) {
             return;
         }
 
@@ -136,7 +138,9 @@
             && hasBilling
             && hasPayment;
 
-        submitButton.disabled = !ready;
+        submitButtons.forEach(function (button) {
+            button.disabled = !ready;
+        });
     }
 
     function syncTotals() {
