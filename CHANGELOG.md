@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-22 · v1.68.2 · build XJMITC
+
+### Storefront
+
+- **Mondial Relay is ticked by default at checkout** whenever the cart can go with it. When it can't (too heavy, a product it can't carry, or the carrier turned off), the cheapest carrier left is ticked instead, judged on what this cart would pay, free shipping included. A tie keeps the carriers' order, and a carrier already chosen (after a form error, or named in the link) is kept.
+
+**No migration.**
+
 ## 2026-10-22 · v1.68.1 · build IOWH7B
 
 ### Storefront
