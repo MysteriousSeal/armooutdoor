@@ -104,10 +104,10 @@
             if (input.value === 'paypal') {
                 return;
             }
+            // Greyed while locked but left ticked: card is the default, and
+            // the customer should not have to tick it again once a relay
+            // point is picked. Submit stays disabled until then anyway.
             input.disabled = locked;
-            if (locked) {
-                input.checked = false;
-            }
         });
 
         if (payment) {

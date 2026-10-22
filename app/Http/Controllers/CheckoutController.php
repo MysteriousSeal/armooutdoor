@@ -110,7 +110,8 @@ class CheckoutController extends Controller
             'selectedCarrierId' => $selectedCarrier?->id,
             'selectedCarrierIsRelay' => $selectedCarrier?->isRelay() ?? false,
             'selectedRelayPointId' => old('relay_point_id'),
-            'selectedPaymentMethod' => old('payment_method'),
+            // Card is the only method on offer until PayPal opens.
+            'selectedPaymentMethod' => old('payment_method', 'card'),
             'paymentCanceled' => request()->boolean('payment_canceled'),
         ]);
     }

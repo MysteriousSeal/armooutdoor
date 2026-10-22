@@ -122,4 +122,15 @@ class CheckoutDefaultCarrierTest extends TestCase
         $this->assertGreaterThan(strpos($html, 'id="payment-section"'), strpos($html, 'class="cart-list-checkout checkout-main-submit"'));
         $this->assertLessThan(strpos($html, 'class="cart-summary checkout-summary"'), strpos($html, 'checkout-main-submit'));
     }
+
+    /** Card is the only way to pay until PayPal opens, so it comes ticked. */
+    public function test_card_payment_is_ticked_by_default(): void
+    {
+        $this->cartOfWeight(200);
+
+        $html = $this->actingAs($this->customer)->get('/checkout')->assertOk()->getContent();
+
+        $this->assertMatchesRegularExpression('/<input[^>]*name="payment_method"[^>]*value="card"[^>]*\schecked\b/s', $html);
+        $this->assertDoesNotMatchRegularExpression('/<input[^>]*name="payment_method"[^>]*value="paypal"[^>]*\schecked\b/s', $html);
+    }
 }
