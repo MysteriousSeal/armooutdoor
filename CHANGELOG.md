@@ -2,6 +2,22 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-26 · v1.71.0 · build IDDLZX
+
+### Storefront
+
+- **Address suggestions while typing « Adresse »,** in the checkout and in « Mes adresses ». From three characters, real French addresses from the Base Adresse Nationale (IGN Géoplateforme, free, no key) appear under the field, street on one line and postal code and town under it; tapping one or choosing it with the arrow keys and Entrée fills the street, postal code, city and country, then moves on to the complement line. The browser's own autocomplete is off on that field while the suggestions run; typing without picking still works, as does a slow or failing service.
+- **The checkout opens on the cheapest delivery,** relay or not, instead of the cheapest home delivery, which had put most of the catalogue on Colissimo.
+- **« Valider la commande » is never greyed out for a missing step.** Pressed without a saved address, it scrolls to the address form, outlines it with the reason and puts the cursor in the first empty field; pressed with a relay carrier but no point, it does the same for the relay picker. The card payment is no longer greyed while a relay point is missing, and the server still refuses an incomplete order.
+- **Saving an address keeps the delivery already chosen,** and the relay picker no longer says « Aucun point relais trouvé pour cette adresse » before any address exists.
+- **The checkout's new address form fills in the account's last name,** as it already did the first name.
+
+### Under the hood
+
+- Suggestions are served by the shop's own `/address-search` endpoint, for signed-in customers only and limited to 60 searches a minute, so the visitor's IP never reaches the service and the CSP stays as it is. Answers are cached for a day; failures are not.
+
+**No migration.**
+
 ## 2026-10-26 · v1.70.0 · build 339SPG
 
 ### Storefront
