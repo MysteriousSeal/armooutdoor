@@ -42,6 +42,9 @@ class ProductController extends Controller
     /** @var array<string, list<int>> Memo for seoFailingIds() — asked twice per request (count, then tab). */
     private array $seoFailingIds = [];
 
+    /** @var list<int>|null Memo for priceMismatchIds(), asked for the count and then the tab. */
+    private ?array $priceMismatchIds = null;
+
     private const SORT_COOKIE = 'admin_products_sort_v2';
 
     public function index(Request $request): Response
@@ -55,7 +58,7 @@ class ProductController extends Controller
         $seo = in_array($request->query('seo'), ['ok', 'off'], true)
             ? (string) $request->query('seo')
             : '';
-        $tab = in_array($request->query('tab'), ['active', 'disabled', 'in-stock', 'restocking', 'at-supplier', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight', 'no-image', 'no-seo'], true)
+        $tab = in_array($request->query('tab'), ['active', 'disabled', 'in-stock', 'restocking', 'at-supplier', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight', 'no-image', 'no-seo', 'price-mismatch'], true)
             ? (string) $request->query('tab')
             : 'active';
 
@@ -76,6 +79,7 @@ class ProductController extends Controller
 
         return response()->view('admin.products.index', [
             'products' => $products,
+            'averageCosts' => Product::averagePurchaseCostsInclVatCents($products->pluck('id')),
             'tab' => $tab,
             'sort' => $sort,
             'productCount' => Product::query()->count(),
@@ -90,6 +94,7 @@ class ProductController extends Controller
             'noWeightCount' => Product::query()->where('is_active', true)->where(fn ($query) => $query->whereNull('weight_grams')->orWhere('weight_grams', 0))->count(),
             'oneImageCount' => Product::query()->where('is_active', true)->doesntHave('images')->count(),
             'noSeoCount' => count($this->seoFailingIds()),
+            'priceMismatchCount' => count($this->priceMismatchIds()),
             'categories' => $this->categoryOptions(),
             'suppliers' => Supplier::query()->orderBy('name')->get(),
             'search' => $search,
@@ -111,7 +116,7 @@ class ProductController extends Controller
         $seo = in_array($request->query('seo'), ['ok', 'off'], true)
             ? (string) $request->query('seo')
             : '';
-        $tab = in_array($request->query('tab'), ['active', 'disabled', 'in-stock', 'at-supplier', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight', 'no-image', 'no-seo'], true)
+        $tab = in_array($request->query('tab'), ['active', 'disabled', 'in-stock', 'at-supplier', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight', 'no-image', 'no-seo', 'price-mismatch'], true)
             ? (string) $request->query('tab')
             : 'active';
 
@@ -488,6 +493,37 @@ class ProductController extends Controller
             ->all();
     }
 
+    /**
+     * Sets the catalogue price alone, from the list's suggested price dialog,
+     * without pushing the whole product form.
+     */
+    public function updatePrice(Request $request, Product $product): RedirectResponse|JsonResponse
+    {
+        $validated = $request->validate([
+            'price_cents' => ['required', 'integer', 'min:1', 'max:'.Product::MAX_PRICE_CENTS],
+        ]);
+
+        $previousPrice = $product->formattedOriginalPrice();
+        $product->update(['price_cents' => $validated['price_cents']]);
+
+        AdminActivityLog::record(
+            'product.price_updated',
+            $product,
+            'Set price for '.$product->localizedName().' from '.$previousPrice.' to '.$product->formattedOriginalPrice()
+        );
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'price_cents' => $product->price_cents,
+                'price' => $product->formattedOriginalPrice(),
+                'effective_price_cents' => $product->effectivePriceCents(),
+                'effective_price' => $product->formattedPrice(),
+            ]);
+        }
+
+        return back()->with('status', 'Price updated for '.$product->localizedName().'.');
+    }
+
     public function updateQuantity(Request $request, Product $product): RedirectResponse
     {
         $validated = $request->validate([
@@ -742,6 +778,29 @@ class ProductController extends Controller
             ->all();
     }
 
+    /**
+     * Active products whose catalogue price is not their suggested price.
+     * The base price is compared, not the discounted one: a product set on
+     * its suggestion stays off the list while a discount runs. A product
+     * never received on a purchase order has no suggestion to miss.
+     *
+     * @return list<int>
+     */
+    private function priceMismatchIds(): array
+    {
+        if ($this->priceMismatchIds !== null) {
+            return $this->priceMismatchIds;
+        }
+
+        $prices = Product::query()->where('is_active', true)->pluck('price_cents', 'id');
+        $costs = Product::averagePurchaseCostsInclVatCents($prices->keys());
+
+        return $this->priceMismatchIds = collect($costs)
+            ->filter(fn (int $costCents, int $id): bool => (int) $prices[$id] !== Product::siteSuggestedPriceCents($costCents))
+            ->keys()
+            ->all();
+    }
+
     private function applyProductTab(Builder $query, string $tab): void
     {
         match ($tab) {
@@ -758,6 +817,7 @@ class ProductController extends Controller
             // listings, not of products without any picture at all.
             'no-image' => $query->where('is_active', true)->doesntHave('images'),
             'no-seo' => $query->whereIn('id', $this->seoFailingIds()),
+            'price-mismatch' => $query->whereIn('id', $this->priceMismatchIds()),
             default => $query->where('is_active', true),
         };
     }

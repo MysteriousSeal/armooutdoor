@@ -65,7 +65,7 @@ class ProductSeoColumnTest extends TestCase
 
         $response = $this->actingAs(User::factory()->admin()->create())
             ->get('/admin/products?tab=no-seo')->assertOk()
-            ->assertSee('Missing SEO');
+            ->assertSee('<span class="sr-only">Missing </span>SEO', false);
 
         $ids = $response->viewData('products')->pluck('id');
         $this->assertTrue($ids->contains($bad->id));

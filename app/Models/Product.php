@@ -83,6 +83,11 @@ class Product extends Model
      */
     public const MAX_PRICE_CENTS = 9999999;
 
+    /** Stripe's fee on a European card: 1.5% plus 0.25 € per payment. */
+    public const STRIPE_FEE_BASIS_POINTS = 150;
+
+    public const STRIPE_FEE_FIXED_CENTS = 25;
+
     /** @use HasFactory<ProductFactory> */
     use HasFactory;
 
@@ -884,6 +889,39 @@ class Product extends Model
         return $remainder <= 49
             ? $euros * 100 + 49
             : $euros * 100 + 99;
+    }
+
+    /**
+     * The lowest site price ending in ,90, as on NaturaBuy, that earns the same
+     * target as a NaturaBuy listing: once URSSAF and the Stripe card fee are
+     * taken, what the shop keeps covers the packaging and three times the
+     * average purchase cost. No marketplace commission on the shop's own site.
+     */
+    public static function siteSuggestedPriceCents(int $costCents): int
+    {
+        $neededCents = $costCents * (100 + NaturabuyListing::TARGET_PROFIT_PERCENT) / 100 + NaturabuyListing::PACKAGING_COST_CENTS;
+
+        // Start just under the exact break-even price, then step up a cent
+        // at a time: the rounding of either charge may cost a cent or two.
+        $keptShare = 1 - NaturabuyListing::URSSAF_BASIS_POINTS / 10000 - self::STRIPE_FEE_BASIS_POINTS / 10000;
+        $cents = max(0, (int) floor(($neededCents + self::STRIPE_FEE_FIXED_CENTS) / $keptShare) - 2);
+
+        while (self::siteNetAfterChargesCents($cents) < $neededCents) {
+            $cents++;
+        }
+
+        $euros = intdiv($cents, 100) + ($cents % 100 > 90 ? 1 : 0);
+
+        return min($euros * 100 + 90, self::MAX_PRICE_CENTS);
+    }
+
+    /** What the shop keeps of a site sale at this price, URSSAF and the Stripe fee paid. */
+    public static function siteNetAfterChargesCents(int $priceCents): int
+    {
+        return $priceCents
+            - (int) round($priceCents * NaturabuyListing::URSSAF_BASIS_POINTS / 10000)
+            - (int) round($priceCents * self::STRIPE_FEE_BASIS_POINTS / 10000)
+            - self::STRIPE_FEE_FIXED_CENTS;
     }
 
     public function imageUrl(): string

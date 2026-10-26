@@ -57,7 +57,7 @@
                 : null;
         @endphp
 
-        <nav class="admin-tabs" aria-label="Product tabs">
+        <nav class="admin-tabs admin-tabs--dense" aria-label="Product tabs">
             <a href="{{ route('admin.products.index', $tabQuery('active')) }}" class="{{ $tab === 'active' ? 'active' : '' }}">
                 Products <span class="admin-tab-count">{{ number_format($activeCount) }}</span>
             </a>
@@ -73,20 +73,26 @@
             <a href="{{ route('admin.products.index', $tabQuery('out-of-stock')) }}" class="{{ $tab === 'out-of-stock' ? 'active' : '' }}">
                 Out of stock <span class="admin-tab-count">{{ number_format($outOfStockCount) }}</span>
             </a>
-            <a href="{{ route('admin.products.index', $tabQuery('no-sku')) }}" class="starts-group {{ $tab === 'no-sku' ? 'active' : '' }}">
-                Missing SKU <span class="admin-tab-count">{{ number_format($noSkuCount) }}</span>
+            {{-- One word for the whole to-do family instead of « Missing » on
+                 every tab; screen readers still hear it on each link. --}}
+            <span class="admin-tabs-kicker starts-group" aria-hidden="true">Missing</span>
+            <a href="{{ route('admin.products.index', $tabQuery('no-sku')) }}" class="{{ $tab === 'no-sku' ? 'active' : '' }}">
+                <span><span class="sr-only">Missing </span>SKU</span> <span class="admin-tab-count">{{ number_format($noSkuCount) }}</span>
             </a>
             <a href="{{ route('admin.products.index', $tabQuery('no-gtin')) }}" class="{{ $tab === 'no-gtin' ? 'active' : '' }}">
-                Missing GTIN <span class="admin-tab-count">{{ number_format($noGtinCount) }}</span>
+                <span><span class="sr-only">Missing </span>GTIN</span> <span class="admin-tab-count">{{ number_format($noGtinCount) }}</span>
             </a>
             <a href="{{ route('admin.products.index', $tabQuery('no-weight')) }}" class="{{ $tab === 'no-weight' ? 'active' : '' }}">
-                Missing weight <span class="admin-tab-count">{{ number_format($noWeightCount) }}</span>
+                <span><span class="sr-only">Missing </span>Weight</span> <span class="admin-tab-count">{{ number_format($noWeightCount) }}</span>
             </a>
             <a href="{{ route('admin.products.index', $tabQuery('no-image')) }}" class="{{ $tab === 'no-image' ? 'active' : '' }}">
                 One image only <span class="admin-tab-count">{{ number_format($oneImageCount) }}</span>
             </a>
             <a href="{{ route('admin.products.index', $tabQuery('no-seo')) }}" class="{{ $tab === 'no-seo' ? 'active' : '' }}">
-                Missing SEO <span class="admin-tab-count">{{ number_format($noSeoCount) }}</span>
+                <span><span class="sr-only">Missing </span>SEO</span> <span class="admin-tab-count">{{ number_format($noSeoCount) }}</span>
+            </a>
+            <a href="{{ route('admin.products.index', $tabQuery('price-mismatch')) }}" class="starts-group {{ $tab === 'price-mismatch' ? 'active' : '' }}">
+                Price mismatch <span class="admin-tab-count">{{ number_format($priceMismatchCount) }}</span>
             </a>
             <a href="{{ route('admin.products.index', $tabQuery('disabled')) }}" class="sits-apart {{ $tab === 'disabled' ? 'active' : '' }}">
                 Disabled <span class="admin-tab-count">{{ number_format($disabledCount) }}</span>
@@ -231,6 +237,9 @@
                             @case('no-seo')
                                 Every product's SEO lengths sit in their good ranges.
                                 @break
+                            @case('price-mismatch')
+                                Every product with a purchase cost sells at its suggested price.
+                                @break
                             @default
                                 No products found.
                         @endswitch
@@ -279,6 +288,7 @@
                                     @endif
                                 </a>
                             </th>
+                            <th title="Lowest price leaving 200% profit on the average purchase cost, after URSSAF, the Stripe fee and packaging">Suggested</th>
                             <th>
                                 <a href="{{ $stockSort['url'] }}" class="admin-sort-link {{ $stockSort['state'] ? 'is-active' : '' }}">
                                     Stock
@@ -339,8 +349,41 @@
                                     @if ($product->hasDiscount())
                                         <span class="admin-price-cut">
                                             <span class="admin-price-cut-label">{{ $product->discount->label() }}</span>
-                                            {{ $product->formattedPrice() }}
+                                            <span class="admin-price-cut-value">{{ $product->formattedPrice() }}</span>
                                         </span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @php
+                                        $costCents = $averageCosts[$product->id] ?? null;
+                                    @endphp
+                                    @if ($costCents !== null)
+                                        @php
+                                            $suggestedCents = \App\Models\Product::siteSuggestedPriceCents($costCents);
+                                            $suggestedProfit = \App\Models\Product::siteNetAfterChargesCents($suggestedCents) - $costCents - \App\Models\NaturabuyListing::PACKAGING_COST_CENTS;
+                                            // The price sold at today, discount included: red below the
+                                            // suggestion, blue above it, green on it.
+                                            $priceGap = $product->effectivePriceCents() <=> $suggestedCents;
+                                            [$gapClass, $gapTitle] = match ($priceGap) {
+                                                1 => ['is-high', 'The product sells for more than this'],
+                                                -1 => ['is-low', 'The product sells for less than this'],
+                                                default => ['is-ok', 'The product sells at this price'],
+                                            };
+                                        @endphp
+                                        {{-- A click opens the dialog below to sell at this price, unless it already does. --}}
+                                        <button
+                                            type="button"
+                                            class="admin-order-profit admin-suggested-price {{ $gapClass }}"
+                                            title="{{ $gapTitle }}. Average purchase cost {{ format_euros($costCents) }}: a profit of {{ format_euros($suggestedProfit) }} after URSSAF, the Stripe fee and {{ format_euros(\App\Models\NaturabuyListing::PACKAGING_COST_CENTS) }} of packaging"
+                                            data-suggested-price="{{ $suggestedCents }}"
+                                            data-suggested-price-label="{{ format_euros($suggestedCents) }}"
+                                            data-price-url="{{ route('admin.products.price', $product) }}"
+                                            data-product-name="{{ $product->localizedName() }}"
+                                            data-has-discount="{{ $product->hasDiscount() ? '1' : '0' }}"
+                                            @disabled($product->price_cents === $suggestedCents)
+                                        >{{ format_euros($suggestedCents) }}</button>
+                                    @else
+                                        <span title="No purchase received yet">-</span>
                                     @endif
                                 </td>
                                 <td>{{ $product->quantity }}</td>
@@ -548,7 +591,7 @@
                                         ->values();
                                 @endphp
                                 <tr class="admin-variant-row" id="variant-panel-{{ $product->id }}" hidden>
-                                    <td colspan="15">
+                                    <td colspan="16">
                                         <div class="admin-variant-panel">
                                             <table class="admin-variant-table">
                                                 <thead>
@@ -633,12 +676,33 @@
             </div>
 
             @include('admin.partials.pager', ['paginator' => $products])
+
+            {{-- One dialog for every row: the script fills it from the button clicked. --}}
+            <dialog id="suggested-price-modal" class="modal" aria-labelledby="suggested-price-title">
+                <form method="POST" action="" data-suggested-price-form>
+                    @csrf
+                    @method('PATCH')
+                    <input type="hidden" name="price_cents" value="">
+                    <p class="modal-kicker" data-suggested-price-product></p>
+                    <h3 class="modal-title" id="suggested-price-title">Change the price to <span data-suggested-price-amount></span>?</h3>
+                    <p class="modal-body">
+                        Current price: <span data-suggested-price-current></span>.
+                        <span data-suggested-price-discount hidden>Its discount still applies on top of the new price.</span>
+                    </p>
+                    <p class="form-error" data-suggested-price-error hidden>The price could not be saved. Try again.</p>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                        <button type="submit" class="btn btn-primary">Change price</button>
+                    </div>
+                </form>
+            </dialog>
         @endif
     </div>
 @endsection
 
 @push('scripts')
     <script src="{{ versioned_asset('js/admin-supplier-availability.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/admin-suggested-price.js') }}" defer></script>
     <script>
         (function () {
             document.querySelectorAll('[data-variants-toggle]').forEach(function (trigger) {
