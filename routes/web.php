@@ -8,6 +8,7 @@ use App\Http\Controllers\Account\DiscountCodeController as AccountDiscountCodeCo
 use App\Http\Controllers\Account\IdentityDocumentController as AccountIdentityDocumentController;
 // Admin (back office)
 use App\Http\Controllers\Account\ProfileController;
+use App\Http\Controllers\AddressSearchController;
 use App\Http\Controllers\Admin\AccountingController as AdminAccountingController;
 use App\Http\Controllers\Admin\ActivityController as AdminActivityController;
 use App\Http\Controllers\Admin\AdminUserController;
@@ -659,6 +660,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
     Route::get('/checkout/relay-points', [CheckoutController::class, 'relayPoints'])->name('checkout.relay-points');
     Route::get('/checkout/postal-codes', [CheckoutController::class, 'postalCodeSearch'])->name('checkout.postal-codes');
+    Route::get('/address-search', AddressSearchController::class)
+        ->middleware('throttle:60,1')
+        ->name('address-search');
     Route::post('/checkout/addresses', [CheckoutController::class, 'storeAddress'])->name('checkout.addresses.store');
     Route::post('/checkout/discount-code', [CheckoutController::class, 'applyDiscountCode'])->name('checkout.discount-code.store');
     Route::delete('/checkout/discount-code', [CheckoutController::class, 'removeDiscountCode'])->name('checkout.discount-code.destroy');

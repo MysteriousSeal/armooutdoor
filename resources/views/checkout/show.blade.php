@@ -127,7 +127,7 @@
 
                                 <div class="form-group">
                                     <label for="line1">{{ __('store.line1') }}</label>
-                                    <input type="text" id="line1" name="line1" class="form-control" value="{{ old('line1') }}" required maxlength="120" autocomplete="address-line1">
+                                    <input type="text" id="line1" name="line1" class="form-control" value="{{ old('line1') }}" required maxlength="120" autocomplete="address-line1" data-address-autocomplete="{{ localized_route('address-search') }}">
                                     @error('line1') <p class="form-error">{{ $message }}</p> @enderror
                                 </div>
 
@@ -619,5 +619,6 @@
         };
     </script>
     <script src="{{ versioned_asset('js/checkout.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/address-autocomplete.js') }}" defer></script>
     <script src="{{ versioned_asset('js/checkout-discount-code.js') }}" defer></script>
 @endpush

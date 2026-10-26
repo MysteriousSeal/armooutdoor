@@ -4727,6 +4727,31 @@ body.has-menu-open {
     background: var(--bg);
 }
 
+/* Address suggestions under « Adresse »: the relay search's dropdown,
+   with the street on one line and the postal code and town under it. */
+.address-autocomplete {
+    position: relative;
+}
+
+.address-suggestion {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.address-suggestion.is-active {
+    background: var(--bg);
+}
+
+.address-suggestion-street {
+    font-weight: 500;
+}
+
+.address-suggestion-town {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+
 .address-form-wrap {
     margin-top: 1.25rem;
     padding: 1rem 1.15rem 1.15rem;
