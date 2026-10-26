@@ -13,8 +13,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * The carrier ticked when the checkout opens: Mondial Relay whenever the
- * cart can go with it, otherwise the cheapest carrier still on offer.
+ * The carrier ticked when the checkout opens: the cheapest home delivery the
+ * cart can go with, so paying never waits on a relay point being picked.
  */
 class CheckoutDefaultCarrierTest extends TestCase
 {
@@ -60,22 +60,21 @@ class CheckoutDefaultCarrierTest extends TestCase
         return null;
     }
 
-    public function test_mondial_relay_is_ticked_when_the_cart_fits(): void
+    public function test_a_light_cart_gets_the_cheapest_home_delivery(): void
     {
-        // Lettre suivie is cheaper and carries this cart too, but Mondial
-        // Relay comes first.
+        // Lettre suivie at 3,50 € beats Mondial Relay at 3,90 €.
         $this->cartOfWeight(200);
 
-        $this->assertSame('mondial-relay', $this->checkedCarrierSlug());
+        $this->assertSame('lettre-suivie', $this->checkedCarrierSlug());
     }
 
-    public function test_too_heavy_for_mondial_relay_falls_back_to_the_cheapest(): void
+    public function test_home_delivery_is_ticked_even_when_a_relay_is_cheaper(): void
     {
         // 1 kg: Mondial Relay and Lettre suivie are out; Shop2Shop at 4,50 €
-        // beats Colissimo at 6,90 € and Chronopost at 12,90 €.
+        // is cheaper, but Colissimo at 6,90 € needs no relay point picked.
         $this->cartOfWeight(1000);
 
-        $this->assertSame('relais-pickup', $this->checkedCarrierSlug());
+        $this->assertSame('colissimo-home', $this->checkedCarrierSlug());
     }
 
     public function test_the_cheapest_is_judged_on_what_this_cart_pays(): void
@@ -92,12 +91,12 @@ class CheckoutDefaultCarrierTest extends TestCase
         $this->assertSame('colissimo-home', $this->checkedCarrierSlug());
     }
 
-    public function test_without_mondial_relay_on_offer_the_cheapest_is_ticked(): void
+    public function test_with_no_home_delivery_on_offer_the_cheapest_relay_is_ticked(): void
     {
-        Carrier::query()->where('slug', 'mondial-relay')->update(['active' => false]);
+        Carrier::query()->whereIn('slug', ['colissimo-home', 'chronopost-home', 'lettre-suivie'])->update(['active' => false]);
         $this->cartOfWeight(200);
 
-        $this->assertSame('lettre-suivie', $this->checkedCarrierSlug());
+        $this->assertSame('mondial-relay', $this->checkedCarrierSlug());
     }
 
     public function test_a_carrier_asked_for_in_the_url_still_wins(): void

@@ -54,6 +54,39 @@ class AuthTest extends TestCase
         ]);
     }
 
+    public function test_signing_up_from_the_checkout_goes_back_to_the_checkout(): void
+    {
+        // Checkout sends a guest to log in; they create an account instead.
+        $this->get('/checkout')->assertRedirect('/login');
+        $this->get('/login')->assertOk();
+        $this->get('/register')->assertOk();
+
+        $this->post('/register', [
+            'first_name' => 'Jean',
+            'last_name' => 'Test',
+            'email' => 'jean@example.com',
+            'password' => 'secret-pass',
+            'password_confirmation' => 'secret-pass',
+            'terms' => '1',
+        ])->assertRedirect('/checkout');
+
+        $this->assertAuthenticated();
+    }
+
+    public function test_signing_up_goes_back_to_the_page_the_visitor_came_from(): void
+    {
+        $this->from('/cart')->get('/register')->assertOk();
+
+        $this->post('/register', [
+            'first_name' => 'Jean',
+            'last_name' => 'Test',
+            'email' => 'jean@example.com',
+            'password' => 'secret-pass',
+            'password_confirmation' => 'secret-pass',
+            'terms' => '1',
+        ])->assertRedirect('/cart');
+    }
+
     public function test_registration_requires_a_confirmed_password(): void
     {
         $this->from('/register')

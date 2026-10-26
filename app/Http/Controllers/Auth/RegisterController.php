@@ -14,8 +14,12 @@ use Illuminate\View\View;
 
 class RegisterController extends Controller
 {
-    public function create(): View
+    use RemembersIntendedUrl;
+
+    public function create(Request $request): View
     {
+        $this->rememberIntendedUrl($request);
+
         return view('auth.register');
     }
 
@@ -41,7 +45,8 @@ class RegisterController extends Controller
         $cart->claimFor($user);
         CustomerWelcome::send($user);
 
-        return redirect(localized_route('home'))
+        return redirect()
+            ->intended(localized_route('home'))
             ->with('status', __('store.registered'));
     }
 }

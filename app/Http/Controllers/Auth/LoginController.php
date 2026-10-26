@@ -12,6 +12,8 @@ use Illuminate\View\View;
 
 class LoginController extends Controller
 {
+    use RemembersIntendedUrl;
+
     public function create(Request $request): View
     {
         $this->rememberIntendedUrl($request);
@@ -61,20 +63,5 @@ class LoginController extends Controller
 
         return redirect(localized_route('home'))
             ->with('status', __('store.logged_out'));
-    }
-
-    private function rememberIntendedUrl(Request $request): void
-    {
-        if ($request->session()->has('url.intended')) {
-            return;
-        }
-
-        $previous = url()->previous();
-        $login = localized_route('login');
-        $register = localized_route('register');
-
-        if ($previous !== $login && $previous !== $register) {
-            $request->session()->put('url.intended', $previous);
-        }
     }
 }
