@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-26 · v1.69.0 · build XVK9GD
+
+### Admin
+
+- **A « Suggested » column on the product list:** the lowest site price ending in ,90 that leaves 200% profit on the product's average purchase cost, once URSSAF (13.3%), the Stripe card fee (1.5% + 0,25 €) and 0,30 € of packaging are paid. No marketplace commission, so it sits below the NaturaBuy suggestion. The chip is red when the product sells below it (discount included), blue above it, green on it; products never received on a purchase order show « - ».
+- **Click a suggested price to sell at it:** a dialog confirms the change and saves it without reloading the page. The row's price and chip update in place, and the change is written to the activity log.
+- **A « Price mismatch » tab** lists the active products whose catalogue price is not their suggested price. The tab bar is tighter, with one « Missing » label over the SKU, GTIN, Weight and SEO tabs, so it fits on one line again.
+
+**No migration.**
+
 ## 2026-10-22 · v1.68.4 · build Q5ALDB
 
 ### Storefront
