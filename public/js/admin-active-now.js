@@ -11,13 +11,13 @@
     var url = script.getAttribute('data-active-now-url');
     var countEl = chip.querySelector('.admin-active-now-count');
 
+    // People only: bots stay on the analytics page.
     function render(data) {
-        countEl.textContent = data.total;
-        chip.classList.toggle('is-live', data.total > 0);
-        chip.title = data.total
+        countEl.textContent = data.humans;
+        chip.classList.toggle('is-live', data.humans > 0);
+        chip.title = data.humans
             + ' active (' + data.users + ' logged in, ' + data.guests + ' '
-            + (data.guests === 1 ? 'guest' : 'guests') + ', ' + data.bots + ' '
-            + (data.bots === 1 ? 'bot' : 'bots') + ') — last 2 minutes';
+            + (data.guests === 1 ? 'guest' : 'guests') + ') in the last 2 minutes';
     }
 
     function poll() {

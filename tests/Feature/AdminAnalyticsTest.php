@@ -380,6 +380,40 @@ class AdminAnalyticsTest extends TestCase
         $this->assertTrue($chart < $tops && $tops < $donuts && $donuts < $log);
     }
 
+    public function test_a_signed_in_visit_is_never_a_bot_by_request_rate(): void
+    {
+        $chrome = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36';
+        $customer = User::factory()->create();
+
+        // A script hammering the shop from the same connection the customer
+        // uses: twelve page loads in a few seconds, nobody signed in.
+        foreach (range(1, 12) as $i) {
+            SiteVisit::create(['path' => '/rafale-'.$i, 'ip_address' => '203.0.113.70', 'user_agent' => 'curl/8.7.1 (compatible)']);
+        }
+        SiteVisit::create(['path' => '/le-client-navigue', 'ip_address' => '203.0.113.70', 'user_agent' => $chrome, 'user_id' => $customer->id]);
+
+        $response = $this->actingAsAdmin()->get('/admin/analytics')->assertOk();
+
+        $this->assertSame(1, $response->viewData('rangeVisitors')['users']);
+        $this->assertSame(1, $response->viewData('rangeVisitors')['bots']);
+
+        // Hiding bots keeps the customer's page and drops the burst.
+        $this->actingAsAdmin()->get('/admin/analytics?bots=hide')->assertOk()
+            ->assertSee('/le-client-navigue')
+            ->assertDontSee('/rafale-1');
+    }
+
+    public function test_a_signed_in_visit_with_a_bot_signature_is_still_a_bot(): void
+    {
+        $customer = User::factory()->create();
+        SiteVisit::create(['path' => '/', 'ip_address' => '203.0.113.71', 'user_agent' => 'Googlebot/2.1', 'user_id' => $customer->id]);
+
+        $response = $this->actingAsAdmin()->get('/admin/analytics')->assertOk();
+
+        $this->assertSame(1, $response->viewData('rangeVisitors')['bots']);
+        $this->assertSame(0, $response->viewData('rangeVisitors')['users']);
+    }
+
     public function test_the_log_can_hide_bots(): void
     {
         SiteVisit::create(['path' => '/vu-par-un-bot', 'ip_address' => '203.0.113.50', 'user_agent' => 'Googlebot/2.1']);
@@ -406,6 +440,21 @@ class AdminAnalyticsTest extends TestCase
         $this->actingAsAdmin()
             ->getJson('/admin/analytics/active-now')
             ->assertOk()
-            ->assertJson(['total' => 1, 'users' => 0, 'guests' => 1, 'bots' => 0]);
+            ->assertJson(['total' => 1, 'humans' => 1, 'users' => 0, 'guests' => 1, 'bots' => 0]);
+    }
+
+    public function test_the_active_chips_count_people_only(): void
+    {
+        SiteVisit::create(['path' => '/', 'ip_address' => '203.0.113.31', 'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36']);
+        SiteVisit::create(['path' => '/', 'ip_address' => '203.0.113.32', 'user_agent' => 'Googlebot/2.1']);
+
+        $this->actingAsAdmin()
+            ->getJson('/admin/analytics/active-now')
+            ->assertOk()
+            ->assertJson(['total' => 2, 'humans' => 1, 'bots' => 1]);
+
+        // The analytics page's own chip and « Active now » figure follow it.
+        $this->actingAsAdmin()->get('/admin/analytics')->assertOk()
+            ->assertSee('<span class="admin-active-now-count">1</span>', false);
     }
 }

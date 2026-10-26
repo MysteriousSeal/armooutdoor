@@ -11,9 +11,9 @@
                 Visit breakdowns and a detailed log of recent traffic.
             </p>
             <div class="admin-list-meta">
-                <span class="admin-list-chip admin-active-now-chip {{ $activeNow['total'] > 0 ? 'is-live' : '' }}" title="Distinct visitors with a page view in the last 2 minutes (bots counted separately)">
+                <span class="admin-list-chip admin-active-now-chip {{ $activeNow['humans'] > 0 ? 'is-live' : '' }}" title="Distinct people with a page view in the last 2 minutes; bots are not in the count">
                     <span class="admin-active-now-dot" aria-hidden="true"></span>
-                    <span class="admin-active-now-count">{{ number_format($activeNow['total']) }}</span>
+                    <span class="admin-active-now-count">{{ number_format($activeNow['humans']) }}</span>
                     active
                     <span class="admin-list-chip-muted">
                         · {{ number_format($activeNow['users']) }} logged in
@@ -68,11 +68,11 @@
                     <span class="admin-analytics-stat-sub">{{ number_format($flow['bounces']) }} of {{ number_format($flowSessions) }} sessions</span>
                 @endif
             </div>
-            <div class="admin-analytics-stat admin-analytics-stat-live {{ $activeNow['total'] > 0 ? 'is-live' : '' }}">
+            <div class="admin-analytics-stat admin-analytics-stat-live {{ $activeNow['humans'] > 0 ? 'is-live' : '' }}">
                 <span class="admin-analytics-stat-label">Active now</span>
                 <span class="admin-analytics-stat-value">
                     <span class="admin-active-now-dot" aria-hidden="true"></span>
-                    {{ number_format($activeNow['total']) }}
+                    {{ number_format($activeNow['humans']) }}
                 </span>
             </div>
         </section>
@@ -436,7 +436,7 @@
                     <ul class="admin-visits-list">
                         @foreach ($visits as $visit)
                             @php
-                                $isBursty = isset($burstyIps[$visit->ip_address ?: 'unknown']);
+                                $isBursty = \App\Http\Controllers\Admin\AnalyticsController::isBurstBot($visit->ip_address, $visit->user_id, $burstyIps);
                                 $isBot = $visit->is_bot || $isBursty;
                             @endphp
                             <li class="admin-visits-row {{ $isBot ? 'is-bot' : '' }}">

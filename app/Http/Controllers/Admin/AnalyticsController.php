@@ -104,7 +104,7 @@ class AnalyticsController extends Controller
      * signature matching with the IP request-burst heuristic (see burstyIps()).
      *
      * @param  array<string, true>|null  $burstyIps  Pass a precomputed set to avoid recalculating it for the same range.
-     * @return array{total: int, users: int, guests: int, bots: int}
+     * @return array{total: int, humans: int, users: int, guests: int, bots: int}
      */
     private function countDistinctVisitors(?CarbonInterface $since, ?array $burstyIps = null): array
     {
@@ -119,7 +119,7 @@ class AnalyticsController extends Controller
 
         foreach ($query->cursor() as $row) {
             $ip = $row->ip_address ?: 'unknown';
-            $isBot = UserAgentParser::isBot($row->user_agent) || isset($burstyIps[$ip]);
+            $isBot = UserAgentParser::isBot($row->user_agent) || self::isBurstBot($row->ip_address, $row->user_id, $burstyIps);
 
             if ($isBot) {
                 $botKeys['b:'.$ip.'|'.md5((string) $row->user_agent)] = true;
@@ -140,6 +140,8 @@ class AnalyticsController extends Controller
 
         return [
             'total' => $users + $guests + $bots,
+            // People only: what the « active » chips show.
+            'humans' => $users + $guests,
             'users' => $users,
             'guests' => $guests,
             'bots' => $bots,
@@ -172,6 +174,21 @@ class AnalyticsController extends Controller
         if ($since !== null) {
             $query->where('created_at', '>=', $since);
         }
+    }
+
+    /**
+     * Whether the request-rate rule makes this visit a bot: it comes from an
+     * IP that loaded pages in a burst, and nobody was signed in. A signed-in
+     * visit is never a bot by rate alone: an account in a real browser is a
+     * person, even on a connection shared with something faster (the owner
+     * testing from the same line, a household, an office). The signature
+     * rule still applies to it.
+     *
+     * @param  array<string, true>  $burstyIps
+     */
+    public static function isBurstBot(?string $ip, mixed $userId, array $burstyIps): bool
+    {
+        return $userId === null && isset($burstyIps[$ip ?: 'unknown']);
     }
 
     /**
@@ -240,7 +257,7 @@ class AnalyticsController extends Controller
                 continue;
             }
 
-            $isBot = UserAgentParser::isBot($row->user_agent) || isset($burstyIps[$row->ip_address ?: 'unknown']);
+            $isBot = UserAgentParser::isBot($row->user_agent) || self::isBurstBot($row->ip_address, $row->user_id, $burstyIps);
 
             if ($isBot) {
                 continue;
@@ -302,7 +319,7 @@ class AnalyticsController extends Controller
      */
     private function buildTopCartProducts(?CarbonInterface $since, array $burstyIps): array
     {
-        $query = CartAddEvent::query()->select(['product_id', 'quantity', 'unit_price_cents', 'ip_address']);
+        $query = CartAddEvent::query()->select(['product_id', 'quantity', 'unit_price_cents', 'ip_address', 'user_id']);
         $this->applyRange($query, $since);
 
         $counts = [];
@@ -310,7 +327,7 @@ class AnalyticsController extends Controller
         $revenueCents = [];
 
         foreach ($query->cursor() as $row) {
-            if (isset($burstyIps[$row->ip_address ?: 'unknown'])) {
+            if (self::isBurstBot($row->ip_address, $row->user_id, $burstyIps)) {
                 continue;
             }
 
@@ -384,7 +401,7 @@ class AnalyticsController extends Controller
 
         foreach ($rows as $row) {
             $parsed = UserAgentParser::parse($row->user_agent);
-            $isBot = $parsed['is_bot'] || isset($burstyIps[$row->ip_address ?: 'unknown']);
+            $isBot = $parsed['is_bot'] || self::isBurstBot($row->ip_address, $row->user_id, $burstyIps);
 
             $os = $isBot ? '—' : ($parsed['os'] === '—' ? 'Unknown' : $parsed['os']);
             $device = $isBot ? 'Bot' : $parsed['device'];
