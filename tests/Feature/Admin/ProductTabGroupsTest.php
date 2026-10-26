@@ -12,6 +12,9 @@ use Tests\TestCase;
  * Huit onglets alignés sans respiration se lisent comme une seule liste. Ils
  * forment pourtant trois familles — ce qu'on vend, l'état des stocks, ce
  * qu'il reste à renseigner — et « Désactivés » n'appartient à aucune.
+ *
+ * A fourth family, pricing, holds the « Price mismatch » tab. The to-do
+ * family opens on a « Missing » label rather than on its first tab.
  */
 class ProductTabGroupsTest extends TestCase
 {
@@ -24,7 +27,7 @@ class ProductTabGroupsTest extends TestCase
             ->assertOk()
             ->getContent();
 
-        preg_match('/<nav class="admin-tabs".*?<\/nav>/s', $html, $m);
+        preg_match('/<nav class="admin-tabs[^"]*".*?<\/nav>/s', $html, $m);
 
         return $m[0] ?? '';
     }
@@ -36,13 +39,19 @@ class ProductTabGroupsTest extends TestCase
 
     public function test_a_rule_opens_the_missing_data_group(): void
     {
-        $this->assertMatchesRegularExpression('/tab=no-sku[^>]*"\s*class="starts-group/', $this->bar());
+        // On the « Missing » label heading the family, just before its first tab.
+        $this->assertMatchesRegularExpression('/<span class="admin-tabs-kicker starts-group" aria-hidden="true">Missing<\/span>\s*<a[^>]*tab=no-sku/', $this->bar());
     }
 
-    public function test_only_two_rules_are_drawn(): void
+    public function test_a_rule_opens_the_pricing_group(): void
     {
-        // Un filet par frontière : trois familles, deux frontières.
-        $this->assertSame(2, substr_count($this->bar(), 'starts-group'));
+        $this->assertMatchesRegularExpression('/tab=price-mismatch[^>]*"\s*class="starts-group/', $this->bar());
+    }
+
+    public function test_only_three_rules_are_drawn(): void
+    {
+        // One rule per border: four families, three borders.
+        $this->assertSame(3, substr_count($this->bar(), 'starts-group'));
     }
 
     public function test_disabled_sits_apart(): void
@@ -63,13 +72,13 @@ class ProductTabGroupsTest extends TestCase
     {
         $bar = $this->bar();
 
-        $this->assertGreaterThan(strpos($bar, 'tab=no-weight'), strpos($bar, 'tab=disabled'));
+        $this->assertGreaterThan(strpos($bar, 'tab=price-mismatch'), strpos($bar, 'tab=disabled'));
     }
 
     public function test_the_order_of_the_bar_holds(): void
     {
         $bar = $this->bar();
-        $expected = ['tab=in-stock', 'tab=at-supplier', 'tab=out-of-stock', 'tab=no-sku', 'tab=no-gtin', 'tab=no-weight', 'tab=disabled'];
+        $expected = ['tab=in-stock', 'tab=at-supplier', 'tab=out-of-stock', 'tab=no-sku', 'tab=no-gtin', 'tab=no-weight', 'tab=no-seo', 'tab=price-mismatch', 'tab=disabled'];
         $positions = array_map(fn (string $needle): int => strpos($bar, $needle), $expected);
 
         $sorted = $positions;
@@ -94,7 +103,7 @@ class ProductTabGroupsTest extends TestCase
     {
         $css = (string) file_get_contents(public_path('css/admin.css'));
 
-        $this->assertMatchesRegularExpression('/\.admin-tabs a\.starts-group::before\s*\{/', $css);
+        $this->assertMatchesRegularExpression('/\.admin-tabs \.starts-group::before\s*\{/', $css);
         $this->assertMatchesRegularExpression('/\.admin-tabs a\.sits-apart\s*\{/', $css);
     }
 
