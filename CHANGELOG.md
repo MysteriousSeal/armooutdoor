@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-26 · v1.70.0 · build 339SPG
+
+### Storefront
+
+- **The login page reached from « Commander » reads as the last step before paying.** Titled « Dernière étape avant le paiement », it shows the basket in one compact row (item count, subtotal, three photos then « +N », a « Modifier le panier » link), then « Continuer avec Google » and « Créer un compte » as a full button, then the returning customers' form under a clear « Déjà client ? Connectez-vous » heading. Its « Se connecter » button is outlined with a strong border so « Créer un compte » keeps the lead, and the e-mail field no longer takes the cursor on arrival.
+- **« Créer un compte » from the checkout shows the same basket row.** Both checkout versions drop the side panel for one centred card.
+- **The side panel of the normal login and sign-up pages is slimmer:** about a third of the width, only as tall as its content, and three concrete facts with icons (free delivery threshold, secure card payment via Stripe, returns within 14 days) instead of the shop pitch and checkbox-style ticks. The threshold comes from the same setting as the footer.
+
+**No migration.**
+
 ## 2026-10-26 · v1.69.1 · build 61RS5J
 
 ### Storefront
