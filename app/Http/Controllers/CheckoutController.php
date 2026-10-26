@@ -136,7 +136,11 @@ class CheckoutController extends Controller
             'is_default' => $makeDefault,
         ]);
 
-        return redirect(localized_route('checkout.show'))
+        // The delivery picked before saving survives the reload; show()
+        // ignores a carrier the cart cannot go with.
+        $carrierId = $request->integer('carrier_id');
+
+        return redirect(localized_route('checkout.show', $carrierId > 0 ? ['carrier_id' => $carrierId] : []))
             ->with('status', __('store.address_saved'))
             ->withInput(['address_id' => $address->id]);
     }
@@ -274,20 +278,18 @@ class CheckoutController extends Controller
     }
 
     /**
-     * The carrier ticked on arrival: the cheapest home delivery that can take
-     * the cart, as charged for this cart (free shipping included), so the
-     * order can be placed without first picking a relay point. Only a cart no
-     * home carrier takes falls back to the cheapest relay. A tie keeps the
-     * carriers' own order.
+     * The carrier ticked on arrival: the cheapest one that can take the cart,
+     * as charged for this cart (free shipping included), relay or not. A
+     * relay ticked before a point is picked does not block the order
+     * buttons: the checkout script turns the click into a pointer to the
+     * relay picker. A tie keeps the carriers' own order.
      *
      * @param  \Illuminate\Support\Collection<int, Carrier>  $selectableCarriers
      * @param  \Illuminate\Support\Collection<int, int>  $carrierPricesCents
      */
     private function defaultCarrier($selectableCarriers, $carrierPricesCents): ?Carrier
     {
-        $byPrice = $selectableCarriers->sortBy(fn (Carrier $carrier): int => $carrierPricesCents[$carrier->id]);
-
-        return $byPrice->first(fn (Carrier $carrier): bool => ! $carrier->isRelay()) ?? $byPrice->first();
+        return $selectableCarriers->sortBy(fn (Carrier $carrier): int => $carrierPricesCents[$carrier->id])->first();
     }
 
     /**

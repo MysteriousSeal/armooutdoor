@@ -53,14 +53,18 @@
                         </div>
                     </section>
 
-                    <section class="checkout-section checkout-section--address">
+                    <section class="checkout-section checkout-section--address" id="address-section">
                         <h3 class="checkout-heading">
                             <span class="home-kicker">01</span>
                             {{ __('store.address_section') }}
                         </h3>
 
+                        {{-- Shown when « Valider la commande » is pressed before an
+                             address is saved: the click lands here instead. --}}
+                        <p class="form-error checkout-required" id="address-required" role="alert" hidden>{{ __('store.address_required') }}</p>
+
                         @if ($addresses->isEmpty())
-                            <p class="checkout-hint">{{ __('store.address_empty') }}</p>
+                            <p class="checkout-hint" id="address-empty-hint">{{ __('store.address_empty') }}</p>
                         @else
                             <div class="choice-grid">
                                 @foreach ($addresses as $address)
@@ -102,8 +106,11 @@
                         <details class="address-form-wrap" @if ($addresses->isEmpty() || $errors->hasAny(['first_name', 'last_name', 'line1', 'postal_code', 'city', 'country'])) open @endif>
                             <summary>{{ __('store.address_new') }}</summary>
 
-                            <form method="POST" action="{{ localized_route('checkout.addresses.store') }}" class="auth-form address-form">
+                            <form method="POST" action="{{ localized_route('checkout.addresses.store') }}" class="auth-form address-form" id="checkout-address-form">
                                 @csrf
+                                {{-- The delivery picked so far, kept across the reload
+                                     that saving an address causes. --}}
+                                <input type="hidden" name="carrier_id" id="address-form-carrier" value="{{ $selectedCarrierId }}">
 
                                 <div class="form-row">
                                     <div class="form-group">
@@ -113,7 +120,7 @@
                                     </div>
                                     <div class="form-group">
                                         <label for="last_name">{{ __('store.last_name') }}</label>
-                                        <input type="text" id="last_name" name="last_name" class="form-control" value="{{ old('last_name') }}" required maxlength="80" autocomplete="family-name">
+                                        <input type="text" id="last_name" name="last_name" class="form-control" value="{{ old('last_name', auth()->user()->last_name) }}" required maxlength="80" autocomplete="family-name">
                                         @error('last_name') <p class="form-error">{{ $message }}</p> @enderror
                                     </div>
                                 </div>
@@ -334,6 +341,10 @@
                     <div id="relay-picker" class="relay-picker" @if (! $selectedCarrierIsRelay) hidden @endif>
                         <h4 class="shipping-group-title">{{ __('store.relay_section') }}</h4>
 
+                        {{-- Shown when « Valider la commande » is pressed before a
+                             point is picked: the click lands here instead. --}}
+                        <p class="form-error checkout-required" id="relay-required" role="alert" hidden>{{ __('store.relay_required') }}</p>
+
                         <div id="relay-list" @if ($selectedRelayPointId) hidden @endif>
                             <div class="form-group relay-search-wrap">
                                 <label for="relay-search">{{ __('store.relay_search') }}</label>
@@ -402,7 +413,7 @@
                                 @endforeach
                             </div>
                             <p class="checkout-hint" id="relay-points-empty" @unless ($relayPoints->isEmpty()) hidden @endunless>
-                                {{ __('store.relay_empty') }}
+                                {{ $addresses->isEmpty() ? __('store.relay_empty_no_address') : __('store.relay_empty') }}
                             </p>
                             <div class="relay-points-more-wrap">
                                 <button type="button" class="btn btn-secondary" id="relay-points-more" hidden>
@@ -492,7 +503,6 @@
                         form="checkout-form"
                         class="btn btn-primary cart-list-checkout-btn"
                         data-checkout-submit
-                        @disabled($addresses->isEmpty())
                     >
                         {{ __('store.place_order') }}
                         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
@@ -579,7 +589,6 @@
                     form="checkout-form"
                     class="btn btn-primary btn-block"
                     data-checkout-submit
-                    @disabled($addresses->isEmpty())
                 >
                     {{ __('store.place_order') }}
                 </button>

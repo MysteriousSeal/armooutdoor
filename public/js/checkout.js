@@ -100,22 +100,12 @@
         var hasRelayPoint = !!document.querySelector('input[name="relay_point_id"]:checked');
         var locked = !!isRelay && !hasRelayPoint;
 
-        document.querySelectorAll('input[name="payment_method"]').forEach(function (input) {
-            if (input.value === 'paypal') {
-                return;
-            }
-            // Greyed while locked but left ticked: card is the default, and
-            // the customer should not have to tick it again once a relay
-            // point is picked. Submit stays disabled until then anyway.
-            input.disabled = locked;
-        });
-
-        if (payment) {
-            payment.classList.toggle('is-locked', locked);
-        }
-
+        // The card stays live and ticked: a missing relay point no longer
+        // greys the payment out. The hint says what is left (only once an
+        // address is saved, or it would not be the last step), and the
+        // order buttons lead to what is missing (see guideToMissingStep).
         if (paymentLockedHint) {
-            paymentLockedHint.hidden = !locked;
+            paymentLockedHint.hidden = !locked || !selectedAddress();
         }
     }
 
@@ -124,17 +114,15 @@
             return;
         }
 
-        var hasAddress = !!document.querySelector('input[name="address_id"]:checked');
         var carrier = selectedCarrier();
-        var isRelay = carrier && carrier.getAttribute('data-method') === 'relay';
-        var hasRelayPoint = !!document.querySelector('input[name="relay_point_id"]:checked');
         var hasBilling = !sameBilling || sameBilling.checked
             || !!document.querySelector('input[name="billing_address_id"]:checked');
         var hasPayment = !!document.querySelector('input[name="payment_method"]:checked');
 
-        var ready = hasAddress
-            && !!carrier
-            && (!isRelay || hasRelayPoint)
+        // A missing address or relay point still counts as ready: the click
+        // is caught and turned into a guided step instead of a greyed-out
+        // button (see guideToMissingStep).
+        var ready = !!carrier
             && hasBilling
             && hasPayment;
 
@@ -561,6 +549,111 @@
 
         if (name === 'address_id' || name === 'billing_address_id' || name === 'payment_method' || event.target === sameBilling) {
             syncSubmitAvailability();
+        }
+    });
+
+    var relayRequired = document.getElementById('relay-required');
+    var addressRequired = document.getElementById('address-required');
+    var addressSection = document.getElementById('address-section');
+    var addressForm = document.getElementById('checkout-address-form');
+    var addressFormCarrier = document.getElementById('address-form-carrier');
+    var checkoutForm = document.getElementById('checkout-form');
+
+    function needsRelayPoint() {
+        var carrier = selectedCarrier();
+
+        return !!carrier
+            && carrier.getAttribute('data-method') === 'relay'
+            && !document.querySelector('input[name="relay_point_id"]:checked');
+    }
+
+    function flag(section, notice) {
+        if (notice) {
+            notice.hidden = false;
+        }
+
+        if (section) {
+            section.classList.add('is-required');
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    function unflag(section, notice) {
+        if (notice) {
+            notice.hidden = true;
+        }
+
+        if (section) {
+            section.classList.remove('is-required');
+        }
+    }
+
+    // « Valider la commande » pressed with a step missing: stop, bring that
+    // step into view and say why, in the order the page asks for them.
+    function guideToMissingStep() {
+        if (!selectedAddress()) {
+            flag(addressSection, addressRequired);
+
+            // The red notice says it all; the quiet hint under it would repeat it.
+            var emptyHint = document.getElementById('address-empty-hint');
+
+            if (emptyHint) {
+                emptyHint.hidden = true;
+            }
+
+            var wrap = addressForm ? addressForm.closest('details') : null;
+
+            if (wrap) {
+                wrap.open = true;
+            }
+
+            var firstEmpty = addressForm
+                ? Array.prototype.find.call(addressForm.querySelectorAll('input[required]'), function (input) { return !input.value; })
+                : null;
+
+            if (firstEmpty) {
+                firstEmpty.focus({ preventScroll: true });
+            }
+
+            return true;
+        }
+
+        if (needsRelayPoint()) {
+            flag(picker, relayRequired);
+
+            var firstPoint = document.querySelector('#relay-points-grid input[name="relay_point_id"]:not([disabled])');
+
+            if (!firstPoint && search) {
+                search.focus({ preventScroll: true });
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    if (checkoutForm) {
+        checkoutForm.addEventListener('submit', function (event) {
+            if (guideToMissingStep()) {
+                event.preventDefault();
+            }
+        });
+    }
+
+    document.addEventListener('change', function (event) {
+        var name = event.target.name;
+
+        if (name === 'relay_point_id' || name === 'carrier_id') {
+            unflag(picker, relayRequired);
+        }
+
+        if (name === 'address_id') {
+            unflag(addressSection, addressRequired);
+        }
+
+        if (name === 'carrier_id' && addressFormCarrier && event.target.form !== addressForm) {
+            addressFormCarrier.value = event.target.value;
         }
     });
 

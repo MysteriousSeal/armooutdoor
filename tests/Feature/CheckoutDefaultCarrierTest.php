@@ -13,8 +13,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * The carrier ticked when the checkout opens: the cheapest home delivery the
- * cart can go with, so paying never waits on a relay point being picked.
+ * The carrier ticked when the checkout opens: the cheapest one the cart can
+ * go with, relay or not, as charged for this cart.
  */
 class CheckoutDefaultCarrierTest extends TestCase
 {
@@ -68,13 +68,36 @@ class CheckoutDefaultCarrierTest extends TestCase
         $this->assertSame('lettre-suivie', $this->checkedCarrierSlug());
     }
 
-    public function test_home_delivery_is_ticked_even_when_a_relay_is_cheaper(): void
+    public function test_a_cheaper_relay_beats_home_delivery(): void
     {
         // 1 kg: Mondial Relay and Lettre suivie are out; Shop2Shop at 4,50 €
-        // is cheaper, but Colissimo at 6,90 € needs no relay point picked.
+        // beats Colissimo at 6,90 €.
         $this->cartOfWeight(1000);
 
-        $this->assertSame('colissimo-home', $this->checkedCarrierSlug());
+        $this->assertSame('relais-pickup', $this->checkedCarrierSlug());
+    }
+
+    public function test_a_product_closed_to_lettre_suivie_opens_on_mondial_relay(): void
+    {
+        // Most of the catalogue: light, but not allowed in a letter. Mondial
+        // Relay at 3,90 € beats Colissimo at 6,90 €.
+        $this->cartOfWeight(200);
+        $product = Product::query()->where('slug', 'cast-iron-skillet')->firstOrFail();
+        $product->update(['carrier_ids' => Carrier::query()->whereIn('slug', ['colissimo-home', 'chronopost-home', 'mondial-relay', 'relais-pickup'])->pluck('id')->all()]);
+
+        $this->assertSame('mondial-relay', $this->checkedCarrierSlug());
+    }
+
+    public function test_the_relay_picker_carries_its_required_notice(): void
+    {
+        $this->cartOfWeight(1000);
+
+        $html = $this->actingAs($this->customer)->get('/checkout')->assertOk()->getContent();
+
+        $this->assertMatchesRegularExpression('#<p class="form-error checkout-required" id="relay-required" role="alert" hidden>#', $html);
+        // A relay ticked by default leaves the order buttons usable: only a
+        // missing address disables them on the server side.
+        $this->assertDoesNotMatchRegularExpression('/<button[^>]*data-checkout-submit[^>]*\sdisabled/s', $html);
     }
 
     public function test_the_cheapest_is_judged_on_what_this_cart_pays(): void
@@ -107,6 +130,43 @@ class CheckoutDefaultCarrierTest extends TestCase
         $html = $this->actingAs($this->customer)->get('/checkout?carrier_id='.$colissimo)->getContent();
 
         $this->assertMatchesRegularExpression('/<input[^>]*name="carrier_id"[^>]*value="'.$colissimo.'"[^>]*\schecked\b/s', $html);
+    }
+
+    public function test_without_an_address_the_order_buttons_stay_usable_and_point_to_the_form(): void
+    {
+        $newcomer = User::factory()->create();
+        $product = Product::query()->where('slug', 'cast-iron-skillet')->firstOrFail();
+        $product->update(['weight_grams' => 200, 'price_cents' => 2000]);
+        $this->actingAs($newcomer)->post('/cart', ['product_id' => $product->id, 'quantity' => 1]);
+
+        $html = $this->actingAs($newcomer)->get('/checkout')->assertOk()->getContent();
+
+        $this->assertDoesNotMatchRegularExpression('/<button[^>]*data-checkout-submit[^>]*\sdisabled/s', $html);
+        $this->assertMatchesRegularExpression('#<p class="form-error checkout-required" id="address-required" role="alert" hidden>#', $html);
+        // The new address starts from the account's own name, both halves.
+        $this->assertMatchesRegularExpression('#id="first_name" name="first_name" class="form-control" value="'.preg_quote(e($newcomer->first_name), '#').'"#', $html);
+        $this->assertMatchesRegularExpression('#id="last_name" name="last_name" class="form-control" value="'.preg_quote(e($newcomer->last_name), '#').'"#', $html);
+        // No address, so no « nothing found for this address ».
+        $this->assertStringContainsString('Enregistrez votre adresse pour voir les points relais proches', $html);
+        $this->assertStringNotContainsString('Aucun point relais trouvé pour cette adresse.', $html);
+    }
+
+    public function test_saving_an_address_keeps_the_delivery_picked_so_far(): void
+    {
+        $newcomer = User::factory()->create();
+        $this->actingAs($newcomer)->post('/cart', ['product_id' => Product::query()->where('slug', 'cast-iron-skillet')->value('id'), 'quantity' => 1]);
+        $colissimo = Carrier::query()->where('slug', 'colissimo-home')->value('id');
+
+        $this->actingAs($newcomer)->post('/checkout/addresses', [
+            'first_name' => 'Jean',
+            'last_name' => 'Test',
+            'line1' => '10 rue de Rivoli',
+            'postal_code' => '75001',
+            'city' => 'Paris',
+            'country' => 'FR',
+            'phone' => '0600000000',
+            'carrier_id' => $colissimo,
+        ])->assertRedirect('/checkout?carrier_id='.$colissimo);
     }
 
     /** A second « Valider la commande » under the payment section, on the same form. */

@@ -4202,6 +4202,23 @@ body.has-menu-open {
     margin-bottom: 1rem;
 }
 
+/* The address section or the relay picker after « Valider la commande »
+   was pressed with that step missing: outlined, with the reason at its top. */
+.checkout-section--address.is-required,
+.relay-picker.is-required {
+    outline: 2px solid #c44;
+    outline-offset: 0.5rem;
+}
+
+.checkout-required {
+    margin: 0 0 0.85rem;
+}
+
+.checkout-section--address,
+.relay-picker {
+    scroll-margin-top: 6rem;
+}
+
 .payment-locked-hint {
     margin: 0 0 1rem;
     padding: 0.75rem 0.9rem;
