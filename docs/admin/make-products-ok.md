@@ -32,6 +32,10 @@ not finished, and `ai_validated` stays `false`.
 | 10 | Main image plus at least one gallery image, all files present | `image`, `images` |
 | 11 | The page renders and every claim on it matches the artwork | — |
 
+A price that does not end in 90 is a defect too, but a reported one rather than
+a blocking one, because fixing it is the owner's call and not the agent's: see
+[Step 6](#step-6--price-check-flag-only).
+
 A page that is merely *complete* is not automatically OK. Requirement 11 is the
 one that takes judgement: a full spec table describing a product that looks
 nothing like its photographs is worse than an empty one.
@@ -346,6 +350,23 @@ the rest of the category — go back to Step 3.
 ## Step 6 — Price check (flag only)
 
 **Never change a price.** Report and let a human decide.
+
+### Every price ends in 90
+
+House convention: the cents of a retail price are always **90**. `11.90`,
+`14.90`, `7.90`, `12.90`, `13.90`. A price ending in anything else, be it `11.99`,
+`24.99` or a round `12.00`, is a defect to report alongside the rest of the
+pass, the same as a missing weight.
+
+This is about the ending only. **Which** price a product should carry is still
+the owner's call and still needs the market comparison below; do not move a
+product between price tiers on your own. Bringing an existing price onto the
+90 ending is a one-cent-scale correction, and the owner has applied it
+repeatedly across the catalogue, but ask before writing it unless they have
+asked for that sweep.
+
+A price set on a **new** product should end in 90 from the start, taken from
+whatever its category already charges.
 
 Compare against the nearest equivalent product at French retail — same format,
 same quantity, same size — and normalise to a per-unit figure so packs of
