@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-26 · v1.71.1 · build AJND6G
+
+### Admin
+
+- **A signed-in visit is never counted as a bot by request rate.** The rule that marks an IP as a bot after 12 page loads within 60 seconds now only marks visits where nobody was signed in, so a customer (or the owner) sharing a connection with something faster stays a person in the totals, charts, visit log, « Hide bots », journeys and top added-to-cart products. A signed-in visit with a bot's own signature is still a bot.
+- **The « active » chips count people only.** The header badge, its tooltip, and the analytics page's chip and « Active now » figure show signed-in customers plus guests; the analytics chip's breakdown still lists the bots.
+
+**No migration.**
+
 ## 2026-10-26 · v1.71.0 · build IDDLZX
 
 ### Storefront
