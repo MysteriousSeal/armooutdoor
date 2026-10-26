@@ -14,11 +14,19 @@ class LoginController extends Controller
 {
     use RemembersIntendedUrl;
 
-    public function create(Request $request): View
+    public function create(Request $request, Cart $cart): View
     {
         $this->rememberIntendedUrl($request);
 
-        return view('auth.login');
+        // Sent here by « Commander »: the page says it is the last step
+        // before paying and shows what is being bought.
+        $forCheckout = $this->intendsCheckout($request) && ! $cart->isEmpty();
+
+        return view('auth.login', [
+            'checkoutLines' => $forCheckout ? $cart->lines() : null,
+            'checkoutSubtotal' => $forCheckout ? $cart->formattedTotal() : null,
+            'checkoutQuantity' => $forCheckout ? $cart->quantity() : 0,
+        ]);
     }
 
     public function store(Request $request, Cart $cart): RedirectResponse

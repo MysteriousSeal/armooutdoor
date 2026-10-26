@@ -24,4 +24,12 @@ trait RemembersIntendedUrl
             $request->session()->put('url.intended', $previous);
         }
     }
+
+    /** Whether signing in here leads on to the checkout. */
+    private function intendsCheckout(Request $request): bool
+    {
+        $intended = (string) $request->session()->get('url.intended', '');
+
+        return $intended !== '' && str_starts_with($intended, localized_route('checkout.show'));
+    }
 }

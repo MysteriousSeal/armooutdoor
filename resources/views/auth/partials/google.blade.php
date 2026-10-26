@@ -24,6 +24,8 @@
             <a href="{{ route('legal.privacy') }}">politique de confidentialité</a>.
         </p>
 
-        <p class="auth-divider"><span>{{ __('store.google_or') }}</span></p>
+        @if ($divider ?? true)
+            <p class="auth-divider"><span>{{ __('store.google_or') }}</span></p>
+        @endif
     </div>
 @endif

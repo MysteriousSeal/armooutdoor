@@ -6672,6 +6672,92 @@ body.lightbox-open {
     text-decoration: underline;
 }
 
+/*
+ * Login reached from « Commander »: the basket being bought, then the two
+ * ways for a newcomer (Google, a new account) before the returning
+ * customer's form.
+ */
+.auth-checkout-cart {
+    margin-top: 1.25rem;
+    padding: 0.85rem 1rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+/* The total on the left, the photos on the right, which drop to their own
+   line on the narrowest phones rather than squeeze the total. */
+.auth-checkout-cart-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem 0.85rem;
+}
+
+/* Three products at most, side by side, then a count of the rest. */
+.auth-checkout-thumbs {
+    display: flex;
+    flex-shrink: 0;
+    gap: 0.3rem;
+}
+
+.auth-checkout-thumbs > * {
+    width: 2.5rem;
+    height: 2.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.auth-checkout-thumbs img {
+    object-fit: contain;
+}
+
+.auth-checkout-thumbs-more {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.auth-checkout-cart-text {
+    min-width: 0;
+    white-space: nowrap;
+}
+
+.auth-checkout-count {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.auth-checkout-subtotal {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.auth-checkout-note {
+    margin-top: 0.6rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.auth-checkout-note a {
+    margin-left: 0.25rem;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+}
+
+.auth-checkout-register {
+    margin-top: 0.75rem;
+    min-height: 2.75rem;
+}
+
+.auth-checkout-cart + .auth-checkout-register {
+    margin-top: 1.5rem;
+}
+
 /* A hairline either side of the words, so the two ways in read as peers. */
 .auth-divider {
     display: flex;
