@@ -65,7 +65,8 @@ class AuthPagesTest extends TestCase
         foreach (['/login', '/register'] as $path) {
             $this->get($path)->assertOk()
                 ->assertSee('auth-brand', false)
-                ->assertSee('tenue par des passionnés de tir sportif')
+                ->assertSee('Paiement sécurisé')
+                ->assertSee('Retour sous 14 jours')
                 ->assertSee(route('about'));
         }
     }

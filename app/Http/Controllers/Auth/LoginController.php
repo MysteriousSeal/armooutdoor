@@ -20,13 +20,7 @@ class LoginController extends Controller
 
         // Sent here by « Commander »: the page says it is the last step
         // before paying and shows what is being bought.
-        $forCheckout = $this->intendsCheckout($request) && ! $cart->isEmpty();
-
-        return view('auth.login', [
-            'checkoutLines' => $forCheckout ? $cart->lines() : null,
-            'checkoutSubtotal' => $forCheckout ? $cart->formattedTotal() : null,
-            'checkoutQuantity' => $forCheckout ? $cart->quantity() : 0,
-        ]);
+        return view('auth.login', $this->checkoutCart($request, $cart));
     }
 
     public function store(Request $request, Cart $cart): RedirectResponse

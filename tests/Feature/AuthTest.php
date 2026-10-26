@@ -105,6 +105,10 @@ class AuthTest extends TestCase
         $this->assertStringContainsString('Déjà client ? Connectez-vous', $html);
         // The new account comes before the returning customer's form.
         $this->assertLessThan(strpos($html, 'name="password"'), strpos($html, 'auth-checkout-register'));
+        // No shop panel beside it: the page is the order's next step.
+        $this->assertStringNotContainsString('class="auth-brand"', $html);
+        // Nothing pulls the cursor into the returning customers' form.
+        $this->assertStringNotContainsString('autofocus', $html);
     }
 
     public function test_a_large_cart_stays_one_compact_row(): void
@@ -124,11 +128,37 @@ class AuthTest extends TestCase
         $this->assertStringContainsString('60,00', $html);
     }
 
+    public function test_signing_up_from_the_checkout_shows_the_basket_too(): void
+    {
+        $product = Product::factory()->create(['name' => 'Cagoule Test', 'price_cents' => 690, 'quantity' => 5]);
+        $this->post('/cart', ['product_id' => $product->id, 'quantity' => 2]);
+        $this->get('/checkout')->assertRedirect('/login');
+        $this->get('/login')->assertOk();
+
+        $html = $this->get('/register')->assertOk()->getContent();
+
+        $this->assertStringContainsString('auth-checkout-cart', $html);
+        $this->assertStringContainsString('2 articles', $html);
+        $this->assertStringContainsString('13,80', $html);
+        $this->assertStringNotContainsString('class="auth-brand"', $html);
+    }
+
+    public function test_a_plain_sign_up_keeps_its_shop_panel(): void
+    {
+        $html = $this->get('/register')->assertOk()->getContent();
+
+        $this->assertStringContainsString('class="auth-brand"', $html);
+        $this->assertStringNotContainsString('auth-checkout-cart', $html);
+    }
+
     public function test_a_plain_login_keeps_its_usual_title(): void
     {
         $html = $this->get('/login')->assertOk()->getContent();
 
         $this->assertStringContainsString('<h1>Connexion</h1>', $html);
+        $this->assertStringContainsString('class="auth-brand"', $html);
+        $this->assertStringContainsString('Retour sous 14 jours', $html);
+        $this->assertStringContainsString('autofocus', $html);
         $this->assertStringNotContainsString('Dernière étape avant le paiement', $html);
         $this->assertStringNotContainsString('auth-checkout-cart', $html);
     }

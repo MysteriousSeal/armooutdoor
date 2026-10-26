@@ -16,11 +16,11 @@ class RegisterController extends Controller
 {
     use RemembersIntendedUrl;
 
-    public function create(Request $request): View
+    public function create(Request $request, Cart $cart): View
     {
         $this->rememberIntendedUrl($request);
 
-        return view('auth.register');
+        return view('auth.register', $this->checkoutCart($request, $cart));
     }
 
     public function store(Request $request, Cart $cart): RedirectResponse

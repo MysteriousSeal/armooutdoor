@@ -1,26 +1,33 @@
-{{-- The shop's side of the auth pages: who you are signing in with.
-     Hidden on mobile — the visitor came for the form. --}}
+{{-- Beside the sign-in and sign-up forms on wide screens: the three facts a
+     visitor checks before handing over an e-mail, the same ones as the
+     footer strip, with the same threshold setting. No title: the wordmark is
+     in the header. Hidden on mobile, where the visitor came for the form. --}}
+@php($freeShipping = \App\Models\ShippingSetting::current()->freeShippingLabel())
 <aside class="auth-brand">
-    <p class="auth-brand-kicker">{{ __('store.hero_kicker') }}</p>
-    <p class="auth-brand-title">
-        <span class="auth-brand-title-accent">Armo Outdoor</span>
-    </p>
-    <p class="auth-brand-pitch">
-        Une boutique française à taille humaine, tenue par des passionnés de tir sportif.
-        Un catalogue court, choisi pour servir au stand comme sur le terrain.
-    </p>
-    <ul class="auth-brand-points">
-        @foreach ([
-            'Des produits utiles, testés par des pratiquants',
-            'Des prix justes toute l\'année, affichés TTC',
-            'Une expédition rapide et suivie',
-            'Une équipe en France, à votre écoute',
-        ] as $point)
+    <ul class="auth-brand-facts">
+        @if (filled($freeShipping))
             <li>
-                <span class="auth-brand-point-mark" aria-hidden="true"></span>
-                <span>{{ $point }}</span>
+                <span class="auth-brand-fact-mark" aria-hidden="true">@include('partials.icon', ['name' => 'truck-fast', 'size' => 22])</span>
+                <span>
+                    <strong>{{ __('store.footer_ship_title', ['amount' => $freeShipping]) }}</strong>
+                    <span>{{ __('store.footer_ship_note') }}</span>
+                </span>
             </li>
-        @endforeach
+        @endif
+        <li>
+            <span class="auth-brand-fact-mark" aria-hidden="true">@include('partials.icon', ['name' => 'shield-halved', 'size' => 22])</span>
+            <span>
+                <strong>{{ __('store.home_hero_pay_title') }}</strong>
+                <span>{{ __('store.home_hero_pay_text') }}</span>
+            </span>
+        </li>
+        <li>
+            <span class="auth-brand-fact-mark" aria-hidden="true">@include('partials.icon', ['name' => 'box-open', 'size' => 22])</span>
+            <span>
+                <strong>{{ __('store.footer_returns_title') }}</strong>
+                <span>{{ __('store.footer_returns_note') }}</span>
+            </span>
+        </li>
     </ul>
     <a href="{{ route('about') }}" class="auth-brand-more">En savoir plus sur la boutique</a>
 </aside>

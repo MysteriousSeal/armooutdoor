@@ -7,41 +7,22 @@
 @section('content')
     <div class="container">
         <div class="auth-page">
-            <div class="auth-layout">
-                @include('auth.partials.brand-panel')
+            <div class="auth-layout {{ $checkoutLines ? 'auth-layout--checkout' : '' }}">
+                @unless ($checkoutLines)
+                    @include('auth.partials.brand-panel')
+                @endunless
                 <div class="auth-card">
                 @if ($checkoutLines)
                     <h1>{{ __('store.login_checkout_title') }}</h1>
                     <p class="auth-card-intro">{{ __('store.login_checkout_intro') }}</p>
 
-                    {{-- What is being bought, in one row whatever the cart's size:
-                         a few thumbnails, the item count and the subtotal. --}}
-                    <div class="auth-checkout-cart">
-                        <div class="auth-checkout-cart-row">
-                            <div class="auth-checkout-cart-text">
-                                <p class="auth-checkout-count">{{ trans_choice('store.cart_count', $checkoutQuantity, ['count' => $checkoutQuantity]) }}</p>
-                                <p class="auth-checkout-subtotal">{{ $checkoutSubtotal }}</p>
-                            </div>
-                            <div class="auth-checkout-thumbs">
-                                @foreach ($checkoutLines->take(3) as $line)
-                                    <img src="{{ $line->variant?->thumbnailUrl() ?? $line->product->thumbnailUrl() }}" alt="{{ $line->product->localizedName() }}" width="44" height="44">
-                                @endforeach
-                                @if ($checkoutLines->count() > 3)
-                                    <span class="auth-checkout-thumbs-more">+{{ $checkoutLines->count() - 3 }}</span>
-                                @endif
-                            </div>
-                        </div>
-                        <p class="auth-checkout-note">
-                            {{ __('store.login_checkout_shipping') }}
-                            <a href="{{ localized_route('cart.show') }}">{{ __('store.login_checkout_edit_cart') }}</a>
-                        </p>
-                    </div>
+                    @include('auth.partials.checkout-cart')
 
                     @include('auth.partials.google', ['divider' => false])
 
                     <a href="{{ localized_route('register') }}" class="btn btn-primary btn-block auth-checkout-register">{{ __('store.register') }}</a>
 
-                    <p class="auth-divider"><span>{{ __('store.login_checkout_existing') }}</span></p>
+                    <h2 class="auth-divider auth-divider--heading">{{ __('store.login_checkout_existing') }}</h2>
                 @else
                     <h1>{{ __('store.login_title') }}</h1>
                     <p class="auth-card-intro">{{ __('store.login_intro') }}</p>
@@ -61,7 +42,7 @@
                             class="form-control"
                             value="{{ old('email') }}"
                             required
-                            autofocus
+                            @unless ($checkoutLines) autofocus @endunless
                             autocomplete="email"
                             autocapitalize="none"
                             spellcheck="false"
@@ -94,7 +75,7 @@
                         <a href="{{ localized_route('password.request') }}" class="auth-form-link">{{ __('store.forgot_password') }}</a>
                     </div>
 
-                    <button type="submit" class="btn {{ $checkoutLines ? 'btn-secondary' : 'btn-primary' }} btn-block">{{ __('store.login_cta') }}</button>
+                    <button type="submit" class="btn {{ $checkoutLines ? 'btn-secondary auth-login-submit--outline' : 'btn-primary' }} btn-block">{{ __('store.login_cta') }}</button>
                 </form>
 
                 @unless ($checkoutLines)

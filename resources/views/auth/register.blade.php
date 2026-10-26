@@ -7,11 +7,17 @@
 @section('content')
     <div class="container">
         <div class="auth-page">
-            <div class="auth-layout">
-                @include('auth.partials.brand-panel')
+            <div class="auth-layout {{ $checkoutLines ? 'auth-layout--checkout' : '' }}">
+                @unless ($checkoutLines)
+                    @include('auth.partials.brand-panel')
+                @endunless
                 <div class="auth-card">
                 <h1>{{ __('store.register_title') }}</h1>
                 <p class="auth-card-intro">{{ __('store.register_intro') }}</p>
+
+                @if ($checkoutLines)
+                    @include('auth.partials.checkout-cart')
+                @endif
 
                 @include('auth.partials.google')
 
