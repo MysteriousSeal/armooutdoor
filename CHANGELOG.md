@@ -2,6 +2,19 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-26 · v1.69.1 · build 61RS5J
+
+### Storefront
+
+- **Signing up or logging in from the checkout goes back to the checkout.** A customer sent to log in by « Commander » who creates an account instead used to land on the homepage and had to find the cart again; sign-up now returns to the page the visitor came from, as login already did. Opening « Créer un compte » from the cart returns to the cart.
+- **The checkout opens on the cheapest home delivery,** no longer on Mondial Relay. « Valider la commande » can be used straight away instead of waiting for a relay point to be picked; for a light parcel that is Lettre suivie, also cheaper than Mondial Relay. A cart no home carrier takes still opens on the cheapest relay, and a relay can always be chosen.
+
+### Under the hood
+
+- The products guide states that every retail price ends in ,90, and the product tab groups test follows the « Missing » label and the « Price mismatch » group.
+
+**No migration.**
+
 ## 2026-10-26 · v1.69.0 · build XVK9GD
 
 ### Admin
