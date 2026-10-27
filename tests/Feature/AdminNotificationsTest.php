@@ -71,6 +71,22 @@ class AdminNotificationsTest extends TestCase
         Notification::assertSentTimes(AdminConversationReceived::class, 2);
     }
 
+    public function test_the_email_quotes_the_newest_message_not_the_first(): void
+    {
+        $conversation = $this->conversationFor(User::factory()->create());
+        $conversation->postMessage('Premier message, la veille.', ConversationMessage::AUTHOR_CUSTOMER, null);
+
+        // Replies come minutes or days apart, never in the same second.
+        $this->travel(1)->days();
+        $conversation->postMessage('Nouvelle question ce matin.', ConversationMessage::AUTHOR_CUSTOMER, null);
+
+        $mail = (new AdminConversationReceived($conversation->fresh()))->toMail(new AnonymousNotifiable);
+        $text = implode(' ', $mail->introLines);
+
+        $this->assertStringContainsString('Nouvelle question ce matin.', $text);
+        $this->assertStringNotContainsString('Premier message', $text);
+    }
+
     public function test_an_admin_reply_never_emails_the_shop(): void
     {
         $conversation = $this->conversationFor(User::factory()->create());

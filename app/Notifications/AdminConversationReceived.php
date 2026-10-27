@@ -26,7 +26,9 @@ class AdminConversationReceived extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
-        $lastMessage = $this->conversation->messages()->latest('id')->first();
+        // messages() is oldest first: reorder() drops that order, or
+        // latest('id') would only break ties and the first message would win.
+        $lastMessage = $this->conversation->messages()->reorder()->latest('id')->first();
 
         return (new MailMessage)
             ->subject('Nouveau message de '.$this->conversation->name.' — '.$this->conversation->subject)

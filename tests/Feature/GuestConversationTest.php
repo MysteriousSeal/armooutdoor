@@ -76,7 +76,7 @@ class GuestConversationTest extends TestCase
             ->assertOk()
             ->assertJson(['message' => __('store.conversation_reply_sent')]);
 
-        $reply = $conversation->messages()->latest('id')->first();
+        $reply = $conversation->messages()->reorder()->latest('id')->first();
         $this->assertSame(ConversationMessage::AUTHOR_CUSTOMER, $reply->author_type);
         $this->assertNull($reply->user_id);
         $this->assertSame('Merci pour votre réponse !', $reply->body);
