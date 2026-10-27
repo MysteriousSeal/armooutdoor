@@ -122,7 +122,7 @@
                 <p class="empty-state">Guest carts can only be read when sessions are stored in the database.</p>
             @else
                 <p class="admin-table-sub admin-carts-guests-note">
-                    Read from live sessions. A guest cart disappears {{ $sessionLifetimeMinutes >= 60 && $sessionLifetimeMinutes % 60 === 0 ? ($sessionLifetimeMinutes / 60).' h' : $sessionLifetimeMinutes.' min' }}
+                    Read from live sessions. A guest cart disappears {{ $sessionLifetimeMinutes % 1440 === 0 ? trans_choice(':count day|:count days', $sessionLifetimeMinutes / 1440) : ($sessionLifetimeMinutes % 60 === 0 ? ($sessionLifetimeMinutes / 60).' h' : $sessionLifetimeMinutes.' min') }}
                     after the visitor's last page, and moves to their account if they sign in. Bots are left out.
                 </p>
 

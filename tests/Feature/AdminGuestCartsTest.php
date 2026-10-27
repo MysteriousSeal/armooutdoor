@@ -21,7 +21,7 @@ class AdminGuestCartsTest extends TestCase
     {
         parent::setUp();
 
-        config(['session.driver' => 'database', 'session.lifetime' => 120, 'session.serialization' => 'json']);
+        config(['session.driver' => 'database', 'session.lifetime' => 20160, 'session.serialization' => 'json']);
         $this->seed(AdminSeeder::class);
     }
 
@@ -55,13 +55,14 @@ class AdminGuestCartsTest extends TestCase
         $this->assertStringContainsString('3&times; Cagoule Invitée', $html);
         $this->assertStringContainsString('11,70', $html);
         $this->assertStringContainsString('1 guest cart', $html);
+        $this->assertStringContainsString('A guest cart disappears 14 days', $html);
     }
 
     public function test_bots_expired_sessions_empty_carts_and_signed_in_sessions_are_left_out(): void
     {
         $product = Product::factory()->create(['name' => 'Produit Fantôme']);
         $this->guestSession([$product->id => [0 => 1]], 'Googlebot/2.1');
-        $this->guestSession([$product->id => [0 => 1]], minutesAgo: 180);
+        $this->guestSession([$product->id => [0 => 1]], minutesAgo: 20160 + 60);
         $this->guestSession([]);
         $this->guestSession([$product->id => [0 => 1]], userId: User::factory()->create()->id);
 

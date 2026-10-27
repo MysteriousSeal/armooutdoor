@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 /**
  * The carts of visitors who are not signed in, read from their live sessions
  * for the admin's information. A guest cart only exists in its session, so
- * it is visible while the session lives (the session lifetime after the last
+ * it is visible while the session lives (session.lifetime after the last
  * page load) and moves to the account when the visitor signs in.
  */
 class GuestCarts
@@ -42,7 +42,10 @@ class GuestCarts
             ->whereNull('user_id')
             ->where('last_activity', '>=', $since)
             ->orderByDesc('last_activity')
-            ->get(['ip_address', 'user_agent', 'payload', 'last_activity']);
+            ->select(['ip_address', 'user_agent', 'payload', 'last_activity'])
+            // Streamed: with sessions kept for days, most rows are visitors
+            // and crawlers with nothing in a cart, and the scan stops at LIMIT.
+            ->cursor();
 
         $found = [];
 
