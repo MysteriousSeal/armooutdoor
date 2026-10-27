@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-27 · v1.72.2 · build HFSBVX
+
+### Admin
+
+- **The « Nouveau message de … » email quotes the customer's latest message.** When a customer wrote again on a thread already read, the email quoted their first message instead of the new one: the lookup kept the thread's oldest-first order and only used the message number to break ties within the same second.
+
+### Under the hood
+
+- The guest reply test no longer fails at random on slow runs, for the same reason, and a new test checks the email quotes a message sent a day after the first.
+
+**No migration.**
+
 ## 2026-10-27 · v1.72.1 · build V463L1
 
 ### Storefront
