@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-27 · v1.72.1 · build V463L1
+
+### Storefront
+
+- **Sessions last 14 days instead of 2 hours by default,** so a visitor who is not signed in finds their cart again when they come back the next day or the next week. It also keeps customers, and the admin, signed in for 14 days without activity. A `SESSION_LIFETIME` set in the server's `.env` still takes precedence: remove it, or set it to 20160, for the 14 days to apply.
+
+### Admin
+
+- **The Carts page states guest carts' lifetime in days** (« 14 days after the visitor's last page ») and reads the sessions one at a time, stopping at 50 carts, now that far more sessions are kept.
+
+**No migration.**
+
 ## 2026-10-27 · v1.72.0 · build HNM2P6
 
 ### Admin
