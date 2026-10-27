@@ -8,12 +8,15 @@
             <p class="admin-list-kicker">Sales</p>
             <h2 class="admin-list-title">Carts</h2>
             <p class="admin-list-lede">
-                What logged-in shoppers currently have sitting in their cart. A cart empties itself the moment its
-                order completes, so every row here is still in progress — guest carts live only in their own
-                browser session and never reach this list.
+                What shoppers currently have sitting in their cart. A cart empties itself the moment its order
+                completes, so every row here is still in progress. Visitors who are not signed in are listed
+                apart, below, for information.
             </p>
             <div class="admin-list-meta">
-                <span class="admin-list-chip">{{ number_format($cartCount) }} active {{ \Illuminate\Support\Str::plural('cart', $cartCount) }}</span>
+                <span class="admin-list-chip">{{ number_format($cartCount) }} customer {{ \Illuminate\Support\Str::plural('cart', $cartCount) }}</span>
+                @if ($guestCartsReadable)
+                    <span class="admin-list-chip">{{ number_format($guestCarts->count()) }} guest {{ \Illuminate\Support\Str::plural('cart', $guestCarts->count()) }}</span>
+                @endif
             </div>
         </header>
 
@@ -110,5 +113,63 @@
 
             @include('admin.partials.pager', ['paginator' => $carts])
         @endif
+
+        {{-- Guests' carts, read from their live sessions: information only,
+             nothing here can be acted on or followed up. --}}
+        <section class="admin-carts-guests">
+            <h3 class="admin-carts-guests-title">Visitors not signed in</h3>
+            @if (! $guestCartsReadable)
+                <p class="empty-state">Guest carts can only be read when sessions are stored in the database.</p>
+            @else
+                <p class="admin-table-sub admin-carts-guests-note">
+                    Read from live sessions. A guest cart disappears {{ $sessionLifetimeMinutes >= 60 && $sessionLifetimeMinutes % 60 === 0 ? ($sessionLifetimeMinutes / 60).' h' : $sessionLifetimeMinutes.' min' }}
+                    after the visitor's last page, and moves to their account if they sign in. Bots are left out.
+                </p>
+
+                @if ($guestCarts->isEmpty())
+                    <p class="empty-state">No visitor has anything in their cart right now.</p>
+                @else
+                    <div class="admin-table-wrap">
+                        <table class="admin-table admin-carts-table admin-carts-table--guests">
+                            <thead>
+                                <tr>
+                                    <th>Visitor</th>
+                                    <th>Products</th>
+                                    <th class="admin-table-num">Qty</th>
+                                    <th class="admin-table-num">Total</th>
+                                    <th>Last activity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($guestCarts as $guest)
+                                    <tr>
+                                        <td>
+                                            <span class="admin-table-primary">{{ $guest['device'] }} · {{ $guest['browser'] }}</span>
+                                            <span class="admin-table-sub">{{ $guest['os'] }}@if ($guest['ip']) · {{ $guest['ip'] }}@endif</span>
+                                        </td>
+                                        <td class="admin-carts-lines">
+                                            @foreach ($guest['lines'] as $line)
+                                                <span class="admin-carts-line">
+                                                    {{ $line->quantity }}&times; {{ $line->product->localizedName() }}
+                                                    @if ($line->variantLabel())
+                                                        <span class="admin-table-sub">({{ $line->variantLabel() }})</span>
+                                                    @endif
+                                                </span>
+                                            @endforeach
+                                        </td>
+                                        <td class="admin-table-num">{{ number_format($guest['itemCount']) }}</td>
+                                        <td class="admin-table-num">{{ format_euros($guest['totalCents']) }}</td>
+                                        <td>
+                                            <span class="admin-table-primary">{{ $guest['lastActivity']->timezone(config('app.timezone'))->format('d M Y') }}</span>
+                                            <span class="admin-table-sub">{{ $guest['lastActivity']->timezone(config('app.timezone'))->format('H:i') }}</span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            @endif
+        </section>
     </div>
 @endsection

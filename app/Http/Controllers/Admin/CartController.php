@@ -5,15 +5,16 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Support\CartLine;
+use App\Support\GuestCarts;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class CartController extends Controller
 {
     /**
-     * Carts persist in the database only for logged-in users — a guest's
-     * cart lives in their own session and never reaches the server's
-     * database, so it can't be listed here. A cart also empties itself the
+     * Customers' carts persist in the database; a guest's cart lives in its
+     * session, so it is listed apart, read from the live sessions, for
+     * information only (see GuestCarts). A cart also empties itself the
      * moment its order completes, so every row shown is still in progress.
      */
     public function index(Request $request): View
@@ -52,6 +53,9 @@ class CartController extends Controller
             'carts' => $carts,
             'search' => $search,
             'cartCount' => User::query()->whereHas('cartItems')->count(),
+            'guestCarts' => GuestCarts::active(),
+            'guestCartsReadable' => GuestCarts::readable(),
+            'sessionLifetimeMinutes' => (int) config('session.lifetime'),
         ]);
     }
 }

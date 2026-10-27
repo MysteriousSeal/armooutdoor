@@ -4234,6 +4234,31 @@ a.admin-stat-card:hover {
     width: 12%;
 }
 
+/* Guests' carts, under the customers': read from live sessions, for
+   information only, so the table has no action column and the products
+   take its width. */
+.admin-carts-guests {
+    margin-top: 2.5rem;
+}
+
+.admin-carts-guests-title {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text);
+}
+
+.admin-carts-guests-note {
+    display: block;
+    margin: 0.35rem 0 1rem;
+}
+
+.admin-carts-table--guests th:nth-child(2),
+.admin-carts-table--guests td:nth-child(2) {
+    width: 46%;
+}
+
 .admin-carts-line {
     display: block;
     font-size: 0.8125rem;
