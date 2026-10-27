@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-27 · v1.72.0 · build HNM2P6
+
+### Admin
+
+- **The Carts page also lists the carts of visitors who are not signed in,** for information, under the customers' carts: device and browser, system and IP, products with quantity and variant, item count, total and time of the last page, most recent first. They are read from the live sessions, so a guest cart shows for as long as its session lives (2 hours after the visitor's last page) and moves to the customer's own cart if they sign in. Bots are left out, and the header chips count customer and guest carts apart.
+
+**No migration.**
+
 ## 2026-10-26 · v1.71.1 · build AJND6G
 
 ### Admin
