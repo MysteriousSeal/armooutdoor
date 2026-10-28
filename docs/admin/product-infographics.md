@@ -25,6 +25,7 @@ Everything lives in `scripts/infographics/`:
 |------|---------|------------|
 | `molle-belt-eva` | Ceinture tactique + ceinture rembourrée MOLLE | black, khaki, odg |
 | `belt-tac-adj-pls` | Ceinture tactique à boucle rapide (cobra-style, plastic buckle) | black, green |
+| `men-nylon-belt-qr` | Ceinture en sangle à boucle rapide (eyelets, webbing clips; polypropylene, not nylon) | odg |
 
 Open `out/` to see the finished look before starting a new one.
 
@@ -50,6 +51,8 @@ Things that have already gone wrong:
   appear nowhere in the text.
 - **If the sheet says plastic, say plastic,** even when the photo looks like
   metal.
+- **The supplier sheet beats the file name.** The `men-nylon-belt` strap is
+  polypropylene according to its sheet.
 - **Flag anything you can't confirm to the user.** Example: "EVA" and "MOLLE"
   only came from file names.
 
@@ -87,6 +90,9 @@ Copy the closest existing file in `products/` and change it. The fields:
   - `footer`: `{ tag, html }`.
   - `photoFilter` (optional): a CSS filter to whiten an off-white photo
     background.
+  - `photoBox` (optional): `{ x, y, size }` to draw the photo larger than the
+    default `{ x: 300, y: 265, size: 900 }`, when the product only fills the
+    middle of its photo. Markers follow automatically.
 - `dimensions`:
   - `title`.
   - `footer`.

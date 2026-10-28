@@ -67,8 +67,11 @@
     photo.src = variant.photo;
     if (sheet.photoFilter) photo.style.filter = sheet.photoFilter;
 
-    // Points are in source-photo pixels (1000x1000), drawn at (300, 265) scaled to 900px.
-    const OX = 300, OY = 265, S = 0.9;
+    // Points are in source-photo pixels (1000x1000), drawn at (300, 265) scaled
+    // to 900px unless the spec sets photoBox { x, y, size } to enlarge a small product.
+    const box = sheet.photoBox || { x: 300, y: 265, size: 900 };
+    const OX = box.x, OY = box.y, S = box.size / 1000;
+    Object.assign(photo.style, { left: OX + 'px', top: OY + 'px', width: box.size + 'px', height: box.size + 'px' });
     const k = svgKit(document.getElementById('lines'));
     const labels = document.getElementById('labels');
     const halo = [], ink = [], marks = [];
