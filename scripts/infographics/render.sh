@@ -10,18 +10,26 @@ product="${1:?usage: render.sh <product> [variant ...]}"; shift
 spec="$DIR/products/$product.js"
 [[ -f "$spec" ]] || { echo "No spec at $spec" >&2; exit 1; }
 
-if [[ $# -eq 0 ]]; then
-  # The spec is browser JS: give it a fake window and read the variant keys.
-  read -r -a variants <<< "$(node --input-type=commonjs -e '
+# The spec is browser JS: give it a fake window and read what it defines.
+read_spec() {
+  node --input-type=commonjs -e '
     global.window = {}; eval(require("fs").readFileSync(process.argv[1], "utf8"));
-    console.log(Object.keys(window.PRODUCT.variants).join(" "));' "$spec")"
+    const P = window.PRODUCT;
+    console.log(process.argv[2] === "variants"
+      ? Object.keys(P.variants).join(" ")
+      : ["anatomy", "dimensions", "effect"].filter(s => P[s]).join(" "));' "$spec" "$1"
+}
+
+if [[ $# -eq 0 ]]; then
+  read -r -a variants <<< "$(read_spec variants)"
 else
   variants=("$@")
 fi
+read -r -a sheets <<< "$(read_spec sheets)"
 
 mkdir -p "$DIR/out"
 for v in "${variants[@]}"; do
-  for sheet in anatomy dimensions; do
+  for sheet in "${sheets[@]}"; do
     out="$DIR/out/$product-$sheet-$v.png"
     "$CHROME" --headless=new --disable-gpu --hide-scrollbars --allow-file-access-from-files \
       --virtual-time-budget=8000 --window-size=1500,1500 \

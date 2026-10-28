@@ -116,5 +116,111 @@
     sheet.draw(svgKit(document.getElementById('draw')), variant.palette);
   }
 
-  window.Infographic = { loadProduct, renderAnatomy, renderDimensions };
+  // Effect sheet (optional): the spec draws how the product behaves in use,
+  // with the variant passed in so it can place the photo itself.
+  function renderEffect(product, variant) {
+    const sheet = product.effect;
+    fillChrome(product, sheet);
+    sheet.draw(svgKit(document.getElementById('draw')), variant);
+  }
+
+  // Seeded random numbers, so a drawn effect renders the same every time.
+  function rng(seed) {
+    return () => {
+      seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+      let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  // Shared drawings for the round reactive targets (stickers on a roll).
+  const targets = {
+    // Dimensions sheet: a 1 euro coin (23.25 mm) to the right of the target,
+    // bottoms aligned, and the pack facts above it. K is px per mm.
+    coinAndFacts({ el, text }, { K, cy, R, facts }) {
+      const cr = 23.25 / 2 * K, ccx = 1130, ccy = cy + R - cr;
+      // Gold-coloured outer ring, silver-coloured centre (the 2 euro is the reverse).
+      el('circle', { cx: ccx, cy: ccy, r: cr, fill: '#d6b25e', stroke: '#a8873d', 'stroke-width': 3 });
+      el('circle', { cx: ccx, cy: ccy, r: cr * 0.72, fill: '#cfcbc2', stroke: '#8f8a7d', 'stroke-width': 2 });
+      text(ccx, ccy + 14, '1 €', { 'text-anchor': 'middle', 'font-size': 40, 'font-weight': 700, fill: '#55524b' });
+      text(ccx, ccy - cr - 46, 'Pièce de 1 €', { 'text-anchor': 'middle', 'font-size': 34, 'font-weight': 700, fill: 'var(--ink)' });
+      text(ccx, ccy - cr - 14, '23,25 mm', { 'text-anchor': 'middle', 'font-size': 28, 'font-weight': 500, fill: 'var(--mute)' });
+      facts.forEach(([big, small], i) => {
+        const fy = 470 + i * 110;
+        text(900, fy, big, { 'font-size': 50, 'font-weight': 700, fill: 'var(--ink)' });
+        text(900, fy + 32, small, { 'font-size': 26, 'font-weight': 500, fill: 'var(--mute)', 'letter-spacing': '.04em' });
+      });
+    },
+
+    // Effect sheet: the photo's target before and after a series, with the
+    // fluo splatter drawn on each hit, and a close-up of one hit.
+    // centre/radius locate the target disc in the photo; hits are offsets in
+    // panel px from the centre of the 560 px "after" panel.
+    beforeAfter({ el, text, section }, photo, { centre: [px, py], radius, seed, hits, afterLabel, caption }) {
+      const rnd = rng(seed);
+      const Y = '#e4f21c';
+      const defs = el('defs', {});
+
+      // The photo's target disc clipped from its background.
+      function panel(id, cx, cy, D) {
+        const s = D / (2 * radius);
+        const cp = el('clipPath', { id }, defs);
+        el('circle', { cx, cy, r: D / 2 }, cp);
+        el('image', { href: photo, x: cx - px * s, y: cy - py * s, width: 1000 * s, height: 1000 * s, 'clip-path': `url(#${id})` });
+      }
+
+      // One impact: a ragged fluo halo, a few flecks, the hole in the middle.
+      function splat(x, y, r, parent) {
+        // Jittered outline, smoothed through midpoints so the edge reads torn, not starry.
+        const pts = [];
+        for (let i = 0, n = 30; i < n; i++) {
+          const a = (i / n) * 2 * Math.PI;
+          const rr = r * (0.78 + rnd() * 0.32) * (rnd() < 0.12 ? 1.3 : 1);
+          pts.push([x + Math.cos(a) * rr, y + Math.sin(a) * rr]);
+        }
+        const mid = (p, q) => [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
+        const m0 = mid(pts[pts.length - 1], pts[0]);
+        let d = `M${m0[0].toFixed(1)} ${m0[1].toFixed(1)}`;
+        pts.forEach((p, i) => {
+          const m = mid(p, pts[(i + 1) % pts.length]);
+          d += ` Q${p[0].toFixed(1)} ${p[1].toFixed(1)} ${m[0].toFixed(1)} ${m[1].toFixed(1)}`;
+        });
+        el('path', { d: d + 'Z', fill: Y }, parent);
+        for (let i = 0, m = 5 + Math.floor(rnd() * 5); i < m; i++) {
+          const a = rnd() * 2 * Math.PI, dd = r * (1.2 + rnd() * 0.8);
+          el('circle', { cx: x + Math.cos(a) * dd, cy: y + Math.sin(a) * dd, r: r * (0.05 + rnd() * 0.09), fill: Y }, parent);
+        }
+        el('circle', { cx: x, cy: y, r: r * 0.27, fill: '#3a3b35' }, parent);
+        el('circle', { cx: x, cy: y, r: r * 0.19, fill: '#050505' }, parent);
+      }
+
+      const D = 560, cy = 650, lx = 410, rx = 1090;
+      section(lx - D / 2, 335, 'AVANT');
+      section(rx - D / 2, 335, afterLabel);
+      panel('before', lx, cy, D);
+      panel('after', rx, cy, D);
+      // Arrow from before to after.
+      el('path', { d: `M${lx + D / 2 + 30} ${cy} H${rx - D / 2 - 34}`, stroke: 'var(--coyote)', 'stroke-width': 5 });
+      el('path', { d: `M${rx - D / 2 - 50} ${cy - 16} L${rx - D / 2 - 28} ${cy} L${rx - D / 2 - 50} ${cy + 16}`, fill: 'none', stroke: 'var(--coyote)', 'stroke-width': 5, 'stroke-linejoin': 'round' });
+
+      const after = el('g', { 'clip-path': 'url(#after)' });
+      for (const [dx, dy] of hits) splat(rx + dx, cy + dy, 24 + rnd() * 7, after);
+
+      // Close-up of one hit.
+      const mx = 330, my = 1125, mr = 125;
+      const mc = el('clipPath', { id: 'zoom' }, defs);
+      el('circle', { cx: mx, cy: my, r: mr }, mc);
+      const g = el('g', { 'clip-path': 'url(#zoom)' });
+      el('rect', { x: mx - mr, y: my - mr, width: 2 * mr, height: 2 * mr, fill: '#111210' }, g);
+      splat(mx, my, 70, g);
+      el('circle', { cx: mx, cy: my, r: mr, fill: 'none', stroke: 'var(--coyote)', 'stroke-width': 5 });
+      text(mx + mr + 60, my - 30, 'Gerbe jaune fluorescent', { 'font-size': 52, 'font-weight': 700, fill: 'var(--ink)' });
+      caption.forEach((line, i) => {
+        text(mx + mr + 60, my + 18 + i * 38, line, { style: 'font-family: Barlow', 'font-size': 27, fill: 'var(--mute)' });
+      });
+    },
+  };
+
+  window.Infographic = { loadProduct, renderAnatomy, renderDimensions, renderEffect, rng, targets };
 })();

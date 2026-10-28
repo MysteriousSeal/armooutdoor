@@ -1,15 +1,17 @@
 # Product infographics
 
 How to make the square gallery images that explain a product: an **anatomy**
-sheet (the product photo with each part labelled) and a **dimensions** sheet
-(a technical drawing of the product with its measurements). Both are
+sheet (the product photo with each part labelled), a **dimensions** sheet
+(a technical drawing of the product with its measurements) and, when the
+product does something visible in use, an optional **effect** sheet (for
+example a reactive target before and after a series). Both are
 rendered from HTML and SVG to a 1500x1500 PNG with headless Chrome.
 
 Everything lives in `scripts/infographics/`:
 
 | Path | What it is |
 |------|------------|
-| `anatomy.html`, `dimensions.html` | The two sheet templates. Generic, never edited per product. |
+| `anatomy.html`, `dimensions.html`, `effect.html` | The sheet templates. Generic, never edited per product. `effect` renders only for specs that define it. |
 | `kit.js` | Shared runtime: loads the product spec, draws the labels, leader lines, reticle markers and dimension lines. |
 | `shared.css` | House style: colours, fonts, header, labels, the note box at the bottom. |
 | `products/<product>.js` | One spec per product family: text, colourways, marker positions, and the dimensions drawing. |
@@ -26,6 +28,18 @@ Everything lives in `scripts/infographics/`:
 | `molle-belt-eva` | Ceinture tactique + ceinture rembourrée MOLLE | black, khaki, odg |
 | `belt-tac-adj-pls` | Ceinture tactique à boucle rapide (cobra-style, plastic buckle) | black, green |
 | `men-nylon-belt-qr` | Ceinture en sangle à boucle rapide (eyelets, webbing clips; polypropylene, not nylon) | odg |
+| `crt-react-076-200-fluo` | 200 cibles rondes réactives 76 mm (no supplier sheet: facts from the product page; a 1 € coin drawn to scale; effect sheet with the splatter) | fluo |
+| `rlt-splat-076-200-fluo` | 200 cibles rondes réactives 76 mm 10 zones lettrées (same approach; the series is grouped in sector H) | fluo |
+
+Round reactive targets share `Infographic.targets` in `kit.js`:
+`coinAndFacts` (the 1 € coin and the pack facts on the dimensions sheet) and
+`beforeAfter` (the whole effect sheet, given the target's centre and radius in
+its photo and the hits). A new target only has to redraw its own design for
+the dimensions sheet. Keep hits and markers off printed letters and numbers.
+
+When there is no supplier sheet, take the facts from the product's own
+`characteristics` and description (Admin API, see
+`docs/admin/api/products.md`), which have already been checked.
 
 Open `out/` to see the finished look before starting a new one.
 
@@ -98,6 +112,16 @@ Copy the closest existing file in `products/` and change it. The fields:
   - `footer`.
   - `draw(kit, palette)`: draws the product with the helpers `el`, `text`,
     `dim`, `ext`, `arrow`, `sideLabel` and `section`.
+- `effect` (optional):
+  - `title` and `footer`.
+  - `draw(kit, variant)`: same helpers, and it gets the whole variant so it
+    can place `variant.photo` itself.
+  - Use `Infographic.rng(seed)` for any randomness, so the image comes out
+    the same on every render.
+  - An effect drawn over a real photo is an illustration: the footer must
+    say so (tag `Illustration`), and it may only show behaviour that the
+    product page documents. The target's splatter is the "gerbe jaune
+    fluorescent" from its specs.
 
 Layout rules that keep sheets readable:
 
