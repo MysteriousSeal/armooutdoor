@@ -157,7 +157,17 @@
     // fluo splatter drawn on each hit, and a close-up of one hit.
     // centre/radius locate the target disc in the photo; hits are offsets in
     // panel px from the centre of the 560 px "after" panel.
-    beforeAfter({ el, text, section }, photo, { centre: [px, py], radius, seed, hits, afterLabel, caption }) {
+    // A target whose splatter changes colour by zone sets zones: [[maxR, colour], ...]
+    // (radii in photo px, innermost first) and closeUps: [{ label, colour, bg }]
+    // for a row of one close-up per zone instead of the single one.
+    // A non-reactive target sets holes: 'plain' (bare holes, no splatter),
+    // can add beforeHits and a correction arrow pair from the before group
+    // back to the centre, and swaps the close-up for a text block (closeUp: false).
+    beforeAfter({ el, text, section }, photo, {
+      centre: [px, py], radius, seed, hits, afterLabel, caption,
+      beforeLabel = 'AVANT', beforeHits = [], holes = 'splatter', correction = null,
+      closeUp = true, closeUpTitle = 'Gerbe jaune fluorescent', zones = null, closeUps = null,
+    }) {
       const rnd = rng(seed);
       const Y = '#e4f21c';
       const defs = el('defs', {});
@@ -171,7 +181,7 @@
       }
 
       // One impact: a ragged fluo halo, a few flecks, the hole in the middle.
-      function splat(x, y, r, parent) {
+      function splat(x, y, r, parent, colour = Y) {
         // Jittered outline, smoothed through midpoints so the edge reads torn, not starry.
         const pts = [];
         for (let i = 0, n = 30; i < n; i++) {
@@ -186,17 +196,39 @@
           const m = mid(p, pts[(i + 1) % pts.length]);
           d += ` Q${p[0].toFixed(1)} ${p[1].toFixed(1)} ${m[0].toFixed(1)} ${m[1].toFixed(1)}`;
         });
-        el('path', { d: d + 'Z', fill: Y }, parent);
+        el('path', { d: d + 'Z', fill: colour }, parent);
         for (let i = 0, m = 5 + Math.floor(rnd() * 5); i < m; i++) {
           const a = rnd() * 2 * Math.PI, dd = r * (1.2 + rnd() * 0.8);
-          el('circle', { cx: x + Math.cos(a) * dd, cy: y + Math.sin(a) * dd, r: r * (0.05 + rnd() * 0.09), fill: Y }, parent);
+          el('circle', { cx: x + Math.cos(a) * dd, cy: y + Math.sin(a) * dd, r: r * (0.05 + rnd() * 0.09), fill: colour }, parent);
         }
         el('circle', { cx: x, cy: y, r: r * 0.27, fill: '#3a3b35' }, parent);
         el('circle', { cx: x, cy: y, r: r * 0.19, fill: '#050505' }, parent);
       }
 
+      // A bare hole in paper: dark centre, a pale torn rim so it shows on black too.
+      function hole(x, y, parent) {
+        el('circle', { cx: x, cy: y, r: 11, fill: '#141414', stroke: 'rgba(255,255,255,.75)', 'stroke-width': 2.5 }, parent);
+      }
+
+      // Coyote arrow with a white halo, readable over any print.
+      function arrowTo(x1, y1, x2, y2) {
+        const a = Math.atan2(y2 - y1, x2 - x1), h = 18;
+        const head = `M${x2 - h * Math.cos(a - 0.5)} ${y2 - h * Math.sin(a - 0.5)} L${x2} ${y2} L${x2 - h * Math.cos(a + 0.5)} ${y2 - h * Math.sin(a + 0.5)}`;
+        for (const [stroke, w] of [['#fff', 11], ['var(--coyote)', 5]]) {
+          el('path', { d: `M${x1} ${y1} L${x2} ${y2} ${head}`, fill: 'none', stroke, 'stroke-width': w, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' });
+        }
+      }
+      const tag = (x, y, str, anchor) => text(x, y, str, { 'text-anchor': anchor, 'font-size': 30, 'font-weight': 700, fill: 'var(--ink)', stroke: '#fff', 'stroke-width': 7, 'paint-order': 'stroke' });
+
       const D = 560, cy = 650, lx = 410, rx = 1090;
-      section(lx - D / 2, 335, 'AVANT');
+      // Splatter colour for a hit at (dx, dy) panel px from the centre.
+      const zoneColour = (dx, dy) => {
+        if (!zones) return Y;
+        const r = Math.hypot(dx, dy) * (2 * radius) / D;
+        const z = zones.find(([maxR]) => r <= maxR);
+        return z ? z[1] : zones[zones.length - 1][1];
+      };
+      section(lx - D / 2, 335, beforeLabel);
       section(rx - D / 2, 335, afterLabel);
       panel('before', lx, cy, D);
       panel('after', rx, cy, D);
@@ -204,8 +236,48 @@
       el('path', { d: `M${lx + D / 2 + 30} ${cy} H${rx - D / 2 - 34}`, stroke: 'var(--coyote)', 'stroke-width': 5 });
       el('path', { d: `M${rx - D / 2 - 50} ${cy - 16} L${rx - D / 2 - 28} ${cy} L${rx - D / 2 - 50} ${cy + 16}`, fill: 'none', stroke: 'var(--coyote)', 'stroke-width': 5, 'stroke-linejoin': 'round' });
 
+      const before = el('g', { 'clip-path': 'url(#before)' });
+      for (const [dx, dy] of beforeHits) hole(lx + dx, cy + dy, before);
+      if (correction) {
+        // Height back to the horizontal axis, then windage back to the centre.
+        const [fx, fy] = correction;
+        arrowTo(lx + fx, cy + fy - 30, lx + fx, cy + 14);
+        arrowTo(lx + fx + 14, cy, lx - 30, cy);
+        tag(lx + fx - 16, cy + fy / 2, 'Hauteur', 'end');
+        tag(lx + fx / 2, cy - 22, 'Dérive', 'middle');
+      }
+
       const after = el('g', { 'clip-path': 'url(#after)' });
-      for (const [dx, dy] of hits) splat(rx + dx, cy + dy, 24 + rnd() * 7, after);
+      for (const [dx, dy] of hits) {
+        if (holes === 'plain') hole(rx + dx, cy + dy, after);
+        else splat(rx + dx, cy + dy, 24 + rnd() * 7, after, zoneColour(dx, dy));
+      }
+
+      if (closeUps) {
+        closeUps.forEach(({ label, colour, bg }, i) => {
+          const zx = 230 + i * 220, zy = 1135, zr = 85;
+          const zc = el('clipPath', { id: 'zoom' + i }, defs);
+          el('circle', { cx: zx, cy: zy, r: zr }, zc);
+          const g = el('g', { 'clip-path': `url(#zoom${i})` });
+          el('rect', { x: zx - zr, y: zy - zr, width: 2 * zr, height: 2 * zr, fill: bg }, g);
+          splat(zx, zy, 46, g, colour);
+          el('circle', { cx: zx, cy: zy, r: zr, fill: 'none', stroke: 'var(--coyote)', 'stroke-width': 4 });
+          text(zx, zy + zr + 40, label, { 'text-anchor': 'middle', 'font-size': 30, 'font-weight': 700, fill: 'var(--ink)' });
+        });
+        text(870, 1110, closeUpTitle, { 'font-size': 48, 'font-weight': 700, fill: 'var(--ink)' });
+        caption.forEach((line, i) => {
+          text(870, 1156 + i * 36, line, { style: 'font-family: Barlow', 'font-size': 26, fill: 'var(--mute)' });
+        });
+        return;
+      }
+
+      if (!closeUp) {
+        text(150, 1100, closeUpTitle, { 'font-size': 52, 'font-weight': 700, fill: 'var(--ink)' });
+        caption.forEach((line, i) => {
+          text(150, 1150 + i * 38, line, { style: 'font-family: Barlow', 'font-size': 27, fill: 'var(--mute)' });
+        });
+        return;
+      }
 
       // Close-up of one hit.
       const mx = 330, my = 1125, mr = 125;
@@ -215,7 +287,7 @@
       el('rect', { x: mx - mr, y: my - mr, width: 2 * mr, height: 2 * mr, fill: '#111210' }, g);
       splat(mx, my, 70, g);
       el('circle', { cx: mx, cy: my, r: mr, fill: 'none', stroke: 'var(--coyote)', 'stroke-width': 5 });
-      text(mx + mr + 60, my - 30, 'Gerbe jaune fluorescent', { 'font-size': 52, 'font-weight': 700, fill: 'var(--ink)' });
+      text(mx + mr + 60, my - 30, closeUpTitle, { 'font-size': 52, 'font-weight': 700, fill: 'var(--ink)' });
       caption.forEach((line, i) => {
         text(mx + mr + 60, my + 18 + i * 38, line, { style: 'font-family: Barlow', 'font-size': 27, fill: 'var(--mute)' });
       });

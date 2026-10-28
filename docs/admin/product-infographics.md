@@ -30,12 +30,26 @@ Everything lives in `scripts/infographics/`:
 | `men-nylon-belt-qr` | Ceinture en sangle à boucle rapide (eyelets, webbing clips; polypropylene, not nylon) | odg |
 | `crt-react-076-200-fluo` | 200 cibles rondes réactives 76 mm (no supplier sheet: facts from the product page; a 1 € coin drawn to scale; effect sheet with the splatter) | fluo |
 | `rlt-splat-076-200-fluo` | 200 cibles rondes réactives 76 mm 10 zones lettrées (same approach; the series is grouped in sector H) | fluo |
+| `tgt-splat-pnk-076-200` | 200 cibles rondes 76 mm rose fluorescent réglage visée (**not reactive**: the effect sheet shows a sight correction with plain holes) | pink |
+| `cr-ov-splat-076-200` | 200 cibles rondes réactives 76 mm gerbe zonée 3 couleurs (splatter green / orange / yellow by zone, one close-up per zone) | tricolour |
 
 Round reactive targets share `Infographic.targets` in `kit.js`:
 `coinAndFacts` (the 1 € coin and the pack facts on the dimensions sheet) and
 `beforeAfter` (the whole effect sheet, given the target's centre and radius in
 its photo and the hits). A new target only has to redraw its own design for
 the dimensions sheet. Keep hits and markers off printed letters and numbers.
+
+Check the product's "Réaction à l'impact" before drawing an effect. A
+non-reactive target (the pink one says "Aucune") must never get a splatter,
+even when its image file names say "splatter". `beforeAfter` handles it with
+`holes: 'plain'`, `beforeHits`, `correction: [dx, dy]` (height and windage
+arrows from the before group back to the centre) and `closeUp: false` (a text
+block instead of the splatter close-up).
+
+A target whose splatter colour depends on the zone hit sets
+`zones: [[maxR, colour], ...]` (radii in photo px, innermost first): each hit
+takes the colour of its zone. `closeUps: [{ label, colour, bg }]` replaces
+the single close-up with a row of one per zone.
 
 When there is no supplier sheet, take the facts from the product's own
 `characteristics` and description (Admin API, see
