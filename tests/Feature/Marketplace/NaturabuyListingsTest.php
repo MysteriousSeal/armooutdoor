@@ -1466,10 +1466,10 @@ class NaturabuyListingsTest extends TestCase
         $html = $this->actingAs($this->admin())->get('/admin/marketplaces/naturabuy')->assertOk()->getContent();
 
         $this->assertStringContainsString('title="Photos on our shop: main photo plus gallery">Photos</th>', $html);
-        $this->assertMatchesRegularExpression('/<td class="nb-num">\s*3\s*<\/td>/', $html);
+        $this->assertStringContainsString('title="3 photos on our shop, five wanted">3</span>', $html);
     }
 
-    /** None in red, one in amber: the listings short of photos stand out. */
+    /** None or one in red: the listings short of photos stand out. */
     public function test_few_photos_are_flagged(): void
     {
         $this->productWithPhotos('NO-PHOTO', 0, main: false);
@@ -1479,8 +1479,8 @@ class NaturabuyListingsTest extends TestCase
 
         $this->actingAs($this->admin())->get('/admin/marketplaces/naturabuy')
             ->assertOk()
-            ->assertSee('<span class="admin-availability-chip is-out-of-stock" title="No photo on our shop">0</span>', false)
-            ->assertSee('<span class="admin-availability-chip is-low-stock" title="Only one photo on our shop">1</span>', false);
+            ->assertSee('<span class="admin-availability-chip is-out-of-stock" title="No photo on our shop, five wanted">0</span>', false)
+            ->assertSee('<span class="admin-availability-chip is-out-of-stock" title="Only one photo on our shop, five wanted">1</span>', false);
     }
 
     /** A listing matched to nothing here has no photo count to give. */
@@ -1490,7 +1490,7 @@ class NaturabuyListingsTest extends TestCase
 
         $this->actingAs($this->admin())->get('/admin/marketplaces/naturabuy')
             ->assertOk()
-            ->assertDontSee('title="No photo on our shop"', false);
+            ->assertDontSee('photo on our shop', false);
     }
 
     public function test_the_missing_tab_shows_the_photo_count_too(): void
@@ -1500,6 +1500,6 @@ class NaturabuyListingsTest extends TestCase
         $html = $this->actingAs($this->admin())->get('/admin/marketplaces/naturabuy?tab=missing')->assertOk()->getContent();
 
         $this->assertStringContainsString('>Photos</th>', $html);
-        $this->assertMatchesRegularExpression('/<td class="nb-num">\s*5\s*<\/td>/', $html);
+        $this->assertStringContainsString('<span class="admin-availability-chip is-in-stock" title="5 photos on our shop">5</span>', $html);
     }
 }

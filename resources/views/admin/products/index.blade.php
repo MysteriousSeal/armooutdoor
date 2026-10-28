@@ -88,6 +88,9 @@
             <a href="{{ route('admin.products.index', $tabQuery('no-image')) }}" class="{{ $tab === 'no-image' ? 'active' : '' }}">
                 One image only <span class="admin-tab-count">{{ number_format($oneImageCount) }}</span>
             </a>
+            <a href="{{ route('admin.products.index', $tabQuery('few-images')) }}" class="{{ $tab === 'few-images' ? 'active' : '' }}">
+                Less than 5 images <span class="admin-tab-count">{{ number_format($fewImagesCount) }}</span>
+            </a>
             <a href="{{ route('admin.products.index', $tabQuery('no-seo')) }}" class="{{ $tab === 'no-seo' ? 'active' : '' }}">
                 <span><span class="sr-only">Missing </span>SEO</span> <span class="admin-tab-count">{{ number_format($noSeoCount) }}</span>
             </a>
@@ -234,6 +237,9 @@
                             @case('no-image')
                                 Every product carries more than one image.
                                 @break
+                            @case('few-images')
+                                No product sits between two and four images.
+                                @break
                             @case('no-seo')
                                 Every product's SEO lengths sit in their good ranges.
                                 @break
@@ -255,7 +261,7 @@
             </p>
 
             <div class="admin-table-wrap">
-                <table class="admin-table">
+                <table class="admin-table admin-products-table">
                     <thead>
                         <tr>
                             @php
@@ -300,6 +306,7 @@
                             <th>Availability</th>
                             <th title="Supplier can still source it — click to toggle">At supplier</th>
                             <th>Variants</th>
+                            <th title="Photos on the shop: main photo plus gallery">Photos</th>
                             <th>Weight</th>
                             <th>GTIN</th>
                             <th title="Title 20–60 and meta description 80–160 characters">SEO</th>
@@ -445,6 +452,7 @@
                                         —
                                     @endif
                                 </td>
+                                <td>@include('admin.marketplaces.partials.shop-image-count', ['count' => $product->shopImageCount()])</td>
                                 <td>
                                     {{-- Le poids décide du prix du port : le chiffre reste quand
                                          il existe. Absent, un tiret se confond avec une colonne
@@ -591,7 +599,7 @@
                                         ->values();
                                 @endphp
                                 <tr class="admin-variant-row" id="variant-panel-{{ $product->id }}" hidden>
-                                    <td colspan="16">
+                                    <td colspan="17">
                                         <div class="admin-variant-panel">
                                             <table class="admin-variant-table">
                                                 <thead>

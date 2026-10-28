@@ -58,7 +58,7 @@ class ProductController extends Controller
         $seo = in_array($request->query('seo'), ['ok', 'off'], true)
             ? (string) $request->query('seo')
             : '';
-        $tab = in_array($request->query('tab'), ['active', 'disabled', 'in-stock', 'restocking', 'at-supplier', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight', 'no-image', 'no-seo', 'price-mismatch'], true)
+        $tab = in_array($request->query('tab'), ['active', 'disabled', 'in-stock', 'restocking', 'at-supplier', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight', 'no-image', 'few-images', 'no-seo', 'price-mismatch'], true)
             ? (string) $request->query('tab')
             : 'active';
 
@@ -72,7 +72,8 @@ class ProductController extends Controller
             // The discount rides along: the list prints it on every row that
             // has one, and asking per row is twenty queries a page.
             ->with('category', 'supplier', 'discount', 'variants.supplier')
-            ->withCount('variants')
+            // The gallery count feeds shopImageCount() without a query per row.
+            ->withCount('variants', 'images')
             ->tap(fn ($query) => $this->applyProductSort($query, $sort))
             ->paginate(24)
             ->withQueryString();
@@ -93,6 +94,7 @@ class ProductController extends Controller
             'noGtinCount' => Product::query()->tap(fn ($query) => $this->missingGtin($query))->count(),
             'noWeightCount' => Product::query()->where('is_active', true)->where(fn ($query) => $query->whereNull('weight_grams')->orWhere('weight_grams', 0))->count(),
             'oneImageCount' => Product::query()->where('is_active', true)->doesntHave('images')->count(),
+            'fewImagesCount' => Product::query()->tap(fn ($query) => $this->fewImages($query))->count(),
             'noSeoCount' => count($this->seoFailingIds()),
             'priceMismatchCount' => count($this->priceMismatchIds()),
             'categories' => $this->categoryOptions(),
@@ -116,7 +118,7 @@ class ProductController extends Controller
         $seo = in_array($request->query('seo'), ['ok', 'off'], true)
             ? (string) $request->query('seo')
             : '';
-        $tab = in_array($request->query('tab'), ['active', 'disabled', 'in-stock', 'at-supplier', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight', 'no-image', 'no-seo', 'price-mismatch'], true)
+        $tab = in_array($request->query('tab'), ['active', 'disabled', 'in-stock', 'at-supplier', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight', 'no-image', 'few-images', 'no-seo', 'price-mismatch'], true)
             ? (string) $request->query('tab')
             : 'active';
 
@@ -816,10 +818,20 @@ class ProductController extends Controller
             // shows exactly one photo: this is the shelf of one-picture
             // listings, not of products without any picture at all.
             'no-image' => $query->where('is_active', true)->doesntHave('images'),
+            'few-images' => $this->fewImages($query),
             'no-seo' => $query->whereIn('id', $this->seoFailingIds()),
             'price-mismatch' => $query->whereIn('id', $this->priceMismatchIds()),
             default => $query->where('is_active', true),
         };
+    }
+
+    /**
+     * Two to four photos: more than the one-image shelf, short of the five
+     * every product should have. The main image counts as one, as there.
+     */
+    private function fewImages(Builder $query): Builder
+    {
+        return $query->where('is_active', true)->has('images', '>=', 1)->has('images', '<=', 3);
     }
 
     private function categoryOptions()

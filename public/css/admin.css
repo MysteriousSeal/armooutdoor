@@ -3782,6 +3782,22 @@ a.admin-stat-card:hover {
     vertical-align: middle;
 }
 
+/* The product list carries seventeen columns: the usual padding pushes the
+   last one off the edge of a laptop screen. */
+.admin-products-table th,
+.admin-products-table td {
+    padding-inline: 0.6rem;
+}
+
+/* Its storefront eye, a small square rather than a button-wide pill. */
+.admin-products-table .btn-icon {
+    width: 1.9rem;
+    min-width: 0;
+    height: 1.9rem;
+    padding: 0;
+    justify-content: center;
+}
+
 .admin-table th {
     font-size: 0.75rem;
     font-weight: 500;
