@@ -36,6 +36,7 @@ use App\Http\Controllers\Admin\LabelController as AdminLabelController;
 use App\Http\Controllers\Admin\MarketplaceController as AdminMarketplaceController;
 use App\Http\Controllers\Admin\MarketplaceListingController as AdminMarketplaceListingController;
 use App\Http\Controllers\Admin\MarketplaceSettingController as AdminMarketplaceSettingController;
+use App\Http\Controllers\Admin\EbayController;
 use App\Http\Controllers\Admin\OctopiaController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\OrderNoteController as AdminOrderNoteController;
@@ -325,6 +326,13 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         Route::post('/marketplaces/cdiscount/submissions/{submission}/check', [OctopiaController::class, 'checkSubmission'])->name('marketplaces.cdiscount.submissions.check');
         Route::delete('/marketplaces/cdiscount/categories/{template}', [OctopiaController::class, 'destroyCategory'])->name('marketplaces.cdiscount.categories.destroy');
         Route::post('/marketplaces/naturabuy/sync', [AdminMarketplaceListingController::class, 'syncNaturabuy'])->name('marketplaces.naturabuy.sync');
+        // eBay, through the seller account signed in by OAuth.
+        Route::get('/marketplaces/ebay', [EbayController::class, 'index'])->name('marketplaces.ebay');
+        Route::post('/marketplaces/ebay/connect', [EbayController::class, 'connect'])->name('marketplaces.ebay.connect');
+        Route::get('/marketplaces/ebay/callback', [EbayController::class, 'callback'])->name('marketplaces.ebay.callback');
+        Route::delete('/marketplaces/ebay/connection', [EbayController::class, 'disconnect'])->name('marketplaces.ebay.disconnect');
+        Route::post('/marketplaces/ebay/sync', [EbayController::class, 'sync'])->name('marketplaces.ebay.sync');
+        Route::post('/marketplaces/ebay/stock', [EbayController::class, 'pushStock'])->name('marketplaces.ebay.stock');
         // Vinted: the articles sold there and nowhere else, kept by hand.
         // They are not products, so the storefront never sees them.
         Route::get('/marketplaces/vinted', [VintedItemController::class, 'index'])->name('marketplaces.vinted');

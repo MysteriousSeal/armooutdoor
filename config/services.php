@@ -50,6 +50,23 @@ return [
     ],
 
     /*
+     * eBay, through a developer app on developer.ebay.com. The client id and
+     * secret are the app's keys; the RuName is the name eBay gives the
+     * redirect URL, and it is what the OAuth calls pass as redirect_uri.
+     * Without the three, the admin page says so rather than calling.
+     */
+    'ebay' => [
+        'client_id' => env('EBAY_CLIENT_ID'),
+        'client_secret' => env('EBAY_CLIENT_SECRET'),
+        'ru_name' => env('EBAY_RU_NAME'),
+        // "production" or "sandbox".
+        'environment' => env('EBAY_ENVIRONMENT', 'production'),
+        // 71 is eBay.fr for the Trading API; EBAY_FR is its name elsewhere.
+        'site_id' => (int) env('EBAY_SITE_ID', 71),
+        'marketplace_id' => env('EBAY_MARKETPLACE_ID', 'EBAY_FR'),
+    ],
+
+    /*
      * Octopia's REST Seller API, behind Cdiscount. The three values come from
      * the seller's API credentials page on Octopia; without them nothing is
      * called and the admin says so rather than failing on submit.

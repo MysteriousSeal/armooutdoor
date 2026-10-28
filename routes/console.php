@@ -22,6 +22,14 @@ Schedule::command('backup:database')
     ->runInBackground();
 
 /*
+ * The shop's stock to eBay: the listings are read, then each one whose
+ * quantity differs is sent ours. Does nothing until eBay is connected.
+ */
+Schedule::command('ebay:sync-stock')
+    ->everyFifteenMinutes()
+    ->withoutOverlapping(30);
+
+/*
  * One NaturaBuy listing page a minute, for its photo count: their API does
  * not give it. Each listing is read again after a week.
  */

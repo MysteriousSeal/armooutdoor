@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\EbayConnection;
+use App\Models\EbayListing;
 use App\Models\Marketplace;
 use App\Models\NaturabuyListing;
 use App\Models\OctopiaTemplate;
@@ -32,6 +34,9 @@ class MarketplaceListingController extends Controller
             'naturabuySyncedAt' => NaturabuyListing::query()->max('synced_at'),
             'octopiaTemplates' => OctopiaTemplate::query()->count(),
             'vintedItems' => VintedItem::query()->available()->count(),
+            'ebayCount' => EbayListing::query()->count(),
+            'ebaySyncedAt' => EbayListing::query()->max('synced_at'),
+            'ebayConnected' => EbayConnection::current() !== null,
         ]);
     }
 

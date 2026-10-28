@@ -23,11 +23,13 @@
                 {{-- Vinted has no API either: its page is the list of what is
                      sold there only, kept by hand. --}}
                 @php($vinted = $marketplace->name === 'Vinted')
-                @php($link = $connected || $octopia || $vinted)
+                @php($ebay = strcasecmp($marketplace->name, 'eBay') === 0)
+                @php($link = $connected || $octopia || $vinted || $ebay)
                 <{{ $link ? 'a' : 'div' }}
                     @if ($connected) href="{{ route('admin.marketplaces.naturabuy') }}" @endif
                     @if ($octopia) href="{{ route('admin.marketplaces.cdiscount') }}" @endif
                     @if ($vinted) href="{{ route('admin.marketplaces.vinted') }}" @endif
+                    @if ($ebay) href="{{ route('admin.marketplaces.ebay') }}" @endif
                     class="marketplace-card{{ $link ? ' is-connected' : '' }}"
                 >
                     <span class="marketplace-card-head">
@@ -59,6 +61,18 @@
                         <span class="marketplace-card-figure">{{ number_format($vintedItems) }}</span>
                         <span class="marketplace-card-label">{{ $vintedItems === 1 ? 'item' : 'items' }} to sell</span>
                         <span class="marketplace-card-foot">Sold on Vinted only, never on the shop</span>
+                    @elseif ($ebay)
+                        <span class="marketplace-card-figure">{{ number_format($ebayCount) }}</span>
+                        <span class="marketplace-card-label">{{ $ebayCount === 1 ? 'listing' : 'listings' }}</span>
+                        <span class="marketplace-card-foot">
+                            @if (! $ebayConnected)
+                                Not connected yet
+                            @elseif ($ebaySyncedAt)
+                                Synced {{ admin_relative_date($ebaySyncedAt) }}
+                            @else
+                                Never synced
+                            @endif
+                        </span>
                     @else
                         <span class="marketplace-card-figure marketplace-card-figure--muted">—</span>
                         <span class="marketplace-card-label">not connected</span>
