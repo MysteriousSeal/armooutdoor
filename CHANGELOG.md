@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-28 · v1.73.0 · build VU91RL
+
+### Admin
+
+- **The product list has a Photos column:** the main photo plus the gallery, against the five every product should have. None or one shows in red, two to four in amber, five or more in green. The NaturaBuy page's photo count follows the same colors.
+- **A « Less than 5 images » tab** beside « One image only » lists the active products with two to four photos.
+- **The product table's cells are narrower and its storefront eye is a small square,** so the extra column fits without pushing the last one off a laptop screen.
+
+**No migration.**
+
 ## 2026-10-27 · v1.72.2 · build HFSBVX
 
 ### Admin
