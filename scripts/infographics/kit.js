@@ -109,11 +109,12 @@
     [...halo, ...ink, ...marks].forEach(n => svg.appendChild(n));
   }
 
-  // Dimensions sheet: the product spec draws its own technical drawing.
+  // Dimensions sheet: the product spec draws its own technical drawing; it gets
+  // the variant's palette, and the variant itself for a drawing built on the photo.
   function renderDimensions(product, variant) {
     const sheet = product.dimensions;
     fillChrome(product, sheet);
-    sheet.draw(svgKit(document.getElementById('draw')), variant.palette);
+    sheet.draw(svgKit(document.getElementById('draw')), variant.palette, variant);
   }
 
   // Effect sheet (optional): the spec draws how the product behaves in use,
@@ -153,6 +154,28 @@
       });
     },
 
+    // Dimensions sheet for a square target: its fine printed legends are best
+    // shown as they are, so the photo itself is cropped to the square and
+    // drawn at true size, with the side measured on top and on the left.
+    // centre/half locate the square in the photo, in photo px.
+    squareToScale({ el, text, dim, ext, arrow, section }, photo, { centre: [px, py], half, mm, K, facts }) {
+      const side = mm * K, R = side / 2, cx = 560, cy = 800, s = side / (2 * half);
+      const label = Number.isInteger(mm) ? `${mm} mm` : `${String(mm / 10).replace('.', ',')} cm`;
+      const defs = el('defs', {});
+      const cp = el('clipPath', { id: 'square' }, defs);
+      el('rect', { x: cx - R, y: cy - R, width: side, height: side }, cp);
+      el('image', { href: photo, x: cx - px * s, y: cy - py * s, width: 1000 * s, height: 1000 * s, 'clip-path': 'url(#square)' });
+
+      section(150, 350, 'UNE CIBLE');
+      ext(cx - R, cy - R - 8, cx - R, cy - R - 70); ext(cx + R, cy - R - 8, cx + R, cy - R - 70);
+      dim(cx - R, cy - R - 55, cx + R, cy - R - 55, label, 56);
+      const vx = cx - R - 40;
+      ext(cx - R - 8, cy - R, vx - 10, cy - R); ext(cx - R - 8, cy + R, vx - 10, cy + R);
+      arrow(vx, cy - R, vx, cy + R);
+      text(vx - 16, cy + 14, label, { 'text-anchor': 'end', 'font-size': 40, 'font-weight': 700, fill: 'var(--ink)' });
+      targets.coinAndFacts({ el, text }, { K, cy, R, facts });
+    },
+
     // Effect sheet: the photo's target before and after a series, with the
     // fluo splatter drawn on each hit, and a close-up of one hit.
     // centre/radius locate the target disc in the photo; hits are offsets in
@@ -167,17 +190,19 @@
       centre: [px, py], radius, seed, hits, afterLabel, caption,
       beforeLabel = 'AVANT', beforeHits = [], holes = 'splatter', correction = null,
       closeUp = true, closeUpTitle = 'Gerbe jaune fluorescent', zones = null, closeUps = null,
-      splatColour = '#e4f21c', closeUpBg = '#111210',
+      splatColour = '#e4f21c', closeUpBg = '#111210', shape = 'round',
     }) {
       const rnd = rng(seed);
       const Y = splatColour;
       const defs = el('defs', {});
 
-      // The photo's target disc clipped from its background.
+      // The photo's target clipped from its background: a disc, or for a
+      // square target (shape: 'square', radius = half the side) a square.
       function panel(id, cx, cy, D) {
         const s = D / (2 * radius);
         const cp = el('clipPath', { id }, defs);
-        el('circle', { cx, cy, r: D / 2 }, cp);
+        if (shape === 'square') el('rect', { x: cx - D / 2, y: cy - D / 2, width: D, height: D }, cp);
+        else el('circle', { cx, cy, r: D / 2 }, cp);
         el('image', { href: photo, x: cx - px * s, y: cy - py * s, width: 1000 * s, height: 1000 * s, 'clip-path': `url(#${id})` });
       }
 

@@ -42,6 +42,19 @@ Everything lives in `scripts/infographics/`:
 | `cr-rn-splat-76mm-100` | 100 cibles rondes réactives 76 mm 5 zones et pastilles (the 76 mm version of `cr-rn-splat-100mm-100`; its gallery photo is the very same file) | redblack |
 | `tgt-spltr-blk-100x10` | 100 cibles rondes réactives 10 cm noires numérotées (zones 7 to 9, four "10" in the red centre) | black |
 | `cr-react-076-250-fluo` | 250 cibles rondes réactives 76 mm papier anti-déchirure (effect sheet shows a tight group) | fluo |
+| `ccg-splat-076-200-fluo` | 200 cibles carrées réactives 76 mm grille en pouces | grid |
+| `ccg-splat-051-200-fluo` | 200 cibles carrées réactives 51 mm 5 points de visée (one hit per aim point) | five |
+| `tgt-react-sq-100-4in-grid` | 100 cibles carrées réactives 10,16 cm grille de réglage (the page's own example: grouped high left, read D and R) | grid |
+| `ccs-5dia-076-200-fluo` | 200 cibles carrées réactives 76 mm 5 losanges rouges (one hit per diamond) | diamonds |
+| `ccs-vis-076-200-fluo` | 200 cibles carrées réactives 76 mm réticule de visée (reinforced paper) | reticle |
+
+Square targets carry fine printed legends (inch fractions, 4R to 4L) that a
+redrawing would get wrong, so their dimensions sheet uses
+`Infographic.targets.squareToScale`: the photo cropped to the square and drawn
+at true size (`mm` × `K`), with the side measured on top and on the left,
+then the coin and facts. Their effect sheet passes `shape: 'square'` to
+`beforeAfter`, with `radius` set to half the side. The dimensions `draw`
+receives the variant as a third argument for this.
 
 Round reactive targets share `Infographic.targets` in `kit.js`:
 `coinAndFacts` (the 1 € coin and the pack facts on the dimensions sheet) and
