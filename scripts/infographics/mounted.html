@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Cible en situation</title>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Stencil+One&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;700&display=block" rel="stylesheet">
+<link href="shared.css" rel="stylesheet">
+<style>
+  svg#s { position: absolute; inset: 0; display: block; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <svg id="s" width="1500" height="1500" viewBox="0 0 1500 1500"></svg>
+  <header>
+    <div class="eyebrow" id="eyebrow"></div>
+    <h1 id="title"></h1>
+  </header>
+</div>
+<script>
+  // A product's targets stuck on a plain plywood panel, on white, under the
+  // house header (eyebrow + title, `mounted.title`, "Grandeur nature" by default).
+  // Never a human-shaped silhouette, not even headless: the FFTir does not
+  // allow shooting at human-shaped targets.
+  // Opened as mounted.html?p=<product>&v=<variant>; the spec's `mounted`
+  // block gives the target's square in its photo and its real size.
+  const params = new URLSearchParams(location.search);
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.getElementById('s');
+  const el = (tag, attrs, parent = svg) => {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    parent.appendChild(n);
+    return n;
+  };
+
+  const spec = document.createElement('script');
+  spec.src = 'products/' + params.get('p') + '.js';
+  spec.onload = () => {
+    const P = window.PRODUCT;
+    const V = P.variants[params.get('v') || Object.keys(P.variants)[0]];
+    document.getElementById('eyebrow').textContent = P.eyebrow;
+    document.getElementById('title').textContent = P.mounted.title || 'Grandeur nature';
+    draw(V.photo, P.mounted);
+  };
+  document.head.appendChild(spec);
+
+  function draw(photo, { centre: [px, py], half, cm, round = false }) {
+    // A rectangular panel in cm (PW x PH), standing on two wooden laths set
+    // in a steel base 18 cm below it.
+    const PW = 100, PH = 60, K = 11, W = PW * K, H = PH * K, ox = (1500 - W) / 2, oy = 440; // centred in the space left under the header
+    const outline = [[0, 0], [PW, 0], [PW, PH], [0, PH]];
+    const d = 'M' + outline.map(([x, y]) => `${ox + x * K} ${oy + y * K}`).join(' L') + ' Z';
+
+    const defs = el('defs', {});
+    // Plywood face: a generated birch veneer clipped to the outline.
+    const panelClip = el('clipPath', { id: 'panel' }, defs);
+    el('path', { d }, panelClip);
+    const shadow = el('filter', { id: 'shadow', x: '-10%', y: '-10%', width: '130%', height: '130%' }, defs);
+    el('feDropShadow', { dx: 6, dy: 8, stdDeviation: 10, 'flood-color': '#000', 'flood-opacity': 0.16 }, shadow);
+    const thin = el('filter', { id: 'thin', x: '-10%', y: '-10%', width: '130%', height: '130%' }, defs);
+    el('feDropShadow', { dx: 2, dy: 3, stdDeviation: 3, 'flood-color': '#000', 'flood-opacity': 0.35 }, thin);
+    const light = el('linearGradient', { id: 'light', x1: 0, y1: 0, x2: 1, y2: 1 }, defs);
+    el('stop', { offset: 0, 'stop-color': '#fff', 'stop-opacity': 0.14 }, light);
+    el('stop', { offset: 1, 'stop-color': '#000', 'stop-opacity': 0.12 }, light);
+
+    stand(defs, K, ox, oy, PW, PH);
+    // Panel thickness (12 mm), seen as the layered edge to the lower right.
+    el('path', { d, fill: '#a07b4b', filter: 'url(#shadow)', transform: 'translate(5 5)' });
+    el('path', { d, fill: '#a07b4b', transform: 'translate(5 5)' });
+    el('image', {
+      href: woodTexture(Math.ceil(W), Math.ceil(H), { seed: 11, knots: [[0.22, 0.86, 1], [0.8, 0.12, 0.6]] }),
+      x: ox, y: oy, width: Math.ceil(W), height: Math.ceil(H), 'clip-path': 'url(#panel)',
+    });
+    el('path', { d, fill: 'url(#light)' });
+    // Sanded front edge.
+    el('path', { d, fill: 'none', stroke: '#ead2ac', 'stroke-width': 2.5, 'stroke-linejoin': 'round' });
+
+    // Screws where the panel is fixed to each lath.
+    for (const lx of [40, 60]) {
+      for (const sy of [44, 54]) {
+        const x = ox + lx * K, y = oy + sy * K;
+        el('circle', { cx: x, cy: y, r: 6, fill: '#a7acb1', stroke: '#6b7077', 'stroke-width': 1 });
+        el('path', { d: `M${x - 4} ${y} L${x + 4} ${y} M${x} ${y - 4} L${x} ${y + 4}`, stroke: '#5d6268', 'stroke-width': 1.2 });
+      }
+    }
+
+    // The panel's size, styled like the dimensions sheets' dim() and
+    // sideLabel(): width above it at 52 px, height to its left at 44 px.
+    const mk = el('marker', { id: 'arr', viewBox: '0 0 12 12', refX: 11, refY: 6, markerWidth: 12, markerHeight: 12, orient: 'auto-start-reverse' }, defs);
+    el('path', { d: 'M1 1 L11 6 L1 11 Z', fill: '#1b1d19' }, mk);
+    const font = 'font-family: "Barlow Condensed", sans-serif';
+    const arrowLine = (x1, y1, x2, y2) => el('line', { x1, y1, x2, y2, stroke: '#1b1d19', 'stroke-width': 2.5, 'marker-start': 'url(#arr)', 'marker-end': 'url(#arr)' });
+    const label = (x, y, str, size, anchor) => {
+      const t = el('text', { x, y, 'text-anchor': anchor, 'font-size': size, 'font-weight': 700, fill: '#1b1d19', style: font });
+      t.textContent = str;
+    };
+    const ext = (x1, y1, x2, y2) => el('line', { x1, y1, x2, y2, stroke: '#6b6e66', 'stroke-width': 1.5, 'stroke-dasharray': '5 5' });
+    ext(ox, oy - 10, ox, oy - 80); ext(ox + W, oy - 10, ox + W, oy - 80);
+    arrowLine(ox, oy - 62, ox + W, oy - 62);
+    const wLabel = PW >= 100 ? `${PW / 100} m`.replace('.', ',') : `${PW} cm`, ww = wLabel.length * 26 + 34;
+    el('rect', { x: ox + W / 2 - ww / 2, y: oy - 62 - 32, width: ww, height: 64, fill: '#fff' });
+    label(ox + W / 2, oy - 62 + 19, wLabel, 52, 'middle');
+    ext(ox - 10, oy, ox - 50, oy); ext(ox - 10, oy + H, ox - 50, oy + H);
+    arrowLine(ox - 40, oy, ox - 40, oy + H);
+    label(ox - 56, oy + H / 2 + 15, `${PH} cm`, 44, 'end');
+
+    // Five targets at true size, as on a die: one in the centre, one in each
+    // corner, the corner ones 15 cm from the sides and 7 cm from top and bottom.
+    const side = cm * K, s = side / (2 * half), mx = 15 + cm / 2, my = 7 + cm / 2;
+    const spots = [[PW / 2, PH / 2], [mx, my], [PW - mx, my], [mx, PH - my], [PW - mx, PH - my]];
+    for (let i = 0; i < spots.length; i++) {
+      const cx = ox + spots[i][0] * K, cy = oy + spots[i][1] * K;
+      const cp = el('clipPath', { id: 'sticker' + i }, defs);
+      if (round) el('circle', { cx, cy, r: side / 2 }, cp);
+      else el('rect', { x: cx - side / 2, y: cy - side / 2, width: side, height: side, rx: 4 }, cp);
+      const g = el('g', { filter: 'url(#thin)' });
+      el('image', { href: photo, x: cx - px * s, y: cy - py * s, width: 1000 * s, height: 1000 * s, 'clip-path': `url(#sticker${i})` }, g);
+    }
+  }
+
+  // Two pine laths (2.5 cm) rising behind the panel into a steel stand: a
+  // 4 cm square tube base, seen slightly from above so its top face shows,
+  // with two welded square sockets, each locked by a hex bolt. Black powder
+  // coat with a fine grain, rounded edges catching the light, plastic end
+  // caps, and a contact shadow on the ground.
+  function stand(defs, K, ox, oy, PW, PH) {
+    const ground = oy + (PH + 18) * K, baseH = 4 * K, top = 1.3 * K, baseY = ground - baseH;
+    const bx = ox - 6 * K, bw = (PW + 12) * K;
+
+    // Powder coat: a tile of fine speckle laid over every steel face.
+    const tile = document.createElement('canvas'); tile.width = tile.height = 96;
+    const tc = tile.getContext('2d'), td = tc.createImageData(96, 96);
+    let a = 977;
+    for (let i = 0; i < td.data.length; i += 4) {
+      a = (a * 16807) % 2147483647;
+      const v = (a / 2147483647) * 255;
+      td.data[i] = td.data[i + 1] = td.data[i + 2] = v; td.data[i + 3] = 11;
+    }
+    tc.putImageData(td, 0, 0);
+    const coat = el('pattern', { id: 'coat', width: 96, height: 96, patternUnits: 'userSpaceOnUse' }, defs);
+    el('image', { href: tile.toDataURL(), width: 96, height: 96 }, coat);
+
+    const grad = (id, stops, vertical = true) => {
+      const g = el('linearGradient', { id, x1: 0, y1: 0, x2: vertical ? 0 : 1, y2: vertical ? 1 : 0 }, defs);
+      stops.forEach(([o, c]) => el('stop', { offset: o, 'stop-color': c }, g));
+    };
+    // Front faces: a bright rounded top edge, then dark, then a faint
+    // bounce light from the floor at the bottom.
+    grad('front', [[0, '#6c7075'], [0.07, '#3b3e42'], [0.2, '#232528'], [0.85, '#17181a'], [1, '#26282b']]);
+    grad('topface', [[0, '#2a2c2f'], [0.6, '#44474b'], [1, '#5d6166']]);
+    grad('side', [[0, '#1a1b1d'], [0.15, '#34373b'], [0.5, '#1f2023'], [0.85, '#121314'], [1, '#2b2d30']], false);
+    grad('cap', [[0, '#2e2e2e'], [0.5, '#151515'], [1, '#0b0b0b']]);
+    grad('hex', [[0, '#b9bdc2'], [0.45, '#7b8086'], [1, '#3f4347']]);
+    const blur = (id, sd) => { const f = el('filter', { id, x: '-30%', y: '-300%', width: '160%', height: '700%' }, defs); el('feGaussianBlur', { stdDeviation: sd }, f); };
+    blur('ambient', 22); blur('contact', 5);
+
+    // Ground: a wide soft shadow, then a tight dark line where the tube sits.
+    el('ellipse', { cx: bx + bw / 2, cy: ground + 6, rx: bw * 0.55, ry: 2.6 * K, fill: '#000', opacity: 0.18, filter: 'url(#ambient)' });
+    el('rect', { x: bx + 6, y: ground - 4, width: bw - 12, height: 9, rx: 4, fill: '#000', opacity: 0.45, filter: 'url(#contact)' });
+
+    const face = (x, y, w, h, fill, r = 3) => {
+      el('rect', { x, y, width: w, height: h, rx: r, fill });
+      el('rect', { x, y, width: w, height: h, rx: r, fill: 'url(#coat)' });
+    };
+
+    // Base tube: top face, then front face, then end caps.
+    face(bx, baseY - top, bw, top + 4, 'url(#topface)', 4);
+    face(bx, baseY, bw, baseH, 'url(#front)', 4);
+    for (const ex of [bx - 0.15 * K, bx + bw - 0.75 * K]) {
+      el('rect', { x: ex, y: baseY - top + 1, width: 0.9 * K, height: top + baseH - 1, rx: 5, fill: 'url(#cap)' });
+      el('rect', { x: ex + 2, y: baseY - top + 3, width: 0.9 * K - 4, height: 2, rx: 1, fill: '#3a3a3a' });
+    }
+
+    for (const lx of [40, 60]) {
+      const lw = Math.ceil(2.5 * K), x = ox + lx * K - lw / 2;
+      const sw = 4 * K, sx = ox + lx * K - sw / 2, sh = 7 * K, sTop = 0.9 * K;
+      const sBottom = baseY - top * 0.45, sY = sBottom - sh;
+      // Socket top face with its square opening.
+      face(sx, sY - sTop, sw, sTop + 3, 'url(#topface)', 3);
+      el('rect', { x: x - 2.5, y: sY - sTop * 0.75, width: lw + 5, height: sTop * 0.6, rx: 1.5, fill: '#060606' });
+      // The lath, from behind the panel down into the opening.
+      const ly = oy + 30 * K, lh = Math.ceil(sY - sTop * 0.35 - ly);
+      el('image', { href: woodTexture(lw, lh, { seed: 3 + lx, vertical: true, tone: 0.9 }), x, y: ly, width: lw, height: lh, preserveAspectRatio: 'none' });
+      el('rect', { x, y: ly, width: lw, height: lh, fill: 'none', stroke: '#9c7748', 'stroke-width': 1 });
+      // Lath end grain darkening as it enters the socket.
+      el('rect', { x, y: sY - sTop * 0.75, width: lw, height: sTop * 0.4, fill: '#000', opacity: 0.35 });
+      // Socket front face, shaded across like a square tube's rounded corners.
+      face(sx, sY, sw, sh, 'url(#side)', 3);
+      el('rect', { x: sx, y: sY, width: sw, height: 3, rx: 1.5, fill: '#7a7f85', opacity: 0.8 });
+      // Weld bead where the socket meets the tube.
+      for (let i = 0; i <= 14; i++) {
+        const wx = sx - 3 + (i / 14) * (sw + 6);
+        el('ellipse', { cx: wx, cy: sBottom + 1, rx: 4.2, ry: 3, fill: i % 2 ? '#4a4d51' : '#5c6065', stroke: '#1c1d1f', 'stroke-width': 0.6 });
+      }
+      // Locking bolt: washer and hex head on the socket face.
+      const hx = sx + sw / 2, hy = sY + sh * 0.42, hr = 0.62 * K;
+      el('circle', { cx: hx, cy: hy, r: hr * 1.35, fill: '#5d6166', stroke: '#2a2c2f', 'stroke-width': 1 });
+      const hexPts = [...Array(6)].map((_, k) => { const t = Math.PI / 6 + k * Math.PI / 3; return `${hx + Math.cos(t) * hr},${hy + Math.sin(t) * hr}`; }).join(' ');
+      el('polygon', { points: hexPts, fill: 'url(#hex)', stroke: '#2b2e31', 'stroke-width': 1 });
+      el('circle', { cx: hx, cy: hy, r: hr * 0.35, fill: '#6f747a' });
+    }
+  }
+
+  // Procedural wood: value-noise fBm warps a band of growth lines running
+  // along the grain; latewood lines are thin and darker, broad bands vary
+  // the tone, a fine streaky noise gives the pores, and knots bend the
+  // lines around a dark core. knots: [u, v, strength] in 0..1 of the image.
+  function woodTexture(w, h, { seed = 1, vertical = false, tone = 1, knots = [] }) {
+    const perm = new Uint8Array(512);
+    const rnd = (() => { let a = seed * 9301 + 49297; return () => ((a = (a * 233280 + 1) % 2147483647) / 2147483647); })();
+    const p = [...Array(256).keys()].sort(() => rnd() - 0.5);
+    for (let i = 0; i < 512; i++) perm[i] = p[i & 255];
+    const hash = (x, y) => perm[(perm[x & 255] + y) & 255] / 255;
+    const fade = t => t * t * (3 - 2 * t);
+    const noise = (x, y) => {
+      const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi;
+      const a = hash(xi, yi), b = hash(xi + 1, yi), c = hash(xi, yi + 1), dd = hash(xi + 1, yi + 1);
+      const u = fade(xf), v = fade(yf);
+      return a + (b - a) * u + (c - a) * v + (a - b - c + dd) * u * v;
+    };
+    const fbm = (x, y, o = 4) => { let s = 0, amp = 0.5, f = 1; for (let i = 0; i < o; i++) { s += amp * noise(x * f, y * f); amp *= 0.5; f *= 2.03; } return s; };
+
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    const ctx = c.getContext('2d'), img = ctx.createImageData(w, h), px = img.data;
+    const light = [232, 204, 160], mid = [212, 176, 126], dark = [150, 108, 64];
+    for (let j = 0; j < h; j++) {
+      for (let i = 0; i < w; i++) {
+        // Along = direction of the grain, across = the direction lines stack in.
+        const along = vertical ? j : i, across = vertical ? i : j;
+        let t = across * 0.075 + 7 * fbm(along * 0.0035, across * 0.011) + 1.2 * fbm(along * 0.02, across * 0.06);
+        let core = 0;
+        for (const [ku, kv, ks] of knots) {
+          const dx = (i - ku * w) / (w * 0.05), dy = (j - kv * h) / (w * 0.035);
+          const r2 = dx * dx + dy * dy;
+          t += ks * 9 / (1 + r2);
+          core = Math.max(core, ks * Math.exp(-r2 * 3.2));
+        }
+        const ring = t - Math.floor(t);
+        const late = Math.pow(1 - Math.abs(ring * 2 - 1), 7);
+        const band = fbm(along * 0.0015 + 40, across * 0.004 + 40, 3);
+        const pore = (noise(along * 0.35 + 7, across * 2.2) - 0.5) * 0.09;
+        let k = Math.min(1, Math.max(0, (band - 0.3) * 1.6));
+        const o = (j * w + i) * 4;
+        for (let ch = 0; ch < 3; ch++) {
+          let v = light[ch] + (mid[ch] - light[ch]) * k;
+          v += (dark[ch] - v) * (late * 0.32 + core * 0.75);
+          v *= (1 + pore) * tone;
+          px[o + ch] = Math.max(0, Math.min(255, v));
+        }
+        px[o + 3] = 255;
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+    return c.toDataURL('image/png');
+  }
+</script>
+</body>
+</html>

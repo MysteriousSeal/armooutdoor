@@ -17,7 +17,7 @@ read_spec() {
     const P = window.PRODUCT;
     console.log(process.argv[2] === "variants"
       ? Object.keys(P.variants).join(" ")
-      : ["anatomy", "dimensions", "effect"].filter(s => P[s]).join(" "));' "$spec" "$1"
+      : ["anatomy", "dimensions", "effect", "mounted"].filter(s => P[s]).join(" "));' "$spec" "$1"
 }
 
 if [[ $# -eq 0 ]]; then

@@ -44,6 +44,9 @@ window.PRODUCT = {
     },
   },
 
+  // The board stuck on a cardboard silhouette (mounted.html), at true size.
+  mounted: { centre: [498, 500], half: 422, cm: 15 },
+
   // The case the protractor is for: impacts stretched along a diagonal.
   effect: {
     title: 'L’effet à l’impact',

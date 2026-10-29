@@ -12,6 +12,7 @@ Everything lives in `scripts/infographics/`:
 | Path | What it is |
 |------|------------|
 | `anatomy.html`, `dimensions.html`, `effect.html` | The sheet templates. Generic, never edited per product. `effect` renders only for specs that define it. |
+| `mounted.html` | The "Grandeur nature" sheet: five of the product's targets stuck at true size on a plain plywood panel 1 m wide and 60 cm high (one in the centre, four towards the corners), standing on pine laths in a steel base, under the house header, with the panel's width and height measured. Renders for specs that define `mounted`, see below. |
 | `kit.js` | Shared runtime: loads the product spec, draws the labels, leader lines, reticle markers and dimension lines. |
 | `shared.css` | House style: colours, fonts, header, labels, the note box at the bottom. |
 | `products/<product>.js` | One spec per product family: text, colourways, marker positions, and the dimensions drawing. |
@@ -208,6 +209,37 @@ default path; override it with `CHROME=/path/to/chrome`.
 The rendered PNGs in `out/` are the deliverables and the reference. Gallery
 images can't be added over the Admin API (`images` is read-only), so the user
 uploads them through the web admin.
+
+## The "Grandeur nature" sheet
+
+`mounted.html` shows the real size of a target the way a buyer pictures it:
+five of them on a 1 m × 60 cm plywood panel on a range stand. A spec opts in
+with one line:
+
+```js
+mounted: { centre: [498, 500], half: 422, cm: 15 },  // add round: true for a disc
+```
+
+`centre` and `half` locate the target in its photo, in photo px (the same
+values as the square or round geometry already in the spec), and `cm` is its
+real size. Optional `title` replaces "Grandeur nature".
+
+- **Never a human-shaped target, not even headless.** The FFTir does not
+  allow shooting at human-shaped targets, so no image of ours may show one.
+  The panel is a plain rectangle on purpose.
+- **Layout:** one target in the centre, four 15 cm in from the sides and
+  7 cm from top and bottom. The laths and their screws sit 40 cm from each
+  side, in the gap under the centre target.
+- **Measures:** "1 m" over the panel at 52 px and "60 cm" beside it at
+  44 px, the same Barlow Condensed as the dimensions sheets.
+- **Title:** "Grandeur nature", not "À l'échelle": a capital with an accent
+  rises into the gap under the eyebrow and makes the header look tighter
+  than on the other sheets.
+- **Textures:** the birch veneer, the laths and the powder-coated steel are
+  generated and seeded, so the image is the same on every render.
+- **Gallery position:** right after the dimensions sheet. A typical order is
+  the product photos first (packshot, front view, real impacts), then
+  anatomy, dimensions, grandeur nature, effect.
 
 ## House style
 
