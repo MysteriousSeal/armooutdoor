@@ -158,15 +158,15 @@
     // shown as they are, so the photo itself is cropped to the square and
     // drawn at true size, with the side measured on top and on the left.
     // centre/half locate the square in the photo, in photo px.
-    squareToScale({ el, text, dim, ext, arrow, section }, photo, { centre: [px, py], half, mm, K, facts }) {
+    squareToScale({ el, text, dim, ext, arrow, section }, photo, { centre: [px, py], half, mm, K, facts, label = null, heading = 'UNE CIBLE' }) {
       const side = mm * K, R = side / 2, cx = 560, cy = 800, s = side / (2 * half);
-      const label = Number.isInteger(mm) ? `${mm} mm` : `${String(mm / 10).replace('.', ',')} cm`;
+      label = label || (Number.isInteger(mm) ? `${mm} mm` : `${String(mm / 10).replace('.', ',')} cm`);
       const defs = el('defs', {});
       const cp = el('clipPath', { id: 'square' }, defs);
       el('rect', { x: cx - R, y: cy - R, width: side, height: side }, cp);
       el('image', { href: photo, x: cx - px * s, y: cy - py * s, width: 1000 * s, height: 1000 * s, 'clip-path': 'url(#square)' });
 
-      section(150, 350, 'UNE CIBLE');
+      section(150, 350, heading);
       ext(cx - R, cy - R - 8, cx - R, cy - R - 70); ext(cx + R, cy - R - 8, cx + R, cy - R - 70);
       dim(cx - R, cy - R - 55, cx + R, cy - R - 55, label, 56);
       const vx = cx - R - 40;

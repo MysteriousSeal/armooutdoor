@@ -47,6 +47,7 @@ Everything lives in `scripts/infographics/`:
 | `tgt-react-sq-100-4in-grid` | 100 cibles carrées réactives 10,16 cm grille de réglage (the page's own example: grouped high left, read D and R) | grid |
 | `ccs-5dia-076-200-fluo` | 200 cibles carrées réactives 76 mm 5 losanges rouges (one hit per diamond) | diamonds |
 | `ccs-vis-076-200-fluo` | 200 cibles carrées réactives 76 mm réticule de visée (reinforced paper) | reticle |
+| `cgl-splat-150-25-fluo` | 25 planches de tir 15 cm grille de réglage et rapporteur (square tooling with `label: '15 cm'`, `heading: 'UNE PLANCHE'`; effect shows a diagonal group, the case the protractor is for) | board |
 
 Square targets carry fine printed legends (inch fractions, 4R to 4L) that a
 redrawing would get wrong, so their dimensions sheet uses
