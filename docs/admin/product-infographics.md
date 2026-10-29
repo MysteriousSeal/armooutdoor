@@ -49,6 +49,8 @@ Everything lives in `scripts/infographics/`:
 | `ccs-5dia-076-200-fluo` | 200 cibles carrées réactives 76 mm 5 losanges rouges (one hit per diamond) | diamonds |
 | `ccs-vis-076-200-fluo` | 200 cibles carrées réactives 76 mm réticule de visée (reinforced paper) | reticle |
 | `cgl-splat-150-25-fluo` | 25 planches de tir 15 cm grille de réglage et rapporteur (square tooling with `label: '15 cm'`, `heading: 'UNE PLANCHE'`; effect shows a diagonal group, the case the protractor is for) | board |
+| `tgt-spltr-5pt-10x15` | 10 planches de tir 15,24 cm 5 cibles jaune fluorescent (square tooling; effect shows one hit per target, the session the page describes) | five |
+| `tgt-splat-200mm-20-fluo` | 20 planches de tir 20 cm zones numérotées et pastilles (square tooling at `K: 3` so the 20 cm board clears the facts column) | board |
 
 Square targets carry fine printed legends (inch fractions, 4R to 4L) that a
 redrawing would get wrong, so their dimensions sheet uses
@@ -223,6 +225,12 @@ mounted: { centre: [498, 500], half: 422, cm: 15 },  // add round: true for a di
 `centre` and `half` locate the target in its photo, in photo px (the same
 values as the square or round geometry already in the spec), and `cm` is its
 real size. Optional `title` replaces "Grandeur nature".
+
+Mount what the shooter actually sticks on the panel, not the backing sheet.
+When a sheet carries a target plus extras around it (repair patches, a
+coloured margin), point `mounted` at the target alone: the 20 cm boards
+mount only their 18 cm disc (`centre` and `half` of the disc,
+`cm: 18, round: true`).
 
 - **Never a human-shaped target, not even headless.** The FFTir does not
   allow shooting at human-shaped targets, so no image of ours may show one.
