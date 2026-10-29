@@ -92,7 +92,16 @@ class ProductPhotoColumnTest extends TestCase
         // Left out: a disabled product does not pull the average down.
         $this->productWithPhotos(0, main: false)->update(['is_active' => false]);
 
-        // (1 + 4 + 1) / 3 active products.
-        $this->assertStringContainsString('2.000 photos per product</span>', $this->list());
+        // (1 + 4 + 1) / 3 active products, and 6 of the 15 photos wanted.
+        $this->assertStringContainsString('2.000 photos per product · 40.000% of the 5-photo goal</span>', $this->list());
+    }
+
+    public function test_photos_past_five_do_not_count_toward_the_goal(): void
+    {
+        $this->productWithPhotos(8);
+        $this->productWithPhotos(0);
+
+        // Nine and one photos average five, but only five and one count: 6 of 10.
+        $this->assertStringContainsString('5.000 photos per product · 60.000% of the 5-photo goal</span>', $this->list());
     }
 }

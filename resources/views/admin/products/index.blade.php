@@ -23,8 +23,8 @@
                 <span class="admin-list-chip">{{ number_format($noSkuCount) }} without SKU</span>
                 <span class="admin-list-chip">{{ number_format($noGtinCount) }} without GTIN</span>
                 <span class="admin-list-chip">{{ number_format($noWeightCount) }} without weight</span>
-                @if ($averagePhotos !== null)
-                    <span class="admin-list-chip" title="Main photo plus gallery, averaged over the active products">{{ number_format($averagePhotos, 3) }} photos per product</span>
+                @if ($photoStats !== null)
+                    <span class="admin-list-chip" title="Main photo plus gallery, averaged over the active products. The goal is 5 per product; a product counts for 5 at most toward it">{{ number_format($photoStats['average'], 3) }} photos per product · {{ number_format($photoStats['completion'], 3) }}% of the 5-photo goal</span>
                 @endif
                 @if ($search !== '' || $categorySlug !== '' || $supplierId !== null || $ai !== '' || $seo !== '')
                     <span class="admin-list-chip is-filtered">Filtered</span>

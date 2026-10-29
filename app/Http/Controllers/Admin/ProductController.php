@@ -47,6 +47,9 @@ class ProductController extends Controller
 
     private const SORT_COOKIE = 'admin_products_sort_v2';
 
+    /** The number of photos every product should have. */
+    private const PHOTO_GOAL = 5;
+
     public function index(Request $request): Response
     {
         $search = trim((string) $request->query('search', ''));
@@ -95,7 +98,7 @@ class ProductController extends Controller
             'noWeightCount' => Product::query()->where('is_active', true)->where(fn ($query) => $query->whereNull('weight_grams')->orWhere('weight_grams', 0))->count(),
             'oneImageCount' => Product::query()->where('is_active', true)->doesntHave('images')->count(),
             'fewImagesCount' => Product::query()->tap(fn ($query) => $this->fewImages($query))->count(),
-            'averagePhotos' => $this->averageActivePhotos(),
+            'photoStats' => $this->activePhotoStats(),
             'noSeoCount' => count($this->seoFailingIds()),
             'priceMismatchCount' => count($this->priceMismatchIds()),
             'categories' => $this->categoryOptions(),
@@ -827,22 +830,29 @@ class ProductController extends Controller
     }
 
     /**
-     * Photos per active product, main photo plus gallery as the Photos column
-     * counts them, or null while there is no active product to divide by.
+     * Photos across the active products, counted as the Photos column counts
+     * them: the average, and how far the catalogue is toward five each. A
+     * product counts for five at most toward the goal, so one with nine does
+     * not make up for one with a single photo. Null while nothing is active.
+     *
+     * @return array{average: float, completion: float}|null
      */
-    private function averageActivePhotos(): ?float
+    private function activePhotoStats(): ?array
     {
-        $active = Product::query()->where('is_active', true);
-        $products = (clone $active)->count();
+        $counts = Product::query()
+            ->where('is_active', true)
+            ->withCount('images')
+            ->get(['id', 'image'])
+            ->map(fn (Product $product): int => $product->shopImageCount());
 
-        if ($products === 0) {
+        if ($counts->isEmpty()) {
             return null;
         }
 
-        $main = (clone $active)->whereNotNull('image')->where('image', '!=', '')->count();
-        $gallery = ProductImage::query()->whereIn('product_id', (clone $active)->select('id'))->count();
-
-        return ($main + $gallery) / $products;
+        return [
+            'average' => $counts->avg(),
+            'completion' => $counts->sum(fn (int $count): int => min($count, self::PHOTO_GOAL)) / ($counts->count() * self::PHOTO_GOAL) * 100,
+        ];
     }
 
     /**
