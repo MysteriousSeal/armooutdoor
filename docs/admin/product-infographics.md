@@ -38,6 +38,10 @@ Everything lives in `scripts/infographics/`:
 | `tgt-fluo-rctr-200-76mm` | 200 cibles rondes réactives 76 mm réticule et chiffres (red reticle, zones 8 and 9) | reticle |
 | `tgt-fluo-gnbk-200-5z` | 200 cibles rondes 76 mm vert et noir 5 zones (**not reactive** despite "fluo" in the SKU: the third sheet, "Compter les points", adds up a series with plain holes) | greenblack |
 | `tgt-fluo-3in-200` | 200 cibles rondes réactives 76 mm et pastilles réparation (four red patches outside the disc; the 76 mm line sits above them) | patches |
+| `cr-rn-react-076-250` | 250 cibles rondes réactives 76 mm réticule rouge (cross stops at the inner ring, no numbers) | red |
+| `cr-rn-splat-76mm-100` | 100 cibles rondes réactives 76 mm 5 zones et pastilles (the 76 mm version of `cr-rn-splat-100mm-100`; its gallery photo is the very same file) | redblack |
+| `tgt-spltr-blk-100x10` | 100 cibles rondes réactives 10 cm noires numérotées (zones 7 to 9, four "10" in the red centre) | black |
+| `cr-react-076-250-fluo` | 250 cibles rondes réactives 76 mm papier anti-déchirure (effect sheet shows a tight group) | fluo |
 
 Round reactive targets share `Infographic.targets` in `kit.js`:
 `coinAndFacts` (the 1 € coin and the pack facts on the dimensions sheet) and
