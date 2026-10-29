@@ -33,6 +33,8 @@ Everything lives in `scripts/infographics/`:
 | `tgt-splat-pnk-076-200` | 200 cibles rondes 76 mm rose fluorescent réglage visée (**not reactive**: the effect sheet shows a sight correction with plain holes) | pink |
 | `cr-ov-splat-076-200` | 200 cibles rondes réactives 76 mm gerbe zonée 3 couleurs (splatter green / orange / yellow by zone, one close-up per zone) | tricolour |
 | `tgt-spltr-org-100x10` | 100 cibles rondes réactives 10 cm orange centre noir (10 cm drawn at 6 px/mm; yellow splatter on orange) | orange |
+| `cr-splat-076-100-22lr` | 100 cibles rondes réactives 76 mm jaune fluorescent (same design as the 200 pack, measured on its own photo) | fluo |
+| `cr-rn-splat-100mm-100` | 100 cibles rondes réactives 10 cm rouge et noir 5 zones (numbered 6 to 10, four repair patches; hits on the diagonals, off the numbers) | redblack |
 
 Round reactive targets share `Infographic.targets` in `kit.js`:
 `coinAndFacts` (the 1 € coin and the pack facts on the dimensions sheet) and

@@ -83,4 +83,16 @@ class ProductPhotoColumnTest extends TestCase
         $this->assertSame(2, $response->viewData('fewImagesCount'));
         $response->assertSee('Less than 5 images');
     }
+
+    public function test_the_header_averages_the_photos_of_active_products(): void
+    {
+        $this->productWithPhotos(0);
+        $this->productWithPhotos(3);
+        $this->productWithPhotos(1, main: false);
+        // Left out: a disabled product does not pull the average down.
+        $this->productWithPhotos(0, main: false)->update(['is_active' => false]);
+
+        // (1 + 4 + 1) / 3 active products.
+        $this->assertStringContainsString('2.000 photos per product</span>', $this->list());
+    }
 }

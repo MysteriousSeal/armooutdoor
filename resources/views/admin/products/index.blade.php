@@ -23,6 +23,9 @@
                 <span class="admin-list-chip">{{ number_format($noSkuCount) }} without SKU</span>
                 <span class="admin-list-chip">{{ number_format($noGtinCount) }} without GTIN</span>
                 <span class="admin-list-chip">{{ number_format($noWeightCount) }} without weight</span>
+                @if ($averagePhotos !== null)
+                    <span class="admin-list-chip" title="Main photo plus gallery, averaged over the active products">{{ number_format($averagePhotos, 3) }} photos per product</span>
+                @endif
                 @if ($search !== '' || $categorySlug !== '' || $supplierId !== null || $ai !== '' || $seo !== '')
                     <span class="admin-list-chip is-filtered">Filtered</span>
                 @endif

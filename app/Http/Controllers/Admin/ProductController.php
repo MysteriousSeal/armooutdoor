@@ -95,6 +95,7 @@ class ProductController extends Controller
             'noWeightCount' => Product::query()->where('is_active', true)->where(fn ($query) => $query->whereNull('weight_grams')->orWhere('weight_grams', 0))->count(),
             'oneImageCount' => Product::query()->where('is_active', true)->doesntHave('images')->count(),
             'fewImagesCount' => Product::query()->tap(fn ($query) => $this->fewImages($query))->count(),
+            'averagePhotos' => $this->averageActivePhotos(),
             'noSeoCount' => count($this->seoFailingIds()),
             'priceMismatchCount' => count($this->priceMismatchIds()),
             'categories' => $this->categoryOptions(),
@@ -823,6 +824,25 @@ class ProductController extends Controller
             'price-mismatch' => $query->whereIn('id', $this->priceMismatchIds()),
             default => $query->where('is_active', true),
         };
+    }
+
+    /**
+     * Photos per active product, main photo plus gallery as the Photos column
+     * counts them, or null while there is no active product to divide by.
+     */
+    private function averageActivePhotos(): ?float
+    {
+        $active = Product::query()->where('is_active', true);
+        $products = (clone $active)->count();
+
+        if ($products === 0) {
+            return null;
+        }
+
+        $main = (clone $active)->whereNotNull('image')->where('image', '!=', '')->count();
+        $gallery = ProductImage::query()->whereIn('product_id', (clone $active)->select('id'))->count();
+
+        return ($main + $gallery) / $products;
     }
 
     /**
