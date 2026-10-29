@@ -52,6 +52,7 @@ Everything lives in `scripts/infographics/`:
 | `tgt-spltr-5pt-10x15` | 10 planches de tir 15,24 cm 5 cibles jaune fluorescent (square tooling; effect shows one hit per target, the session the page describes) | five |
 | `tgt-splat-200mm-20-fluo` | 20 planches de tir 20 cm zones numérotées et pastilles (square tooling at `K: 3` so the 20 cm board clears the facts column) | board |
 | `25pk-sticky-fluoro-sightgrid-6in` | 25 planches de tir 15,24 cm 5 losanges grille graduée (square tooling; grid numbered 3, 2, 1 on the four edges; effect shows one hit per diamond) | diamonds |
+| `tgt-fluo-sq-20-6in-grid-mp` | 20 planches de tir 15,24 cm 5 cibles vert fluorescent (square tooling; ring bulls, dashed grid 0 to 2,5; effect uses `splatColour: '#4cf23a'` and `closeUpTitle: 'Gerbe vert fluorescent'`) | green |
 | `grip-sleeve-snd` | Grip caoutchouc antidérapant sable (anatomy + dimensions only; sizes from the product page, 7,2 x 5,4 cm, drawn as arrows along the grip's edges with no coin, because the photo's proportions don't match them: the supplier sheet in `sources/` says 7,5 x 6 x 2,5 cm) | sand |
 | `grip-sleeve-blk` | Grip caoutchouc antidérapant pour poignée de pistolet, black (same mould and framing as `grip-sleeve-snd`, same size treatment; its footer carries the page's holster warning) | black |
 
