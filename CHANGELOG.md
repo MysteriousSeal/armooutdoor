@@ -2,6 +2,19 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-10-29 · v1.74.0 · build 1LFGTS
+
+### Admin
+
+- **The product list header shows the photos per active product and the progress toward five each,** for example « 1.434 photos per product · 28.240% of the 5-photo goal », both to three decimals. The photos are counted as in the Photos column, main photo plus gallery, and a product counts for five at most toward the goal, so one with many photos does not make up for one with a single photo. Disabled products are left out.
+
+### Under the hood
+
+- **Product infographics are rendered from a template, one spec per product,** in `scripts/infographics`: square 1500x1500 anatomy and dimensions sheets for the product gallery, turned into PNGs with headless Chrome by `render.sh`, and explained in `docs/admin/product-infographics.md`. A spec can draw the product to scale next to a 1 euro coin, enlarge a photo that only fills its middle, and add an optional effect sheet showing a target before and after a series.
+- **Specs so far:** the MOLLE belt set, the quick-release belt, the webbing belt with eyelets, and seven targets (the 76 mm fluo target in 200 and 100 packs, the 10-zone lettered one, the pink sighting-in target, the 3-colour zoned one, and the 10 cm orange and red-and-black reactive ones). The pink target's third sheet shows a sight correction, since it is not reactive, and the zoned target's splatter takes the colour of the zone it lands in.
+
+**No migration.**
+
 ## 2026-10-28 · v1.73.0 · build VU91RL
 
 ### Admin
