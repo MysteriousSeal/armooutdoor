@@ -32,6 +32,7 @@ Everything lives in `scripts/infographics/`:
 | `rlt-splat-076-200-fluo` | 200 cibles rondes réactives 76 mm 10 zones lettrées (same approach; the series is grouped in sector H) | fluo |
 | `tgt-splat-pnk-076-200` | 200 cibles rondes 76 mm rose fluorescent réglage visée (**not reactive**: the effect sheet shows a sight correction with plain holes) | pink |
 | `cr-ov-splat-076-200` | 200 cibles rondes réactives 76 mm gerbe zonée 3 couleurs (splatter green / orange / yellow by zone, one close-up per zone) | tricolour |
+| `tgt-spltr-org-100x10` | 100 cibles rondes réactives 10 cm orange centre noir (10 cm drawn at 6 px/mm; yellow splatter on orange) | orange |
 
 Round reactive targets share `Infographic.targets` in `kit.js`:
 `coinAndFacts` (the 1 € coin and the pack facts on the dimensions sheet) and
@@ -49,7 +50,13 @@ block instead of the splatter close-up).
 A target whose splatter colour depends on the zone hit sets
 `zones: [[maxR, colour], ...]` (radii in photo px, innermost first): each hit
 takes the colour of its zone. `closeUps: [{ label, colour, bg }]` replaces
-the single close-up with a row of one per zone.
+the single close-up with a row of one per zone. `splatColour` and
+`closeUpBg` change the splatter colour and the close-up background for a
+target that is not black (the orange one has a yellow splatter on orange).
+
+The dimensions sheet's scale `K` (px per mm) is 7.9 for 76 mm targets; a
+bigger target needs a smaller one (6 for 10 cm) to stay clear of the facts
+column at x 900.
 
 When there is no supplier sheet, take the facts from the product's own
 `characteristics` and description (Admin API, see

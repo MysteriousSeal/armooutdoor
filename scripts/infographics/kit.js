@@ -167,9 +167,10 @@
       centre: [px, py], radius, seed, hits, afterLabel, caption,
       beforeLabel = 'AVANT', beforeHits = [], holes = 'splatter', correction = null,
       closeUp = true, closeUpTitle = 'Gerbe jaune fluorescent', zones = null, closeUps = null,
+      splatColour = '#e4f21c', closeUpBg = '#111210',
     }) {
       const rnd = rng(seed);
-      const Y = '#e4f21c';
+      const Y = splatColour;
       const defs = el('defs', {});
 
       // The photo's target disc clipped from its background.
@@ -284,7 +285,7 @@
       const mc = el('clipPath', { id: 'zoom' }, defs);
       el('circle', { cx: mx, cy: my, r: mr }, mc);
       const g = el('g', { 'clip-path': 'url(#zoom)' });
-      el('rect', { x: mx - mr, y: my - mr, width: 2 * mr, height: 2 * mr, fill: '#111210' }, g);
+      el('rect', { x: mx - mr, y: my - mr, width: 2 * mr, height: 2 * mr, fill: closeUpBg }, g);
       splat(mx, my, 70, g);
       el('circle', { cx: mx, cy: my, r: mr, fill: 'none', stroke: 'var(--coyote)', 'stroke-width': 5 });
       text(mx + mr + 60, my - 30, closeUpTitle, { 'font-size': 52, 'font-weight': 700, fill: 'var(--ink)' });
