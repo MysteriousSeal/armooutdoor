@@ -68,6 +68,20 @@ window.PRODUCT = {
 
   // Before / after a series grouped in sector H, the splatter drawn over the
   // real photo. An illustration of the documented "gerbe jaune fluorescente".
+  // On a 55 x 55 cm plywood board, the size of a C50 card (mounted.html),
+  // at true size: five 76 mm discs, the corner ones 10 cm from the edges.
+  mounted: [
+    { id: 'c50', centre: [500, 487], half: 390, cm: 7.6, round: true, panel: [55, 55], inset: [10, 10] },
+  ],
+
+  // The series both the effect sheet and the text-free impact.html draw:
+  // a group in sector H (between 12 o'clock and the upper-right line), one
+  // hit in the centre and a flyer in B, all clear of the letters.
+  impact: {
+    centre: [500, 487], radius: 390, seed: 46,
+    hits: [[30, -110], [80, -120], [50, -165], [115, -160], [5, -200], [6, -6], [-164, -60]],
+  },
+
   effect: {
     title: 'L’effet à l’impact',
     footer: {
@@ -76,10 +90,7 @@ window.PRODUCT = {
     },
     draw(kit, V) {
       Infographic.targets.beforeAfter(kit, V.photo, {
-        centre: [500, 487], radius: 390, seed: 46,
-        // A group in sector H (between 12 o'clock and the upper-right line),
-        // one hit in the centre and a flyer in B, all clear of the letters.
-        hits: [[30, -110], [80, -120], [50, -165], [115, -160], [5, -200], [6, -6], [-164, -60]],
+        ...window.PRODUCT.impact,
         afterLabel: 'APRÈS UNE SÉRIE',
         caption: ['Le contour de chaque trou vire au jaune vif :', 'on lit aussitôt le secteur touché.'],
       });

@@ -72,6 +72,19 @@ window.PRODUCT = {
   // What the axes are for: a group off to the low left, the height and
   // windage it calls for, and the group centred after the correction. Plain
   // holes, since the target does not react.
+  // On a 55 x 55 cm plywood board, the size of a C50 card (mounted.html),
+  // at true size: five 76 mm discs, the corner ones 10 cm from the edges.
+  mounted: [
+    { id: 'c50', centre: [500, 500], half: 438, cm: 7.6, round: true, panel: [55, 55], inset: [10, 10] },
+  ],
+
+  // The corrected group both the effect sheet's after panel and the
+  // text-free impact.html draw. Plain holes: this target is not reactive.
+  impact: {
+    centre: [500, 500], radius: 438, seed: 63, holes: 'plain',
+    hits: [[-26, -20], [24, -16], [-14, 30], [30, 26], [0, 2]],
+  },
+
   effect: {
     title: 'Le réglage de visée',
     footer: {
@@ -80,11 +93,10 @@ window.PRODUCT = {
     },
     draw(kit, V) {
       Infographic.targets.beforeAfter(kit, V.photo, {
-        centre: [500, 500], radius: 438, seed: 63, holes: 'plain',
+        ...window.PRODUCT.impact,
         beforeLabel: 'AVANT CORRECTION', afterLabel: 'APRÈS CORRECTION',
         beforeHits: [[-172, 130], [-130, 138], [-166, 176], [-124, 182], [-150, 157]],
         correction: [-148, 156],
-        hits: [[-26, -20], [24, -16], [-14, 30], [30, 26], [0, 2]],
         closeUp: false,
         closeUpTitle: 'Lire la correction',
         caption: [

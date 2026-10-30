@@ -17,7 +17,8 @@
   // through Infographic.targets.splat, so the splatter has the same shapes,
   // only larger. Opened as impact.html?p=<product>&v=<variant>; the spec's
   // `impact` block gives { centre, radius, seed, hits } exactly as passed
-  // to beforeAfter (hits in its 560 px panel).
+  // to beforeAfter (hits in its 560 px panel), plus zones (a colour per
+  // zone, radii in photo px) or holes: 'plain' for a non-reactive target.
   const params = new URLSearchParams(location.search);
   const NS = 'http://www.w3.org/2000/svg';
   const svg = document.getElementById('s');
@@ -37,7 +38,7 @@
   };
   document.head.appendChild(spec);
 
-  function draw(photo, { centre: [px, py], radius, seed, hits, colour = '#e4f21c' }) {
+  function draw(photo, { centre: [px, py], radius, seed, hits, colour = '#e4f21c', zones = null, holes = 'splatter' }) {
     const D = 1200, cx = 750, cy = 750, s = D / (2 * radius), k = D / 560;
     const rnd = Infographic.rng(seed);
     const defs = el('defs', {});
@@ -45,9 +46,18 @@
     el('circle', { cx, cy, r: D / 2 }, cp);
     el('image', { href: photo, x: cx - px * s, y: cy - py * s, width: 1000 * s, height: 1000 * s, 'clip-path': 'url(#disc)' });
     const g = el('g', { 'clip-path': 'url(#disc)' });
+    // Splatter colour for a hit at (dx, dy) panel px, as in beforeAfter.
+    const zoneColour = (dx, dy) => {
+      if (!zones) return colour;
+      const r = Math.hypot(dx, dy) * (2 * radius) / 560;
+      const z = zones.find(([maxR]) => r <= maxR);
+      return z ? z[1] : zones[zones.length - 1][1];
+    };
     for (const [dx, dy] of hits) {
-      const r = (24 + rnd() * 7) * k;
-      Infographic.targets.splat(el, rnd, cx + dx * k, cy + dy * k, r, g, colour);
+      const x = cx + dx * k, y = cy + dy * k;
+      // A bare hole: dark centre, a pale torn rim (beforeAfter's, scaled).
+      if (holes === 'plain') el('circle', { cx: x, cy: y, r: 11 * k, fill: '#141414', stroke: 'rgba(255,255,255,.75)', 'stroke-width': 2.5 * k }, g);
+      else Infographic.targets.splat(el, rnd, x, y, (24 + rnd() * 7) * k, g, zoneColour(dx, dy));
     }
   }
 </script>

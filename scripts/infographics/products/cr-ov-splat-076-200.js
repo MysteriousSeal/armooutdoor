@@ -5,6 +5,8 @@
 // orange middle zone, yellow in the bull). Geometry measured on the flat
 // gallery photo: centre 500,488; green edge r381 to r392; orange circle r265;
 // red bull r129 ringed yellow to r136; cross green outside, orange inside.
+const COLOURS = { green: '#3fe060', orange: '#ff8f1f', yellow: '#e9f51c' };
+
 window.PRODUCT = {
   eyebrow: '200 cibles réactives à gerbe zonée',
 
@@ -64,6 +66,21 @@ window.PRODUCT = {
 
   // Before / after a series spread over the three zones, each splatter in
   // its zone's documented colour, then one close-up per zone.
+  // On a 55 x 55 cm plywood board, the size of a C50 card (mounted.html),
+  // at true size: five 76 mm discs, the corner ones 10 cm from the edges.
+  mounted: [
+    { id: 'c50', centre: [500, 488], half: 392, cm: 7.6, round: true, panel: [55, 55], inset: [10, 10] },
+  ],
+
+  // The series both the effect sheet and the text-free impact.html draw:
+  // two in the bull, three in the middle zone, two in the outer ring, each
+  // splatter in its zone's colour.
+  impact: {
+    centre: [500, 488], radius: 392, seed: 68,
+    zones: [[136, COLOURS.yellow], [265, COLOURS.orange], [392, COLOURS.green]],
+    hits: [[-15, -25], [25, 20], [-120, 60], [90, -110], [140, 40], [-170, -170], [60, 235]],
+  },
+
   effect: {
     title: 'L’effet à l’impact',
     footer: {
@@ -71,12 +88,9 @@ window.PRODUCT = {
       html: 'Effet reproduit <strong>à titre d’illustration</strong> : la forme de chaque gerbe varie d’un tir à l’autre.',
     },
     draw(kit, V) {
-      const green = '#3fe060', orange = '#ff8f1f', yellow = '#e9f51c';
+      const { green, orange, yellow } = COLOURS;
       Infographic.targets.beforeAfter(kit, V.photo, {
-        centre: [500, 488], radius: 392, seed: 68,
-        zones: [[136, yellow], [265, orange], [392, green]],
-        // Two in the bull, three in the middle zone, two in the outer ring.
-        hits: [[-15, -25], [25, 20], [-120, 60], [90, -110], [140, 40], [-170, -170], [60, 235]],
+        ...window.PRODUCT.impact,
         afterLabel: 'APRÈS UNE SÉRIE',
         closeUps: [
           { label: 'Mouche', colour: yellow, bg: '#ea0104' },
