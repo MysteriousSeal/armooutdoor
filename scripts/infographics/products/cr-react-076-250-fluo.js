@@ -61,6 +61,18 @@ window.PRODUCT = {
 
   // Before / after a tight series, the point of this paper: close hits that
   // stay readable. Yellow splatter as documented.
+  // On a 55 x 55 cm plywood board, the size of a C50 card (mounted.html),
+  // at true size: five 76 mm discs, the corner ones 10 cm from the edges.
+  mounted: [
+    { id: 'c50', centre: [500, 490], half: 399, cm: 7.6, round: true, panel: [55, 55], inset: [10, 10] },
+  ],
+
+  // The tight group both the effect sheet and the text-free impact.html draw.
+  impact: {
+    centre: [500, 490], radius: 399, seed: 71,
+    hits: [[-42, -40], [24, -52], [52, 6], [-6, 40], [-58, 18], [36, 58]],
+  },
+
   effect: {
     title: 'L’effet à l’impact',
     footer: {
@@ -69,9 +81,8 @@ window.PRODUCT = {
     },
     draw(kit, V) {
       Infographic.targets.beforeAfter(kit, V.photo, {
-        centre: [500, 490], radius: 399, seed: 71,
+        ...window.PRODUCT.impact,
         afterLabel: 'APRÈS DES TIRS RAPPROCHÉS',
-        hits: [[-42, -40], [24, -52], [52, 6], [-6, 40], [-58, 18], [36, 58]],
         caption: ['Une gerbe jaune autour de chaque trou,', 'sans que le papier se déchire entre les tirs.'],
       });
     },

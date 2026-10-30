@@ -70,6 +70,20 @@ window.PRODUCT = {
 
   // Before / after a series spread over the zones, yellow-green splatter as
   // documented, kept clear of the printed numbers on the axes.
+  // On a 55 x 55 cm plywood board, the size of a C50 card (mounted.html),
+  // at true size: five 10 cm (the disc only, without the corner patches) discs, the corner ones 10 cm from the edges.
+  mounted: [
+    { id: 'c50', centre: [500, 500], half: 352, cm: 10, round: true, panel: [55, 55], inset: [10, 10] },
+  ],
+
+  // The series both the effect sheet and the text-free impact.html draw:
+  // three 9, one 8, one 7, all on the diagonals, clear of the numbers; the
+  // page's yellow-green splatter.
+  impact: {
+    centre: [500, 500], radius: 352, seed: 93, colour: '#c8f51e',
+    hits: [[-56, -58], [58, -54], [52, 60], [100, -100], [-138, 138]],
+  },
+
   effect: {
     title: 'L’effet à l’impact',
     footer: {
@@ -78,10 +92,8 @@ window.PRODUCT = {
     },
     draw(kit, V) {
       Infographic.targets.beforeAfter(kit, V.photo, {
-        centre: [500, 500], radius: 352, seed: 93,
-        splatColour: '#c8f51e',
-        // Three 9, one 8, one 7, all on the diagonals, clear of the numbers.
-        hits: [[-56, -58], [58, -54], [52, 60], [100, -100], [-138, 138]],
+        ...window.PRODUCT.impact,
+        splatColour: window.PRODUCT.impact.colour,
         afterLabel: 'APRÈS UNE SÉRIE',
         closeUpTitle: 'Gerbe jaune-vert fluorescent',
         caption: ['Chaque impact se repère depuis le pas de tir,', 'et le chiffre de la zone donne le score.'],
