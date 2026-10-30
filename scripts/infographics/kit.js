@@ -195,6 +195,33 @@
     // A non-reactive target sets holes: 'plain' (bare holes, no splatter),
     // can add beforeHits and a correction arrow pair from the before group
     // back to the centre, and swaps the close-up for a text block (closeUp: false).
+    // One impact: a ragged fluo halo, a few flecks, the hole in the middle.
+    // rnd is the caller's seeded generator, so a sheet that replays the same
+    // hits in the same order gets the same splatter shapes.
+    splat(el, rnd, x, y, r, parent, colour = '#e4f21c') {
+      // Jittered outline, smoothed through midpoints so the edge reads torn, not starry.
+      const pts = [];
+      for (let i = 0, n = 30; i < n; i++) {
+        const a = (i / n) * 2 * Math.PI;
+        const rr = r * (0.78 + rnd() * 0.32) * (rnd() < 0.12 ? 1.3 : 1);
+        pts.push([x + Math.cos(a) * rr, y + Math.sin(a) * rr]);
+      }
+      const mid = (p, q) => [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
+      const m0 = mid(pts[pts.length - 1], pts[0]);
+      let d = `M${m0[0].toFixed(1)} ${m0[1].toFixed(1)}`;
+      pts.forEach((p, i) => {
+        const m = mid(p, pts[(i + 1) % pts.length]);
+        d += ` Q${p[0].toFixed(1)} ${p[1].toFixed(1)} ${m[0].toFixed(1)} ${m[1].toFixed(1)}`;
+      });
+      el('path', { d: d + 'Z', fill: colour }, parent);
+      for (let i = 0, m = 5 + Math.floor(rnd() * 5); i < m; i++) {
+        const a = rnd() * 2 * Math.PI, dd = r * (1.2 + rnd() * 0.8);
+        el('circle', { cx: x + Math.cos(a) * dd, cy: y + Math.sin(a) * dd, r: r * (0.05 + rnd() * 0.09), fill: colour }, parent);
+      }
+      el('circle', { cx: x, cy: y, r: r * 0.27, fill: '#3a3b35' }, parent);
+      el('circle', { cx: x, cy: y, r: r * 0.19, fill: '#050505' }, parent);
+    },
+
     beforeAfter({ el, text, section }, photo, {
       centre: [px, py], radius, seed, hits, afterLabel, caption,
       beforeLabel = 'AVANT', beforeHits = [], holes = 'splatter', correction = null,
@@ -217,30 +244,7 @@
         el('image', { href: photo, x: cx - px * s, y: cy - py * s, width: 1000 * s, height: 1000 * s, 'clip-path': `url(#${id})` });
       }
 
-      // One impact: a ragged fluo halo, a few flecks, the hole in the middle.
-      function splat(x, y, r, parent, colour = Y) {
-        // Jittered outline, smoothed through midpoints so the edge reads torn, not starry.
-        const pts = [];
-        for (let i = 0, n = 30; i < n; i++) {
-          const a = (i / n) * 2 * Math.PI;
-          const rr = r * (0.78 + rnd() * 0.32) * (rnd() < 0.12 ? 1.3 : 1);
-          pts.push([x + Math.cos(a) * rr, y + Math.sin(a) * rr]);
-        }
-        const mid = (p, q) => [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
-        const m0 = mid(pts[pts.length - 1], pts[0]);
-        let d = `M${m0[0].toFixed(1)} ${m0[1].toFixed(1)}`;
-        pts.forEach((p, i) => {
-          const m = mid(p, pts[(i + 1) % pts.length]);
-          d += ` Q${p[0].toFixed(1)} ${p[1].toFixed(1)} ${m[0].toFixed(1)} ${m[1].toFixed(1)}`;
-        });
-        el('path', { d: d + 'Z', fill: colour }, parent);
-        for (let i = 0, m = 5 + Math.floor(rnd() * 5); i < m; i++) {
-          const a = rnd() * 2 * Math.PI, dd = r * (1.2 + rnd() * 0.8);
-          el('circle', { cx: x + Math.cos(a) * dd, cy: y + Math.sin(a) * dd, r: r * (0.05 + rnd() * 0.09), fill: colour }, parent);
-        }
-        el('circle', { cx: x, cy: y, r: r * 0.27, fill: '#3a3b35' }, parent);
-        el('circle', { cx: x, cy: y, r: r * 0.19, fill: '#050505' }, parent);
-      }
+      const splat = (x, y, r, parent, colour = Y) => targets.splat(el, rnd, x, y, r, parent, colour);
 
       // A bare hole in paper: dark centre, a pale torn rim so it shows on black too.
       function hole(x, y, parent) {

@@ -17,7 +17,8 @@ read_spec() {
     const P = window.PRODUCT;
     console.log(process.argv[2] === "variants"
       ? Object.keys(P.variants).join(" ")
-      : ["anatomy", "dimensions", "effect", "mounted", "stack"].filter(s => P[s]).join(" "));' "$spec" "$1"
+      : ["anatomy", "dimensions", "effect", "mounted", "stack", "impact"].filter(s => P[s])
+          .flatMap(s => s === "mounted" && Array.isArray(P.mounted) ? P.mounted.map(m => "mounted:" + m.id) : [s]).join(" "));' "$spec" "$1"
 }
 
 if [[ $# -eq 0 ]]; then
@@ -30,10 +31,12 @@ read -r -a sheets <<< "$(read_spec sheets)"
 mkdir -p "$DIR/out"
 for v in "${variants[@]}"; do
   for sheet in "${sheets[@]}"; do
-    out="$DIR/out/$product-$sheet-$v.png"
+    # "mounted:<id>" is one board of a spec that lists several.
+    page="${sheet%%:*}"; board="${sheet#*:}"; [[ "$board" == "$sheet" ]] && board=""
+    out="$DIR/out/$product-$page${board:+-$board}-$v.png"
     "$CHROME" --headless=new --disable-gpu --hide-scrollbars --allow-file-access-from-files \
       --virtual-time-budget=8000 --window-size=1500,1500 \
-      --screenshot="$out" "file://$DIR/$sheet.html?p=$product&v=$v" 2>/dev/null
+      --screenshot="$out" "file://$DIR/$page.html?p=$product&v=$v${board:+&b=$board}" 2>/dev/null
     echo "$out"
   done
 done

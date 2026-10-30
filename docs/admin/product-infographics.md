@@ -14,6 +14,7 @@ Everything lives in `scripts/infographics/`:
 | `anatomy.html`, `dimensions.html`, `effect.html` | The sheet templates. Generic, never edited per product. `effect` renders only for specs that define it. |
 | `mounted.html` | The "Grandeur nature" sheet: five of the product's targets stuck at true size on a plain plywood panel 1 m wide and 60 cm high (one in the centre, four towards the corners), standing on pine laths in a steel base, under the house header, with the panel's width and height measured. Renders for specs that define `mounted`, see below. |
 | `stack.html` | A pile of the product's cards on white, **no text**, to show the pack holds several: fanned cards in balanced pairs behind a squared-up pile. Renders for specs that define `stack` (same fields as `mounted`, plus `count`, the number of cards drawn, 7 by default in the specs so far). |
+| `impact.html` | A round target filling the page after a series, **no text**: it replays the effect sheet's after panel (same hits, seed and order through `Infographic.targets.splat`), so the splatter has the same shapes, only larger. Renders for specs that define `impact: { centre, radius, seed, hits }`; the effect sheet spreads the same block (`...window.PRODUCT.impact`) so the two never drift apart. |
 | `kit.js` | Shared runtime: loads the product spec, draws the labels, leader lines, reticle markers and dimension lines. |
 | `shared.css` | House style: colours, fonts, header, labels, the note box at the bottom. |
 | `products/<product>.js` | One spec per product family: text, colourways, marker positions, and the dimensions drawing. |
@@ -58,6 +59,7 @@ Everything lives in `scripts/infographics/`:
 | `bon-pol-org-dubl-ux` | Bonnet polaire orange unisexe (same cut, supplier sheets and layout as `bon-pol-ngrn-dubl-ux`; its page says less, so no "under a hood or helmet" and no "thick" fleece; the fleece texture dots are tinted orange in its `feColorMatrix`) | orange |
 | `20pk-8bullseye-target-9x7in` | 20 cibles carton 8 blasons 22,86 x 17,78 cm (portrait card: the rectangle options below; **not reactive**, so the third sheet, "Une série par blason", shows eight plain-hole groups tightening over the session; Grandeur nature with `count: 3`) | card |
 | `20pk-score-target-ylbk-9x7in` | 20 cibles carton score jaune et noir 22,86 x 17,78 cm (same format and options as the 8-bullseye card; a plain oval, not a human shape; **not reactive**: "Compter les points" scores 9 + 9 + 8 + 8 + 7 = 41, each hit checked against the stadium-shaped zone lines and kept out of the inner X oval, whose value the page doesn't give) | card |
+| `5plate-reset-spinner-target` | Cible métal 5 plaques basculantes (anatomy + dimensions; supplier sheet in `sources/`. The anatomy uses the gallery photo, with no marker on its ghosted motion plates; the dimensions sheet uses a clean straight-on photo the user supplied, as a second photo, `variants.steel.front`, with 36 cm top plate to feet and 26,5 cm across the legs as the supplier drew them, and no coin; its proportions match those sizes) | steel |
 | `grip-sleeve-snd` | Grip caoutchouc antidérapant sable (anatomy + dimensions only; sizes from the product page, 7,2 x 5,4 cm, drawn as arrows along the grip's edges with no coin, because the photo's proportions don't match them: the supplier sheet in `sources/` says 7,5 x 6 x 2,5 cm) | sand |
 | `grip-sleeve-blk` | Grip caoutchouc antidérapant pour poignée de pistolet, black (same mould and framing as `grip-sleeve-snd`, same size treatment; its footer carries the page's holster warning) | black |
 
@@ -256,6 +258,13 @@ mount only their 18 cm disc (`centre` and `half` of the disc,
 - **Layout:** one target in the centre, four 15 cm in from the sides and
   7 cm from top and bottom. The laths and their screws sit 40 cm from each
   side, in the gap under the centre target.
+- **Other boards:** `panel: [PW, PH]` (cm) and `inset: [x, y]` (the corner
+  targets' gap to the sides and to top and bottom) change the board; the
+  scale then grows to fit, and the laths and screws follow (40 % and 60 %
+  across). `mounted` can also be a list of boards, each with an `id`:
+  `render.sh` writes one `<product>-mounted-<id>-<variant>.png` per board.
+  The 76 mm round targets have a 55 x 55 cm board, the size of a C50 card
+  (`id: 'c50'`, insets 10 cm).
 - **Three instead of five:** `count: 3` puts three in a row, centred in
   height with even gaps, for a card too big for five (the 22,86 cm
   cardboard target, at the user's request).

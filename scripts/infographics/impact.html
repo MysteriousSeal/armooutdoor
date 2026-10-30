@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Cible après une série</title>
+<style>
+  html, body { margin: 0; background: #fff; }
+  svg { display: block; }
+</style>
+</head>
+<body>
+<svg id="s" width="1500" height="1500" viewBox="0 0 1500 1500"></svg>
+<script src="kit.js"></script>
+<script>
+  // The product's round target filling the page, after a series, no text.
+  // It replays the effect sheet's after panel: the same hits, seed and order
+  // through Infographic.targets.splat, so the splatter has the same shapes,
+  // only larger. Opened as impact.html?p=<product>&v=<variant>; the spec's
+  // `impact` block gives { centre, radius, seed, hits } exactly as passed
+  // to beforeAfter (hits in its 560 px panel).
+  const params = new URLSearchParams(location.search);
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.getElementById('s');
+  const el = (tag, attrs, parent = svg) => {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    parent.appendChild(n);
+    return n;
+  };
+
+  const spec = document.createElement('script');
+  spec.src = 'products/' + params.get('p') + '.js';
+  spec.onload = () => {
+    const P = window.PRODUCT;
+    const V = P.variants[params.get('v') || Object.keys(P.variants)[0]];
+    draw(V.photo, P.impact);
+  };
+  document.head.appendChild(spec);
+
+  function draw(photo, { centre: [px, py], radius, seed, hits, colour = '#e4f21c' }) {
+    const D = 1200, cx = 750, cy = 750, s = D / (2 * radius), k = D / 560;
+    const rnd = Infographic.rng(seed);
+    const defs = el('defs', {});
+    const cp = el('clipPath', { id: 'disc' }, defs);
+    el('circle', { cx, cy, r: D / 2 }, cp);
+    el('image', { href: photo, x: cx - px * s, y: cy - py * s, width: 1000 * s, height: 1000 * s, 'clip-path': 'url(#disc)' });
+    const g = el('g', { 'clip-path': 'url(#disc)' });
+    for (const [dx, dy] of hits) {
+      const r = (24 + rnd() * 7) * k;
+      Infographic.targets.splat(el, rnd, cx + dx * k, cy + dy * k, r, g, colour);
+    }
+  }
+</script>
+</body>
+</html>

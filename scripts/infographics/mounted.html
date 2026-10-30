@@ -40,17 +40,24 @@
     const P = window.PRODUCT;
     const V = P.variants[params.get('v') || Object.keys(P.variants)[0]];
     document.getElementById('eyebrow').textContent = P.eyebrow;
-    document.getElementById('title').textContent = P.mounted.title || 'Grandeur nature';
-    draw(V.photo, P.mounted);
+    // `mounted` is one board, or a list of boards each with an `id`, picked
+    // by ?b=<id> (render.sh writes them to <product>-mounted-<id>-<variant>.png).
+    const M = Array.isArray(P.mounted) ? P.mounted.find(m => m.id === params.get('b')) : P.mounted;
+    document.getElementById('title').textContent = M.title || 'Grandeur nature';
+    draw(V.photo, M);
   };
   document.head.appendChild(spec);
 
   // A rectangular card adds cmH (real height) and halfH (half its height in
-  // photo px); width and height then scale separately.
-  function draw(photo, { centre: [px, py], half, cm, round = false, cmH = cm, halfH = half, count = 5 }) {
+  // photo px); width and height then scale separately. panel: [PW, PH] in cm
+  // (1 m x 60 cm by default) and inset: [x, y], the corner targets' gap to
+  // the panel's sides and to its top and bottom (15 and 7 cm by default).
+  function draw(photo, { centre: [px, py], half, cm, round = false, cmH = cm, halfH = half, count = 5, panel = [100, 60], inset = [15, 7] }) {
     // A rectangular panel in cm (PW x PH), standing on two wooden laths set
-    // in a steel base 18 cm below it.
-    const PW = 100, PH = 60, K = 11, W = PW * K, H = PH * K, ox = (1500 - W) / 2, oy = 440; // centred in the space left under the header
+    // in a steel base 18 cm below it. K (px per cm) is as large as fits:
+    // 1100 px wide at most, the ground no lower than y 1360.
+    const [PW, PH] = panel, oy = 440; // centred in the space left under the header
+    const K = Math.min(1100 / PW, (1360 - oy) / (PH + 18)), W = PW * K, H = PH * K, ox = (1500 - W) / 2;
     const outline = [[0, 0], [PW, 0], [PW, PH], [0, PH]];
     const d = 'M' + outline.map(([x, y]) => `${ox + x * K} ${oy + y * K}`).join(' L') + ' Z';
 
@@ -79,8 +86,8 @@
     el('path', { d, fill: 'none', stroke: '#ead2ac', 'stroke-width': 2.5, 'stroke-linejoin': 'round' });
 
     // Screws where the panel is fixed to each lath.
-    for (const lx of [40, 60]) {
-      for (const sy of [44, 54]) {
+    for (const lx of [PW * 0.4, PW * 0.6]) {
+      for (const sy of [PH - 16, PH - 6]) {
         const x = ox + lx * K, y = oy + sy * K;
         el('circle', { cx: x, cy: y, r: 6, fill: '#a7acb1', stroke: '#6b7077', 'stroke-width': 1 });
         el('path', { d: `M${x - 4} ${y} L${x + 4} ${y} M${x} ${y - 4} L${x} ${y + 4}`, stroke: '#5d6268', 'stroke-width': 1.2 });
@@ -111,7 +118,7 @@
     // corner, the corner ones 15 cm from the sides and 7 cm from top and bottom.
     // count: 3 puts three in a row instead, centred in height, with four
     // equal gaps across (for cards too big for five).
-    const side = cm * K, sideH = cmH * K, sx = side / (2 * half), sy = sideH / (2 * halfH), mx = 15 + cm / 2, my = 7 + cmH / 2;
+    const side = cm * K, sideH = cmH * K, sx = side / (2 * half), sy = sideH / (2 * halfH), mx = inset[0] + cm / 2, my = inset[1] + cmH / 2;
     const rx = (PW - 3 * cm) / 4 + cm / 2;
     const spots = count === 3
       ? [[rx, PH / 2], [PW / 2, PH / 2], [PW - rx, PH / 2]]
@@ -179,7 +186,7 @@
       el('rect', { x: ex + 2, y: baseY - top + 3, width: 0.9 * K - 4, height: 2, rx: 1, fill: '#3a3a3a' });
     }
 
-    for (const lx of [40, 60]) {
+    for (const lx of [PW * 0.4, PW * 0.6]) {
       const lw = Math.ceil(2.5 * K), x = ox + lx * K - lw / 2;
       const sw = 4 * K, sx = ox + lx * K - sw / 2, sh = 7 * K, sTop = 0.9 * K;
       const sBottom = baseY - top * 0.45, sY = sBottom - sh;
@@ -187,7 +194,7 @@
       face(sx, sY - sTop, sw, sTop + 3, 'url(#topface)', 3);
       el('rect', { x: x - 2.5, y: sY - sTop * 0.75, width: lw + 5, height: sTop * 0.6, rx: 1.5, fill: '#060606' });
       // The lath, from behind the panel down into the opening.
-      const ly = oy + 30 * K, lh = Math.ceil(sY - sTop * 0.35 - ly);
+      const ly = oy + PH / 2 * K, lh = Math.ceil(sY - sTop * 0.35 - ly);
       el('image', { href: woodTexture(lw, lh, { seed: 3 + lx, vertical: true, tone: 0.9 }), x, y: ly, width: lw, height: lh, preserveAspectRatio: 'none' });
       el('rect', { x, y: ly, width: lw, height: lh, fill: 'none', stroke: '#9c7748', 'stroke-width': 1 });
       // Lath end grain darkening as it enters the socket.

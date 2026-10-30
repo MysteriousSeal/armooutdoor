@@ -59,6 +59,19 @@ window.PRODUCT = {
     },
   },
 
+  // On a 55 x 55 cm plywood board, the size of a C50 card (mounted.html),
+  // at true size: five 76 mm discs, the corner ones 10 cm from the edges.
+  mounted: [
+    { id: 'c50', centre: [500, 491], half: 392, cm: 7.6, round: true, panel: [55, 55], inset: [10, 10] },
+  ],
+
+  // The series both the effect sheet and the text-free impact.html draw:
+  // a tight group around the centre plus two flyers.
+  impact: {
+    centre: [500, 491], radius: 392, seed: 76,
+    hits: [[-52, -38], [28, -66], [74, 14], [-18, 52], [46, 82], [-88, 30], [10, -4], [170, -125], [-190, 140]],
+  },
+
   // Before / after a series, the splatter drawn over the real photo. It is an
   // illustration of the documented "gerbe jaune fluorescent", and says so.
   effect: {
@@ -69,9 +82,7 @@ window.PRODUCT = {
     },
     draw(kit, V) {
       Infographic.targets.beforeAfter(kit, V.photo, {
-        centre: [500, 491], radius: 392, seed: 76,
-        // A tight group around the centre plus two flyers.
-        hits: [[-52, -38], [28, -66], [74, 14], [-18, 52], [46, 82], [-88, 30], [10, -4], [170, -125], [-190, 140]],
+        ...window.PRODUCT.impact,
         afterLabel: 'APRÈS UNE SÉRIE',
         caption: ['Le contour de chaque trou vire au jaune vif sur le fond noir.', 'Visible sans lunette et sans aller jusqu’à la cible.'],
       });
