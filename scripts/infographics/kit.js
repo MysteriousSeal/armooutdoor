@@ -144,7 +144,10 @@
       // Gold-coloured outer ring, silver-coloured centre (the 2 euro is the reverse).
       el('circle', { cx: ccx, cy: ccy, r: cr, fill: '#d6b25e', stroke: '#a8873d', 'stroke-width': 3 });
       el('circle', { cx: ccx, cy: ccy, r: cr * 0.72, fill: '#cfcbc2', stroke: '#8f8a7d', 'stroke-width': 2 });
-      text(ccx, ccy + 14, '1 €', { 'text-anchor': 'middle', 'font-size': 40, 'font-weight': 700, fill: '#55524b' });
+      // The face text follows the coin's size, so it stays inside the
+      // silver centre on small-scale sheets.
+      const fs = Math.min(40, cr * 0.72);
+      text(ccx, ccy + fs * 0.35, '1 €', { 'text-anchor': 'middle', 'font-size': fs, 'font-weight': 700, fill: '#55524b' });
       text(ccx, ccy - cr - 46, 'Pièce de 1 €', { 'text-anchor': 'middle', 'font-size': 34, 'font-weight': 700, fill: 'var(--ink)' });
       text(ccx, ccy - cr - 14, '23,25 mm', { 'text-anchor': 'middle', 'font-size': 28, 'font-weight': 500, fill: 'var(--mute)' });
       facts.forEach(([big, small], i) => {
@@ -157,23 +160,29 @@
     // Dimensions sheet for a square target: its fine printed legends are best
     // shown as they are, so the photo itself is cropped to the square and
     // drawn at true size, with the side measured on top and on the left.
-    // centre/half locate the square in the photo, in photo px.
-    squareToScale({ el, text, dim, ext, arrow, section }, photo, { centre: [px, py], half, mm, K, facts, label = null, heading = 'UNE CIBLE' }) {
-      const side = mm * K, R = side / 2, cx = 560, cy = 800, s = side / (2 * half);
-      label = label || (Number.isInteger(mm) ? `${mm} mm` : `${String(mm / 10).replace('.', ',')} cm`);
+    // centre/half locate the square in the photo, in photo px. A rectangular
+    // card adds its height as mmH (real) and halfH (photo px); width and
+    // height then scale separately, so a slightly squashed photo still
+    // comes out at its true size.
+    squareToScale({ el, text, dim, ext, arrow, section }, photo, { centre: [px, py], half, mm, K, facts, label = null, heading = 'UNE CIBLE', mmH = mm, halfH = half, labelH = null }) {
+      const w = mm * K, h = mmH * K, R = w / 2, RH = h / 2, cx = 560, cy = 800;
+      const sx = w / (2 * half), sy = h / (2 * halfH);
+      const fmt = v => Number.isInteger(v) ? `${v} mm` : `${String(v / 10).replace('.', ',')} cm`;
+      label = label || fmt(mm);
+      labelH = labelH || (mmH === mm ? label : fmt(mmH));
       const defs = el('defs', {});
       const cp = el('clipPath', { id: 'square' }, defs);
-      el('rect', { x: cx - R, y: cy - R, width: side, height: side }, cp);
-      el('image', { href: photo, x: cx - px * s, y: cy - py * s, width: 1000 * s, height: 1000 * s, 'clip-path': 'url(#square)' });
+      el('rect', { x: cx - R, y: cy - RH, width: w, height: h }, cp);
+      el('image', { href: photo, x: cx - px * sx, y: cy - py * sy, width: 1000 * sx, height: 1000 * sy, preserveAspectRatio: 'none', 'clip-path': 'url(#square)' });
 
       section(150, 350, heading);
-      ext(cx - R, cy - R - 8, cx - R, cy - R - 70); ext(cx + R, cy - R - 8, cx + R, cy - R - 70);
-      dim(cx - R, cy - R - 55, cx + R, cy - R - 55, label, 56);
+      ext(cx - R, cy - RH - 8, cx - R, cy - RH - 70); ext(cx + R, cy - RH - 8, cx + R, cy - RH - 70);
+      dim(cx - R, cy - RH - 55, cx + R, cy - RH - 55, label, 56);
       const vx = cx - R - 40;
-      ext(cx - R - 8, cy - R, vx - 10, cy - R); ext(cx - R - 8, cy + R, vx - 10, cy + R);
-      arrow(vx, cy - R, vx, cy + R);
-      text(vx - 16, cy + 14, label, { 'text-anchor': 'end', 'font-size': 40, 'font-weight': 700, fill: 'var(--ink)' });
-      targets.coinAndFacts({ el, text }, { K, cy, R, facts });
+      ext(cx - R - 8, cy - RH, vx - 10, cy - RH); ext(cx - R - 8, cy + RH, vx - 10, cy + RH);
+      arrow(vx, cy - RH, vx, cy + RH);
+      text(vx - 16, cy + 14, labelH, { 'text-anchor': 'end', 'font-size': 40, 'font-weight': 700, fill: 'var(--ink)' });
+      targets.coinAndFacts({ el, text }, { K, cy, R: RH, facts });
     },
 
     // Effect sheet: the photo's target before and after a series, with the
@@ -190,7 +199,7 @@
       centre: [px, py], radius, seed, hits, afterLabel, caption,
       beforeLabel = 'AVANT', beforeHits = [], holes = 'splatter', correction = null,
       closeUp = true, closeUpTitle = 'Gerbe jaune fluorescent', zones = null, closeUps = null,
-      splatColour = '#e4f21c', closeUpBg = '#111210', shape = 'round',
+      splatColour = '#e4f21c', closeUpBg = '#111210', shape = 'round', radiusH = radius,
     }) {
       const rnd = rng(seed);
       const Y = splatColour;
@@ -198,10 +207,12 @@
 
       // The photo's target clipped from its background: a disc, or for a
       // square target (shape: 'square', radius = half the side) a square.
+      // A rectangular card (shape: 'rect') adds radiusH, half its height:
+      // its longer side fills D.
       function panel(id, cx, cy, D) {
-        const s = D / (2 * radius);
+        const s = D / (2 * Math.max(radius, radiusH)), w = 2 * radius * s, h = 2 * radiusH * s;
         const cp = el('clipPath', { id }, defs);
-        if (shape === 'square') el('rect', { x: cx - D / 2, y: cy - D / 2, width: D, height: D }, cp);
+        if (shape === 'square' || shape === 'rect') el('rect', { x: cx - w / 2, y: cy - h / 2, width: w, height: h }, cp);
         else el('circle', { cx, cy, r: D / 2 }, cp);
         el('image', { href: photo, x: cx - px * s, y: cy - py * s, width: 1000 * s, height: 1000 * s, 'clip-path': `url(#${id})` });
       }

@@ -45,7 +45,9 @@
   };
   document.head.appendChild(spec);
 
-  function draw(photo, { centre: [px, py], half, cm, round = false }) {
+  // A rectangular card adds cmH (real height) and halfH (half its height in
+  // photo px); width and height then scale separately.
+  function draw(photo, { centre: [px, py], half, cm, round = false, cmH = cm, halfH = half, count = 5 }) {
     // A rectangular panel in cm (PW x PH), standing on two wooden laths set
     // in a steel base 18 cm below it.
     const PW = 100, PH = 60, K = 11, W = PW * K, H = PH * K, ox = (1500 - W) / 2, oy = 440; // centred in the space left under the header
@@ -107,15 +109,20 @@
 
     // Five targets at true size, as on a die: one in the centre, one in each
     // corner, the corner ones 15 cm from the sides and 7 cm from top and bottom.
-    const side = cm * K, s = side / (2 * half), mx = 15 + cm / 2, my = 7 + cm / 2;
-    const spots = [[PW / 2, PH / 2], [mx, my], [PW - mx, my], [mx, PH - my], [PW - mx, PH - my]];
+    // count: 3 puts three in a row instead, centred in height, with four
+    // equal gaps across (for cards too big for five).
+    const side = cm * K, sideH = cmH * K, sx = side / (2 * half), sy = sideH / (2 * halfH), mx = 15 + cm / 2, my = 7 + cmH / 2;
+    const rx = (PW - 3 * cm) / 4 + cm / 2;
+    const spots = count === 3
+      ? [[rx, PH / 2], [PW / 2, PH / 2], [PW - rx, PH / 2]]
+      : [[PW / 2, PH / 2], [mx, my], [PW - mx, my], [mx, PH - my], [PW - mx, PH - my]];
     for (let i = 0; i < spots.length; i++) {
       const cx = ox + spots[i][0] * K, cy = oy + spots[i][1] * K;
       const cp = el('clipPath', { id: 'sticker' + i }, defs);
       if (round) el('circle', { cx, cy, r: side / 2 }, cp);
-      else el('rect', { x: cx - side / 2, y: cy - side / 2, width: side, height: side, rx: 4 }, cp);
+      else el('rect', { x: cx - side / 2, y: cy - sideH / 2, width: side, height: sideH, rx: 4 }, cp);
       const g = el('g', { filter: 'url(#thin)' });
-      el('image', { href: photo, x: cx - px * s, y: cy - py * s, width: 1000 * s, height: 1000 * s, 'clip-path': `url(#sticker${i})` }, g);
+      el('image', { href: photo, x: cx - px * sx, y: cy - py * sy, width: 1000 * sx, height: 1000 * sy, preserveAspectRatio: 'none', 'clip-path': `url(#sticker${i})` }, g);
     }
   }
 

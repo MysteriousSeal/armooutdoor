@@ -54,6 +54,9 @@ Everything lives in `scripts/infographics/`:
 | `25pk-sticky-fluoro-sightgrid-6in` | 25 planches de tir 15,24 cm 5 losanges grille graduée (square tooling; grid numbered 3, 2, 1 on the four edges; effect shows one hit per diamond) | diamonds |
 | `tgt-fluo-sq-20-6in-grid-mp` | 20 planches de tir 15,24 cm 5 cibles vert fluorescent (square tooling; ring bulls, dashed grid 0 to 2,5; effect uses `splatColour: '#4cf23a'` and `closeUpTitle: 'Gerbe vert fluorescent'`) | green |
 | `bon-pol-ngrn-dubl-ux` | Bonnet polaire vert fluo unisexe (anatomy + dimensions only; the only photo is a three-quarter view, so the dimensions sheet draws a flat silhouette at 25 px/cm with the supplier's 26 x 22 cm, a seeded `feTurbulence` fleece texture and the cuff seam unmeasured; uses in the footer from the supplier sheet) | green |
+| `bon-pol-org-dubl-ux` | Bonnet polaire orange unisexe (same cut, supplier sheets and layout as `bon-pol-ngrn-dubl-ux`; its page says less, so no "under a hood or helmet" and no "thick" fleece; the fleece texture dots are tinted orange in its `feColorMatrix`) | orange |
+| `20pk-8bullseye-target-9x7in` | 20 cibles carton 8 blasons 22,86 x 17,78 cm (portrait card: the rectangle options below; **not reactive**, so the third sheet, "Une série par blason", shows eight plain-hole groups tightening over the session; Grandeur nature with `count: 3`) | card |
+| `20pk-score-target-ylbk-9x7in` | 20 cibles carton score jaune et noir 22,86 x 17,78 cm (same format and options as the 8-bullseye card; a plain oval, not a human shape; **not reactive**: "Compter les points" scores 9 + 9 + 8 + 8 + 7 = 41, each hit checked against the stadium-shaped zone lines and kept out of the inner X oval, whose value the page doesn't give) | card |
 | `grip-sleeve-snd` | Grip caoutchouc antidérapant sable (anatomy + dimensions only; sizes from the product page, 7,2 x 5,4 cm, drawn as arrows along the grip's edges with no coin, because the photo's proportions don't match them: the supplier sheet in `sources/` says 7,5 x 6 x 2,5 cm) | sand |
 | `grip-sleeve-blk` | Grip caoutchouc antidérapant pour poignée de pistolet, black (same mould and framing as `grip-sleeve-snd`, same size treatment; its footer carries the page's holster warning) | black |
 
@@ -64,6 +67,11 @@ at true size (`mm` × `K`), with the side measured on top and on the left,
 then the coin and facts. Their effect sheet passes `shape: 'square'` to
 `beforeAfter`, with `radius` set to half the side. The dimensions `draw`
 receives the variant as a third argument for this.
+
+A rectangular card adds its height to the same helpers: `mmH` and `halfH`
+for `squareToScale`, `shape: 'rect'` with `radiusH` for `beforeAfter`, and
+`cmH` and `halfH` for `mounted`. Width and height then scale separately, so
+a slightly squashed photo still comes out at the true size.
 
 Round reactive targets share `Infographic.targets` in `kit.js`:
 `coinAndFacts` (the 1 € coin and the pack facts on the dimensions sheet) and
@@ -84,6 +92,10 @@ takes the colour of its zone. `closeUps: [{ label, colour, bg }]` replaces
 the single close-up with a row of one per zone. `splatColour` and
 `closeUpBg` change the splatter colour and the close-up background for a
 target that is not black (the orange one has a yellow splatter on orange).
+
+The "1 €" on the coin scales with it (0.72 × its radius, at most 40 px), so
+it stays inside the silver centre at small `K`; the user asked for it
+smaller on 2026-10-30.
 
 The dimensions sheet's scale `K` (px per mm) is 7.9 for 76 mm targets; a
 bigger target needs a smaller one (6 for 10 cm) to stay clear of the facts
@@ -243,6 +255,9 @@ mount only their 18 cm disc (`centre` and `half` of the disc,
 - **Layout:** one target in the centre, four 15 cm in from the sides and
   7 cm from top and bottom. The laths and their screws sit 40 cm from each
   side, in the gap under the centre target.
+- **Three instead of five:** `count: 3` puts three in a row, centred in
+  height with even gaps, for a card too big for five (the 22,86 cm
+  cardboard target, at the user's request).
 - **Measures:** "1 m" over the panel at 52 px and "60 cm" beside it at
   44 px, the same Barlow Condensed as the dimensions sheets.
 - **Title:** "Grandeur nature", not "À l'échelle": a capital with an accent
