@@ -52,6 +52,9 @@ window.PRODUCT = {
   // for the 8-bullseye card of the same format.
   mounted: { centre: [499.5, 501], half: 343.5, halfH: 438, cm: 17.78, cmH: 22.86, count: 3 },
 
+  // A pile of cards, no text (stack.html): the pack holds 20.
+  stack: { centre: [499.5, 501], half: 343.5, halfH: 438, cm: 17.78, cmH: 22.86, count: 7 },
+
   // A series scored by zone, plain holes. Each hit was checked against the
   // stadium lines above, off the printed numbers and outside the inner
   // oval (whose value the page doesn't give): 9, 9, 8, 8, 7.

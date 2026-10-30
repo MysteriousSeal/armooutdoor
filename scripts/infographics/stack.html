@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Plusieurs cibles</title>
+<style>
+  html, body { margin: 0; background: #fff; }
+  svg { display: block; }
+</style>
+</head>
+<body>
+<svg id="s" width="1500" height="1500" viewBox="0 0 1500 1500"></svg>
+<script src="kit.js"></script>
+<script>
+  // A loose pile of the product's cards on white, no text: shows that the
+  // pack holds several. Fanned cards behind, a squared-up pile with visible
+  // edges under the top card. Opened as stack.html?p=<product>&v=<variant>;
+  // the spec's `stack` block locates the card in its photo like `mounted`:
+  // { centre, half, halfH?, cm, cmH?, count? }.
+  const params = new URLSearchParams(location.search);
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.getElementById('s');
+  const el = (tag, attrs, parent = svg) => {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    parent.appendChild(n);
+    return n;
+  };
+
+  const spec = document.createElement('script');
+  spec.src = 'products/' + params.get('p') + '.js';
+  spec.onload = () => {
+    const P = window.PRODUCT;
+    const V = P.variants[params.get('v') || Object.keys(P.variants)[0]];
+    draw(V.photo, P.stack, Number(String(params.get('p')).length));
+  };
+  document.head.appendChild(spec);
+
+  function draw(photo, { centre: [px, py], half, halfH = half, cm, cmH = cm, count = 6 }, seed) {
+    const rnd = Infographic.rng(seed * 7919 + 17);
+    // The top card's height fills about two thirds of the page.
+    const H = 900, W = H * cm / cmH, sx = W / (2 * half), sy = H / (2 * halfH);
+    const defs = el('defs', {});
+    const shadow = el('filter', { id: 'shadow', x: '-20%', y: '-20%', width: '140%', height: '140%' }, defs);
+    el('feDropShadow', { dx: 0, dy: 6, stdDeviation: 9, 'flood-color': '#000', 'flood-opacity': 0.22 }, shadow);
+    const soft = el('filter', { id: 'soft', x: '-30%', y: '-30%', width: '160%', height: '160%' }, defs);
+    el('feGaussianBlur', { stdDeviation: 28 }, soft);
+    const clip = el('clipPath', { id: 'card' }, defs);
+    el('rect', { x: -W / 2, y: -H / 2, width: W, height: H, rx: 4 }, clip);
+
+    // One card centred on (cx, cy), turned by deg: its cardboard edge, then the print.
+    function card(cx, cy, deg, shade = 0) {
+      const g = el('g', { transform: `translate(${cx} ${cy}) rotate(${deg})`, filter: 'url(#shadow)' });
+      el('rect', { x: -W / 2 + 1.5, y: -H / 2 + 3, width: W, height: H, rx: 4, fill: '#9c8c74' }, g);
+      el('image', { href: photo, x: -px * sx, y: -py * sy, width: 1000 * sx, height: 1000 * sy, preserveAspectRatio: 'none', 'clip-path': 'url(#card)' }, g);
+      if (shade) el('rect', { x: -W / 2, y: -H / 2, width: W, height: H, rx: 4, fill: '#000', opacity: shade }, g);
+    }
+
+    const cx = 750, cy = 760;
+    // A soft ground shadow under the whole pile.
+    el('ellipse', { cx, cy: cy + H / 2 + 10, rx: W * 0.75, ry: 34, fill: '#000', opacity: 0.12, filter: 'url(#soft)' });
+
+    // Fanned cards behind, in pairs left and right, the furthest pair turned
+    // the most, so the fan stays balanced on the page.
+    const levels = Math.ceil(Math.max(0, count - 3) / 2);
+    for (let j = levels; j >= 1; j--) {
+      for (const side of [-1, 1]) {
+        const deg = side * (3 + j * 6) + (rnd() - 0.5) * 2;
+        card(cx + side * (30 + j * 55) + (rnd() - 0.5) * 12, cy - 10 + (rnd() - 0.5) * 24, deg, 0.04 * j);
+      }
+    }
+    // A squared-up pile under the top card: its edges step down and right.
+    for (let i = 2; i >= 1; i--) card(cx + i * 7, cy + i * 9, -1.5 + (rnd() - 0.5) * 1.2, 0.03 * i);
+    card(cx, cy, -1.5);
+  }
+</script>
+</body>
+</html>

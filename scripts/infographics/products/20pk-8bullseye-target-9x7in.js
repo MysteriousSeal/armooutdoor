@@ -54,6 +54,9 @@ window.PRODUCT = {
   // user asked for three, five don't fit at this size.
   mounted: { centre: [498.5, 499.5], half: 346.5, halfH: 439.5, cm: 17.78, cmH: 22.86, count: 3 },
 
+  // A pile of cards, no text (stack.html): the pack holds 20.
+  stack: { centre: [498.5, 499.5], half: 346.5, halfH: 439.5, cm: 17.78, cmH: 22.86, count: 7 },
+
   // One series per blason, in reading order, the groups tightening as the
   // session goes: the page's "see at a glance whether precision improved".
   effect: {

@@ -13,6 +13,7 @@ Everything lives in `scripts/infographics/`:
 |------|------------|
 | `anatomy.html`, `dimensions.html`, `effect.html` | The sheet templates. Generic, never edited per product. `effect` renders only for specs that define it. |
 | `mounted.html` | The "Grandeur nature" sheet: five of the product's targets stuck at true size on a plain plywood panel 1 m wide and 60 cm high (one in the centre, four towards the corners), standing on pine laths in a steel base, under the house header, with the panel's width and height measured. Renders for specs that define `mounted`, see below. |
+| `stack.html` | A pile of the product's cards on white, **no text**, to show the pack holds several: fanned cards in balanced pairs behind a squared-up pile. Renders for specs that define `stack` (same fields as `mounted`, plus `count`, the number of cards drawn, 7 by default in the specs so far). |
 | `kit.js` | Shared runtime: loads the product spec, draws the labels, leader lines, reticle markers and dimension lines. |
 | `shared.css` | House style: colours, fonts, header, labels, the note box at the bottom. |
 | `products/<product>.js` | One spec per product family: text, colourways, marker positions, and the dimensions drawing. |
