@@ -42,7 +42,8 @@
     document.getElementById('eyebrow').textContent = P.eyebrow;
     // `mounted` is one board, or a list of boards each with an `id`, picked
     // by ?b=<id> (render.sh writes them to <product>-mounted-<id>-<variant>.png).
-    const M = Array.isArray(P.mounted) ? P.mounted.find(m => m.id === params.get('b')) : P.mounted;
+    // A board without an id is the default one, written as <product>-mounted-<variant>.png.
+    const M = Array.isArray(P.mounted) ? P.mounted.find(m => (m.id || null) === params.get('b')) : P.mounted;
     document.getElementById('title').textContent = M.title || 'Grandeur nature';
     draw(V.photo, M);
   };
@@ -117,12 +118,16 @@
     // Five targets at true size, as on a die: one in the centre, one in each
     // corner, the corner ones 15 cm from the sides and 7 cm from top and bottom.
     // count: 3 puts three in a row instead, centred in height, with four
-    // equal gaps across (for cards too big for five).
+    // equal gaps across (for cards too big for five); count: 4 a 2 x 2 grid
+    // with equal gaps both ways.
     const side = cm * K, sideH = cmH * K, sx = side / (2 * half), sy = sideH / (2 * halfH), mx = inset[0] + cm / 2, my = inset[1] + cmH / 2;
     const rx = (PW - 3 * cm) / 4 + cm / 2;
+    const gx = (PW - 2 * cm) / 3 + cm / 2, gy = (PH - 2 * cmH) / 3 + cmH / 2;
     const spots = count === 3
       ? [[rx, PH / 2], [PW / 2, PH / 2], [PW - rx, PH / 2]]
-      : [[PW / 2, PH / 2], [mx, my], [PW - mx, my], [mx, PH - my], [PW - mx, PH - my]];
+      : count === 4
+        ? [[gx, gy], [PW - gx, gy], [gx, PH - gy], [PW - gx, PH - gy]]
+        : [[PW / 2, PH / 2], [mx, my], [PW - mx, my], [mx, PH - my], [PW - mx, PH - my]];
     for (let i = 0; i < spots.length; i++) {
       const cx = ox + spots[i][0] * K, cy = oy + spots[i][1] * K;
       const cp = el('clipPath', { id: 'sticker' + i }, defs);

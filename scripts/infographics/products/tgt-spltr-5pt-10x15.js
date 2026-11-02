@@ -44,8 +44,20 @@ window.PRODUCT = {
     },
   },
 
-  // The board on a 1 m panel (mounted.html), at true size.
-  mounted: { centre: [501, 498], half: 436, cm: 15.24 },
+  // The board at true size (mounted.html): five on the default 1 m panel,
+  // and four in a 2 x 2 grid on a 55 x 55 cm board, the size of a C50 card
+  // (five 15,24 cm boards do not fit on it without overlapping).
+  mounted: [
+    { centre: [501, 498], half: 436, cm: 15.24 },
+    { id: 'c50', centre: [501, 498], half: 436, cm: 15.24, panel: [55, 55], count: 4 },
+  ],
+
+  // The series both the effect sheet and the text-free impact.html draw:
+  // one hit on each target.
+  impact: {
+    centre: [501, 498], radius: 436, shape: 'square', seed: 90,
+    hits: [[-136, -136], [134, -138], [-140, 134], [136, 140], [4, -4]],
+  },
 
   // The session the page describes: one hit on each corner target, then the
   // centre one.
@@ -57,8 +69,7 @@ window.PRODUCT = {
     },
     draw(kit, V) {
       Infographic.targets.beforeAfter(kit, V.photo, {
-        centre: [501, 498], radius: 436, shape: 'square', seed: 90,
-        hits: [[-136, -136], [134, -138], [-140, 134], [136, 140], [4, -4]],
+        ...window.PRODUCT.impact,
         afterLabel: 'APRÈS CINQ SÉRIES',
         caption: ['Une gerbe jaune autour de chaque trou,', 'repérable sans quitter le pas de tir.'],
       });

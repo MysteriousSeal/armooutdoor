@@ -42,6 +42,19 @@ window.PRODUCT = {
   },
 
   // One shot on each of the five aim points, as the page describes a series per point.
+  // On a 55 x 55 cm plywood board, the size of a C50 card (mounted.html),
+  // at true size: five 5,1 cm squares, the corner ones 10 cm from the edges.
+  mounted: [
+    { id: 'c50', centre: [498, 498], half: 435, cm: 5.1, panel: [55, 55], inset: [10, 10] },
+  ],
+
+  // The series both the effect sheet and the text-free impact.html draw:
+  // one hit on each aim point.
+  impact: {
+    centre: [498, 498], radius: 435, shape: 'square', seed: 51,
+    hits: [[-170, -176], [176, -170], [-178, 180], [168, 174], [10, -12]],
+  },
+
   effect: {
     title: 'L’effet à l’impact',
     footer: {
@@ -50,8 +63,7 @@ window.PRODUCT = {
     },
     draw(kit, V) {
       Infographic.targets.beforeAfter(kit, V.photo, {
-        centre: [498, 498], radius: 435, shape: 'square', seed: 51,
-        hits: [[-170, -176], [176, -170], [-178, 180], [168, 174], [10, -12]],
+        ...window.PRODUCT.impact,
         afterLabel: 'APRÈS CINQ SÉRIES',
         caption: ['Une gerbe jaune autour de chaque trou : sur un repère', 'aussi petit, on voit tout de suite un tir au centre.'],
       });

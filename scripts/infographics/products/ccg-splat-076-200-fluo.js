@@ -42,6 +42,19 @@ window.PRODUCT = {
   },
 
   // A group off to the upper right, to be measured in squares from the centre.
+  // On a 55 x 55 cm plywood board, the size of a C50 card (mounted.html),
+  // at true size: five 7,6 cm squares, the corner ones 10 cm from the edges.
+  mounted: [
+    { id: 'c50', centre: [500, 500], half: 410, cm: 7.6, panel: [55, 55], inset: [10, 10] },
+  ],
+
+  // The series both the effect sheet and the text-free impact.html draw:
+  // a group high right, read on the grid.
+  impact: {
+    centre: [500, 500], radius: 410, shape: 'square', seed: 52,
+    hits: [[55, -45], [115, -60], [80, -5], [130, -110], [60, -115]],
+  },
+
   effect: {
     title: 'L’effet à l’impact',
     footer: {
@@ -50,8 +63,7 @@ window.PRODUCT = {
     },
     draw(kit, V) {
       Infographic.targets.beforeAfter(kit, V.photo, {
-        centre: [500, 500], radius: 410, shape: 'square', seed: 52,
-        hits: [[55, -45], [115, -60], [80, -5], [130, -110], [60, -115]],
+        ...window.PRODUCT.impact,
         afterLabel: 'APRÈS UNE SÉRIE',
         caption: ['Le groupement se lit sur la grille : comptez les cases', 'jusqu’au centre, chacune vaut un tiers de pouce.'],
       });

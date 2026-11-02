@@ -47,8 +47,20 @@ window.PRODUCT = {
     },
   },
 
-  // The board on a 1 m panel (mounted.html), at true size.
-  mounted: { centre: [499, 500], half: 404, cm: 15.24 },
+  // The board at true size (mounted.html): five on the default 1 m panel,
+  // and four in a 2 x 2 grid on a 55 x 55 cm board, the size of a C50 card
+  // (five 15,24 cm boards do not fit on it without overlapping).
+  mounted: [
+    { centre: [499, 500], half: 404, cm: 15.24 },
+    { id: 'c50', centre: [499, 500], half: 404, cm: 15.24, panel: [55, 55], count: 4 },
+  ],
+
+  // The series both the effect sheet and the text-free impact.html draw:
+  // one hit on each diamond.
+  impact: {
+    centre: [499, 500], radius: 404, shape: 'square', seed: 118,
+    hits: [[-130, -138], [138, -132], [-136, 132], [132, 138], [6, -6]],
+  },
 
   // Five aim points per board: one hit on each diamond.
   effect: {
@@ -59,9 +71,7 @@ window.PRODUCT = {
     },
     draw(kit, V) {
       Infographic.targets.beforeAfter(kit, V.photo, {
-        centre: [499, 500], radius: 404, shape: 'square', seed: 118,
-        // Panel scale 0.69: corner diamonds at about ±135 panel px.
-        hits: [[-130, -138], [138, -132], [-136, 132], [132, 138], [6, -6]],
+        ...window.PRODUCT.impact,
         afterLabel: 'APRÈS CINQ SÉRIES',
         caption: ['Une gerbe jaune autour de chaque trou,', 'repérable sans quitter le pas de tir.'],
       });

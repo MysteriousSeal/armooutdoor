@@ -42,6 +42,19 @@ window.PRODUCT = {
   },
 
   // The page’s own example: a group high and to the left, read as D and R.
+  // On a 55 x 55 cm plywood board, the size of a C50 card (mounted.html),
+  // at true size: five 10,16 cm squares, the corner ones 10 cm from the edges.
+  mounted: [
+    { id: 'c50', centre: [500, 500], half: 374, cm: 10.16, panel: [55, 55], inset: [10, 10] },
+  ],
+
+  // The series both the effect sheet and the text-free impact.html draw:
+  // the page's own example, a group high left.
+  impact: {
+    centre: [500, 500], radius: 374, shape: 'square', seed: 145,
+    hits: [[-80, -70], [-145, -115], [-75, -140], [-135, -50], [-190, -95]],
+  },
+
   effect: {
     title: 'L’effet à l’impact',
     footer: {
@@ -50,8 +63,7 @@ window.PRODUCT = {
     },
     draw(kit, V) {
       Infographic.targets.beforeAfter(kit, V.photo, {
-        centre: [500, 500], radius: 374, shape: 'square', seed: 145,
-        hits: [[-80, -70], [-145, -115], [-75, -140], [-135, -50], [-190, -95]],
+        ...window.PRODUCT.impact,
         afterLabel: 'GROUPÉ EN HAUT À GAUCHE',
         caption: ['La bordure se lit D et R : la correction se fait', 'vers le bas et vers la droite.'],
       });

@@ -14,7 +14,7 @@ Everything lives in `scripts/infographics/`:
 | `anatomy.html`, `dimensions.html`, `effect.html` | The sheet templates. Generic, never edited per product. `effect` renders only for specs that define it. |
 | `mounted.html` | The "Grandeur nature" sheet: five of the product's targets stuck at true size on a plain plywood panel 1 m wide and 60 cm high (one in the centre, four towards the corners), standing on pine laths in a steel base, under the house header, with the panel's width and height measured. Renders for specs that define `mounted`, see below. |
 | `stack.html` | A pile of the product's cards on white, **no text**, to show the pack holds several: fanned cards in balanced pairs behind a squared-up pile. Renders for specs that define `stack` (same fields as `mounted`, plus `count`, the number of cards drawn, 7 by default in the specs so far). |
-| `impact.html` | A round target filling the page after a series, **no text**: it replays the effect sheet's after panel (same hits, seed and order through `Infographic.targets.splat`), so the splatter has the same shapes, only larger. Renders for specs that define `impact: { centre, radius, seed, hits }`, plus `zones` for a zoned splatter or `holes: 'plain'` for a non-reactive target (the pink one shows its corrected group as bare holes); the effect sheet spreads the same block (`...window.PRODUCT.impact`) so the two never drift apart. |
+| `impact.html` | A round target filling the page after a series, **no text**: it replays the effect sheet's after panel (same hits, seed and order through `Infographic.targets.splat`), so the splatter has the same shapes, only larger. Renders for specs that define `impact: { centre, radius, seed, hits }`, plus `zones` for a zoned splatter or `holes: 'plain'` for a non-reactive target (the pink one shows its corrected group as bare holes), or `shape: 'square'` (radius = half the side) for a square target; the effect sheet spreads the same block (`...window.PRODUCT.impact`) so the two never drift apart. |
 | `kit.js` | Shared runtime: loads the product spec, draws the labels, leader lines, reticle markers and dimension lines. |
 | `shared.css` | House style: colours, fonts, header, labels, the note box at the bottom. |
 | `products/<product>.js` | One spec per product family: text, colourways, marker positions, and the dimensions drawing. |
@@ -66,6 +66,8 @@ Everything lives in `scripts/infographics/`:
 | `cag-brwnsnd-breath` | Cagoule coyote unie respirante (same cut, supplier sheets and layout as `cag-blk-breath`, whose open-hole knit and panel wording its page shares; footer on hearing-protection compatibility. Its dimensions drawing centres the balaclava on the page from its measured extents, at the user's request: `X = x => 750 + (x - (left + right) / 2) * 0.95`) | coyote |
 | `cag-orng-breath` | Cagoule orange unie respirante (same layout and centred dimensions as `cag-brwnsnd-breath`; its page says it is **not certified high visibility** and does not replace a hi-vis vest in a battue, so the anatomy footer says that) | orange |
 | `cag-desert-breath` | Cagoule camouflage désert respirante (Desert DPM; camo callouts as `cag-mcdes-breath`, centred dimensions as `cag-brwnsnd-breath`; footer on dry open ground from its page) | desert |
+| `tgt-splat-200mm-10-fluo` | 10 planches de tir 20 cm zones numérotées et pastilles (same board and layout as `tgt-splat-200mm-20-fluo`, on the sharper flat photo the user uploaded; drops 346's "lisibles à 30 ou 50 m", which its page doesn't make) | board |
+| `tgt-plain-200mm-25` | 25 planches de tir 20 cm **non réactives** (same board and photo as `tgt-splat-200mm-10-fluo`; the third sheet is "Compter les points" with plain holes, 9 + 9 + 8 + 8 + 7 = 41, kept out of the centre zone whose value the page doesn't give; 10 to 25 m) | board |
 | `grip-sleeve-snd` | Grip caoutchouc antidérapant sable (anatomy + dimensions only; sizes from the product page, 7,2 x 5,4 cm, drawn as arrows along the grip's edges with no coin, because the photo's proportions don't match them: the supplier sheet in `sources/` says 7,5 x 6 x 2,5 cm) | sand |
 | `grip-sleeve-blk` | Grip caoutchouc antidérapant pour poignée de pistolet, black (same mould and framing as `grip-sleeve-snd`, same size treatment; its footer carries the page's holster warning) | black |
 
@@ -271,6 +273,10 @@ mount only their 18 cm disc (`centre` and `half` of the disc,
   `render.sh` writes one `<product>-mounted-<id>-<variant>.png` per board.
   The 76 mm round targets have a 55 x 55 cm board, the size of a C50 card
   (`id: 'c50'`, insets 10 cm).
+- **Four in a grid:** `count: 4` puts a 2 x 2 grid with equal gaps both
+  ways. The 15 cm boards use it on the C50 board, where five would
+  overlap; their default 1 m board stays first in the `mounted` list with no
+  `id`, so its file keeps the name `<product>-mounted-<variant>.png`.
 - **Three instead of five:** `count: 3` puts three in a row, centred in
   height with even gaps, for a card too big for five (the 22,86 cm
   cardboard target, at the user's request).

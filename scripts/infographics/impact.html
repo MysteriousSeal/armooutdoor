@@ -18,7 +18,8 @@
   // only larger. Opened as impact.html?p=<product>&v=<variant>; the spec's
   // `impact` block gives { centre, radius, seed, hits } exactly as passed
   // to beforeAfter (hits in its 560 px panel), plus zones (a colour per
-  // zone, radii in photo px) or holes: 'plain' for a non-reactive target.
+  // zone, radii in photo px) or holes: 'plain' for a non-reactive target,
+  // and shape: 'square' (radius = half the side) for a square target.
   const params = new URLSearchParams(location.search);
   const NS = 'http://www.w3.org/2000/svg';
   const svg = document.getElementById('s');
@@ -38,12 +39,13 @@
   };
   document.head.appendChild(spec);
 
-  function draw(photo, { centre: [px, py], radius, seed, hits, colour = '#e4f21c', zones = null, holes = 'splatter' }) {
+  function draw(photo, { centre: [px, py], radius, seed, hits, colour = '#e4f21c', zones = null, holes = 'splatter', shape = 'round' }) {
     const D = 1200, cx = 750, cy = 750, s = D / (2 * radius), k = D / 560;
     const rnd = Infographic.rng(seed);
     const defs = el('defs', {});
     const cp = el('clipPath', { id: 'disc' }, defs);
-    el('circle', { cx, cy, r: D / 2 }, cp);
+    if (shape === 'square') el('rect', { x: cx - D / 2, y: cy - D / 2, width: D, height: D }, cp);
+    else el('circle', { cx, cy, r: D / 2 }, cp);
     el('image', { href: photo, x: cx - px * s, y: cy - py * s, width: 1000 * s, height: 1000 * s, 'clip-path': 'url(#disc)' });
     const g = el('g', { 'clip-path': 'url(#disc)' });
     // Splatter colour for a hit at (dx, dy) panel px, as in beforeAfter.

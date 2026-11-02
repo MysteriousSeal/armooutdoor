@@ -42,6 +42,19 @@ window.PRODUCT = {
   },
 
   // One shot on each diamond, a series per aim point.
+  // On a 55 x 55 cm plywood board, the size of a C50 card (mounted.html),
+  // at true size: five 7,6 cm squares, the corner ones 10 cm from the edges.
+  mounted: [
+    { id: 'c50', centre: [500, 500], half: 446, cm: 7.6, panel: [55, 55], inset: [10, 10] },
+  ],
+
+  // The series both the effect sheet and the text-free impact.html draw:
+  // one hit on each diamond.
+  impact: {
+    centre: [500, 500], radius: 446, shape: 'square', seed: 92,
+    hits: [[-180, -196], [196, -180], [-196, 180], [180, 196], [12, -14]],
+  },
+
   effect: {
     title: 'L’effet à l’impact',
     footer: {
@@ -50,8 +63,7 @@ window.PRODUCT = {
     },
     draw(kit, V) {
       Infographic.targets.beforeAfter(kit, V.photo, {
-        centre: [500, 500], radius: 446, shape: 'square', seed: 92,
-        hits: [[-180, -196], [196, -180], [-196, 180], [180, 196], [12, -14]],
+        ...window.PRODUCT.impact,
         afterLabel: 'APRÈS CINQ SÉRIES',
         caption: ['Le jaune tranche sur le rouge et le noir : on voit', 'si le tir a touché le losange ou la case voisine.'],
       });

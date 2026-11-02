@@ -42,6 +42,19 @@ window.PRODUCT = {
   },
 
   // A group around the red dot, yellow splatter on the bare black.
+  // On a 55 x 55 cm plywood board, the size of a C50 card (mounted.html),
+  // at true size: five 7,6 cm squares, the corner ones 10 cm from the edges.
+  mounted: [
+    { id: 'c50', centre: [500, 486], half: 377, cm: 7.6, panel: [55, 55], inset: [10, 10] },
+  ],
+
+  // The series both the effect sheet and the text-free impact.html draw:
+  // a group round the centre plus a flyer high right.
+  impact: {
+    centre: [500, 486], radius: 377, shape: 'square', seed: 91,
+    hits: [[-55, -45], [55, -55], [58, 48], [-48, 60], [120, -130]],
+  },
+
   effect: {
     title: 'L’effet à l’impact',
     footer: {
@@ -50,8 +63,7 @@ window.PRODUCT = {
     },
     draw(kit, V) {
       Infographic.targets.beforeAfter(kit, V.photo, {
-        centre: [500, 486], radius: 377, shape: 'square', seed: 91,
-        hits: [[-55, -45], [55, -55], [58, 48], [-48, 60], [120, -130]],
+        ...window.PRODUCT.impact,
         afterLabel: 'APRÈS UNE SÉRIE',
         caption: ['Sur ce fond presque vide, les trous d’une série', 'ressortent dès les premiers tirs.'],
       });

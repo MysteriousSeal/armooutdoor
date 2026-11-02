@@ -18,7 +18,7 @@ read_spec() {
     console.log(process.argv[2] === "variants"
       ? Object.keys(P.variants).join(" ")
       : ["anatomy", "dimensions", "effect", "mounted", "stack", "impact"].filter(s => P[s])
-          .flatMap(s => s === "mounted" && Array.isArray(P.mounted) ? P.mounted.map(m => "mounted:" + m.id) : [s]).join(" "));' "$spec" "$1"
+          .flatMap(s => s === "mounted" && Array.isArray(P.mounted) ? P.mounted.map(m => m.id ? "mounted:" + m.id : "mounted") : [s]).join(" "));' "$spec" "$1"
 }
 
 if [[ $# -eq 0 ]]; then

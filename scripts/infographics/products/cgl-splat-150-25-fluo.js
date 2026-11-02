@@ -44,8 +44,20 @@ window.PRODUCT = {
     },
   },
 
-  // The board stuck on a cardboard silhouette (mounted.html), at true size.
-  mounted: { centre: [498, 500], half: 422, cm: 15 },
+  // The board at true size (mounted.html): five on the default 1 m panel,
+  // and four in a 2 x 2 grid on a 55 x 55 cm board, the size of a C50 card
+  // (five 15 cm boards do not fit on it without overlapping).
+  mounted: [
+    { centre: [498, 500], half: 422, cm: 15 },
+    { id: 'c50', centre: [498, 500], half: 422, cm: 15, panel: [55, 55], count: 4 },
+  ],
+
+  // The series both the effect sheet and the text-free impact.html draw:
+  // the diagonal group the protractor is for.
+  impact: {
+    centre: [498, 500], radius: 422, shape: 'square', seed: 67,
+    hits: [[-130, 100], [-72, 56], [-15, 12], [42, -32], [100, -78]],
+  },
 
   // The case the protractor is for: impacts stretched along a diagonal.
   effect: {
@@ -56,8 +68,7 @@ window.PRODUCT = {
     },
     draw(kit, V) {
       Infographic.targets.beforeAfter(kit, V.photo, {
-        centre: [498, 500], radius: 422, shape: 'square', seed: 67,
-        hits: [[-130, 100], [-72, 56], [-15, 12], [42, -32], [100, -78]],
+        ...window.PRODUCT.impact,
         afterLabel: 'IMPACTS EN DIAGONALE',
         caption: ['Relevez l’angle du groupement au rapporteur,', 'et mesurez son étendue à la règle.'],
       });

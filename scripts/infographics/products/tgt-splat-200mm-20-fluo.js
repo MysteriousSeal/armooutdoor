@@ -59,9 +59,25 @@ window.PRODUCT = {
     },
   },
 
-  // On a 1 m panel (mounted.html), at true size: only the 18 cm round
-  // target, as it is used once peeled off the board, not the square sheet.
-  mounted: { centre: [500, 500], half: 368, cm: 18, round: true },
+  // At true size (mounted.html): only the 18 cm round target, as it is used
+  // once peeled off the board, not the square sheet. Five on the default 1 m
+  // panel, and four in a 2 x 2 grid on a 55 x 55 cm board, the size of a C50
+  // card (five 18 cm discs would overlap on it).
+  mounted: [
+    { centre: [500, 500], half: 368, cm: 18, round: true },
+    { id: 'c50', centre: [500, 500], half: 368, cm: 18, round: true, panel: [55, 55], count: 4 },
+  ],
+
+  // A pile of boards, no text (stack.html): the pack holds 20.
+  stack: { centre: [499, 500], half: 437, cm: 20, count: 7 },
+
+  // The series both the effect sheet and the text-free impact.html draw,
+  // scored by zone, kept off the numbers on the horizontal axis. In panel px
+  // the rings sit at r59 (centre), r106 (9), r147 (8).
+  impact: {
+    centre: [499, 500], radius: 437, shape: 'square', seed: 346,
+    hits: [[-30, -42], [44, -32], [24, 48], [-72, 82], [104, -96]],
+  },
 
   // Before / after a series scored by zone, yellow splatter on the black
   // disc, kept off the numbers on the horizontal axis.
@@ -73,9 +89,7 @@ window.PRODUCT = {
     },
     draw(kit, V) {
       Infographic.targets.beforeAfter(kit, V.photo, {
-        centre: [499, 500], radius: 437, shape: 'square', seed: 346,
-        // In panel px the rings sit at r59 (centre), r106 (9), r147 (8).
-        hits: [[-30, -42], [44, -32], [24, 48], [-72, 82], [104, -96]],
+        ...window.PRODUCT.impact,
         afterLabel: 'APRÈS UNE SÉRIE',
         caption: ['Le jaune ressort sur le disque noir : on lit', 'la zone touchée même à grande distance.'],
       });
