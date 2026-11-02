@@ -62,6 +62,19 @@ window.PRODUCT = {
 
   // Before / after a series: a group on the centre that holds the first
   // circle, two shots out to the second. Yellow splatter on the orange.
+  // On a 55 x 55 cm plywood board, the size of a C50 card (mounted.html),
+  // at true size: five 10 cm discs, the corner ones 10 cm from the edges.
+  mounted: [
+    { id: 'c50', centre: [503, 502], half: 445, cm: 10, round: true, panel: [55, 55], inset: [10, 10] },
+  ],
+
+  // The series both the effect sheet and the text-free impact.html draw:
+  // a group round the black centre plus two flyers; yellow splatter on orange.
+  impact: {
+    centre: [503, 502], radius: 445, seed: 94, colour: '#ffec1f',
+    hits: [[-40, -40], [35, -30], [10, 45], [-50, 25], [120, -70], [-100, 125]],
+  },
+
   effect: {
     title: 'L’effet à l’impact',
     footer: {
@@ -70,9 +83,8 @@ window.PRODUCT = {
     },
     draw(kit, V) {
       Infographic.targets.beforeAfter(kit, V.photo, {
-        centre: [503, 502], radius: 445, seed: 94,
-        splatColour: '#ffec1f', closeUpBg: '#fb2a0e',
-        hits: [[-40, -40], [35, -30], [10, 45], [-50, 25], [120, -70], [-100, 125]],
+        ...window.PRODUCT.impact,
+        splatColour: window.PRODUCT.impact.colour, closeUpBg: '#fb2a0e',
         afterLabel: 'APRÈS UNE SÉRIE',
         caption: ['Le jaune ressort sur l’orange : chaque impact', 'se repère depuis le pas de tir.'],
       });

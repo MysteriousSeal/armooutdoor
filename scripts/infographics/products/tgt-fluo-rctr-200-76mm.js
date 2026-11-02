@@ -69,6 +69,19 @@ window.PRODUCT = {
 
   // Before / after a series, yellow splatter as documented, kept off the
   // red bars and the printed numbers (which sit low left).
+  // On a 55 x 55 cm plywood board, the size of a C50 card (mounted.html),
+  // at true size: five 76 mm discs, the corner ones 10 cm from the edges.
+  mounted: [
+    { id: 'c50', centre: [497, 500], half: 400, cm: 7.6, round: true, panel: [55, 55], inset: [10, 10] },
+  ],
+
+  // The series both the effect sheet and the text-free impact.html draw:
+  // a group high right, clear of the printed numbers, plus a flyer.
+  impact: {
+    centre: [497, 500], radius: 400, seed: 138,
+    hits: [[40, -42], [86, -30], [36, -96], [96, -88], [150, 110]],
+  },
+
   effect: {
     title: 'L’effet à l’impact',
     footer: {
@@ -77,8 +90,7 @@ window.PRODUCT = {
     },
     draw(kit, V) {
       Infographic.targets.beforeAfter(kit, V.photo, {
-        centre: [497, 500], radius: 400, seed: 138,
-        hits: [[40, -42], [86, -30], [36, -96], [96, -88], [150, 110]],
+        ...window.PRODUCT.impact,
         afterLabel: 'APRÈS UNE SÉRIE',
         caption: ['Le jaune ressort sur le noir et le réticule rouge :', 'chaque tir se repère depuis le pas de tir.'],
       });

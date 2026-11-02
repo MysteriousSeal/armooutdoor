@@ -64,6 +64,19 @@ window.PRODUCT = {
 
   // Before / after a series scored by zone, yellow splatter on the
   // diagonals, clear of the printed numbers.
+  // On a 55 x 55 cm plywood board, the size of a C50 card (mounted.html),
+  // at true size: five 10 cm discs, the corner ones 10 cm from the edges.
+  mounted: [
+    { id: 'c50', centre: [500, 498], half: 400, cm: 10, round: true, panel: [55, 55], inset: [10, 10] },
+  ],
+
+  // The series both the effect sheet and the text-free impact.html draw:
+  // two 9, a 10, an 8 and a 7, off the numbers.
+  impact: {
+    centre: [500, 498], radius: 400, seed: 96,
+    hits: [[-60, -62], [64, -56], [52, 66], [-108, 112], [150, -150]],
+  },
+
   effect: {
     title: 'L’effet à l’impact',
     footer: {
@@ -72,9 +85,8 @@ window.PRODUCT = {
     },
     draw(kit, V) {
       Infographic.targets.beforeAfter(kit, V.photo, {
-        centre: [500, 498], radius: 400, seed: 96,
+        ...window.PRODUCT.impact,
         // In panel px the zone edges are r68 (10), r140 (9), r209 (8), r271 (7).
-        hits: [[-60, -62], [64, -56], [52, 66], [-108, 112], [150, -150]],
         afterLabel: 'APRÈS UNE SÉRIE',
         caption: ['Chaque impact se repère depuis le pas de tir,', 'et le chiffre de la zone donne le score.'],
       });

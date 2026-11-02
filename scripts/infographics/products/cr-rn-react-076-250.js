@@ -59,6 +59,19 @@ window.PRODUCT = {
   },
 
   // Before / after a series, the yellow splatter between the red lines.
+  // On a 55 x 55 cm plywood board, the size of a C50 card (mounted.html),
+  // at true size: five 76 mm discs, the corner ones 10 cm from the edges.
+  mounted: [
+    { id: 'c50', centre: [500, 492], half: 391, cm: 7.6, round: true, panel: [55, 55], inset: [10, 10] },
+  ],
+
+  // The series both the effect sheet and the text-free impact.html draw:
+  // a group round the red dot plus a flyer low left.
+  impact: {
+    centre: [500, 492], radius: 391, seed: 97,
+    hits: [[-30, -36], [38, -28], [-12, 44], [70, 52], [-150, 120]],
+  },
+
   effect: {
     title: 'L’effet à l’impact',
     footer: {
@@ -67,8 +80,7 @@ window.PRODUCT = {
     },
     draw(kit, V) {
       Infographic.targets.beforeAfter(kit, V.photo, {
-        centre: [500, 492], radius: 391, seed: 97,
-        hits: [[-30, -36], [38, -28], [-12, 44], [70, 52], [-150, 120]],
+        ...window.PRODUCT.impact,
         afterLabel: 'APRÈS UNE SÉRIE',
         caption: ['Le jaune ressort sur le noir et les repères rouges :', 'on voit le groupement sans aller à la cible.'],
       });

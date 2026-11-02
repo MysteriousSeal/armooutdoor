@@ -63,6 +63,20 @@ window.PRODUCT = {
 
   // A series scored zone by zone: plain holes on the diagonals, clear of the
   // numbers, adding up to the total in the caption.
+  // On a 55 x 55 cm plywood board, the size of a C50 card (mounted.html),
+  // at true size: five 76 mm discs, the corner ones 10 cm from the edges.
+  mounted: [
+    { id: 'c50', centre: [493, 502], half: 334, cm: 7.6, round: true, panel: [55, 55], inset: [10, 10] },
+  ],
+
+  // The scored series both the effect sheet and the text-free impact.html
+  // draw (5 + 4 + 4 + 3 + 2). Plain holes: this target is not reactive. In
+  // panel px the zone edges are r54 (5), r111 (4), r166 (3), r223 (2), r280 (1).
+  impact: {
+    centre: [493, 502], radius: 334, seed: 154, holes: 'plain',
+    hits: [[20, -25], [60, 60], [-62, 58], [100, -100], [-140, -140]],
+  },
+
   effect: {
     title: 'Compter les points',
     footer: {
@@ -71,9 +85,7 @@ window.PRODUCT = {
     },
     draw(kit, V) {
       Infographic.targets.beforeAfter(kit, V.photo, {
-        centre: [493, 502], radius: 334, seed: 154, holes: 'plain',
-        // In panel px the zone edges are r54 (5), r111 (4), r166 (3), r223 (2), r280 (1).
-        hits: [[20, -25], [60, 60], [-62, 58], [100, -100], [-140, -140]],
+        ...window.PRODUCT.impact,
         afterLabel: 'APRÈS UNE SÉRIE',
         closeUp: false,
         closeUpTitle: 'Le score de la série',
