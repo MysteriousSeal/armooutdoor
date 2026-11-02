@@ -2,6 +2,21 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-11-02 · v1.75.0 · build MHRPF3
+
+### Admin
+
+- **The labels page has a second download per article, « Batch 2026-10-12 » for example,** which prints the same label with the last day the article came in from a purchase order as its batch instead of the day it is printed. Partial receipts count, and a variant takes only its own receipts. An article never received keeps the button greyed, as « Batch received », with a tooltip saying why. The usual « Download label » is unchanged.
+- **Saving a label's wording on the labels page switches both buttons on in place** and updates the Ready / Incomplete status beside them; before, the save replaced the cell with a single button and dropped the status.
+
+### Under the hood
+
+- **A « Grandeur nature » sheet** (`mounted.html`) shows a product's targets at true size on a plain 1 m x 60 cm plywood panel on a range stand. The panel is a plain rectangle on purpose: the FFTir does not allow shooting at human-shaped targets, so no image may show one. It takes any panel size, rectangular cards and several boards per product, and its wood and steel are seeded so renders are repeatable.
+- **A text-free impact image** replays a target's effect sheet without any wording, from a splatter helper now shared by both.
+- **New infographic specs:** the 76 mm and 10 cm reactive and scoring targets (round and square, with their 250-packs), the 15 cm, 15,24 cm and 20 cm shooting boards, the two 22,86 x 17,78 cm cardboard targets and their packs, the metal 5-plate target, eight balaclavas, the orange and fluo green beanies, and the sand and black grip sleeves. Targets that are not reactive, whatever their SKU or file names say, get a scored series of plain holes or a sight correction instead of a splatter.
+
+**No migration.**
+
 ## 2026-10-29 · v1.74.0 · build 1LFGTS
 
 ### Admin
