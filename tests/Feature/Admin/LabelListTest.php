@@ -461,10 +461,10 @@ class LabelListTest extends TestCase
         $this->page()
             ->assertSee('js/admin-label-save.js', false)
             ->assertSee('data-label-form', false)
-            // The cell knows its article and where its sheet lives, so a save
-            // can switch the button on.
+            // The cell knows its article and each button where its sheet
+            // lives, so a save can switch the buttons on.
             ->assertSee('data-label-action', false)
-            ->assertSee('data-url="'.route('admin.products.label', $product).'"', false);
+            ->assertSee('data-href="'.route('admin.products.label', $product).'"', false);
     }
 
     public function test_the_name_and_the_line_under_it_are_stored_in_capitals(): void

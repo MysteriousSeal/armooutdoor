@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 
 /**
  * Une ligne du journal de stock : ce qui a bougé, de combien, pourquoi.
@@ -68,6 +69,29 @@ class StockMovement extends Model
     public function subject(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    /**
+     * The last day each article was received from a purchase order, partial
+     * receipts included, in one query for any number of products. Keyed
+     * "product:variant", with an empty variant for a plain product.
+     *
+     * @param  iterable<int>  $productIds
+     * @return array<string, Carbon>
+     */
+    public static function lastReceivedDates(iterable $productIds): array
+    {
+        return static::query()
+            ->where('reason', StockMovementReason::PurchaseOrderReceived)
+            ->where('delta', '>', 0)
+            ->whereIn('product_id', collect($productIds)->all())
+            ->groupBy('product_id', 'product_variant_id')
+            ->selectRaw('product_id, product_variant_id, max(created_at) as received_at')
+            ->get()
+            ->mapWithKeys(fn (self $row): array => [
+                $row->product_id.':'.$row->product_variant_id => Carbon::parse($row->getRawOriginal('received_at')),
+            ])
+            ->all();
     }
 
     /** La déclinaison concernée, ou son nom figé si elle a été supprimée. */

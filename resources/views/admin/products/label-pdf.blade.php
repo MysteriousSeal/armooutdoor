@@ -14,8 +14,9 @@
     The face is laid out as it reads (wide, short), then turned about its
     top-left corner so the turned box fills the sheet above the barcode.
 
-    The batch date is the day the label was printed rather than anything
-    stored: a batch is what goes out wearing these labels.
+    The batch date is the day the label was printed, or, from the second
+    button on the labels page, the day the article last came in from a
+    supplier.
 --}}
 <!DOCTYPE html>
 <html lang="en">

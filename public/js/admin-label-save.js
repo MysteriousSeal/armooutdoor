@@ -46,33 +46,46 @@
     }
 
     /**
-     * Turns the greyed buttons of the articles that can now be printed into
-     * live links.
+     * Switches the buttons of each article on or off as the save left it, and
+     * its status with them.
      *
      * A plain product answers with an empty name, a variant with its id, which
-     * is how the cells identify themselves.
+     * is how the cells identify themselves. A button with no link to carry, the
+     * received batch of an article never received, stays off either way.
      */
     function switchOn(productId, printable) {
         document.querySelectorAll('[data-label-action][data-product="' + productId + '"]').forEach(function (cell) {
             var isPrintable = printable.indexOf(cell.getAttribute('data-variant')) !== -1;
-            var isLive = cell.querySelector('a') !== null;
+            var status = cell.querySelector('[data-label-status]');
 
-            if (isPrintable === isLive) {
-                return;
+            if (status) {
+                status.className = 'label-status ' + (isPrintable ? 'is-ready' : 'is-incomplete');
+                status.textContent = isPrintable ? 'Ready' : 'Incomplete';
             }
 
-            var button = document.createElement(isPrintable ? 'a' : 'span');
-            button.className = 'btn btn-secondary btn-small' + (isPrintable ? '' : ' is-disabled');
-            button.textContent = 'Download label';
+            cell.querySelectorAll('[data-label-button]').forEach(function (old) {
+                var href = old.getAttribute('data-href');
+                var live = isPrintable && href !== '';
 
-            if (isPrintable) {
-                button.href = cell.getAttribute('data-url');
-            } else {
-                button.setAttribute('aria-disabled', 'true');
-            }
+                if ((old.tagName === 'A') === live) {
+                    return;
+                }
 
-            cell.innerHTML = '';
-            cell.appendChild(button);
+                var button = document.createElement(live ? 'a' : 'span');
+                button.className = 'btn btn-secondary btn-small' + (live ? '' : ' is-disabled');
+                button.textContent = old.textContent;
+                button.title = old.title;
+                button.setAttribute('data-label-button', '');
+                button.setAttribute('data-href', href);
+
+                if (live) {
+                    button.href = href;
+                } else {
+                    button.setAttribute('aria-disabled', 'true');
+                }
+
+                old.replaceWith(button);
+            });
         });
     }
 

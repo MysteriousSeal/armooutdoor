@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Models\StockMovement;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -367,23 +369,32 @@ class LabelController extends Controller
      */
     private function articlesOf(Collection $products): Collection
     {
-        return $products->flatMap(function (Product $product): array {
+        $received = StockMovement::lastReceivedDates($products->pluck('id'));
+
+        return $products->flatMap(function (Product $product) use ($received): array {
             if (! $product->hasVariants()) {
-                return [$this->article($product, null)];
+                return [$this->article($product, null, received: $received)];
             }
 
             return $product->variants
                 ->where('is_active', true)
                 ->sortBy(fn (ProductVariant $variant) => $variant->sizeSortRank() ?? $variant->sort_order)
                 ->values()
-                ->map(fn (ProductVariant $variant, int $index): array => $this->article($product, $variant, $index === 0))
+                ->map(fn (ProductVariant $variant, int $index): array => $this->article($product, $variant, $index === 0, $received))
                 ->all();
         });
     }
 
-    /** @return array<string, mixed> */
-    private function article(Product $product, ?ProductVariant $variant, bool $first = true): array
+    /**
+     * @param  array<string, Carbon>  $received  from StockMovement::lastReceivedDates()
+     * @return array<string, mixed>
+     */
+    private function article(Product $product, ?ProductVariant $variant, bool $first = true, array $received = []): array
     {
+        $url = $variant === null
+            ? route('admin.products.label', $product)
+            : route('admin.products.variants.label', ['product' => $product, 'variant' => $variant]);
+
         return [
             'product' => $product,
             'variant' => $variant,
@@ -395,9 +406,11 @@ class LabelController extends Controller
             // other without either saying so.
             'editable' => $first,
             'missing' => $product->labelRequirements($variant),
-            'url' => $variant === null
-                ? route('admin.products.label', $product)
-                : route('admin.products.variants.label', ['product' => $product, 'variant' => $variant]),
+            'url' => $url,
+            // The second button prints the day the article last came in from
+            // a supplier as its batch; never received, it has nothing to print.
+            'receivedOn' => $received[$product->id.':'.$variant?->id] ?? null,
+            'receivedUrl' => $url.'?batch=received',
         ];
     }
 

@@ -13,6 +13,7 @@ use App\Models\ProductImage;
 use App\Models\ProductSlug;
 use App\Models\ProductVariant;
 use App\Models\PurchaseOrderItem;
+use App\Models\StockMovement;
 use App\Models\Supplier;
 use App\Support\Csv;
 use App\Support\Ean13;
@@ -227,7 +228,7 @@ class ProductController extends Controller
      * nothing about the article, one without a barcode cannot be scanned, and
      * one without a reference cannot be looked up.
      */
-    public function label(Product $product, ?ProductVariant $variant = null): Response
+    public function label(Request $request, Product $product, ?ProductVariant $variant = null): Response
     {
         if ($variant !== null) {
             abort_unless($variant->product_id === $product->id, 404);
@@ -251,6 +252,17 @@ class ProductController extends Controller
             $subtitle = trim($subtitle.' - '.$variant->label(), ' -');
         }
 
+        // The batch is the day the labels are printed: they go out on what is
+        // packed today. Asked for, it is the day the article last came in
+        // from a supplier instead, and there is no such label without one.
+        $batchDate = now();
+
+        if ($request->query('batch') === 'received') {
+            $batchDate = StockMovement::lastReceivedDates([$product->id])[$product->id.':'.$variant?->id] ?? null;
+
+            abort_if($batchDate === null, 404);
+        }
+
         $pdf = Pdf::loadView('admin.products.label-pdf', [
             'title' => $product->label?->title,
             'subtitle' => $subtitle,
@@ -259,9 +271,7 @@ class ProductController extends Controller
             'sku' => $article->sku,
             'gtin' => Ean13::normalise($article->gtin),
             'modules' => Ean13::modules($article->gtin),
-            // The batch is the day the labels are printed: they go out on what
-            // is packed today, and nothing stored would say otherwise.
-            'batchDate' => now()->format('Y-m-d'),
+            'batchDate' => $batchDate->format('Y-m-d'),
         ])
             // 500 × 700 CSS pixels at 96dpi: a portrait sheet, with the label
             // printed across it on its side.

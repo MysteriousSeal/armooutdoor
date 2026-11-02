@@ -196,20 +196,36 @@
                                     data-label-action
                                     data-product="{{ $product->id }}"
                                     data-variant="{{ $article['variant']?->id ?? '' }}"
-                                    data-url="{{ $article['url'] }}"
                                 >
                                     {{-- Status then action: a row says where it stands
                                          without the button's state having to be read. --}}
-                                    @if ($article['missing'] === [])
-                                        <span class="label-status is-ready">Ready</span>
-                                        <a href="{{ $article['url'] }}" class="btn btn-secondary btn-small">Download label</a>
+                                    {{-- Switched off rather than hidden: the fields that
+                                         would switch them on are on the line below. Each
+                                         button carries its link, so the save script can
+                                         switch it on in place. --}}
+                                    @php($ready = $article['missing'] === [])
+                                    @php($receivedOn = $article['receivedOn']?->format('Y-m-d'))
+                                    @if ($ready)
+                                        <span class="label-status is-ready" data-label-status>Ready</span>
                                     @else
-                                        <span class="label-status is-incomplete">Incomplete</span>
-                                        {{-- Switched off rather than hidden: the fields
-                                             that would switch it on are on the line
-                                             below, so there is nothing to explain. --}}
-                                        <span class="btn btn-secondary btn-small is-disabled" aria-disabled="true">Download label</span>
+                                        <span class="label-status is-incomplete" data-label-status>Incomplete</span>
                                     @endif
+                                    @include('admin.labels.partials.download-button', [
+                                        'live' => $ready,
+                                        'href' => $article['url'],
+                                        'text' => 'Download label',
+                                        'title' => 'Batch: the day it is printed',
+                                    ])
+                                    {{-- The same label, with the day the article last came
+                                         in from a supplier as its batch. --}}
+                                    @include('admin.labels.partials.download-button', [
+                                        'live' => $ready && $receivedOn !== null,
+                                        'href' => $receivedOn !== null ? $article['receivedUrl'] : '',
+                                        'text' => $receivedOn !== null ? 'Batch '.$receivedOn : 'Batch received',
+                                        'title' => $receivedOn !== null
+                                            ? 'Download with the batch '.$receivedOn.', the day it was last received from a purchase order'
+                                            : 'Never received from a purchase order',
+                                    ])
                                 </td>
                             </tr>
                             @if ($article['editable'])
