@@ -45,7 +45,9 @@
     // A board without an id is the default one, written as <product>-mounted-<variant>.png.
     const M = Array.isArray(P.mounted) ? P.mounted.find(m => (m.id || null) === params.get('b')) : P.mounted;
     document.getElementById('title').textContent = M.title || 'Grandeur nature';
-    draw(V.photo, M);
+    // A board can show another photo of the product, e.g. one peel-off
+    // sticker's close-up instead of the whole sheet.
+    draw(M.photo || V.photo, M);
   };
   document.head.appendChild(spec);
 
@@ -53,7 +55,7 @@
   // photo px); width and height then scale separately. panel: [PW, PH] in cm
   // (1 m x 60 cm by default) and inset: [x, y], the corner targets' gap to
   // the panel's sides and to its top and bottom (15 and 7 cm by default).
-  function draw(photo, { centre: [px, py], half, cm, round = false, cmH = cm, halfH = half, count = 5, panel = [100, 60], inset = [15, 7] }) {
+  function draw(photo, { centre: [px, py], half, cm, round = false, cmH = cm, halfH = half, count = 5, panel = [100, 60], inset = [15, 7], grid = null }) {
     // A rectangular panel in cm (PW x PH), standing on two wooden laths set
     // in a steel base 18 cm below it. K (px per cm) is as large as fits:
     // 1100 px wide at most, the ground no lower than y 1360.
@@ -123,7 +125,14 @@
     const side = cm * K, sideH = cmH * K, sx = side / (2 * half), sy = sideH / (2 * halfH), mx = inset[0] + cm / 2, my = inset[1] + cmH / 2;
     const rx = (PW - 3 * cm) / 4 + cm / 2;
     const gx = (PW - 2 * cm) / 3 + cm / 2, gy = (PH - 2 * cmH) / 3 + cmH / 2;
-    const spots = count === 3
+    // grid: [cols, rows] spreads that many targets with equal gaps both ways.
+    const spots = grid
+      ? [...Array(grid[0] * grid[1])].map((_, i) => {
+          const c = i % grid[0], r = Math.floor(i / grid[0]);
+          const g = (PW - grid[0] * cm) / (grid[0] + 1), h = (PH - grid[1] * cmH) / (grid[1] + 1);
+          return [g + cm / 2 + c * (g + cm), h + cmH / 2 + r * (h + cmH)];
+        })
+      : count === 3
       ? [[rx, PH / 2], [PW / 2, PH / 2], [PW - rx, PH / 2]]
       : count === 4
         ? [[gx, gy], [PW - gx, gy], [gx, PH - gy], [PW - gx, PH - gy]]

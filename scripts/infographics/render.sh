@@ -18,7 +18,7 @@ read_spec() {
     console.log(process.argv[2] === "variants"
       ? Object.keys(P.variants).join(" ")
       : ["anatomy", "dimensions", "effect", "mounted", "stack", "impact"].filter(s => P[s])
-          .flatMap(s => s === "mounted" && Array.isArray(P.mounted) ? P.mounted.map(m => m.id ? "mounted:" + m.id : "mounted") : [s]).join(" "));' "$spec" "$1"
+          .flatMap(s => ["mounted", "stack", "effect"].includes(s) && Array.isArray(P[s]) ? P[s].map(m => m.id ? s + ":" + m.id : s) : [s]).join(" "));' "$spec" "$1"
 }
 
 if [[ $# -eq 0 ]]; then
@@ -31,7 +31,7 @@ read -r -a sheets <<< "$(read_spec sheets)"
 mkdir -p "$DIR/out"
 for v in "${variants[@]}"; do
   for sheet in "${sheets[@]}"; do
-    # "mounted:<id>" is one board of a spec that lists several.
+    # "<sheet>:<id>" is one entry of a mounted, stack or effect list.
     page="${sheet%%:*}"; board="${sheet#*:}"; [[ "$board" == "$sheet" ]] && board=""
     out="$DIR/out/$product-$page${board:+-$board}-$v.png"
     "$CHROME" --headless=new --disable-gpu --hide-scrollbars --allow-file-access-from-files \

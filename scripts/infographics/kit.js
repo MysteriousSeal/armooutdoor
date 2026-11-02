@@ -119,8 +119,10 @@
 
   // Effect sheet (optional): the spec draws how the product behaves in use,
   // with the variant passed in so it can place the photo itself.
+  // `effect` can also be a list of sheets each with an `id`, picked by ?b=<id>
+  // (render.sh writes <product>-effect-<id>-<variant>.png).
   function renderEffect(product, variant) {
-    const sheet = product.effect;
+    const sheet = Array.isArray(product.effect) ? product.effect.find(e => (e.id || null) === params.get('b')) : product.effect;
     fillChrome(product, sheet);
     sheet.draw(svgKit(document.getElementById('draw')), variant);
   }
@@ -135,21 +137,102 @@
     };
   }
 
+  // The defs the sticker helpers share, made once per page.
+  let stickerCount = 0, stickerDefsNode = null;
+  function stickerDefs(el) {
+    if (stickerDefsNode) return stickerDefsNode;
+    stickerDefsNode = el('defs', {});
+    const f = el('filter', { id: 'stkShadow', x: '-20%', y: '-20%', width: '140%', height: '140%' }, stickerDefsNode);
+    el('feDropShadow', { dx: 1.5, dy: 2.5, stdDeviation: 2.5, 'flood-color': '#000', 'flood-opacity': 0.35 }, f);
+    return stickerDefsNode;
+  }
+
   // Shared drawings for the round reactive targets (stickers on a roll).
   const targets = {
+    // A 1 euro coin (23.25 mm) of radius cr at (cx, cy), titled above.
+    coin({ el, text }, cx, cy, cr) {
+      // Gold-coloured outer ring, silver-coloured centre (the 2 euro is the reverse).
+      el('circle', { cx, cy, r: cr, fill: '#d6b25e', stroke: '#a8873d', 'stroke-width': 3 });
+      el('circle', { cx, cy, r: cr * 0.72, fill: '#cfcbc2', stroke: '#8f8a7d', 'stroke-width': 2 });
+      // The face text follows the coin's size, so it stays inside the
+      // silver centre on small-scale sheets.
+      const fs = Math.min(40, cr * 0.72);
+      text(cx, cy + fs * 0.35, '1 €', { 'text-anchor': 'middle', 'font-size': fs, 'font-weight': 700, fill: '#55524b' });
+      text(cx, cy - cr - 46, 'Pièce de 1 €', { 'text-anchor': 'middle', 'font-size': 34, 'font-weight': 700, fill: 'var(--ink)' });
+      text(cx, cy - cr - 14, '23,25 mm', { 'text-anchor': 'middle', 'font-size': 28, 'font-weight': 500, fill: 'var(--mute)' });
+    },
+
+    // Peel-off stickers. One sticker of radius r at (cx, cy), cut round from
+    // its close-up photo (disc centre 500,500, r483 in a 1000 px image), with
+    // a thin shadow so it reads as stuck on whatever is under it.
+    sticker(el, href, cx, cy, r, parent) {
+      const defs = stickerDefs(el);
+      const id = 'stk' + (++stickerCount);
+      const cp = el('clipPath', { id }, defs);
+      el('circle', { cx, cy, r }, cp);
+      const s = r / 478;
+      const g = el('g', { filter: 'url(#stkShadow)' }, parent);
+      el('image', { href, x: cx - 500 * s, y: cy - 500 * s, width: 1000 * s, height: 1000 * s, 'clip-path': `url(#${id})` }, g);
+    },
+
+    // A used 76 mm reactive target (crt-react-076-200-fluo's photo) cut
+    // round at diameter D on (cx, cy), with yellow splatters at hits (px
+    // from the centre): the surface a fresh sticker gets stuck on. The
+    // splatter keeps its size relative to the target (sized for D = 560).
+    usedTarget(el, cx, cy, D, rnd, hits) {
+      const photo = 'photos/crt-react-076-200-fluo.jpg', [px, py] = [500, 491], s = D / (2 * 392), k = D / 560;
+      const id = 'used' + (++stickerCount);
+      const cp = el('clipPath', { id }, stickerDefs(el));
+      el('circle', { cx, cy, r: D / 2 }, cp);
+      el('image', { href: photo, x: cx - px * s, y: cy - py * s, width: 1000 * s, height: 1000 * s, 'clip-path': `url(#${id})` });
+      const g = el('g', { 'clip-path': `url(#${id})` });
+      for (const [dx, dy] of hits) targets.splat(el, rnd, cx + dx, cy + dy, (22 + rnd() * 6) * k, g);
+    },
+
+    // Dimensions for a sheet of stickers: the sheet photo on the left, its
+    // size unlabelled (sheet: { centre, half } in photo px), and one sticker
+    // with the 1 euro coin on the right, both at 8 px per mm.
+    sheetDimensions({ el, text, dim, ext, section }, photo, { sheet, sticker, mm, label, sheetLine, facts, heading = 'UNE CIBLE ET LA PIÈCE' }) {
+      const side = 640, cx = 470, cy = 800, s = side / (2 * sheet.half);
+      const cp = el('clipPath', { id: 'sheet' }, stickerDefs(el));
+      el('rect', { x: cx - side / 2, y: cy - side / 2, width: side, height: side }, cp);
+      el('image', { href: photo, x: cx - sheet.centre[0] * s, y: cy - sheet.centre[1] * s, width: 1000 * s, height: 1000 * s, 'clip-path': 'url(#sheet)' });
+      section(150, 400, 'UNE PLANCHE');
+      text(cx, cy + side / 2 + 56, sheetLine, { 'text-anchor': 'middle', 'font-size': 36, 'font-weight': 700, fill: 'var(--ink)' });
+
+      const K = 8, r = mm / 2 * K, sx = 1010, sy = 700, cr = 23.25 / 2 * K;
+      section(880, 400, heading);
+      targets.sticker(el, sticker, sx, sy, r);
+      ext(sx - r, sy - 8, sx - r, sy - r - 70); ext(sx + r, sy - 8, sx + r, sy - r - 70);
+      dim(sx - r, sy - r - 55, sx + r, sy - r - 55, label, 44);
+      targets.coin({ el, text }, 1270, sy + r - cr, cr);
+      facts.forEach(([big, small], i) => {
+        const fy = 960 + i * 100;
+        text(880, fy, big, { 'font-size': 50, 'font-weight': 700, fill: 'var(--ink)' });
+        text(880, fy + 32, small, { 'font-size': 26, 'font-weight': 500, fill: 'var(--mute)', 'letter-spacing': '.04em' });
+      });
+    },
+
+    // A plain kraft cardboard backing with a faint seeded grain.
+    cardboard(el, x, y, w, h, seed) {
+      const defs = stickerDefs(el);
+      const f = el('filter', { id: 'kraft' + seed, x: 0, y: 0, width: 1, height: 1 }, defs);
+      el('feTurbulence', { type: 'fractalNoise', baseFrequency: '0.9 0.04', numOctaves: 2, seed, result: 'n' }, f);
+      el('feColorMatrix', { in: 'n', type: 'matrix', values: '0 0 0 0 0.35  0 0 0 0 0.24  0 0 0 0 0.12  0 0 0 -1.6 0.95', result: 'g' }, f);
+      el('feComposite', { in: 'g', in2: 'SourceGraphic', operator: 'in', result: 'grain' }, f);
+      const m = el('feMerge', {}, f);
+      el('feMergeNode', { in: 'SourceGraphic' }, m);
+      el('feMergeNode', { in: 'grain' }, m);
+      el('rect', { x: x + 4, y: y + 6, width: w, height: h, fill: '#000', opacity: 0.12 });
+      el('rect', { x, y, width: w, height: h, fill: '#c9a170', filter: `url(#kraft${seed})` });
+      el('rect', { x, y, width: w, height: h, fill: 'none', stroke: '#a57f4f', 'stroke-width': 2 });
+    },
+
     // Dimensions sheet: a 1 euro coin (23.25 mm) to the right of the target,
     // bottoms aligned, and the pack facts above it. K is px per mm.
     coinAndFacts({ el, text }, { K, cy, R, facts }) {
       const cr = 23.25 / 2 * K, ccx = 1130, ccy = cy + R - cr;
-      // Gold-coloured outer ring, silver-coloured centre (the 2 euro is the reverse).
-      el('circle', { cx: ccx, cy: ccy, r: cr, fill: '#d6b25e', stroke: '#a8873d', 'stroke-width': 3 });
-      el('circle', { cx: ccx, cy: ccy, r: cr * 0.72, fill: '#cfcbc2', stroke: '#8f8a7d', 'stroke-width': 2 });
-      // The face text follows the coin's size, so it stays inside the
-      // silver centre on small-scale sheets.
-      const fs = Math.min(40, cr * 0.72);
-      text(ccx, ccy + fs * 0.35, '1 €', { 'text-anchor': 'middle', 'font-size': fs, 'font-weight': 700, fill: '#55524b' });
-      text(ccx, ccy - cr - 46, 'Pièce de 1 €', { 'text-anchor': 'middle', 'font-size': 34, 'font-weight': 700, fill: 'var(--ink)' });
-      text(ccx, ccy - cr - 14, '23,25 mm', { 'text-anchor': 'middle', 'font-size': 28, 'font-weight': 500, fill: 'var(--mute)' });
+      targets.coin({ el, text }, ccx, ccy, cr);
       facts.forEach(([big, small], i) => {
         const fy = 470 + i * 110;
         text(900, fy, big, { 'font-size': 50, 'font-weight': 700, fill: 'var(--ink)' });

@@ -19,7 +19,10 @@
   // `impact` block gives { centre, radius, seed, hits } exactly as passed
   // to beforeAfter (hits in its 560 px panel), plus zones (a colour per
   // zone, radii in photo px) or holes: 'plain' for a non-reactive target,
-  // and shape: 'square' (radius = half the side) for a square target.
+  // and shape: 'square' (radius = half the side) for a square target, and
+  // size to scale the splatter and holes (sheets of small stickers), and
+  // shape: 'rect' with radiusH (half the height) for a portrait card, its
+  // longer side filling the page as in beforeAfter.
   const params = new URLSearchParams(location.search);
   const NS = 'http://www.w3.org/2000/svg';
   const svg = document.getElementById('s');
@@ -39,12 +42,13 @@
   };
   document.head.appendChild(spec);
 
-  function draw(photo, { centre: [px, py], radius, seed, hits, colour = '#e4f21c', zones = null, holes = 'splatter', shape = 'round' }) {
-    const D = 1200, cx = 750, cy = 750, s = D / (2 * radius), k = D / 560;
+  function draw(photo, { centre: [px, py], radius, seed, hits, colour = '#e4f21c', zones = null, holes = 'splatter', shape = 'round', size = 1, radiusH = radius }) {
+    const D = 1200, cx = 750, cy = 750, s = D / (2 * Math.max(radius, radiusH)), k = D / 560;
     const rnd = Infographic.rng(seed);
     const defs = el('defs', {});
     const cp = el('clipPath', { id: 'disc' }, defs);
-    if (shape === 'square') el('rect', { x: cx - D / 2, y: cy - D / 2, width: D, height: D }, cp);
+    const w = 2 * radius * s, h = 2 * radiusH * s;
+    if (shape === 'square' || shape === 'rect') el('rect', { x: cx - w / 2, y: cy - h / 2, width: w, height: h }, cp);
     else el('circle', { cx, cy, r: D / 2 }, cp);
     el('image', { href: photo, x: cx - px * s, y: cy - py * s, width: 1000 * s, height: 1000 * s, 'clip-path': 'url(#disc)' });
     const g = el('g', { 'clip-path': 'url(#disc)' });
@@ -58,8 +62,8 @@
     for (const [dx, dy] of hits) {
       const x = cx + dx * k, y = cy + dy * k;
       // A bare hole: dark centre, a pale torn rim (beforeAfter's, scaled).
-      if (holes === 'plain') el('circle', { cx: x, cy: y, r: 11 * k, fill: '#141414', stroke: 'rgba(255,255,255,.75)', 'stroke-width': 2.5 * k }, g);
-      else Infographic.targets.splat(el, rnd, x, y, (24 + rnd() * 7) * k, g, zoneColour(dx, dy));
+      if (holes === 'plain') el('circle', { cx: x, cy: y, r: 11 * k * size, fill: '#141414', stroke: 'rgba(255,255,255,.75)', 'stroke-width': 2.5 * k * size }, g);
+      else Infographic.targets.splat(el, rnd, x, y, (24 + rnd() * 7) * k * size, g, zoneColour(dx, dy));
     }
   }
 </script>

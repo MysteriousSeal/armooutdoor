@@ -1,24 +1,28 @@
 // 20 cardboard score targets, yellow and black, 22.86 x 17.78 cm portrait
 // (SKU 20PK-SCORE-TARGET-YLBK-9X7IN, product 230 on prod). No supplier sheet:
 // every fact comes from the product page on armooutdoor.fr. Not reactive and
-// not adhesive. A plain oval, not a human shape. Measured on the flat
-// gallery photo: card x 156 to 843, y 63 to 939 (centre 499.5, 501, half
-// 343.5 x 438); stadium-shaped lines around 500,505: black oval x 215 to 785,
-// y 92 to 920; outer line x 240 to 760, y 117 to 895; 8 line x 293 to 708,
-// y 220 to 790; 9 line x 371 to 629, y 297 to 712; inner oval x 440 to 560,
-// y 400 to 607; red X bull x 468 to 533, y 452 to 555.
+// not adhesive. A plain oval, not a human shape. Measured on the sharper
+// flat photo the user uploaded on 2026-11-02: card x 147 to 851, y 62 to 939
+// (centre 499, 500.5, half 352 x 438.5); stadium-shaped lines around 500,503:
+// black oval x 212 to 788, y 88 to 920; outer line x 237 to 763; 8 line x 292
+// to 708, y 218 to 788; 9 line x 370 to 630, y 297 to 707; inner oval x 440
+// to 560, y 400 to 607; red X bull x 467 to 533, y 452 to 557 (the X itself
+// is printed yellow). Zones: 9 between the inner oval and the 9 line, 8 to
+// the 8 line, 7 to the outer line.
+const CARD = { centre: [499, 500.5], half: 352, halfH: 438.5 };
 window.PRODUCT = {
   eyebrow: '20 cibles carton score jaune et noir',
 
   variants: {
     card: {
       photo: 'photos/20pk-score-target-ylbk-9x7in.jpg',
-      points: [[[228, 300]], [[293, 640]], [[190, 850]], [[558, 178]], [[500, 462]], [[820, 920]]],
+      points: [[[224, 380]], [[292, 640]], [[180, 850]], [[562, 177]], [[500, 466]], [[820, 920]]],
     },
   },
 
   anatomy: {
     title: 'Anatomie de la cible',
+    photoFilter: 'brightness(1.03)',
     callouts: [
       { side: 'l', y: 380, title: 'Ovale noir', text: 'Plus haut que large, il épouse le carton' },
       { side: 'l', y: 640, title: 'Zones 7, 8 et 9', text: 'Délimitées par des lignes jaunes' },
@@ -42,7 +46,7 @@ window.PRODUCT = {
     },
     draw(kit, P, V) {
       Infographic.targets.squareToScale(kit, V.photo, {
-        centre: [499.5, 501], half: 343.5, halfH: 438, mm: 177.8, mmH: 228.6, K: 3,
+        ...CARD, mm: 177.8, mmH: 228.6, K: 3,
         facts: [['20', 'cibles'], ['Zones 7 à 9', 'et mouche X'], ['Carton', 'non adhésif']],
       });
     },
@@ -50,14 +54,26 @@ window.PRODUCT = {
 
   // Three cards in a row on a 1 m panel (mounted.html), at true size, as
   // for the 8-bullseye card of the same format.
-  mounted: { centre: [499.5, 501], half: 343.5, halfH: 438, cm: 17.78, cmH: 22.86, count: 3 },
+  mounted: [
+    { ...CARD, cm: 17.78, cmH: 22.86, count: 3 },
+    // Four in a 2 x 2 grid on a 55 x 55 cm board, the size of a C50 card.
+    { id: 'c50', ...CARD, cm: 17.78, cmH: 22.86, panel: [55, 55], count: 4 },
+  ],
 
   // A pile of cards, no text (stack.html): the pack holds 20.
-  stack: { centre: [499.5, 501], half: 343.5, halfH: 438, cm: 17.78, cmH: 22.86, count: 7 },
+  stack: { ...CARD, cm: 17.78, cmH: 22.86, count: 7 },
 
-  // A series scored by zone, plain holes. Each hit was checked against the
-  // stadium lines above, off the printed numbers and outside the inner
-  // oval (whose value the page doesn't give): 9, 9, 8, 8, 7.
+  // The scored series both the effect sheet and the text-free impact.html
+  // draw. Each hit was checked on the photo by counting the yellow lines
+  // crossed from the centre, and keeps 27 px or more from any line: photo
+  // (575,415) 9, (420,600) 9, (660,380) 8, (340,640) 8, (650,210) 7, at
+  // panel scale 0.6386.
+  impact: {
+    ...CARD, radius: CARD.half, radiusH: CARD.halfH, shape: 'rect', seed: 230, holes: 'plain',
+    hits: [[48.5, -54.6], [-50.4, 63.5], [102.8, -77], [-101.5, 89.1], [96.4, -185.5]],
+  },
+
+  // Before / after the scored series, plain holes.
   effect: {
     title: 'Compter les points',
     footer: {
@@ -66,11 +82,7 @@ window.PRODUCT = {
     },
     draw(kit, V) {
       Infographic.targets.beforeAfter(kit, V.photo, {
-        centre: [499.5, 501], radius: 343.5, radiusH: 438, shape: 'rect', seed: 230,
-        holes: 'plain',
-        // Photo (585,440) 9, (420,600) 9, (660,380) 8, (380,690) 8, (620,200) 7, at 0.639;
-        // each at least 25 photo px inside its zone's lines.
-        hits: [[55, -39], [-51, 63], [103, -77], [-76, 121], [77, -192]],
+        ...window.PRODUCT.impact,
         afterLabel: 'APRÈS UNE SÉRIE',
         closeUp: false,
         closeUpTitle: 'Le score de la série',
