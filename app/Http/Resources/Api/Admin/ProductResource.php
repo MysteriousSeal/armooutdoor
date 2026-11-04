@@ -42,6 +42,7 @@ class ProductResource extends JsonResource
             'gtin' => $this->gtin,
             'is_active' => (bool) $this->is_active,
             'ai_validated' => (bool) $this->ai_validated,
+            'full_photos' => (bool) $this->full_photos,
             'age_restricted' => (bool) $this->age_restricted,
             'image_may_vary' => (bool) $this->image_may_vary,
             'featured' => (bool) $this->featured,

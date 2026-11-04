@@ -96,6 +96,7 @@ Every endpoint wraps its payload in `data`.
   "gtin": null,
   "is_active": true,
   "ai_validated": false,
+  "full_photos": false,
   "age_restricted": false,
   "image_may_vary": false,
   "featured": false,
@@ -148,6 +149,7 @@ Every endpoint wraps its payload in `data`.
 | `sort_order` | Ascending. Storefront listings order by it, so **lower appears first**. |
 | `slug` | The product's public URL. Writable; every previous slug keeps redirecting here with a `301`. |
 | `ai_validated` | Whether the page has been reviewed and passed. `false` on every new product. Nothing on the storefront reads it; it is a bookkeeping flag for whoever is working through the catalogue. |
+| `full_photos` | Whether the product has its model photos and infographics, ticked by hand on the admin product list. `false` on every new product. Read-only here. Nothing on the storefront reads it. |
 
 ### Write-only fields
 

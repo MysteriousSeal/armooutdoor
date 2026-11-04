@@ -515,4 +515,20 @@ class AdminProductApiTest extends TestCase
             'price' => 4.9,
         ], $this->headers())->assertCreated()->assertJsonPath('data.slug', 'cible-ronde-fluo-2');
     }
+
+    // ---------------------------------------------------------------- full photos
+
+    public function test_the_full_photos_mark_can_be_read_but_not_written(): void
+    {
+        $product = Product::factory()->create(['full_photos' => true]);
+
+        $this->getJson('/api/admin/products/'.$product->id, $this->headers())
+            ->assertOk()
+            ->assertJsonPath('data.full_photos', true);
+
+        $this->patchJson('/api/admin/products/'.$product->id, ['full_photos' => false], $this->headers())
+            ->assertOk();
+
+        $this->assertTrue($product->fresh()->full_photos);
+    }
 }
