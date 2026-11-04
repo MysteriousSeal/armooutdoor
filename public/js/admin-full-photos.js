@@ -52,6 +52,14 @@
                 button.querySelector('path').setAttribute('d', on ? CHECK : CROSS);
                 button.querySelector('.sr-only').textContent = on ? 'Full photos' : 'Photos missing';
 
+                var count = document.querySelector('[data-full-photos-count]');
+                var percent = document.querySelector('[data-full-photos-percent]');
+
+                if (count && percent) {
+                    count.textContent = data.full_photos_stats.count;
+                    percent.textContent = data.full_photos_stats.percent;
+                }
+
                 if (window.armoToast) {
                     window.armoToast.show(data.message);
                 }

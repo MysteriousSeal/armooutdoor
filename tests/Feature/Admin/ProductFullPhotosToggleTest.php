@@ -58,7 +58,7 @@ class ProductFullPhotosToggleTest extends TestCase
         $this->actingAs($this->admin())
             ->patchJson(route('admin.products.full-photos', $product))
             ->assertOk()
-            ->assertExactJson(['full_photos' => true, 'message' => 'Marked as having its full photos.']);
+            ->assertExactJson(['full_photos' => true, 'full_photos_stats' => ['count' => '1', 'percent' => '100.000'], 'message' => 'Marked as having its full photos.']);
 
         $this->assertTrue($product->fresh()->full_photos);
     }
@@ -70,6 +70,18 @@ class ProductFullPhotosToggleTest extends TestCase
         $this->actingAs($this->admin())->get('/admin/products')
             ->assertSee('data-full-photos', false)
             ->assertSee('js/admin-full-photos.js', false);
+    }
+
+    public function test_the_header_counts_the_active_marked_products(): void
+    {
+        Product::factory()->count(2)->create(['full_photos' => true]);
+        Product::factory()->create();
+        // Left out: a disabled product is not on the shop.
+        Product::factory()->create(['full_photos' => true, 'is_active' => false]);
+
+        $this->actingAs($this->admin())->get('/admin/products')
+            // 2 of the 3 active products.
+            ->assertSee('<span data-full-photos-count>2</span> with full photos · <span data-full-photos-percent>66.667</span>%', false);
     }
 
     public function test_a_second_click_undoes_a_misclick(): void

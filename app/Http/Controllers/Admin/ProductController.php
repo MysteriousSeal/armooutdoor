@@ -103,6 +103,7 @@ class ProductController extends Controller
             'oneImageCount' => Product::query()->where('is_active', true)->doesntHave('images')->count(),
             'fewImagesCount' => Product::query()->tap(fn ($query) => $this->fewImages($query))->count(),
             'photoStats' => $this->activePhotoStats(),
+            'fullPhotosStats' => $this->activeFullPhotosStats(),
             'noSeoCount' => count($this->seoFailingIds()),
             'priceMismatchCount' => count($this->priceMismatchIds()),
             'categories' => $this->categoryOptions(),
@@ -383,6 +384,23 @@ class ProductController extends Controller
         return back()->with('status', $product->is_active ? 'Product activated.' : 'Product disabled.');
     }
 
+    /**
+     * The active products marked as having their full photos, already
+     * formatted so the page and its script print the same figures.
+     *
+     * @return array{count: string, percent: string}
+     */
+    private function activeFullPhotosStats(): array
+    {
+        $active = Product::query()->where('is_active', true)->count();
+        $marked = Product::query()->where('is_active', true)->where('full_photos', true)->count();
+
+        return [
+            'count' => number_format($marked),
+            'percent' => number_format($active > 0 ? $marked / $active * 100 : 0, 3),
+        ];
+    }
+
     public function toggleFullPhotos(Request $request, Product $product): RedirectResponse|JsonResponse
     {
         $product->update(['full_photos' => ! $product->full_photos]);
@@ -395,7 +413,11 @@ class ProductController extends Controller
         $message = $product->full_photos ? 'Marked as having its full photos.' : 'No longer marked as having its full photos.';
 
         if ($request->expectsJson()) {
-            return response()->json(['full_photos' => $product->full_photos, 'message' => $message]);
+            return response()->json([
+                'full_photos' => $product->full_photos,
+                'full_photos_stats' => $this->activeFullPhotosStats(),
+                'message' => $message,
+            ]);
         }
 
         return back()->with('status', $message);
