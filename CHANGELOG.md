@@ -2,6 +2,20 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-11-04 · v1.76.0 · build ZO6ADU
+
+### Admin
+
+- **A Lettre suivie order has a « Download full address label » button** next to « Download address label »: a 15 x 10 cm landscape label for a label printer roll, with « Réf. commande : » and the order number in the top left corner above the sender (« Expéditeur », the company name and address), and the recipient in the bottom right corner in the same size. No phone, no price. The small 70 x 50 mm label is unchanged.
+
+### Under the hood
+
+- **More product infographics:** seven more round targets (94, 96, 97, 138, 146, 154, 155) get a text-free impact image and a 55 cm C50 board; the square targets and boards get impact images, C50 boards and piles; products 350 and 351 get their full set on their sharper photo, and 153 is redone on its new one.
+- **Stickers and pastilles:** the target helpers gain peel-off stickers (sheet dimensions, usage sheets, loose stickers on the C50 board), `pastilles.js` draws the nine 13 mm colours, and an effect slot takes a list of sheets. Product 228 gets its cycle and safety sheets, and 229, 230 and 349 move to their sharper photos.
+- **New specs** for the 100, 50 and 40 round ammo boxes, the .22 LR mini cases, the label rolls, the 8-colour dots, the MOLLE phone pouches (57, 362, 364), the 12-gauge shell pouches (85, 372, 373) and the neck gaiters (366, 367). The coin helper can skip its caption so a sheet sets its own.
+
+**No migration.**
+
 ## 2026-11-02 · v1.75.0 · build MHRPF3
 
 ### Admin
