@@ -26,7 +26,7 @@
                 @if ($photoStats !== null)
                     <span class="admin-list-chip" title="Main photo plus gallery, averaged over the active products. The goal is 5 per product; a product counts for 5 at most toward it">{{ number_format($photoStats['average'], 3) }} photos per product · {{ number_format($photoStats['completion'], 3) }}% of the 5-photo goal</span>
                 @endif
-                @if ($search !== '' || $categorySlug !== '' || $supplierId !== null || $ai !== '' || $seo !== '')
+                @if ($search !== '' || $categorySlug !== '' || $supplierId !== null || $ai !== '' || $seo !== '' || $fullPhotos !== '')
                     <span class="admin-list-chip is-filtered">Filtered</span>
                 @endif
             </div>
@@ -41,6 +41,7 @@
                 'supplier' => array_key_exists('supplier', $overrides) ? $overrides['supplier'] : $supplierId,
                 'ai' => array_key_exists('ai', $overrides) ? $overrides['ai'] : ($ai !== '' ? $ai : null),
                 'seo' => array_key_exists('seo', $overrides) ? $overrides['seo'] : ($seo !== '' ? $seo : null),
+                'photos' => array_key_exists('photos', $overrides) ? $overrides['photos'] : ($fullPhotos !== '' ? $fullPhotos : null),
             ]);
             $tabQuery = fn (string $name) => $listQuery(['tab' => $name]);
             $sortLink = function (string $column) use ($sort, $listQuery): array {
@@ -51,7 +52,7 @@
                     'state' => str_starts_with($sort, $column.'-') ? substr($sort, strlen($column) + 1) : null,
                 ];
             };
-            $hasFilters = $search !== '' || $categorySlug !== '' || $supplierId !== null || $ai !== '' || $seo !== '';
+            $hasFilters = $search !== '' || $categorySlug !== '' || $supplierId !== null || $ai !== '' || $seo !== '' || $fullPhotos !== '';
             $activeCategory = $categorySlug !== ''
                 ? $categories->firstWhere('slug', $categorySlug)
                 : null;
@@ -165,10 +166,18 @@
                         <option value="off" @selected($seo === 'off')>Off</option>
                     </select>
                 </div>
+                <div class="admin-filter-field">
+                    <label class="admin-field-label" for="product-full-photos">Full photos</label>
+                    <select id="product-full-photos" name="photos" class="form-control">
+                        <option value="">All</option>
+                        <option value="yes" @selected($fullPhotos === 'yes')>Yes</option>
+                        <option value="no" @selected($fullPhotos === 'no')>No</option>
+                    </select>
+                </div>
                 <div class="admin-filter-actions">
                     <button type="submit" class="btn btn-primary">Apply</button>
                     @if ($hasFilters)
-                        <a href="{{ route('admin.products.index', $listQuery(['search' => null, 'category' => null, 'supplier' => null, 'ai' => null, 'seo' => null])) }}" class="btn btn-secondary">Clear</a>
+                        <a href="{{ route('admin.products.index', $listQuery(['search' => null, 'category' => null, 'supplier' => null, 'ai' => null, 'seo' => null, 'photos' => null])) }}" class="btn btn-secondary">Clear</a>
                     @endif
                 </div>
             </div>
@@ -203,6 +212,12 @@
                 @if ($seo !== '')
                     <a href="{{ route('admin.products.index', $listQuery(['seo' => null])) }}" class="admin-filter-chip">
                         SEO · {{ $seo === 'ok' ? 'OK' : 'Off' }}
+                        <span aria-hidden="true">×</span>
+                    </a>
+                @endif
+                @if ($fullPhotos !== '')
+                    <a href="{{ route('admin.products.index', $listQuery(['photos' => null])) }}" class="admin-filter-chip">
+                        Full photos · {{ $fullPhotos === 'yes' ? 'Yes' : 'No' }}
                         <span aria-hidden="true">×</span>
                     </a>
                 @endif

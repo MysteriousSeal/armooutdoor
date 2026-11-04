@@ -90,4 +90,33 @@ class ProductFullPhotosToggleTest extends TestCase
 
         $this->assertFalse($product->fresh()->full_photos);
     }
+
+    public function test_the_filter_keeps_marked_or_unmarked_products(): void
+    {
+        $marked = Product::factory()->create(['full_photos' => true]);
+        $unmarked = Product::factory()->create();
+
+        $listed = fn (string $query) => $this->actingAs($this->admin())
+            ->get('/admin/products'.$query)
+            ->assertOk()
+            ->viewData('products')
+            ->pluck('id')
+            ->all();
+
+        $this->assertSame([$marked->id], $listed('?photos=yes'));
+        $this->assertSame([$unmarked->id], $listed('?photos=no'));
+        $this->assertEqualsCanonicalizing([$marked->id, $unmarked->id], $listed(''));
+        // An unknown value filters nothing.
+        $this->assertEqualsCanonicalizing([$marked->id, $unmarked->id], $listed('?photos=maybe'));
+    }
+
+    public function test_an_active_filter_shows_its_chip_and_survives_the_tabs(): void
+    {
+        Product::factory()->create();
+
+        $this->actingAs($this->admin())->get('/admin/products?photos=no')
+            ->assertSee('Full photos · No')
+            ->assertSee('tab=disabled&amp;sort=', false)
+            ->assertSee('photos=no', false);
+    }
 }
