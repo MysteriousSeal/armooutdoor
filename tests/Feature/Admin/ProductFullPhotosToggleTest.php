@@ -51,6 +51,27 @@ class ProductFullPhotosToggleTest extends TestCase
             ->assertSee('uploaded: click to unmark');
     }
 
+    public function test_the_page_script_gets_the_new_state_without_a_redirect(): void
+    {
+        $product = Product::factory()->create();
+
+        $this->actingAs($this->admin())
+            ->patchJson(route('admin.products.full-photos', $product))
+            ->assertOk()
+            ->assertExactJson(['full_photos' => true, 'message' => 'Marked as having its full photos.']);
+
+        $this->assertTrue($product->fresh()->full_photos);
+    }
+
+    public function test_the_list_hands_the_form_to_the_page_script(): void
+    {
+        Product::factory()->create();
+
+        $this->actingAs($this->admin())->get('/admin/products')
+            ->assertSee('data-full-photos', false)
+            ->assertSee('js/admin-full-photos.js', false);
+    }
+
     public function test_a_second_click_undoes_a_misclick(): void
     {
         $product = Product::factory()->create(['full_photos' => true]);

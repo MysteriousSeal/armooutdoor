@@ -450,7 +450,7 @@
                                 </td>
                                 <td>@include('admin.marketplaces.partials.shop-image-count', ['count' => $product->shopImageCount()])</td>
                                 <td>
-                                    <form method="POST" action="{{ route('admin.products.full-photos', $product) }}">
+                                    <form method="POST" action="{{ route('admin.products.full-photos', $product) }}" data-full-photos>
                                         @csrf
                                         @method('PATCH')
                                         <button
@@ -458,17 +458,11 @@
                                             class="gtin-flag gtin-flag--btn {{ $product->full_photos ? 'is-set' : 'is-missing' }}"
                                             title="{{ $product->full_photos ? 'Model photos and infographics uploaded: click to unmark' : 'Model photos and infographics not uploaded yet: click to mark' }}"
                                         >
-                                            @if ($product->full_photos)
-                                                <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
-                                                    <path d="m5 13 4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                                <span class="sr-only">Full photos</span>
-                                            @else
-                                                <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
-                                                    <path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-                                                </svg>
-                                                <span class="sr-only">Photos missing</span>
-                                            @endif
+                                            {{-- One drawing for both states: admin-full-photos.js swaps its path. --}}
+                                            <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                                                <path d="{{ $product->full_photos ? 'm5 13 4 4L19 7' : 'M6 6l12 12M18 6 6 18' }}" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                            <span class="sr-only">{{ $product->full_photos ? 'Full photos' : 'Photos missing' }}</span>
                                         </button>
                                     </form>
                                 </td>
@@ -729,6 +723,7 @@
 
 @push('scripts')
     <script src="{{ versioned_asset('js/admin-supplier-availability.js') }}" defer></script>
+    <script src="{{ versioned_asset('js/admin-full-photos.js') }}" defer></script>
     <script src="{{ versioned_asset('js/admin-suggested-price.js') }}" defer></script>
     <script>
         (function () {

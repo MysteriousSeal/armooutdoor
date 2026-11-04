@@ -375,7 +375,7 @@ class ProductController extends Controller
         return back()->with('status', $product->is_active ? 'Product activated.' : 'Product disabled.');
     }
 
-    public function toggleFullPhotos(Product $product): RedirectResponse
+    public function toggleFullPhotos(Request $request, Product $product): RedirectResponse|JsonResponse
     {
         $product->update(['full_photos' => ! $product->full_photos]);
         AdminActivityLog::record(
@@ -384,7 +384,13 @@ class ProductController extends Controller
             ($product->full_photos ? 'Marked full photos on ' : 'Unmarked full photos on ').$product->localizedName()
         );
 
-        return back()->with('status', $product->full_photos ? 'Marked as having its full photos.' : 'No longer marked as having its full photos.');
+        $message = $product->full_photos ? 'Marked as having its full photos.' : 'No longer marked as having its full photos.';
+
+        if ($request->expectsJson()) {
+            return response()->json(['full_photos' => $product->full_photos, 'message' => $message]);
+        }
+
+        return back()->with('status', $message);
     }
 
     /**
