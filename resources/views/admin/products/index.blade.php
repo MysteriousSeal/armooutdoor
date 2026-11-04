@@ -309,6 +309,7 @@
                             <th title="Supplier can still source it — click to toggle">At supplier</th>
                             <th>Variants</th>
                             <th title="Photos on the shop: main photo plus gallery">Photos</th>
+                            <th title="Model photos and infographics uploaded: click to toggle">Full photos</th>
                             <th>Weight</th>
                             <th>GTIN</th>
                             <th title="Title 20–60 and meta description 80–160 characters">SEO</th>
@@ -448,6 +449,29 @@
                                     @endif
                                 </td>
                                 <td>@include('admin.marketplaces.partials.shop-image-count', ['count' => $product->shopImageCount()])</td>
+                                <td>
+                                    <form method="POST" action="{{ route('admin.products.full-photos', $product) }}">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button
+                                            type="submit"
+                                            class="gtin-flag gtin-flag--btn {{ $product->full_photos ? 'is-set' : 'is-missing' }}"
+                                            title="{{ $product->full_photos ? 'Model photos and infographics uploaded: click to unmark' : 'Model photos and infographics not uploaded yet: click to mark' }}"
+                                        >
+                                            @if ($product->full_photos)
+                                                <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                                                    <path d="m5 13 4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
+                                                <span class="sr-only">Full photos</span>
+                                            @else
+                                                <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                                                    <path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                                                </svg>
+                                                <span class="sr-only">Photos missing</span>
+                                            @endif
+                                        </button>
+                                    </form>
+                                </td>
                                 <td>
                                     {{-- Le poids décide du prix du port : le chiffre reste quand
                                          il existe. Absent, un tiret se confond avec une colonne
@@ -594,7 +618,7 @@
                                         ->values();
                                 @endphp
                                 <tr class="admin-variant-row" id="variant-panel-{{ $product->id }}" hidden>
-                                    <td colspan="16">
+                                    <td colspan="17">
                                         <div class="admin-variant-panel">
                                             <table class="admin-variant-table">
                                                 <thead>

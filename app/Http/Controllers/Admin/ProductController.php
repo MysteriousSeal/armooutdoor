@@ -375,6 +375,18 @@ class ProductController extends Controller
         return back()->with('status', $product->is_active ? 'Product activated.' : 'Product disabled.');
     }
 
+    public function toggleFullPhotos(Product $product): RedirectResponse
+    {
+        $product->update(['full_photos' => ! $product->full_photos]);
+        AdminActivityLog::record(
+            'product.full_photos_updated',
+            $product,
+            ($product->full_photos ? 'Marked full photos on ' : 'Unmarked full photos on ').$product->localizedName()
+        );
+
+        return back()->with('status', $product->full_photos ? 'Marked as having its full photos.' : 'No longer marked as having its full photos.');
+    }
+
     /**
      * Tout ce qui a fait bouger le stock de ce produit.
      *
