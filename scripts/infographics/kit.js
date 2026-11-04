@@ -149,8 +149,9 @@
 
   // Shared drawings for the round reactive targets (stickers on a roll).
   const targets = {
-    // A 1 euro coin (23.25 mm) of radius cr at (cx, cy), titled above.
-    coin({ el, text }, cx, cy, cr) {
+    // A 1 euro coin (23.25 mm) of radius cr at (cx, cy), titled above
+    // unless caption is false (the sheet then sets its own).
+    coin({ el, text }, cx, cy, cr, { caption = true } = {}) {
       // Gold-coloured outer ring, silver-coloured centre (the 2 euro is the reverse).
       el('circle', { cx, cy, r: cr, fill: '#d6b25e', stroke: '#a8873d', 'stroke-width': 3 });
       el('circle', { cx, cy, r: cr * 0.72, fill: '#cfcbc2', stroke: '#8f8a7d', 'stroke-width': 2 });
@@ -158,6 +159,7 @@
       // silver centre on small-scale sheets.
       const fs = Math.min(40, cr * 0.72);
       text(cx, cy + fs * 0.35, '1 €', { 'text-anchor': 'middle', 'font-size': fs, 'font-weight': 700, fill: '#55524b' });
+      if (!caption) return;
       text(cx, cy - cr - 46, 'Pièce de 1 €', { 'text-anchor': 'middle', 'font-size': 34, 'font-weight': 700, fill: 'var(--ink)' });
       text(cx, cy - cr - 14, '23,25 mm', { 'text-anchor': 'middle', 'font-size': 28, 'font-weight': 500, fill: 'var(--mute)' });
     },

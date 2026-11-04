@@ -54,8 +54,9 @@
   // two targets of 250 px, the hits as holes (or splatter on the reactive
   // one), then the stickers over the hits listed in cover.
   // kind: 'reactive' (our 76 mm target), 'paper' or 'green'.
-  function repair(kit, x0, { kind, fill, hits, cover, seed }) {
-    const { el, text } = kit, D = 250, cy = 730, xs = [x0 + 125, x0 + 435], r = 21;
+  // r: the sticker's radius on the 250 px target (21 for 13 mm on 76 mm).
+  function repair(kit, x0, { kind, fill, hits, cover, seed, r = 21 }) {
+    const { el, text } = kit, D = 250, cy = 730, xs = [x0 + 125, x0 + 435];
     xs.forEach((cx, i) => {
       if (kind === 'reactive') T().usedTarget(el, cx, cy, D, Infographic.rng(seed), hits);
       else {
@@ -90,32 +91,99 @@
     });
   }
 
-  // The dimensions sheet: one sticker and the coin at 14 px per mm, the pack
-  // facts, then the holes the pages say a 13 mm sticker covers, at the same
-  // scale, dashed over three stickers.
-  function dimensions({ el, text, dim, ext, section }, fill) {
+  // The dimensions sheet: one sticker and the coin enlarged at the same
+  // scale, the pack facts, then holes the page says it covers, at the same
+  // scale, dashed over stickers. opts (all optional, 13 mm by default):
+  // mm, count ('1 000'), K (px per mm), holes [[label, small, hole mm]].
+  // The scale shrinks for bigger stickers so the row of holes still fits.
+  const HOLES_13 = [['4,5 mm', 'plomb ou bille', 4.5], ['5,5 mm', 'plomb ou bille', 5.5], ['.22 LR', 'impact', 5.7]];
+  function dimensions({ el, text, dim, ext, section }, fill, { mm = 13, count = '1 000', K, holes = HOLES_13 } = {}) {
     defs(el);
-    const K = 14, r = 13 / 2 * K, cr = 23.25 / 2 * K, sx = 270, sy = 760;
+    // As large as the row allows: sticker, gap and coin within 610 px.
+    K = K || Math.min(14, 610 / (mm + 23.25));
+    const r = mm / 2 * K, cr = 23.25 / 2 * K, sx = Math.max(270, 150 + r), sy = Math.min(760, 895 - r);
     section(150, 400, 'UNE PASTILLE ET LA PIÈCE');
     dot(el, sx, sy, r, fill);
     ext(sx - r, sy - 8, sx - r, sy - r - 70); ext(sx + r, sy - 8, sx + r, sy - r - 70);
-    dim(sx - r, sy - r - 55, sx + r, sy - r - 55, '13 mm', 44);
-    T().coin({ el, text }, 610, sy + r - cr, cr);
-    [['1 000', 'pastilles'], ['Rouleau', 'à dérouler au fil des séances']].forEach(([big, small], i) => {
+    dim(sx - r, sy - r - 55, sx + r, sy - r - 55, `${String(mm).replace('.', ',')} mm`, 44);
+    const coinX = Math.max(610, sx + r + 60 + cr);
+    T().coin({ el, text }, coinX, sy + r - cr, cr);
+    const fx = Math.max(860, coinX + cr + 60);
+    [[count, 'pastilles'], ['Rouleau', 'à dérouler au fil des séances']].forEach(([big, small], i) => {
       const fy = 640 + i * 110;
-      text(860, fy, big, { 'font-size': 50, 'font-weight': 700, fill: 'var(--ink)' });
-      text(860, fy + 32, small, { 'font-size': 26, 'font-weight': 500, fill: 'var(--mute)', 'letter-spacing': '.04em' });
+      text(fx, fy, big, { 'font-size': 50, 'font-weight': 700, fill: 'var(--ink)' });
+      text(fx, fy + 32, small, { 'font-size': 26, 'font-weight': 500, fill: 'var(--mute)', 'letter-spacing': '.04em' });
     });
     section(150, 960, 'IMPACTS COUVERTS');
-    // Hole sizes: the pellet calibres, and a .22 LR bullet (5.7 mm).
     const line = fill === '#000000' ? '#e8e4dc' : INK;
-    [['4,5 mm', 'plomb ou bille', 4.5], ['5,5 mm', 'plomb ou bille', 5.5], ['.22 LR', 'impact', 5.7]].forEach(([big, small, mm], i) => {
-      const cx = 245 + i * 350, cy = 1120;
-      dot(el, cx, cy, r, fill);
-      el('circle', { cx, cy, r: mm / 2 * K, fill: 'none', stroke: line, 'stroke-width': 3, 'stroke-dasharray': '6 5' });
-      text(cx + r + 24, cy - 4, big, { 'font-size': 38, 'font-weight': 700, fill: 'var(--ink)' });
-      text(cx + r + 24, cy + 28, small, { 'font-size': 24, 'font-weight': 500, fill: 'var(--mute)' });
+    // Up to four holes across: smaller dots when there are more of them.
+    // Three holes keep the 13 mm layout; more get smaller dots on a grid.
+    const n = holes.length, hr = Math.min(r, n > 3 ? 52 : 91), step = n > 3 ? 1200 / Math.ceil(n / 2) : 350;
+    holes.forEach(([big, small, hmm], i) => {
+      const k = hr / r * K, col = n > 3 ? i % Math.ceil(n / 2) : i, row = n > 3 ? Math.floor(i / Math.ceil(n / 2)) : 0;
+      const cx = (n > 3 ? 150 + hr : 245) + col * step, cy = n > 3 ? 1045 + row * 135 : 1120;
+      dot(el, cx, cy, hr, fill);
+      el('circle', { cx, cy, r: hmm / 2 * k, fill: 'none', stroke: line, 'stroke-width': 3, 'stroke-dasharray': '6 5' });
+      text(cx + hr + 24, cy - 4, big, { 'font-size': n > 3 ? 34 : 38, 'font-weight': 700, fill: 'var(--ink)' });
+      text(cx + hr + 24, cy + 28, small, { 'font-size': n > 3 ? 22 : 24, 'font-weight': 500, fill: 'var(--mute)' });
     });
+  }
+
+  // A round close-up of a surface (radius R, coyote rim) at (cx, cy): bg
+  // fill, optional rings of a light paper target, one sticker of radius r
+  // and, beside it, a bare hole of radius hole or a splatter (an unrepaired
+  // reactive hit, to show the black sticker blends in).
+  let zoomN = 0;
+  function closeUp(el, cx, cy, R, { bg, ring = false, fill, r, hole: holeR = 0, splat = false }) {
+    defs(el);
+    const id = 'zoom' + (++zoomN), cp = el('clipPath', { id }, el('defs', {}));
+    el('circle', { cx, cy, r: R }, cp);
+    const g = el('g', { 'clip-path': `url(#${id})` });
+    el('rect', { x: cx - R, y: cy - R, width: 2 * R, height: 2 * R, fill: bg }, g);
+    if (ring) for (const k of [1.25, 1.75]) el('circle', { cx: cx - 30, cy: cy + 10, r: R * k * 0.55, fill: 'none', stroke: INK, 'stroke-width': 3 }, g);
+    dot(el, cx - 40, cy + 10, r, fill, g);
+    if (holeR) {
+      // The hole the sticker now hides, dashed, and its torn edge.
+      el('circle', { cx: cx - 40, cy: cy + 10, r: holeR * 1.6, fill: 'none', stroke: '#9a958a', 'stroke-width': 3, 'stroke-dasharray': '7 6' }, g);
+    }
+    if (splat) T().splat(el, Infographic.rng(345), cx + 150, cy - 120, 48, g);
+    el('circle', { cx, cy, r: R, fill: 'none', stroke: 'var(--coyote)', 'stroke-width': 5 });
+  }
+
+  // Our 20 cm board (tgt-splat-200mm-20-fluo's photo, red centre r40 in
+  // its photo = 9.15 mm of its 200 mm) before and after: hits in the red
+  // centre, then one 25 mm sticker over it. Drawn at 250 px for 200 mm.
+  function bigRepair(kit, x0, fill) {
+    const { el, text } = kit, cy = 730, xs = [x0 + 125, x0 + 435], D = 250, s = D / (2 * 437);
+    const hits = [[-6, 4], [7, -5], [3, 9]];
+    xs.forEach((cx, i) => {
+      const id = 'big' + i, cp = el('clipPath', { id }, el('defs', {}));
+      el('rect', { x: cx - D / 2, y: cy - D / 2, width: D, height: D }, cp);
+      el('image', { href: 'photos/tgt-splat-200mm-20-fluo.jpg', x: cx - 499 * s, y: cy - 500 * s, width: 1000 * s, height: 1000 * s, 'clip-path': `url(#${id})` });
+      const g = el('g', { 'clip-path': `url(#${id})` }), rnd = Infographic.rng(109);
+      hits.forEach(([dx, dy]) => T().splat(el, rnd, cx + dx, cy + dy, 7, g));
+      if (i) dot(el, cx, cy, 25 / 2 * D / 200, fill);
+      text(cx, 900, i ? 'APRÈS' : 'AVANT', { 'text-anchor': 'middle', 'font-size': 24, 'font-weight': 700, 'letter-spacing': '.2em', fill: 'var(--mute)' });
+    });
+    arrowBetween(el, x0, cy);
+  }
+
+  // A tight group on our 76 mm reactive target (at 250 px), covered by one
+  // 25 mm sticker (r 41) after.
+  function groupRepair(kit, x0, fill) {
+    const { el, text } = kit, cy = 730, xs = [x0 + 125, x0 + 435];
+    const hits = [[-60, -60], [-48, -72], [-70, -44], [-42, -50], [-58, -40]];
+    xs.forEach((cx, i) => {
+      T().usedTarget(el, cx, cy, 250, Infographic.rng(345), hits);
+      if (i) dot(el, cx - 55, cy - 55, 41, fill);
+      text(cx, 900, i ? 'APRÈS' : 'AVANT', { 'text-anchor': 'middle', 'font-size': 24, 'font-weight': 700, 'letter-spacing': '.2em', fill: 'var(--mute)' });
+    });
+    arrowBetween(el, x0, cy);
+  }
+
+  function arrowBetween(el, x0, cy) {
+    el('path', { d: `M${x0 + 264} ${cy} H${x0 + 296}`, stroke: 'var(--coyote)', 'stroke-width': 5 });
+    el('path', { d: `M${x0 + 284} ${cy - 12} L${x0 + 298} ${cy} L${x0 + 284} ${cy + 12}`, fill: 'none', stroke: 'var(--coyote)', 'stroke-width': 5, 'stroke-linejoin': 'round' });
   }
 
   // Small drawn props for the labelling uses. Each centred on (cx, cy).
@@ -154,7 +222,7 @@
   }
 
   Infographic.pastilles = {
-    dot, hole, paperTarget, greenTarget, repair, usage, dimensions, ammoBox, magazine, rifleCase, stand, darkBoard,
+    dot, hole, paperTarget, greenTarget, repair, closeUp, bigRepair, groupRepair, usage, dimensions, ammoBox, magazine, rifleCase, stand, darkBoard,
     REACTIVE_HITS, BLACK_ZONES,
     COLOURS: {
       rouge: '#f20d0d', blanc: '#fefefe', noir: '#000000', bleu: '#005dd9', jaune: '#fed504',

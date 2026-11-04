@@ -17,7 +17,7 @@ read_spec() {
     const P = window.PRODUCT;
     console.log(process.argv[2] === "variants"
       ? Object.keys(P.variants).join(" ")
-      : ["anatomy", "dimensions", "effect", "mounted", "stack", "impact"].filter(s => P[s])
+      : ["anatomy", "dimensions", "effect", "mounted", "stack", "impact", "swatch"].filter(s => P[s])
           .flatMap(s => ["mounted", "stack", "effect"].includes(s) && Array.isArray(P[s]) ? P[s].map(m => m.id ? s + ":" + m.id : s) : [s]).join(" "));' "$spec" "$1"
 }
 

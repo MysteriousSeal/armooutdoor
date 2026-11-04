@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Couleurs</title>
+<style>
+  html, body { margin: 0; background: #fff; }
+  svg { display: block; }
+</style>
+</head>
+<body>
+<svg id="s" width="1500" height="1500" viewBox="0 0 1500 1500"></svg>
+<script>
+  // The product's sticker colours as large flat paper dots on white, no
+  // text, in a grid of up to four per row. Opened as
+  // swatch.html?p=<product>&v=<variant>; the spec's `swatch` block gives
+  // { colours: ['#hex', ...] }.
+  const params = new URLSearchParams(location.search);
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.getElementById('s');
+  const el = (tag, attrs, parent = svg) => {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    parent.appendChild(n);
+    return n;
+  };
+
+  const spec = document.createElement('script');
+  spec.src = 'products/' + params.get('p') + '.js';
+  spec.onload = () => draw(window.PRODUCT.swatch.colours);
+  document.head.appendChild(spec);
+
+  function draw(colours) {
+    const defs = el('defs', {});
+    const f = el('filter', { id: 'soft', x: '-30%', y: '-30%', width: '160%', height: '160%' }, defs);
+    el('feGaussianBlur', { stdDeviation: 6 }, f);
+    const cols = Math.min(4, colours.length), rows = Math.ceil(colours.length / cols);
+    const step = 300, r = 118;
+    const x0 = 750 - (cols - 1) * step / 2, y0 = 750 - (rows - 1) * step / 2;
+    colours.forEach((c, i) => {
+      const cx = x0 + (i % cols) * step, cy = y0 + Math.floor(i / cols) * step;
+      el('circle', { cx: cx + 3, cy: cy + 6, r, fill: '#000', opacity: 0.18, filter: 'url(#soft)' });
+      el('circle', { cx, cy, r, fill: c, stroke: c.toLowerCase() === '#fefefe' ? '#cfcfcf' : 'none', 'stroke-width': 2 });
+    });
+  }
+</script>
+</body>
+</html>
