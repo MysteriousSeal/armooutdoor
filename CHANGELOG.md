@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-11-04 · v1.79.0 · build 88XBUQ
+
+### Admin API
+
+- **Products return `full_photos`,** the mark ticked on the admin product list. It is read-only: a PATCH carrying it is ignored. Documented in `docs/admin/api/products.md`.
+
+**No migration.**
+
 ## 2026-11-04 · v1.78.0 · build 0SH76R
 
 ### Admin
