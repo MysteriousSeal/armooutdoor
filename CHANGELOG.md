@@ -2,6 +2,16 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-11-04 · v1.78.0 · build 0SH76R
+
+### Admin
+
+- **The product list has a « Full photos » column,** a mark you tick by hand once a product has its model photos and infographics, which the photo count alone cannot tell. Every product starts unmarked. A click switches it in place without reloading the page, a second click undoes it, and each click goes in the activity log.
+- **A « Full photos » filter** beside AI and SEO keeps the marked or unmarked products (All, Yes, No). It shows as a removable chip, stays on when changing tab or sort, and the CSV export follows it.
+- **The header shows how many active products have their full photos,** for example « 2 with full photos · 0.749% », the share of active products to three decimals. It updates as you tick.
+
+**Migration:** `php artisan migrate` adds the `full_photos` column to `products`.
+
 ## 2026-11-04 · v1.77.0 · build UI1T23
 
 ### Admin
