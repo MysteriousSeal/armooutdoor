@@ -288,7 +288,6 @@
                                     @endif
                                 </a>
                             </th>
-                            <th>Category</th>
                             <th>
                                 <a href="{{ $priceSort['url'] }}" class="admin-sort-link {{ $priceSort['state'] ? 'is-active' : '' }}">
                                     Price
@@ -336,18 +335,11 @@
                                     <a href="{{ route('admin.products.edit', $product) }}" class="admin-table-strong" title="{{ $product->name['fr'] ?? $product->localizedName() }}">
                                         {{ \Illuminate\Support\Str::limit($product->name['fr'] ?? $product->localizedName(), 30) }}
                                     </a>
+                                    @if ($product->category)
+                                        <span class="admin-table-sub admin-table-category" title="{{ $product->category->name['fr'] ?? $product->category->localizedName() }}">{{ \Illuminate\Support\Str::limit($product->category->name['fr'] ?? $product->category->localizedName(), 30) }}</span>
+                                    @endif
                                     @if (filled($product->sku))
                                         <span class="admin-table-sub">{{ $product->sku }}</span>
-                                    @endif
-                                    <span class="admin-table-sub admin-table-slug" title="{{ $product->slug }}">{{ $product->slug }}</span>
-                                </td>
-                                <td>
-                                    @if ($product->category)
-                                        <span title="{{ $product->category->name['fr'] ?? $product->category->localizedName() }}">
-                                            {{ \Illuminate\Support\Str::limit($product->category->name['fr'] ?? $product->category->localizedName(), 20) }}
-                                        </span>
-                                    @else
-                                        —
                                     @endif
                                 </td>
                                 <td>
@@ -602,7 +594,7 @@
                                         ->values();
                                 @endphp
                                 <tr class="admin-variant-row" id="variant-panel-{{ $product->id }}" hidden>
-                                    <td colspan="17">
+                                    <td colspan="16">
                                         <div class="admin-variant-panel">
                                             <table class="admin-variant-table">
                                                 <thead>
