@@ -2,6 +2,19 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-11-04 · v1.77.0 · build UI1T23
+
+### Admin
+
+- **The product list shows the category under the product name,** in semi-bold olive so it stands apart from the grey SKU beneath it. The Category column is gone, which gives the table back some width, and a long category now cuts off at 30 characters instead of 20, in full on hover.
+- **The slug no longer shows in the product list.** The name cell now reads name, category, SKU.
+
+### Under the hood
+
+- **Holster 368 gets its infographics:** anatomy, dimensions and three effect sheets, covering carry inside or outside the trousers, the side stitching to cut, and the kit.
+
+**No migration.**
+
 ## 2026-11-04 · v1.76.0 · build ZO6ADU
 
 ### Admin
