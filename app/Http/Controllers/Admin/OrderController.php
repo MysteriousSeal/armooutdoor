@@ -1193,6 +1193,25 @@ class OrderController extends Controller
     }
 
     /**
+     * A 15 × 10 cm landscape address label for the same envelopes, printed on a label
+     * printer roll: the sender in the top left corner, the recipient in the
+     * bottom right one, where La Poste expects each of them.
+     */
+    public function fullAddressLabel(Order $order): Response
+    {
+        abort_if($order->isDraft() || ! $order->shipsByLettreSuivie(), 404);
+
+        $pdf = Pdf::loadView('admin.orders.full-address-label-pdf', [
+            'order' => $order,
+            'company' => CompanySetting::current(),
+        ])
+            // 150 × 100 mm in PDF points (1 mm = 72/25.4 pt), landscape.
+            ->setPaper([0, 0, 150 * 72 / 25.4, 100 * 72 / 25.4]);
+
+        return $pdf->download('adresse-complete-'.$order->number.'.pdf');
+    }
+
+    /**
      * Offre un code de remerciement depuis la commande : 10 %, un seul
      * usage, pour n'importe quel client, valable trois mois après la date
      * de la commande. Un par commande — le second clic n'a rien à créer.

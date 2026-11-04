@@ -310,7 +310,7 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         Route::patch('/products/{product}/status', [AdminProductController::class, 'toggleStatus'])->name('products.status');
         Route::patch('/products/{product}/supplier-availability', [AdminProductController::class, 'toggleSupplierAvailability'])->name('products.supplier-availability');
         Route::patch('/products/{product}/price', [AdminProductController::class, 'updatePrice'])->name('products.price');
-        Route::patch('/products/{product}/quantity',[AdminProductController::class, 'updateQuantity'])->name('products.quantity');
+        Route::patch('/products/{product}/quantity', [AdminProductController::class, 'updateQuantity'])->name('products.quantity');
         Route::patch('/products/{product}/supplier', [AdminProductController::class, 'updateSupplier'])->name('products.supplier');
 
         // Marketplaces
@@ -413,6 +413,7 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         Route::get('/orders/{order}/credit-note', [AdminOrderController::class, 'creditNote'])->name('orders.credit-note');
         Route::get('/orders/{order}/delivery-slip', [AdminOrderController::class, 'deliverySlip'])->name('orders.delivery-slip');
         Route::get('/orders/{order}/address-label', [AdminOrderController::class, 'addressLabel'])->name('orders.address-label');
+        Route::get('/orders/{order}/full-address-label', [AdminOrderController::class, 'fullAddressLabel'])->name('orders.full-address-label');
         Route::patch('/orders/{order}/validate-draft', [AdminOrderController::class, 'validateDraft'])->name('orders.validate-draft');
         Route::patch('/orders/{order}/prepare', [AdminOrderController::class, 'prepare'])->name('orders.prepare');
         Route::patch('/orders/{order}/ship', [AdminOrderController::class, 'ship'])->name('orders.ship');

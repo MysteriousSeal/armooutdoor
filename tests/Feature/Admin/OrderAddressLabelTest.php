@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\CompanySetting;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -118,5 +119,47 @@ class OrderAddressLabelTest extends TestCase
         ]);
 
         $this->assertStringContainsString('Belgique', $this->render($order));
+    }
+
+    public function test_the_full_label_downloads_for_a_letter_only(): void
+    {
+        $order = $this->order();
+        $parcel = $this->order(['carrier_snapshot' => ['slug' => 'colissimo', 'name' => ['fr' => 'Colissimo']]]);
+
+        $this->actingAs($this->admin())
+            ->get(route('admin.orders.full-address-label', $order))
+            ->assertOk()
+            ->assertDownload('adresse-complete-'.$order->number.'.pdf');
+
+        $this->actingAs($this->admin())
+            ->get(route('admin.orders.full-address-label', $parcel))
+            ->assertNotFound();
+
+        $this->actingAs($this->admin())
+            ->get(route('admin.orders.show', $order))
+            ->assertSee('Download full address label');
+    }
+
+    public function test_the_full_label_carries_the_sender_and_the_recipient(): void
+    {
+        CompanySetting::current()->update(['company_name' => 'Armo Outdoor', 'address' => '22 Rue Anita Conti, 44300, Nantes']);
+        $order = $this->order();
+
+        $html = view('admin.orders.full-address-label-pdf', [
+            'order' => $order,
+            'company' => CompanySetting::current(),
+        ])->render();
+
+        $this->assertStringContainsString('Expéditeur', $html);
+        $this->assertStringContainsString('Armo Outdoor', $html);
+        $this->assertStringContainsString('44300 Nantes', $html);
+        $this->assertStringNotContainsString('Destinataire', $html);
+        $this->assertStringContainsString('31000 Toulouse', $html);
+        // The sender comes first, at the top of the label.
+        $this->assertLessThan(strpos($html, 'Julien'), strpos($html, 'Armo Outdoor'));
+        // The order reference sits above the sender, to match the envelope with its order.
+        $this->assertStringContainsString('Réf. commande : '.$order->number, $html);
+        $this->assertLessThan(strpos($html, 'Expéditeur'), strpos($html, 'Réf. commande'));
+        $this->assertStringNotContainsString('0612345678', $html);
     }
 }

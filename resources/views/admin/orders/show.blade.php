@@ -364,6 +364,7 @@
                             {{-- A letter has no parcel to slip a document into: the
                                  address label is what travels on the envelope. --}}
                             <a href="{{ route('admin.orders.address-label', $order) }}" class="btn btn-secondary">Download address label</a>
+                            <a href="{{ route('admin.orders.full-address-label', $order) }}" class="btn btn-secondary">Download full address label</a>
                         @endif
                         @if ($order->adminInvoiceIsAvailable())
                             <a
