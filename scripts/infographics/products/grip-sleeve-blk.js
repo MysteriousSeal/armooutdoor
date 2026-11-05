@@ -57,6 +57,9 @@ window.PRODUCT = {
       measure([103, 840], [340, 105], -70, '7,2 cm', [X(218) - 90, Y(476) + 18], 'end');
       // Bottom edge, back to front.
       measure([103, 845], [762, 885], 70, '5,4 cm', [X(425), Y(865) + 140], 'middle');
+      // The weight, in the facts column and type sizes of the other sheets.
+      text(1040, 900, '30 g', { 'font-size': 52, 'font-weight': 700, fill: 'var(--ink)' });
+      text(1040, 934, 'poids', { 'font-size': 25, 'font-weight': 500, fill: 'var(--mute)', 'letter-spacing': '.02em' });
     },
   },
 };

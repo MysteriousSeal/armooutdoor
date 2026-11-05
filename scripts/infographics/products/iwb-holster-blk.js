@@ -1,8 +1,8 @@
 // Ambidextrous IWB/OWB belt holster, black (SKU IWB-HOLSTER-BLK, product 368
 // on prod). Facts from the product page on armooutdoor.fr (15,2 x 10,1 cm,
 // about 3 cm at the mouth, 5,5 x 2,5 cm clip mounted either side, belts up to
-// 5 cm, snap tab over the slide, short and long tab, nylon, about 90 g, an
-// estimate) and the supplier sheets
+// 5 cm, snap tab over the slide, short and long tab, nylon, 90 g, as the
+// user confirmed) and the supplier sheets
 // the user sent as screenshots, not kept (same measures, 15,2 cm taken from
 // the mouth to the bottom; before and after the cut; IWB, OWB, right, left;
 // stretch, breathable, lightweight, moisture wicking). The bottom is open:
@@ -81,7 +81,7 @@ window.PRODUCT = {
       text(vx - 18, (t + b) / 2 + 18, '15,2 cm', { 'text-anchor': 'end', 'font-size': 52, 'font-weight': 700, fill: 'var(--ink)' });
       ext(l + 20, b + 12, l + 20, hy + 14); ext(r, Y(560), r, hy + 14);
       dim(l + 20, hy, r, hy, '10,1 cm', 52);
-      [['3 cm', 'd’ouverture, environ'], ['5,5 x 2,5 cm', 'clip métal'], ['5 cm', 'de ceinture au plus'], ['90 g', 'poids du colis, environ'], ['Pièce de 1 €', '23,25 mm, à la même échelle']].forEach(([big, small], i) => {
+      [['3 cm', 'd’ouverture, environ'], ['5,5 x 2,5 cm', 'clip métal'], ['5 cm', 'de ceinture au plus'], ['90 g', 'poids'], ['Pièce de 1 €', '23,25 mm, à la même échelle']].forEach(([big, small], i) => {
         const fy = 480 + i * 105;
         text(1040, fy, big, { 'font-size': 52, 'font-weight': 700, fill: 'var(--ink)' });
         text(1040, fy + 34, small, { 'font-size': 25, 'font-weight': 500, fill: 'var(--mute)', 'letter-spacing': '.02em' });
