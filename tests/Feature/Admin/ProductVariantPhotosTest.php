@@ -11,7 +11,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
-/** Up to three photos per variant: saved in slots, shown as a gallery. */
+/** Up to eight photos per variant: saved in slots, shown as a gallery. */
 class ProductVariantPhotosTest extends TestCase
 {
     use RefreshDatabase;
@@ -75,7 +75,7 @@ class ProductVariantPhotosTest extends TestCase
         ];
     }
 
-    public function test_a_new_variant_takes_three_photos(): void
+    public function test_a_new_variant_takes_eight_photos(): void
     {
         $product = $this->product();
 
@@ -86,19 +86,16 @@ class ProductVariantPhotosTest extends TestCase
                 'quantity' => 2,
                 'is_active' => '1',
             ], [
-                0 => UploadedFile::fake()->image('front.jpg', 300, 300),
-                1 => UploadedFile::fake()->image('back.jpg', 300, 300),
-                2 => UploadedFile::fake()->image('worn.jpg', 300, 300),
+                ...array_map(fn (int $slot) => UploadedFile::fake()->image("photo-{$slot}.jpg", 300, 300), range(0, 7)),
             ]))
             ->assertSessionHasNoErrors()
             ->assertRedirect();
 
         $variant = $product->variants()->firstOrFail();
 
-        $this->assertCount(3, $variant->photos());
+        $this->assertCount(8, $variant->photos());
         $this->assertNotNull($variant->image);
-        $this->assertNotNull($variant->image_2);
-        $this->assertNotNull($variant->image_3);
+        $this->assertNotNull($variant->image_8);
 
         foreach ($variant->photos() as $photo) {
             $this->assertFileExists(public_path('images/'.$photo));
@@ -193,7 +190,23 @@ class ProductVariantPhotosTest extends TestCase
         $this->assertFileDoesNotExist(public_path('images/'.$third));
     }
 
-    public function test_the_edit_page_shows_three_slots_per_variant(): void
+    public function test_a_ninth_photo_is_refused(): void
+    {
+        $product = $this->product();
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->put('/admin/products/'.$product->id, $this->payload($product, [
+                'attributes_text' => 'Groupe: A+',
+                'sku' => 'PATCH-AP',
+                'quantity' => 2,
+                'is_active' => '1',
+            ], array_map(fn (int $slot) => UploadedFile::fake()->image("photo-{$slot}.jpg", 300, 300), range(0, 8))))
+            ->assertSessionHasErrors('variant_images.0');
+
+        $this->assertSame(0, $product->variants()->count());
+    }
+
+    public function test_the_edit_page_shows_eight_slots_per_variant(): void
     {
         $product = $this->product();
         $variant = ProductVariant::create([
@@ -208,14 +221,15 @@ class ProductVariantPhotosTest extends TestCase
             ->get('/admin/products/'.$product->id.'/edit')
             ->assertOk()
             ->assertSee('Main photo')
-            ->assertSee('name="variant_images[0][2]"', false)
+            ->assertSee('name="variant_images[0][7]"', false)
+            ->assertDontSee('name="variant_images[0][8]"', false)
             ->assertSee('name="variants[0][remove_images][1]"', false)
             ->assertSee('download="patch-ap_2.jpg"', false)
             ->assertDontSee('name="variants[0][remove_images][2]"', false)
             ->getContent();
 
-        // The empty template for a new variant carries the three slots too.
-        $this->assertStringContainsString('name="variant_images[__INDEX__][2]"', $html);
+        // The empty template for a new variant carries the eight slots too.
+        $this->assertStringContainsString('name="variant_images[__INDEX__][7]"', $html);
     }
 
     public function test_the_product_page_opens_on_the_selected_variant_photos(): void

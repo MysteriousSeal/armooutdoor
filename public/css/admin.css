@@ -1305,7 +1305,8 @@
     gap: 0.45rem;
 }
 
-/* The three photo slots sit in a row above the fields, the main one first. */
+/* The eight photo slots sit in a row above the fields, the main one first,
+   wrapping when the card is narrower than all of them. */
 .variant-photo-slots {
     display: flex;
     flex-wrap: wrap;

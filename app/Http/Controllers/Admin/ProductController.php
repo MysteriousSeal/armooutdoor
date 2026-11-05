@@ -1131,14 +1131,14 @@ class ProductController extends Controller
     }
 
     /**
-     * The variant's three photo slots after this save: a new file replaces
+     * The variant's eight photo slots after this save: a new file replaces
      * the slot's photo, a ticked Remove clears it, and the slots are then
      * packed to the front so `image` is always the main photo whenever the
      * variant has one.
      *
      * @param  array<int|string, mixed>  $uploads  slot => UploadedFile
      * @param  array<int|string, mixed>  $removals  slot => truthy
-     * @return array{image: ?string, image_2: ?string, image_3: ?string}
+     * @return array<string, ?string> column => photo, for every PHOTO_COLUMNS entry
      */
     private function variantPhotoSlots(ProductVariant $variant, array $uploads, array $removals, Product $product): array
     {

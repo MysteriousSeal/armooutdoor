@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Rules\UniqueCatalogIdentifier;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -78,14 +79,14 @@ class StoreProductRequest extends FormRequest
             'variants.*.price' => ['nullable', 'numeric', 'min:0', 'max:99999.99'],
             'variants.*.quantity' => ['nullable', 'integer', 'min:0', 'max:99999'],
             'variants.*.is_active' => ['nullable', 'boolean'],
-            'variants.*.remove_images' => ['nullable', 'array', 'max:3'],
+            'variants.*.remove_images' => ['nullable', 'array', 'max:'.count(ProductVariant::PHOTO_COLUMNS)],
             'variants.*.remove_images.*' => ['nullable', 'boolean'],
             'variants.*.supplier_id' => ['nullable', 'exists:suppliers,id'],
             'variants.*.available_at_supplier' => ['nullable', 'boolean'],
             'variants.*.supplier_reference' => ['nullable', 'string', 'max:120'],
             'variants.*.supplier_product_url' => ['nullable', 'url', 'max:2048'],
             'variant_images' => ['nullable', 'array'],
-            'variant_images.*' => ['nullable', 'array', 'max:3'],
+            'variant_images.*' => ['nullable', 'array', 'max:'.count(ProductVariant::PHOTO_COLUMNS)],
             'variant_images.*.*' => ['nullable', 'image', 'max:4096'],
         ];
     }

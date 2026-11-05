@@ -27,13 +27,18 @@ use Illuminate\Support\Str;
     'image',
     'image_2',
     'image_3',
+    'image_4',
+    'image_5',
+    'image_6',
+    'image_7',
+    'image_8',
     'is_active',
     'sort_order',
 ])]
 class ProductVariant extends Model
 {
     /** The photo slots, in order: the first is the variant's main photo. */
-    public const PHOTO_COLUMNS = ['image', 'image_2', 'image_3'];
+    public const PHOTO_COLUMNS = ['image', 'image_2', 'image_3', 'image_4', 'image_5', 'image_6', 'image_7', 'image_8'];
 
     private const SIZE_ORDER = [
         'XXS' => 0,

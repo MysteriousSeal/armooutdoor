@@ -1,4 +1,4 @@
-{{-- A variant's three photo slots. The first is the main photo, the one the
+{{-- A variant's eight photo slots. The first is the main photo, the one the
      variant chip, the cart and the orders show. Saving packs the slots to the
      front, so a photo left alone after an emptied slot moves up.
 
