@@ -2,6 +2,25 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-11-05 · v1.80.0 · build TD0L83
+
+### Shop
+
+- **The homepage reminds visitors of the two offers** in two panels under « Achetez par catégorie »: « Livraison offerte dès 49€ d'achat, France métropolitaine » on forest teal, and « -10% sur votre première commande, avec le code BIENVENUE10 » on sunset orange. Each figure comes from the shipping settings or the discount code, so the panels follow any change. A customer who has used the code stops seeing it, and on a phone each panel keeps to three short lines.
+- **A closure is announced on the storefront:** from 14 days ahead until its last day, a strip above the homepage, category and product pages reads « Commandes ouvertes, envois suspendus du 24 décembre au 3 janvier », with the day shipping resumes. Orders are not blocked during a closure.
+- **Ship dates step over closures,** and over the weekend right after one, including on backordered items.
+
+### Admin
+
+- **Settings > Holidays** adds, edits and removes shop closures, each with a first and a last day, both included.
+
+### Under the hood
+
+- **More product infographics:** anatomy and dimensions sheets for seventeen more breathable balaclavas (354, 355, 356, 359, 360, 365, 352, 347, 200, 199, 198, 197, 195, 194, 191, 189, 188) and the 3D leaf ghillie (80), whose measures come from its own supplier sheet. The 16-round MOLLE shell pouches (374 to 377) get anatomy, dimensions and Mode d'emploi sheets. Multicam-pattern balaclavas say « Multi-terrain » on their sheets.
+- **The admin authorization test** now covers the holiday routes.
+
+**Migration:** one, run with `php artisan migrate`, creating the `holidays` table. Run it straight after pulling the code: the storefront reads this table. No data changes.
+
 ## 2026-11-04 · v1.79.0 · build 88XBUQ
 
 ### Admin API
