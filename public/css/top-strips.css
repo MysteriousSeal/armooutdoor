@@ -15,6 +15,8 @@
     --ship-ink: #f6f4ec;
     /* The welcome-code band under it: rust, an offer rather than a service. */
     --welcome-band: #8b3f22;
+    /* The holiday notice: slate, news about the shop rather than an offer. */
+    --holiday-band: #33464f;
 }
 
 /* On a dark ground the band stays dark: flipping polarity from one theme
@@ -24,6 +26,7 @@
     --ship-band: #454731;
     --ship-ink: #eeecdf;
     --welcome-band: #6e3320;
+    --holiday-band: #2a3a41;
 }
 
 .ship-strip {
@@ -174,6 +177,12 @@
 .ship-strip--welcome {
     --ship-band: var(--welcome-band);
     border-top: 1px solid color-mix(in srgb, #fff 14%, transparent);
+}
+
+/* The holiday notice, above the other two. Same shape again, on slate: it
+   is about when the shop works, and must not read as a promotion. */
+.ship-strip--holiday {
+    --ship-band: var(--holiday-band);
 }
 
 /* The code is what the visitor has to copy, so it is set apart from the

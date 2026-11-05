@@ -114,8 +114,8 @@ class Order extends Model
 
     /**
      * The estimated shipping date shown to the customer: orders placed
-     * before 10am ship the same day, otherwise the next day — pushed past
-     * the weekend when it lands on one. Backordered items add their own
+     * before 10am ship the same day, otherwise the next day, pushed past
+     * the weekend or a closure when it lands on one. Backordered items add their own
      * order-date-plus-supplier-lead-time estimate to the mix; whichever
      * candidate date is latest is the one shown, since that's the item
      * holding up the whole shipment.

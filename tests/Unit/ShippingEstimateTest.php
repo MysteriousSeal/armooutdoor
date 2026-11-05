@@ -8,6 +8,24 @@ use PHPUnit\Framework\TestCase;
 
 class ShippingEstimateTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // A feature test run earlier in the process leaves the holidays
+        // table as the closure source; here there is no app to read it.
+        ShippingEstimate::closuresUsing(null);
+    }
+
+    public function test_a_closure_pushes_the_date_past_its_last_day_and_the_weekend(): void
+    {
+        ShippingEstimate::closuresUsing(fn (): array => [['2026-08-19', '2026-08-21']]);
+
+        $result = ShippingEstimate::nextBusinessDay(Carbon::parse('2026-08-19', 'Europe/Paris')); // Wednesday
+
+        $this->assertTrue($result->isSameDay(Carbon::parse('2026-08-24', 'Europe/Paris')));
+    }
+
     public function test_an_order_placed_before_10am_paris_time_ships_the_same_day(): void
     {
         $placedAt = Carbon::parse('2026-08-19 08:00:00', 'Europe/Paris'); // Wednesday

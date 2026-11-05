@@ -31,6 +31,10 @@
                 <span class="admin-stat-label">Orders</span>
                 <span class="admin-stat-value admin-stat-value--sm">Marketplaces you also sell on</span>
             </a>
+            <a href="{{ route('admin.settings.holidays.index') }}" class="admin-stat-card">
+                <span class="admin-stat-label">Holidays</span>
+                <span class="admin-stat-value admin-stat-value--sm">Closures that push ship dates and show a notice on the shop</span>
+            </a>
             <a href="{{ route('admin.settings.invoice.edit') }}" class="admin-stat-card">
                 <span class="admin-stat-label">Invoice</span>
                 <span class="admin-stat-value admin-stat-value--sm">Footer link shown on invoice PDFs</span>

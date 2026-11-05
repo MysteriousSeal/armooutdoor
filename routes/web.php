@@ -30,6 +30,7 @@ use App\Http\Controllers\Admin\FftirAmmunitionController as AdminFftirAmmunition
 use App\Http\Controllers\Admin\FftirController as AdminFftirController;
 use App\Http\Controllers\Admin\FftirSessionController as AdminFftirSessionController;
 use App\Http\Controllers\Admin\FftirWeaponController as AdminFftirWeaponController;
+use App\Http\Controllers\Admin\HolidayController as AdminHolidayController;
 use App\Http\Controllers\Admin\IdentityDocumentController as AdminIdentityDocumentController;
 use App\Http\Controllers\Admin\InvoiceSettingController as AdminInvoiceSettingController;
 use App\Http\Controllers\Admin\LabelController as AdminLabelController;
@@ -476,6 +477,10 @@ Route::prefix(config('shop.admin_path'))->name('admin.')->group(function () {
         // NaturaBuy, not the marketplaces an order can be attached to.
         Route::get('/settings/naturabuy', [AdminMarketplaceSettingController::class, 'edit'])->name('settings.naturabuy.edit');
         Route::put('/settings/naturabuy', [AdminMarketplaceSettingController::class, 'update'])->name('settings.naturabuy.update');
+        Route::get('/settings/holidays', [AdminHolidayController::class, 'index'])->name('settings.holidays.index');
+        Route::post('/settings/holidays', [AdminHolidayController::class, 'store'])->name('settings.holidays.store');
+        Route::put('/settings/holidays/{holiday}', [AdminHolidayController::class, 'update'])->name('settings.holidays.update');
+        Route::delete('/settings/holidays/{holiday}', [AdminHolidayController::class, 'destroy'])->name('settings.holidays.destroy');
         Route::get('/settings/products', [AdminProductSettingController::class, 'edit'])->name('settings.products.edit');
         Route::put('/settings/products', [AdminProductSettingController::class, 'update'])->name('settings.products.update');
         Route::get('/settings/orders', [AdminSettingsController::class, 'orders'])->name('settings.orders.edit');

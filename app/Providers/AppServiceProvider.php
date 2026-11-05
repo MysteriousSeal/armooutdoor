@@ -2,10 +2,11 @@
 
 namespace App\Providers;
 
-use App\Models\Category;
 use App\Models\Carrier;
+use App\Models\Category;
 use App\Models\CompanySetting;
 use App\Models\Conversation;
+use App\Models\Holiday;
 use App\Models\IdentityDocument;
 use App\Models\MarketplaceSetting;
 use App\Models\Order;
@@ -17,6 +18,7 @@ use App\Services\Octopia\OctopiaAttributeWriter;
 use App\Services\Octopia\OctopiaDescriptionWriter;
 use App\Services\VintedCopywriter;
 use App\Support\Cart;
+use App\Support\ShippingEstimate;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -66,6 +68,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureRateLimiting();
+
+        // Ship dates step over the closures set in Settings > Holidays.
+        ShippingEstimate::closuresUsing(fn (): array => Holiday::periods());
 
         // Token only — the address stays out of the URL, where it would
         // otherwise linger in browser history and server logs.

@@ -5430,6 +5430,11 @@ input[type="date"].form-control {
     max-width: 40rem;
 }
 
+/* Settings > Holidays: the add form sits above the list, not on it. */
+.admin-holiday-form {
+    margin-bottom: 1.5rem;
+}
+
 /* Several cards under one form: they save together, so the button belongs to
    the stack rather than to the last card.
 

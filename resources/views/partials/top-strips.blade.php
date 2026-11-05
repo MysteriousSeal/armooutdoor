@@ -1,14 +1,40 @@
-{{-- The free-shipping strip and the welcome-code band, above the site
+{{-- The holiday notice, the free-shipping strip and the welcome-code band, above the site
      header. Included at the top level of the homepage, category and product
      views, so its pushes land in the layout's head and topbar stacks. --}}
 @php
     $freeShippingAmount ??= \App\Models\ShippingSetting::current()->freeShippingLabel();
     $welcomeCode = \App\Models\DiscountCode::welcomeBannerCodeFor(auth()->user());
+    $holiday = \App\Models\Holiday::announced();
 @endphp
 
-@if ($freeShippingAmount || $welcomeCode)
+@if ($freeShippingAmount || $welcomeCode || $holiday)
     @push('head')
         <link rel="stylesheet" href="{{ versioned_asset('css/top-strips.css') }}">
+    @endpush
+@endif
+
+@if ($holiday)
+    @push('topbar')
+        {{-- Pushed first: a closure changes when the parcel leaves, which
+             matters more than what it costs. --}}
+        @php
+            $holidayDates = ['from' => $holiday->starts_on->translatedFormat('j F'), 'to' => $holiday->ends_on->translatedFormat('j F')];
+            $holidayKey = $holiday->starts_on->isSameDay($holiday->ends_on) ? 'store.holiday_strip_one_day' : 'store.holiday_strip';
+            $holidayCopy = __($holidayKey, $holidayDates);
+            $holidayNote = __('store.holiday_strip_note', ['resume' => $holiday->resumesOn()->translatedFormat('l j F')]);
+        @endphp
+        <aside class="ship-strip ship-strip--holiday" aria-label="{{ $holidayCopy }}">
+            <p class="ship-strip-inner">
+                {{-- A calendar page, in the same line weight as the parcel. --}}
+                <svg class="ship-strip-icon" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false">
+                    <rect x="3.5" y="5" width="17" height="15.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M3.5 9.5h17M8 3v4M16 3v4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="m9.5 12.5 5 5M14.5 12.5l-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <span class="ship-strip-copy">{!! __($holidayKey, array_map(fn (string $date): string => '<b class="ship-strip-amount">'.e($date).'</b>', $holidayDates)) !!}</span>
+                <span class="ship-strip-note">{{ $holidayNote }}</span>
+            </p>
+        </aside>
     @endpush
 @endif
 

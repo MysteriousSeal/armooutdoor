@@ -15,6 +15,7 @@ use App\Models\DiscountCode;
 use App\Models\FftirAmmunition;
 use App\Models\FftirSession;
 use App\Models\FftirWeapon;
+use App\Models\Holiday;
 use App\Models\IdentityDocument;
 use App\Models\Marketplace;
 use App\Models\OctopiaSubmission;
@@ -198,7 +199,11 @@ class AdminAuthorizationTest extends TestCase
         // An order note: same reason as the Vinted photo.
         $orderNote = $order->notes()->create(['body' => 'Audit note.']);
 
+        // A shop closure: its update and delete routes bind one.
+        $holiday = Holiday::query()->create(['starts_on' => '2026-12-24', 'ends_on' => '2026-12-27']);
+
         $bindings = [
+            'holiday' => $holiday->id,
             'note' => $orderNote->id,
             'category' => $category->id,
             'product' => $product->id,
