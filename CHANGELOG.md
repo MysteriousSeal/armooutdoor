@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-11-05 · v1.81.0 · build I0TH03
+
+### Admin
+
+- **A variant takes up to eight photos instead of three.** The product edit page shows eight slots per variant, the main photo first, each with Add, Replace, Remove and the JPEG download. Saving still packs the photos to the front, and a ninth is refused. The product page shows all of them when the variant is selected, and the Admin API returns them in `images`.
+
+### Under the hood
+
+- **More product infographics:** the suppressor cover (284) gets anatomy, dimensions and size guide sheets for each of its five lengths; the empty chamber flags (114) get anatomy, in-place and detail sheets, with no dimensions sheet as the listing gives no measure; the thigh holster (234) and the bungee slings (73, 268, 267) get their sheets; the grips (369, 370) show their weight, and the 368 weight label is simplified.
+
+**Migration:** one, run with `php artisan migrate`, adding the `image_4` to `image_8` columns to `product_variants`. No data changes.
+
 ## 2026-11-05 · v1.80.0 · build TD0L83
 
 ### Shop
