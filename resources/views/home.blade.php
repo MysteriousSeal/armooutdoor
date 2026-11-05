@@ -361,6 +361,39 @@
             </section>
         @endif
 
+        {{-- The two offers again, for whoever has scrolled past the strips at
+             the top. Each figure comes from its setting or its code, so this
+             cannot promise something the checkout no longer gives, and a
+             customer who has used the code stops seeing it, as in the strip. --}}
+        @php
+            $welcomeOffer = \App\Models\DiscountCode::welcomeBannerCodeFor(auth()->user());
+        @endphp
+        @if ($freeShippingAmount || $welcomeOffer)
+            <section class="home-perks" aria-label="{{ __('store.home_perks_label') }}">
+                @if ($freeShippingAmount)
+                    <div class="home-perk home-perk--ship">
+                        <p class="home-perk-kicker">{{ __('store.home_perk_ship_kicker') }}</p>
+                        <p class="home-perk-figure">
+                            <span class="home-perk-more">{{ __('store.home_perk_ship_more') }}</span>
+                            <span class="home-perk-count">{{ $freeShippingAmount }}</span>
+                            <span class="home-perk-unit">{{ __('store.home_perk_ship_unit') }}</span>
+                        </p>
+                        <p class="home-perk-note">{{ __('store.home_ship_strip_note') }}</p>
+                    </div>
+                @endif
+                @if ($welcomeOffer)
+                    <div class="home-perk home-perk--welcome">
+                        <p class="home-perk-kicker">{{ __('store.home_perk_welcome_kicker') }}</p>
+                        <p class="home-perk-figure">
+                            <span class="home-perk-count">{{ $welcomeOffer->customerLabel() }}</span>
+                            <span class="home-perk-unit">{{ __('store.home_perk_welcome_unit') }}</span>
+                        </p>
+                        <p class="home-perk-note">{!! __('store.home_welcome_strip_note', ['code' => '<code class="home-perk-code">'.e($welcomeOffer->code).'</code>']) !!}</p>
+                    </div>
+                @endif
+            </section>
+        @endif
+
         @if ($featured->isNotEmpty())
             <section class="home-featured" id="featured" aria-labelledby="home-featured-title">
                 <header class="home-cats-header">

@@ -1878,6 +1878,203 @@
     color: var(--hero-orange);
 }
 
+/* ============ the two offers ============ */
+
+/*
+ * The catalogue band's layout for the two offers under it: a pill, a figure
+ * sitting in the rings, one sentence read top to bottom. The colours turn
+ * solid so they read as offers rather than more catalogue: the heroes' forest
+ * for shipping, their sunset for the code. Set as fixed values because the
+ * ground stays dark in both themes, where --hero-teal lifts for dark mode.
+ */
+.home .home-perks {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(22rem, 100%), 1fr));
+    gap: 0.75rem;
+    margin-top: 2.75rem;
+}
+
+.home .home-perk {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    /* The pills stay level across the two panels, whatever each one holds. */
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+        "kicker kicker"
+        "figure note";
+    align-items: end;
+    gap: 0.7rem 2rem;
+    padding: 1.5rem 2.25rem 1.6rem;
+    color: #fff;
+    background: var(--perk-ground);
+}
+
+.home .home-perk--ship {
+    --perk-ground: #0d484e;
+    --perk-figure: #f9ac36;
+    --perk-pill: #f9ac36;
+    --perk-pill-ink: #0d484e;
+}
+
+/* The sunset orange taken down until white small text reads on it. */
+.home .home-perk--welcome {
+    --perk-ground: #a8412a;
+    --perk-figure: #fff;
+    --perk-pill: #fff;
+    --perk-pill-ink: #a8412a;
+}
+
+.home .home-perk::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    top: 55%;
+    left: -5rem;
+    width: 21rem;
+    height: 21rem;
+    transform: translateY(-50%);
+    border-radius: 50%;
+    background: repeating-radial-gradient(
+        circle at center,
+        transparent 0 1.25rem,
+        rgba(255, 255, 255, 0.2) 1.25rem 1.31rem
+    );
+    -webkit-mask-image: radial-gradient(circle at center, #000 34%, transparent 66%);
+    mask-image: radial-gradient(circle at center, #000 34%, transparent 66%);
+}
+
+.home .home-perk-kicker {
+    grid-area: kicker;
+    justify-self: start;
+    margin: 0;
+    padding: 0.22em 0.55em 0.26em;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--perk-pill-ink);
+    background: var(--perk-pill);
+}
+
+.home .home-perk-figure {
+    grid-area: figure;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    margin: 0;
+}
+
+.home .home-perk-more {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.home .home-perk-count {
+    font-size: clamp(2.6rem, 4.6vw, 3.6rem);
+    font-weight: 700;
+    letter-spacing: -0.05em;
+    line-height: 0.92;
+    color: var(--perk-figure);
+    font-variant-numeric: tabular-nums;
+}
+
+.home .home-perk-unit {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: #fff;
+}
+
+.home .home-perk-note {
+    grid-area: note;
+    justify-self: end;
+    margin: 0;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-align: right;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* Dashed like a coupon's edge, as in the strip at the top of the page. */
+.home .home-perk-code {
+    display: inline-block;
+    margin-left: 0.3em;
+    padding: 0.2em 0.6em;
+    border: 1px dashed #fff;
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: #fff;
+    user-select: all;
+}
+
+/*
+ * On a phone each panel keeps to three short lines: the figure and its words
+ * share one row instead of stacking, so the offers stay reminders rather than
+ * two screens to scroll past.
+ */
+@media (max-width: 40rem) {
+    .home .home-perks {
+        gap: 0.5rem;
+        margin-top: 2rem;
+    }
+
+    .home .home-perk {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: none;
+        grid-template-areas:
+            "kicker"
+            "figure"
+            "note";
+        gap: 0.45rem;
+        padding: 0.8rem 1.1rem 0.85rem;
+    }
+
+    .home .home-perk-figure {
+        flex-direction: row;
+        align-items: baseline;
+        gap: 0.4rem;
+    }
+
+    .home .home-perk-count {
+        font-size: 2.1rem;
+        line-height: 1;
+    }
+
+    .home .home-perk-unit {
+        min-width: 0;
+        font-size: 0.875rem;
+        line-height: 1.2;
+    }
+
+    .home .home-perk-note {
+        justify-self: start;
+        text-align: left;
+    }
+
+    .home .home-perk-code {
+        padding: 0.1em 0.5em;
+        font-size: 0.75rem;
+    }
+
+    /* Behind the figure's row now, and small enough to stay a ground. */
+    .home .home-perk::before {
+        top: 50%;
+        left: -3.5rem;
+        width: 13rem;
+        height: 13rem;
+    }
+}
+
 /* ============ what customers said ============ */
 
 /* Three range tickets, each still pointing at the product it judged: a
