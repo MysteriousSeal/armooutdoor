@@ -2,6 +2,21 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-11-06 · v1.81.2 · build B623U2
+
+### Shop
+
+- **A variant's photos are followed by the product's own on the product page.** When a size or colour has photos of its own, the gallery shows them first, then the product's main photo and gallery under a « Photos générales du produit » heading. It redraws the same way when another variant is picked. A variant without photos still shows the product's alone. A product without a main photo no longer gets a broken thumbnail.
+
+### Admin
+
+- **The product list's variant panel** drops the Supplier and Supplier ref. columns for three new ones:
+  - an **At supplier** Yes/No switch per variant, flipped in place and logged, which also redraws the product's availability chip
+  - the variant's **photo count**, coloured like the product Photos column
+  - a **Full photos** tick per variant, switched in place and logged, separate from the product's own mark and left out of the header count
+
+**Migration:** one, run with `php artisan migrate`, adding the `full_photos` column to `product_variants`. No data changes.
+
 ## 2026-11-06 · v1.81.1 · build 57X0SP
 
 ### Google Shopping
