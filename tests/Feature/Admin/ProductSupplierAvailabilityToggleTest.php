@@ -208,8 +208,8 @@ class ProductSupplierAvailabilityToggleTest extends TestCase
         $this->actingAs($admin)
             ->patchJson('/admin/products/'.$product->id.'/variants/'.$variant->id.'/full-photos')
             ->assertOk()
-            ->assertJson(['full_photos' => true])
-            ->assertJsonMissingPath('full_photos_stats');
+            // The only variant now ticked: the product counts toward the header.
+            ->assertJson(['full_photos' => true, 'full_photos_stats' => ['count' => '1', 'percent' => '100.000']]);
 
         $this->assertTrue($variant->fresh()->full_photos);
         // The product keeps its own mark.
@@ -220,6 +220,45 @@ class ProductSupplierAvailabilityToggleTest extends TestCase
             ->patch('/admin/products/'.$product->id.'/variants/'.$variant->id.'/full-photos')
             ->assertRedirect();
         $this->assertFalse($variant->fresh()->full_photos);
+    }
+
+    public function test_a_product_in_variants_counts_once_every_active_variant_is_ticked(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $product = Product::factory()->create(['full_photos' => false]);
+        $first = $this->variant($product, ['full_photos' => true]);
+        $second = $this->variant($product, ['full_photos' => false]);
+        // An inactive variant is not waited for.
+        $this->variant($product, ['full_photos' => false, 'is_active' => false]);
+        // A plain product, ticked, and an inactive one, left out of both figures.
+        Product::factory()->create(['full_photos' => true]);
+        Product::factory()->create(['full_photos' => true, 'is_active' => false]);
+
+        $stats = fn () => $this->actingAs($admin)->get('/admin/products')->assertOk()->viewData('fullPhotosStats');
+
+        // One of two variants ticked: only the plain product counts, 1 of 2.
+        $this->assertSame(['count' => '1', 'percent' => '50.000'], $stats());
+
+        $this->actingAs($admin)
+            ->patchJson('/admin/products/'.$product->id.'/variants/'.$second->id.'/full-photos')
+            ->assertOk()
+            ->assertJson(['full_photos_stats' => ['count' => '2', 'percent' => '100.000']]);
+
+        // Unticking one variant takes the product back out.
+        $this->actingAs($admin)
+            ->patchJson('/admin/products/'.$product->id.'/variants/'.$first->id.'/full-photos')
+            ->assertJson(['full_photos_stats' => ['count' => '1', 'percent' => '50.000']]);
+    }
+
+    public function test_a_product_in_variants_still_counts_by_its_own_tick(): void
+    {
+        $product = Product::factory()->create(['full_photos' => true]);
+        $this->variant($product, ['full_photos' => false]);
+
+        $this->assertSame(
+            ['count' => '1', 'percent' => '100.000'],
+            $this->actingAs(User::factory()->admin()->create())->get('/admin/products')->viewData('fullPhotosStats'),
+        );
     }
 
     public function test_a_variant_of_another_product_cannot_be_marked(): void

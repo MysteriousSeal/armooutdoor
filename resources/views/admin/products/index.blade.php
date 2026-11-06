@@ -26,7 +26,7 @@
                 @if ($photoStats !== null)
                     <span class="admin-list-chip" title="Main photo plus gallery, averaged over the active products. The goal is 5 per product; a product counts for 5 at most toward it">{{ number_format($photoStats['average'], 3) }} photos per product · {{ number_format($photoStats['completion'], 3) }}% of the 5-photo goal</span>
                 @endif
-                <span class="admin-list-chip" title="Active products marked as having their model photos and infographics"><span><span data-full-photos-count>{{ $fullPhotosStats['count'] }}</span> with full photos · <span data-full-photos-percent>{{ $fullPhotosStats['percent'] }}</span>%</span></span>
+                <span class="admin-list-chip" title="Active products marked as having their model photos and infographics; a product sold in variants also counts once all its active variants are ticked"><span><span data-full-photos-count>{{ $fullPhotosStats['count'] }}</span> with full photos · <span data-full-photos-percent>{{ $fullPhotosStats['percent'] }}</span>%</span></span>
                 @if ($search !== '' || $categorySlug !== '' || $supplierId !== null || $ai !== '' || $seo !== '' || $fullPhotos !== '')
                     <span class="admin-list-chip is-filtered">Filtered</span>
                 @endif

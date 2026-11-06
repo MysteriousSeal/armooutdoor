@@ -414,15 +414,25 @@ class ProductController extends Controller
     }
 
     /**
-     * The active products marked as having their full photos, already
-     * formatted so the page and its script print the same figures.
+     * The active products that have their full photos, already formatted so
+     * the page and its script print the same figures. A product counts when
+     * its own mark is ticked, or, sold in variants, once every active
+     * variant has its tick.
      *
      * @return array{count: string, percent: string}
      */
     private function activeFullPhotosStats(): array
     {
         $active = Product::query()->where('is_active', true)->count();
-        $marked = Product::query()->where('is_active', true)->where('full_photos', true)->count();
+        $activeVariant = fn (Builder $query) => $query->where('is_active', true);
+        $marked = Product::query()
+            ->where('is_active', true)
+            ->where(fn (Builder $query) => $query
+                ->where('full_photos', true)
+                ->orWhere(fn (Builder $query) => $query
+                    ->whereHas('variants', $activeVariant)
+                    ->whereDoesntHave('variants', fn (Builder $query) => $activeVariant($query)->where('full_photos', false))))
+            ->count();
 
         return [
             'count' => number_format($marked),
@@ -453,8 +463,9 @@ class ProductController extends Controller
     }
 
     /**
-     * The same mark for one variant, from the list's variant panel. The
-     * header's count stays the products' own, so the reply carries no stats.
+     * The same mark for one variant, from the list's variant panel. Its
+     * product counts toward the header's figure once every active variant
+     * is ticked, so the reply carries the figure again.
      */
     public function toggleVariantFullPhotos(Request $request, Product $product, ProductVariant $variant): RedirectResponse|JsonResponse
     {
@@ -472,6 +483,7 @@ class ProductController extends Controller
         if ($request->expectsJson()) {
             return response()->json([
                 'full_photos' => $variant->full_photos,
+                'full_photos_stats' => $this->activeFullPhotosStats(),
                 'message' => $message,
             ]);
         }
