@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-11-06 · v1.81.1 · build 57X0SP
+
+### Google Shopping
+
+- **Products sold in variants reach Google again.** The feed (`feed/google.xml`) lists each active variant as its own line instead of one line for the product. Each line has the variant's SKU as its id, a group id tying it to its siblings, a title like « Cagoule - M », and the variant's own GTIN, price, stock, size and colour. It shows the variant's photos first, then the product's. Before, the 18 products with variants went out under the product's SKU, which none of them has, so Google refused them for a missing id. Inactive variants are left out.
+- **Each variant line links to the product page opened on that variant** (`?variant=`). The page shows that variant's price, stock and photos, and its structured data describes that variant alone (SKU, GTIN, price, availability, shipping cost), so Merchant Center reads on the page what the feed line says. Opened without `?variant=`, the page is unchanged.
+
+**No migration.**
+
 ## 2026-11-05 · v1.81.0 · build I0TH03
 
 ### Admin
