@@ -27,7 +27,7 @@
                     <span class="admin-list-chip" title="Main photo plus gallery, averaged over the active products. The goal is 5 per product; a product counts for 5 at most toward it">{{ number_format($photoStats['average'], 3) }} photos per product · {{ number_format($photoStats['completion'], 3) }}% of the 5-photo goal</span>
                 @endif
                 <span class="admin-list-chip" title="Active products marked as having their model photos and infographics; a product sold in variants also counts once all its active variants are ticked"><span><span data-full-photos-count>{{ $fullPhotosStats['count'] }}</span> with full photos · <span data-full-photos-percent>{{ $fullPhotosStats['percent'] }}</span>%</span></span>
-                @if ($search !== '' || $categorySlug !== '' || $supplierId !== null || $ai !== '' || $seo !== '' || $fullPhotos !== '')
+                @if ($search !== '' || $categorySlug !== '' || $supplierId !== null || $ai !== '' || $seo !== '' || $fullPhotos !== '' || $variants !== '')
                     <span class="admin-list-chip is-filtered">Filtered</span>
                 @endif
             </div>
@@ -43,6 +43,7 @@
                 'ai' => array_key_exists('ai', $overrides) ? $overrides['ai'] : ($ai !== '' ? $ai : null),
                 'seo' => array_key_exists('seo', $overrides) ? $overrides['seo'] : ($seo !== '' ? $seo : null),
                 'photos' => array_key_exists('photos', $overrides) ? $overrides['photos'] : ($fullPhotos !== '' ? $fullPhotos : null),
+                'variants' => array_key_exists('variants', $overrides) ? $overrides['variants'] : ($variants !== '' ? $variants : null),
             ]);
             $tabQuery = fn (string $name) => $listQuery(['tab' => $name]);
             $sortLink = function (string $column) use ($sort, $listQuery): array {
@@ -53,7 +54,7 @@
                     'state' => str_starts_with($sort, $column.'-') ? substr($sort, strlen($column) + 1) : null,
                 ];
             };
-            $hasFilters = $search !== '' || $categorySlug !== '' || $supplierId !== null || $ai !== '' || $seo !== '' || $fullPhotos !== '';
+            $hasFilters = $search !== '' || $categorySlug !== '' || $supplierId !== null || $ai !== '' || $seo !== '' || $fullPhotos !== '' || $variants !== '';
             $activeCategory = $categorySlug !== ''
                 ? $categories->firstWhere('slug', $categorySlug)
                 : null;
@@ -175,10 +176,18 @@
                         <option value="no" @selected($fullPhotos === 'no')>No</option>
                     </select>
                 </div>
+                <div class="admin-filter-field">
+                    <label class="admin-field-label" for="product-variants">Variants</label>
+                    <select id="product-variants" name="variants" class="form-control">
+                        <option value="">All</option>
+                        <option value="yes" @selected($variants === 'yes')>With variants</option>
+                        <option value="no" @selected($variants === 'no')>Without variants</option>
+                    </select>
+                </div>
                 <div class="admin-filter-actions">
                     <button type="submit" class="btn btn-primary">Apply</button>
                     @if ($hasFilters)
-                        <a href="{{ route('admin.products.index', $listQuery(['search' => null, 'category' => null, 'supplier' => null, 'ai' => null, 'seo' => null, 'photos' => null])) }}" class="btn btn-secondary">Clear</a>
+                        <a href="{{ route('admin.products.index', $listQuery(['search' => null, 'category' => null, 'supplier' => null, 'ai' => null, 'seo' => null, 'photos' => null, 'variants' => null])) }}" class="btn btn-secondary">Clear</a>
                     @endif
                 </div>
             </div>
@@ -219,6 +228,12 @@
                 @if ($fullPhotos !== '')
                     <a href="{{ route('admin.products.index', $listQuery(['photos' => null])) }}" class="admin-filter-chip">
                         Full photos · {{ $fullPhotos === 'yes' ? 'Yes' : 'No' }}
+                        <span aria-hidden="true">×</span>
+                    </a>
+                @endif
+                @if ($variants !== '')
+                    <a href="{{ route('admin.products.index', $listQuery(['variants' => null])) }}" class="admin-filter-chip">
+                        Variants · {{ $variants === 'yes' ? 'With variants' : 'Without variants' }}
                         <span aria-hidden="true">×</span>
                     </a>
                 @endif

@@ -65,6 +65,9 @@ class ProductController extends Controller
         $fullPhotos = in_array($request->query('photos'), ['yes', 'no'], true)
             ? (string) $request->query('photos')
             : '';
+        $variants = in_array($request->query('variants'), ['yes', 'no'], true)
+            ? (string) $request->query('variants')
+            : '';
         $tab = in_array($request->query('tab'), ['active', 'disabled', 'in-stock', 'restocking', 'at-supplier', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight', 'no-image', 'few-images', 'no-seo', 'price-mismatch'], true)
             ? (string) $request->query('tab')
             : 'active';
@@ -75,7 +78,7 @@ class ProductController extends Controller
             ? (string) $request->query('sort')
             : (in_array($request->cookie(self::SORT_COOKIE), self::SORTS, true) ? $request->cookie(self::SORT_COOKIE) : self::DEFAULT_SORT);
 
-        $products = $this->filteredProductsQuery($search, $categorySlug, $tab, $supplierId, $ai, $seo, $fullPhotos)
+        $products = $this->filteredProductsQuery($search, $categorySlug, $tab, $supplierId, $ai, $seo, $fullPhotos, $variants)
             // The discount rides along: the list prints it on every row that
             // has one, and asking per row is twenty queries a page.
             ->with('category', 'supplier', 'discount', 'variants.supplier')
@@ -114,6 +117,7 @@ class ProductController extends Controller
             'ai' => $ai,
             'seo' => $seo,
             'fullPhotos' => $fullPhotos,
+            'variants' => $variants,
         ])->cookie(self::SORT_COOKIE, $sort, 60 * 24 * 365);
     }
 
@@ -131,11 +135,14 @@ class ProductController extends Controller
         $fullPhotos = in_array($request->query('photos'), ['yes', 'no'], true)
             ? (string) $request->query('photos')
             : '';
+        $variants = in_array($request->query('variants'), ['yes', 'no'], true)
+            ? (string) $request->query('variants')
+            : '';
         $tab = in_array($request->query('tab'), ['active', 'disabled', 'in-stock', 'at-supplier', 'out-of-stock', 'no-sku', 'no-gtin', 'no-weight', 'no-image', 'few-images', 'no-seo', 'price-mismatch'], true)
             ? (string) $request->query('tab')
             : 'active';
 
-        $products = $this->filteredProductsQuery($search, $categorySlug, $tab, $supplierId, $ai, $seo, $fullPhotos)
+        $products = $this->filteredProductsQuery($search, $categorySlug, $tab, $supplierId, $ai, $seo, $fullPhotos, $variants)
             ->with('category', 'supplier')
             ->orderBy('id')
             ->get();
@@ -158,7 +165,7 @@ class ProductController extends Controller
         );
     }
 
-    private function filteredProductsQuery(string $search, string $categorySlug, string $tab, ?int $supplierId = null, string $ai = '', string $seo = '', string $fullPhotos = ''): Builder
+    private function filteredProductsQuery(string $search, string $categorySlug, string $tab, ?int $supplierId = null, string $ai = '', string $seo = '', string $fullPhotos = '', string $variants = ''): Builder
     {
         return Product::query()
             ->tap(fn ($query) => $this->applyProductTab($query, $tab))
@@ -183,6 +190,9 @@ class ProductController extends Controller
             ->when($ai === 'reviewed', fn ($query) => $query->where('ai_validated', true))
             ->when($ai === 'pending', fn ($query) => $query->where('ai_validated', false))
             ->when($fullPhotos !== '', fn ($query) => $query->where('full_photos', $fullPhotos === 'yes'))
+            // Any variant, active or not: the Variants column counts them all.
+            ->when($variants === 'yes', fn ($query) => $query->has('variants'))
+            ->when($variants === 'no', fn ($query) => $query->doesntHave('variants'))
             ->when($seo === 'off', fn ($query) => $query->whereIn('id', $this->seoFailingIds(activeOnly: false)))
             ->when($seo === 'ok', fn ($query) => $query->whereNotIn('id', $this->seoFailingIds(activeOnly: false)));
     }
