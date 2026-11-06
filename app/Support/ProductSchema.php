@@ -34,24 +34,36 @@ class ProductSchema
      */
     private const RETURN_DAYS = 14;
 
-    /** @return array<string, mixed> */
-    public static function for(Product $product): array
+    /**
+     * The page opened on one variant (?variant=, as the Google feed links
+     * each of its variant lines) describes that variant: its SKU, GTIN,
+     * photos, price and stock, so Merchant Center reads on the page what
+     * the feed line says. Without one, the product as a whole.
+     *
+     * @return array<string, mixed>
+     */
+    public static function for(Product $product, ?ProductVariant $variant = null): array
     {
+        $variant?->setRelation('product', $product);
+        $label = $variant?->label() ?? '';
+
         $schema = array_filter([
             '@context' => 'https://schema.org',
             '@type' => 'Product',
             // The node's own address, so another block can point at this
-            // product instead of describing it a second time.
-            '@id' => self::id($product),
-            'url' => localized_route('products.show', ['product' => $product->slug]),
-            'name' => $product->localizedName(),
+            // product instead of describing it a second time. A variant gets
+            // its own: under the product's, Google would merge two
+            // descriptions with different SKUs and prices into one node.
+            '@id' => $variant ? self::url($product, $variant).'#product' : self::id($product),
+            'url' => self::url($product, $variant),
+            'name' => $label !== '' ? $product->localizedName().' - '.$label : $product->localizedName(),
             'description' => Str::limit($product->localizedDescriptionText(), self::MAX_DESCRIPTION),
-            'sku' => $product->sku,
-            'gtin' => $product->gtin,
+            'sku' => $variant ? $variant->sku : $product->sku,
+            'gtin' => $variant ? $variant->gtin : $product->gtin,
             'category' => $product->category?->localizedName(),
             'brand' => self::brand($product),
-            'image' => self::images($product),
-            'offers' => self::offers($product),
+            'image' => self::images($product, $variant),
+            'offers' => self::offers($product, $variant),
         ], fn ($value): bool => $value !== null && $value !== '' && $value !== []);
 
         // Sans avis, `ratingCount` vaudrait zéro : Google refuse le bloc
@@ -128,10 +140,24 @@ class ProductSchema
         ];
     }
 
-    /** @return array<int, string> */
-    private static function images(Product $product): array
+    /** The page's address, on the variant when the page was opened on one. */
+    private static function url(Product $product, ?ProductVariant $variant): string
     {
-        return collect($product->image !== '' ? [$product->imageUrl()] : [])
+        $url = localized_route('products.show', ['product' => $product->slug]);
+
+        return $variant ? $url.'?variant='.$variant->id : $url;
+    }
+
+    /**
+     * The variant's own photos first, as the page shows them, then the
+     * product's.
+     *
+     * @return array<int, string>
+     */
+    private static function images(Product $product, ?ProductVariant $variant = null): array
+    {
+        return collect($variant ? array_column($variant->gallerySlides(), 'full') : [])
+            ->concat($product->image !== '' ? [$product->imageUrl()] : [])
             ->concat($product->images->map(fn ($image): string => $image->imageUrl()))
             ->filter(fn (string $url): bool => $url !== '')
             ->unique()
@@ -148,13 +174,13 @@ class ProductSchema
      *
      * @return array<string, mixed>
      */
-    private static function offers(Product $product): array
+    private static function offers(Product $product, ?ProductVariant $variant = null): array
     {
         $common = [
             'priceCurrency' => 'EUR',
-            'availability' => self::availability($product),
+            'availability' => self::availability($product, $variant),
             'itemCondition' => 'https://schema.org/NewCondition',
-            'url' => localized_route('products.show', ['product' => $product->slug]),
+            'url' => self::url($product, $variant),
             // Who is selling: the same business node the home page declares,
             // named again rather than described a second time.
             'seller' => OrganizationSchema::reference(),
@@ -178,8 +204,16 @@ class ProductSchema
             'hasMerchantReturnPolicy' => self::returnPolicy(),
         ];
 
-        if (($shipping = self::shippingDetails($product)) !== null) {
+        if (($shipping = self::shippingDetails($product, $variant)) !== null) {
             $common['shippingDetails'] = $shipping;
+        }
+
+        // One variant, one price: no range to state.
+        if ($variant !== null) {
+            return $common + [
+                '@type' => 'Offer',
+                'price' => self::amount($variant->effectivePriceCents()),
+            ];
         }
 
         $variantPrices = $product->hasVariants()
@@ -217,14 +251,14 @@ class ProductSchema
      *
      * @return array<string, mixed>|null
      */
-    private static function shippingDetails(Product $product): ?array
+    private static function shippingDetails(Product $product, ?ProductVariant $variant = null): ?array
     {
-        $subtotalCents = $product->hasVariants()
+        $subtotalCents = $variant?->effectivePriceCents() ?? ($product->hasVariants()
             ? $product->variants
                 ->filter(fn (ProductVariant $variant): bool => (bool) $variant->is_active)
                 ->map(fn (ProductVariant $variant): int => $variant->effectivePriceCents())
                 ->min() ?? $product->effectivePriceCents()
-            : $product->effectivePriceCents();
+            : $product->effectivePriceCents());
 
         $setting = ShippingSetting::current();
         $weight = (int) $product->weight_grams;
@@ -314,11 +348,22 @@ class ProductSchema
      * `restocking` compte comme épuisé, et non comme commande différée :
      * la boutique refuse l'achat tant que le réassort n'est pas arrivé.
      */
-    private static function availability(Product $product): string
+    private static function availability(Product $product, ?ProductVariant $variant = null): string
     {
         // Taken off sale, the page stays up but nothing on it can be bought.
         if (! $product->is_active) {
             return 'https://schema.org/OutOfStock';
+        }
+
+        // The variant's own stock, read as the feed reads it: a size already
+        // on order from the supplier is not reordered there.
+        if ($variant !== null) {
+            return 'https://schema.org/'.match (true) {
+                $variant->inStock() => 'InStock',
+                $variant->isRestocking() => 'OutOfStock',
+                $variant->isBackorderable() => 'BackOrder',
+                default => 'OutOfStock',
+            };
         }
 
         return 'https://schema.org/'.match ($product->availabilityState()) {

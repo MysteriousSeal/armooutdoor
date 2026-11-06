@@ -12,7 +12,8 @@
         <link rel="stylesheet" href="{{ versioned_asset('css/blog.css') }}">
     @endif
     <script type="application/ld+json">
-        {!! json_encode(\App\Support\ProductSchema::for($product), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+        {{-- Opened on a variant (?variant=, the Google feed's links), the block describes that variant. --}}
+        {!! json_encode(\App\Support\ProductSchema::for($product, $product->variants->where('is_active', true)->firstWhere('id', request()->integer('variant'))), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
     </script>
     <script type="application/ld+json">
         {!! json_encode([
@@ -52,7 +53,10 @@
         $activeVariants = $product->variants->where('is_active', true)
             ->sortBy(fn ($variant) => $variant->sizeSortRank() ?? $variant->sort_order)
             ->values();
-        $selectedVariantId = old('variant_id', optional($activeVariants->first(fn ($variant) => $variant->inStock()) ?? $activeVariants->first())->id);
+        // ?variant= opens the page on that variant, as each line of the
+        // Google feed links to its own; an unknown or inactive id is ignored.
+        $linkedVariant = $activeVariants->firstWhere('id', request()->integer('variant'));
+        $selectedVariantId = old('variant_id', optional($linkedVariant ?? $activeVariants->first(fn ($variant) => $variant->inStock()) ?? $activeVariants->first())->id);
         $displayVariant = $product->hasVariants() ? $activeVariants->firstWhere('id', (int) $selectedVariantId) : null;
         // A variant with photos of its own shows them in place of the
         // product's gallery; product-variant.js swaps them on selection.

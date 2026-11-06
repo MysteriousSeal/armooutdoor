@@ -207,6 +207,53 @@ class ProductSchemaTest extends TestCase
         $this->assertSame('Offer', $this->schema($product)['offers']['@type']);
     }
 
+    /** @return array<string, mixed> The Product block of the page, as rendered. */
+    private function pageSchema(string $url): array
+    {
+        preg_match_all('#<script type="application/ld\+json">\s*(.*?)\s*</script>#s', $this->get($url)->assertOk()->getContent(), $blocks);
+
+        return collect($blocks[1])->map(fn (string $json) => json_decode($json, true))->firstWhere('@type', 'Product');
+    }
+
+    public function test_the_page_opened_on_a_variant_describes_that_variant(): void
+    {
+        $product = $this->product(['slug' => 'cagoule', 'price_cents' => 1000, 'quantity' => 0, 'gtin' => null]);
+        $this->variant($product, 'M', 1500);
+        $this->variant($product, 'L', 2500);
+        $large = $product->variants()->where('sku', 'V-'.$product->id.'-L')->sole();
+        // The L is sold out while the M is not: the product as a whole is in stock.
+        $large->update(['quantity' => 0, 'gtin' => '3701234567890', 'image' => 'products/large.webp']);
+
+        $schema = $this->pageSchema('/products/cagoule?variant='.$large->id);
+
+        $this->assertSame($product->localizedName().' - L', $schema['name']);
+        $this->assertSame('V-'.$product->id.'-L', $schema['sku']);
+        $this->assertSame('3701234567890', $schema['gtin']);
+        $this->assertStringEndsWith('products/large.webp', $schema['image'][0]);
+        $this->assertStringEndsWith('/products/cagoule?variant='.$large->id, $schema['url']);
+        $this->assertStringEndsWith('/products/cagoule?variant='.$large->id.'#product', $schema['@id']);
+        $this->assertSame('Offer', $schema['offers']['@type']);
+        $this->assertSame('25.00', $schema['offers']['price']);
+        $this->assertSame('https://schema.org/OutOfStock', $schema['offers']['availability']);
+        $this->assertStringEndsWith('?variant='.$large->id, $schema['offers']['url']);
+
+        // Opened plainly, the page still speaks for the whole product.
+        $plain = $this->pageSchema('/products/cagoule');
+
+        $this->assertSame($product->localizedName(), $plain['name']);
+        $this->assertStringEndsWith('/products/cagoule#product', $plain['@id']);
+        $this->assertSame('AggregateOffer', $plain['offers']['@type']);
+        $this->assertSame('https://schema.org/InStock', $plain['offers']['availability']);
+    }
+
+    public function test_an_unknown_variant_falls_back_to_the_whole_product(): void
+    {
+        $product = $this->product(['slug' => 'cagoule']);
+        $this->variant($product, 'M', 1500);
+
+        $this->assertSame($product->localizedName(), $this->pageSchema('/products/cagoule?variant=999999')['name']);
+    }
+
     public function test_the_rating_appears_only_once_someone_has_rated(): void
     {
         $product = $this->product();

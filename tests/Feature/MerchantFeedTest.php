@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
+use App\Models\ProductVariant;
 use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -210,5 +211,85 @@ class MerchantFeedTest extends TestCase
 
         $this->assertStringContainsString('Cibles &amp; planches', $xml);
         $this->assertNotFalse(simplexml_load_string($xml));
+    }
+
+    private function variant(Product $product, array $attributes): ProductVariant
+    {
+        return ProductVariant::query()->create(array_merge([
+            'product_id' => $product->id,
+            'quantity' => 3,
+            'is_active' => true,
+        ], $attributes));
+    }
+
+    public function test_a_product_in_variants_is_listed_as_its_variants_only(): void
+    {
+        $product = Product::factory()->create([
+            'is_active' => true, 'sku' => null, 'gtin' => null, 'brand' => 'Armo',
+            'price_cents' => 2490, 'name' => ['fr' => 'Cagoule', 'en' => 'Balaclava'],
+        ]);
+        $m = $this->variant($product, ['sku' => 'CAG-M', 'gtin' => '3701234567890', 'attribute_values' => [['label' => 'Taille', 'value' => 'M']], 'sort_order' => 0]);
+        $this->variant($product, ['sku' => 'CAG-L', 'price_cents' => 2690, 'quantity' => 0, 'attribute_values' => [['label' => 'Taille', 'value' => 'L'], ['label' => 'Couleur', 'value' => 'Noir']], 'sort_order' => 1]);
+        // An inactive variant is not offered, so not listed.
+        $this->variant($product, ['sku' => 'CAG-XL', 'is_active' => false, 'attribute_values' => [['label' => 'Taille', 'value' => 'XL']]]);
+
+        $xml = $this->get('/feed/google.xml')->assertOk()->getContent();
+        $feed = simplexml_load_string($xml);
+        $items = $feed->channel->item;
+
+        $this->assertCount(2, $items);
+        $g = fn ($item) => $item->children('g', true);
+
+        $first = $g($items[0]);
+        $this->assertSame('CAG-M', (string) $first->id);
+        $this->assertSame('product-'.$product->id, (string) $first->item_group_id);
+        $this->assertSame('Cagoule - M', (string) $items[0]->title);
+        $this->assertSame('24.90 EUR', (string) $first->price);
+        $this->assertSame('in_stock', (string) $first->availability);
+        $this->assertSame('3701234567890', (string) $first->gtin);
+        $this->assertSame('M', (string) $first->size);
+        $this->assertStringEndsWith('/products/'.$product->slug.'?variant='.$m->id, (string) $items[0]->link);
+
+        $second = $g($items[1]);
+        $this->assertSame('CAG-L', (string) $second->id);
+        $this->assertSame('product-'.$product->id, (string) $second->item_group_id);
+        $this->assertSame('26.90 EUR', (string) $second->price);
+        $this->assertSame('out_of_stock', (string) $second->availability);
+        $this->assertSame('L', (string) $second->size);
+        $this->assertSame('Noir', (string) $second->color);
+
+        $this->assertStringNotContainsString('CAG-XL', $xml);
+    }
+
+    public function test_a_variant_line_leads_with_its_own_photo(): void
+    {
+        $product = Product::factory()->create(['is_active' => true, 'image' => 'products/main.webp']);
+        ProductImage::query()->create(['product_id' => $product->id, 'image' => 'products/gallery.webp', 'sort_order' => 0]);
+        $this->variant($product, ['sku' => 'V-RED', 'image' => 'products/red.webp', 'image_2' => 'products/red-back.webp']);
+
+        $feed = simplexml_load_string($this->get('/feed/google.xml')->assertOk()->getContent());
+        $g = $feed->channel->item[0]->children('g', true);
+
+        $this->assertStringEndsWith('products/red.webp', (string) $g->image_link);
+        $this->assertSame(
+            ['products/red-back.webp', 'products/main.webp', 'products/gallery.webp'],
+            array_map(fn ($url) => substr((string) $url, strpos((string) $url, 'products/')), iterator_to_array($g->additional_image_link, false)),
+        );
+    }
+
+    public function test_the_product_page_opens_on_the_linked_variant(): void
+    {
+        $product = Product::factory()->create(['is_active' => true]);
+        $this->variant($product, ['sku' => 'V-M', 'attribute_values' => [['label' => 'Taille', 'value' => 'M']], 'sort_order' => 0]);
+        $l = $this->variant($product, ['sku' => 'V-L', 'attribute_values' => [['label' => 'Taille', 'value' => 'L']], 'sort_order' => 1]);
+
+        $this->get('/products/'.$product->slug.'?variant='.$l->id)
+            ->assertOk()
+            ->assertSee('<span class="product-variants-current" id="product-variant-current">L</span>', false);
+
+        // An unknown id falls back to the usual choice.
+        $this->get('/products/'.$product->slug.'?variant=999999')
+            ->assertOk()
+            ->assertSee('<span class="product-variants-current" id="product-variant-current">M</span>', false);
     }
 }
