@@ -76,14 +76,21 @@ class HomeCatalogueSizeTest extends TestCase
         $this->assertSame(50, $catalogue['exact']);
     }
 
-    public function test_the_figure_is_rounded_down_to_the_fifty(): void
+    public function test_the_figure_is_rounded_up_to_the_fifty(): void
     {
         $this->standalone(87);
 
         $this->get('/')->assertOk()
             ->assertSee('Plus de')
-            ->assertSee('>50<', false)
+            ->assertSee('>100<', false)
             ->assertSee('références');
+    }
+
+    public function test_an_exact_fifty_stays_as_it_is(): void
+    {
+        $this->standalone(100);
+
+        $this->assertSame(100, $this->get('/')->assertOk()->viewData('catalogue')['rounded']);
     }
 
     public function test_the_band_sits_under_the_offers_and_above_the_aisles(): void

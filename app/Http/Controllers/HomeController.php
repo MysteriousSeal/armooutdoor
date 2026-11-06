@@ -166,15 +166,15 @@ class HomeController extends Controller
     }
 
     /**
-     * How many references the shop carries, rounded down to a round figure.
+     * How many references the shop carries, rounded up to a round figure.
      *
      * A product with variants is counted as its variants rather than as
      * itself: the parent is not something anyone can buy, and counting it
      * alongside its own sizes would inflate the claim. One with no variants
      * is a reference on its own.
      *
-     * Rounded down so the number stays true between two stock takes: the
-     * page says "plus de", and a figure that rounded up would not be.
+     * Rounded up to the next fifty, the owner's call: 346 reads « Plus de
+     * 350 ». An exact fifty stays as it is.
      *
      * @return array{exact: int, rounded: int, rayons: int, categories: int}|null
      */
@@ -191,11 +191,11 @@ class HomeController extends Controller
             ->count();
 
         $exact = $standalone + $variants;
-        $rounded = intdiv($exact, self::REFERENCE_STEP) * self::REFERENCE_STEP;
+        $rounded = intdiv($exact + self::REFERENCE_STEP - 1, self::REFERENCE_STEP) * self::REFERENCE_STEP;
 
-        // Below one step there is no round figure to claim, and "plus de 0"
-        // is not a boast.
-        if ($rounded < self::REFERENCE_STEP) {
+        // Below one step the band stays off: a handful of products rounded
+        // up to fifty is not a catalogue.
+        if ($exact < self::REFERENCE_STEP) {
             return null;
         }
 
