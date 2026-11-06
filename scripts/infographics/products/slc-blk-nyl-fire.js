@@ -22,15 +22,40 @@ const SIZES = [
   { key: '18', len: 18, h: 15.5, straps: 3, inch: 7, flat: [127, 301, 872, 839], points: [[470, 520], [240, 640], [160, 760], [890, 260], [700, 250], [790, 360]] },
   { key: '235', len: 23.5, h: 18, straps: 3, inch: 9, flat: [136, 297, 863, 816], points: [[500, 500], [380, 600], [170, 760], [890, 240], [720, 220], [760, 400]] },
 ];
+// Top of the straps on each flat photo, for cropping the range sheet.
+const TABS = { 10: 80, 13: 73, 155: 79, 18: 141, 235: 169 };
 const cm = v => `${String(v).replace('.', ',')} cm`;
 const big = { 'font-size': 52, 'font-weight': 700, fill: 'var(--ink)' };
 const small = { 'font-size': 25, 'font-weight': 500, fill: 'var(--mute)', 'letter-spacing': '.02em' };
 
+// The five covers laid flat on one sheet, each from its own photo scaled so
+// its panel is len x K wide (heights then run a little over, as on the
+// photos), the supplier's measures under each.
+function range({ el, text }) {
+  const K = 16, rows = [['10', '13', '155'], ['18', '235']], gap = 70;
+  rows.forEach((row, ri) => {
+    const Ss = row.map(k => SIZES.find(S => S.key === k));
+    const total = Ss.reduce((a, S) => a + S.len * K, 0) + gap * (row.length - 1);
+    let x = 130 + (1240 - total) / 2;
+    const base = ri ? 1150 : 690;
+    Ss.forEach(S => {
+      const [l, t, r, b] = S.flat, s = S.len * K / (r - l), top = TABS[S.key];
+      const id = 'flat' + S.key, X = px => x + (px - l) * s, Y = py => base - (b - py) * s;
+      el('rect', { x: X(l) - 4, y: Y(top) - 4, width: (r - l) * s + 8, height: (b - top) * s + 8 }, el('clipPath', { id }, el('defs', {})));
+      el('image', { href: `photos/slc-blk-nyl-fire-${S.key}-flat.jpg`, x: X(0), y: Y(0), width: 1000 * s, height: 1000 * s, 'clip-path': `url(#${id})`, style: 'mix-blend-mode: multiply' });
+      const cx = x + S.len * K / 2;
+      text(cx, base + 50, `${cm(S.len)} x ${cm(S.h)}`, { 'text-anchor': 'middle', 'font-size': 36, 'font-weight': 700, fill: 'var(--ink)' });
+      text(cx, base + 82, `${S.inch} pouces, ${S.straps} sangles`, { 'text-anchor': 'middle', ...small });
+      x += S.len * K + gap;
+    });
+  });
+}
+
 // The cover rolled, seen from the side: len cm long, a tube of fixed
-// diameter, its straps around it; highlighted for the size on show.
-function rolled(el, x, cy, S, K, on) {
+// diameter, its straps around it; on shows it dark, ring outlines it.
+function rolled(el, x, cy, S, K, on, ring = on) {
   const w = S.len * K, d = 3.4 * K, xs = S.straps === 2 ? [.25, .75] : [.16, .5, .84];
-  el('rect', { x, y: cy - d / 2, width: w, height: d, rx: d * .18, fill: on ? '#1d1e21' : '#9a9ca1', stroke: on ? 'var(--coyote)' : 'none', 'stroke-width': 5 });
+  el('rect', { x, y: cy - d / 2, width: w, height: d, rx: d * .18, fill: on ? '#1d1e21' : '#9a9ca1', stroke: ring ? 'var(--coyote)' : 'none', 'stroke-width': 5 });
   xs.forEach(f => el('rect', { x: x + w * f - 1.25 * K, y: cy - d / 2 - 4, width: 2.5 * K, height: d + 8, rx: 4, fill: on ? '#36383d' : '#b8babe' }));
   el('ellipse', { cx: x + 4, cy, rx: 6, ry: d / 2 - 4, fill: on ? '#0b0c0d' : '#7d7f84' });
 }
@@ -43,7 +68,13 @@ window.PRODUCT = {
     flatPhoto: `photos/slc-blk-nyl-fire-${S.key}-flat.jpg`,
     size: S,
     points: S.points.map(p => [p]),
-  }])),
+  }]).concat([['gamme', {
+    // The product's own gallery, all sizes at once: the anatomy on the
+    // longest cover, the five flat covers together, the size guide unmarked.
+    photo: 'photos/slc-blk-nyl-fire-235.jpg',
+    size: null,
+    points: SIZES[4].points.map(p => [p]),
+  }]])),
 
   anatomy: {
     title: 'Anatomie de la housse',
@@ -69,7 +100,9 @@ window.PRODUCT = {
       tag: 'À plat',
       html: 'Mesures du fabricant, housse <strong>dépliée à plat</strong>. Le scratch rattrape le diamètre du tube.',
     },
-    draw({ el, text, dim, ext, arrow, section }, P, V) {
+    draw(kit, P, V) {
+      const { el, text, dim, ext, arrow, section } = kit;
+      if (!V.size) return range(kit);
       const S = V.size, [l, t, r, b] = S.flat, s = 0.74, X = x => 190 + x * s, Y = y => 380 + y * s;
       section(130, 380, `LA HOUSSE DE ${cm(S.len).toUpperCase()}, DÉPLIÉE`);
       el('image', { href: V.flatPhoto, x: X(0), y: Y(0), width: 1000 * s, height: 1000 * s, style: 'mix-blend-mode: multiply' });
@@ -98,11 +131,11 @@ window.PRODUCT = {
     draw({ el, text }, V) {
       const K = 30, x = 300;
       SIZES.forEach((S, i) => {
-        const cy = 470 + i * 148, on = S.key === V.size.key;
-        rolled(el, x, cy, S, K, on);
+        const cy = 470 + i * 148, all = !V.size, on = all || S.key === V.size.key;
+        rolled(el, x, cy, S, K, on, !all && on);
         text(x - 30, cy + 15, cm(S.len), { 'text-anchor': 'end', 'font-size': on ? 48 : 40, 'font-weight': 700, fill: on ? 'var(--ink)' : 'var(--mute)' });
         text(x + S.len * K + 30, cy + 10, `${S.inch} pouces, ${S.straps} sangles`, { 'font-size': 32, 'font-weight': on ? 700 : 500, fill: on ? 'var(--ink)' : 'var(--mute)' });
-        if (on) text(x + S.len * K + 30, cy + 46, 'la taille de cette fiche', { 'font-size': 27, 'font-weight': 600, fill: 'var(--coyote)' });
+        if (on && !all) text(x + S.len * K + 30, cy + 46, 'la taille de cette fiche', { 'font-size': 27, 'font-weight': 600, fill: 'var(--coyote)' });
       });
     },
   },
