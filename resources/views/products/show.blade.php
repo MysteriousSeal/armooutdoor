@@ -45,7 +45,9 @@
 @section('content')
     @php
         $inWishlist = ($wishlistProductIds ?? collect())->contains($product->id);
-        $productGallery = collect([['full' => $product->imageUrl(), 'thumb' => $product->thumbnailUrl()]])
+        // No main photo, no slide: imageUrl() of an empty path is the bare
+        // images/ folder, which would sit in the strip as a broken picture.
+        $productGallery = collect($product->image !== '' ? [['full' => $product->imageUrl(), 'thumb' => $product->thumbnailUrl()]] : [])
             ->concat($product->images->map(fn ($image) => ['full' => $image->imageUrl(), 'thumb' => $image->thumbnailUrl()]))
             ->filter(fn (array $entry) => $entry['full'] !== '')
             ->unique('full')
@@ -58,10 +60,17 @@
         $linkedVariant = $activeVariants->firstWhere('id', request()->integer('variant'));
         $selectedVariantId = old('variant_id', optional($linkedVariant ?? $activeVariants->first(fn ($variant) => $variant->inStock()) ?? $activeVariants->first())->id);
         $displayVariant = $product->hasVariants() ? $activeVariants->firstWhere('id', (int) $selectedVariantId) : null;
-        // A variant with photos of its own shows them in place of the
-        // product's gallery; product-variant.js swaps them on selection.
+        // A variant with photos of its own shows them first, then the
+        // product's own photos after them, so the general shots stay in
+        // reach; product-variant.js swaps them on selection.
+        // The product's photos are marked as such: the thumbnails set them
+        // apart under their own heading.
+        $variantGallery = fn ($variant) => collect($variant->gallerySlides())
+            ->concat($productGallery->map(fn (array $slide) => $slide + ['shared' => true]))
+            ->unique('full')
+            ->values();
         $gallery = $displayVariant && $displayVariant->photos() !== []
-            ? collect($displayVariant->gallerySlides())
+            ? $variantGallery($displayVariant)
             : $productGallery;
         $allowedCarriers = \App\Models\Carrier::active()->get()->filter(fn ($carrier) => $product->isCarrierAllowed($carrier));
         $allowedHomeCarriers = $allowedCarriers->where('method', \App\Enums\DeliveryMethod::Home)->map->localizedName();
@@ -100,13 +109,18 @@
                 </div>
                 {{-- Always there, hidden when there is a single photo: selecting a
                      variant can bring a gallery where there was none. --}}
-                <div class="product-detail-thumbs" role="group" aria-label="{{ __('store.product_photos') }}" @if ($gallery->count() < 2) hidden @endif>
+                <div class="product-detail-thumbs" role="group" aria-label="{{ __('store.product_photos') }}" data-shared-label="{{ __('store.product_photos_shared') }}" @if ($gallery->count() < 2) hidden @endif>
                     @if ($gallery->count() > 1)
                         @foreach ($gallery as $src)
+                            {{-- Where a variant's own photos give way to the product's. --}}
+                            @if (! empty($src['shared']) && ! $loop->first && empty($gallery[$loop->index - 1]['shared']))
+                                <p class="product-detail-thumbs-label">{{ __('store.product_photos_shared') }}</p>
+                            @endif
                             <button
                                 type="button"
                                 class="product-detail-thumb {{ $loop->first ? 'is-active' : '' }}"
                                 data-full-src="{{ $src['full'] }}"
+                                @if (! empty($src['shared'])) data-shared @endif
                             >
                                 <img
                                     src="{{ $src['thumb'] }}"
@@ -329,7 +343,7 @@
                                                 data-variant-max="{{ $variant->maxPurchasable() }}"
                                                 data-variant-sku="{{ $variant->sku ?: $product->sku }}"
                                                 @if ($variant->photos() !== [])
-                                                    data-variant-images="{{ json_encode($variant->gallerySlides(), JSON_UNESCAPED_SLASHES) }}"
+                                                    data-variant-images="{{ $variantGallery($variant)->toJson(JSON_UNESCAPED_SLASHES) }}"
                                                 @endif
                                                 @checked((string) $selectedVariantId === (string) $variant->id)
                                             >

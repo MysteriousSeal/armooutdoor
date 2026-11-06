@@ -4,6 +4,7 @@ namespace Tests\Feature\Admin;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductImage;
 use App\Models\ProductVariant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -257,5 +258,55 @@ class ProductVariantPhotosTest extends TestCase
         $this->assertStringContainsString('data-variant-images=', $html);
         // ...and the product's gallery stays at hand for a variant without photos.
         $this->assertStringContainsString('data-default-gallery=', $html);
+    }
+
+    public function test_the_product_photos_follow_the_variant_photos(): void
+    {
+        $product = $this->product();
+        ProductVariant::create([
+            'product_id' => $product->id,
+            'attribute_values' => [['label' => 'Groupe', 'value' => 'A+']],
+            'sku' => 'PATCH-AP',
+            'quantity' => 3,
+            'is_active' => true,
+            'image' => $first = $this->webp('first'),
+        ]);
+
+        $html = $this->get(route('products.show', $product->slug))->assertOk()->getContent();
+
+        // On the page: the variant's photo, then the product's cover.
+        $variantAt = strpos($html, 'data-full-src="'.asset('images/'.$first).'"');
+        $coverAt = strpos($html, 'data-full-src="'.$product->imageUrl().'"');
+        $this->assertNotFalse($variantAt);
+        $this->assertNotFalse($coverAt);
+        $this->assertLessThan($coverAt, $variantAt);
+
+        // And in the set the variant switch redraws.
+        preg_match('#data-variant-images="([^"]+)"#', $html, $match);
+        $slides = json_decode(html_entity_decode($match[1]), true);
+        $this->assertSame([asset('images/'.$first), $product->imageUrl()], array_column($slides, 'full'));
+        $this->assertSame([false, true], array_map(fn (array $slide) => ! empty($slide['shared']), $slides));
+
+        // The product's photos sit under their own heading, once, after the variant's.
+        $this->assertSame(1, substr_count($html, '<p class="product-detail-thumbs-label">Photos générales du produit</p>'));
+        $this->assertLessThan(strpos($html, 'product-detail-thumbs-label">'), $variantAt);
+        $this->assertLessThan($coverAt, strpos($html, 'product-detail-thumbs-label">'));
+    }
+
+    public function test_a_variant_without_photos_shows_no_heading(): void
+    {
+        $product = $this->product();
+        ProductImage::query()->create(['product_id' => $product->id, 'image' => $this->webp('gallery'), 'sort_order' => 0]);
+        ProductVariant::create([
+            'product_id' => $product->id,
+            'attribute_values' => [['label' => 'Groupe', 'value' => 'A+']],
+            'sku' => 'PATCH-AP',
+            'quantity' => 3,
+            'is_active' => true,
+        ]);
+
+        $this->get(route('products.show', $product->slug))
+            ->assertOk()
+            ->assertDontSee('<p class="product-detail-thumbs-label">', false);
     }
 }

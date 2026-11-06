@@ -15,7 +15,7 @@
 
         return thumbs.length
             ? thumbs.map(function (thumb) {
-                return { full: thumb.dataset.fullSrc, thumb: thumb.querySelector('img').src };
+                return { full: thumb.dataset.fullSrc, thumb: thumb.querySelector('img').src, shared: thumb.hasAttribute('data-shared') };
             })
             : [{ full: mainImage.src, thumb: mainImage.src }];
     }
@@ -82,10 +82,23 @@
         }
 
         slides.forEach(function (slide, index) {
+            // Where a variant's own photos give way to the product's, as the
+            // page draws it on load.
+            if (slide.shared && index > 0 && !slides[index - 1].shared) {
+                var label = document.createElement('p');
+                label.className = 'product-detail-thumbs-label';
+                label.textContent = thumbsEl.dataset.sharedLabel || '';
+                thumbsEl.appendChild(label);
+            }
+
             var button = document.createElement('button');
             button.type = 'button';
             button.className = 'product-detail-thumb' + (index === 0 ? ' is-active' : '');
             button.dataset.fullSrc = slide.full;
+
+            if (slide.shared) {
+                button.setAttribute('data-shared', '');
+            }
 
             var thumbImage = document.createElement('img');
             thumbImage.src = slide.thumb;
@@ -102,8 +115,10 @@
     }
 
     function sameSlides(a, b) {
+        // The shared mark counts too: the same photos can need the heading
+        // for one variant and not for another.
         return a.length === b.length && a.every(function (slide, i) {
-            return slide.full === b[i].full;
+            return slide.full === b[i].full && !!slide.shared === !!b[i].shared;
         });
     }
 

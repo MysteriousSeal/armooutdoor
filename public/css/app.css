@@ -2053,6 +2053,19 @@ body.has-menu-open {
     display: none;
 }
 
+/* The heading between a variant's own photos and the product's: a row of
+   its own, so the two sets read as two. */
+.product-detail-thumbs-label {
+    flex-basis: 100%;
+    margin: 0.35rem 0 0;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+}
+
 .product-detail-thumb {
     width: 4rem;
     height: 4rem;

@@ -282,6 +282,7 @@ return [
     'cart_variant' => 'Variante',
     'select_variant_required' => 'Merci de choisir une variante.',
     'product_photos' => 'Photos du produit',
+    'product_photos_shared' => 'Photos générales du produit',
     'breadcrumb_home' => 'Accueil',
     'empty_category' => 'Rien dans cette catégorie pour le moment.',
     'sort_label' => 'Trier',

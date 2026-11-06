@@ -41,8 +41,8 @@
             currentEl.textContent = radio.getAttribute('data-variant-label') || '';
         }
 
-        // The gallery shows the variant's own photos, or the product's when it
-        // has none; product-gallery.js redraws it.
+        // The gallery shows the variant's own photos followed by the product's,
+        // or the product's alone when it has none; product-gallery.js redraws it.
         if (mainImage) {
             var slides = null;
 
