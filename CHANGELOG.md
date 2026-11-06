@@ -2,6 +2,15 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-11-06 · v1.81.3 · build TSCHKD
+
+### Admin
+
+- **Variant ticks count toward « N with full photos · x% ».** A product sold in variants now counts as having its full photos once every active variant is ticked, or when its own mark is set as before. Inactive variants are not waited for. Ticking or unticking a variant updates the figure in place. The goal is still the active products.
+- **A « Variants » filter** on the product list keeps the products with variants or without them (All, With variants, Without variants). Any variant counts, inactive ones included, as in the Variants column. It shows as a removable chip, stays on when changing tab or sort, and the CSV export follows it.
+
+**No migration.**
+
 ## 2026-11-06 · v1.81.2 · build B623U2
 
 ### Shop
