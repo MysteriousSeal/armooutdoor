@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-11-06 · v1.81.4 · build ENAG4O
+
+### Shop
+
+- **The homepage catalogue figure rounds up to the next fifty.** « Plus de … références » now shows 350 for 346 references, where it showed 300 before. An exact multiple of fifty stays as it is, and the band still stays off below fifty references. The count itself is unchanged: products without variants plus active variants.
+
+### Under the hood
+
+- **More product infographics:** the suppressor cover (284) gets a whole-range set for its main gallery, and the olive one (285) gets the same sheets as the black one for each length and for its main gallery, on photos of the green cover.
+
+**No migration.**
+
 ## 2026-11-06 · v1.81.3 · build TSCHKD
 
 ### Admin
