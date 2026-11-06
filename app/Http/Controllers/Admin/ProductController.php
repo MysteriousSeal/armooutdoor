@@ -351,11 +351,40 @@ class ProductController extends Controller
             ($product->available_at_supplier ? 'Marked ' : 'Unmarked ').$product->localizedName().' as available at supplier'
         );
 
+        return $this->supplierAvailabilityResponse($request, $product, $product->available_at_supplier);
+    }
+
+    /**
+     * The same flip for one variant, from the list's variant panel. Refused
+     * without a supplier, where the flag would command nothing.
+     */
+    public function toggleVariantSupplierAvailability(Request $request, Product $product, ProductVariant $variant): RedirectResponse|JsonResponse
+    {
+        abort_if($variant->product_id !== $product->id, 404);
+        abort_if($variant->supplier_id === null, 422);
+
+        $variant->update(['available_at_supplier' => ! $variant->available_at_supplier]);
+
+        AdminActivityLog::record(
+            'product.supplier_updated',
+            $product,
+            ($variant->available_at_supplier ? 'Marked ' : 'Unmarked ').$product->localizedName().' ('.($variant->label() ?: $variant->sku).') as available at supplier'
+        );
+
+        return $this->supplierAvailabilityResponse($request, $product->load('variants'), $variant->available_at_supplier);
+    }
+
+    /**
+     * The list redraws the switch and the product's availability chip, a
+     * variant's flag being able to move the whole product's reading.
+     */
+    private function supplierAvailabilityResponse(Request $request, Product $product, bool $on): RedirectResponse|JsonResponse
+    {
         if ($request->expectsJson()) {
             $availability = $product->availabilityState();
 
             return response()->json([
-                'available_at_supplier' => $product->available_at_supplier,
+                'available_at_supplier' => $on,
                 'availability' => $availability,
                 'availability_label' => [
                     'in_stock' => 'In stock',
@@ -367,7 +396,7 @@ class ProductController extends Controller
             ]);
         }
 
-        return back()->with('status', $product->available_at_supplier
+        return back()->with('status', $on
             ? 'Marked as available at supplier.'
             : 'No longer marked as available at supplier.');
     }
@@ -416,6 +445,33 @@ class ProductController extends Controller
             return response()->json([
                 'full_photos' => $product->full_photos,
                 'full_photos_stats' => $this->activeFullPhotosStats(),
+                'message' => $message,
+            ]);
+        }
+
+        return back()->with('status', $message);
+    }
+
+    /**
+     * The same mark for one variant, from the list's variant panel. The
+     * header's count stays the products' own, so the reply carries no stats.
+     */
+    public function toggleVariantFullPhotos(Request $request, Product $product, ProductVariant $variant): RedirectResponse|JsonResponse
+    {
+        abort_if($variant->product_id !== $product->id, 404);
+
+        $variant->update(['full_photos' => ! $variant->full_photos]);
+        AdminActivityLog::record(
+            'product.full_photos_updated',
+            $product,
+            ($variant->full_photos ? 'Marked full photos on ' : 'Unmarked full photos on ').$product->localizedName().' ('.($variant->label() ?: $variant->sku).')'
+        );
+
+        $message = $variant->full_photos ? 'Variant marked as having its full photos.' : 'Variant no longer marked as having its full photos.';
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'full_photos' => $variant->full_photos,
                 'message' => $message,
             ]);
         }

@@ -417,7 +417,7 @@
                                             'out_of_stock' => 'Out of stock',
                                         ][$availability];
                                     @endphp
-                                    <span class="admin-availability-chip is-{{ str_replace('_', '-', $availability) }}">{{ $availabilityLabel }}</span>
+                                    <span class="admin-availability-chip is-{{ str_replace('_', '-', $availability) }}" data-availability-chip>{{ $availabilityLabel }}</span>
                                 </td>
                                 <td>
                                     {{-- Le drapeau produit ne pilote rien sur un produit à
@@ -641,8 +641,9 @@
                                                         @endforelse
                                                         <th>SKU</th>
                                                         <th>GTIN</th>
-                                                        <th>Supplier</th>
-                                                        <th>Supplier ref.</th>
+                                                        <th title="Supplier can still source it: click to toggle">At supplier</th>
+                                                        <th title="The variant's own photos, main one included">Photos</th>
+                                                        <th title="Model photos and infographics uploaded: click to toggle">Full photos</th>
                                                         <th class="admin-table-num">Price</th>
                                                         <th class="admin-table-num">Stock</th>
                                                     </tr>
@@ -679,8 +680,42 @@
                                                             @endforelse
                                                             <td><span class="admin-variant-code">{{ $variant->sku ?: '—' }}</span></td>
                                                             <td><span class="admin-variant-code">{{ $variant->gtin ?: '—' }}</span></td>
-                                                            <td>{{ $variant->supplier?->name ?? '—' }}</td>
-                                                            <td>{{ $variant->supplier_reference ?: '—' }}</td>
+                                                            <td>
+                                                                @if ($variant->supplier_id === null)
+                                                                    <span class="supplier-availability-chip is-unavailable" title="Assign a supplier first">No supplier</span>
+                                                                @else
+                                                                    <form
+                                                                        method="POST"
+                                                                        action="{{ route('admin.products.variants.supplier-availability', [$product, $variant]) }}"
+                                                                        data-supplier-availability
+                                                                    >
+                                                                        @csrf
+                                                                        @method('PATCH')
+                                                                        <button
+                                                                            type="submit"
+                                                                            class="supplier-availability-chip {{ $variant->available_at_supplier ? 'is-on' : 'is-off' }}"
+                                                                            title="Click to {{ $variant->available_at_supplier ? 'disable' : 'enable' }} supplier availability"
+                                                                        >{{ $variant->available_at_supplier ? 'Yes' : 'No' }}</button>
+                                                                    </form>
+                                                                @endif
+                                                            </td>
+                                                            <td>@include('admin.marketplaces.partials.shop-image-count', ['count' => count($variant->photos())])</td>
+                                                            <td>
+                                                                <form method="POST" action="{{ route('admin.products.variants.full-photos', [$product, $variant]) }}" data-full-photos>
+                                                                    @csrf
+                                                                    @method('PATCH')
+                                                                    <button
+                                                                        type="submit"
+                                                                        class="gtin-flag gtin-flag--btn {{ $variant->full_photos ? 'is-set' : 'is-missing' }}"
+                                                                        title="{{ $variant->full_photos ? 'Model photos and infographics uploaded: click to unmark' : 'Model photos and infographics not uploaded yet: click to mark' }}"
+                                                                    >
+                                                                        <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                                                                            <path d="{{ $variant->full_photos ? 'm5 13 4 4L19 7' : 'M6 6l12 12M18 6 6 18' }}" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                                        </svg>
+                                                                        <span class="sr-only">{{ $variant->full_photos ? 'Full photos' : 'Photos missing' }}</span>
+                                                                    </button>
+                                                                </form>
+                                                            </td>
                                                             <td class="admin-table-num">
                                                                 <span class="admin-price">{{ $variant->formattedOriginalPrice() }}</span>
                                                                 @if ($variant->isDiscounted())

@@ -43,7 +43,11 @@
                 // The flag can flip the row's availability reading too
                 // (at supplier <-> out of stock), so redraw that chip from
                 // the server's own verdict rather than guessing it here.
-                var availabilityChip = form.closest('tr')?.querySelector('.admin-availability-chip');
+                // A variant's switch sits in the panel row under its
+                // product's row, which holds the chip.
+                var row = form.closest('.admin-variant-row')?.previousElementSibling || form.closest('tr');
+                // By its own marker: the Photos count wears the same chip class.
+                var availabilityChip = row?.querySelector('[data-availability-chip]');
 
                 if (availabilityChip && data.availability) {
                     availabilityChip.className = 'admin-availability-chip is-' + data.availability.replace(/_/g, '-');

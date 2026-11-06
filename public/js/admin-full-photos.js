@@ -55,7 +55,8 @@
                 var count = document.querySelector('[data-full-photos-count]');
                 var percent = document.querySelector('[data-full-photos-percent]');
 
-                if (count && percent) {
+                // A variant's reply carries no stats: the header counts products.
+                if (count && percent && data.full_photos_stats) {
                     count.textContent = data.full_photos_stats.count;
                     percent.textContent = data.full_photos_stats.percent;
                 }

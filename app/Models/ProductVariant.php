@@ -33,6 +33,7 @@ use Illuminate\Support\Str;
     'image_7',
     'image_8',
     'is_active',
+    'full_photos',
     'sort_order',
 ])]
 class ProductVariant extends Model
@@ -65,6 +66,7 @@ class ProductVariant extends Model
             'is_active' => 'boolean',
             'sort_order' => 'integer',
             'available_at_supplier' => 'boolean',
+            'full_photos' => 'boolean',
         ];
     }
 
