@@ -27,6 +27,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -107,6 +108,7 @@ class ProductController extends Controller
             'fewImagesCount' => Product::query()->tap(fn ($query) => $this->fewImages($query))->count(),
             'photoStats' => $this->activePhotoStats(),
             'fullPhotosStats' => $this->activeFullPhotosStats(),
+            'sharpPhotoStats' => $this->activeSharpPhotoStats(),
             'noSeoCount' => count($this->seoFailingIds()),
             'priceMismatchCount' => count($this->priceMismatchIds()),
             'categories' => $this->categoryOptions(),
@@ -447,6 +449,56 @@ class ProductController extends Controller
         return [
             'count' => number_format($marked),
             'percent' => number_format($active > 0 ? $marked / $active * 100 : 0, 3),
+        ];
+    }
+
+    /** The smallest side, in pixels, a photo needs to count as sharp. */
+    private const SHARP_PHOTO_PX = 1024;
+
+    /**
+     * Every photo of the active products, counted one by one: the cover, the
+     * gallery and the photo slots of their active variants. A photo is sharp
+     * when its shorter side reaches SHARP_PHOTO_PX, read from the stored file,
+     * the size the shop serves. A missing file or a remote URL counts among
+     * the photos but not as sharp.
+     *
+     * @return array{sharp: string, total: string, percent: string}
+     */
+    private function activeSharpPhotoStats(): array
+    {
+        // One query for them all, a branch per place a photo can sit: the list
+        // page already runs a few dozen, and this must not add one per table.
+        $query = DB::table('products')->where('is_active', true)->select('image as path');
+        $query->unionAll(DB::table('product_images')
+            ->join('products', 'products.id', '=', 'product_images.product_id')
+            ->where('products.is_active', true)
+            ->select('product_images.image as path'));
+
+        foreach (ProductVariant::PHOTO_COLUMNS as $column) {
+            $query->unionAll(DB::table('product_variants')
+                ->join('products', 'products.id', '=', 'product_variants.product_id')
+                ->where('products.is_active', true)
+                ->where('product_variants.is_active', true)
+                ->select("product_variants.{$column} as path"));
+        }
+
+        $paths = $query->pluck('path')->filter(fn (?string $path): bool => filled($path));
+
+        $sharp = $paths->filter(function (string $path): bool {
+            if (str_starts_with($path, 'http')) {
+                return false;
+            }
+
+            $file = public_path('images/'.$path);
+            $size = is_file($file) ? @getimagesize($file) : false;
+
+            return $size !== false && min($size[0], $size[1]) >= self::SHARP_PHOTO_PX;
+        })->count();
+
+        return [
+            'sharp' => number_format($sharp),
+            'total' => number_format($paths->count()),
+            'percent' => number_format($paths->isNotEmpty() ? $sharp / $paths->count() * 100 : 0, 3),
         ];
     }
 
