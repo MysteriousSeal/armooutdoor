@@ -19,6 +19,7 @@
                 @include('admin.products.partials.photo-download', [
                     'href' => route('admin.products.photos.variant', ['product' => $product, 'variant' => $variantModel, 'position' => $slot + 1]),
                     'filename' => $variantModel->setRelation('product', $product)->photoDownloadName($slot + 1),
+                    'path' => $photo,
                 ])
                 <label class="form-check">
                     <input type="checkbox" name="variants[{{ $index }}][remove_images][{{ $slot }}]" value="1">

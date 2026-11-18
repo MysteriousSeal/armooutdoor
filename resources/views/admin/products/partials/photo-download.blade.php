@@ -1,6 +1,17 @@
 {{-- One photo as a JPEG, converted on the way out: the shop stores WebP,
      which marketplace forms will not take. `download` names the file on the
-     browser's side too, as on the Vinted page. --}}
+     browser's side too, as on the Vinted page.
+
+     $path (optional): the photo's path under public/images, to print its
+     size above the link, read from the file itself. --}}
+@php
+    $photoSize = isset($path) && ! str_starts_with((string) $path, 'http') && is_file(public_path('images/'.$path))
+        ? @getimagesize(public_path('images/'.$path))
+        : false;
+@endphp
+@if ($photoSize)
+    <span class="photo-size" title="Size of the stored photo, in pixels">{{ $photoSize[0] }} × {{ $photoSize[1] }} px</span>
+@endif
 <a
     href="{{ $href }}"
     download="{{ $filename }}"

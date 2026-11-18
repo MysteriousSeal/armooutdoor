@@ -161,6 +161,7 @@
                                     @include('admin.products.partials.photo-download', [
                                         'href' => route('admin.products.photos.cover', $product),
                                         'filename' => $product->photoDownloadName(1),
+                                        'path' => $product->image,
                                     ])
                                 </div>
                             @endif
@@ -179,6 +180,7 @@
                                     @include('admin.products.partials.photo-download', [
                                         'href' => route('admin.products.photos.gallery', ['product' => $product, 'photo' => $galleryImage]),
                                         'filename' => $product->photoDownloadName($product->galleryPhotoPosition($galleryImage)),
+                                        'path' => $galleryImage->image,
                                     ])
                                 </div>
                             @endforeach

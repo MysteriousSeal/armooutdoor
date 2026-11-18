@@ -6209,8 +6209,34 @@ body.admin-lightbox-open {
     position: relative;
     z-index: 3;
     justify-content: center;
-    height: var(--photo-download-row);
+    height: 1.75rem;
     border-width: 1px 0 0;
+}
+
+/* The photo's size sits between the picture and its JPEG link, so the strip
+   grows by a line and the overlays above it move up with it. */
+.additional-images-item:has(> .photo-size) {
+    --photo-download-row: 3.1rem;
+}
+
+.additional-images-item > .photo-size {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 1.35rem;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+}
+
+.photo-size {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+    color: var(--text-muted);
+    white-space: nowrap;
 }
 
 /* One photo as a JPEG, on the edit page's tiles and variant cards. */

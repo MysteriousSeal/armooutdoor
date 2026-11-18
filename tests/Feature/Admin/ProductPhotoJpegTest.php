@@ -195,6 +195,32 @@ class ProductPhotoJpegTest extends TestCase
             ->assertSee('Cover as JPG');
     }
 
+    public function test_each_saved_photo_shows_its_size_above_its_link(): void
+    {
+        $product = Product::factory()->create(['sku' => 'CRT-REACT-076', 'image' => $this->webp('cover', 1000, 1000)]);
+        ProductImage::create(['product_id' => $product->id, 'image' => $this->webp('wide', 1254, 940), 'sort_order' => 0]);
+
+        $html = $this->actingAs($this->admin())
+            ->get('/admin/products/'.$product->id.'/edit')
+            ->assertOk()
+            ->assertSee('1000 × 1000 px')
+            ->assertSee('1254 × 940 px')
+            ->getContent();
+
+        // Between the picture and the link, as the tile reads.
+        $this->assertLessThan(strpos($html, '/photos/cover.jpg'), strpos($html, '1000 × 1000 px'));
+    }
+
+    public function test_a_missing_file_shows_no_size(): void
+    {
+        $product = Product::factory()->create(['sku' => 'CRT-REACT-076', 'image' => 'products/gone.webp']);
+
+        $this->actingAs($this->admin())
+            ->get('/admin/products/'.$product->id.'/edit')
+            ->assertOk()
+            ->assertDontSee('class="photo-size"', false);
+    }
+
     public function test_only_an_admin_can_take_them(): void
     {
         [$product, $first] = $this->productWithGallery();
