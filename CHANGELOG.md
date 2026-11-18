@@ -2,6 +2,18 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-11-18 · v1.81.5 · build J6R1IR
+
+### Admin
+
+- **Each saved photo on the product edit page shows its size,** for example « 1000 × 1000 px », between the picture and its JPG link: the cover, every gallery photo and each variant's photo slots. It is read from the stored file, so it is the size the shop serves; a missing file shows no size.
+
+### Under the hood
+
+- **More product infographics:** the navy (378), sand (379) and olive (380) neck gaiters get the same anatomy and dimensions sheets as 366 and 367, on the fabric close-up recoloured to each page's shade.
+
+**No migration.**
+
 ## 2026-11-06 · v1.81.4 · build ENAG4O
 
 ### Shop
