@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-11-18 · v1.81.6 · build JYJOWI
+
+### Admin
+
+- **The product list header shows how many photos are at 1024 px or more,** for example « 812 of 1,240 images at 1024 px · 65.484% », next to the full photos figure. Every photo of the active products counts, one by one: the cover, the gallery and the photo slots of active variants. A photo counts when its shorter side reaches 1024 px in the stored file, so 1600 × 900 does not; a missing file counts among the photos but not as 1024 px. The percentage is over images, not products, and one query gathers them all.
+
+**No migration.**
+
 ## 2026-11-18 · v1.81.5 · build J6R1IR
 
 ### Admin
