@@ -62,6 +62,13 @@
                 Name mismatch <span class="admin-tab-count">{{ number_format($nameMismatchCount) }}</span>
             </a>
             <a
+                href="{{ route('admin.marketplaces.naturabuy', ['tab' => 'img-qty-mismatch']) }}"
+                class="{{ $tab === 'img-qty-mismatch' ? 'active' : '' }}{{ $imageMismatchCount > 0 ? ' nb-tab-attention' : '' }}"
+                title="Listings whose NaturaBuy photo count differs from our shop's"
+            >
+                Img Qty mismatch <span class="admin-tab-count">{{ number_format($imageMismatchCount) }}</span>
+            </a>
+            <a
                 href="{{ route('admin.marketplaces.naturabuy', ['tab' => 'price-mismatch']) }}"
                 class="{{ $tab === 'price-mismatch' ? 'active' : '' }}{{ $priceMismatchCount > 0 ? ' nb-tab-attention' : '' }}"
                 title="Listings whose price is not exactly the suggested price"

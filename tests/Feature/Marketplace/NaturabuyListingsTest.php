@@ -1502,4 +1502,31 @@ class NaturabuyListingsTest extends TestCase
         $this->assertStringContainsString('>Photos</th>', $html);
         $this->assertStringContainsString('<span class="admin-availability-chip is-in-stock" title="5 photos on our shop">5</span>', $html);
     }
+
+    /** Listings whose NaturaBuy photo count is not our shop's, either way. */
+    public function test_the_img_qty_mismatch_tab_lists_listings_with_a_different_photo_count(): void
+    {
+        // 3 photos each on our shop: the main one plus a gallery of two.
+        foreach (['SAME-PH', 'FEWER-PH', 'MORE-PH', 'UNREAD-PH'] as $sku) {
+            $this->productWithPhotos($sku, 2);
+        }
+
+        $same = $this->listing(['title' => 'Meme nombre', 'internalcode' => 'SAME-PH', 'photo_count' => 3]);
+        $fewer = $this->listing(['title' => 'Moins de photos', 'internalcode' => 'FEWER-PH', 'photo_count' => 1]);
+        $more = $this->listing(['title' => 'Plus de photos', 'internalcode' => 'MORE-PH', 'photo_count' => 6]);
+        // Not read yet, or no product here: nothing to compare.
+        $unread = $this->listing(['title' => 'Pas encore lue', 'internalcode' => 'UNREAD-PH', 'photo_count' => null]);
+        $unmatched = $this->listing(['title' => 'Inconnue', 'internalcode' => '000019-1', 'photo_count' => 2]);
+
+        $this->actingAs($this->admin())
+            ->get('/admin/marketplaces/naturabuy?tab=img-qty-mismatch')
+            ->assertOk()
+            ->assertSee('Img Qty mismatch <span class="admin-tab-count">2</span>', false)
+            ->assertSee($fewer->title)
+            ->assertSee($more->title)
+            ->assertDontSee($same->title)
+            ->assertDontSee($unread->title)
+            ->assertDontSee($unmatched->title)
+            ->assertSee('>NB photos</th>', false);
+    }
 }

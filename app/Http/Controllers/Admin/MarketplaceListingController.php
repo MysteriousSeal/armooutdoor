@@ -419,15 +419,25 @@ class MarketplaceListingController extends Controller
      * one pass fills both tabs. A listing with no product cost has no
      * suggestion and stays out of both.
      *
-     * @return array{match: array<int, int>, mismatch: array<int, int>} listing ids
+     * The same pass fills the Img Qty mismatch tab: the NaturaBuy photo count
+     * against our main photo plus gallery. A listing whose page has not been
+     * read yet has nothing to compare and stays out.
+     *
+     * @return array{match: array<int, int>, mismatch: array<int, int>, images: array<int, int>} listing ids
      */
-    private function priceComparisonIds(): array
+    private function listingComparisonIds(): array
     {
-        $listings = $this->whereMatched($this->openListings())->get(['id', 'internalcode', 'price_cents']);
+        $listings = $this->whereMatched($this->openListings())->get(['id', 'internalcode', 'price_cents', 'photo_count']);
         $matches = $this->catalogueMatches($listings);
-        $ids = ['match' => [], 'mismatch' => []];
+        $ids = ['match' => [], 'mismatch' => [], 'images' => []];
 
         foreach ($listings as $listing) {
+            $ourPhotos = $matches[$listing->internalcode]['image_count'] ?? null;
+
+            if ($listing->photo_count !== null && $ourPhotos !== null && $ourPhotos !== $listing->photo_count) {
+                $ids['images'][] = $listing->id;
+            }
+
             $costCents = $matches[$listing->internalcode]['cost_cents'] ?? null;
 
             if ($costCents === null) {
@@ -521,14 +531,14 @@ class MarketplaceListingController extends Controller
 
     public function naturabuy(Request $request): View
     {
-        $tab = in_array($request->query('tab'), ['in-stock', 'out-of-stock', 'in-catalogue', 'not-in-catalogue', 'qty-mismatch', 'name-mismatch', 'price-mismatch', 'price-match', 'missing'], true)
+        $tab = in_array($request->query('tab'), ['in-stock', 'out-of-stock', 'in-catalogue', 'not-in-catalogue', 'qty-mismatch', 'name-mismatch', 'img-qty-mismatch', 'price-mismatch', 'price-match', 'missing'], true)
             ? $request->query('tab')
             : 'all';
 
         $search = trim((string) $request->query('search', ''));
 
-        // Read once: it filters the two price tabs and counts them on every tab.
-        $priceIds = $this->priceComparisonIds();
+        // Read once: it filters the price and photo tabs and counts them on every tab.
+        $comparisonIds = $this->listingComparisonIds();
 
         $listings = $this->openListings()
             ->when($search !== '', fn (Builder $q) => $q->where(fn (Builder $inner) => $inner
@@ -540,8 +550,9 @@ class MarketplaceListingController extends Controller
             ->when($tab === 'not-in-catalogue', fn (Builder $q) => $this->whereMatched($q, false))
             ->when($tab === 'qty-mismatch', fn (Builder $q) => $this->whereQuantityMismatch($q))
             ->when($tab === 'name-mismatch', fn (Builder $q) => $this->whereNameMismatch($q))
-            ->when($tab === 'price-mismatch', fn (Builder $q) => $q->whereIn('id', $priceIds['mismatch']))
-            ->when($tab === 'price-match', fn (Builder $q) => $q->whereIn('id', $priceIds['match']))
+            ->when($tab === 'img-qty-mismatch', fn (Builder $q) => $q->whereIn('id', $comparisonIds['images']))
+            ->when($tab === 'price-mismatch', fn (Builder $q) => $q->whereIn('id', $comparisonIds['mismatch']))
+            ->when($tab === 'price-match', fn (Builder $q) => $q->whereIn('id', $comparisonIds['match']))
             ->orderBy('title')
             ->paginate(50)
             ->withQueryString();
@@ -569,8 +580,9 @@ class MarketplaceListingController extends Controller
             'notInCatalogueCount' => $this->whereMatched($this->openListings(), false)->count(),
             'mismatchCount' => $this->whereQuantityMismatch($this->openListings())->count(),
             'nameMismatchCount' => $this->whereNameMismatch($this->openListings())->count(),
-            'priceMismatchCount' => count($priceIds['mismatch']),
-            'priceMatchCount' => count($priceIds['match']),
+            'imageMismatchCount' => count($comparisonIds['images']),
+            'priceMismatchCount' => count($comparisonIds['mismatch']),
+            'priceMatchCount' => count($comparisonIds['match']),
             'missingCount' => $this->productsMissingFromNaturabuyQuery()->count(),
             'syncedAt' => NaturabuyListing::query()->max('synced_at'),
         ]);
