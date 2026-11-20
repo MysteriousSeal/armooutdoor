@@ -2,6 +2,14 @@
 
 All notable changes to this project since the initial commit are documented here, newest first.
 
+## 2026-11-20 · v1.81.7 · build FWIVWJ
+
+### Admin
+
+- **The NaturaBuy page has an Img Qty mismatch tab,** next to Name mismatch. It lists the open listings whose photo count on NaturaBuy, as read from their page once a week, differs from our shop's (main photo plus gallery), whether NaturaBuy has fewer or more. A listing whose page has not been read yet, or with no product here, stays out. The comparison rides along with the price tabs' pass, so the page runs no extra query.
+
+**No migration.**
+
 ## 2026-11-18 · v1.81.6 · build JYJOWI
 
 ### Admin
